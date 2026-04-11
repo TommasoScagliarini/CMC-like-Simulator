@@ -19,20 +19,20 @@ class SimulatorConfig:
     # =========================================================================
 
     # Biomechanical model (contains muscles + SEA CoordinateActuators)
-    model_file: str = "models/gait2392_prosthetic.osim"
+    model_file: str = "models\Adjusted_SEASEA - Copia.osim"
 
     # C++ plugin basename WITHOUT OS extension.
     # Loader adds .dll / .dylib / .so automatically.
-    plugin_name: str = "SeriesElasticActuator"
+    plugin_name: str = "plugins\SEA_Plugin_BlackBox_mCMC_impedence"
 
     # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto)
-    kinematics_file: str = "data/IK_Kinematics_q.sto"
+    kinematics_file: str = "data\3DGaitModel2392_Kinematics_q.sto"
 
     # GRF ExternalLoads setup XML  (points to the .mot data file internally)
-    external_loads_xml: str = "data/external_loads_setup.xml"
+    external_loads_xml: str = "data\Externall_Loads.xml"
 
     # Reserve actuators ForceSet XML  (CMC_Actuators.xml)
-    reserve_actuators_xml: str = "data/CMC_Actuators.xml"
+    reserve_actuators_xml: str = "data\CMC_Actuators.xml"
 
     # Output directory (created automatically if missing)
     output_dir: str = "results"
@@ -50,8 +50,8 @@ class SimulatorConfig:
     # =========================================================================
 
     # Names of the SEA plugin actuators as they appear in the .osim
-    sea_knee_name:  str = "SEA_knee"
-    sea_ankle_name: str = "SEA_ankle"
+    sea_knee_name:  str = "SEA_Knee"
+    sea_ankle_name: str = "SEA_Ankle"
 
     # Coordinates controlled exclusively by the two SEAs.
     # These are EXCLUDED from the biological outer-loop and from the QP.

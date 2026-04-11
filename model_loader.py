@@ -121,14 +121,19 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     model.setUseVisualizer(False)
 
     # ── 3. External Loads (GRF) ───────────────────────────────────────────────
-    # ExternalLoads reads a setup XML that contains ExternalForce definitions
-    # and a pointer to the GRF .mot file.
     print(f"[ModelLoader] Loading GRF      : {cfg.external_loads_xml}")
-    ext_loads = opensim.ExternalLoads(cfg.external_loads_xml, True)
-    # Add each ExternalForce to the model's ForceSet
-    for i in range(ext_loads.getSize()):
-        model.addForce(ext_loads.get(i).clone())
 
+    ext_loads = opensim.ExternalLoads(cfg.external_loads_xml, True)
+
+    # Re-apply the global datafile path to propagate it to all child ExternalForce
+    # objects, overriding any stale data_source_name entries in the XML.
+    ext_loads.setDataFileName(ext_loads.getDataFileName())
+
+    # Adding ExternalLoads as a ModelComponent is sufficient — it registers
+    # all child ExternalForce objects automatically. Do NOT clone and re-add
+    # them individually, as clones lose the data source reference.
+    model.addModelComponent(ext_loads)
+   
     # ── 4. Reserve Actuators ──────────────────────────────────────────────────
     # The ForceSet XML contains CoordinateActuators for every coordinate.
     # We load them all into the model; at QP-build time we will filter the ones
