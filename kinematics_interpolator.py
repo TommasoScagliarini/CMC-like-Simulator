@@ -173,6 +173,13 @@ def _read_sto(filepath: str) -> Tuple[np.ndarray, List[str], np.ndarray]:
         )
 
     # Verify monotonically increasing time
+    _, unique_idx = np.unique(time, return_index=True)
+    if len(unique_idx) < len(time):
+        print(f"[KinInterp] WARNING: rimossi {len(time) - len(unique_idx)} "
+            f"timestamp duplicati dal file IK.")
+        time = time[unique_idx]
+        data = data[unique_idx]
+
     if np.any(np.diff(time) <= 0):
         raise ValueError("Time vector in kinematics file is not strictly monotonic.")
 

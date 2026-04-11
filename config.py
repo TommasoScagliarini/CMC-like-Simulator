@@ -26,7 +26,7 @@ class SimulatorConfig:
     plugin_name: str = "plugins\SEA_Plugin_BlackBox_mCMC_impedence"
 
     # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto)
-    kinematics_file: str = "data\3DGaitModel2392_Kinematics_q.sto"
+    kinematics_file: str = "data/3DGaitModel2392_Kinematics_q.sto"
 
     # GRF ExternalLoads setup XML  (points to the .mot data file internally)
     external_loads_xml: str = "data\Externall_Loads.xml"

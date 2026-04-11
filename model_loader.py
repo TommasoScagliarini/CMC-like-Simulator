@@ -203,14 +203,19 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     # Actuator.getControlIndex() returns the position of this actuator's first
     # control signal in the model-level control Vector.
     def ctrl_idx(act_name: str) -> int:
-        return actuator_set.get(act_name).getControlIndex()
+        idx = actuator_set.getIndex(act_name)
+        if idx < 0:
+            raise RuntimeError(
+                f"[ModelLoader] Attuatore '{act_name}' non trovato nell'ActuatorSet."
+            )
+        return idx
 
     sea_ctrl_idx = {
-        cfg.sea_knee_name:  ctrl_idx(cfg.sea_knee_name),
-        cfg.sea_ankle_name: ctrl_idx(cfg.sea_ankle_name),
+        cfg.sea_knee_name:  actuator_set.getIndex(cfg.sea_knee_name),
+        cfg.sea_ankle_name: actuator_set.getIndex(cfg.sea_ankle_name),
     }
-    muscle_ctrl_idx  = {name: ctrl_idx(name) for name in muscle_names}
-    reserve_ctrl_idx = {name: ctrl_idx(name) for name in reserve_names}
+    muscle_ctrl_idx  = {name: actuator_set.getIndex(name) for name in muscle_names}
+    reserve_ctrl_idx = {name: actuator_set.getIndex(name) for name in reserve_names}
 
     # --- State variable indices (for setting q and qdot) ---
     # model.getStateVariableNames() returns strings like
