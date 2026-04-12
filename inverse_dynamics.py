@@ -3,8 +3,8 @@ inverse_dynamics.py
 ===================
 Partial inverse-dynamics computation for the biological degrees of freedom.
 
-Method: "zero-muscle residual + mass-matrix projection"
----------------------------------------------------------
+Method: "zero-actuator residual + mass-matrix projection"
+-----------------------------------------------------------
 At each frame we want the vector of generalised forces  τ_bio  that muscles
 and reserve actuators must produce to achieve the desired accelerations
 q̈_des (bio DOFs).  The derivation is:
@@ -12,30 +12,27 @@ q̈_des (bio DOFs).  The derivation is:
     Equation of motion (full system):
         M(q) · q̈  =  τ_muscles + τ_SEA + τ_GRF + τ_gravity + τ_passive
 
-    Step 1 – zero all MUSCLE controls, keep SEA controls and all other forces:
-        M · q̈₀  =  τ_SEA + τ_GRF + τ_gravity + τ_passive
-        → realise to acceleration → read q̈₀
+    Step 1 – zero ALL actuator controls (muscles, reserves, SEA).
+             Compute q̈₀ via realizeDynamics + InverseDynamicsSolver.
 
-    Step 2 – acceleration deficit (bio DOFs only; prosthetic DOFs set to 0):
+    Step 2 – acceleration deficit (bio DOFs only, prosthetic DOFs set to 0):
         Δq̈[i]  =  q̈_des[i] − q̈₀[i]    for i ∈ bio_coords
         Δq̈[j]  =  0                      for j ∈ pros_coords
 
     Step 3 – project through mass matrix:
-        τ_required  =  M · Δq̈
-        τ_bio[i]    =  τ_required[i]      for i ∈ bio_coords
+        τ_bio[i]  =  (M · Δq̈)[i]        for i ∈ bio_coords
 
-This automatically accounts for inter-DOF coupling in M without requiring
-an explicit GRF projection step.
+Why not realizeAcceleration?
+----------------------------
+realizeAcceleration computes BOTH q̈ AND zdot (auxiliary state variable
+derivatives).  The SEA BlackBox plugin's computeStateVariableDerivatives()
+crashes when its internal state variables are in an unexpected configuration.
 
-Simbody API note
-----------------
-``SimbodyMatterSubsystem.multiplyByM(state, v, Mv)`` multiplies v by the
-full mass matrix M and writes the result into Mv.  Both v and Mv are
-opensim.Vector objects of size n_mob.  The state must be realised to at
-least Stage::Position before calling this.
+Bypass:  realizeDynamics (forces only, no zdot)
+       + InverseDynamicsSolver.solve (uses calcResidualForce, no zdot)
+       + multiplyByM (pure mass-matrix algebra, no zdot)
 
-If ``multiplyByM`` is not in your SWIG binding (rare), uncomment and use the
-``_tau_via_id_solver`` fallback that uses ``opensim.InverseDynamicsSolver``.
+All three are safe and produce identical q̈ values.
 """
 
 from __future__ import annotations
@@ -49,9 +46,73 @@ from config import SimulatorConfig
 from model_loader import SimulationContext
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+#  Module-level helpers (shared with simulation_runner)
+# ─────────────────────────────────────────────────────────────────────────────
+def build_mass_matrix(
+    matter: opensim.SimbodyMatterSubsystem,
+    state:  opensim.State,
+    n_mob:  int,
+    e_vec:  opensim.Vector,
+    Me_vec: opensim.Vector,
+) -> np.ndarray:
+    """
+    Build the full mass matrix M as a numpy array.
+
+    Uses n_mob calls to matter.multiplyByM (one per column).
+    For gait2392 (n_mob=21) this is negligible (~μs per call).
+    Requires state ≥ Stage::Position.
+    """
+    M = np.zeros((n_mob, n_mob))
+    for j in range(n_mob):
+        for k in range(n_mob):
+            e_vec.set(k, 0.0)
+        e_vec.set(j, 1.0)
+        matter.multiplyByM(state, e_vec, Me_vec)
+        for i in range(n_mob):
+            M[i, j] = Me_vec.get(i)
+    return M
+
+
+def compute_udot_bypass(
+    matter: opensim.SimbodyMatterSubsystem,
+    model:  opensim.Model,
+    state:  opensim.State,
+    n_mob:  int,
+    e_vec:  opensim.Vector,
+    Me_vec: opensim.Vector,
+) -> np.ndarray:
+    """
+    Compute generalised accelerations q̈ WITHOUT realizeAcceleration.
+
+    The state must already have controls set via model.setControls().
+
+    Steps:
+      1. realizeDynamics  — computes all forces, no zdot
+      2. ID_solver.solve(state, q̈=0) → residual = C + G − f_applied
+      3. Build M via multiplyByM
+      4. q̈ = solve(M, −residual)
+
+    Returns
+    -------
+    udot : np.ndarray shape (n_mob,)
+    """
+    model.realizeDynamics(state)
+
+    id_solver = opensim.InverseDynamicsSolver(model)
+    zero_udot = opensim.Vector(n_mob, 0.0)
+    residual  = id_solver.solve(state, zero_udot)
+
+    M = build_mass_matrix(matter, state, n_mob, e_vec, Me_vec)
+
+    neg_res = np.array([-residual.get(i) for i in range(n_mob)])
+    udot = np.linalg.solve(M, neg_res)
+    return udot
+
+
 class InverseDynamicsComputer:
     """
-    Frame-by-frame partial ID using the zero-muscle + M·Δq̈ approach.
+    Frame-by-frame partial ID using the zero-actuator + M·Δq̈ approach.
 
     Parameters
     ----------
@@ -60,57 +121,23 @@ class InverseDynamicsComputer:
     """
 
     def __init__(self, cfg: SimulatorConfig, ctx: SimulationContext) -> None:
-        self._ctx  = ctx
-        self._cfg  = cfg
+        self._ctx = ctx
+        self._cfg = cfg
 
-        model      = ctx.model
-        coord_set  = model.getCoordinateSet()
+        self._n_mob = ctx.n_mob
+        self._n_bio = ctx.n_bio
 
-        # Pre-fetch coordinate objects for reading acceleration values
-        self._all_coords: List[opensim.Coordinate] = [
-            coord_set.get(name) for name in ctx.coord_names
-        ]
-        self._n_mob   = ctx.n_mob
-        self._n_bio   = ctx.n_bio
-
-        # Indices of bio_coords within the full coord list (= mobility vector)
-        self._bio_mob_indices: List[int] = [
+        # Indices of bio_coords within the full mobility vector (numpy for fancy indexing)
+        self._bio_mob_indices = np.array([
             ctx.coord_mob_idx[name] for name in ctx.bio_coord_names
-        ]
-        # Indices of pros_coords (to leave Δq̈ = 0 there)
-        self._pros_mob_indices: List[int] = [
-            ctx.coord_mob_idx[name] for name in ctx.pros_coord_names
-        ]
+        ], dtype=int)
 
-        # Simbody matter subsystem – used for M·v product
-        self._matter = model.getMatterSubsystem()
+        # Simbody matter subsystem — used for multiplyByM
+        self._matter = ctx.model.getMatterSubsystem()
 
-        # Reusable SimTK::Vector objects (avoid re-allocation every step)
-        self._delta_udot  = opensim.Vector(self._n_mob, 0.0)
-        self._M_delta_udot = opensim.Vector(self._n_mob, 0.0)
-
-        # Zero-control vector for the muscle-zeroing step
-        self._zero_muscle_controls = opensim.Vector(ctx.n_controls, 0.0)
-
-        # ── SEA Force objects (for appliesForce toggling during ID) ──────────
-        # Zeroing u_SEA = 0 does NOT prevent computeActuation() from running:
-        # the plugin's internal impedance logic still executes and may crash
-        # if internal state variables are in an unexpected configuration.
-        # Instead, we toggle appliesForce = False to completely skip the
-        # plugin's computeForce() during the zero-muscle realizeAcceleration.
-        # This is safe because SEA forces act only on prosthetic coordinates
-        # and do not contribute to τ_bio.
-        force_set = model.getForceSet()
-        self._sea_forces: List[opensim.Force] = []
-        for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
-            try:
-                idx = force_set.getIndex(sea_name)
-                if idx >= 0:
-                    self._sea_forces.append(force_set.get(idx))
-                else:
-                    print(f"[ID] WARNING: SEA '{sea_name}' not found in ForceSet")
-            except Exception:
-                print(f"[ID] WARNING: could not look up SEA '{sea_name}' in ForceSet")
+        # Reusable scratch vectors for build_mass_matrix
+        self._e_vec  = opensim.Vector(self._n_mob, 0.0)
+        self._Me_vec = opensim.Vector(self._n_mob, 0.0)
 
     # ─────────────────────────────────────────────────────────────────────────
     #  Public API
@@ -126,123 +153,48 @@ class InverseDynamicsComputer:
 
         Parameters
         ----------
-        state          : current OpenSim State; must be ≥ Stage::Velocity on entry.
-                         On exit the state will have been realised to Acceleration
-                         (Stage is NOT rolled back; caller must be aware).
-        controls       : full control Vector already containing SEA commands.
-                         Muscle entries will be temporarily zeroed.
-        qddot_des_bio  : desired accelerations for bio coords {name → [rad/s²]}
+        state          : current OpenSim State; must be ≥ Stage::Velocity.
+                         On exit: Stage::Dynamics (never Acceleration).
+        controls       : full control Vector.  All entries are temporarily
+                         zeroed; original values are restored on exit.
+        qddot_des_bio  : desired accelerations for bio coords {name → rad/s²}
 
         Returns
         -------
         tau_bio : np.ndarray shape (n_bio,)
-            Required generalised forces [N·m or N] for each bio coordinate,
-            ordered consistently with ctx.bio_coord_names.
         """
         model = self._ctx.model
+        n_mob = self._n_mob
 
-        # ══════════════════════════════════════════════════════════════════════
-        # DIAGNOSTIC: disable ALL forces in the ForceSet during q̈₀ computation.
-        # This leaves only gravity and constraints → if realizeAcceleration
-        # still crashes, the issue is in the state itself (invalid q/qdot,
-        # constraint failure, etc.), NOT in any Force.
-        # If it succeeds, one of the Forces is the culprit.
-        # ══════════════════════════════════════════════════════════════════════
-
-        # Save and zero ALL controls (not just muscles)
+        # ── Step 1: save and zero ALL controls ───────────────────────────────
         n_ctrl = controls.size()
-        saved_all_controls = [controls.get(i) for i in range(n_ctrl)]
+        saved = [controls.get(i) for i in range(n_ctrl)]
         for i in range(n_ctrl):
             controls.set(i, 0.0)
-
-        # Disable EVERY Force in the ForceSet
-        force_set = model.getForceSet()
-        n_forces  = force_set.getSize()
-        saved_applies: list = []
-        print(f"[ID-DBG] disabling ALL {n_forces} forces …", flush=True)
-        for i in range(n_forces):
-            f = force_set.get(i)
-            saved_applies.append(f.get_appliesForce())
-            f.set_appliesForce(False)
-        print("[ID-DBG] all forces disabled OK", flush=True)
-
-        print("[ID-DBG] setControls (all zero) …", flush=True)
         model.setControls(state, controls)
 
-        # ── Step 2: realise to Acceleration → q̈₀ (gravity only) ─────────────
-        print("[ID-DBG] realizeAcceleration (ALL forces off, gravity only) …",
-              flush=True)
-        model.realizeAcceleration(state)
-        print("[ID-DBG] realizeAcceleration OK ✓", flush=True)
+        # ── Step 2: compute q̈₀ (no realizeAcceleration) ─────────────────────
+        qdot0 = compute_udot_bypass(
+            self._matter, model, state, n_mob,
+            self._e_vec, self._Me_vec,
+        )
 
-        # Read q̈₀ for every DOF
-        q_ddot_0 = np.array([
-            coord.getAccelerationValue(state)
-            for coord in self._all_coords
-        ])
-
-        # ── Step 3: re-enable all Forces and restore controls ────────────────
-        for i in range(n_forces):
-            force_set.get(i).set_appliesForce(saved_applies[i])
+        # ── Step 3: restore controls ────────────────────────────────────────
         for i in range(n_ctrl):
-            controls.set(i, saved_all_controls[i])
+            controls.set(i, saved[i])
 
-        # ── Step 4: build Δq̈ vector (bio deficit, zeros elsewhere) ──────────
-        for i in range(self._n_mob):
-            self._delta_udot.set(i, 0.0)
+        # ── Step 4: Δq̈ (bio = desired − q̈₀, pros = 0) ─────────────────────
+        delta_udot = np.zeros(n_mob)
         for name, idx in zip(self._ctx.bio_coord_names, self._bio_mob_indices):
-            des = qddot_des_bio.get(name, 0.0)
-            self._delta_udot.set(idx, des - q_ddot_0[idx])
+            delta_udot[idx] = qddot_des_bio.get(name, 0.0) - qdot0[idx]
 
-        # ── Step 5: τ_required = M · Δq̈ ────────────────────────────────────
-        try:
-            self._matter.multiplyByM(
-                state,
-                self._delta_udot,
-                self._M_delta_udot,
-            )
-        except AttributeError:
-            self._M_delta_udot = self._tau_via_id_solver(state, qddot_des_bio)
+        # ── Step 5: τ = M · Δq̈ ──────────────────────────────────────────────
+        # M depends on q only → same as in step 2 → rebuild (cheap, 21 calls)
+        M = build_mass_matrix(
+            self._matter, state, n_mob,
+            self._e_vec, self._Me_vec,
+        )
+        tau_full = M @ delta_udot
 
-        # ── Step 6: extract bio-DOF rows ────────────────────────────────────
-        tau_bio = np.array([
-            self._M_delta_udot.get(idx)
-            for idx in self._bio_mob_indices
-        ])
-
-        return tau_bio
-
-    # ─────────────────────────────────────────────────────────────────────────
-    #  Fallback (uncomment / call if multiplyByM is unavailable)
-    # ─────────────────────────────────────────────────────────────────────────
-    def _tau_via_id_solver(
-        self,
-        state: opensim.State,
-        qddot_des_bio: Dict[str, float],
-    ) -> opensim.Vector:
-        """
-        Alternative ID via ``opensim.InverseDynamicsSolver``.
-
-        The solver computes  τ = M·q̈_des + C·q̇ + G − τ_applied  directly,
-        accounting for all applied forces (GRF, gravity, passive forces).
-        """
-        n_mob = self._n_mob
-        model = self._ctx.model
-
-        id_solver = opensim.InverseDynamicsSolver(model)
-
-        # Build desired udot vector (bio = desired, pros = current)
-        udot_des = opensim.Vector(n_mob, 0.0)
-        for name in self._ctx.bio_coord_names:
-            idx = self._ctx.coord_mob_idx[name]
-            udot_des.set(idx, qddot_des_bio.get(name, 0.0))
-        for coord in [
-            model.getCoordinateSet().get(n)
-            for n in self._ctx.pros_coord_names
-        ]:
-            idx = self._ctx.coord_mob_idx[coord.getName()]
-            udot_des.set(idx, coord.getAccelerationValue(state))
-
-        tau_out = opensim.Vector(n_mob, 0.0)
-        id_solver.solve(state, udot_des, tau_out)
-        return tau_out
+        # ── Step 6: extract bio rows ────────────────────────────────────────
+        return tau_full[self._bio_mob_indices]

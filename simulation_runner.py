@@ -51,7 +51,9 @@ Step order inside each iteration
                     reads q̈₀, restores muscle controls)
   F. SO          – StaticOptimizer.solve() → a, u_res
   G. APPLY CTRL  – apply_to_controls() + model.setControls()
-  H. REALISE A   – model.realizeAcceleration(state)  [with final controls]
+  H. COMPUTE q̈  – compute_udot_bypass(state)
+                   (realizeDynamics + ID solver + multiplyByM + np.solve
+                    — no realizeAcceleration, avoids SEA plugin crash)
   I. RECORD      – append data row to results buffers
   J. EULER STEP  – q(t+dt)  = q(t)  + q̇(t)  · dt
                    q̇(t+dt) = q̇(t) + q̈(t) · dt
@@ -76,7 +78,7 @@ from model_loader import SimulationContext
 from kinematics_interpolator import KinematicsInterpolator
 from prosthesis_controller import ProsthesisController
 from outer_loop import OuterLoop
-from inverse_dynamics import InverseDynamicsComputer
+from inverse_dynamics import InverseDynamicsComputer, compute_udot_bypass
 from static_optimization import StaticOptimizer
 
 
@@ -106,24 +108,6 @@ class SimulationRunner:
         self._outer_loop      = OuterLoop(cfg, ctx)
         self._id_computer     = InverseDynamicsComputer(cfg, ctx)
         self._so              = StaticOptimizer(cfg, ctx)
-
-        # ── Cache SEA Force objects for appliesForce toggling ─────────────────
-        # The SEA BlackBox plugin overrides computeActuation() with internal
-        # impedance logic that may crash if internal state variables are in an
-        # unexpected configuration.  We toggle appliesForce = False before any
-        # realizeAcceleration call and re-enable after, until the plugin state
-        # has been validated.
-        force_set = ctx.model.getForceSet()
-        self._sea_forces: list = []
-        for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
-            idx = force_set.getIndex(sea_name)
-            if idx >= 0:
-                self._sea_forces.append(force_set.get(idx))
-                print(f"[Runner] Cached SEA Force: '{sea_name}' (ForceSet idx={idx})",
-                      flush=True)
-            else:
-                print(f"[Runner] WARNING: SEA '{sea_name}' not in ForceSet",
-                      flush=True)
 
         # ── Output buffers (pre-allocated for efficiency) ─────────────────────
         n_steps  = int((cfg.t_end - cfg.t_start) / cfg.dt) + 2
@@ -175,60 +159,15 @@ class SimulationRunner:
         # Pre-fetch CoordinateSet once — used in the Euler step
         coord_set = model.getCoordinateSet()
 
-        # ══════════════════════════════════════════════════════════════════════
-        # PRE-FLIGHT: confirm crash source and test bypass
-        # ══════════════════════════════════════════════════════════════════════
-        print("\n[Pre-flight] Testing realization stages …", flush=True)
-
-        print("[Pre-flight] 1. realizeDynamics …", flush=True)
-        model.realizeDynamics(state)
-        print("[Pre-flight] 1. OK ✓  (forces compute fine)", flush=True)
-
-        # ── Test 2: InverseDynamicsSolver bypass ─────────────────────────────
-        # InverseDynamicsSolver internally uses calcResidualForceIgnoringConstraints
-        # which does NOT trigger computeStateVariableDerivatives → no SEA crash.
-        #
-        # residual = M·q̈_desired + C(q,q̇) − f_applied
-        # With q̈_desired = 0:  residual = C − f_applied
-        # Actual q̈ = M⁻¹ · (f_applied − C) = M⁻¹ · (−residual)
-        print("[Pre-flight] 2. InverseDynamicsSolver (q̈=0) …", flush=True)
-        try:
-            matter   = model.getMatterSubsystem()
-            n_mob_pf = state.getNU()
-
-            id_solver = opensim.InverseDynamicsSolver(model)
-            zero_udot = opensim.Vector(n_mob_pf, 0.0)
-            residual  = id_solver.solve(state, zero_udot)   # returns Vector
-            print(f"[Pre-flight] 2. OK ✓  residual[0..2] = "
-                  f"{residual.get(0):.2f}, {residual.get(1):.2f}, "
-                  f"{residual.get(2):.2f}", flush=True)
-
-            # Now compute actual q̈ = M⁻¹ · (−residual)
-            neg_resid = opensim.Vector(n_mob_pf, 0.0)
-            for i in range(n_mob_pf):
-                neg_resid.set(i, -residual.get(i))
-
-            udot_actual = opensim.Vector(n_mob_pf, 0.0)
-
-            print("[Pre-flight] 3. multiplyByMInv …", flush=True)
-            matter.multiplyByMInv(state, neg_resid, udot_actual)
-            print(f"[Pre-flight] 3. OK ✓  q̈[0..2] = "
-                  f"{udot_actual.get(0):.4f}, {udot_actual.get(1):.4f}, "
-                  f"{udot_actual.get(2):.4f}", flush=True)
-
-            print("[Pre-flight] ══════════════════════════════════════════",
-                  flush=True)
-            print("[Pre-flight] BYPASS VALIDATED: can compute q̈ without "
-                  "realizeAcceleration.", flush=True)
-            print("[Pre-flight] ══════════════════════════════════════════\n",
-                  flush=True)
-
-        except Exception as e:
-            print(f"[Pre-flight] FAILED: {type(e).__name__}: {e}", flush=True)
-            import traceback; traceback.print_exc()
-            print("[Pre-flight] Cannot bypass realizeAcceleration — aborting.",
-                  flush=True)
-            return
+        # ── Bypass resources (for computing q̈ without realizeAcceleration) ──
+        # realizeAcceleration triggers computeStateVariableDerivatives() in the
+        # SEA BlackBox plugin, which crashes.  Instead we use:
+        #   realizeDynamics + InverseDynamicsSolver + multiplyByM → q̈
+        # See inverse_dynamics.py docstring for the full derivation.
+        matter = model.getMatterSubsystem()
+        n_mob  = ctx.n_mob
+        _e_vec  = opensim.Vector(n_mob, 0.0)   # scratch for build_mass_matrix
+        _Me_vec = opensim.Vector(n_mob, 0.0)   # scratch for build_mass_matrix
 
         # ── Main loop ─────────────────────────────────────────────────────────
         wall_t0     = _time.perf_counter()
@@ -277,7 +216,7 @@ class SimulationRunner:
 
                 # ═══════════════════════════════════════════════════════════
                 # E. Inverse dynamics → τ_bio
-                #    (SEA forces are disabled INSIDE compute_tau_bio)
+                #    Uses ID solver bypass (no realizeAcceleration)
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
                     print(f"[DBG t={t:.4f}] E: inverse_dynamics …", flush=True)
@@ -301,23 +240,18 @@ class SimulationRunner:
                 model.setControls(state, controls)
 
                 # ═══════════════════════════════════════════════════════════
-                # H. Realise to Acceleration with final controls
-                #    SEA forces are DISABLED to prevent plugin crash.
-                #    SEA torques act only on prosthetic DOFs; for the Euler
-                #    step, prosthetic accelerations will lack SEA contribution
-                #    but the joints will still be driven by the reference
-                #    kinematics through the outer PD tracking.
+                # H. Compute q̈ with final controls (NO realizeAcceleration)
+                #
+                #    realizeAcceleration triggers the SEA plugin's
+                #    computeStateVariableDerivatives() which crashes.
+                #    Instead: realizeDynamics + ID solver + M → q̈.
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] H: realizeAcceleration "
-                          f"(SEA disabled) …", flush=True)
-                for sea_f in self._sea_forces:
-                    sea_f.set_appliesForce(False)
-
-                model.realizeAcceleration(state)
-
-                for sea_f in self._sea_forces:
-                    sea_f.set_appliesForce(True)
+                    print(f"[DBG t={t:.4f}] H: compute_udot_bypass …",
+                          flush=True)
+                udot = compute_udot_bypass(
+                    matter, model, state, n_mob, _e_vec, _Me_vec,
+                )
 
                 # ═══════════════════════════════════════════════════════════
                 # I. Record current state BEFORE advancing time
@@ -326,15 +260,17 @@ class SimulationRunner:
 
                 # ═══════════════════════════════════════════════════════════
                 # J. Semi-explicit Euler step
+                #    q̈ comes from the bypass (udot array), NOT from the
+                #    state (which was never realised to Acceleration).
                 # ═══════════════════════════════════════════════════════════
                 q_new:    Dict[str, float] = {}
                 qdot_new: Dict[str, float] = {}
 
-                for name in ctx.coord_names:
+                for i_c, name in enumerate(ctx.coord_names):
                     coord    = coord_set.get(name)
                     q_cur    = coord.getValue(state)
                     qdot_cur = coord.getSpeedValue(state)
-                    qacc_cur = coord.getAccelerationValue(state)
+                    qacc_cur = udot[ctx.coord_mob_idx[name]]   # from bypass
 
                     q_new[name]    = q_cur    + qdot_cur * dt
                     qdot_new[name] = qdot_cur + qacc_cur * dt
