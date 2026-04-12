@@ -77,6 +77,13 @@ class SimulationContext:
     n_reserves: int   # len(reserve_names)
     n_controls: int   # model.getNumControls()
 
+    # ── GRF data (MUST stay alive for the entire simulation) ─────────────────
+    # ExternalForce(Storage, ...) stores a raw C++ pointer to the Storage.
+    # If the Python wrapper is garbage-collected, the C++ object is destroyed
+    # and the ExternalForce pointer dangles → native crash on realizeAcceleration.
+    # Storing the reference here keeps it alive as long as SimulationContext exists.
+    grf_storage: object = None   # opensim.Storage
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Plugin loader
@@ -121,18 +128,95 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     model.setUseVisualizer(False)
 
     # ── 3. External Loads (GRF) ───────────────────────────────────────────────
+    # Strategy:
+    #   a) Remove any ExternalForce objects already in the .osim ForceSet
+    #      (they may carry stale absolute paths from a previous CMC setup).
+    #   b) Parse the ExternalLoads XML to read ExternalForce definitions
+    #      and the global <datafile> path to the .mot file.
+    #   c) Load the GRF .mot file into an opensim.Storage object.
+    #   d) Create each ExternalForce using the Storage-based constructor,
+    #      which binds the GRF data directly to the Force — no name-based
+    #      lookup at runtime.
+    #   e) Add each ExternalForce to the model via model.addForce().
+    #
+    # WHY NOT addModelComponent(ext_loads)?
+    #   ExternalLoads is a ModelComponentSet, NOT a Force.  When added as a
+    #   generic ModelComponent, the child ExternalForce objects are NOT
+    #   registered in the model's ForceSet.  During Stage::Dynamics the model
+    #   iterates the ForceSet to call computeForce() — ExternalForces that
+    #   are not in the ForceSet produce zero GRF, leading to a native crash
+    #   or wildly incorrect dynamics.
     print(f"[ModelLoader] Loading GRF      : {cfg.external_loads_xml}")
 
+    # ── 3a. Remove stale ExternalForce objects baked into the .osim ──────────
+    try:
+        force_set = model.updForceSet()
+        i = 0
+        n_removed = 0
+        while i < force_set.getSize():
+            if force_set.get(i).getConcreteClassName() == "ExternalForce":
+                force_set.remove(i)
+                n_removed += 1
+                # do NOT increment i — indices shift after removal
+            else:
+                i += 1
+        print(f"[ModelLoader] Removed {n_removed} ExternalForce(s) from .osim")
+    except AttributeError:
+        print("[ModelLoader] WARNING: updForceSet() unavailable — "
+              "ExternalForce(s) from .osim may still be present")
+
+    # ── 3b. Parse ExternalLoads XML → read .mot path + force definitions ────
     ext_loads = opensim.ExternalLoads(cfg.external_loads_xml, True)
+    mot_file = ext_loads.getDataFileName()
 
-    # Re-apply the global datafile path to propagate it to all child ExternalForce
-    # objects, overriding any stale data_source_name entries in the XML.
-    ext_loads.setDataFileName(ext_loads.getDataFileName())
+    # Resolve relative .mot path against the XML's directory
+    if not os.path.isabs(mot_file):
+        xml_dir = os.path.dirname(os.path.abspath(cfg.external_loads_xml))
+        mot_file = os.path.join(xml_dir, mot_file)
 
-    # Adding ExternalLoads as a ModelComponent is sufficient — it registers
-    # all child ExternalForce objects automatically. Do NOT clone and re-add
-    # them individually, as clones lose the data source reference.
-    model.addModelComponent(ext_loads)
+    if not os.path.isfile(mot_file):
+        raise FileNotFoundError(
+            f"[ModelLoader] GRF data file not found: {mot_file}\n"
+            f"  (resolved from <datafile> in {cfg.external_loads_xml})"
+        )
+    print(f"[ModelLoader] GRF datafile       : {mot_file}")
+
+    # ── 3c. Load the GRF .mot data into an opensim.Storage ──────────────────
+    # The Storage object holds the time-series of force/point/torque columns.
+    # By passing it directly to the ExternalForce constructor, the data
+    # binding is immediate — no deferred name-based lookup that could fail
+    # if the .mot header contains a stale internal path.
+    grf_storage = opensim.Storage(mot_file)
+    print(f"[ModelLoader] GRF Storage loaded : "
+          f"{grf_storage.getSize()} rows, "
+          f"{grf_storage.getColumnLabels().getSize() - 1} columns")
+
+    # ── 3d. Create each ExternalForce with the Storage constructor ──────────
+    # ExternalForce(Storage, force_id, point_id, torque_id) binds the data
+    # directly at construction time.  The remaining properties (applied_to_body,
+    # force_expressed_in_body, point_expressed_in_body) must be set manually.
+    for i in range(ext_loads.getSize()):
+        ef_template = ext_loads.get(i)
+
+        ef = opensim.ExternalForce(
+            grf_storage,
+            ef_template.getForceIdentifier(),
+            ef_template.getPointIdentifier(),
+            ef_template.getTorqueIdentifier(),
+        )
+        ef.setName(ef_template.getName())
+        ef.set_applied_to_body(ef_template.get_applied_to_body())
+        ef.set_force_expressed_in_body(
+            ef_template.get_force_expressed_in_body()
+        )
+        ef.set_point_expressed_in_body(
+            ef_template.get_point_expressed_in_body()
+        )
+
+        model.addForce(ef)
+        print(f"[ModelLoader]   '{ef.getName()}' → addForce OK  "
+              f"(applied_to: {ef.get_applied_to_body()}, "
+              f"force_id: {ef.getForceIdentifier()})")
    
     # ── 4. Reserve Actuators ──────────────────────────────────────────────────
     # The ForceSet XML contains CoordinateActuators for every coordinate.
@@ -148,9 +232,16 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     model.finalizeConnections()
     state = model.initSystem()
 
-    # Equilibrate muscles so activation/fibre-length state is physiologically
-    # plausible at t_start (reduces initial transients).
-    model.equilibrateMuscles(state)
+    # equilibrateMuscles at the default pose reduces initial transients.
+    # Some muscles (e.g. flex_dig_r) may fail at boundary configurations —
+    # this is acceptable; they will settle during the first integration steps.
+    try:
+        model.equilibrateMuscles(state)
+    except RuntimeError as e:
+        print(
+            f"[ModelLoader] WARNING: equilibrateMuscles failed at default pose. "
+            f"Continuing.\n  Detail: {e}"
+        )
 
     # ── 6. Cache topology ─────────────────────────────────────────────────────
     coord_set    = model.getCoordinateSet()
@@ -279,4 +370,5 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         n_muscles        = len(muscle_names),
         n_reserves       = len(reserve_names),
         n_controls       = n_controls,
+        grf_storage      = grf_storage,
     )

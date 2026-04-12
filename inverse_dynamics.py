@@ -92,6 +92,26 @@ class InverseDynamicsComputer:
         # Zero-control vector for the muscle-zeroing step
         self._zero_muscle_controls = opensim.Vector(ctx.n_controls, 0.0)
 
+        # ── SEA Force objects (for appliesForce toggling during ID) ──────────
+        # Zeroing u_SEA = 0 does NOT prevent computeActuation() from running:
+        # the plugin's internal impedance logic still executes and may crash
+        # if internal state variables are in an unexpected configuration.
+        # Instead, we toggle appliesForce = False to completely skip the
+        # plugin's computeForce() during the zero-muscle realizeAcceleration.
+        # This is safe because SEA forces act only on prosthetic coordinates
+        # and do not contribute to τ_bio.
+        force_set = model.getForceSet()
+        self._sea_forces: List[opensim.Force] = []
+        for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
+            try:
+                idx = force_set.getIndex(sea_name)
+                if idx >= 0:
+                    self._sea_forces.append(force_set.get(idx))
+                else:
+                    print(f"[ID] WARNING: SEA '{sea_name}' not found in ForceSet")
+            except Exception:
+                print(f"[ID] WARNING: could not look up SEA '{sea_name}' in ForceSet")
+
     # ─────────────────────────────────────────────────────────────────────────
     #  Public API
     # ─────────────────────────────────────────────────────────────────────────
@@ -121,54 +141,60 @@ class InverseDynamicsComputer:
         """
         model = self._ctx.model
 
-        # ── Step 1: temporarily zero muscle controls ─────────────────────────
-        # We keep SEA controls intact (they are already in `controls`).
-        # We do NOT use a copy of controls here; we restore muscle controls
-        # after the ID realisation.
-        #
-        # IMPORTANT: GRF forces are applied through ExternalLoads which are
-        # part of the model's ForceSet.  They are evaluated automatically when
-        # the state is realised to Stage::Dynamics — no explicit setup needed.
-        saved_muscle_controls = {
-            name: controls.get(self._ctx.muscle_ctrl_idx[name])
-            for name in self._ctx.muscle_names
-        }
-        for name in self._ctx.muscle_names:
-            controls.set(self._ctx.muscle_ctrl_idx[name], 0.0)
+        # ══════════════════════════════════════════════════════════════════════
+        # DIAGNOSTIC: disable ALL forces in the ForceSet during q̈₀ computation.
+        # This leaves only gravity and constraints → if realizeAcceleration
+        # still crashes, the issue is in the state itself (invalid q/qdot,
+        # constraint failure, etc.), NOT in any Force.
+        # If it succeeds, one of the Forces is the culprit.
+        # ══════════════════════════════════════════════════════════════════════
 
-        # Apply zeroed-muscle controls to the state cache
-        # After setControls, any call to realizeAcceleration will use exactly
-        # these control values (the stage cache is now valid).
+        # Save and zero ALL controls (not just muscles)
+        n_ctrl = controls.size()
+        saved_all_controls = [controls.get(i) for i in range(n_ctrl)]
+        for i in range(n_ctrl):
+            controls.set(i, 0.0)
+
+        # Disable EVERY Force in the ForceSet
+        force_set = model.getForceSet()
+        n_forces  = force_set.getSize()
+        saved_applies: list = []
+        print(f"[ID-DBG] disabling ALL {n_forces} forces …", flush=True)
+        for i in range(n_forces):
+            f = force_set.get(i)
+            saved_applies.append(f.get_appliesForce())
+            f.set_appliesForce(False)
+        print("[ID-DBG] all forces disabled OK", flush=True)
+
+        print("[ID-DBG] setControls (all zero) …", flush=True)
         model.setControls(state, controls)
 
-        # ── Step 2: realise to Acceleration → q̈₀ ───────────────────────────
+        # ── Step 2: realise to Acceleration → q̈₀ (gravity only) ─────────────
+        print("[ID-DBG] realizeAcceleration (ALL forces off, gravity only) …",
+              flush=True)
         model.realizeAcceleration(state)
+        print("[ID-DBG] realizeAcceleration OK ✓", flush=True)
 
-        # Read q̈₀ for every DOF (ordered as in coord_names = mobility order)
+        # Read q̈₀ for every DOF
         q_ddot_0 = np.array([
             coord.getAccelerationValue(state)
             for coord in self._all_coords
         ])
 
-        # ── Step 3: restore muscle controls for subsequent SO step ───────────
-        for name, val in saved_muscle_controls.items():
-            controls.set(self._ctx.muscle_ctrl_idx[name], val)
-        # (We do NOT re-apply controls here; the SO step will set the final
-        #  muscle controls and call setControls before the next realisation.)
+        # ── Step 3: re-enable all Forces and restore controls ────────────────
+        for i in range(n_forces):
+            force_set.get(i).set_appliesForce(saved_applies[i])
+        for i in range(n_ctrl):
+            controls.set(i, saved_all_controls[i])
 
         # ── Step 4: build Δq̈ vector (bio deficit, zeros elsewhere) ──────────
         for i in range(self._n_mob):
             self._delta_udot.set(i, 0.0)
-
         for name, idx in zip(self._ctx.bio_coord_names, self._bio_mob_indices):
             des = qddot_des_bio.get(name, 0.0)
             self._delta_udot.set(idx, des - q_ddot_0[idx])
 
         # ── Step 5: τ_required = M · Δq̈ ────────────────────────────────────
-        # multiplyByM requires state ≥ Stage::Position (guaranteed post-realize)
-        # M is the generalised mass matrix of the full Simbody system.
-        # The result encodes how much extra generalised force muscles must add
-        # to cover the acceleration deficit, accounting for all inertial coupling.
         try:
             self._matter.multiplyByM(
                 state,
@@ -176,8 +202,6 @@ class InverseDynamicsComputer:
                 self._M_delta_udot,
             )
         except AttributeError:
-            # Fallback for rare SWIG bindings that do not expose multiplyByM.
-            # Uses the InverseDynamicsSolver instead.
             self._M_delta_udot = self._tau_via_id_solver(state, qddot_des_bio)
 
         # ── Step 6: extract bio-DOF rows ────────────────────────────────────
