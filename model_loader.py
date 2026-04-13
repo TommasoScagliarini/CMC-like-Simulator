@@ -11,7 +11,6 @@ hot path.
 from __future__ import annotations
 
 import os
-import platform
 from dataclasses import dataclass, field
 from typing import Dict, List
 
@@ -44,8 +43,8 @@ class SimulationContext:
     # Prosthetic subset
     pros_coord_names: List[str]
 
-    # Map: coordinate_name → index in coord_names  (= mobility index for
-    # gait2392-style models without quaternions)
+    # Map: coordinate_name → index in the Simbody mobility vector (U/UDot).
+    # This is not necessarily the CoordinateSet order for custom models.
     coord_mob_idx:    Dict[str, int]
 
     # ── Muscle metadata ───────────────────────────────────────────────────────
@@ -77,6 +76,12 @@ class SimulationContext:
     n_reserves: int   # len(reserve_names)
     n_controls: int   # model.getNumControls()
 
+    # ── SEA actuator metadata ────────────────────────────────────────────────
+    sea_f_opt:               Dict[str, float] = field(default_factory=dict)
+    sea_motor_angle_sv_idx:  Dict[str, int]   = field(default_factory=dict)
+    sea_motor_speed_sv_idx:  Dict[str, int]   = field(default_factory=dict)
+    pros_mob_indices:        np.ndarray = field(default_factory=lambda: np.array([], dtype=int))
+
     # ── GRF data (MUST stay alive for the entire simulation) ─────────────────
     # ExternalForce(Storage, ...) stores a raw C++ pointer to the Storage.
     # If the Python wrapper is garbage-collected, the C++ object is destroyed
@@ -90,14 +95,114 @@ class SimulationContext:
 # ─────────────────────────────────────────────────────────────────────────────
 def _load_plugin(plugin_name: str) -> None:
     """
-    Load the SEA C++ shared library.  The extension is chosen based on the
-    running OS so the same config works on Windows, macOS, and Linux.
+    Load the SEA C++ shared library via OpenSim's plugin loader.
+
+    opensim.LoadOpenSimLibrary() already applies the platform-specific
+    naming convention internally:
+      - macOS  : prepends 'lib' and appends '.dylib'
+                 e.g. "plugins/SEA_…" → dlopen("plugins/libSEA_….dylib")
+      - Windows: appends '.dll'  (no 'lib' prefix)
+      - Linux  : prepends 'lib' and appends '.so'
+
+    Therefore we must pass the bare basename WITHOUT any extension.
+    Adding '.dylib' here would produce a double extension (.dylib.dylib).
     """
-    ext_map = {"Windows": ".dll", "Darwin": ".dylib"}
-    ext = ext_map.get(platform.system(), ".so")
-    lib_path = plugin_name + ext
-    print(f"[ModelLoader] Loading plugin  : {lib_path}")
-    opensim.LoadOpenSimLibrary(lib_path)
+    print(f"[ModelLoader] Loading plugin  : {plugin_name}")
+    opensim.LoadOpenSimLibrary(plugin_name)
+
+
+def _infer_coordinate_mobility_indices(
+    model: opensim.Model,
+    state: opensim.State,
+    coord_names: List[str],
+    actuator_set: opensim.Set,
+    probe_time: float,
+) -> Dict[str, int]:
+    """
+    Infer coordinate_name -> Simbody U/UDot index by applying one reserve
+    CoordinateActuator at a time.
+
+    CoordinateSet order is not guaranteed to match the global mobility vector
+    order.  The inverse-dynamics residual, mass matrix, and udot vectors are all
+    in mobility order, so using CoordinateSet order here can route torques and
+    accelerations to the wrong DOF.
+    """
+    probe_actuator_by_coord: Dict[str, str] = {}
+
+    for i in range(actuator_set.getSize()):
+        act = actuator_set.get(i)
+        if act.getConcreteClassName() != "CoordinateActuator":
+            continue
+        ca = opensim.CoordinateActuator.safeDownCast(act)
+        if ca is None:
+            continue
+        coord_name = ca.getCoordinate().getName()
+        act_name = act.getName()
+        if coord_name not in probe_actuator_by_coord or act_name.startswith("reserve_"):
+            probe_actuator_by_coord[coord_name] = act_name
+
+    missing = [name for name in coord_names if name not in probe_actuator_by_coord]
+    if missing:
+        raise RuntimeError(
+            "[ModelLoader] Cannot infer mobility indices; no CoordinateActuator "
+            f"probe found for coordinates: {missing}"
+        )
+
+    n_mob = state.getNU()
+    n_controls = model.getNumControls()
+    zero_udot = opensim.Vector(n_mob, 0.0)
+
+    state.setTime(probe_time)
+    controls = opensim.Vector(n_controls, 0.0)
+    model.realizeVelocity(state)
+    model.setControls(state, controls)
+    model.realizeDynamics(state)
+
+    id_solver = opensim.InverseDynamicsSolver(model)
+    base_residual_os = id_solver.solve(state, zero_udot)
+    base_residual = np.array([base_residual_os.get(i) for i in range(n_mob)])
+
+    coord_mob_idx: Dict[str, int] = {}
+    used_indices = set()
+
+    for coord_name in coord_names:
+        for j in range(n_controls):
+            controls.set(j, 0.0)
+
+        act_name = probe_actuator_by_coord[coord_name]
+        ctrl_idx = actuator_set.getIndex(act_name)
+        controls.set(ctrl_idx, 1.0)
+
+        model.setControls(state, controls)
+        model.realizeDynamics(state)
+        residual_os = id_solver.solve(state, zero_udot)
+        residual = np.array([residual_os.get(i) for i in range(n_mob)])
+
+        # A positive CoordinateActuator control changes exactly one generalized
+        # mobility residual.  Use the response location as the global U index.
+        applied = base_residual - residual
+        mob_idx = int(np.argmax(np.abs(applied)))
+        if abs(applied[mob_idx]) < 1e-8:
+            raise RuntimeError(
+                f"[ModelLoader] Mobility probe for '{coord_name}' via "
+                f"'{act_name}' produced no measurable generalized force."
+            )
+
+        coord_mob_idx[coord_name] = mob_idx
+        used_indices.add(mob_idx)
+
+    for j in range(n_controls):
+        controls.set(j, 0.0)
+    model.setControls(state, controls)
+
+    if len(used_indices) != len(coord_names):
+        raise RuntimeError(
+            "[ModelLoader] Coordinate mobility probe produced duplicate indices: "
+            f"{coord_mob_idx}"
+        )
+
+    print("[ModelLoader] Mobility index map inferred from reserve actuators.")
+    return coord_mob_idx
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -253,7 +358,9 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     # --- Coordinate names & mobility index map ---
     coord_names = [coord_set.get(i).getName()
                    for i in range(coord_set.getSize())]
-    coord_mob_idx = {name: i for i, name in enumerate(coord_names)}
+    coord_mob_idx = _infer_coordinate_mobility_indices(
+        model, state, coord_names, actuator_set, cfg.t_start
+    )
 
     bio_coord_names  = [n for n in coord_names if n not in cfg.pros_coords]
     pros_coord_names = [n for n in coord_names if n     in cfg.pros_coords]
@@ -291,8 +398,6 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     reserve_bio_row = np.array(reserve_bio_row_list, dtype=int)
 
     # --- Control vector indices ---
-    # Actuator.getControlIndex() returns the position of this actuator's first
-    # control signal in the model-level control Vector.
     def ctrl_idx(act_name: str) -> int:
         idx = actuator_set.getIndex(act_name)
         if idx < 0:
@@ -307,6 +412,13 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     }
     muscle_ctrl_idx  = {name: actuator_set.getIndex(name) for name in muscle_names}
     reserve_ctrl_idx = {name: actuator_set.getIndex(name) for name in reserve_names}
+
+    # --- SEA actuator properties ---
+    sea_f_opt: Dict[str, float] = {}
+    for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
+        act = actuator_set.get(actuator_set.getIndex(sea_name))
+        ca = opensim.CoordinateActuator.safeDownCast(act)
+        sea_f_opt[sea_name] = ca.getOptimalForce() if ca else 100.0
 
     # --- State variable indices (for setting q and qdot) ---
     # model.getStateVariableNames() returns strings like
@@ -337,6 +449,19 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
             f"  Available: {sv_name_list}"
         )
 
+    # --- SEA motor state variable indices ---
+    sea_motor_angle_sv_idx: Dict[str, int] = {}
+    sea_motor_speed_sv_idx: Dict[str, int] = {}
+    for sv_idx, sv_name in enumerate(sv_name_list):
+        for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
+            if sv_name.endswith(f"{sea_name}/motor_angle"):
+                sea_motor_angle_sv_idx[sea_name] = sv_idx
+            elif sv_name.endswith(f"{sea_name}/motor_speed"):
+                sea_motor_speed_sv_idx[sea_name] = sv_idx
+
+    # --- Prosthetic mobility indices ---
+    pros_mob_indices = np.array([coord_mob_idx[n] for n in pros_coord_names], dtype=int)
+
     n_controls = model.getNumControls()
 
     print(
@@ -346,6 +471,12 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         f"  Muscles     : {len(muscle_names)}\n"
         f"  Reserves    : {len(reserve_names)} (bio coords only)\n"
         f"  Controls    : {n_controls}"
+    )
+
+    print(
+        f"  SEA F_opt   : {sea_f_opt}\n"
+        f"  SEA motor SV: angle={sea_motor_angle_sv_idx}, "
+        f"speed={sea_motor_speed_sv_idx}"
     )
 
     return SimulationContext(
@@ -370,5 +501,9 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         n_muscles        = len(muscle_names),
         n_reserves       = len(reserve_names),
         n_controls       = n_controls,
+        sea_f_opt             = sea_f_opt,
+        sea_motor_angle_sv_idx = sea_motor_angle_sv_idx,
+        sea_motor_speed_sv_idx = sea_motor_speed_sv_idx,
+        pros_mob_indices      = pros_mob_indices,
         grf_storage      = grf_storage,
     )

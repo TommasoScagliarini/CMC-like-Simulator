@@ -1,43 +1,38 @@
 """
 inverse_dynamics.py
 ===================
-Partial inverse-dynamics computation for the biological degrees of freedom.
+Partial inverse-dynamics computation for biological AND prosthetic DOFs.
 
 Method: "zero-actuator residual + mass-matrix projection"
 -----------------------------------------------------------
-At each frame we want the vector of generalised forces  τ_bio  that muscles
-and reserve actuators must produce to achieve the desired accelerations
-q̈_des (bio DOFs).  The derivation is:
+At each frame we want the vector of generalised forces that actuators must
+produce to achieve the desired accelerations q̈_des.
 
-    Equation of motion (full system):
-        M(q) · q̈  =  τ_muscles + τ_SEA + τ_GRF + τ_gravity + τ_passive
-
-    Step 1 – zero ALL actuator controls (muscles, reserves, SEA).
+    Step 1 – zero ALL actuator contributions:
+             - Zero all controls (muscles, reserves, SEA)
+             - Zero SEA spring forces (set motor_angle = theta_joint)
              Compute q̈₀ via realizeDynamics + InverseDynamicsSolver.
 
-    Step 2 – acceleration deficit (bio DOFs only, prosthetic DOFs set to 0):
-        Δq̈[i]  =  q̈_des[i] − q̈₀[i]    for i ∈ bio_coords
-        Δq̈[j]  =  0                      for j ∈ pros_coords
+    Step 2 – acceleration deficit (ALL DOFs):
+        Δq̈[i]  =  q̈_des[i] − q̈₀[i]
 
     Step 3 – project through mass matrix:
-        τ_bio[i]  =  (M · Δq̈)[i]        for i ∈ bio_coords
+        τ  =  M · Δq̈
+
+    Step 4 – split:
+        τ_bio  = τ[bio_indices]    → muscles + reserves (QP)
+        τ_pros = τ[pros_indices]   → SEA actuators
 
 Why not realizeAcceleration?
 ----------------------------
-realizeAcceleration computes BOTH q̈ AND zdot (auxiliary state variable
-derivatives).  The SEA BlackBox plugin's computeStateVariableDerivatives()
-crashes when its internal state variables are in an unexpected configuration.
-
-Bypass:  realizeDynamics (forces only, no zdot)
-       + InverseDynamicsSolver.solve (uses calcResidualForce, no zdot)
-       + multiplyByM (pure mass-matrix algebra, no zdot)
-
-All three are safe and produce identical q̈ values.
+realizeAcceleration triggers computeStateVariableDerivatives() in the
+SEA plugin, which crashes.  The bypass (realizeDynamics + ID solver +
+multiplyByM) avoids this entirely.
 """
 
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import opensim
@@ -60,7 +55,6 @@ def build_mass_matrix(
     Build the full mass matrix M as a numpy array.
 
     Uses n_mob calls to matter.multiplyByM (one per column).
-    For gait2392 (n_mob=21) this is negligible (~μs per call).
     Requires state ≥ Stage::Position.
     """
     M = np.zeros((n_mob, n_mob))
@@ -85,17 +79,11 @@ def compute_udot_bypass(
     """
     Compute generalised accelerations q̈ WITHOUT realizeAcceleration.
 
-    The state must already have controls set via model.setControls().
-
     Steps:
       1. realizeDynamics  — computes all forces, no zdot
-      2. ID_solver.solve(state, q̈=0) → residual = C + G − f_applied
+      2. ID_solver.solve(state, q̈=0) → residual
       3. Build M via multiplyByM
       4. q̈ = solve(M, −residual)
-
-    Returns
-    -------
-    udot : np.ndarray shape (n_mob,)
     """
     model.realizeDynamics(state)
 
@@ -112,12 +100,9 @@ def compute_udot_bypass(
 
 class InverseDynamicsComputer:
     """
-    Frame-by-frame partial ID using the zero-actuator + M·Δq̈ approach.
+    Frame-by-frame ID using the zero-actuator + M·Δq̈ approach.
 
-    Parameters
-    ----------
-    cfg : SimulatorConfig
-    ctx : SimulationContext
+    Computes required forces for BOTH biological and prosthetic DOFs.
     """
 
     def __init__(self, cfg: SimulatorConfig, ctx: SimulationContext) -> None:
@@ -127,51 +112,80 @@ class InverseDynamicsComputer:
         self._n_mob = ctx.n_mob
         self._n_bio = ctx.n_bio
 
-        # Indices of bio_coords within the full mobility vector (numpy for fancy indexing)
+        # Indices of bio_coords within the full mobility vector
         self._bio_mob_indices = np.array([
             ctx.coord_mob_idx[name] for name in ctx.bio_coord_names
         ], dtype=int)
 
-        # Simbody matter subsystem — used for multiplyByM
+        # Indices of pros_coords within the full mobility vector
+        self._pros_mob_indices = ctx.pros_mob_indices
+
+        # Simbody matter subsystem
         self._matter = ctx.model.getMatterSubsystem()
 
         # Reusable scratch vectors for build_mass_matrix
         self._e_vec  = opensim.Vector(self._n_mob, 0.0)
         self._Me_vec = opensim.Vector(self._n_mob, 0.0)
 
+        # SEA coordinate names (for zeroing springs)
+        self._sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
+        self._pros_coords = cfg.pros_coords
+
     # ─────────────────────────────────────────────────────────────────────────
     #  Public API
     # ─────────────────────────────────────────────────────────────────────────
-    def compute_tau_bio(
+    def compute_tau(
         self,
         state:          opensim.State,
         controls:       opensim.Vector,
-        qddot_des_bio:  Dict[str, float],
-    ) -> np.ndarray:
+        qddot_des:      Dict[str, float],
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Compute the generalised forces that muscles + reserves must produce.
+        Compute the generalised forces for bio DOFs (muscles + reserves)
+        and pros DOFs (SEA actuators).
 
         Parameters
         ----------
-        state          : current OpenSim State; must be ≥ Stage::Velocity.
-                         On exit: Stage::Dynamics (never Acceleration).
-        controls       : full control Vector.  All entries are temporarily
-                         zeroed; original values are restored on exit.
-        qddot_des_bio  : desired accelerations for bio coords {name → rad/s²}
+        state          : current OpenSim State ≥ Stage::Velocity.
+        controls       : full control Vector (temporarily zeroed, restored on exit).
+        qddot_des      : desired accelerations for ALL coords {name → rad/s²}
 
         Returns
         -------
-        tau_bio : np.ndarray shape (n_bio,)
+        tau_bio  : np.ndarray shape (n_bio,)
+        tau_pros : np.ndarray shape (n_pros,)
         """
         model = self._ctx.model
+        ctx   = self._ctx
         n_mob = self._n_mob
 
-        # ── Step 1: save and zero ALL controls ───────────────────────────────
+        # ── Step 1a: save and zero ALL controls ──────────────────────────────
         n_ctrl = controls.size()
-        saved = [controls.get(i) for i in range(n_ctrl)]
+        saved_ctrl = [controls.get(i) for i in range(n_ctrl)]
         for i in range(n_ctrl):
             controls.set(i, 0.0)
         model.setControls(state, controls)
+
+        # ── Step 1b: zero SEA springs (motor_angle = theta_joint) ────────────
+        #    In non-impedance mode, computeActuation = K*(theta_m - theta_j).
+        #    With u=0 but theta_m ≠ theta_j, the spring still applies force.
+        #    We must zero this to get a true "zero-actuator" baseline.
+        sv = model.getStateVariableValues(state)
+        saved_motor = {}
+        coord_set = model.getCoordinateSet()
+        for sea_name, coord_name in zip(self._sea_names, self._pros_coords):
+            ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
+            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+            if ma_idx is not None:
+                saved_motor[sea_name] = (
+                    sv.get(ma_idx),
+                    sv.get(ms_idx) if ms_idx is not None else 0.0,
+                )
+                theta_j = coord_set.get(coord_name).getValue(state)
+                sv.set(ma_idx, theta_j)      # zero spring deflection
+                if ms_idx is not None:
+                    sv.set(ms_idx, 0.0)       # zero motor speed
+        model.setStateVariableValues(state, sv)
 
         # ── Step 2: compute q̈₀ (no realizeAcceleration) ─────────────────────
         qdot0 = compute_udot_bypass(
@@ -179,22 +193,36 @@ class InverseDynamicsComputer:
             self._e_vec, self._Me_vec,
         )
 
-        # ── Step 3: restore controls ────────────────────────────────────────
+        # ── Step 3: restore controls and SEA motor state ─────────────────────
         for i in range(n_ctrl):
-            controls.set(i, saved[i])
+            controls.set(i, saved_ctrl[i])
 
-        # ── Step 4: Δq̈ (bio = desired − q̈₀, pros = 0) ─────────────────────
+        sv = model.getStateVariableValues(state)
+        for sea_name, (saved_ma, saved_ms) in saved_motor.items():
+            ma_idx = ctx.sea_motor_angle_sv_idx[sea_name]
+            sv.set(ma_idx, saved_ma)
+            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+            if ms_idx is not None:
+                sv.set(ms_idx, saved_ms)
+        model.setStateVariableValues(state, sv)
+
+        # ── Step 4: Δq̈ for ALL DOFs ─────────────────────────────────────────
         delta_udot = np.zeros(n_mob)
-        for name, idx in zip(self._ctx.bio_coord_names, self._bio_mob_indices):
-            delta_udot[idx] = qddot_des_bio.get(name, 0.0) - qdot0[idx]
+        for name in ctx.coord_names:
+            idx = ctx.coord_mob_idx[name]
+            delta_udot[idx] = qddot_des.get(name, 0.0) - qdot0[idx]
 
         # ── Step 5: τ = M · Δq̈ ──────────────────────────────────────────────
-        # M depends on q only → same as in step 2 → rebuild (cheap, 21 calls)
+        # Re-realize after setStateVariableValues invalidated the cache
+        model.realizePosition(state)
         M = build_mass_matrix(
             self._matter, state, n_mob,
             self._e_vec, self._Me_vec,
         )
         tau_full = M @ delta_udot
 
-        # ── Step 6: extract bio rows ────────────────────────────────────────
-        return tau_full[self._bio_mob_indices]
+        # ── Step 6: split bio / pros ─────────────────────────────────────────
+        tau_bio  = tau_full[self._bio_mob_indices]
+        tau_pros = tau_full[self._pros_mob_indices]
+
+        return tau_bio, tau_pros

@@ -15,10 +15,10 @@ mathematically identical to SemiExplicitEuler2 but fully under our control:
 
   1. Realise the state to Velocity.
   2. Compute controls (SEA + biological SO) using all sub-components.
-  3. Apply controls and realise to Acceleration → read q̈.
-  4. Advance q and q̇ with a first-order Euler step.
-  5. Write the new (q, q̇, t) back into the OpenSim State via
-     model.setStateVariableValues().
+  3. Apply controls and compute actual q̈ via bypass (no realizeAcceleration).
+  4. Record current state (activations, tau_bio, SEA controls, kinematics).
+  5. Advance q and q̇ with a semi-explicit Euler step.  The IK data are a
+     reference for the controllers, not a forced output trajectory.
 
 This is a Zero-Order-Hold scheme: controls computed at time t are held
 constant over the interval [t, t+Δt], consistent with the single-stage
@@ -44,20 +44,15 @@ Step order inside each iteration
 ---------------------------------
   A. REALISE V   – model.realizeVelocity(state)
   B. KIN REF     – kin.get(t) → q_ref, qdot_ref, qddot_ref
-  C. SEA CTRL    – ProsthesisController.compute() → fills controls[SEA_idx]
-  D. OUTER LOOP  – OuterLoop.compute_desired_accelerations()
-  E. ID          – InverseDynamicsComputer.compute_tau_bio()
-                   (temporarily zeros muscle controls, realises to Accel,
-                    reads q̈₀, restores muscle controls)
-  F. SO          – StaticOptimizer.solve() → a, u_res
-  G. APPLY CTRL  – apply_to_controls() + model.setControls()
+  C. OUTER LOOP  – OuterLoop.compute_desired_accelerations() [bio DOFs]
+  D. ID          – InverseDynamicsComputer.compute_tau() [bio + pros]
+                   (zeros controls + SEA springs, computes q̈₀, restores)
+  E. SEA CTRL    – ProsthesisController.compute() with ID feed-forward
+  F. SO          – StaticOptimizer.solve() → a, u_res  (bio DOFs)
+  G. APPLY CTRL  – apply_to_controls() + set SEA controls + setControls()
   H. COMPUTE q̈  – compute_udot_bypass(state)
-                   (realizeDynamics + ID solver + multiplyByM + np.solve
-                    — no realizeAcceleration, avoids SEA plugin crash)
   I. RECORD      – append data row to results buffers
-  J. EULER STEP  – q(t+dt)  = q(t)  + q̇(t)  · dt
-                   q̇(t+dt) = q̇(t) + q̈(t) · dt
-                   set_state(q_new, qdot_new, t+dt)
+  J. EULER STEP  – integrate simulated q and qdot, update SEA motor state
 
 Output files
 ------------
@@ -109,6 +104,12 @@ class SimulationRunner:
         self._id_computer     = InverseDynamicsComputer(cfg, ctx)
         self._so              = StaticOptimizer(cfg, ctx)
 
+        # SEA name ↔ pros coordinate mapping
+        self._sea_pros_map = list(zip(
+            [cfg.sea_knee_name, cfg.sea_ankle_name],
+            cfg.pros_coords,
+        ))
+
         # ── Output buffers (pre-allocated for efficiency) ─────────────────────
         n_steps  = int((cfg.t_end - cfg.t_start) / cfg.dt) + 2
         n_coords = len(ctx.coord_names)
@@ -156,18 +157,16 @@ class SimulationRunner:
         # Pre-allocate the full OpenSim controls vector (reused every step)
         controls = opensim.Vector(ctx.n_controls, 0.0)
 
-        # Pre-fetch CoordinateSet once — used in the Euler step
+        # Pre-fetch CoordinateSet once, used in the Euler step
         coord_set = model.getCoordinateSet()
 
-        # ── Bypass resources (for computing q̈ without realizeAcceleration) ──
-        # realizeAcceleration triggers computeStateVariableDerivatives() in the
-        # SEA BlackBox plugin, which crashes.  Instead we use:
-        #   realizeDynamics + InverseDynamicsSolver + multiplyByM → q̈
-        # See inverse_dynamics.py docstring for the full derivation.
+        # Bypass resources for computing q̈ without realizeAcceleration.
+        # The SEA plugin can crash while computing auxiliary state derivatives;
+        # compute_udot_bypass uses realizeDynamics + ID solver + M instead.
         matter = model.getMatterSubsystem()
         n_mob  = ctx.n_mob
-        _e_vec  = opensim.Vector(n_mob, 0.0)   # scratch for build_mass_matrix
-        _Me_vec = opensim.Vector(n_mob, 0.0)   # scratch for build_mass_matrix
+        _e_vec  = opensim.Vector(n_mob, 0.0)
+        _Me_vec = opensim.Vector(n_mob, 0.0)
 
         # ── Main loop ─────────────────────────────────────────────────────────
         wall_t0     = _time.perf_counter()
@@ -197,54 +196,79 @@ class SimulationRunner:
                 q_ref, qdot_ref, qddot_ref = self._kin.get(t)
 
                 # ═══════════════════════════════════════════════════════════
-                # C. SEA high-level controller
+                # C. Outer loop – desired biological accelerations
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] C: prosthesis_ctrl …", flush=True)
-                u_sea = self._prosthesis_ctrl.compute(
-                    state, q_ref, qdot_ref, controls
-                )
-
-                # ═══════════════════════════════════════════════════════════
-                # D. Outer loop – desired biological accelerations
-                # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] D: outer_loop …", flush=True)
+                    print(f"[DBG t={t:.4f}] C: outer_loop …", flush=True)
                 qddot_des_bio = self._outer_loop.compute_desired_accelerations(
                     state, q_ref, qdot_ref, qddot_ref
                 )
 
+                # Build desired accelerations for ALL DOFs (bio + pros).
+                # Pros DOFs use the reference accelerations only for the ID
+                # feed-forward estimate; the applied SEA command comes from
+                # ProsthesisController, and the state is integrated dynamically.
+                qddot_des_all = dict(qddot_des_bio)
+                for coord_name in cfg.pros_coords:
+                    qddot_des_all[coord_name] = qddot_ref.get(coord_name, 0.0)
+
                 # ═══════════════════════════════════════════════════════════
-                # E. Inverse dynamics → τ_bio
-                #    Uses ID solver bypass (no realizeAcceleration)
+                # D. Inverse dynamics → τ_bio + τ_pros feed-forward estimate
+                #    Zeros controls AND SEA springs, computes q̈₀, then
+                #    τ = M · (q̈_des − q̈₀) for ALL DOFs.
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] E: inverse_dynamics …", flush=True)
-                tau_bio = self._id_computer.compute_tau_bio(
-                    state, controls, qddot_des_bio
+                    print(f"[DBG t={t:.4f}] D: inverse_dynamics …", flush=True)
+                tau_bio, tau_pros_ff = self._id_computer.compute_tau(
+                    state, controls, qddot_des_all
                 )
+                model.realizeVelocity(state)
+
+                # ═══════════════════════════════════════════════════════════
+                # E. SEA high-level controller
+                #    Feed-forward holds the nominal inverse-dynamics torque;
+                #    the PD terms correct residual tracking error.
+                # ═══════════════════════════════════════════════════════════
+                tau_pros_ff_by_coord = {
+                    coord_name: float(tau_pros_ff[i])
+                    for i, coord_name in enumerate(ctx.pros_coord_names)
+                }
+                if step < 3:
+                    print(f"[DBG t={t:.4f}] E: prosthesis_ctrl …", flush=True)
+                u_sea = self._prosthesis_ctrl.compute(
+                    state, q_ref, qdot_ref, controls,
+                    tau_ff=tau_pros_ff_by_coord,
+                )
+                tau_sea_cmd = np.array([
+                    u_sea.get(coord_name, 0.0) * ctx.sea_f_opt[sea_name]
+                    for sea_name, coord_name in self._sea_pros_map
+                ])
 
                 # ═══════════════════════════════════════════════════════════
                 # F. Static Optimisation → muscle activations + reserves
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
+                    sea_str = ", ".join(f"{k}={v:.4f}" for k, v in u_sea.items())
+                    print(f"[DBG t={t:.4f}] F: u_sea = {{{sea_str}}}",
+                          flush=True)
                     print(f"[DBG t={t:.4f}] F: static_optimization …", flush=True)
                 a, u_res = self._so.solve(state, tau_bio)
 
                 # ═══════════════════════════════════════════════════════════
-                # G. Apply all controls to the model
+                # G. Apply muscle + reserve controls (SEA already set above)
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
                     print(f"[DBG t={t:.4f}] G: apply_controls …", flush=True)
                 self._so.apply_to_controls(a, u_res, controls)
+                self._update_sea_motor_state(state, tau_sea_cmd)
+                model.realizeVelocity(state)
                 model.setControls(state, controls)
 
                 # ═══════════════════════════════════════════════════════════
                 # H. Compute q̈ with final controls (NO realizeAcceleration)
                 #
-                #    realizeAcceleration triggers the SEA plugin's
-                #    computeStateVariableDerivatives() which crashes.
-                #    Instead: realizeDynamics + ID solver + M → q̈.
+                #    q̈ comes from the bypass, so output kinematics are produced
+                #    by the simulated dynamics rather than copied from kin.get().
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
                     print(f"[DBG t={t:.4f}] H: compute_udot_bypass …",
@@ -252,6 +276,14 @@ class SimulationRunner:
                 udot = compute_udot_bypass(
                     matter, model, state, n_mob, _e_vec, _Me_vec,
                 )
+                if not np.all(np.isfinite(udot)):
+                    bad_coords = [
+                        name for name in ctx.coord_names
+                        if not np.isfinite(udot[ctx.coord_mob_idx[name]])
+                    ]
+                    raise FloatingPointError(
+                        f"Non-finite accelerations at t={t:.4f}: {bad_coords[:5]}"
+                    )
 
                 # ═══════════════════════════════════════════════════════════
                 # I. Record current state BEFORE advancing time
@@ -259,31 +291,31 @@ class SimulationRunner:
                 self._record(t, state, a, u_res, tau_bio, u_sea)
 
                 # ═══════════════════════════════════════════════════════════
-                # J. Semi-explicit Euler step
-                #    q̈ comes from the bypass (udot array), NOT from the
-                #    state (which was never realised to Acceleration).
+                # J. Semi-explicit Euler step + SEA motor state update
                 # ═══════════════════════════════════════════════════════════
                 q_new:    Dict[str, float] = {}
                 qdot_new: Dict[str, float] = {}
 
-                for i_c, name in enumerate(ctx.coord_names):
+                for name in ctx.coord_names:
                     coord    = coord_set.get(name)
                     q_cur    = coord.getValue(state)
                     qdot_cur = coord.getSpeedValue(state)
-                    qacc_cur = udot[ctx.coord_mob_idx[name]]   # from bypass
+                    qacc_cur = udot[ctx.coord_mob_idx[name]]
 
-                    q_new[name]    = q_cur    + qdot_cur * dt
-                    qdot_new[name] = qdot_cur + qacc_cur * dt
+                    qdot_next      = qdot_cur + qacc_cur * dt
+                    q_new[name]    = q_cur + qdot_next * dt
+                    qdot_new[name] = qdot_next
 
                 t_new = t + dt
                 self._set_state(state, q_new, qdot_new, t_new)
+                self._update_sea_motor_state(state, tau_sea_cmd)
+
                 t = t_new
 
                 if step < 3:
                     print(f"[DBG t={t:.4f}] ✓ step {step} complete", flush=True)
 
             except Exception as exc:
-                # Catch ALL Python exceptions (not just RuntimeError)
                 print(f"\n[Runner] Exception at t={t:.4f} s, step={step}: "
                       f"{type(exc).__name__}: {exc}", flush=True)
                 import traceback
@@ -429,6 +461,62 @@ class SimulationRunner:
                 + ", ".join(sv_name.split("/")[-1] for _, sv_name in plugin_sv),
                 flush=True
             )
+
+    def _update_sea_motor_state(
+        self,
+        state:       opensim.State,
+        tau_sea_cmd: np.ndarray,
+    ) -> None:
+        """
+        Set SEA motor_angle to the equilibrium position that produces
+        the requested SEA spring torque at the current joint angle.
+
+        In non-impedance mode:  actuation = K * (motor_angle - theta_joint)
+        For actuation = τ_required:
+            motor_angle = theta_joint + τ_required / K
+
+        In impedance mode: actuation = F_opt * u (independent of motor_angle),
+        but we still update motor_angle for consistency.
+        """
+        ctx   = self._ctx
+        model = ctx.model
+        coord_set = model.getCoordinateSet()
+
+        sv = model.getStateVariableValues(state)
+
+        for i, (sea_name, coord_name) in enumerate(self._sea_pros_map):
+            ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
+            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+            if ma_idx is None:
+                continue
+
+            theta_j = coord_set.get(coord_name).getValue(state)
+            tau_req = tau_sea_cmd[i]
+            K = self._sea_stiffness(sea_name, coord_name)
+
+            # Equilibrium: spring deflection = τ_required / K
+            theta_m_eq = theta_j + tau_req / K if K > 1e-10 else theta_j
+            sv.set(ma_idx, theta_m_eq)
+
+            # Motor speed: approximate from joint speed (tracks joint)
+            if ms_idx is not None:
+                omega_j = coord_set.get(coord_name).getSpeedValue(state)
+                sv.set(ms_idx, omega_j)
+
+        model.setStateVariableValues(state, sv)
+
+    def _sea_stiffness(self, sea_name: str, coord_name: str) -> float:
+        """Return SEA stiffness, accepting both legacy scalar and dict config."""
+        stiffness = self._cfg.sea_stiffness
+        if isinstance(stiffness, dict):
+            if sea_name in stiffness:
+                return float(stiffness[sea_name])
+            if coord_name in stiffness:
+                return float(stiffness[coord_name])
+            raise KeyError(
+                f"Missing SEA stiffness for '{sea_name}' / '{coord_name}'"
+            )
+        return float(stiffness)
 
     def _set_state(
         self,

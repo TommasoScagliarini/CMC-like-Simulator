@@ -13,10 +13,15 @@ normalised command signal  u ∈ [−1, +1]  whose physical meaning is:
 This module implements the *high-level* position-tracking loop that runs at
 the Python level:
 
-    e_q    = q_ref    − q_current
-    e_qdot = qdot_ref − qdot_current
-    u_raw  = Kp · e_q + Kd · e_qdot
-    u      = clip(u_raw, −1, +1)
+    e_q     = q_ref    − q_current
+    e_qdot  = qdot_ref − qdot_current
+    τ_pd    = Kp · e_q + Kd · e_qdot
+    τ_cmd   = τ_ff + τ_pd
+    u       = clip(τ_cmd / F_opt, −1, +1)
+
+If a feed-forward torque is supplied, it is added in physical torque units
+before the final normalisation by the SEA optimal force.  This matches the
+plugin source, where the low-level torque reference is ``tau_ref = u * F_opt``.
 
 The resulting u values are injected into the OpenSim control vector at the
 indices assigned to SEA_knee and SEA_ankle before the model is realised to
@@ -28,7 +33,7 @@ forward, etc.) only requires editing :meth:`compute`.
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
+from typing import Dict, Optional
 
 import numpy as np
 import opensim
@@ -71,6 +76,7 @@ class ProsthesisController:
         q_ref:    Dict[str, float],
         qdot_ref: Dict[str, float],
         controls: opensim.Vector,
+        tau_ff:   Optional[Dict[str, float]] = None,
     ) -> Dict[str, float]:
         """
         Compute and inject SEA control signals into *controls*.
@@ -83,12 +89,14 @@ class ProsthesisController:
         q_ref    : reference positions   {coord_name: value [rad]}
         qdot_ref : reference velocities  {coord_name: value [rad/s]}
         controls : model control Vector (modified in-place)
+        tau_ff   : optional feed-forward torque {coord_name: N*m}
 
         Returns
         -------
         u_dict : {coord_name: u} for logging / debugging
         """
         u_dict: Dict[str, float] = {}
+        tau_ff = tau_ff or {}
 
         for sea_name, coord_name in zip(self._sea_names, self._pros_coords):
             coord = self._coords[coord_name]
@@ -106,7 +114,9 @@ class ProsthesisController:
             kp = self._cfg.sea_kp.get(coord_name, 5.0)
             kd = self._cfg.sea_kd.get(coord_name, 0.5)
 
-            u_raw = kp * e_q + kd * e_qdot
+            f_opt = self._ctx.sea_f_opt.get(sea_name, 1.0)
+            tau_cmd = tau_ff.get(coord_name, 0.0) + kp * e_q + kd * e_qdot
+            u_raw = tau_cmd / f_opt if f_opt > 1e-10 else 0.0
             u     = float(np.clip(u_raw, -1.0, 1.0))
 
             # ── Inject into control Vector ──────────────────────────────────

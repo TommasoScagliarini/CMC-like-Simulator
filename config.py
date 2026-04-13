@@ -19,20 +19,20 @@ class SimulatorConfig:
     # =========================================================================
 
     # Biomechanical model (contains muscles + SEA CoordinateActuators)
-    model_file: str = "models\Adjusted_SEASEA - Copia.osim"
+    model_file: str = "models/Adjusted_SEASEA - Copia.osim"
 
     # C++ plugin basename WITHOUT OS extension.
     # Loader adds .dll / .dylib / .so automatically.
-    plugin_name: str = "plugins\SEA_Plugin_BlackBox_mCMC_impedence"
+    plugin_name: str = "plugins/SEA_Plugin_BlackBox_mCMC_impedence"
 
     # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto)
     kinematics_file: str = "data/3DGaitModel2392_Kinematics_q.sto"
 
     # GRF ExternalLoads setup XML  (points to the .mot data file internally)
-    external_loads_xml: str = "data\Externall_Loads.xml"
+    external_loads_xml: str = "data/Externall_Loads.xml"
 
     # Reserve actuators ForceSet XML  (CMC_Actuators.xml)
-    reserve_actuators_xml: str = "data\CMC_Actuators.xml"
+    reserve_actuators_xml: str = "data/CMC_Actuators.xml"
 
     # Output directory (created automatically if missing)
     output_dir: str = "results"
@@ -71,10 +71,11 @@ class SimulatorConfig:
     # =========================================================================
     # SEA HIGH-LEVEL CONTROLLER  (outer PD, prosthetic side)
     #
-    #   u = clip( Kp*(q_ref – q) + Kd*(qdot_ref – qdot) , -1, +1 )
+    #   τ_cmd = τ_ff + Kp*(q_ref – q) + Kd*(qdot_ref – qdot)
+    #   u     = clip(τ_cmd/F_opt, -1, +1)
     #
     # u is passed to the plugin's inner PD torque loop.
-    # Units: [rad^-1] for Kp, [s·rad^-1] for Kd.
+    # Units: [N·m/rad] for Kp, [N·m·s/rad] for Kd.
     # =========================================================================
     sea_kp: Dict[str, float] = field(default_factory=lambda: {
         "pros_knee_angle":  5.0,
@@ -83,6 +84,13 @@ class SimulatorConfig:
     sea_kd: Dict[str, float] = field(default_factory=lambda: {
         "pros_knee_angle":  0.5,
         "pros_ankle_angle": 0.5,
+    })
+
+    # SEA spring stiffness [N·m/rad] — must match each plugin <stiffness> property.
+    # Used to update motor_angle at each step (non-impedance mode).
+    sea_stiffness: Dict[str, float] = field(default_factory=lambda: {
+        "SEA_Knee":  250.0,
+        "SEA_Ankle": 500.0,
     })
 
     # =========================================================================
@@ -116,11 +124,21 @@ class SimulatorConfig:
     #         0 ≤ a_i ≤ 1
     #         –u_res_max ≤ u_res_j ≤ u_res_max
     #
-    # Reserve actuators are deliberately penalised (w_res >> 1) so muscles
-    # are preferred; reserves only activate when muscles are insufficient.
+    # With use_muscles_in_so=False (default), the reserve block is the exact
+    # biological tracking actuator.  When use_muscles_in_so=True, reserves are
+    # penalised (w_res >> 1) so muscles are preferred.
     # =========================================================================
     reserve_weight:  float = 1000.0   # w_res  (dimensionless)
-    reserve_u_max:   float = 10.0     # max normalised reserve control  [–]
+    # The CMC_Actuators.xml reserves are unbounded; keep a large numerical cap
+    # so the SO problem remains feasible during early tracking transients.
+    reserve_u_max:   float = 1000.0   # max normalised reserve control  [–]
+
+    # Keep the biological tracking actuator exactly consistent with OpenSim
+    # dynamics.  The old linear muscle approximation (moment_arm * Fmax) is not
+    # equivalent to instantaneous Thelen muscle forces and destabilises the
+    # closed-loop simulation.  Set True only when a full muscle-force mapping is
+    # implemented.
+    use_muscles_in_so: bool = False
 
     # QP solver backend: "slsqp" (scipy, zero extra deps) | "osqp" (faster,
     # needs `pip install qpsolvers[osqp]`)

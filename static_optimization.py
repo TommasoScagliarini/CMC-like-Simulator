@@ -37,9 +37,12 @@ converges in very few iterations after the first step.
 
 Moment-arm computation
 -----------------------
-Muscle.computeMomentArm(state, Coordinate) is called for every (muscle, coord)
-pair at each time step.  This is the main computational cost.  Possible
-optimisations (not implemented here):
+By default, ``cfg.use_muscles_in_so`` is false and the biological tracking
+torque is applied through the reserve actuator block, which is exactly
+consistent with the OpenSim dynamics used by the bypass.  If muscle SO is
+enabled, Muscle.computeMomentArm(state, Coordinate) is called for every
+(muscle, coord) pair at each time step.  This is the main computational cost.
+Possible optimisations (not implemented here):
   - Cache R when the configuration changes slowly (check ‖Δq‖ < threshold).
   - Use finite-difference moment-arm approximation for speed.
 """
@@ -50,7 +53,7 @@ import warnings
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from scipy.optimize import minimize, OptimizeResult
+from scipy.optimize import lsq_linear, minimize, OptimizeResult
 
 import opensim
 
@@ -158,12 +161,12 @@ class StaticOptimizer:
             x, success = self._solve_slsqp(A, tau_bio)
 
         if not success:
-            # Fallback: return previous solution and log a warning
             warnings.warn(
-                f"[StaticOptimizer] QP did not converge. Reusing previous solution.",
+                "[StaticOptimizer] QP did not converge. "
+                "Using bounded least-squares fallback.",
                 RuntimeWarning,
             )
-            x = self._x_prev.copy()
+            x = self._solve_bounded_least_squares(A, tau_bio)
 
         self._x_prev = x.copy()
 
@@ -191,15 +194,16 @@ class StaticOptimizer:
         # R[i, j] = computeMomentArm(state, bio_coord_i)  for muscle j
         # Multiply column j by F_max[j] to get force → torque mapping.
         R_muscle_scaled = np.zeros((n_bio, n_m))
-        for j, muscle in enumerate(self._muscles):
-            for i, coord in enumerate(self._bio_coords):
-                # computeMomentArm takes an opensim.Coordinate and the state.
-                # Positive sign convention: positive moment arm means the
-                # muscle *flexes* the joint (increases coord value).
-                R_muscle_scaled[i, j] = (
-                    muscle.computeMomentArm(state, coord)   # [m]
-                    * ctx.f_max[j]                           # [N]  → [N·m]
-                )
+        if self._cfg.use_muscles_in_so:
+            for j, muscle in enumerate(self._muscles):
+                for i, coord in enumerate(self._bio_coords):
+                    # computeMomentArm takes an opensim.Coordinate and the state.
+                    # Positive sign convention: positive moment arm means the
+                    # muscle *flexes* the joint (increases coord value).
+                    R_muscle_scaled[i, j] = (
+                        muscle.computeMomentArm(state, coord)   # [m]
+                        * ctx.f_max[j]                           # [N]  → [N·m]
+                    )
 
         # -- Concatenate muscle and reserve blocks ---------------------------
         A = np.hstack([R_muscle_scaled, self._R_res_scaled])
@@ -245,6 +249,40 @@ class StaticOptimizer:
             },
         )
         return result.x, result.success
+
+    def _solve_bounded_least_squares(
+        self,
+        A: np.ndarray,
+        b: np.ndarray,
+    ) -> np.ndarray:
+        """
+        Robust fallback for frames where SLSQP cannot satisfy the equality
+        constraints exactly.
+
+        The variable transform y=sqrt(w)*x keeps the fallback close to the QP
+        objective: among near-feasible controls, reserve usage remains costly.
+        """
+        if not np.all(np.isfinite(A)) or not np.all(np.isfinite(b)):
+            warnings.warn(
+                "[StaticOptimizer] Non-finite SO inputs. Reusing previous solution.",
+                RuntimeWarning,
+            )
+            return self._x_prev.copy()
+
+        scale = np.sqrt(self._weights)
+        A_scaled = A / scale[np.newaxis, :]
+
+        lb = np.array([lo for lo, _ in self._bounds], dtype=float) * scale
+        ub = np.array([hi for _, hi in self._bounds], dtype=float) * scale
+
+        result = lsq_linear(
+            A_scaled,
+            b,
+            bounds=(lb, ub),
+            lsmr_tol="auto",
+            max_iter=self._cfg.qp_max_iter,
+        )
+        return result.x / scale
 
     # ── OSQP via qpsolvers ───────────────────────────────────────────────────
     def _solve_osqp(
