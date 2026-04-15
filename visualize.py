@@ -23,6 +23,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime
+from xml.etree import ElementTree as ET
 
 import numpy as np
 import opensim
@@ -31,7 +32,67 @@ from config import SimulatorConfig
 from output import read_sto
 
 
-def _configure_geometry_search_paths(extra_dirs: list[str] | None = None) -> None:
+def _library_variant_exists(path_without_ext: str) -> bool:
+    """Return True if a platform shared-library variant exists for a basename."""
+    directory = os.path.dirname(path_without_ext)
+    basename = os.path.basename(path_without_ext)
+    candidates = [
+        path_without_ext + ".dll",
+        path_without_ext + ".dylib",
+        path_without_ext + ".so",
+        os.path.join(directory, "lib" + basename + ".dylib"),
+        os.path.join(directory, "lib" + basename + ".so"),
+    ]
+    return any(os.path.isfile(path) for path in candidates)
+
+
+def _resolve_project_path(path: str, library_basename: bool = False) -> str:
+    """Resolve repo-relative defaults even if visualize.py is launched elsewhere."""
+    if os.path.isabs(path):
+        return path
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.abspath(path),
+        os.path.join(script_dir, path),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+        if library_basename and _library_variant_exists(candidate):
+            return candidate
+    return candidates[0]
+
+
+def _xml_local_name(tag: str) -> str:
+    """Return an XML tag name without a namespace, if present."""
+    return tag.rsplit("}", 1)[-1]
+
+
+def _mesh_files_from_model(model_file: str) -> list[str]:
+    """Read mesh_file entries from a model XML for diagnostics."""
+    try:
+        root = ET.parse(model_file).getroot()
+    except Exception:
+        return []
+
+    mesh_files: list[str] = []
+    for element in root.iter():
+        if _xml_local_name(element.tag) == "mesh_file" and element.text:
+            mesh_files.append(element.text.strip())
+    return sorted(set(mesh_files))
+
+
+def _mesh_exists(mesh_file: str, search_dirs: list[str]) -> bool:
+    if os.path.isabs(mesh_file):
+        return os.path.isfile(mesh_file)
+    return any(os.path.isfile(os.path.join(path, mesh_file)) for path in search_dirs)
+
+
+def _configure_geometry_search_paths(
+    extra_dirs: list[str] | None = None,
+    model_file: str | None = None,
+) -> list[str]:
     """
     Register geometry directories so OpenSim can resolve mesh filenames used
     by the model.  The workspace Geometry folder is added first, then common
@@ -42,27 +103,88 @@ def _configure_geometry_search_paths(extra_dirs: list[str] | None = None) -> Non
     script_dir = os.path.dirname(os.path.abspath(__file__))
     candidate_dirs.extend(
         [
-            os.path.join(script_dir, "geometry"),
             os.path.join(script_dir, "Geometry"),
+            os.path.join(script_dir, "geometry"),
         ]
     )
+    if model_file:
+        model_dir = os.path.dirname(os.path.abspath(model_file))
+        candidate_dirs.extend(
+            [
+                model_dir,
+                os.path.join(model_dir, "geometry"),
+                os.path.join(model_dir, "Geometry"),
+                os.path.join(os.path.dirname(model_dir), "Geometry"),
+            ]
+        )
     if extra_dirs:
         candidate_dirs.extend(extra_dirs)
+
+    for env_name in ["OPENSIM_HOME", "OPENSIM_ROOT", "OPENSIM_INSTALL_DIR"]:
+        root = os.environ.get(env_name)
+        if not root:
+            continue
+        candidate_dirs.extend(
+            [
+                os.path.join(root, "Geometry"),
+                os.path.join(root, "Resources", "opensim", "Geometry"),
+                os.path.join(root, "share", "opensim", "Geometry"),
+            ]
+        )
 
     candidate_dirs.extend(
         glob.glob(
             "/Applications/OpenSim*/OpenSim*.app/Contents/Resources/opensim/Geometry"
         )
     )
+    candidate_dirs.extend(glob.glob("/Applications/OpenSim*/Geometry"))
+    candidate_dirs.extend(glob.glob("/Applications/OpenSim*/Resources/opensim/Geometry"))
+
+    if os.name == "nt":
+        candidate_dirs.extend(glob.glob(r"C:\OpenSim*\Geometry"))
+        candidate_dirs.extend(glob.glob(r"C:\Program Files\OpenSim*\Geometry"))
+        candidate_dirs.extend(glob.glob(r"C:\Program Files (x86)\OpenSim*\Geometry"))
+        candidate_dirs.extend(
+            glob.glob(
+                os.path.join(
+                    os.path.expanduser("~"),
+                    "Documents",
+                    "OpenSim",
+                    "*",
+                    "Geometry",
+                )
+            )
+        )
 
     seen = set()
+    added_dirs: list[str] = []
     for path in candidate_dirs:
         abs_path = os.path.abspath(path)
-        if abs_path in seen or not os.path.isdir(abs_path):
+        key = os.path.normcase(abs_path)
+        if key in seen or not os.path.isdir(abs_path):
             continue
-        seen.add(abs_path)
+        seen.add(key)
         opensim.ModelVisualizer.addDirToGeometrySearchPaths(abs_path)
+        added_dirs.append(abs_path)
         print(f"[Viz] Geometry path added: {abs_path}")
+
+    if model_file:
+        missing = [
+            mesh_file
+            for mesh_file in _mesh_files_from_model(model_file)
+            if not _mesh_exists(mesh_file, added_dirs)
+        ]
+        if missing:
+            preview = ", ".join(missing[:12])
+            suffix = " ..." if len(missing) > 12 else ""
+            print(
+                "[Viz] WARNING: some model meshes were not found in the "
+                f"registered Geometry paths: {preview}{suffix}\n"
+                "      Add the OpenSim Geometry folder with --geometry-dir "
+                "if the visualizer still shows missing meshes."
+            )
+
+    return added_dirs
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -156,16 +278,20 @@ def run_visualizer(
     if cfg is None:
         cfg = SimulatorConfig()
 
+    plugin_name = _resolve_project_path(cfg.plugin_name, library_basename=True)
+    model_file = _resolve_project_path(cfg.model_file)
+    sto_path = _resolve_project_path(sto_path)
+
     # ── Load plugin ──────────────────────────────────────────────────────────
-    print(f"[Viz] Loading plugin: {cfg.plugin_name}")
-    opensim.LoadOpenSimLibrary(cfg.plugin_name)
+    print(f"[Viz] Loading plugin: {plugin_name}")
+    opensim.LoadOpenSimLibrary(plugin_name)
 
     # ── Make the workspace Geometry folder visible to the visualizer ───────
-    _configure_geometry_search_paths(geometry_dirs)
+    _configure_geometry_search_paths(geometry_dirs, model_file=model_file)
 
     # ── Load model WITH visualizer ───────────────────────────────────────────
-    print(f"[Viz] Loading model : {cfg.model_file}")
-    model = opensim.Model(cfg.model_file)
+    print(f"[Viz] Loading model : {model_file}")
+    model = opensim.Model(model_file)
     model.setUseVisualizer(True)
 
     # ── Read kinematics ──────────────────────────────────────────────────────
@@ -226,7 +352,7 @@ def run_visualizer(
 
     if save_video:
         frame_dir = tempfile.mkdtemp(prefix="opensim_viz_")
-        print(f"[Viz] Video mode: frames → {frame_dir}")
+        print(f"[Viz] Video mode: frames -> {frame_dir}")
 
         # Draw the first frame so the window exists, then find its ID
         if col_coord_map:
@@ -258,9 +384,9 @@ def run_visualizer(
         tag = f" (pass {pass_num})" if loop else ""
 
         if save_video:
-            print(f"[Viz] Recording{tag} ({n_frames} frames) …")
+            print(f"[Viz] Recording{tag} ({n_frames} frames) ...")
         else:
-            print(f"[Viz] Playing{tag} at {speed:.2f}x …")
+            print(f"[Viz] Playing{tag} at {speed:.2f}x ...")
 
         for frame_idx in range(n_frames):
             t_frame = times[frame_idx]
@@ -323,7 +449,7 @@ def run_visualizer(
         timestamp = datetime.now().strftime("%H%M%S_%d%m%Y")
         video_path = os.path.join(video_dir, f"{timestamp}.mp4")
 
-        print(f"[Viz] Encoding video ({fps:.1f} fps) → {video_path}")
+        print(f"[Viz] Encoding video ({fps:.1f} fps) -> {video_path}")
         ok = _frames_to_mp4(frame_dir, video_path, fps)
 
         # Clean up temporary frames

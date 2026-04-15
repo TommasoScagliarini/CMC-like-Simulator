@@ -176,3 +176,12 @@ class SimulatorConfig:
     save_muscle_forces:  bool = True   # F_i = a_i * F_max_i  [N]
     save_sea_torques:    bool = True   # spring + motor torque per SEA  [N·m]
     save_states:         bool = True   # q, qdot, qddot for all coordinates
+    save_reserve_controls: bool = True # reserve actuator controls
+    save_reserve_torques:  bool = True # reserve torque = control * optimal_force
+    save_sea_states:       bool = True # SEA motor_angle + motor_speed
+    save_power:            bool = True # SEA joint + motor power
+    save_gait_events:      bool = True # gait cycles from GRF threshold crossings
+
+    # GRF event extraction / plotting defaults
+    grf_contact_threshold_n: float = 20.0
+    plot_gait_side: str = "left"

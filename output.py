@@ -13,13 +13,21 @@ Every other module that needs to read or write .sto data imports from here.
 from __future__ import annotations
 
 import os
-from typing import Dict, List, Optional
+import csv
+import re
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 import numpy as np
-import opensim
 
 from config import SimulatorConfig
-from model_loader import SimulationContext
+
+try:
+    import opensim
+except ModuleNotFoundError:
+    opensim = None
+
+if TYPE_CHECKING:
+    from model_loader import SimulationContext
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -109,6 +117,123 @@ def read_sto(path: str):
 # ─────────────────────────────────────────────────────────────────────────────
 #  Output recorder
 # ─────────────────────────────────────────────────────────────────────────────
+def _read_storage_table(path: str):
+    """Read whitespace-delimited OpenSim Storage/.mot data."""
+    with open(path) as f:
+        for line in f:
+            if line.strip().lower() == "endheader":
+                break
+
+        header_line = ""
+        for line in f:
+            if line.strip():
+                header_line = line.strip()
+                break
+        if not header_line:
+            raise ValueError(f"No data header found in Storage file: {path}")
+
+        col_names = re.split(r"\s+", header_line)
+        rows = []
+        for line in f:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            vals = re.split(r"\s+", stripped)
+            if len(vals) == len(col_names):
+                rows.append([float(v) for v in vals])
+
+    if not rows:
+        raise ValueError(f"No numeric rows found in Storage file: {path}")
+
+    arr = np.array(rows, dtype=float)
+    return arr[:, 0], col_names[1:], arr[:, 1:]
+
+
+def _cycles_from_vertical_grf(
+    time: np.ndarray,
+    vertical_grf: np.ndarray,
+    threshold: float,
+    t_start: float,
+    t_end: float,
+) -> List[tuple]:
+    """Return complete heel-strike-to-heel-strike cycles from GRF crossings."""
+    edges: List[float] = []
+    for i in range(1, len(time)):
+        was_contact = vertical_grf[i - 1] > threshold
+        is_contact = vertical_grf[i] > threshold
+        if was_contact or not is_contact:
+            continue
+        denom = vertical_grf[i] - vertical_grf[i - 1]
+        frac = 0.0 if abs(denom) < 1e-12 else (threshold - vertical_grf[i - 1]) / denom
+        edge_time = time[i - 1] + frac * (time[i] - time[i - 1])
+        if t_start <= edge_time <= t_end:
+            edges.append(float(edge_time))
+
+    return [
+        (edges[i], edges[i + 1])
+        for i in range(len(edges) - 1)
+        if t_start <= edges[i] < edges[i + 1] <= t_end
+    ]
+
+
+def _write_gait_events_csv(cfg: SimulatorConfig, ctx: "SimulationContext") -> None:
+    """Write gait-cycle events inferred from GRF vertical threshold crossings."""
+    out = cfg.output_dir
+    pfx = cfg.output_prefix
+    path = os.path.join(out, f"{pfx}_gait_events.csv")
+    threshold = float(cfg.grf_contact_threshold_n)
+    rows = []
+
+    grf_file = getattr(ctx, "grf_data_file", "")
+    grf_columns = getattr(ctx, "grf_vertical_force_columns", {})
+
+    if grf_file and os.path.isfile(grf_file) and grf_columns:
+        time, col_names, data = _read_storage_table(grf_file)
+        col_idx = {name: i for i, name in enumerate(col_names)}
+        for side in ("left", "right"):
+            source_col = grf_columns.get(side)
+            idx = col_idx.get(source_col) if source_col else None
+            if idx is None:
+                continue
+            cycles = _cycles_from_vertical_grf(
+                time,
+                data[:, idx],
+                threshold,
+                cfg.t_start,
+                cfg.t_end,
+            )
+            for start, end in cycles:
+                rows.append(
+                    {
+                        "side": side,
+                        "cycle_start": f"{start:.8f}",
+                        "cycle_end": f"{end:.8f}",
+                        "source_force": source_col,
+                        "threshold_n": f"{threshold:.8f}",
+                    }
+                )
+
+    with open(path, "w", newline="") as fh:
+        writer = csv.DictWriter(
+            fh,
+            fieldnames=[
+                "side",
+                "cycle_start",
+                "cycle_end",
+                "source_force",
+                "threshold_n",
+            ],
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+    counts = {side: sum(1 for row in rows if row["side"] == side) for side in ("left", "right")}
+    print(
+        f"  -> Gait events : {path} "
+        f"(left={counts['left']}, right={counts['right']}, threshold={threshold:g} N)"
+    )
+
+
 class OutputRecorder:
     """
     Pre-allocates output buffers, records one row per simulation step,
@@ -136,7 +261,8 @@ class OutputRecorder:
 
         n_steps  = int((cfg.t_end - cfg.t_start) / cfg.dt) + 2
         n_coords = len(ctx.coord_names)
-        n_sea    = 2  # knee + ankle
+        n_sea    = len(sea_pros_map)
+        n_res_all = len(getattr(ctx, "reserve_all_names", ctx.reserve_names))
 
         self._rec_time          = np.full(n_steps, np.nan)
         self._rec_q             = np.full((n_steps, n_coords),       np.nan)
@@ -144,10 +270,14 @@ class OutputRecorder:
         self._rec_qddot         = np.full((n_steps, n_coords),       np.nan)
         self._rec_activations   = np.full((n_steps, ctx.n_muscles),  np.nan)
         self._rec_u_res         = np.full((n_steps, ctx.n_reserves), np.nan)
+        self._rec_reserve_controls = np.full((n_steps, n_res_all),   np.nan)
+        self._rec_reserve_torques  = np.full((n_steps, n_res_all),   np.nan)
         self._rec_tau_bio       = np.full((n_steps, ctx.n_bio),      np.nan)
         self._rec_sea_controls  = np.full((n_steps, 2),              np.nan)
         self._rec_muscle_forces = np.full((n_steps, ctx.n_muscles),  np.nan)
         self._rec_sea_torques   = np.full((n_steps, n_sea * 2),      np.nan)
+        self._rec_sea_states    = np.full((n_steps, n_sea * 2),      np.nan)
+        self._rec_power         = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_recruitment   = np.full((n_steps, 12),             np.nan)
         self._step_count        = 0
 
@@ -164,6 +294,7 @@ class OutputRecorder:
         tau_bio: np.ndarray,
         u_sea:   Dict[str, float],
         udot:    np.ndarray,
+        controls: opensim.Vector,
         so_diagnostics: Optional[dict] = None,
     ) -> None:
         """Append one row to all output buffers."""
@@ -185,6 +316,17 @@ class OutputRecorder:
         self._rec_tau_bio[k]      = tau_bio
         self._rec_sea_controls[k, 0] = u_sea.get(cfg.pros_coords[0], 0.0)
         self._rec_sea_controls[k, 1] = u_sea.get(cfg.pros_coords[1], 0.0)
+
+        reserve_all_names = getattr(ctx, "reserve_all_names", ctx.reserve_names)
+        reserve_all_f_opt = getattr(ctx, "reserve_all_f_opt", ctx.reserve_f_opt)
+        reserve_all_ctrl_idx = getattr(ctx, "reserve_all_ctrl_idx", ctx.reserve_ctrl_idx)
+        for j, reserve_name in enumerate(reserve_all_names):
+            ctrl_idx = reserve_all_ctrl_idx.get(reserve_name)
+            if ctrl_idx is None or ctrl_idx < 0:
+                continue
+            ctrl = controls.get(ctrl_idx)
+            self._rec_reserve_controls[k, j] = ctrl
+            self._rec_reserve_torques[k, j] = ctrl * reserve_all_f_opt[j]
 
         # ── Muscle forces: F_i = a_i * F_max_i ─────────────────────────────
         self._rec_muscle_forces[k] = a * ctx.f_max
@@ -228,6 +370,10 @@ class OutputRecorder:
 
             self._rec_sea_torques[k, i * 2]     = tau_spring
             self._rec_sea_torques[k, i * 2 + 1] = tau_input
+            self._rec_sea_states[k, i * 2]       = theta_m
+            self._rec_sea_states[k, i * 2 + 1]   = omega_m
+            self._rec_power[k, i * 2]            = tau_spring * omega_j
+            self._rec_power[k, i * 2 + 1]        = tau_input * omega_m
 
         # ── Recruitment diagnostics ─────────────────────────────────────────
         diag = so_diagnostics
@@ -287,6 +433,35 @@ class OutputRecorder:
             )
             print(f"  -> SEA ctrl    : {path}")
 
+        reserve_all_names = getattr(ctx, "reserve_all_names", ctx.reserve_names)
+        reserve_all_coords = getattr(ctx, "reserve_all_coord_names", reserve_all_names)
+        reserve_control_cols = [
+            f"{coord_name}_reserve_control"
+            for coord_name in reserve_all_coords
+        ]
+        reserve_torque_cols = [
+            f"{coord_name}_reserve_torque"
+            for coord_name in reserve_all_coords
+        ]
+
+        if cfg.save_reserve_controls and reserve_control_cols:
+            path = os.path.join(out, f"{pfx}_reserve_controls.sto")
+            write_sto(
+                path, "ReserveControls",
+                self._rec_time[:k], reserve_control_cols,
+                self._rec_reserve_controls[:k],
+            )
+            print(f"  -> Reserve ctrl: {path}")
+
+        if cfg.save_reserve_torques and reserve_torque_cols:
+            path = os.path.join(out, f"{pfx}_reserve_torques.sto")
+            write_sto(
+                path, "ReserveTorques",
+                self._rec_time[:k], reserve_torque_cols,
+                self._rec_reserve_torques[:k],
+            )
+            print(f"  -> Reserve tau : {path}")
+
         if cfg.save_kinematics:
             path = os.path.join(out, f"{pfx}_kinematics.sto")
             write_sto(
@@ -318,8 +493,8 @@ class OutputRecorder:
         if cfg.save_sea_torques:
             sea_col_names = []
             for sea_name, coord_name in self._sea_pros_map:
-                sea_col_names.append(f"{coord_name}_tau_spring")
-                sea_col_names.append(f"{coord_name}_tau_motor")
+                sea_col_names.append(f"{sea_name}_tau_spring")
+                sea_col_names.append(f"{sea_name}_tau_motor")
             path = os.path.join(out, f"{pfx}_sea_torques.sto")
             write_sto(
                 path, "SEATorques",
@@ -327,6 +502,33 @@ class OutputRecorder:
                 self._rec_sea_torques[:k],
             )
             print(f"  -> SEA torques : {path}")
+
+        if cfg.save_sea_states:
+            sea_state_cols = []
+            for sea_name, coord_name in self._sea_pros_map:
+                sea_state_cols.append(f"{sea_name}_motor_angle")
+                sea_state_cols.append(f"{sea_name}_motor_speed")
+            path = os.path.join(out, f"{pfx}_sea_states.sto")
+            write_sto(
+                path, "SEAStates",
+                self._rec_time[:k], sea_state_cols,
+                self._rec_sea_states[:k],
+                in_degrees=False,
+            )
+            print(f"  -> SEA states  : {path}")
+
+        if cfg.save_power:
+            power_cols = []
+            for sea_name, coord_name in self._sea_pros_map:
+                power_cols.append(f"{sea_name}_joint_power")
+                power_cols.append(f"{sea_name}_motor_power")
+            path = os.path.join(out, f"{pfx}_power.sto")
+            write_sto(
+                path, "SEAPower",
+                self._rec_time[:k], power_cols,
+                self._rec_power[:k],
+            )
+            print(f"  -> SEA power   : {path}")
 
         if cfg.save_states:
             state_col_names = []
@@ -369,5 +571,8 @@ class OutputRecorder:
                 self._rec_recruitment[:k],
             )
             print(f"  -> Recruitment: {path}")
+
+        if cfg.save_gait_events:
+            _write_gait_events_csv(cfg, ctx)
 
         print(f"\n[Runner] All results saved to: {os.path.abspath(out)}")

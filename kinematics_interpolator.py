@@ -38,7 +38,7 @@ class KinematicsInterpolator:
         self._cfg = cfg
         self._translation_set = set(cfg.translation_coords)
 
-        print(f"[KinInterp] Reading {cfg.kinematics_file} …")
+        print(f"[KinInterp] Reading {cfg.kinematics_file} ...")
         time, coord_names, data = _read_sto(cfg.kinematics_file)
 
         # Check that the file covers the simulation window
@@ -70,7 +70,7 @@ class KinematicsInterpolator:
 
         print(
             f"[KinInterp] Ready. {len(coord_names)} coordinates, "
-            f"t ∈ [{time[0]:.3f}, {time[-1]:.3f}] s, "
+            f"t in [{time[0]:.3f}, {time[-1]:.3f}] s, "
             f"{len(time)} samples."
         )
 

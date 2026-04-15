@@ -11,8 +11,10 @@ hot path.
 from __future__ import annotations
 
 import os
+import glob
 from dataclasses import dataclass, field
 from typing import Dict, List
+from xml.etree import ElementTree as ET
 
 import numpy as np
 
@@ -58,12 +60,18 @@ class SimulationContext:
     reserve_f_opt:     np.ndarray   # shape (n_reserves,) [N·m]
     # reserve_bio_row[j] = row index in bio_coord_names for reserve actuator j
     reserve_bio_row:   np.ndarray   # shape (n_reserves,) dtype int
+    # All reserve CoordinateActuators, including prosthetic coordinates, for
+    # diagnostics only. The SO still uses reserve_names/reserve_f_opt above.
+    reserve_all_names:       List[str]
+    reserve_all_coord_names: List[str]
+    reserve_all_f_opt:       np.ndarray
 
     # ── Control vector indices ────────────────────────────────────────────────
     # Position in the model-level control Vector (size = model.getNumControls())
     sea_ctrl_idx:     Dict[str, int]   # {"SEA_knee": i, "SEA_ankle": i}
     muscle_ctrl_idx:  Dict[str, int]   # {muscle_name: ctrl_idx}
     reserve_ctrl_idx: Dict[str, int]   # {reserve_name: ctrl_idx}
+    reserve_all_ctrl_idx: Dict[str, int] # {reserve_name: ctrl_idx}
 
     # ── State variable indices ────────────────────────────────────────────────
     # Indices into the SimTK::Vector returned by model.getStateVariableValues()
@@ -80,6 +88,7 @@ class SimulationContext:
 
     # ── SEA actuator metadata ────────────────────────────────────────────────
     sea_f_opt:               Dict[str, float] = field(default_factory=dict)
+    sea_props:               Dict[str, dict]  = field(default_factory=dict)
     sea_motor_angle_sv_idx:  Dict[str, int]   = field(default_factory=dict)
     sea_motor_speed_sv_idx:  Dict[str, int]   = field(default_factory=dict)
     pros_mob_indices:        np.ndarray = field(default_factory=lambda: np.array([], dtype=int))
@@ -90,6 +99,8 @@ class SimulationContext:
     # and the ExternalForce pointer dangles → native crash on realizeAcceleration.
     # Storing the reference here keeps it alive as long as SimulationContext exists.
     grf_storage: object = None   # opensim.Storage
+    grf_data_file: str = ""
+    grf_vertical_force_columns: Dict[str, str] = field(default_factory=dict)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -111,6 +122,161 @@ def _load_plugin(plugin_name: str) -> None:
     """
     print(f"[ModelLoader] Loading plugin  : {plugin_name}")
     opensim.LoadOpenSimLibrary(plugin_name)
+
+
+def _configure_geometry_search_paths(model_file: str) -> None:
+    """
+    Register local and installed OpenSim Geometry folders before model loading.
+
+    OpenSim emits missing-mesh warnings while constructing the Model, even when
+    the visualizer is disabled. Registering these paths here keeps the simulator
+    and visualizer behavior consistent across Windows and macOS.
+    """
+    module_dir = os.path.dirname(os.path.abspath(__file__))
+    model_dir = os.path.dirname(os.path.abspath(model_file))
+
+    candidate_dirs = [
+        os.path.join(module_dir, "Geometry"),
+        os.path.join(module_dir, "geometry"),
+        model_dir,
+        os.path.join(model_dir, "Geometry"),
+        os.path.join(model_dir, "geometry"),
+        os.path.join(os.path.dirname(model_dir), "Geometry"),
+    ]
+
+    for env_name in ["OPENSIM_HOME", "OPENSIM_ROOT", "OPENSIM_INSTALL_DIR"]:
+        root = os.environ.get(env_name)
+        if not root:
+            continue
+        candidate_dirs.extend(
+            [
+                os.path.join(root, "Geometry"),
+                os.path.join(root, "Resources", "opensim", "Geometry"),
+                os.path.join(root, "share", "opensim", "Geometry"),
+            ]
+        )
+
+    candidate_dirs.extend(
+        glob.glob(
+            "/Applications/OpenSim*/OpenSim*.app/Contents/Resources/opensim/Geometry"
+        )
+    )
+    candidate_dirs.extend(glob.glob("/Applications/OpenSim*/Geometry"))
+    candidate_dirs.extend(glob.glob("/Applications/OpenSim*/Resources/opensim/Geometry"))
+
+    if os.name == "nt":
+        candidate_dirs.extend(glob.glob(r"C:\OpenSim*\Geometry"))
+        candidate_dirs.extend(glob.glob(r"C:\Program Files\OpenSim*\Geometry"))
+        candidate_dirs.extend(glob.glob(r"C:\Program Files (x86)\OpenSim*\Geometry"))
+
+    seen = set()
+    for path in candidate_dirs:
+        abs_path = os.path.abspath(path)
+        key = os.path.normcase(abs_path)
+        if key in seen or not os.path.isdir(abs_path):
+            continue
+        seen.add(key)
+        opensim.ModelVisualizer.addDirToGeometrySearchPaths(abs_path)
+        print(f"[ModelLoader] Geometry path : {abs_path}")
+
+
+def _xml_local_name(tag: str) -> str:
+    """Return an XML tag name without a namespace, if present."""
+    return tag.rsplit("}", 1)[-1]
+
+
+def _child_text(element: ET.Element, child_name: str) -> str | None:
+    """Find direct child text while tolerating namespaced OpenSim XML."""
+    for child in list(element):
+        if _xml_local_name(child.tag) == child_name:
+            return child.text.strip() if child.text is not None else ""
+    return None
+
+
+def _infer_external_force_side(force_name: str, applied_to_body: str) -> str | None:
+    """Infer left/right from ExternalForce names and applied body names."""
+    text = f"{force_name} {applied_to_body}".lower()
+    tokens = text.replace("-", "_").replace(".", "_").split("_")
+    if "l" in tokens or text.endswith("_l") or "foot_l" in text or "calcn_l" in text:
+        return "left"
+    if "r" in tokens or text.endswith("_r") or "foot_r" in text or "calcn_r" in text:
+        return "right"
+    return None
+
+
+def _read_sea_properties_from_osim(
+    model_file: str,
+    sea_names: List[str],
+) -> Dict[str, dict]:
+    """
+    Read SeriesElasticActuator properties from the .osim XML.
+
+    On some Windows OpenSim/Python builds, custom plugin properties are not
+    exposed through Object.getPropertyByName() even though the plugin itself
+    loads and uses them correctly. The .osim file is the authoritative source
+    for these values, so reading it preserves the plugin semantics without
+    relying on fragile Python reflection.
+    """
+    model_path = os.path.abspath(model_file)
+    if not os.path.isfile(model_path):
+        raise FileNotFoundError(f"[ModelLoader] Model file not found: {model_path}")
+
+    try:
+        root = ET.parse(model_path).getroot()
+    except ET.ParseError as exc:
+        raise RuntimeError(
+            f"[ModelLoader] Could not parse model XML for SEA properties: "
+            f"{model_path}\n  Detail: {exc}"
+        ) from exc
+
+    sea_elements: Dict[str, ET.Element] = {}
+    for element in root.iter():
+        if _xml_local_name(element.tag) != "SeriesElasticActuator":
+            continue
+        name = element.attrib.get("name")
+        if name:
+            sea_elements[name] = element
+
+    def required_float(element: ET.Element, sea_name: str, tag: str) -> float:
+        text = _child_text(element, tag)
+        if text is None or text == "":
+            raise RuntimeError(
+                f"[ModelLoader] Missing <{tag}> for SeriesElasticActuator "
+                f"'{sea_name}' in {model_path}"
+            )
+        return float(text)
+
+    def required_bool(element: ET.Element, sea_name: str, tag: str) -> bool:
+        text = _child_text(element, tag)
+        if text is None or text == "":
+            raise RuntimeError(
+                f"[ModelLoader] Missing <{tag}> for SeriesElasticActuator "
+                f"'{sea_name}' in {model_path}"
+            )
+        return text.strip().lower() in {"true", "1", "yes"}
+
+    sea_props: Dict[str, dict] = {}
+    missing = [name for name in sea_names if name not in sea_elements]
+    if missing:
+        raise RuntimeError(
+            "[ModelLoader] Missing SeriesElasticActuator(s) in model XML: "
+            f"{missing}\n  Model: {model_path}"
+        )
+
+    for sea_name in sea_names:
+        element = sea_elements[sea_name]
+        sea_props[sea_name] = {
+            "K": required_float(element, sea_name, "stiffness"),
+            "Kp": required_float(element, sea_name, "Kp"),
+            "Kd": required_float(element, sea_name, "Kd"),
+            "Bm": required_float(element, sea_name, "motor_damping"),
+            "Jm": required_float(element, sea_name, "motor_inertia"),
+            "F_opt": required_float(element, sea_name, "optimal_force"),
+            "impedance": required_bool(element, sea_name, "Impedence"),
+        }
+
+    print(f"[ModelLoader] SEA XML props    : {sea_props}")
+    return sea_props
 
 
 def _infer_coordinate_mobility_indices(
@@ -227,6 +393,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     """
     # ── 1. C++ plugin ────────────────────────────────────────────────────────
     _load_plugin(cfg.plugin_name)
+    _configure_geometry_search_paths(cfg.model_file)
 
     # ── 2. OpenSim Model ─────────────────────────────────────────────────────
     print(f"[ModelLoader] Loading model    : {cfg.model_file}")
@@ -269,7 +436,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
                 i += 1
         print(f"[ModelLoader] Removed {n_removed} ExternalForce(s) from .osim")
     except AttributeError:
-        print("[ModelLoader] WARNING: updForceSet() unavailable — "
+        print("[ModelLoader] WARNING: updForceSet() unavailable - "
               "ExternalForce(s) from .osim may still be present")
 
     # ── 3b. Parse ExternalLoads XML → read .mot path + force definitions ────
@@ -297,6 +464,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     print(f"[ModelLoader] GRF Storage loaded : "
           f"{grf_storage.getSize()} rows, "
           f"{grf_storage.getColumnLabels().getSize() - 1} columns")
+    grf_vertical_force_columns: Dict[str, str] = {}
 
     # ── 3d. Create each ExternalForce with the Storage constructor ──────────
     # ExternalForce(Storage, force_id, point_id, torque_id) binds the data
@@ -304,10 +472,19 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     # force_expressed_in_body, point_expressed_in_body) must be set manually.
     for i in range(ext_loads.getSize()):
         ef_template = ext_loads.get(i)
+        force_id = ef_template.getForceIdentifier()
+        side = _infer_external_force_side(
+            ef_template.getName(),
+            ef_template.get_applied_to_body(),
+        )
+        if side in {"left", "right"}:
+            # Current GRF files use OpenSim's y-up convention and columns like
+            # ground_force1_vx/ground_force1_vy/ground_force1_vz.
+            grf_vertical_force_columns[side] = f"{force_id}y"
 
         ef = opensim.ExternalForce(
             grf_storage,
-            ef_template.getForceIdentifier(),
+            force_id,
             ef_template.getPointIdentifier(),
             ef_template.getTorqueIdentifier(),
         )
@@ -321,7 +498,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         )
 
         model.addForce(ef)
-        print(f"[ModelLoader]   '{ef.getName()}' → addForce OK  "
+        print(f"[ModelLoader]   '{ef.getName()}' -> addForce OK  "
               f"(applied_to: {ef.get_applied_to_body()}, "
               f"force_id: {ef.getForceIdentifier()})")
    
@@ -335,7 +512,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         model.addForce(reserve_fs.get(i).clone())
 
     # ── 5. Build system & initialise state ───────────────────────────────────
-    print("[ModelLoader] Building system …")
+    print("[ModelLoader] Building system ...")
     model.finalizeConnections()
     state = model.initSystem()
 
@@ -380,6 +557,9 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     reserve_names:        List[str] = []
     reserve_f_opt_list:   List[float] = []
     reserve_bio_row_list: List[int]  = []
+    reserve_all_names:        List[str] = []
+    reserve_all_coord_names:  List[str] = []
+    reserve_all_f_opt_list:   List[float] = []
 
     for i in range(actuator_set.getSize()):
         act = actuator_set.get(i)
@@ -388,16 +568,22 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         ca = opensim.CoordinateActuator.safeDownCast(act)
         if ca is None:
             continue
+        act_name = act.getName()
         coord_name = ca.getCoordinate().getName()
+        if act_name.startswith("reserve_"):
+            reserve_all_names.append(act_name)
+            reserve_all_coord_names.append(coord_name)
+            reserve_all_f_opt_list.append(ca.getOptimalForce())
         # Only biological coordinates enter the SO constraint
         if coord_name not in bio_coord_row:
             continue
-        reserve_names.append(act.getName())
+        reserve_names.append(act_name)
         reserve_f_opt_list.append(ca.getOptimalForce())
         reserve_bio_row_list.append(bio_coord_row[coord_name])
 
     reserve_f_opt   = np.array(reserve_f_opt_list,   dtype=float)
     reserve_bio_row = np.array(reserve_bio_row_list, dtype=int)
+    reserve_all_f_opt = np.array(reserve_all_f_opt_list, dtype=float)
 
     # --- Control vector indices ---
     def ctrl_idx(act_name: str) -> int:
@@ -409,18 +595,19 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         return idx
 
     sea_ctrl_idx = {
-        cfg.sea_knee_name:  actuator_set.getIndex(cfg.sea_knee_name),
-        cfg.sea_ankle_name: actuator_set.getIndex(cfg.sea_ankle_name),
+        cfg.sea_knee_name:  ctrl_idx(cfg.sea_knee_name),
+        cfg.sea_ankle_name: ctrl_idx(cfg.sea_ankle_name),
     }
     muscle_ctrl_idx  = {name: actuator_set.getIndex(name) for name in muscle_names}
     reserve_ctrl_idx = {name: actuator_set.getIndex(name) for name in reserve_names}
+    reserve_all_ctrl_idx = {
+        name: actuator_set.getIndex(name) for name in reserve_all_names
+    }
 
     # --- SEA actuator properties ---
-    sea_f_opt: Dict[str, float] = {}
-    for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
-        act = actuator_set.get(actuator_set.getIndex(sea_name))
-        ca = opensim.CoordinateActuator.safeDownCast(act)
-        sea_f_opt[sea_name] = ca.getOptimalForce() if ca else 100.0
+    sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
+    sea_props = _read_sea_properties_from_osim(cfg.model_file, sea_names)
+    sea_f_opt = {name: props["F_opt"] for name, props in sea_props.items()}
 
     # --- State variable indices (for setting q and qdot) ---
     # model.getStateVariableNames() returns strings like
@@ -495,7 +682,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         f"  Coordinates : {len(coord_names)} total "
         f"({len(bio_coord_names)} bio, {len(pros_coord_names)} pros)\n"
         f"  Muscles     : {len(muscle_names)}\n"
-        f"  Reserves    : {len(reserve_names)} (bio coords only)\n"
+        f"  Reserves    : {len(reserve_names)} SO, "
+        f"{len(reserve_all_names)} diagnostic total\n"
         f"  Controls    : {n_controls}"
     )
 
@@ -519,9 +707,13 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         reserve_names    = reserve_names,
         reserve_f_opt    = reserve_f_opt,
         reserve_bio_row  = reserve_bio_row,
+        reserve_all_names       = reserve_all_names,
+        reserve_all_coord_names = reserve_all_coord_names,
+        reserve_all_f_opt       = reserve_all_f_opt,
         sea_ctrl_idx     = sea_ctrl_idx,
         muscle_ctrl_idx  = muscle_ctrl_idx,
         reserve_ctrl_idx = reserve_ctrl_idx,
+        reserve_all_ctrl_idx = reserve_all_ctrl_idx,
         q_sv_idx         = q_sv_idx,
         qdot_sv_idx      = qdot_sv_idx,
         n_mob            = n_mob,
@@ -530,8 +722,11 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         n_reserves       = len(reserve_names),
         n_controls       = n_controls,
         sea_f_opt             = sea_f_opt,
+        sea_props             = sea_props,
         sea_motor_angle_sv_idx = sea_motor_angle_sv_idx,
         sea_motor_speed_sv_idx = sea_motor_speed_sv_idx,
         pros_mob_indices      = pros_mob_indices,
         grf_storage      = grf_storage,
+        grf_data_file    = mot_file,
+        grf_vertical_force_columns = grf_vertical_force_columns,
     )

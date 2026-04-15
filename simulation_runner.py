@@ -112,26 +112,16 @@ class SimulationRunner:
         ))
 
         # ── Cache SEA plugin properties (for tau_input computation) ──────────
+        # These are parsed from the .osim XML in model_loader. On Windows,
+        # OpenSim/Python may not expose custom plugin properties through
+        # getPropertyByName(), even though the plugin itself uses them.
         self._sea_props: Dict[str, dict] = {}
-        actuator_set = ctx.model.getActuators()
         for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
-            idx = actuator_set.getIndex(sea_name)
-            if idx < 0:
-                continue
-            act = actuator_set.get(idx)
-            def _prop_float(obj, name):
-                return float(obj.getPropertyByName(name).toString())
-            def _prop_bool(obj, name):
-                return obj.getPropertyByName(name).toString().lower() == "true"
-            self._sea_props[sea_name] = {
-                "K":     _prop_float(act, "stiffness"),
-                "Kp":    _prop_float(act, "Kp"),
-                "Kd":    _prop_float(act, "Kd"),
-                "Bm":    _prop_float(act, "motor_damping"),
-                "Jm":    _prop_float(act, "motor_inertia"),
-                "F_opt": ctx.sea_f_opt[sea_name],
-                "impedance": _prop_bool(act, "Impedence"),
-            }
+            if sea_name not in ctx.sea_props:
+                raise RuntimeError(
+                    f"[Runner] Missing cached SEA properties for '{sea_name}'"
+                )
+            self._sea_props[sea_name] = dict(ctx.sea_props[sea_name])
             print(f"[Runner] SEA '{sea_name}' props: {self._sea_props[sea_name]}")
 
         # ── Output recorder ───────────────────────────────────────────────────
@@ -190,7 +180,7 @@ class SimulationRunner:
         n_steps_est = int((t_end - t) / dt)
 
         print(
-            f"\n[Runner] Starting simulation  t ∈ [{t:.3f}, {t_end:.3f}] s  "
+            f"\n[Runner] Starting simulation  t in [{t:.3f}, {t_end:.3f}] s  "
             f"dt={dt:.4f} s  (~{n_steps_est} steps)\n"
         )
 
@@ -201,21 +191,21 @@ class SimulationRunner:
                 # A. Realise to Velocity
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] A: realizeVelocity …", flush=True)
+                    print(f"[DBG t={t:.4f}] A: realizeVelocity ...", flush=True)
                 model.realizeVelocity(state)
 
                 # ═══════════════════════════════════════════════════════════
                 # B. Reference kinematics at current time
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] B: kin.get …", flush=True)
+                    print(f"[DBG t={t:.4f}] B: kin.get ...", flush=True)
                 q_ref, qdot_ref, qddot_ref = self._kin.get(t)
 
                 # ═══════════════════════════════════════════════════════════
                 # C. Outer loop – desired biological accelerations
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] C: outer_loop …", flush=True)
+                    print(f"[DBG t={t:.4f}] C: outer_loop ...", flush=True)
                 qddot_des_bio = self._outer_loop.compute_desired_accelerations(
                     state, q_ref, qdot_ref, qddot_ref
                 )
@@ -238,7 +228,7 @@ class SimulationRunner:
                 #    τ = M · (q̈_des − q̈₀) for ALL DOFs.
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] D: inverse_dynamics …", flush=True)
+                    print(f"[DBG t={t:.4f}] D: inverse_dynamics ...", flush=True)
                 tau_bio, tau_pros_ff = self._id_computer.compute_tau(
                     state, controls, qddot_des_all
                 )
@@ -254,7 +244,7 @@ class SimulationRunner:
                     for i, coord_name in enumerate(ctx.pros_coord_names)
                 }
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] E: prosthesis_ctrl …", flush=True)
+                    print(f"[DBG t={t:.4f}] E: prosthesis_ctrl ...", flush=True)
                 u_sea = self._prosthesis_ctrl.compute(
                     state, q_ref, qdot_ref, controls,
                     tau_ff=tau_pros_ff_by_coord,
@@ -271,14 +261,14 @@ class SimulationRunner:
                     sea_str = ", ".join(f"{k}={v:.4f}" for k, v in u_sea.items())
                     print(f"[DBG t={t:.4f}] F: u_sea = {{{sea_str}}}",
                           flush=True)
-                    print(f"[DBG t={t:.4f}] F: static_optimization …", flush=True)
+                    print(f"[DBG t={t:.4f}] F: static_optimization ...", flush=True)
                 a, u_res = self._so.solve(state, tau_bio)
 
                 # ═══════════════════════════════════════════════════════════
                 # G. Apply muscle + reserve controls (SEA already set above)
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] G: apply_controls …", flush=True)
+                    print(f"[DBG t={t:.4f}] G: apply_controls ...", flush=True)
                 self._so.apply_to_controls(a, u_res, controls, state)
                 self._update_sea_motor_state(state, tau_sea_cmd)
                 model.realizeVelocity(state)
@@ -291,7 +281,7 @@ class SimulationRunner:
                 #    by the simulated dynamics rather than copied from kin.get().
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] H: compute_udot_bypass …",
+                    print(f"[DBG t={t:.4f}] H: compute_udot_bypass ...",
                           flush=True)
                 udot = compute_udot_bypass(
                     matter, model, state, n_mob, _e_vec, _Me_vec,
@@ -310,6 +300,7 @@ class SimulationRunner:
                 # ═══════════════════════════════════════════════════════════
                 self._recorder.record(
                     t, state, a, u_res, tau_bio, u_sea, udot,
+                    controls,
                     so_diagnostics=self._so.last_diagnostics,
                 )
 
@@ -336,14 +327,14 @@ class SimulationRunner:
                 t = t_new
 
                 if step < 3:
-                    print(f"[DBG t={t:.4f}] ✓ step {step} complete", flush=True)
+                    print(f"[DBG t={t:.4f}] step {step} complete", flush=True)
 
             except Exception as exc:
                 print(f"\n[Runner] Exception at t={t:.4f} s, step={step}: "
                       f"{type(exc).__name__}: {exc}", flush=True)
                 import traceback
                 traceback.print_exc()
-                print("[Runner] Saving partial results …", flush=True)
+                print("[Runner] Saving partial results ...", flush=True)
                 break
 
             step += 1
@@ -529,7 +520,11 @@ class SimulationRunner:
         model.setStateVariableValues(state, sv)
 
     def _sea_stiffness(self, sea_name: str, coord_name: str) -> float:
-        """Return SEA stiffness, accepting both legacy scalar and dict config."""
+        """Return SEA stiffness from parsed plugin props, with config fallback."""
+        props = self._sea_props.get(sea_name)
+        if props is not None and "K" in props:
+            return float(props["K"])
+
         stiffness = self._cfg.sea_stiffness
         if isinstance(stiffness, dict):
             if sea_name in stiffness:

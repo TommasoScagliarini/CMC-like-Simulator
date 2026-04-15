@@ -122,6 +122,7 @@ Bug storici su scaling PD e baseline molla documentati in [[DIVERGENZA_BUGFIXES]
   low-level plugin C++ dei SEA.
 - Non modificare il plugin C++ o la semantica del comando SEA senza una richiesta
   esplicita.
+- Questo progetto deve essere adatto sia per Windows x86 che per MacOS arm 64, ogni modifica al codice deve essere consistente per entrambi gli OS. 
 - Quando viene inserito il comando `start_day` leggi il contesto del progetto indficato in questo file `AGENT.md` e i daily report presenti nella cartella `reports/daily/`
 - Quando viene inserito il comando `create_report`, scrivi in `reports/user/` un report Markdown.
 - Il titolo del report deve avere il formato:

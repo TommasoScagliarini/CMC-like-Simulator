@@ -6,6 +6,7 @@ Entry point for the prosthetic gait simulator.
 Usage
 -----
     python main.py [--config config_override.yaml]
+    python main.py --plot
 
 In the absence of a config file, SimulatorConfig defaults are used.
 Edit config.py directly to change file paths and parameters.
@@ -35,6 +36,8 @@ See each module's docstring for detailed explanations.
 from __future__ import annotations
 
 import argparse
+import os
+import subprocess
 import sys
 import traceback
 
@@ -53,11 +56,11 @@ def main(cfg: SimulatorConfig) -> int:
     0 on success, 1 on error.
     """
     print("=" * 65)
-    print("  Prosthetic Gait Simulator – Custom CMC Replacement")
+    print("  Prosthetic Gait Simulator - Custom CMC Replacement")
     print("=" * 65)
 
     # ── Step 1: Load model, plugin, GRF, reserve actuators ───────────────────
-    print("\n[Main] Step 1/3 – Loading model …")
+    print("\n[Main] Step 1/3 - Loading model ...")
     try:
         ctx = setup_model(cfg)
     except Exception as exc:
@@ -66,7 +69,7 @@ def main(cfg: SimulatorConfig) -> int:
         return 1
 
     # ── Step 2: Build kinematic interpolator ─────────────────────────────────
-    print("\n[Main] Step 2/3 – Loading kinematics …")
+    print("\n[Main] Step 2/3 - Loading kinematics ...")
     try:
         kin = KinematicsInterpolator(cfg)
     except Exception as exc:
@@ -87,7 +90,7 @@ def main(cfg: SimulatorConfig) -> int:
         )
 
     # ── Step 3: Build runner and simulate ────────────────────────────────────
-    print("\n[Main] Step 3/3 – Starting simulation …")
+    print("\n[Main] Step 3/3 - Starting simulation ...")
     try:
         runner = SimulationRunner(cfg, ctx, kin)
         runner.run()
@@ -103,9 +106,9 @@ def main(cfg: SimulatorConfig) -> int:
 # ─────────────────────────────────────────────────────────────────────────────
 #  CLI
 # ─────────────────────────────────────────────────────────────────────────────
-def _parse_args() -> SimulatorConfig:
+def _parse_args():
     """
-    Parse command-line arguments and return a (possibly modified) config.
+    Parse command-line arguments and return a config plus raw CLI args.
 
     Currently supports --config for loading a YAML override file.
     You can extend this with argparse options for individual parameters.
@@ -152,6 +155,11 @@ def _parse_args() -> SimulatorConfig:
         default=None,
         help="QP solver backend for static optimisation",
     )
+    parser.add_argument(
+        "--plot",
+        action="store_true",
+        help="Generate plot PNGs after a successful simulation run.",
+    )
 
     args = parser.parse_args()
 
@@ -165,11 +173,41 @@ def _parse_args() -> SimulatorConfig:
     if args.output_dir    is not None: cfg.output_dir   = args.output_dir
     if args.solver        is not None: cfg.qp_solver    = args.solver
 
-    return cfg
+    return cfg, args
+
+
+def _run_plotter(cfg: SimulatorConfig) -> int:
+    """Run plot/plotter.py with paths from the active simulator config."""
+    plotter_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "plot",
+        "plotter.py",
+    )
+    cmd = [
+        sys.executable,
+        plotter_path,
+        "--results-dir",
+        cfg.output_dir,
+        "--prefix",
+        cfg.output_prefix,
+        "--gait-side",
+        cfg.plot_gait_side,
+    ]
+
+    print("\n[Main] Plotting results ...")
+    try:
+        completed = subprocess.run(cmd, check=False)
+    except FileNotFoundError as exc:
+        print(f"[Main] ERROR launching plotter:\n  {exc}")
+        return 1
+
+    if completed.returncode != 0:
+        print(f"[Main] Plotter failed with exit code {completed.returncode}.")
+    return completed.returncode
 
 
 if __name__ == "__main__":
-    cfg = _parse_args()
+    cfg, args = _parse_args()
 
     # Print active configuration for reproducibility
     print("\nActive configuration:")
@@ -177,4 +215,8 @@ if __name__ == "__main__":
         print(f"  {field_name:<30} = {value}")
     print()
 
-    sys.exit(main(cfg))
+    exit_code = main(cfg)
+    if exit_code == 0 and args.plot:
+        exit_code = _run_plotter(cfg)
+
+    sys.exit(exit_code)

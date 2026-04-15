@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['config.py','model_loader.py','inverse_dynamics.py','simulation_runner.py','outer_loop.py','static_optimization.py']]; print\\('All files parse OK'\\)\")",
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f, encoding='utf-8'\\).read\\(\\)\\) for f in ['config.py','model_loader.py','inverse_dynamics.py','simulation_runner.py','outer_loop.py','static_optimization.py']]; print\\('All files parse OK'\\)\")",
+      "Bash(awk '-F\\\\t' '{for\\(i=2;i<=NF;i++\\) {sum[i]+=$i; count[i]++; if\\($i<min[i] || min[i]==\"\"\\) min[i]=$i; if\\($i>max[i]\\) max[i]=$i}} END {for\\(i=2;i<=NF;i++\\) print \"Col\" i \": min=\" min[i] \", max=\" max[i] \", avg=\" sum[i]/count[i]}')",
+      "Bash(awk '-F\\\\t' '{for\\(i=2;i<=NF;i++\\) {val=$i+0; if\\(val>1.0\\) found=1}} END {if\\(found==1\\) print \"ALERT: Found values > 1.0 in activations\"; else print \"All activation values <= 1.0\"}')"
+    ]
+  }
+}
