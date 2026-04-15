@@ -62,7 +62,7 @@ Effetto:
 
 ### Problema
 
-Il plugin SEA (sorgente C++) usa esplicitamente:
+Il plugin SEA (sorgente C++) usa esplicitamente (equazioni complete in [[AGENT]]):
 
 - `tau_ref = u * F_opt`
 
@@ -154,6 +154,9 @@ Per evitare un modello fisicamente sbagliato:
   coppia biologica richiesta e' applicata tramite reserve actuators (che sono
   esattamente coerenti con la dinamica OpenSim del bypass).
 
+La riscrittura completa della SO muscle-driven (con `use_muscles_in_so=True`) e'
+documentata in [[2026-04-13_report_muscle_driven_reserve_residuali]].
+
 Riferimenti:
 
 - flag e motivazione: `config.py:136`
@@ -214,6 +217,12 @@ Run completa con la configurazione default:
 - `results/sim_output_kinematics.sto`: nessun `nan/inf`
 - `results/sim_output_sea_controls.sto`: nessun `nan/inf`, `|u|` sotto saturazione
 - `results/sim_output_tau_bio.sto`: nessun `nan/inf`
+
+## Vedi anche
+
+- [[2026-04-13_report_muscle_driven_reserve_residuali]] — riscrittura SO muscle-driven e fix tau_ff SEA
+- [[2026-04-14_output_espansi_e_visualizzatore]] — fix state cache `multiplyByM` e output espansi
+- [[AGENT]] — equazioni complete della dinamica SEA (PD, molla, dinamica motore)
 
 ## File toccati (logica)
 

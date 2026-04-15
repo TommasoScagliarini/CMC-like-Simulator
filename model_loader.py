@@ -50,6 +50,8 @@ class SimulationContext:
     # ── Muscle metadata ───────────────────────────────────────────────────────
     muscle_names: List[str]
     f_max:        np.ndarray    # shape (n_muscles,) [N]  — constant per model
+    muscle_activation_sv_idx:    Dict[str, int]
+    muscle_fiber_length_sv_idx:  Dict[str, int]
 
     # ── Reserve actuator metadata (bio DOFs only) ─────────────────────────────
     reserve_names:     List[str]
@@ -429,6 +431,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
 
     q_sv_idx: Dict[str, int] = {}
     qdot_sv_idx: Dict[str, int] = {}
+    muscle_activation_sv_idx: Dict[str, int] = {}
+    muscle_fiber_length_sv_idx: Dict[str, int] = {}
     for coord_name in coord_names:
         for sv_idx, sv_name in enumerate(sv_name_list):
             if sv_name.endswith(f"{coord_name}/value"):
@@ -439,13 +443,35 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
                 qdot_sv_idx[coord_name] = sv_idx
                 break
 
+    for muscle_name in muscle_names:
+        for sv_idx, sv_name in enumerate(sv_name_list):
+            if sv_name.endswith(f"{muscle_name}/activation"):
+                muscle_activation_sv_idx[muscle_name] = sv_idx
+                break
+        for sv_idx, sv_name in enumerate(sv_name_list):
+            if sv_name.endswith(f"{muscle_name}/fiber_length"):
+                muscle_fiber_length_sv_idx[muscle_name] = sv_idx
+                break
+
     # Sanity check
     missing_q    = [n for n in coord_names if n not in q_sv_idx]
     missing_qdot = [n for n in coord_names if n not in qdot_sv_idx]
+    missing_activation = [
+        n for n in muscle_names if n not in muscle_activation_sv_idx
+    ]
+    missing_fiber = [
+        n for n in muscle_names if n not in muscle_fiber_length_sv_idx
+    ]
     if missing_q or missing_qdot:
         raise RuntimeError(
             f"[ModelLoader] Could not find state variables for: "
             f"q={missing_q}  qdot={missing_qdot}\n"
+            f"  Available: {sv_name_list}"
+        )
+    if missing_activation or missing_fiber:
+        raise RuntimeError(
+            f"[ModelLoader] Could not find muscle state variables for: "
+            f"activation={missing_activation}  fiber_length={missing_fiber}\n"
             f"  Available: {sv_name_list}"
         )
 
@@ -488,6 +514,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         coord_mob_idx    = coord_mob_idx,
         muscle_names     = muscle_names,
         f_max            = f_max,
+        muscle_activation_sv_idx   = muscle_activation_sv_idx,
+        muscle_fiber_length_sv_idx = muscle_fiber_length_sv_idx,
         reserve_names    = reserve_names,
         reserve_f_opt    = reserve_f_opt,
         reserve_bio_row  = reserve_bio_row,

@@ -172,6 +172,7 @@ class InverseDynamicsComputer:
         #    We must zero this to get a true "zero-actuator" baseline.
         sv = model.getStateVariableValues(state)
         saved_motor = {}
+        saved_muscle_activations = {}
         coord_set = model.getCoordinateSet()
         for sea_name, coord_name in zip(self._sea_names, self._pros_coords):
             ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
@@ -185,6 +186,9 @@ class InverseDynamicsComputer:
                 sv.set(ma_idx, theta_j)      # zero spring deflection
                 if ms_idx is not None:
                     sv.set(ms_idx, 0.0)       # zero motor speed
+        for muscle_name, activation_idx in ctx.muscle_activation_sv_idx.items():
+            saved_muscle_activations[muscle_name] = sv.get(activation_idx)
+            sv.set(activation_idx, self._cfg.muscle_min_activation)
         model.setStateVariableValues(state, sv)
 
         # ── Step 2: compute q̈₀ (no realizeAcceleration) ─────────────────────
@@ -198,6 +202,9 @@ class InverseDynamicsComputer:
             controls.set(i, saved_ctrl[i])
 
         sv = model.getStateVariableValues(state)
+        for muscle_name, saved_activation in saved_muscle_activations.items():
+            activation_idx = ctx.muscle_activation_sv_idx[muscle_name]
+            sv.set(activation_idx, saved_activation)
         for sea_name, (saved_ma, saved_ms) in saved_motor.items():
             ma_idx = ctx.sea_motor_angle_sv_idx[sea_name]
             sv.set(ma_idx, saved_ma)

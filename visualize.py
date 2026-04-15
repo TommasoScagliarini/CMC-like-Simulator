@@ -9,6 +9,7 @@ Usage
     python visualize.py --speed 0.5              # half-speed
     python visualize.py --sto results/other.sto  # custom file
     python visualize.py --loop                   # repeat forever
+    python visualize.py --save-video             # save MP4 to results/video/
 """
 
 from __future__ import annotations
@@ -16,52 +17,18 @@ from __future__ import annotations
 import argparse
 import glob
 import os
+import shutil
+import subprocess
 import sys
+import tempfile
 import time
+from datetime import datetime
 
 import numpy as np
 import opensim
 
 from config import SimulatorConfig
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  .sto parser
-# ─────────────────────────────────────────────────────────────────────────────
-def read_sto(path: str):
-    """
-    Parse an OpenSim .sto file (version=1, tab-separated).
-
-    Returns
-    -------
-    times       : np.ndarray shape (n_frames,)
-    col_names   : list[str]  (excluding 'time')
-    data        : np.ndarray shape (n_frames, n_cols)
-    in_degrees  : bool
-    """
-    with open(path) as f:
-        in_degrees = False
-        for line in f:
-            stripped = line.strip()
-            if stripped.lower().startswith("indegrees"):
-                in_degrees = "yes" in stripped.lower()
-            if stripped == "endheader":
-                break
-
-        header_line = f.readline().strip()
-        col_names = header_line.split("\t")  # first is "time"
-
-        rows = []
-        for line in f:
-            vals = line.strip().split("\t")
-            if len(vals) == len(col_names):
-                rows.append([float(v) for v in vals])
-
-    arr = np.array(rows)
-    times = arr[:, 0]
-    data = arr[:, 1:]
-    col_names = col_names[1:]  # drop "time"
-    return times, col_names, data, in_degrees
+from output import read_sto
 
 
 def _configure_geometry_search_paths(extra_dirs: list[str] | None = None) -> None:
@@ -99,6 +66,80 @@ def _configure_geometry_search_paths(extra_dirs: list[str] | None = None) -> Non
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+#  Video capture helpers (macOS)
+# ─────────────────────────────────────────────────────────────────────────────
+_SWIFT_FIND_WINDOW = """\
+import CoreGraphics
+let wl = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) \
+    as! [[String:Any]]
+for w in wl {
+    let owner = w["kCGWindowOwnerName"] as? String ?? ""
+    if owner.lowercased().contains("simbody") \
+       || owner.lowercased().contains("visuali") {
+        let wid = w["kCGWindowNumber"] as? Int ?? 0
+        if wid > 0 { print(wid); break }
+    }
+}
+"""
+
+
+def _find_simbody_window_id() -> int | None:
+    """Return the CGWindowID of the Simbody visualizer, or None."""
+    try:
+        r = subprocess.run(
+            ["swift", "-e", _SWIFT_FIND_WINDOW],
+            capture_output=True, text=True, timeout=5,
+        )
+        wid = r.stdout.strip()
+        return int(wid) if wid else None
+    except Exception:
+        return None
+
+
+def _capture_frame(window_id: int | None, dest: str) -> bool:
+    """Capture a single frame to a PNG file via macOS screencapture."""
+    cmd = ["screencapture", "-x"]
+    if window_id is not None:
+        cmd += ["-l", str(window_id)]
+    cmd.append(dest)
+    try:
+        subprocess.run(cmd, check=True, timeout=10,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except Exception:
+        return False
+
+
+def _frames_to_mp4(
+    frame_dir: str,
+    output_path: str,
+    fps: float,
+) -> bool:
+    """Combine numbered PNGs into an MP4 using ffmpeg."""
+    cmd = [
+        "ffmpeg", "-y",
+        "-r", str(fps),
+        "-i", os.path.join(frame_dir, "frame_%06d.png"),
+        "-vcodec", "libx264",
+        "-pix_fmt", "yuv420p",
+        "-crf", "18",
+        output_path,
+    ]
+    try:
+        subprocess.run(
+            cmd, check=True, timeout=300,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+        return True
+    except FileNotFoundError:
+        print("[Viz] ERROR: ffmpeg not found. Install it with: brew install ffmpeg")
+        return False
+    except subprocess.CalledProcessError as exc:
+        print(f"[Viz] ERROR: ffmpeg failed (exit {exc.returncode})")
+        return False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 #  Visualizer
 # ─────────────────────────────────────────────────────────────────────────────
 def run_visualizer(
@@ -109,6 +150,8 @@ def run_visualizer(
     t_end: float | None = None,
     cfg: SimulatorConfig | None = None,
     geometry_dirs: list[str] | None = None,
+    save_video: bool = False,
+    video_fps: float = 30.0,
 ) -> None:
     if cfg is None:
         cfg = SimulatorConfig()
@@ -139,6 +182,21 @@ def run_visualizer(
     n_frames = len(times)
     print(f"[Viz] Frames: {n_frames}, t=[{times[0]:.3f} .. {times[-1]:.3f}] s")
 
+    # ── Decimate frames for video recording ─────────────────────────────────
+    # screencapture is too slow (~100ms/frame) for high-rate .sto data.
+    # Subsample to the target video_fps to keep capture feasible.
+    if save_video and n_frames > 1:
+        data_dt = (times[-1] - times[0]) / (n_frames - 1)
+        data_fps = 1.0 / data_dt if data_dt > 0 else 30.0
+        if data_fps > video_fps:
+            step = max(1, int(round(data_fps / video_fps)))
+            indices = list(range(0, n_frames, step))
+            times = times[indices]
+            data = data[indices]
+            n_frames = len(times)
+            print(f"[Viz] Decimated to {n_frames} frames "
+                  f"(~{video_fps:.0f} fps target, step={step})")
+
     # ── Init system (opens the visualizer window) ────────────────────────────
     state = model.initSystem()
 
@@ -162,14 +220,47 @@ def run_visualizer(
     # Identify translation columns (no deg→rad conversion)
     translation_set = set(cfg.translation_coords)
 
+    # ── Video recording setup ────────────────────────────────────────────────
+    frame_dir: str | None = None
+    window_id: int | None = None
+
+    if save_video:
+        frame_dir = tempfile.mkdtemp(prefix="opensim_viz_")
+        print(f"[Viz] Video mode: frames → {frame_dir}")
+
+        # Draw the first frame so the window exists, then find its ID
+        if col_coord_map:
+            for ci, coord in col_coord_map:
+                val = data[0, ci]
+                if in_degrees and col_names[ci] not in translation_set:
+                    val *= np.pi / 180.0
+                coord.setValue(state, val, False)
+        state.setTime(times[0])
+        model.realizePosition(state)
+        simbody_viz.drawFrameNow(state)
+        time.sleep(0.5)  # let the window appear
+
+        window_id = _find_simbody_window_id()
+        if window_id is not None:
+            print(f"[Viz] Found Simbody window (id={window_id})")
+        else:
+            print("[Viz] WARNING: Simbody window not found, "
+                  "capturing full screen instead")
+
     # ── Playback loop ────────────────────────────────────────────────────────
     deg2rad = np.pi / 180.0
     pass_num = 0
+    captured_count = 0          # sequential counter for successfully captured frames
+    captured_times: list[float] = []  # timestamps of captured frames (for FPS calc)
 
     while True:
         pass_num += 1
         tag = f" (pass {pass_num})" if loop else ""
-        print(f"[Viz] Playing{tag} at {speed:.2f}x …")
+
+        if save_video:
+            print(f"[Viz] Recording{tag} ({n_frames} frames) …")
+        else:
+            print(f"[Viz] Playing{tag} at {speed:.2f}x …")
 
         for frame_idx in range(n_frames):
             t_frame = times[frame_idx]
@@ -186,15 +277,61 @@ def run_visualizer(
             model.realizePosition(state)
             simbody_viz.drawFrameNow(state)
 
-            # Sleep to achieve real-time * speed factor
-            if frame_idx < n_frames - 1:
-                dt_frames = times[frame_idx + 1] - t_frame
-                sleep_s = dt_frames / speed
-                if sleep_s > 0:
-                    time.sleep(sleep_s)
+            if save_video:
+                # Capture frame to PNG (blocking — sets the pace)
+                # Use captured_count for naming so ffmpeg always gets a
+                # gapless sequence even if some captures fail.
+                frame_path = os.path.join(
+                    frame_dir, f"frame_{captured_count:06d}.png"
+                )
+                ok = _capture_frame(window_id, frame_path)
+                if ok and os.path.isfile(frame_path):
+                    captured_times.append(t_frame)
+                    captured_count += 1
+                else:
+                    print(f"  [Viz] WARNING: capture failed for sim "
+                          f"frame {frame_idx} (t={t_frame:.3f}s)")
+                if frame_idx % 50 == 0:
+                    print(f"  frame {frame_idx}/{n_frames} "
+                          f"(captured: {captured_count})")
+            else:
+                # Normal real-time playback
+                if frame_idx < n_frames - 1:
+                    dt_frames = times[frame_idx + 1] - t_frame
+                    sleep_s = dt_frames / speed
+                    if sleep_s > 0:
+                        time.sleep(sleep_s)
 
+        # When recording, only do one pass (ignore --loop)
+        if save_video:
+            break
         if not loop:
             break
+
+    # ── Encode video ─────────────────────────────────────────────────────────
+    if save_video and frame_dir is not None:
+        # Compute effective FPS from actually captured frames
+        if captured_count > 1 and len(captured_times) > 1:
+            total_sim_time = captured_times[-1] - captured_times[0]
+            fps = (captured_count - 1) / total_sim_time if total_sim_time > 0 else 30.0
+        else:
+            fps = 30.0
+        print(f"[Viz] Captured {captured_count}/{n_frames} frames")
+
+        video_dir = os.path.join(cfg.output_dir, "video")
+        os.makedirs(video_dir, exist_ok=True)
+        timestamp = datetime.now().strftime("%H%M%S_%d%m%Y")
+        video_path = os.path.join(video_dir, f"{timestamp}.mp4")
+
+        print(f"[Viz] Encoding video ({fps:.1f} fps) → {video_path}")
+        ok = _frames_to_mp4(frame_dir, video_path, fps)
+
+        # Clean up temporary frames
+        shutil.rmtree(frame_dir, ignore_errors=True)
+
+        if ok:
+            print(f"[Viz] Video saved: {video_path}")
+        return
 
     print("[Viz] Playback complete. Close the visualizer window to exit.")
     # Keep process alive until user closes the window
@@ -258,6 +395,21 @@ def main() -> int:
         default=[],
         help="Additional mesh directory to add to OpenSim geometry search paths.",
     )
+    parser.add_argument(
+        "--save-video",
+        action="store_true",
+        help="Capture each frame and encode as MP4 in results/video/. "
+             "Requires ffmpeg (brew install ffmpeg). Playback will be slower "
+             "during capture; the output video plays at the correct FPS.",
+    )
+    parser.add_argument(
+        "--video-fps",
+        type=float,
+        default=30.0,
+        help="Target FPS for video recording (default: 30). The .sto data is "
+             "decimated to this rate before capture to avoid overwhelming "
+             "screencapture. Ignored when --save-video is not set.",
+    )
     args = parser.parse_args()
 
     cfg = SimulatorConfig()
@@ -266,7 +418,6 @@ def main() -> int:
 
     sto_path = args.sto
     if sto_path is None:
-        import os
         if args.ik:
             sto_path = cfg.kinematics_file
         else:
@@ -281,6 +432,8 @@ def main() -> int:
             t_end=args.t_end,
             cfg=cfg,
             geometry_dirs=args.geometry_dir,
+            save_video=args.save_video,
+            video_fps=args.video_fps,
         )
     except FileNotFoundError as exc:
         print(f"[Viz] ERROR: {exc}")

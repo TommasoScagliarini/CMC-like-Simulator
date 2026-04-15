@@ -99,46 +99,65 @@ class SimulatorConfig:
     #   q_ddot_des = q_ddot_ref + Kp*(q_ref – q) + Kd*(qdot_ref – qdot)
     #
     # Default gains apply to all biological coordinates unless overridden below.
-    # Pelvis translations: zero gain (no net muscle force actuator available).
+    # Pelvis translations are root/residual DOFs: they are tracked with moderate
+    # residual-actuator feedback to prevent open-loop integration drift, while
+    # the muscle-driven joint recruitment remains handled by the SO.
     # =========================================================================
     default_tracking_kp: float = 100.0   # [rad^-1 · s^-2]  or [m^-1 · s^-2]
     default_tracking_kd: float = 20.0    # [rad^-1 · s^-1]
 
     # Per-coordinate overrides  (coordinate_name → gain)
     tracking_kp: Dict[str, float] = field(default_factory=lambda: {
-        "pelvis_tx": 0.0,
-        "pelvis_ty": 0.0,
-        "pelvis_tz": 0.0,
+        "pelvis_tx": 25.0,
+        "pelvis_ty": 25.0,
+        "pelvis_tz": 25.0,
     })
     tracking_kd: Dict[str, float] = field(default_factory=lambda: {
-        "pelvis_tx": 0.0,
-        "pelvis_ty": 0.0,
-        "pelvis_tz": 0.0,
+        "pelvis_tx": 10.0,
+        "pelvis_ty": 10.0,
+        "pelvis_tz": 10.0,
     })
 
     # =========================================================================
-    # STATIC OPTIMIZATION (QP)
+    # STATIC OPTIMIZATION (QP) -- muscle-first biological recruitment
     #
     #   min   Σ a_i²  +  w_res · Σ u_res_j²
-    #   s.t.  R·(a ⊙ F_max)  +  R_res·(u_res ⊙ F_opt_res)  =  τ_des_bio
-    #         0 ≤ a_i ≤ 1
+    #   s.t.  A_muscle(q, qdot, fiber_length)·(a - a_min)
+    #       + R_res·(u_res ⊙ F_opt_res)  =  τ_des_bio
+    #         a_min ≤ a_i ≤ a_max
     #         –u_res_max ≤ u_res_j ≤ u_res_max
     #
-    # With use_muscles_in_so=False (default), the reserve block is the exact
-    # biological tracking actuator.  When use_muscles_in_so=True, reserves are
-    # penalised (w_res >> 1) so muscles are preferred.
+    # A_muscle is built frame-by-frame from Thelen equilibrium tendon-force
+    # changes between a_min and a_max, not from the old moment_arm * Fmax
+    # approximation. Reserves remain in the problem only as residual actuators.
+    # The selected force application keeps the optimized muscle contribution on
+    # the OpenSim muscle actuators while avoiding per-frame fiber-state resets
+    # during forward dynamics.
     # =========================================================================
-    reserve_weight:  float = 1000.0   # w_res  (dimensionless)
-    # The CMC_Actuators.xml reserves are unbounded; keep a large numerical cap
-    # so the SO problem remains feasible during early tracking transients.
-    reserve_u_max:   float = 1000.0   # max normalised reserve control  [–]
+    use_muscles_in_so: bool = True
+    muscle_mapping_strategy: str = "equilibrium_activation"
+    muscle_force_application: str = "override_actuation"
+    muscle_min_activation: float = 0.01
+    muscle_max_activation: float = 1.0
+    muscle_activation_weight: float = 1.0
+    muscle_active_threshold: float = 0.02
+    muscle_row_capacity_threshold: float = 1e-6
 
-    # Keep the biological tracking actuator exactly consistent with OpenSim
-    # dynamics.  The old linear muscle approximation (moment_arm * Fmax) is not
-    # equivalent to instantaneous Thelen muscle forces and destabilises the
-    # closed-loop simulation.  Set True only when a full muscle-force mapping is
-    # implemented.
-    use_muscles_in_so: bool = False
+    # Large reserve penalty + finite residual bounds: reserves can close
+    # infeasible directions, but they should not be the primary tracking path.
+    # Pelvis/root DOFs are treated as residual coordinates in this model, so
+    # they get a larger cap and are excluded from the muscle-capable diagnostic
+    # denominator.
+    reserve_weight:  float = 1.0e6    # w_res  (dimensionless)
+    reserve_u_max:   float = 50.0     # joint residual cap, normalised [–]
+    unactuated_reserve_u_max: float = 1000.0
+    unactuated_reserve_coord_prefixes: List[str] = field(
+        default_factory=lambda: ["pelvis_"]
+    )
+
+    # Recruitment diagnostics are written to results/*_recruitment.sto.
+    save_recruitment_diagnostics: bool = True
+    recruitment_diagnostics_interval: int = 50
 
     # QP solver backend: "slsqp" (scipy, zero extra deps) | "osqp" (faster,
     # needs `pip install qpsolvers[osqp]`)
@@ -150,7 +169,10 @@ class SimulatorConfig:
     # =========================================================================
     # OUTPUT FLAGS
     # =========================================================================
-    save_activations:   bool = True
-    save_kinematics:    bool = True
-    save_sea_controls:  bool = True
-    save_tau_bio:       bool = True   # generalised forces after SO
+    save_activations:    bool = True
+    save_kinematics:     bool = True
+    save_sea_controls:   bool = True
+    save_tau_bio:        bool = True   # generalised forces after SO
+    save_muscle_forces:  bool = True   # F_i = a_i * F_max_i  [N]
+    save_sea_torques:    bool = True   # spring + motor torque per SEA  [N·m]
+    save_states:         bool = True   # q, qdot, qddot for all coordinates

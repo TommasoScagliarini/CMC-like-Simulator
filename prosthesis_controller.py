@@ -115,8 +115,7 @@ class ProsthesisController:
             kd = self._cfg.sea_kd.get(coord_name, 0.5)
 
             f_opt = self._ctx.sea_f_opt.get(sea_name, 1.0)
-            #tau_cmd = tau_ff.get(coord_name, 0.0) + kp * e_q + kd * e_qdot
-            tau_cmd = kp * e_q + kd * e_qdot
+            tau_cmd = tau_ff.get(coord_name, 0.0) + kp * e_q + kd * e_qdot
             u_raw = tau_cmd / f_opt if f_opt > 1e-10 else 0.0
             u     = float(np.clip(u_raw, -1.0, 1.0))
 

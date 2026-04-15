@@ -63,7 +63,7 @@ from __future__ import annotations
 
 import os
 import time as _time
-from typing import Dict, List
+from typing import Dict
 
 import numpy as np
 import opensim
@@ -75,6 +75,7 @@ from prosthesis_controller import ProsthesisController
 from outer_loop import OuterLoop
 from inverse_dynamics import InverseDynamicsComputer, compute_udot_bypass
 from static_optimization import StaticOptimizer
+from output import OutputRecorder
 
 
 class SimulationRunner:
@@ -110,18 +111,33 @@ class SimulationRunner:
             cfg.pros_coords,
         ))
 
-        # ── Output buffers (pre-allocated for efficiency) ─────────────────────
-        n_steps  = int((cfg.t_end - cfg.t_start) / cfg.dt) + 2
-        n_coords = len(ctx.coord_names)
+        # ── Cache SEA plugin properties (for tau_input computation) ──────────
+        self._sea_props: Dict[str, dict] = {}
+        actuator_set = ctx.model.getActuators()
+        for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
+            idx = actuator_set.getIndex(sea_name)
+            if idx < 0:
+                continue
+            act = actuator_set.get(idx)
+            def _prop_float(obj, name):
+                return float(obj.getPropertyByName(name).toString())
+            def _prop_bool(obj, name):
+                return obj.getPropertyByName(name).toString().lower() == "true"
+            self._sea_props[sea_name] = {
+                "K":     _prop_float(act, "stiffness"),
+                "Kp":    _prop_float(act, "Kp"),
+                "Kd":    _prop_float(act, "Kd"),
+                "Bm":    _prop_float(act, "motor_damping"),
+                "Jm":    _prop_float(act, "motor_inertia"),
+                "F_opt": ctx.sea_f_opt[sea_name],
+                "impedance": _prop_bool(act, "Impedence"),
+            }
+            print(f"[Runner] SEA '{sea_name}' props: {self._sea_props[sea_name]}")
 
-        self._rec_time          = np.full(n_steps, np.nan)
-        self._rec_q             = np.full((n_steps, n_coords),        np.nan)
-        self._rec_qdot          = np.full((n_steps, n_coords),        np.nan)
-        self._rec_activations   = np.full((n_steps, ctx.n_muscles),  np.nan)
-        self._rec_u_res         = np.full((n_steps, ctx.n_reserves), np.nan)
-        self._rec_tau_bio       = np.full((n_steps, ctx.n_bio),      np.nan)
-        self._rec_sea_controls  = np.full((n_steps, 2),              np.nan)
-        self._step_count        = 0
+        # ── Output recorder ───────────────────────────────────────────────────
+        self._recorder = OutputRecorder(
+            cfg, ctx, self._sea_pros_map, self._sea_props,
+        )
 
         # ── Make output directory ─────────────────────────────────────────────
         os.makedirs(cfg.output_dir, exist_ok=True)
@@ -212,6 +228,10 @@ class SimulationRunner:
                 for coord_name in cfg.pros_coords:
                     qddot_des_all[coord_name] = qddot_ref.get(coord_name, 0.0)
 
+                if cfg.use_muscles_in_so:
+                    self._so.prepare_muscle_baseline(state)
+                    model.realizeVelocity(state)
+
                 # ═══════════════════════════════════════════════════════════
                 # D. Inverse dynamics → τ_bio + τ_pros feed-forward estimate
                 #    Zeros controls AND SEA springs, computes q̈₀, then
@@ -259,7 +279,7 @@ class SimulationRunner:
                 # ═══════════════════════════════════════════════════════════
                 if step < 3:
                     print(f"[DBG t={t:.4f}] G: apply_controls …", flush=True)
-                self._so.apply_to_controls(a, u_res, controls)
+                self._so.apply_to_controls(a, u_res, controls, state)
                 self._update_sea_motor_state(state, tau_sea_cmd)
                 model.realizeVelocity(state)
                 model.setControls(state, controls)
@@ -288,7 +308,10 @@ class SimulationRunner:
                 # ═══════════════════════════════════════════════════════════
                 # I. Record current state BEFORE advancing time
                 # ═══════════════════════════════════════════════════════════
-                self._record(t, state, a, u_res, tau_bio, u_sea)
+                self._recorder.record(
+                    t, state, a, u_res, tau_bio, u_sea, udot,
+                    so_diagnostics=self._so.last_diagnostics,
+                )
 
                 # ═══════════════════════════════════════════════════════════
                 # J. Semi-explicit Euler step + SEA motor state update
@@ -342,7 +365,7 @@ class SimulationRunner:
             f"\n[Runner] Simulation complete. "
             f"{step} steps, {elapsed_total:.1f} s wall time."
         )
-        self._save_results()
+        self._recorder.save_results()
 
     # ─────────────────────────────────────────────────────────────────────────
     #  Private helpers
@@ -549,123 +572,3 @@ class SimulationRunner:
         model.setStateVariableValues(state, sv)
         state.setTime(t)
 
-    def _record(
-        self,
-        t:       float,
-        state:   opensim.State,
-        a:       np.ndarray,
-        u_res:   np.ndarray,
-        tau_bio: np.ndarray,
-        u_sea:   Dict[str, float],
-    ) -> None:
-        """Append one row to all output buffers."""
-        ctx = self._ctx
-        k   = self._step_count
-
-        self._rec_time[k] = t
-
-        for i, coord in enumerate(
-            [ctx.model.getCoordinateSet().get(n) for n in ctx.coord_names]
-        ):
-            self._rec_q[k, i]    = coord.getValue(state)
-            self._rec_qdot[k, i] = coord.getSpeedValue(state)
-
-        self._rec_activations[k]  = a
-        self._rec_u_res[k]        = u_res
-        self._rec_tau_bio[k]      = tau_bio
-        self._rec_sea_controls[k, 0] = u_sea.get(self._cfg.pros_coords[0], 0.0)
-        self._rec_sea_controls[k, 1] = u_sea.get(self._cfg.pros_coords[1], 0.0)
-
-        self._step_count += 1
-
-    def _save_results(self) -> None:
-        """Write all output files as OpenSim-compatible .sto files."""
-        cfg = self._cfg
-        ctx = self._ctx
-        k   = self._step_count
-        out = cfg.output_dir
-        pfx = cfg.output_prefix
-
-        if cfg.save_activations:
-            path = os.path.join(out, f"{pfx}_activations.sto")
-            _write_sto(
-                path, "Activations",
-                self._rec_time[:k], ctx.muscle_names,
-                self._rec_activations[:k],
-            )
-            print(f"  → Activations : {path}")
-
-        if cfg.save_sea_controls:
-            path = os.path.join(out, f"{pfx}_sea_controls.sto")
-            _write_sto(
-                path, "SEAControls",
-                self._rec_time[:k], cfg.pros_coords,
-                self._rec_sea_controls[:k],
-            )
-            print(f"  → SEA ctrl    : {path}")
-
-        if cfg.save_kinematics:
-            path = os.path.join(out, f"{pfx}_kinematics.sto")
-            _write_sto(
-                path, "Kinematics_q",
-                self._rec_time[:k], ctx.coord_names,
-                self._rec_q[:k],
-                in_degrees=False,
-            )
-            print(f"  → Kinematics  : {path}")
-
-        if cfg.save_tau_bio:
-            path = os.path.join(out, f"{pfx}_tau_bio.sto")
-            _write_sto(
-                path, "GeneralisedForces_bio",
-                self._rec_time[:k], ctx.bio_coord_names,
-                self._rec_tau_bio[:k],
-            )
-            print(f"  → Tau_bio     : {path}")
-
-        print(f"\n[Runner] All results saved to: {os.path.abspath(out)}")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  Utility: write an OpenSim .sto file
-# ─────────────────────────────────────────────────────────────────────────────
-def _write_sto(
-    filepath:    str,
-    header_name: str,
-    time:        np.ndarray,
-    col_names:   List[str],
-    data:        np.ndarray,
-    in_degrees:  bool = False,
-) -> None:
-    """
-    Write a minimal OpenSim .sto / Storage file.
-
-    Parameters
-    ----------
-    filepath    : output path
-    header_name : value of the first header line (arbitrary label)
-    time        : shape (N,)
-    col_names   : length n_cols
-    data        : shape (N, n_cols)
-    in_degrees  : whether the file header should say inDegrees=yes
-    """
-    n_rows, n_cols = data.shape
-    assert len(col_names) == n_cols, "col_names / data column count mismatch"
-    assert len(time) == n_rows,      "time / data row count mismatch"
-
-    deg_str = "yes" if in_degrees else "no"
-
-    with open(filepath, "w") as fh:
-        fh.write(f"{header_name}\n")
-        fh.write("version=1\n")
-        fh.write(f"nRows={n_rows}\n")
-        fh.write(f"nColumns={n_cols + 1}\n")
-        fh.write(f"inDegrees={deg_str}\n")
-        fh.write("\n")
-        fh.write("endheader\n")
-        fh.write("time\t" + "\t".join(col_names) + "\n")
-        for i in range(n_rows):
-            row = f"{time[i]:.8f}\t" + "\t".join(
-                f"{v:.8f}" for v in data[i]
-            )
-            fh.write(row + "\n")
