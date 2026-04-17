@@ -78,12 +78,12 @@ class SimulatorConfig:
     # Units: [N·m/rad] for Kp, [N·m·s/rad] for Kd.
     # =========================================================================
     sea_kp: Dict[str, float] = field(default_factory=lambda: {
-        "pros_knee_angle":  5.0,
-        "pros_ankle_angle": 5.0,
+        "pros_knee_angle":  20,
+        "pros_ankle_angle": 20,
     })
     sea_kd: Dict[str, float] = field(default_factory=lambda: {
-        "pros_knee_angle":  0.5,
-        "pros_ankle_angle": 0.5,
+        "pros_knee_angle":  2,
+        "pros_ankle_angle": 2,
     })
 
     # SEA spring stiffness [N·m/rad] — must match each plugin <stiffness> property.

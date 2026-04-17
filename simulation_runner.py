@@ -204,22 +204,16 @@ class SimulationRunner:
                 # ═══════════════════════════════════════════════════════════
                 # A. Realise to Velocity
                 # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] A: realizeVelocity ...", flush=True)
                 model.realizeVelocity(state)
 
                 # ═══════════════════════════════════════════════════════════
                 # B. Reference kinematics at current time
                 # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] B: kin.get ...", flush=True)
                 q_ref, qdot_ref, qddot_ref = self._kin.get(t)
 
                 # ═══════════════════════════════════════════════════════════
                 # C. Outer loop – desired biological accelerations
                 # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] C: outer_loop ...", flush=True)
                 qddot_des_bio = self._outer_loop.compute_desired_accelerations(
                     state, q_ref, qdot_ref, qddot_ref
                 )
@@ -241,8 +235,6 @@ class SimulationRunner:
                 #    Zeros controls AND SEA springs, computes q̈₀, then
                 #    τ = M · (q̈_des − q̈₀) for ALL DOFs.
                 # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] D: inverse_dynamics ...", flush=True)
                 tau_bio, tau_pros_ff = self._id_computer.compute_tau(
                     state, controls, qddot_des_all
                 )
@@ -257,8 +249,6 @@ class SimulationRunner:
                     coord_name: float(tau_pros_ff[i])
                     for i, coord_name in enumerate(ctx.pros_coord_names)
                 }
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] E: prosthesis_ctrl ...", flush=True)
                 u_sea = self._prosthesis_ctrl.compute(
                     state, q_ref, qdot_ref, controls,
                     tau_ff=tau_pros_ff_by_coord,
@@ -271,18 +261,11 @@ class SimulationRunner:
                 # ═══════════════════════════════════════════════════════════
                 # F. Static Optimisation → muscle activations + reserves
                 # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    sea_str = ", ".join(f"{k}={v:.4f}" for k, v in u_sea.items())
-                    print(f"[DBG t={t:.4f}] F: u_sea = {{{sea_str}}}",
-                          flush=True)
-                    print(f"[DBG t={t:.4f}] F: static_optimization ...", flush=True)
                 a, u_res = self._so.solve(state, tau_bio)
 
                 # ═══════════════════════════════════════════════════════════
                 # G. Apply muscle + reserve controls (SEA already set above)
                 # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] G: apply_controls ...", flush=True)
                 self._so.apply_to_controls(a, u_res, controls, state)
                 if cfg.sea_forward_mode == "ideal_torque":
                     self._update_sea_motor_state(state, tau_sea_cmd)
@@ -295,9 +278,6 @@ class SimulationRunner:
                 #    q̈ comes from the bypass, so output kinematics are produced
                 #    by the simulated dynamics rather than copied from kin.get().
                 # ═══════════════════════════════════════════════════════════
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] H: compute_udot_bypass ...",
-                          flush=True)
                 udot = compute_udot_bypass(
                     matter, model, state, n_mob, _e_vec, _Me_vec,
                 )
@@ -365,9 +345,6 @@ class SimulationRunner:
 
                 t = t_new
 
-                if step < 3:
-                    print(f"[DBG t={t:.4f}] step {step} complete", flush=True)
-
             except Exception as exc:
                 print(f"\n[Runner] Exception at t={t:.4f} s, step={step}: "
                       f"{type(exc).__name__}: {exc}", flush=True)
@@ -380,6 +357,9 @@ class SimulationRunner:
                 break
 
             step += 1
+
+            if step == 1:
+                print(f"[Runner] t={t:.4f} - first step OK", flush=True)
 
             # Progress report every 50 steps
             if step % 50 == 0:

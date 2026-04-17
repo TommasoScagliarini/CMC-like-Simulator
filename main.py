@@ -42,6 +42,7 @@ import contextlib
 import os
 import subprocess
 import sys
+import time as _time
 import traceback
 from datetime import datetime
 
@@ -338,12 +339,21 @@ def _run_validator(cfg: SimulatorConfig) -> int:
 
 
 if __name__ == "__main__":
+    _wall_t0 = _time.perf_counter()
+
     cfg, args = _parse_args()
 
-    # Print active configuration for reproducibility
+    # Print key configuration parameters
+    _KEY_FIELDS = {
+        "model_file", "kinematics_file",
+        "t_start", "t_end", "dt",
+        "output_dir", "output_prefix",
+        "sea_forward_mode", "qp_solver",
+    }
     print("\nActive configuration:")
     for field_name, value in cfg.__dict__.items():
-        print(f"  {field_name:<30} = {value}")
+        if field_name in _KEY_FIELDS:
+            print(f"  {field_name:<30} = {value}")
     print()
 
     exit_code = main(cfg, log_simulation=args.log)
@@ -351,5 +361,8 @@ if __name__ == "__main__":
         exit_code = _run_plotter(cfg)
     if exit_code == 0 and args.validate:
         exit_code = _run_validator(cfg)
+
+    _total_elapsed = _time.perf_counter() - _wall_t0
+    print(f"\n[Main] Total elapsed: {_total_elapsed:.1f} s")
 
     sys.exit(exit_code)
