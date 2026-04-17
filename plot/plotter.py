@@ -42,6 +42,8 @@ from config import SimulatorConfig  # noqa: E402
 GAIT_GRID = np.linspace(0.0, 100.0, 101)
 HEALTHY_COLOR = "#ffa500"
 HEALTHY_LINESTYLE = "--"
+TAU_INPUT_SATURATION_NM = 500.0
+SATURATION_MARKER_COLOR = "crimson"
 
 SIDES = [
     {
@@ -191,6 +193,7 @@ def load_tables(results_dir: Path, prefix: str) -> Dict[str, Optional[StoTable]]
         "states": "states",
         "reserve_torques": "reserve_torques",
         "sea_states": "sea_states",
+        "sea_diagnostics": "sea_diagnostics",
         "power": "power",
     }
     return {
@@ -433,6 +436,100 @@ def motor_torque_candidates(coord: str, sea: str) -> List[str]:
     ]
 
 
+def saturation_times(
+    tables: Dict[str, Optional[StoTable]],
+    sea: str,
+) -> np.ndarray:
+    """Return times where the SEA motor torque reaches the plugin clamp."""
+    diagnostics = tables.get("sea_diagnostics")
+    if diagnostics is not None:
+        flag = diagnostics.series([f"{sea}_tau_input_saturated"])
+        if flag is not None:
+            time, values, _ = flag
+            return np.asarray(time)[np.asarray(values) > 0.5]
+        tau_input = diagnostics.series([
+            f"{sea}_tau_input_plugin",
+            f"{sea}_tau_input_python",
+        ])
+        if tau_input is not None:
+            time, values, _ = tau_input
+            return np.asarray(time)[
+                np.abs(values) >= TAU_INPUT_SATURATION_NM - 1e-6
+            ]
+
+    torques = tables.get("sea_torques")
+    if torques is None:
+        return np.array([], dtype=float)
+    tau_input = torques.series(motor_torque_candidates("", sea))
+    if tau_input is None:
+        return np.array([], dtype=float)
+    time, values, _ = tau_input
+    return np.asarray(time)[np.abs(values) >= TAU_INPUT_SATURATION_NM - 1e-6]
+
+
+def saturation_cycle_percentages(
+    times: np.ndarray,
+    cycles: Sequence[Tuple[float, float]],
+) -> np.ndarray:
+    """Project absolute saturation times into gait-cycle percentage."""
+    percentages: List[float] = []
+    for sat_time in times:
+        for start, end in cycles:
+            if start <= sat_time <= end and end > start:
+                percentages.append((sat_time - start) / (end - start) * 100.0)
+                break
+    return np.array(percentages, dtype=float)
+
+
+def mark_time_saturations(ax: plt.Axes, times: np.ndarray) -> None:
+    """Draw vertical markers for tau_input clamp events on time plots."""
+    if times.size == 0:
+        return
+    for sat_time in times:
+        ax.axvline(
+            sat_time,
+            color=SATURATION_MARKER_COLOR,
+            linestyle=":",
+            linewidth=0.8,
+            alpha=0.28,
+        )
+    ax.text(
+        0.02,
+        0.84,
+        f"tau_input sat: {times.size}",
+        transform=ax.transAxes,
+        color=SATURATION_MARKER_COLOR,
+        fontsize=8,
+        va="top",
+    )
+
+
+def mark_gait_saturations(
+    ax: plt.Axes,
+    percentages: Optional[np.ndarray],
+) -> None:
+    """Draw vertical saturation markers on gait-cycle percentage plots."""
+    if percentages is None or percentages.size == 0:
+        return
+    for pct in percentages:
+        ax.axvline(
+            pct,
+            color=SATURATION_MARKER_COLOR,
+            linestyle=":",
+            linewidth=0.8,
+            alpha=0.28,
+        )
+    ax.text(
+        0.02,
+        0.84,
+        f"tau_input sat: {percentages.size}",
+        transform=ax.transAxes,
+        color=SATURATION_MARKER_COLOR,
+        fontsize=8,
+        va="top",
+    )
+
+
 def xml_local_name(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
@@ -667,6 +764,8 @@ def plot_figure_2(
         plot_time_series(axes[1, col], joint_qdot, "joint velocity", "tab:green", "joint velocity")
         plot_time_series(axes[2, col], motor_q, "motor angle", "tab:orange", "SEA motor angle")
         plot_time_series(axes[3, col], motor_qdot, "motor speed", "tab:red", "SEA motor speed")
+        sat_times = saturation_times(tables, sea)
+        mark_time_saturations(axes[3, col], sat_times)
 
         plotted_overlay = False
         if joint_q is not None:
@@ -853,6 +952,7 @@ def plot_power_over_gait(
     missing: MissingReport,
     figure: str,
     side_key: str,
+    saturation_percentages: Optional[np.ndarray] = None,
 ) -> None:
     if not cycles:
         note_missing(missing, figure, side_key, "power", "gait cycle events not available")
@@ -895,6 +995,8 @@ def plot_power_over_gait(
             fontsize=9,
             va="top",
         )
+    if plotted:
+        mark_gait_saturations(ax, saturation_percentages)
 
 
 def plot_figure_3(
@@ -912,6 +1014,10 @@ def plot_figure_3(
         sea = side["sea"]
         axes[0, col].set_title(side["title"])
         cycles = cycles_for(key, events, gait_side)
+        sat_pct = saturation_cycle_percentages(
+            saturation_times(tables, sea),
+            cycles,
+        )
 
         torque = find_series(
             tables["sea_torques"],
@@ -991,6 +1097,7 @@ def plot_figure_3(
             missing,
             "figure 3",
             key,
+            saturation_percentages=sat_pct,
         )
 
     fig.suptitle("Gait Cycle: Torque-Angle and Power", fontsize=14)
@@ -1013,6 +1120,10 @@ def plot_figure_4(
         sea = side["sea"]
         axes[0, col].set_title(side["title"])
         cycles = cycles_for(key, events, gait_side)
+        sat_pct = saturation_cycle_percentages(
+            saturation_times(tables, sea),
+            cycles,
+        )
 
         angle = find_series(
             tables["states"],
@@ -1113,6 +1224,7 @@ def plot_figure_4(
             missing,
             "figure 4",
             key,
+            saturation_percentages=sat_pct,
         )
 
     fig.suptitle("Gait Cycle: Joint Angle, Velocity, Power", fontsize=14)
@@ -1136,6 +1248,7 @@ def plot_figure_5(
         coord = side["coord"]
         sea = side["sea"]
         axes[0, col].set_title(side["title"])
+        sat_times = saturation_times(tables, sea)
 
         tau_input = find_series(
             tables["sea_torques"],
@@ -1214,6 +1327,9 @@ def plot_figure_5(
             axes[2, col].axhline(0.0, color="0.3", linewidth=0.8, linestyle="--")
             axes[2, col].grid(True, alpha=0.25)
             axes[2, col].legend(loc="best", fontsize=8)
+
+        for row in range(3):
+            mark_time_saturations(axes[row, col], sat_times)
 
     finalize_time_axes(fig, axes, "SEA Motor Torque and Tracking Error")
     save_figure(fig, out_dir, "05_time_tau_input_tracking_error.png")

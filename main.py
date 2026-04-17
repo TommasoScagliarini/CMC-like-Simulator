@@ -7,6 +7,8 @@ Usage
 -----
     python main.py [--config config_override.yaml]
     python main.py --plot
+    python main.py --validate
+    python main.py --log
 
 In the absence of a config file, SimulatorConfig defaults are used.
 Edit config.py directly to change file paths and parameters.
@@ -36,10 +38,12 @@ See each module's docstring for detailed explanations.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import subprocess
 import sys
 import traceback
+from datetime import datetime
 
 from config import SimulatorConfig
 from model_loader import setup_model
@@ -47,7 +51,73 @@ from kinematics_interpolator import KinematicsInterpolator
 from simulation_runner import SimulationRunner
 
 
-def main(cfg: SimulatorConfig) -> int:
+class _TeeStream:
+    """Text stream that mirrors writes to multiple streams."""
+
+    def __init__(self, *streams) -> None:
+        self._streams = streams
+
+    def write(self, text: str) -> int:
+        for stream in self._streams:
+            stream.write(text)
+        return len(text)
+
+    def flush(self) -> None:
+        for stream in self._streams:
+            stream.flush()
+
+
+def _phase3_log_path(cfg: SimulatorConfig) -> str:
+    """Return a timestamped log path inside the active output directory."""
+    os.makedirs(cfg.output_dir, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{cfg.output_prefix}_phase3_log_{stamp}.txt"
+    return os.path.join(cfg.output_dir, filename)
+
+
+def _run_phase3(cfg: SimulatorConfig, ctx, kin) -> int:
+    """Construct the runner and execute only the simulation phase."""
+    # ── Step 3: Build runner and simulate ────────────────────────────────────
+    print("\n[Main] Step 3/3 - Starting simulation ...")
+    try:
+        runner = SimulationRunner(cfg, ctx, kin)
+        runner.run()
+    except Exception as exc:
+        print(f"\n[Main] ERROR during simulation:\n  {exc}")
+        traceback.print_exc()
+        return 1
+
+    print("\n[Main] Done.")
+    return 0
+
+
+def _run_phase3_with_log(cfg: SimulatorConfig, ctx, kin) -> int:
+    """Run phase 3 while teeing stdout/stderr to a log file."""
+    log_path = _phase3_log_path(cfg)
+    print(f"\n[Main] Phase 3 log: {log_path}")
+
+    with open(log_path, "w", encoding="utf-8", errors="replace") as log_fh:
+        log_fh.write("Simulation phase 3 log\n")
+        log_fh.write(f"created_at={datetime.now().isoformat(timespec='seconds')}\n")
+        log_fh.write(f"output_dir={cfg.output_dir}\n")
+        log_fh.write(f"output_prefix={cfg.output_prefix}\n")
+        log_fh.write(f"t_start={cfg.t_start}\n")
+        log_fh.write(f"t_end={cfg.t_end}\n")
+        log_fh.write(f"dt={cfg.dt}\n")
+        log_fh.write(f"sea_forward_mode={cfg.sea_forward_mode}\n")
+        log_fh.write("\n")
+        log_fh.flush()
+
+        tee_stdout = _TeeStream(sys.stdout, log_fh)
+        tee_stderr = _TeeStream(sys.stderr, log_fh)
+        with contextlib.redirect_stdout(tee_stdout), contextlib.redirect_stderr(tee_stderr):
+            exit_code = _run_phase3(cfg, ctx, kin)
+
+    print(f"[Main] Simulation log saved: {log_path}")
+    return exit_code
+
+
+def main(cfg: SimulatorConfig, log_simulation: bool = False) -> int:
     """
     Run the full simulation pipeline.
 
@@ -89,18 +159,9 @@ def main(cfg: SimulatorConfig) -> int:
             f"  {missing_coords}"
         )
 
-    # ── Step 3: Build runner and simulate ────────────────────────────────────
-    print("\n[Main] Step 3/3 - Starting simulation ...")
-    try:
-        runner = SimulationRunner(cfg, ctx, kin)
-        runner.run()
-    except Exception as exc:
-        print(f"\n[Main] ERROR during simulation:\n  {exc}")
-        traceback.print_exc()
-        return 1
-
-    print("\n[Main] Done.")
-    return 0
+    if log_simulation:
+        return _run_phase3_with_log(cfg, ctx, kin)
+    return _run_phase3(cfg, ctx, kin)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -160,6 +221,34 @@ def _parse_args():
         action="store_true",
         help="Generate plot PNGs after a successful simulation run.",
     )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate saved results after a successful simulation run.",
+    )
+    parser.add_argument(
+        "--log",
+        action="store_true",
+        help="Save the phase 3 simulation console log to a txt in output-dir.",
+    )
+    parser.add_argument(
+        "--sea-forward-mode",
+        choices=["plugin", "ideal_torque"],
+        default=None,
+        help="SEA forward mode: plugin dynamics or legacy ideal torque baseline.",
+    )
+    parser.add_argument(
+        "--sea-motor-substeps",
+        type=int,
+        default=None,
+        help="Override numerical substeps used for SEA motor state integration.",
+    )
+    parser.add_argument(
+        "--sea-motor-max-substeps",
+        type=int,
+        default=None,
+        help="Override maximum retry substeps for SEA motor state integration.",
+    )
 
     args = parser.parse_args()
 
@@ -172,6 +261,12 @@ def _parse_args():
     if args.dt            is not None: cfg.dt           = args.dt
     if args.output_dir    is not None: cfg.output_dir   = args.output_dir
     if args.solver        is not None: cfg.qp_solver    = args.solver
+    if args.sea_forward_mode is not None:
+        cfg.sea_forward_mode = args.sea_forward_mode
+    if args.sea_motor_substeps is not None:
+        cfg.sea_motor_substeps = args.sea_motor_substeps
+    if args.sea_motor_max_substeps is not None:
+        cfg.sea_motor_max_substeps = args.sea_motor_max_substeps
 
     return cfg, args
 
@@ -206,6 +301,42 @@ def _run_plotter(cfg: SimulatorConfig) -> int:
     return completed.returncode
 
 
+def _run_validator(cfg: SimulatorConfig) -> int:
+    """Run validation/validate_sim_results.py with the active config paths."""
+    validator_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "validation",
+        "validate_sim_results.py",
+    )
+    report_name = f"{datetime.now().strftime('%Y-%m-%d')}_validazione_simulatore.md"
+    report_path = os.path.join("reports", "user", report_name)
+    cmd = [
+        sys.executable,
+        validator_path,
+        "--results-dir",
+        cfg.output_dir,
+        "--prefix",
+        cfg.output_prefix,
+        "--model",
+        cfg.model_file,
+        "--reference",
+        cfg.kinematics_file,
+        "--out",
+        report_path,
+    ]
+
+    print("\n[Main] Validating results ...")
+    try:
+        completed = subprocess.run(cmd, check=False)
+    except FileNotFoundError as exc:
+        print(f"[Main] ERROR launching validator:\n  {exc}")
+        return 1
+
+    if completed.returncode != 0:
+        print(f"[Main] Validator reported FAIL with exit code {completed.returncode}.")
+    return completed.returncode
+
+
 if __name__ == "__main__":
     cfg, args = _parse_args()
 
@@ -215,8 +346,10 @@ if __name__ == "__main__":
         print(f"  {field_name:<30} = {value}")
     print()
 
-    exit_code = main(cfg)
+    exit_code = main(cfg, log_simulation=args.log)
     if exit_code == 0 and args.plot:
         exit_code = _run_plotter(cfg)
+    if exit_code == 0 and args.validate:
+        exit_code = _run_validator(cfg)
 
     sys.exit(exit_code)

@@ -98,6 +98,17 @@ class SimulationRunner:
         self._cfg = cfg
         self._ctx = ctx
         self._kin = kin
+        if cfg.sea_forward_mode not in {"plugin", "ideal_torque"}:
+            raise ValueError(
+                "sea_forward_mode must be 'plugin' or 'ideal_torque', "
+                f"got {cfg.sea_forward_mode!r}"
+            )
+        if cfg.sea_forward_mode == "plugin" and cfg.dt > 0.001:
+            print(
+                "[Runner] WARNING: plugin SEA dynamics are stiff; "
+                "dt > 0.001 s can destabilize the validated path.",
+                flush=True,
+            )
 
         # ── Instantiate sub-components ────────────────────────────────────────
         self._prosthesis_ctrl = ProsthesisController(cfg, ctx)
@@ -178,6 +189,9 @@ class SimulationRunner:
         wall_t0     = _time.perf_counter()
         step        = 0
         n_steps_est = int((t_end - t) / dt)
+        failure_exc: Exception | None = None
+        failure_t = t
+        failure_step = step
 
         print(
             f"\n[Runner] Starting simulation  t in [{t:.3f}, {t_end:.3f}] s  "
@@ -270,7 +284,8 @@ class SimulationRunner:
                 if step < 3:
                     print(f"[DBG t={t:.4f}] G: apply_controls ...", flush=True)
                 self._so.apply_to_controls(a, u_res, controls, state)
-                self._update_sea_motor_state(state, tau_sea_cmd)
+                if cfg.sea_forward_mode == "ideal_torque":
+                    self._update_sea_motor_state(state, tau_sea_cmd)
                 model.realizeVelocity(state)
                 model.setControls(state, controls)
 
@@ -286,6 +301,20 @@ class SimulationRunner:
                 udot = compute_udot_bypass(
                     matter, model, state, n_mob, _e_vec, _Me_vec,
                 )
+                if cfg.sea_forward_mode == "plugin":
+                    sea_plugin_outputs = self._sea_plugin_outputs_from_outputs(
+                        state
+                    )
+                    sea_derivatives = self._sea_derivatives_from_plugin_outputs(
+                        sea_plugin_outputs
+                    )
+                else:
+                    sea_plugin_outputs = np.full(
+                        len(self._sea_pros_map) * 3, np.nan
+                    )
+                    sea_derivatives = np.full(
+                        len(self._sea_pros_map) * 2, np.nan
+                    )
                 if not np.all(np.isfinite(udot)):
                     bad_coords = [
                         name for name in ctx.coord_names
@@ -301,28 +330,38 @@ class SimulationRunner:
                 self._recorder.record(
                     t, state, a, u_res, tau_bio, u_sea, udot,
                     controls,
+                    q_ref=q_ref,
+                    qdot_ref=qdot_ref,
+                    tau_pros_ff=tau_pros_ff_by_coord,
+                    sea_derivatives=sea_derivatives,
+                    sea_plugin_outputs=sea_plugin_outputs,
                     so_diagnostics=self._so.last_diagnostics,
                 )
 
                 # ═══════════════════════════════════════════════════════════
                 # J. Semi-explicit Euler step + SEA motor state update
                 # ═══════════════════════════════════════════════════════════
-                q_new:    Dict[str, float] = {}
-                qdot_new: Dict[str, float] = {}
+                if cfg.sea_forward_mode == "plugin":
+                    t_new = self._advance_plugin_state_substeps(
+                        state, controls, udot, dt
+                    )
+                else:
+                    q_new:    Dict[str, float] = {}
+                    qdot_new: Dict[str, float] = {}
 
-                for name in ctx.coord_names:
-                    coord    = coord_set.get(name)
-                    q_cur    = coord.getValue(state)
-                    qdot_cur = coord.getSpeedValue(state)
-                    qacc_cur = udot[ctx.coord_mob_idx[name]]
+                    for name in ctx.coord_names:
+                        coord    = coord_set.get(name)
+                        q_cur    = coord.getValue(state)
+                        qdot_cur = coord.getSpeedValue(state)
+                        qacc_cur = udot[ctx.coord_mob_idx[name]]
 
-                    qdot_next      = qdot_cur + qacc_cur * dt
-                    q_new[name]    = q_cur + qdot_next * dt
-                    qdot_new[name] = qdot_next
+                        qdot_next      = qdot_cur + qacc_cur * dt
+                        q_new[name]    = q_cur + qdot_next * dt
+                        qdot_new[name] = qdot_next
 
-                t_new = t + dt
-                self._set_state(state, q_new, qdot_new, t_new)
-                self._update_sea_motor_state(state, tau_sea_cmd)
+                    t_new = t + dt
+                    self._set_state(state, q_new, qdot_new, t_new)
+                    self._update_sea_motor_state(state, tau_sea_cmd)
 
                 t = t_new
 
@@ -335,6 +374,9 @@ class SimulationRunner:
                 import traceback
                 traceback.print_exc()
                 print("[Runner] Saving partial results ...", flush=True)
+                failure_exc = exc
+                failure_t = t
+                failure_step = step
                 break
 
             step += 1
@@ -352,11 +394,25 @@ class SimulationRunner:
 
         # ── Save outputs ──────────────────────────────────────────────────────
         elapsed_total = _time.perf_counter() - wall_t0
-        print(
-            f"\n[Runner] Simulation complete. "
-            f"{step} steps, {elapsed_total:.1f} s wall time."
-        )
+        if failure_exc is None:
+            print(
+                f"\n[Runner] Simulation complete. "
+                f"{step} steps, {elapsed_total:.1f} s wall time."
+            )
+        else:
+            print(
+                f"\n[Runner] Simulation stopped early at t={failure_t:.4f} s, "
+                f"step={failure_step}, after {elapsed_total:.1f} s wall time."
+            )
         self._recorder.save_results()
+        status_t = t if failure_exc is None else failure_t
+        status_step = step if failure_exc is None else failure_step
+        self._write_run_status(failure_exc, status_t, status_step, elapsed_total)
+        if failure_exc is not None:
+            raise RuntimeError(
+                "Simulation stopped early; partial results were saved to "
+                f"{os.path.abspath(self._cfg.output_dir)}"
+            ) from failure_exc
 
     # ─────────────────────────────────────────────────────────────────────────
     #  Private helpers
@@ -475,6 +531,248 @@ class SimulationRunner:
                 + ", ".join(sv_name.split("/")[-1] for _, sv_name in plugin_sv),
                 flush=True
             )
+
+    def _component_output_float(
+        self,
+        state: opensim.State,
+        component_path: str,
+        output_name: str,
+        required: bool = True,
+    ) -> float:
+        """Read a scalar component output without entering Acceleration stage."""
+        try:
+            component = self._ctx.model.getComponent(component_path)
+            output = component.getOutput(output_name)
+            return float(output.getValueAsString(state))
+        except Exception as exc:
+            if not required:
+                return float("nan")
+            raise RuntimeError(
+                f"Could not read output '{output_name}' from "
+                f"'{component_path}'"
+            ) from exc
+
+    def _sea_plugin_outputs_from_outputs(self, state: opensim.State) -> np.ndarray:
+        """Return tau_input and motor derivatives exposed by the SEA plugin."""
+        values = np.full(len(self._sea_pros_map) * 3, np.nan)
+        for i, (sea_name, _coord_name) in enumerate(self._sea_pros_map):
+            component_path = f"/forceset/{sea_name}"
+            base = i * 3
+            values[base] = self._component_output_float(
+                state, component_path, "tau_input", required=False
+            )
+            values[base + 1] = self._component_output_float(
+                state, component_path, "motor_angle_dot"
+            )
+            values[base + 2] = self._component_output_float(
+                state, component_path, "motor_speed_dot"
+            )
+
+        derivative_values = np.ravel(
+            [[values[i * 3 + 1], values[i * 3 + 2]]
+             for i in range(len(self._sea_pros_map))]
+        )
+        if not np.all(np.isfinite(derivative_values)):
+            raise FloatingPointError(
+                "Non-finite SEA plugin output derivatives: "
+                f"{values.tolist()}"
+            )
+        return values
+
+    def _sea_derivatives_from_plugin_outputs(
+        self,
+        sea_plugin_outputs: np.ndarray,
+    ) -> np.ndarray:
+        """Extract motor_angle_dot and motor_speed_dot from plugin outputs."""
+        values = np.full(len(self._sea_pros_map) * 2, np.nan)
+        for i in range(len(self._sea_pros_map)):
+            values[i * 2] = sea_plugin_outputs[i * 3 + 1]
+            values[i * 2 + 1] = sea_plugin_outputs[i * 3 + 2]
+        return values
+
+    def _sea_state_derivatives_from_outputs(self, state: opensim.State) -> np.ndarray:
+        """Return motor_angle_dot and motor_speed_dot exposed by the SEA plugin."""
+        return self._sea_derivatives_from_plugin_outputs(
+            self._sea_plugin_outputs_from_outputs(state)
+        )
+
+    def _advance_plugin_state_substeps(
+        self,
+        state: opensim.State,
+        controls: opensim.Vector,
+        udot_step: np.ndarray,
+        dt: float,
+    ) -> float:
+        """
+        Advance coordinates once while substepping SEA motor states.
+
+        The CMC-like controller and SO solve produce one acceleration vector for
+        the step. Recomputing biological accelerations inside SEA substeps would
+        reuse stale controls in states they were not optimized for, which can
+        create artificial drift in lightly constrained coordinates. The SEA
+        motor state still uses the C++ plugin derivatives at every substep.
+        """
+        start_time, start_values = self._snapshot_state_variables(state)
+        requested = max(1, int(getattr(self._cfg, "sea_motor_substeps", 1)))
+        max_substeps = max(
+            requested,
+            int(getattr(self._cfg, "sea_motor_max_substeps", requested)),
+        )
+
+        substeps = requested
+        last_error: Exception | None = None
+        while substeps <= max_substeps:
+            self._restore_state_variables(state, start_time, start_values)
+            try:
+                return self._advance_plugin_state_fixed_substeps(
+                    state, controls, udot_step, dt, substeps
+                )
+            except FloatingPointError as exc:
+                last_error = exc
+                if substeps >= max_substeps:
+                    break
+                next_substeps = min(max_substeps, substeps * 2)
+                print(
+                    "[Runner] Plugin substep retry at "
+                    f"t={start_time:.4f}: {substeps} -> {next_substeps} "
+                    f"substeps ({exc})",
+                    flush=True,
+                )
+                substeps = next_substeps
+
+        self._restore_state_variables(state, start_time, start_values)
+        raise FloatingPointError(
+            "Plugin forward step did not remain finite at "
+            f"t={start_time:.4f} even with {substeps} substeps. "
+            f"Last error: {last_error}"
+        ) from last_error
+
+    def _advance_plugin_state_fixed_substeps(
+        self,
+        state: opensim.State,
+        controls: opensim.Vector,
+        udot_step: np.ndarray,
+        dt: float,
+        substeps: int,
+    ) -> float:
+        """Advance one main step with an already chosen substep count."""
+        ctx = self._ctx
+        model = self._ctx.model
+        coord_set = model.getCoordinateSet()
+
+        h = dt / substeps
+
+        for substep in range(substeps):
+            model.realizeVelocity(state)
+            model.setControls(state, controls)
+            model.realizeDynamics(state)
+
+            sea_derivatives = self._sea_state_derivatives_from_outputs(state)
+
+            q_new: Dict[str, float] = {}
+            qdot_new: Dict[str, float] = {}
+            for name in ctx.coord_names:
+                coord = coord_set.get(name)
+                q_cur = coord.getValue(state)
+                qdot_cur = coord.getSpeedValue(state)
+                qacc_cur = udot_step[ctx.coord_mob_idx[name]]
+
+                qdot_next = qdot_cur + qacc_cur * h
+                q_new[name] = q_cur + qdot_next * h
+                qdot_new[name] = qdot_next
+
+            sv = model.getStateVariableValues(state)
+            sea_next: Dict[int, float] = {}
+            for i, (sea_name, _coord_name) in enumerate(self._sea_pros_map):
+                ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
+                ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+                if ma_idx is None or ms_idx is None:
+                    continue
+
+                omega_next = sv.get(ms_idx) + sea_derivatives[i * 2 + 1] * h
+                theta_next = sv.get(ma_idx) + omega_next * h
+                if not (np.isfinite(theta_next) and np.isfinite(omega_next)):
+                    raise FloatingPointError(
+                        "Non-finite SEA motor integration during plugin "
+                        f"substep {substep + 1}/{substeps} for {sea_name}"
+                    )
+                sea_next[ms_idx] = float(omega_next)
+                sea_next[ma_idx] = float(theta_next)
+
+            t_next = float(state.getTime()) + h
+            self._set_state(state, q_new, qdot_new, t_next)
+            self._set_sea_state_values(state, sea_next)
+
+        return float(state.getTime())
+
+    def _snapshot_state_variables(
+        self,
+        state: opensim.State,
+    ) -> tuple[float, list[float]]:
+        """Capture time and all state variables before a retryable step."""
+        model = self._ctx.model
+        sv = model.getStateVariableValues(state)
+        n_sv = model.getStateVariableNames().getSize()
+        values = [float(sv.get(i)) for i in range(n_sv)]
+        return float(state.getTime()), values
+
+    def _restore_state_variables(
+        self,
+        state: opensim.State,
+        time_value: float,
+        values: list[float],
+    ) -> None:
+        """Restore a state snapshot after a failed plugin substep attempt."""
+        model = self._ctx.model
+        sv = model.getStateVariableValues(state)
+        for i, value in enumerate(values):
+            sv.set(i, float(value))
+        model.setStateVariableValues(state, sv)
+        state.setTime(float(time_value))
+
+    def _write_run_status(
+        self,
+        failure_exc: Exception | None,
+        t_value: float,
+        step: int,
+        wall_time: float,
+    ) -> None:
+        """Write a status file so partial outputs are never ambiguous."""
+        status_path = os.path.join(
+            self._cfg.output_dir,
+            f"{self._cfg.output_prefix}_run_status.txt",
+        )
+        ok = failure_exc is None
+        with open(status_path, "w", encoding="utf-8") as fh:
+            fh.write(f"status={'complete' if ok else 'failed'}\n")
+            fh.write(f"t={float(t_value):.10g}\n")
+            fh.write(f"step={int(step)}\n")
+            fh.write(f"wall_time_s={float(wall_time):.10g}\n")
+            fh.write(f"t_start={float(self._cfg.t_start):.10g}\n")
+            fh.write(f"t_end={float(self._cfg.t_end):.10g}\n")
+            fh.write(f"dt={float(self._cfg.dt):.10g}\n")
+            fh.write(f"sea_forward_mode={self._cfg.sea_forward_mode}\n")
+            fh.write(f"sea_motor_substeps={self._cfg.sea_motor_substeps}\n")
+            fh.write(
+                f"sea_motor_max_substeps={self._cfg.sea_motor_max_substeps}\n"
+            )
+            if failure_exc is not None:
+                fh.write(f"error_type={type(failure_exc).__name__}\n")
+                fh.write(f"error={failure_exc}\n")
+        print(f"  -> Run status  : {status_path}", flush=True)
+
+    def _set_sea_state_values(
+        self,
+        state: opensim.State,
+        sea_values: Dict[int, float] | None,
+    ) -> None:
+        """Write integrated SEA state variables back to the OpenSim State."""
+        if not sea_values:
+            return
+        sv = self._ctx.model.getStateVariableValues(state)
+        for sv_idx, value in sea_values.items():
+            sv.set(sv_idx, float(value))
+        self._ctx.model.setStateVariableValues(state, sv)
 
     def _update_sea_motor_state(
         self,

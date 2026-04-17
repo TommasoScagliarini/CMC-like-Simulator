@@ -120,9 +120,8 @@ class ProsthesisController:
             u     = float(np.clip(u_raw, -1.0, 1.0))
 
             # ── Inject into control Vector ──────────────────────────────────
-            # CRITICAL ORDER: controls must be set BEFORE model.realizeAcceleration(state)
-            # is called.  The SEA plugin reads its control signal via getControl(state)
-            # inside computeActuation(), which is invoked during Stage::Dynamics.
+            # Set the control before any downstream Dynamics-stage plugin output
+            # reads it through getControl(state).
             ctrl_idx = self._ctx.sea_ctrl_idx[sea_name]
             controls.set(ctrl_idx, u)
 

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import os
 import glob
+import ctypes
 from dataclasses import dataclass, field
 from typing import Dict, List
 from xml.etree import ElementTree as ET
@@ -21,6 +22,10 @@ import numpy as np
 import opensim
 
 from config import SimulatorConfig
+
+
+_DLL_DIR_HANDLES = []
+_PRELOADED_DLL_HANDLES = []
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -106,6 +111,71 @@ class SimulationContext:
 # ─────────────────────────────────────────────────────────────────────────────
 #  Plugin loader
 # ─────────────────────────────────────────────────────────────────────────────
+def _opensim_install_root_from_python_module() -> str | None:
+    """Infer the OpenSim installation root used by the imported Python module."""
+    module_file = getattr(opensim, "__file__", "")
+    if not module_file:
+        return None
+
+    path = os.path.abspath(module_file)
+    # Typical Windows layout:
+    #   <root>/sdk/Python/opensim/__init__.py
+    opensim_pkg = os.path.dirname(path)
+    python_dir = os.path.dirname(opensim_pkg)
+    sdk_dir = os.path.dirname(python_dir)
+    root = os.path.dirname(sdk_dir)
+    bin_dir = os.path.join(root, "bin")
+    return root if os.path.isdir(bin_dir) else None
+
+
+def _configure_windows_dll_search_path() -> None:
+    """
+    Keep plugin dependency resolution on the same OpenSim tree as Python.
+
+    Windows can otherwise resolve osim*.dll/SimTK*.dll from another installed
+    OpenSim version in PATH. That is a common cause of native loader exceptions
+    such as 0xc06d007f when loading a C++ plugin.
+    """
+    if os.name != "nt":
+        return
+
+    root = _opensim_install_root_from_python_module()
+    if not root:
+        print("[ModelLoader] WARNING: could not infer OpenSim root from Python.")
+        return
+
+    bin_dir = os.path.abspath(os.path.join(root, "bin"))
+    path_entries = os.environ.get("PATH", "").split(os.pathsep)
+    norm_bin = os.path.normcase(bin_dir)
+    if not path_entries or os.path.normcase(os.path.abspath(path_entries[0])) != norm_bin:
+        path_entries = [
+            entry for entry in path_entries
+            if os.path.normcase(os.path.abspath(entry or ".")) != norm_bin
+        ]
+        os.environ["PATH"] = os.pathsep.join([bin_dir] + path_entries)
+
+    if hasattr(os, "add_dll_directory"):
+        handle = os.add_dll_directory(bin_dir)
+        _DLL_DIR_HANDLES.append(handle)
+
+    preload_order = [
+        "SimTKcommon.dll",
+        "SimTKmath.dll",
+        "SimTKsimbody.dll",
+        "osimCommon.dll",
+        "osimSimulation.dll",
+        "osimActuators.dll",
+        "osimTools.dll",
+        "osimAnalyses.dll",
+    ]
+    for dll_name in preload_order:
+        dll_path = os.path.join(bin_dir, dll_name)
+        if os.path.isfile(dll_path):
+            _PRELOADED_DLL_HANDLES.append(ctypes.WinDLL(dll_path))
+
+    print(f"[ModelLoader] OpenSim DLL path : {bin_dir}")
+
+
 def _load_plugin(plugin_name: str) -> None:
     """
     Load the SEA C++ shared library via OpenSim's plugin loader.
@@ -120,6 +190,7 @@ def _load_plugin(plugin_name: str) -> None:
     Therefore we must pass the bare basename WITHOUT any extension.
     Adding '.dylib' here would produce a double extension (.dylib.dylib).
     """
+    _configure_windows_dll_search_path()
     print(f"[ModelLoader] Loading plugin  : {plugin_name}")
     opensim.LoadOpenSimLibrary(plugin_name)
 

@@ -19,7 +19,7 @@ class SimulatorConfig:
     # =========================================================================
 
     # Biomechanical model (contains muscles + SEA CoordinateActuators)
-    model_file: str = "models/Adjusted_SEASEA - Copia.osim"
+    model_file: str = "models/Adjusted_SEASEA - Copia_tuned.osim"
 
     # C++ plugin basename WITHOUT OS extension.
     # Loader adds .dll / .dylib / .so automatically.
@@ -43,7 +43,7 @@ class SimulatorConfig:
     # =========================================================================
     t_start: float = 4.26     # must be >= first time stamp in kinematics file
     t_end:   float = 11.06    # must be <= last  time stamp in kinematics file
-    dt:      float = 0.01     # integration step  (semi-implicit Euler, ZOH)
+    dt:      float = 0.001    # integration step for validated plugin mode
 
     # =========================================================================
     # MODEL TOPOLOGY  ← edit if your .osim uses different names
@@ -88,10 +88,22 @@ class SimulatorConfig:
 
     # SEA spring stiffness [N·m/rad] — must match each plugin <stiffness> property.
     # Used to update motor_angle at each step (non-impedance mode).
+    # Forward SEA mode:
+    #   "plugin"       -> motor_angle/motor_speed evolve from derivatives
+    #                     computed and exposed by the C++ SEA plugin.
+    #   "ideal_torque" -> legacy diagnostic baseline that algebraically sets
+    #                     motor_angle to produce the commanded spring torque.
+    # Only "plugin" is valid for SEA controller validation.
+    sea_forward_mode: str = "plugin"
+
     sea_stiffness: Dict[str, float] = field(default_factory=lambda: {
         "SEA_Knee":  250.0,
         "SEA_Ankle": 500.0,
     })
+    # Numerical substeps for stiff SEA/plugin forward dynamics. The derivative
+    # values still come from the C++ plugin; Python only advances time.
+    sea_motor_substeps: int = 5
+    sea_motor_max_substeps: int = 80
 
     # =========================================================================
     # OUTER LOOP – biological kinematic tracking  (PD)
@@ -179,6 +191,8 @@ class SimulatorConfig:
     save_reserve_controls: bool = True # reserve actuator controls
     save_reserve_torques:  bool = True # reserve torque = control * optimal_force
     save_sea_states:       bool = True # SEA motor_angle + motor_speed
+    save_sea_derivatives:  bool = True # plugin motor_angle_dot + motor_speed_dot
+    save_sea_diagnostics:  bool = True # plugin/Python SEA interface checks
     save_power:            bool = True # SEA joint + motor power
     save_gait_events:      bool = True # gait cycles from GRF threshold crossings
 

@@ -277,6 +277,8 @@ class OutputRecorder:
         self._rec_muscle_forces = np.full((n_steps, ctx.n_muscles),  np.nan)
         self._rec_sea_torques   = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_sea_states    = np.full((n_steps, n_sea * 2),      np.nan)
+        self._rec_sea_derivatives = np.full((n_steps, n_sea * 2),    np.nan)
+        self._rec_sea_diagnostics = np.full((n_steps, n_sea * 21),   np.nan)
         self._rec_power         = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_recruitment   = np.full((n_steps, 12),             np.nan)
         self._step_count        = 0
@@ -295,6 +297,11 @@ class OutputRecorder:
         u_sea:   Dict[str, float],
         udot:    np.ndarray,
         controls: opensim.Vector,
+        q_ref: Optional[Dict[str, float]] = None,
+        qdot_ref: Optional[Dict[str, float]] = None,
+        tau_pros_ff: Optional[Dict[str, float]] = None,
+        sea_derivatives: Optional[np.ndarray] = None,
+        sea_plugin_outputs: Optional[np.ndarray] = None,
         so_diagnostics: Optional[dict] = None,
     ) -> None:
         """Append one row to all output buffers."""
@@ -341,6 +348,7 @@ class OutputRecorder:
             Kp    = props["Kp"]
             Kd    = props["Kd"]
             Bm    = props["Bm"]
+            Jm    = props.get("Jm", np.nan)
             F_opt = props["F_opt"]
 
             ma_idx = ctx.sea_motor_angle_sv_idx[sea_name]
@@ -354,19 +362,65 @@ class OutputRecorder:
             tau_spring = K * (theta_m - theta_j)
 
             u = u_sea.get(coord_name, 0.0)
+            tau_ref = u * F_opt
+            q_ref_value = (q_ref or {}).get(coord_name, theta_j)
+            qdot_ref_value = (qdot_ref or {}).get(coord_name, omega_j)
+            outer_kp = cfg.sea_kp.get(coord_name, 0.0)
+            outer_kd = cfg.sea_kd.get(coord_name, 0.0)
+            outer_pd_cmd = (
+                outer_kp * (q_ref_value - theta_j)
+                + outer_kd * (qdot_ref_value - omega_j)
+            )
+            tau_ff_cmd = (tau_pros_ff or {}).get(coord_name, np.nan)
+            tau_cmd_raw = (
+                tau_ff_cmd + outer_pd_cmd
+                if np.isfinite(tau_ff_cmd)
+                else np.nan
+            )
+            tau_ref_minus_tau_cmd = (
+                tau_ref - tau_cmd_raw
+                if np.isfinite(tau_cmd_raw)
+                else np.nan
+            )
             if props["impedance"]:
-                tau_ref = u * F_opt
                 theta_m_ref = theta_j + tau_ref / K
                 omega_m_ref = omega_j
                 tau_ff = tau_spring + Bm * omega_m
-                tau_input = (tau_ff
-                             + Kp * (theta_m_ref - theta_m)
-                             + Kd * (omega_m_ref - omega_m))
+                inner_prop_term = Kp * (theta_m_ref - theta_m)
+                inner_damp_term = Kd * (omega_m_ref - omega_m)
+                tau_input_raw = (tau_ff
+                                 + inner_prop_term
+                                 + inner_damp_term)
             else:
-                tau_ref = u * F_opt
-                tau_input = Kp * (tau_ref - tau_spring) - Kd * omega_m
+                inner_prop_term = Kp * (tau_ref - tau_spring)
+                inner_damp_term = -Kd * omega_m
+                tau_input_raw = inner_prop_term + inner_damp_term
 
-            tau_input = max(-500.0, min(500.0, tau_input))
+            tau_input_python = max(-500.0, min(500.0, tau_input_raw))
+            tau_input_plugin = np.nan
+            motor_angle_dot_plugin = np.nan
+            motor_speed_dot_plugin = np.nan
+            if sea_plugin_outputs is not None and len(sea_plugin_outputs) >= (i + 1) * 3:
+                base = i * 3
+                tau_input_plugin = float(sea_plugin_outputs[base])
+                motor_angle_dot_plugin = float(sea_plugin_outputs[base + 1])
+                motor_speed_dot_plugin = float(sea_plugin_outputs[base + 2])
+
+            tau_input = (
+                tau_input_plugin
+                if np.isfinite(tau_input_plugin)
+                else tau_input_python
+            )
+            tau_input_diff = (
+                tau_input_plugin - tau_input_python
+                if np.isfinite(tau_input_plugin)
+                else np.nan
+            )
+            tau_error = tau_ref - tau_spring
+            is_tau_input_saturated = (
+                1.0 if abs(tau_input) >= 500.0 - 1e-9 else 0.0
+            )
+            motor_accel_numerator = tau_input - tau_spring - Bm * omega_m
 
             self._rec_sea_torques[k, i * 2]     = tau_spring
             self._rec_sea_torques[k, i * 2 + 1] = tau_input
@@ -374,6 +428,33 @@ class OutputRecorder:
             self._rec_sea_states[k, i * 2 + 1]   = omega_m
             self._rec_power[k, i * 2]            = tau_spring * omega_j
             self._rec_power[k, i * 2 + 1]        = tau_input * omega_m
+            diag_base = i * 21
+            self._rec_sea_diagnostics[k, diag_base:diag_base + 21] = np.array([
+                tau_ref,
+                tau_ff_cmd,
+                outer_pd_cmd,
+                tau_cmd_raw,
+                tau_ref_minus_tau_cmd,
+                tau_spring,
+                tau_error,
+                tau_input_raw,
+                tau_input_python,
+                tau_input_plugin,
+                tau_input_diff,
+                is_tau_input_saturated,
+                inner_prop_term,
+                inner_damp_term,
+                omega_m,
+                motor_angle_dot_plugin,
+                motor_speed_dot_plugin,
+                motor_accel_numerator,
+                Jm,
+                Bm,
+                K,
+            ])
+
+        if sea_derivatives is not None:
+            self._rec_sea_derivatives[k, :len(sea_derivatives)] = sea_derivatives
 
         # ── Recruitment diagnostics ─────────────────────────────────────────
         diag = so_diagnostics
@@ -516,6 +597,55 @@ class OutputRecorder:
                 in_degrees=False,
             )
             print(f"  -> SEA states  : {path}")
+
+        if getattr(cfg, "save_sea_derivatives", False):
+            sea_derivative_cols = []
+            for sea_name, coord_name in self._sea_pros_map:
+                sea_derivative_cols.append(f"{sea_name}_motor_angle_dot")
+                sea_derivative_cols.append(f"{sea_name}_motor_speed_dot")
+            path = os.path.join(out, f"{pfx}_sea_derivatives.sto")
+            write_sto(
+                path, "SEADerivatives",
+                self._rec_time[:k], sea_derivative_cols,
+                self._rec_sea_derivatives[:k],
+                in_degrees=False,
+            )
+            print(f"  -> SEA derivs  : {path}")
+
+        if getattr(cfg, "save_sea_diagnostics", False):
+            sea_diagnostic_cols = []
+            for sea_name, coord_name in self._sea_pros_map:
+                sea_diagnostic_cols.extend([
+                    f"{sea_name}_tau_ref",
+                    f"{sea_name}_tau_ff_cmd",
+                    f"{sea_name}_outer_pd_cmd",
+                    f"{sea_name}_tau_cmd_raw",
+                    f"{sea_name}_tau_ref_minus_tau_cmd_raw",
+                    f"{sea_name}_tau_spring_state",
+                    f"{sea_name}_tau_error",
+                    f"{sea_name}_tau_input_raw",
+                    f"{sea_name}_tau_input_python",
+                    f"{sea_name}_tau_input_plugin",
+                    f"{sea_name}_tau_input_plugin_minus_python",
+                    f"{sea_name}_tau_input_saturated",
+                    f"{sea_name}_inner_prop_term",
+                    f"{sea_name}_inner_damp_term",
+                    f"{sea_name}_motor_speed",
+                    f"{sea_name}_motor_angle_dot_plugin",
+                    f"{sea_name}_motor_speed_dot_plugin",
+                    f"{sea_name}_motor_accel_numerator",
+                    f"{sea_name}_motor_inertia",
+                    f"{sea_name}_motor_damping",
+                    f"{sea_name}_spring_stiffness",
+                ])
+            path = os.path.join(out, f"{pfx}_sea_diagnostics.sto")
+            write_sto(
+                path, "SEADiagnostics",
+                self._rec_time[:k], sea_diagnostic_cols,
+                self._rec_sea_diagnostics[:k],
+                in_degrees=False,
+            )
+            print(f"  -> SEA diag    : {path}")
 
         if cfg.save_power:
             power_cols = []
