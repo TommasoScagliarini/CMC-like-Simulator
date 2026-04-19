@@ -679,6 +679,22 @@ class SimulationRunner:
                 sea_next[ms_idx] = float(omega_next)
                 sea_next[ma_idx] = float(theta_next)
 
+                mf_idx = ctx.sea_motor_speed_filt_sv_idx.get(sea_name)
+                if mf_idx is not None:
+                    filt_dot = self._component_output_float(
+                        state, f"/forceset/{sea_name}",
+                        "motor_speed_filt_dot", required=False,
+                    )
+                    if np.isfinite(filt_dot):
+                        omega_filt_next = sv.get(mf_idx) + filt_dot * h
+                        if not np.isfinite(omega_filt_next):
+                            raise FloatingPointError(
+                                "Non-finite SEA motor_speed_filt integration "
+                                f"during plugin substep {substep + 1}/{substeps} "
+                                f"for {sea_name}"
+                            )
+                        sea_next[mf_idx] = float(omega_filt_next)
+
             t_next = float(state.getTime()) + h
             self._set_state(state, q_new, qdot_new, t_next)
             self._set_sea_state_values(state, sea_next)
@@ -794,6 +810,9 @@ class SimulationRunner:
             if ms_idx is not None:
                 omega_j = coord_set.get(coord_name).getSpeedValue(state)
                 sv.set(ms_idx, omega_j)
+                mf_idx = ctx.sea_motor_speed_filt_sv_idx.get(sea_name)
+                if mf_idx is not None:
+                    sv.set(mf_idx, omega_j)
 
         model.setStateVariableValues(state, sv)
 

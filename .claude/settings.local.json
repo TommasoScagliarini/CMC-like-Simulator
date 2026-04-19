@@ -4,7 +4,30 @@
       "Bash(python -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['config.py','model_loader.py','inverse_dynamics.py','simulation_runner.py','outer_loop.py','static_optimization.py']]; print\\('All files parse OK'\\)\")",
       "Bash(python -c \"import ast; [ast.parse\\(open\\(f, encoding='utf-8'\\).read\\(\\)\\) for f in ['config.py','model_loader.py','inverse_dynamics.py','simulation_runner.py','outer_loop.py','static_optimization.py']]; print\\('All files parse OK'\\)\")",
       "Bash(awk '-F\\\\t' '{for\\(i=2;i<=NF;i++\\) {sum[i]+=$i; count[i]++; if\\($i<min[i] || min[i]==\"\"\\) min[i]=$i; if\\($i>max[i]\\) max[i]=$i}} END {for\\(i=2;i<=NF;i++\\) print \"Col\" i \": min=\" min[i] \", max=\" max[i] \", avg=\" sum[i]/count[i]}')",
-      "Bash(awk '-F\\\\t' '{for\\(i=2;i<=NF;i++\\) {val=$i+0; if\\(val>1.0\\) found=1}} END {if\\(found==1\\) print \"ALERT: Found values > 1.0 in activations\"; else print \"All activation values <= 1.0\"}')"
+      "Bash(awk '-F\\\\t' '{for\\(i=2;i<=NF;i++\\) {val=$i+0; if\\(val>1.0\\) found=1}} END {if\\(found==1\\) print \"ALERT: Found values > 1.0 in activations\"; else print \"All activation values <= 1.0\"}')",
+      "Bash(where msbuild *)",
+      "Bash(where cmake *)",
+      "Bash(\"C:\\\\Program Files \\(x86\\)\\\\Microsoft Visual Studio\\\\Installer\\\\vswhere.exe\" -latest -products * -requires Microsoft.Component.MSBuild -find \"MSBuild\\\\**\\\\Bin\\\\MSBuild.exe\")",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files \\(x86\\)/Microsoft Visual Studio/**)",
+      "Read(//c/Program Files/Microsoft Visual Studio/**)",
+      "Bash(cmd //c 'dir \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\" /B')",
+      "Bash(cmd //c \"dir \\\\\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\\" /B\")",
+      "Bash(cmake --build \"c:/Users/tomma/Desktop/Opensim OMNIBUS/SEA_plugin_core-agent/build\" --config Release --target SEA_Plugin_BlackBox_mCMC_impedence)",
+      "Bash(rm -rf build_agent)",
+      "Bash(cmake -S . -B build_agent -DCMAKE_BUILD_TYPE=Release -DOPENSIM_INSTALL_DIR=\"C:/OpenSim-mCMC\")",
+      "Bash(cmake -S . -B build_agent -G \"Visual Studio 17 2022\" -A x64 -T host=x64 -DCMAKE_BUILD_TYPE=Release -DOPENSIM_INSTALL_DIR=\"C:/OpenSim-mCMC\")",
+      "Bash(cmake --build build_agent --config Release --target SEA_Plugin_BlackBox_mCMC_impedence)",
+      "Bash(\"C:/Users/tomma/anaconda3/envs/envCMC-like/python.exe\" main.py --t-start 4.26 --t-end 4.40 --output-dir results/_smoke_backcompat_dfilter --validate)",
+      "Bash(\"C:/Users/tomma/anaconda3/envs/envCMC-like/python.exe\" -c \"import opensim; m = opensim.Model\\('models/Adjusted_SEASEA - Copia_tuned.osim'\\); opensim.Object.registerType\\(opensim.SeriesElasticActuator\\(\\)\\) if hasattr\\(opensim, 'SeriesElasticActuator'\\) else None; print\\('OpenSim version:', opensim.GetVersionAndDate\\(\\)\\)\")",
+      "Bash(\"C:/Users/tomma/anaconda3/envs/envCMC-like/python.exe\" -c \"print\\('hello'\\); import sys; print\\(sys.version\\)\")",
+      "Bash(cp SEA_Plugin_BlackBox_mCMC_impedence.dll SEA_Plugin_BlackBox_mCMC_impedence.dll.new_dfilter)",
+      "Bash(cp SEA_Plugin_BlackBox_mCMC_impedence.dll.bak_pre_dfilter_20260417_231306 SEA_Plugin_BlackBox_mCMC_impedence.dll)",
+      "Bash(\"C:/Users/tomma/anaconda3/envs/envCMC-like/python.exe\" -u -c \"import opensim; print\\('os', opensim.GetVersionAndDate\\(\\)\\)\")",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(\"C:/Users/tomma/anaconda3/envs/envCMC-like/python.exe\" -u -c \"import opensim; print\\('os ok'\\)\")",
+      "Read(//tmp/**)",
+      "Bash(\"C:/Users/tomma/anaconda3/Scripts/conda.exe\" run *)"
     ]
   }
 }

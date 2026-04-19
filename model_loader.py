@@ -96,6 +96,7 @@ class SimulationContext:
     sea_props:               Dict[str, dict]  = field(default_factory=dict)
     sea_motor_angle_sv_idx:  Dict[str, int]   = field(default_factory=dict)
     sea_motor_speed_sv_idx:  Dict[str, int]   = field(default_factory=dict)
+    sea_motor_speed_filt_sv_idx: Dict[str, int] = field(default_factory=dict)
     pros_mob_indices:        np.ndarray = field(default_factory=lambda: np.array([], dtype=int))
 
     # ── GRF data (MUST stay alive for the entire simulation) ─────────────────
@@ -736,10 +737,13 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     # --- SEA motor state variable indices ---
     sea_motor_angle_sv_idx: Dict[str, int] = {}
     sea_motor_speed_sv_idx: Dict[str, int] = {}
+    sea_motor_speed_filt_sv_idx: Dict[str, int] = {}
     for sv_idx, sv_name in enumerate(sv_name_list):
         for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
             if sv_name.endswith(f"{sea_name}/motor_angle"):
                 sea_motor_angle_sv_idx[sea_name] = sv_idx
+            elif sv_name.endswith(f"{sea_name}/motor_speed_filt"):
+                sea_motor_speed_filt_sv_idx[sea_name] = sv_idx
             elif sv_name.endswith(f"{sea_name}/motor_speed"):
                 sea_motor_speed_sv_idx[sea_name] = sv_idx
 
@@ -761,7 +765,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     print(
         f"  SEA F_opt   : {sea_f_opt}\n"
         f"  SEA motor SV: angle={sea_motor_angle_sv_idx}, "
-        f"speed={sea_motor_speed_sv_idx}"
+        f"speed={sea_motor_speed_sv_idx}, "
+        f"speed_filt={sea_motor_speed_filt_sv_idx}"
     )
 
     return SimulationContext(
@@ -796,6 +801,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         sea_props             = sea_props,
         sea_motor_angle_sv_idx = sea_motor_angle_sv_idx,
         sea_motor_speed_sv_idx = sea_motor_speed_sv_idx,
+        sea_motor_speed_filt_sv_idx = sea_motor_speed_filt_sv_idx,
         pros_mob_indices      = pros_mob_indices,
         grf_storage      = grf_storage,
         grf_data_file    = mot_file,

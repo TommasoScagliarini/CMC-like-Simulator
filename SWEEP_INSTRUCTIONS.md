@@ -20,9 +20,22 @@ Kp = Jm * omega_n^2 / K - 1
 Kd = 2 * zeta * Jm * omega_n - Bm
 ```
 
-Una modifica al plugin C++ ha reso `max_motor_torque` una property XML
-(default 500 Nm, lo sweep usa 5000 Nm) per eliminare il vincolo di
-saturazione che rendeva impossibile usare guadagni adeguati.
+A partire dal 2026-04-18 il plugin espone due property XML aggiuntive:
+
+- `max_motor_torque` (default `500` Nm) — bound di saturazione su
+  `tau_input`. Prima era hardcoded a 500 Nm; ora e una property (lo sweep
+  usa 5000 Nm) per permettere guadagni adeguati senza clamp.
+- `derivative_filter_tau` (default `0.0` s) — costante di tempo del
+  filtro LPF del primo ordine applicato a `omega_m` e usato nel termine D
+  dell'inner loop non-impedance. A `tau_d=0` la logica e bit-per-bit
+  identica alla versione precedente (backward-compat).
+
+Lo sweep ora gira anche su `derivative_filter_tau`, in modo da trovare
+una combinazione (K, Kp, Kd, tau_d) che soddisfi simultaneamente le
+soglie di tracking e di noise fraction (il best candidate del sweep del
+2026-04-17 non riusciva a scendere sotto la soglia di noise 0.20 al
+ginocchio; la LPF introdotta nel termine D serve a risolvere questo
+trade-off).
 
 ## File coinvolti
 
@@ -41,7 +54,8 @@ saturazione che rendeva impossibile usare guadagni adeguati.
 
 - Python 3.10+ con `numpy` installato
 - Il plugin `.dylib` (macOS) o `.dll` (Windows) deve essere compilato con
-  la property `max_motor_torque` (gia presente nel repo)
+  le property `max_motor_torque` e `derivative_filter_tau` (richieste dal
+  2026-04-18)
 - Il modello template e i file di riferimento devono esistere nei path di default
 
 ### 1. Dry run (verifica griglia candidati)
@@ -82,7 +96,7 @@ Esegue lo sweep in due fasi:
 | `--quick-smoke` | off | Test rapido su 2-3 candidati |
 | `--template PATH` | `models/Adjusted_SEASEA - Copia_tuned.osim` | Modello template |
 | `--reference PATH` | `data/3DGaitModel2392_Kinematics_q.sto` | Cinematica riferimento |
-| `--max-motor-torque VAL` | 5000 | Clamp motore nei candidati .osim |
+| `--max-motor-torque VAL` | 5000 | Clamp motore nei candidati .osim (scritto nel tag XML `max_motor_torque`) |
 | `--top-n-full N` | 5 | Quanti candidati promuovere a full run |
 | `--python PATH` | auto | Python con opensim (auto-detect envCMC-like) |
 | `--screen-t-start` | 4.26 | Inizio finestra screening |
@@ -105,6 +119,20 @@ I risultati vengono salvati in `validation/sweep_results/`:
 - `full_results.csv` - metriche dei candidati promossi
 - `report.md` - report finale con classifica e raccomandazione
 - Sottodirectory per ogni candidato con output `.sto` e log
+
+## Griglia corrente
+
+| Parametro | Valori |
+|-----------|--------|
+| `K_knee`  | 250, 500, 750, 1000 |
+| `K_ankle` | 500, 750, 1000, 1500 |
+| `omega_n` | 300, 500, 700, 900, 1100, 1400 rad/s |
+| `zeta`    | 0.7, 0.85, 1.0, 1.5 |
+| `derivative_filter_tau` | 0.0, 0.001, 0.002, 0.005 s |
+
+Totale cartesiano: 1536. Dopo il pre-filtro sul clamp passano ~1056
+candidati. Con 12 worker su Windows la fase di screening richiede
+~60-90 min sulla finestra 4.26-6.55 s.
 
 ## Criteri di accettazione
 

@@ -52,7 +52,8 @@ SEA_NAMES = (SEA_KNEE, SEA_ANKLE)
 K_KNEE_GRID  = [250, 500, 750, 1000]
 K_ANKLE_GRID = [500, 750, 1000, 1500]
 OMEGA_N_GRID = [300, 500, 700, 900, 1100, 1400]
-ZETA_GRID    = [0.7, 0.85, 1.0]
+ZETA_GRID    = [0.7, 0.85, 1.0, 1.5]
+DERIV_FILTER_TAU_GRID = [0.0, 0.001, 0.002, 0.005]
 
 MAX_MOTOR_TORQUE_SWEEP = 5000.0    # set in each candidate .osim
 CLAMP_MARGIN_FRACTION  = 0.90      # pre-filter accepts Kp*F_opt < margin
@@ -88,6 +89,7 @@ class Candidate:
     t_start: float
     t_end: float
     max_motor_torque: float
+    derivative_filter_tau: float = 0.0
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -205,7 +207,8 @@ def replace_tag(block: str, tag: str, value: str) -> str:
 
 
 def replace_sea_block(text: str, sea_name: str, params: SeaParams,
-                      max_motor_torque: float) -> str:
+                      max_motor_torque: float,
+                      derivative_filter_tau: float = 0.0) -> str:
     pattern = (
         rf'(<SeriesElasticActuator name="{re.escape(sea_name)}">.*?'
         r'</SeriesElasticActuator>)'
@@ -218,6 +221,8 @@ def replace_sea_block(text: str, sea_name: str, params: SeaParams,
         block = replace_tag(block, "Kd", fmt_xml(params.kd))
         block = replace_tag(block, "max_motor_torque",
                             fmt_xml(max_motor_torque))
+        block = replace_tag(block, "derivative_filter_tau",
+                            fmt_xml(derivative_filter_tau))
         return block
 
     new_text, count = re.subn(pattern, repl, text, count=1, flags=re.S)
@@ -231,9 +236,11 @@ def write_candidate_model(
 ) -> None:
     text = template.read_text(encoding="utf-8", errors="replace")
     text = replace_sea_block(text, SEA_KNEE, candidate.knee,
-                             candidate.max_motor_torque)
+                             candidate.max_motor_torque,
+                             candidate.derivative_filter_tau)
     text = replace_sea_block(text, SEA_ANKLE, candidate.ankle,
-                             candidate.max_motor_torque)
+                             candidate.max_motor_torque,
+                             candidate.derivative_filter_tau)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(text, encoding="utf-8")
 
@@ -250,6 +257,7 @@ def generate_candidates(
     stage: str,
     t_start: float,
     t_end: float,
+    deriv_filter_tau_grid: Optional[List[float]] = None,
 ) -> List[Candidate]:
     jm_knee  = float(props[SEA_KNEE]["Jm"])
     bm_knee  = float(props[SEA_KNEE]["Bm"])
@@ -257,6 +265,8 @@ def generate_candidates(
     bm_ankle = float(props[SEA_ANKLE]["Bm"])
     f_opt_knee  = float(props[SEA_KNEE]["F_opt"])
     f_opt_ankle = float(props[SEA_ANKLE]["F_opt"])
+
+    tau_d_grid = deriv_filter_tau_grid if deriv_filter_tau_grid else [0.0]
 
     candidates: List[Candidate] = []
     rejected = 0
@@ -287,21 +297,25 @@ def generate_candidates(
                         rejected += 1
                         continue
 
-                    run_id = (
-                        f"{stage}_kk{fmt_num(k_knee)}_ka{fmt_num(k_ankle)}"
-                        f"_wn{fmt_num(omega_n)}_z{fmt_num(zeta)}"
-                    )
-                    candidates.append(Candidate(
-                        run_id=run_id,
-                        stage=stage,
-                        knee=knee,
-                        ankle=ankle,
-                        omega_n=omega_n,
-                        zeta=zeta,
-                        t_start=t_start,
-                        t_end=t_end,
-                        max_motor_torque=max_motor_torque,
-                    ))
+                    for tau_d in tau_d_grid:
+                        tau_d_slug = fmt_num(tau_d)
+                        run_id = (
+                            f"{stage}_kk{fmt_num(k_knee)}_ka{fmt_num(k_ankle)}"
+                            f"_wn{fmt_num(omega_n)}_z{fmt_num(zeta)}"
+                            f"_td{tau_d_slug}"
+                        )
+                        candidates.append(Candidate(
+                            run_id=run_id,
+                            stage=stage,
+                            knee=knee,
+                            ankle=ankle,
+                            omega_n=omega_n,
+                            zeta=zeta,
+                            t_start=t_start,
+                            t_end=t_end,
+                            max_motor_torque=max_motor_torque,
+                            derivative_filter_tau=float(tau_d),
+                        ))
 
     return candidates
 
@@ -383,6 +397,7 @@ def collect_metrics(
         "ankle_Kd":  candidate.ankle.kd,
         "omega_n":   candidate.omega_n,
         "zeta":      candidate.zeta,
+        "derivative_filter_tau": candidate.derivative_filter_tau,
         "max_motor_torque": candidate.max_motor_torque,
         "t_start":   candidate.t_start,
         "t_end":     candidate.t_end,
@@ -513,7 +528,7 @@ CSV_FIELDS = [
     "run_id", "stage",
     "knee_K", "knee_Kp", "knee_Kd",
     "ankle_K", "ankle_Kp", "ankle_Kd",
-    "omega_n", "zeta", "max_motor_torque",
+    "omega_n", "zeta", "derivative_filter_tau", "max_motor_torque",
     "t_start", "t_end",
     "return_code", "elapsed_s", "run_status",
     "complete", "validator_ok", "finite_outputs",
@@ -569,21 +584,42 @@ def run_candidate(
     ]
     console_path = results_dir / "console.txt"
     start = time.monotonic()
+    # Per-candidate wall-clock timeout: kills rogue solver spins
+    # (SO/SLSQP loops with extreme gains never return on their own).
+    sim_window = max(1.0, candidate.t_end - candidate.t_start)
+    timeout_s = max(300.0, 120.0 * sim_window)
+    timed_out = False
     with console_path.open("w", encoding="utf-8", errors="replace") as log_fh:
         log_fh.write("Command:\n")
         log_fh.write(" ".join(cmd) + "\n\n")
+        log_fh.write(f"Timeout: {timeout_s:.0f}s\n\n")
         log_fh.flush()
-        subprocess.run(
-            cmd, cwd=str(REPO_ROOT),
-            stdout=log_fh, stderr=subprocess.STDOUT,
-            env=subprocess_env(), check=False,
-        )
+        try:
+            subprocess.run(
+                cmd, cwd=str(REPO_ROOT),
+                stdout=log_fh, stderr=subprocess.STDOUT,
+                env=subprocess_env(), check=False,
+                timeout=timeout_s,
+            )
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            log_fh.write(f"\n[Sweep] TIMEOUT after {timeout_s:.0f}s — killing subprocess\n")
+            log_fh.flush()
     elapsed = time.monotonic() - start
-    return collect_metrics(
+    row = collect_metrics(
         candidate, results_dir, reference_path,
         0,  # validator exit code captured via run_status file
         elapsed,
     )
+    if timed_out:
+        row["acceptable"] = False
+        row["score"] = math.inf
+        row["fail_reason"] = (
+            f"timeout after {timeout_s:.0f}s"
+            + (f"; {row.get('fail_reason','')}" if row.get("fail_reason") else "")
+        )
+        row["run_status"] = row.get("run_status") or "timeout"
+    return row
 
 
 def run_batch(
@@ -725,7 +761,8 @@ def generate_report(
             f"- Run: `{best['run_id']}`",
             f"- Knee:  K={best['knee_K']}, Kp={float(best['knee_Kp']):.4g}, Kd={float(best['knee_Kd']):.4g}",
             f"- Ankle: K={best['ankle_K']}, Kp={float(best['ankle_Kp']):.4g}, Kd={float(best['ankle_Kd']):.4g}",
-            f"- omega_n={best.get('omega_n')}, zeta={best.get('zeta')}",
+            f"- omega_n={best.get('omega_n')}, zeta={best.get('zeta')}, "
+            f"tau_d={best.get('derivative_filter_tau')}",
             f"- Score: {float(best['score']):.4f}",
             f"- Tracking: knee={cf(best, 'knee_tracking_rms_deg')} deg, ankle={cf(best, 'ankle_tracking_rms_deg')} deg",
             f"- Noise fraction: knee={cf(best, 'knee_noise_frac')}, ankle={cf(best, 'ankle_noise_frac')}",
@@ -737,8 +774,8 @@ def generate_report(
     lines.extend([
         "## Top Candidates",
         "",
-        "| # | Run | OK | Score | Kk | Ka | wn | z | Knee RMS | Ankle RMS | Noise | Max tau | Reason |",
-        "|--:|-----|:--:|------:|---:|---:|---:|--:|---------:|----------:|------:|--------:|--------|",
+        "| # | Run | OK | Score | Kk | Ka | wn | z | tau_d | Knee RMS | Ankle RMS | Noise | Max tau | Reason |",
+        "|--:|-----|:--:|------:|---:|---:|---:|--:|------:|---------:|----------:|------:|--------:|--------|",
     ])
     for i, row in enumerate(ranked[:20], 1):
         s = float(row.get("score", math.inf))
@@ -749,6 +786,7 @@ def generate_report(
             f"| {st} "
             f"| {row.get('knee_K','')} | {row.get('ankle_K','')} "
             f"| {row.get('omega_n','')} | {row.get('zeta','')} "
+            f"| {row.get('derivative_filter_tau','')} "
             f"| {cf(row,'knee_tracking_rms_deg')} "
             f"| {cf(row,'ankle_tracking_rms_deg')} "
             f"| {cf(row,'worst_noise_frac')} "
@@ -777,28 +815,31 @@ def print_dry_run(
         K_KNEE_GRID, K_ANKLE_GRID, OMEGA_N_GRID, ZETA_GRID,
         max_motor_torque, CLAMP_MARGIN_FRACTION,
         "dry", 0, 0,
+        deriv_filter_tau_grid=DERIV_FILTER_TAU_GRID,
     )
     total_grid = (
         len(K_KNEE_GRID) * len(K_ANKLE_GRID)
-        * len(OMEGA_N_GRID) * len(ZETA_GRID)
+        * len(OMEGA_N_GRID) * len(ZETA_GRID) * len(DERIV_FILTER_TAU_GRID)
     )
     print(f"Grid total: {total_grid}")
     print(f"After pre-filter: {len(candidates)}")
     print(f"max_motor_torque: {max_motor_torque}")
+    print(f"derivative_filter_tau grid: {DERIV_FILTER_TAU_GRID}")
     print()
     print(
-        f"{'omega_n':>8} {'zeta':>5} {'K_knee':>7} {'K_ankle':>8} "
+        f"{'omega_n':>8} {'zeta':>5} {'tau_d':>6} {'K_knee':>7} {'K_ankle':>8} "
         f"{'Kp_knee':>8} {'Kd_knee':>8} {'Kp_ankle':>9} {'Kd_ankle':>9} "
         f"{'peak_knee':>10} {'peak_ankle':>11}"
     )
     for c in sorted(candidates, key=lambda c: (c.omega_n, c.zeta,
+                                                c.derivative_filter_tau,
                                                 c.knee.stiffness,
                                                 c.ankle.stiffness)):
         pk = c.knee.kp * float(props[SEA_KNEE]["F_opt"])
         pa = c.ankle.kp * float(props[SEA_ANKLE]["F_opt"])
         print(
-            f"{c.omega_n:8g} {c.zeta:5.2f} {c.knee.stiffness:7g} "
-            f"{c.ankle.stiffness:8g} "
+            f"{c.omega_n:8g} {c.zeta:5.2f} {c.derivative_filter_tau:6.4f} "
+            f"{c.knee.stiffness:7g} {c.ankle.stiffness:8g} "
             f"{c.knee.kp:8.3f} {c.knee.kd:8.3f} "
             f"{c.ankle.kp:9.3f} {c.ankle.kd:9.3f} "
             f"{pk:10.1f} {pa:11.1f}"
@@ -896,10 +937,15 @@ def main() -> int:
         max_torque, CLAMP_MARGIN_FRACTION,
         "screen",
         args.screen_t_start, args.screen_t_end,
+        deriv_filter_tau_grid=DERIV_FILTER_TAU_GRID,
+    )
+    total_grid = (
+        len(K_KNEE_GRID) * len(K_ANKLE_GRID)
+        * len(OMEGA_N_GRID) * len(ZETA_GRID) * len(DERIV_FILTER_TAU_GRID)
     )
     print(
         f"[Sweep] Screening: {len(screen_candidates)} candidates "
-        f"(from {len(K_KNEE_GRID)*len(K_ANKLE_GRID)*len(OMEGA_N_GRID)*len(ZETA_GRID)} grid points)",
+        f"(from {total_grid} grid points)",
         flush=True,
     )
     screen_rows = run_batch(
@@ -932,6 +978,8 @@ def main() -> int:
             t_start=args.full_t_start,
             t_end=args.full_t_end,
             max_motor_torque=max_torque,
+            derivative_filter_tau=float(
+                row.get("derivative_filter_tau", 0.0) or 0.0),
         ))
 
     if not full_candidates:

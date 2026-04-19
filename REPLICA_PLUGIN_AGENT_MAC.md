@@ -134,7 +134,16 @@ OpenSim_DECLARE_PROPERTY(Kp,             double, "Inner-loop proportional gain")
 OpenSim_DECLARE_PROPERTY(Kd,             double, "Inner-loop derivative gain");
 OpenSim_DECLARE_PROPERTY(Kd_Imp,         double, "Middle-loop derivative gain");
 OpenSim_DECLARE_PROPERTY(Impedence,      bool,   "If true the SEA is controlled by an impedence controller, otherwise by a PD controller");
+OpenSim_DECLARE_PROPERTY(derivative_filter_tau, double,
+    "Time constant [s] of first-order LPF on omega_m used in the D term of the non-impedance inner loop. 0 disables the filter.");
+OpenSim_DECLARE_PROPERTY(max_motor_torque, double,
+    "Saturation bound [N.m] on tau_input. Default 500.");
 ```
+
+`derivative_filter_tau` e `max_motor_torque` sono state aggiunte il
+2026-04-18. I default (`0.0` e `500.0`) garantiscono backward-compat
+con modelli `.osim` precedenti. Per la struttura dello stato continuo
+`motor_speed_filt` consultare [SeriesElasticActuator.cpp](../SEA_plugin_core-agent/SeriesElasticActuator.cpp).
 
 Non devono comparire dichiarazioni attive di:
 
@@ -148,9 +157,11 @@ OpenSim_DECLARE_PROPERTY(Kd_PD, ...)
 Il runner Python non deve ricostruire la dinamica SEA. Deve leggere dal plugin C++ i segnali dinamici necessari. Per questo il plugin agent espone tre output OpenSim:
 
 ```cpp
-OpenSim_DECLARE_OUTPUT(tau_input,       double, getMotorTorque,   SimTK::Stage::Dynamics);
-OpenSim_DECLARE_OUTPUT(motor_angle_dot, double, getMotorAngleDot, SimTK::Stage::Dynamics);
-OpenSim_DECLARE_OUTPUT(motor_speed_dot, double, getMotorSpeedDot, SimTK::Stage::Dynamics);
+OpenSim_DECLARE_OUTPUT(tau_input,            double, getMotorTorque,       SimTK::Stage::Dynamics);
+OpenSim_DECLARE_OUTPUT(motor_angle_dot,      double, getMotorAngleDot,     SimTK::Stage::Dynamics);
+OpenSim_DECLARE_OUTPUT(motor_speed_dot,      double, getMotorSpeedDot,     SimTK::Stage::Dynamics);
+OpenSim_DECLARE_OUTPUT(motor_speed_filt,     double, getMotorSpeedFilt,    SimTK::Stage::Dynamics);
+OpenSim_DECLARE_OUTPUT(motor_speed_filt_dot, double, getMotorSpeedFiltDot, SimTK::Stage::Dynamics);
 ```
 
 Subito sotto devono esserci le firme dei metodi:
@@ -159,13 +170,20 @@ Subito sotto devono esserci le firme dei metodi:
 double getMotorTorque(const SimTK::State& s) const;
 double getMotorAngleDot(const SimTK::State& s) const;
 double getMotorSpeedDot(const SimTK::State& s) const;
+double getMotorSpeedFilt(const SimTK::State& s) const;
+double getMotorSpeedFiltDot(const SimTK::State& s) const;
 ```
 
 Questi output sono fondamentali:
 
 - `tau_input`: coppia motore a monte della molla, calcolata dal plugin;
 - `motor_angle_dot`: derivata di `motor_angle`, cioe `motor_speed`;
-- `motor_speed_dot`: accelerazione del motore SEA calcolata dal plugin.
+- `motor_speed_dot`: accelerazione del motore SEA calcolata dal plugin;
+- `motor_speed_filt`: valore corrente della state variable continua
+  `motor_speed_filt` (LPF di `motor_speed` con costante di tempo
+  `derivative_filter_tau`). A `tau_d=0` resta a 0 e non viene usata;
+- `motor_speed_filt_dot`: derivata richiesta dal runner Python per
+  integrare `motor_speed_filt` con Semi-Explicit Euler nei substep SEA.
 
 ## 5. Modifiche richieste in SeriesElasticActuator.cpp
 
