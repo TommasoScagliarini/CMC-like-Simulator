@@ -40,19 +40,27 @@ its optimal_fiber_length and activation to 0.01 immediately after
 _set_state().  These are conservative, physically valid values that let
 the muscles evolve from a known-good configuration.
 
-Step order inside each iteration
----------------------------------
-  A. REALISE V   – model.realizeVelocity(state)
-  B. KIN REF     – kin.get(t) → q_ref, qdot_ref, qddot_ref
-  C. OUTER LOOP  – OuterLoop.compute_desired_accelerations() [bio DOFs]
-  D. ID          – InverseDynamicsComputer.compute_tau() [bio + pros]
-                   (zeros controls + SEA springs, computes q̈₀, restores)
-  E. SEA CTRL    – ProsthesisController.compute() with ID feed-forward
-  F. SO          – StaticOptimizer.solve() → a, u_res  (bio DOFs)
-  G. APPLY CTRL  – apply_to_controls() + set SEA controls + setControls()
-  H. COMPUTE q̈  – compute_udot_bypass(state)
-  I. RECORD      – append data row to results buffers
-  J. EULER STEP  – integrate simulated q and qdot, update SEA motor state
+Two-level loop (CMC-like)
+-------------------------
+When use_control_window=True the loop has two levels:
+
+  Outer (control) step — once every T_control:
+    A. REALISE V   – model.realizeVelocity(state)
+    B. KIN REF     – kin.get(t) → q_ref, qdot_ref, qddot_ref
+    C. OUTER LOOP  – OuterLoop.compute_desired_accelerations()  [bio]
+    D. ID          – InverseDynamicsComputer.compute_tau()      [bio target]
+    E. SEA CTRL    – ProsthesisController.compute()
+    F. SO          – StaticOptimizer.solve() → a, u_res         [bio]
+    G. APPLY CTRL  – apply_to_controls() + setControls()
+
+  Inner (integration) substep — repeats N = T_control / integration_dt times,
+  with controls held constant:
+    H. COMPUTE q̈  – compute_udot_bypass(state)        (re-evaluated)
+    I. RECORD      – append data row at t_substep
+    J. EULER STEP  – advance q, q̇, SEA motor state by integration_dt
+
+When use_control_window=False the loop degenerates to T_control = dt and
+N = 1 substep, which reproduces the original single-step behaviour exactly.
 
 Output files
 ------------
@@ -103,6 +111,14 @@ class SimulationRunner:
                 "sea_forward_mode must be 'plugin' or 'ideal_torque', "
                 f"got {cfg.sea_forward_mode!r}"
             )
+        integration_scheme = getattr(
+            cfg, "integration_scheme", "semi_implicit_euler"
+        )
+        if integration_scheme not in {"semi_implicit_euler", "rk4_bypass"}:
+            raise ValueError(
+                "integration_scheme must be 'semi_implicit_euler' or "
+                f"'rk4_bypass', got {integration_scheme!r}"
+            )
         if cfg.sea_forward_mode == "plugin" and cfg.dt > 0.001:
             print(
                 "[Runner] WARNING: plugin SEA dynamics are stiff; "
@@ -152,7 +168,23 @@ class SimulationRunner:
         ctx   = self._ctx
         model = ctx.model
 
-        dt    = cfg.dt
+        # Two-level loop parameters. When use_control_window=False the outer
+        # loop runs at integration_dt (legacy single-step behaviour).
+        use_window = bool(getattr(cfg, "use_control_window", False))
+        h_int = float(getattr(cfg, "integration_dt", cfg.dt))
+        if use_window:
+            T_control = float(getattr(cfg, "T_control", h_int))
+            if T_control < h_int:
+                T_control = h_int
+        else:
+            T_control = h_int
+
+        # N substeps per control window (integer; rounded to keep T_control exact)
+        n_substeps = max(1, int(round(T_control / h_int)))
+        # Effective dt that each substep advances by — keeps T_control exact
+        # even when T_control / h_int is not perfectly divisible.
+        h_sub = T_control / n_substeps
+
         t     = cfg.t_start
         t_end = cfg.t_end
 
@@ -180,170 +212,94 @@ class SimulationRunner:
         # Bypass resources for computing q̈ without realizeAcceleration.
         # The SEA plugin can crash while computing auxiliary state derivatives;
         # compute_udot_bypass uses realizeDynamics + ID solver + M instead.
-        matter = model.getMatterSubsystem()
-        n_mob  = ctx.n_mob
-        _e_vec  = opensim.Vector(n_mob, 0.0)
-        _Me_vec = opensim.Vector(n_mob, 0.0)
+        # Stored on self so the per-substep evaluator can reuse them.
+        self._matter = model.getMatterSubsystem()
+        self._n_mob  = ctx.n_mob
+        self._e_vec  = opensim.Vector(ctx.n_mob, 0.0)
+        self._Me_vec = opensim.Vector(ctx.n_mob, 0.0)
 
         # ── Main loop ─────────────────────────────────────────────────────────
         wall_t0     = _time.perf_counter()
         step        = 0
-        n_steps_est = int((t_end - t) / dt)
+        n_windows_est = int((t_end - t) / T_control)
+        n_steps_est = n_windows_est * n_substeps
         failure_exc: Exception | None = None
         failure_t = t
         failure_step = step
 
         print(
             f"\n[Runner] Starting simulation  t in [{t:.3f}, {t_end:.3f}] s  "
-            f"dt={dt:.4f} s  (~{n_steps_est} steps)\n"
+            f"T_control={T_control:.4f} s  h_sub={h_sub:.4f} s  "
+            f"(~{n_windows_est} windows × {n_substeps} substeps "
+            f"= {n_steps_est} steps)\n"
         )
 
-        while t < t_end - dt * 0.5:
+        while t < t_end - h_sub * 0.5:
 
             try:
                 # ═══════════════════════════════════════════════════════════
-                # A. Realise to Velocity
+                # OUTER (CONTROL) STEP — once per T_control
+                # Computes muscle activations, reserves, and SEA commands
+                # that will be held constant during the integration substeps.
                 # ═══════════════════════════════════════════════════════════
-                model.realizeVelocity(state)
+                (
+                    a, u_res, u_sea,
+                    tau_bio, tau_pros_ff_by_coord, tau_sea_cmd,
+                    q_ref_win, qdot_ref_win,
+                ) = self._compute_controls_for_window(state, controls, t)
 
                 # ═══════════════════════════════════════════════════════════
-                # B. Reference kinematics at current time
+                # INNER (INTEGRATION) SUBSTEPS — n_substeps × h_sub = T_control
+                # Controls held constant; bypass re-evaluates udot at each
+                # substep state so the integrator sees the true response.
                 # ═══════════════════════════════════════════════════════════
-                q_ref, qdot_ref, qddot_ref = self._kin.get(t)
-
-                # ═══════════════════════════════════════════════════════════
-                # C. Outer loop – desired biological accelerations
-                # ═══════════════════════════════════════════════════════════
-                qddot_des_bio = self._outer_loop.compute_desired_accelerations(
-                    state, q_ref, qdot_ref, qddot_ref
-                )
-
-                # Build desired accelerations for ALL DOFs (bio + pros).
-                # Pros DOFs use the reference accelerations only for the ID
-                # feed-forward estimate; the applied SEA command comes from
-                # ProsthesisController, and the state is integrated dynamically.
-                qddot_des_all = dict(qddot_des_bio)
-                for coord_name in cfg.pros_coords:
-                    qddot_des_all[coord_name] = qddot_ref.get(coord_name, 0.0)
-
-                if cfg.use_muscles_in_so:
-                    self._so.prepare_muscle_baseline(state)
-                    model.realizeVelocity(state)
-
-                # ═══════════════════════════════════════════════════════════
-                # D. Inverse dynamics → τ_bio + τ_pros feed-forward estimate
-                #    Zeros controls AND SEA springs, computes q̈₀, then
-                #    τ = M · (q̈_des − q̈₀) for ALL DOFs.
-                # ═══════════════════════════════════════════════════════════
-                tau_bio, tau_pros_ff = self._id_computer.compute_tau(
-                    state, controls, qddot_des_all
-                )
-                model.realizeVelocity(state)
-
-                # ═══════════════════════════════════════════════════════════
-                # E. SEA high-level controller
-                #    Feed-forward holds the nominal inverse-dynamics torque;
-                #    the PD terms correct residual tracking error.
-                # ═══════════════════════════════════════════════════════════
-                tau_pros_ff_by_coord = {
-                    coord_name: float(tau_pros_ff[i])
-                    for i, coord_name in enumerate(ctx.pros_coord_names)
-                }
-                u_sea = self._prosthesis_ctrl.compute(
-                    state, q_ref, qdot_ref, controls,
-                    tau_ff=tau_pros_ff_by_coord,
-                )
-                tau_sea_cmd = np.array([
-                    u_sea.get(coord_name, 0.0) * ctx.sea_f_opt[sea_name]
-                    for sea_name, coord_name in self._sea_pros_map
-                ])
-
-                # ═══════════════════════════════════════════════════════════
-                # F. Static Optimisation → muscle activations + reserves
-                # ═══════════════════════════════════════════════════════════
-                a, u_res = self._so.solve(state, tau_bio)
-
-                # ═══════════════════════════════════════════════════════════
-                # G. Apply muscle + reserve controls (SEA already set above)
-                # ═══════════════════════════════════════════════════════════
-                self._so.apply_to_controls(a, u_res, controls, state)
-                if cfg.sea_forward_mode == "ideal_torque":
-                    self._update_sea_motor_state(state, tau_sea_cmd)
-                model.realizeVelocity(state)
-                model.setControls(state, controls)
-
-                # ═══════════════════════════════════════════════════════════
-                # H. Compute q̈ with final controls (NO realizeAcceleration)
-                #
-                #    q̈ comes from the bypass, so output kinematics are produced
-                #    by the simulated dynamics rather than copied from kin.get().
-                # ═══════════════════════════════════════════════════════════
-                udot = compute_udot_bypass(
-                    matter, model, state, n_mob, _e_vec, _Me_vec,
-                )
-                if cfg.sea_forward_mode == "plugin":
-                    sea_plugin_outputs = self._sea_plugin_outputs_from_outputs(
-                        state
-                    )
-                    sea_derivatives = self._sea_derivatives_from_plugin_outputs(
-                        sea_plugin_outputs
-                    )
-                else:
-                    sea_plugin_outputs = np.full(
-                        len(self._sea_pros_map) * 3, np.nan
-                    )
-                    sea_derivatives = np.full(
-                        len(self._sea_pros_map) * 2, np.nan
-                    )
-                if not np.all(np.isfinite(udot)):
-                    bad_coords = [
-                        name for name in ctx.coord_names
-                        if not np.isfinite(udot[ctx.coord_mob_idx[name]])
-                    ]
-                    raise FloatingPointError(
-                        f"Non-finite accelerations at t={t:.4f}: {bad_coords[:5]}"
+                for _sub in range(n_substeps):
+                    udot, sea_plugin_outputs, sea_derivatives = (
+                        self._integrate_evaluate(state, controls, t)
                     )
 
-                # ═══════════════════════════════════════════════════════════
-                # I. Record current state BEFORE advancing time
-                # ═══════════════════════════════════════════════════════════
-                self._recorder.record(
-                    t, state, a, u_res, tau_bio, u_sea, udot,
-                    controls,
-                    q_ref=q_ref,
-                    qdot_ref=qdot_ref,
-                    tau_pros_ff=tau_pros_ff_by_coord,
-                    sea_derivatives=sea_derivatives,
-                    sea_plugin_outputs=sea_plugin_outputs,
-                    so_diagnostics=self._so.last_diagnostics,
-                )
-
-                # ═══════════════════════════════════════════════════════════
-                # J. Semi-explicit Euler step + SEA motor state update
-                # ═══════════════════════════════════════════════════════════
-                if cfg.sea_forward_mode == "plugin":
-                    t_new = self._advance_plugin_state_substeps(
-                        state, controls, udot, dt
+                    self._recorder.record(
+                        t, state, a, u_res, tau_bio, u_sea, udot,
+                        controls,
+                        q_ref=q_ref_win,
+                        qdot_ref=qdot_ref_win,
+                        tau_pros_ff=tau_pros_ff_by_coord,
+                        sea_derivatives=sea_derivatives,
+                        sea_plugin_outputs=sea_plugin_outputs,
+                        so_diagnostics=self._so.last_diagnostics,
                     )
-                else:
-                    q_new:    Dict[str, float] = {}
-                    qdot_new: Dict[str, float] = {}
 
-                    for name in ctx.coord_names:
-                        coord    = coord_set.get(name)
-                        q_cur    = coord.getValue(state)
-                        qdot_cur = coord.getSpeedValue(state)
-                        qacc_cur = udot[ctx.coord_mob_idx[name]]
+                    if getattr(
+                        cfg,
+                        "integration_scheme",
+                        "semi_implicit_euler",
+                    ) == "rk4_bypass":
+                        t_new = self._advance_rk4_bypass_state(
+                            state, controls, h_sub
+                        )
+                    elif cfg.sea_forward_mode == "plugin":
+                        t_new = self._advance_plugin_state_substeps(
+                            state, controls, udot, h_sub
+                        )
+                    else:
+                        q_new:    Dict[str, float] = {}
+                        qdot_new: Dict[str, float] = {}
+                        for name in ctx.coord_names:
+                            coord    = coord_set.get(name)
+                            q_cur    = coord.getValue(state)
+                            qdot_cur = coord.getSpeedValue(state)
+                            qacc_cur = udot[ctx.coord_mob_idx[name]]
 
-                        qdot_next      = qdot_cur + qacc_cur * dt
-                        q_new[name]    = q_cur + qdot_next * dt
-                        qdot_new[name] = qdot_next
+                            qdot_next      = qdot_cur + qacc_cur * h_sub
+                            q_new[name]    = q_cur + qdot_next * h_sub
+                            qdot_new[name] = qdot_next
 
-                    t_new = t + dt
-                    self._set_state(state, q_new, qdot_new, t_new)
-                    self._update_sea_motor_state(state, tau_sea_cmd)
+                        t_new = t + h_sub
+                        self._set_state(state, q_new, qdot_new, t_new)
+                        self._update_sea_motor_state(state, tau_sea_cmd)
 
-                t = t_new
+                    t = t_new
+                    step += 1
 
             except Exception as exc:
                 print(f"\n[Runner] Exception at t={t:.4f} s, step={step}: "
@@ -356,10 +312,8 @@ class SimulationRunner:
                 failure_step = step
                 break
 
-            step += 1
-
-            if step == 1:
-                print(f"[Runner] t={t:.4f} - first step OK", flush=True)
+            if step <= n_substeps:
+                print(f"[Runner] t={t:.4f} - first window OK", flush=True)
 
             # Progress report every 50 steps
             if step % 50 == 0:
@@ -397,6 +351,233 @@ class SimulationRunner:
     # ─────────────────────────────────────────────────────────────────────────
     #  Private helpers
     # ─────────────────────────────────────────────────────────────────────────
+    def _compute_controls_for_window(
+        self,
+        state:    opensim.State,
+        controls: opensim.Vector,
+        t:        float,
+    ) -> tuple:
+        """
+        Compute all control quantities for the current control window.
+
+        Mutates `controls` in place (muscle activations, reserves, SEA u).
+        Mutates `state` (prepare_muscle_baseline updates fiber lengths;
+        ID computer transiently zeros and restores controls/SEA springs).
+        Returns the held-constant quantities the inner integration loop
+        needs for recording.
+        """
+        cfg   = self._cfg
+        ctx   = self._ctx
+        model = ctx.model
+
+        # A. Realise to Velocity
+        model.realizeVelocity(state)
+
+        # B. Reference kinematics at window start
+        q_ref, qdot_ref, qddot_ref = self._kin.get(t)
+
+        # C. Outer loop – raw desired biological accelerations. The feasibility
+        # guard below may scale only the PD correction around qddot_ref.
+        qddot_des_bio_raw = self._outer_loop.compute_desired_accelerations(
+            state, q_ref, qdot_ref, qddot_ref
+        )
+
+        if cfg.use_muscles_in_so:
+            self._so.prepare_muscle_baseline(state)
+            model.realizeVelocity(state)
+
+        if getattr(cfg, "enable_so_feasibility_backtracking", True):
+            raw_scales = getattr(cfg, "so_backtracking_scales", [1.0])
+        else:
+            raw_scales = [1.0]
+        scales = []
+        for value in raw_scales:
+            scale = float(value)
+            if np.isfinite(scale) and scale >= 0.0:
+                scales.append(scale)
+        if not scales:
+            scales = [1.0]
+
+        abs_tol = float(getattr(cfg, "so_residual_abs_tol", 1e-6))
+        rel_tol = float(getattr(cfg, "so_residual_rel_tol", 1e-3))
+        best_candidate = None
+        best_metric = float("inf")
+        best_abs = float("inf")
+
+        # D/F. ID + SO feasibility backtracking. Each candidate recomputes the
+        # full inverse-dynamics vector so tau_bio matches the selected biological
+        # request. The prosthetic slice is retained only as an oracle diagnostic:
+        # it is no longer fed into the SEA outer controller.
+        for attempt_idx, scale in enumerate(scales, start=1):
+            qddot_des_all = {}
+            for coord_name in ctx.bio_coord_names:
+                qddot_ref_value = qddot_ref.get(coord_name, 0.0)
+                qddot_raw_value = qddot_des_bio_raw.get(
+                    coord_name,
+                    qddot_ref_value,
+                )
+                qddot_des_all[coord_name] = (
+                    qddot_ref_value
+                    + scale * (qddot_raw_value - qddot_ref_value)
+                )
+            for coord_name in cfg.pros_coords:
+                qddot_des_all[coord_name] = qddot_ref.get(coord_name, 0.0)
+
+            tau_bio_candidate, tau_pros_ff_candidate = (
+                self._id_computer.compute_tau(state, controls, qddot_des_all)
+            )
+            model.realizeVelocity(state)
+            a_candidate, u_res_candidate = self._so.solve(
+                state,
+                tau_bio_candidate,
+                feasibility_scale=scale,
+            )
+
+            diag_candidate = dict(self._so.last_diagnostics)
+            residual_norm = float(
+                diag_candidate.get("residual_norm", float("inf"))
+            )
+            residual_rel = float(
+                diag_candidate.get("residual_relative_norm", float("inf"))
+            )
+            residual_max_abs = float(
+                diag_candidate.get("residual_max_abs", float("inf"))
+            )
+            feasible = (
+                residual_norm <= abs_tol
+                or residual_max_abs <= abs_tol
+                or residual_rel <= rel_tol
+            )
+            diag_candidate["feasibility_attempts"] = float(attempt_idx)
+            diag_candidate["feasibility_accepted"] = 1.0 if feasible else 0.0
+
+            metric = residual_rel if np.isfinite(residual_rel) else float("inf")
+            abs_metric = (
+                residual_norm if np.isfinite(residual_norm) else float("inf")
+            )
+            if (
+                metric < best_metric
+                or (
+                    np.isclose(metric, best_metric, rtol=0.0, atol=1e-12)
+                    and abs_metric < best_abs
+                )
+            ):
+                best_metric = metric
+                best_abs = abs_metric
+                best_candidate = (
+                    a_candidate.copy(),
+                    u_res_candidate.copy(),
+                    tau_bio_candidate.copy(),
+                    tau_pros_ff_candidate.copy(),
+                    diag_candidate,
+                    True if feasible else False,
+                    scale,
+                    residual_norm,
+                    residual_rel,
+                )
+
+            if feasible:
+                break
+
+        if best_candidate is None:
+            raise FloatingPointError(
+                f"No finite SO feasibility candidate at t={t:.4f}"
+            )
+
+        (
+            a, u_res, tau_bio, tau_pros_ff,
+            selected_diag, feasibility_accepted, selected_scale,
+            selected_residual_norm, selected_residual_rel,
+        ) = best_candidate
+        selected_diag["feasibility_accepted"] = (
+            1.0 if feasibility_accepted else 0.0
+        )
+        self._so.last_diagnostics = selected_diag
+        self._so.remember_solution(a, u_res)
+
+        if not feasibility_accepted:
+            warn_count = getattr(self, "_so_backtracking_warning_count", 0) + 1
+            self._so_backtracking_warning_count = warn_count
+            if warn_count <= 10 or warn_count % 100 == 0:
+                print(
+                    "[Runner] WARNING: SO feasibility backtracking did not "
+                    f"meet tolerance at t={t:.4f}; using scale="
+                    f"{selected_scale:.6g}, |res|={selected_residual_norm:.3g}, "
+                    f"rel={selected_residual_rel:.3g}",
+                    flush=True,
+                )
+
+        # E. SEA high-level controller (writes SEA u into `controls`)
+        tau_pros_ff_by_coord = {
+            coord_name: float(tau_pros_ff[i])
+            for i, coord_name in enumerate(ctx.pros_coord_names)
+        }
+        u_sea = self._prosthesis_ctrl.compute(
+            state, q_ref, qdot_ref, controls,
+        )
+        tau_sea_cmd = np.array([
+            u_sea.get(coord_name, 0.0) * ctx.sea_f_opt[sea_name]
+            for sea_name, coord_name in self._sea_pros_map
+        ])
+
+        # G. Apply muscle + reserve controls (SEA already set above)
+        self._so.apply_to_controls(a, u_res, controls, state)
+        if cfg.sea_forward_mode == "ideal_torque":
+            self._update_sea_motor_state(state, tau_sea_cmd)
+        model.realizeVelocity(state)
+        model.setControls(state, controls)
+
+        return (
+            a, u_res, u_sea,
+            tau_bio, tau_pros_ff_by_coord, tau_sea_cmd,
+            q_ref, qdot_ref,
+        )
+
+    def _integrate_evaluate(
+        self,
+        state:    opensim.State,
+        controls: opensim.Vector,
+        t:        float,
+    ) -> tuple:
+        """
+        Compute q̈ via bypass and read SEA plugin outputs at the current state.
+
+        Called once per integration substep with held-constant `controls`.
+        Re-evaluates the dynamics so the integrator sees the true response
+        of the model at the current state (rather than reusing the udot
+        computed at window start).
+        """
+        cfg   = self._cfg
+        ctx   = self._ctx
+        model = ctx.model
+
+        model.realizeVelocity(state)
+        model.setControls(state, controls)
+
+        udot = compute_udot_bypass(
+            self._matter, model, state, self._n_mob,
+            self._e_vec, self._Me_vec,
+        )
+        if cfg.sea_forward_mode == "plugin":
+            sea_plugin_outputs = self._sea_plugin_outputs_from_outputs(state)
+            sea_derivatives = self._sea_derivatives_from_plugin_outputs(
+                sea_plugin_outputs
+            )
+        else:
+            sea_plugin_outputs = np.full(len(self._sea_pros_map) * 3, np.nan)
+            sea_derivatives = np.full(len(self._sea_pros_map) * 2, np.nan)
+
+        if not np.all(np.isfinite(udot)):
+            bad_coords = [
+                name for name in ctx.coord_names
+                if not np.isfinite(udot[ctx.coord_mob_idx[name]])
+            ]
+            raise FloatingPointError(
+                f"Non-finite accelerations at t={t:.4f}: {bad_coords[:5]}"
+            )
+
+        return udot, sea_plugin_outputs, sea_derivatives
+
     def _init_muscle_states(self, state: opensim.State) -> None:
         """
         Set muscle activation, fiber_length, and plugin state variables to
@@ -627,6 +808,123 @@ class SimulationRunner:
             f"Last error: {last_error}"
         ) from last_error
 
+    def _advance_rk4_bypass_state(
+        self,
+        state: opensim.State,
+        controls: opensim.Vector,
+        dt: float,
+    ) -> float:
+        """
+        Advance coordinates and SEA motor states with explicit RK4.
+
+        All acceleration evaluations use compute_udot_bypass, so this keeps the
+        native Acceleration stage out of the path while reducing the Euler
+        single-step error that can amplify infeasible high-gain corrections.
+        """
+        ctx = self._ctx
+        model = ctx.model
+        coord_set = model.getCoordinateSet()
+        n_coords = len(ctx.coord_names)
+        n_sea = len(self._sea_pros_map)
+
+        start_time, start_values = self._snapshot_state_variables(state)
+
+        y0 = np.zeros(n_coords * 2 + n_sea * 2)
+        for i, name in enumerate(ctx.coord_names):
+            coord = coord_set.get(name)
+            y0[i] = coord.getValue(state)
+            y0[n_coords + i] = coord.getSpeedValue(state)
+
+        sv = model.getStateVariableValues(state)
+        sea_base = n_coords * 2
+        for i, (sea_name, _coord_name) in enumerate(self._sea_pros_map):
+            ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
+            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+            if ma_idx is not None:
+                y0[sea_base + i * 2] = sv.get(ma_idx)
+            if ms_idx is not None:
+                y0[sea_base + i * 2 + 1] = sv.get(ms_idx)
+
+        def write_stage(y_values: np.ndarray, time_value: float) -> None:
+            q_stage = {
+                name: float(y_values[i])
+                for i, name in enumerate(ctx.coord_names)
+            }
+            qdot_stage = {
+                name: float(y_values[n_coords + i])
+                for i, name in enumerate(ctx.coord_names)
+            }
+            self._set_state(state, q_stage, qdot_stage, time_value)
+
+            sea_values: Dict[int, float] = {}
+            for i, (sea_name, _coord_name) in enumerate(self._sea_pros_map):
+                ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
+                ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+                if ma_idx is not None:
+                    sea_values[ma_idx] = float(y_values[sea_base + i * 2])
+                if ms_idx is not None:
+                    sea_values[ms_idx] = float(y_values[sea_base + i * 2 + 1])
+            self._set_sea_state_values(state, sea_values)
+
+        def rhs(y_values: np.ndarray, time_value: float) -> np.ndarray:
+            if not np.all(np.isfinite(y_values)):
+                raise FloatingPointError(
+                    f"Non-finite RK4 stage state at t={time_value:.4f}"
+                )
+            self._restore_state_variables(state, start_time, start_values)
+            write_stage(y_values, time_value)
+
+            model.realizeVelocity(state)
+            model.setControls(state, controls)
+            udot = compute_udot_bypass(
+                self._matter, model, state, self._n_mob,
+                self._e_vec, self._Me_vec,
+            )
+            if not np.all(np.isfinite(udot)):
+                bad_coords = [
+                    name for name in ctx.coord_names
+                    if not np.isfinite(udot[ctx.coord_mob_idx[name]])
+                ]
+                raise FloatingPointError(
+                    "Non-finite RK4 accelerations at "
+                    f"t={time_value:.4f}: {bad_coords[:5]}"
+                )
+
+            if self._cfg.sea_forward_mode == "plugin":
+                sea_derivatives = self._sea_state_derivatives_from_outputs(state)
+            else:
+                sea_derivatives = np.zeros(n_sea * 2)
+
+            dy = np.zeros_like(y_values)
+            dy[:n_coords] = y_values[n_coords:n_coords * 2]
+            for i, name in enumerate(ctx.coord_names):
+                dy[n_coords + i] = udot[ctx.coord_mob_idx[name]]
+            dy[sea_base:sea_base + n_sea * 2] = sea_derivatives[:n_sea * 2]
+
+            if not np.all(np.isfinite(dy)):
+                raise FloatingPointError(
+                    f"Non-finite RK4 derivative at t={time_value:.4f}"
+                )
+            return dy
+
+        h = float(dt)
+        k1 = rhs(y0, start_time)
+        k2 = rhs(y0 + 0.5 * h * k1, start_time + 0.5 * h)
+        k3 = rhs(y0 + 0.5 * h * k2, start_time + 0.5 * h)
+        k4 = rhs(y0 + h * k3, start_time + h)
+        y_next = y0 + (h / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+        if not np.all(np.isfinite(y_next)):
+            self._restore_state_variables(state, start_time, start_values)
+            raise FloatingPointError(
+                f"Non-finite RK4 state update at t={start_time:.4f}"
+            )
+
+        self._restore_state_variables(state, start_time, start_values)
+        write_stage(y_next, start_time + h)
+        model.realizeVelocity(state)
+        return float(state.getTime())
+
     def _advance_plugin_state_fixed_substeps(
         self,
         state: opensim.State,
@@ -678,22 +976,6 @@ class SimulationRunner:
                     )
                 sea_next[ms_idx] = float(omega_next)
                 sea_next[ma_idx] = float(theta_next)
-
-                mf_idx = ctx.sea_motor_speed_filt_sv_idx.get(sea_name)
-                if mf_idx is not None:
-                    filt_dot = self._component_output_float(
-                        state, f"/forceset/{sea_name}",
-                        "motor_speed_filt_dot", required=False,
-                    )
-                    if np.isfinite(filt_dot):
-                        omega_filt_next = sv.get(mf_idx) + filt_dot * h
-                        if not np.isfinite(omega_filt_next):
-                            raise FloatingPointError(
-                                "Non-finite SEA motor_speed_filt integration "
-                                f"during plugin substep {substep + 1}/{substeps} "
-                                f"for {sea_name}"
-                            )
-                        sea_next[mf_idx] = float(omega_filt_next)
 
             t_next = float(state.getTime()) + h
             self._set_state(state, q_new, qdot_new, t_next)
@@ -747,6 +1029,22 @@ class SimulationRunner:
             fh.write(f"t_start={float(self._cfg.t_start):.10g}\n")
             fh.write(f"t_end={float(self._cfg.t_end):.10g}\n")
             fh.write(f"dt={float(self._cfg.dt):.10g}\n")
+            fh.write(
+                f"use_control_window="
+                f"{bool(getattr(self._cfg, 'use_control_window', False))}\n"
+            )
+            fh.write(
+                f"T_control="
+                f"{float(getattr(self._cfg, 'T_control', self._cfg.dt)):.10g}\n"
+            )
+            fh.write(
+                f"integration_dt="
+                f"{float(getattr(self._cfg, 'integration_dt', self._cfg.dt)):.10g}\n"
+            )
+            fh.write(
+                f"integration_scheme="
+                f"{getattr(self._cfg, 'integration_scheme', 'semi_implicit_euler')}\n"
+            )
             fh.write(f"sea_forward_mode={self._cfg.sea_forward_mode}\n")
             fh.write(f"sea_motor_substeps={self._cfg.sea_motor_substeps}\n")
             fh.write(
@@ -810,9 +1108,6 @@ class SimulationRunner:
             if ms_idx is not None:
                 omega_j = coord_set.get(coord_name).getSpeedValue(state)
                 sv.set(ms_idx, omega_j)
-                mf_idx = ctx.sea_motor_speed_filt_sv_idx.get(sea_name)
-                if mf_idx is not None:
-                    sv.set(mf_idx, omega_j)
 
         model.setStateVariableValues(state, sv)
 
@@ -863,4 +1158,3 @@ class SimulationRunner:
 
         model.setStateVariableValues(state, sv)
         state.setTime(t)
-

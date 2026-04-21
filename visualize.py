@@ -308,20 +308,23 @@ def run_visualizer(
     n_frames = len(times)
     print(f"[Viz] Frames: {n_frames}, t=[{times[0]:.3f} .. {times[-1]:.3f}] s")
 
-    # ── Decimate frames for video recording ─────────────────────────────────
-    # screencapture is too slow (~100ms/frame) for high-rate .sto data.
-    # Subsample to the target video_fps to keep capture feasible.
-    if save_video and n_frames > 1:
+    # ── Decimate frames ─────────────────────────────────────────────────────
+    # The .sto data is typically at 1000 Hz which is far too fast for either
+    # screen rendering (~60 fps) or screencapture (~10 fps).  Subsample to a
+    # feasible display rate so that time.sleep() actually controls the pace
+    # and the --speed flag works as expected.
+    display_fps = video_fps if save_video else 60.0
+    if n_frames > 1:
         data_dt = (times[-1] - times[0]) / (n_frames - 1)
-        data_fps = 1.0 / data_dt if data_dt > 0 else 30.0
-        if data_fps > video_fps:
-            step = max(1, int(round(data_fps / video_fps)))
+        data_fps = 1.0 / data_dt if data_dt > 0 else display_fps
+        if data_fps > display_fps:
+            step = max(1, int(round(data_fps / display_fps)))
             indices = list(range(0, n_frames, step))
             times = times[indices]
             data = data[indices]
             n_frames = len(times)
             print(f"[Viz] Decimated to {n_frames} frames "
-                  f"(~{video_fps:.0f} fps target, step={step})")
+                  f"(~{display_fps:.0f} fps target, step={step})")
 
     # ── Init system (opens the visualizer window) ────────────────────────────
     state = model.initSystem()

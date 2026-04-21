@@ -60,12 +60,8 @@ def main():
     model.realizeVelocity(state)
 
     print("E", flush=True)
-    tau_pros_ff_by_coord = {
-        coord_name: float(tau_pros_ff[i])
-        for i, coord_name in enumerate(ctx.pros_coord_names)
-    }
     u_sea = runner._prosthesis_ctrl.compute(
-        state, q_ref, qdot_ref, controls, tau_ff=tau_pros_ff_by_coord
+        state, q_ref, qdot_ref, controls
     )
     print(f"u_sea={u_sea}", flush=True)
 

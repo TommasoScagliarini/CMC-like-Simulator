@@ -21,7 +21,7 @@ produce to achieve the desired accelerations q̈_des.
 
     Step 4 – split:
         τ_bio  = τ[bio_indices]    → muscles + reserves (QP)
-        τ_pros = τ[pros_indices]   → SEA actuators
+        τ_pros = τ[pros_indices]   → diagnostic oracle for prosthetic DOFs
 
 Why not realizeAcceleration?
 ----------------------------
@@ -102,7 +102,8 @@ class InverseDynamicsComputer:
     """
     Frame-by-frame ID using the zero-actuator + M·Δq̈ approach.
 
-    Computes required forces for BOTH biological and prosthetic DOFs.
+    Computes required forces for biological DOFs and a diagnostic oracle torque
+    for prosthetic DOFs. The prosthetic controller does not consume tau_pros.
     """
 
     def __init__(self, cfg: SimulatorConfig, ctx: SimulationContext) -> None:
@@ -142,7 +143,7 @@ class InverseDynamicsComputer:
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Compute the generalised forces for bio DOFs (muscles + reserves)
-        and pros DOFs (SEA actuators).
+        and diagnostic oracle forces for pros DOFs.
 
         Parameters
         ----------
@@ -153,7 +154,7 @@ class InverseDynamicsComputer:
         Returns
         -------
         tau_bio  : np.ndarray shape (n_bio,)
-        tau_pros : np.ndarray shape (n_pros,)
+        tau_pros : np.ndarray shape (n_pros,), diagnostic only
         """
         model = self._ctx.model
         ctx   = self._ctx

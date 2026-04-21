@@ -250,6 +250,11 @@ def _parse_args():
         default=None,
         help="Override maximum retry substeps for SEA motor state integration.",
     )
+    parser.add_argument(
+        "--sea-feasibility-scaling",
+        action="store_true",
+        help="Enable prosthetic PD feasibility scaling for high-gain SEA runs.",
+    )
 
     args = parser.parse_args()
 
@@ -268,6 +273,8 @@ def _parse_args():
         cfg.sea_motor_substeps = args.sea_motor_substeps
     if args.sea_motor_max_substeps is not None:
         cfg.sea_motor_max_substeps = args.sea_motor_max_substeps
+    if args.sea_feasibility_scaling:
+        cfg.enable_sea_feasibility_scaling = True
 
     return cfg, args
 

@@ -154,7 +154,7 @@ class StaticOptimizer:
         self._last_equilibrium_failures = 0
         self._baseline_time: Optional[float] = None
         self._baseline_active = False
-        self.last_diagnostics: Dict[str, float] = {}
+        self.last_diagnostics: Dict[str, object] = {}
 
         # ── Solver selection ─────────────────────────────────────────────────
         self._use_osqp = (cfg.qp_solver == "osqp")
@@ -176,6 +176,7 @@ class StaticOptimizer:
         self,
         state:    opensim.State,
         tau_bio:  np.ndarray,
+        feasibility_scale: float = 1.0,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Solve the QP for the current state.
@@ -186,6 +187,8 @@ class StaticOptimizer:
                   Muscle moment arms are computed via the model geometry,
                   which requires Velocity realisation.
         tau_bio : required generalised forces for bio coords  shape (n_bio,)
+        feasibility_scale : PD correction scale used by the control-window
+                            backtracking loop. It is diagnostic only here.
 
         Returns
         -------
@@ -227,8 +230,18 @@ class StaticOptimizer:
         n_m = self._ctx.n_muscles
         activations = x[:n_m]
         u_res = x[n_m:]
-        self._update_diagnostics(tau_bio, A_muscle, activations, u_res)
+        self._update_diagnostics(
+            tau_bio, A_muscle, activations, u_res, feasibility_scale
+        )
         return activations, u_res
+
+    def remember_solution(
+        self,
+        activations: np.ndarray,
+        u_res: np.ndarray,
+    ) -> None:
+        """Use a selected SO solution as the next QP warm start."""
+        self._x_prev = np.concatenate([activations, u_res]).astype(float)
 
     # ─────────────────────────────────────────────────────────────────────────
     #  Private helpers
@@ -473,15 +486,20 @@ class StaticOptimizer:
         A_muscle: np.ndarray,
         activations: np.ndarray,
         u_res: np.ndarray,
+        feasibility_scale: float,
     ) -> None:
         muscle_delta = np.maximum(0.0, activations - self._activation_min)
         tau_muscle = A_muscle @ muscle_delta
         tau_reserve = self._R_res_scaled @ u_res
+        tau_delivered = tau_muscle + tau_reserve
         residual = tau_bio - tau_muscle - tau_reserve
 
+        target_norm = float(np.linalg.norm(tau_bio))
         muscle_norm = float(np.linalg.norm(tau_muscle))
         reserve_norm = float(np.linalg.norm(tau_reserve))
+        residual_norm = float(np.linalg.norm(residual))
         denom = muscle_norm + reserve_norm + 1e-12
+        residual_rel = residual_norm / max(target_norm, 1e-12)
 
         row_capacity = np.linalg.norm(A_muscle, axis=1)
         muscle_capable = (
@@ -499,7 +517,7 @@ class StaticOptimizer:
             capable_share = 0.0
 
         self.last_diagnostics = {
-            "tau_target_norm": float(np.linalg.norm(tau_bio)),
+            "tau_target_norm": target_norm,
             "tau_muscle_norm": muscle_norm,
             "tau_reserve_norm": reserve_norm,
             "muscle_share": muscle_norm / denom,
@@ -513,8 +531,19 @@ class StaticOptimizer:
             "activation_nonzero_fraction": float(np.mean(
                 activations > self._cfg.muscle_active_threshold
             )),
-            "residual_norm": float(np.linalg.norm(residual)),
+            "residual_norm": residual_norm,
+            "residual_relative_norm": residual_rel,
+            "residual_max_abs": (
+                float(np.max(np.abs(residual))) if residual.size else 0.0
+            ),
             "equilibrium_failures": float(self._last_equilibrium_failures),
+            "feasibility_scale": float(feasibility_scale),
+            "tau_target_by_coord": tau_bio.copy(),
+            "tau_muscle_by_coord": tau_muscle.copy(),
+            "tau_reserve_by_coord": tau_reserve.copy(),
+            "tau_delivered_by_coord": tau_delivered.copy(),
+            "tau_residual_by_coord": residual.copy(),
+            "muscle_row_capacity_by_coord": row_capacity.copy(),
         }
 
     # ── SLSQP via scipy ──────────────────────────────────────────────────────

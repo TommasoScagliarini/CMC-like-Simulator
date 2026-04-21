@@ -618,7 +618,7 @@ def validate_sea_interface_diagnostics(
         raw_excess = np.maximum(np.abs(raw_values) - 500.0, 0.0)
         if sat_count:
             detail = (
-                f"sat median |tau_ff|={np.median(np.abs(tau_ff_values[sat_mask])):.3f} Nm, "
+                f"sat median |tau_ff diagnostic|={np.median(np.abs(tau_ff_values[sat_mask])):.3f} Nm, "
                 f"|outer_PD|={np.median(np.abs(outer_pd_values[sat_mask])):.3f} Nm, "
                 f"|inner_prop|={np.median(np.abs(prop_values[sat_mask])):.3f} Nm, "
                 f"|inner_damp|={np.median(np.abs(damp_values[sat_mask])):.3f} Nm; "

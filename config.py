@@ -46,6 +46,23 @@ class SimulatorConfig:
     dt:      float = 0.001    # integration step for validated plugin mode
 
     # =========================================================================
+    # CONTROL WINDOW  (CMC-like two-level loop)
+    #
+    # When use_control_window=True the simulation uses a two-level loop:
+    #   - Outer: compute controls (PD, ID, SO) every T_control seconds
+    #   - Inner: integrate state with the selected scheme at integration_dt
+    # Controls are held constant during the integration substeps (Zero-Order
+    # Hold), mirroring the CMC architecture in OpenSim.
+    #
+    # When use_control_window=False the loop degenerates to the legacy
+    # single-step mode where T_control = dt (backward compatible).
+    # =========================================================================
+    use_control_window: bool = True
+    T_control: float = 0.003          # control window [s] (3 ms, CMC-like)
+    integration_dt: float = 0.001     # integration substep [s]
+    integration_scheme: str = "rk4_bypass"  # "semi_implicit_euler" | "rk4_bypass"
+
+    # =========================================================================
     # MODEL TOPOLOGY  ← edit if your .osim uses different names
     # =========================================================================
 
@@ -100,6 +117,22 @@ class SimulatorConfig:
         "SEA_Knee":  250.0,
         "SEA_Ankle": 500.0,
     })
+    # Optional CMC-like feasibility guard on the prosthetic high-level PD term.
+    # It scales only the PD correction, never tau_ff, and is meant as a last
+    # resort when fixed 100/20 gains would ask the SEA inner loop to saturate.
+    enable_sea_feasibility_scaling: bool = False
+    sea_feasibility_tau_input_limit: float = 450.0
+    sea_feasibility_u_limit: float = 0.95
+    sea_feasibility_scales: List[float] = field(default_factory=lambda: [
+        1.0,
+        0.75,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+        0.0,
+    ])
     # Numerical substeps for stiff SEA/plugin forward dynamics. The derivative
     # values still come from the C++ plugin; Python only advances time.
     sea_motor_substeps: int = 5
@@ -171,6 +204,24 @@ class SimulatorConfig:
     save_recruitment_diagnostics: bool = True
     recruitment_diagnostics_interval: int = 50
 
+    # Feasibility guard for the CMC-like control window. The runner scales only
+    # the PD correction part of qddot_des before ID/SO, preserving the reference
+    # feed-forward while avoiding torque requests the SO cannot deliver.
+    enable_so_feasibility_backtracking: bool = True
+    so_residual_abs_tol: float = 1e-6
+    so_residual_rel_tol: float = 1e-3
+    so_backtracking_scales: List[float] = field(default_factory=lambda: [
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+        0.015625,
+        0.0078125,
+        0.00390625,
+    ])
+
     # QP solver backend: "slsqp" (scipy, zero extra deps) | "osqp" (faster,
     # needs `pip install qpsolvers[osqp]`)
     qp_solver: str = "slsqp"
@@ -193,6 +244,7 @@ class SimulatorConfig:
     save_sea_states:       bool = True # SEA motor_angle + motor_speed
     save_sea_derivatives:  bool = True # plugin motor_angle_dot + motor_speed_dot
     save_sea_diagnostics:  bool = True # plugin/Python SEA interface checks
+    save_so_torque_diagnostics: bool = True # per-coordinate SO tau/residuals
     save_power:            bool = True # SEA joint + motor power
     save_gait_events:      bool = True # gait cycles from GRF threshold crossings
 

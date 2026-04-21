@@ -541,6 +541,49 @@ def child_text(element: ET.Element, child_name: str) -> Optional[str]:
     return None
 
 
+def load_sea_params(cfg: SimulatorConfig) -> Dict[str, Dict[str, float]]:
+    """Load K, Kp, Kd from the model XML for each SEA actuator."""
+    model_path = resolve_project_path(cfg.model_file)
+    sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
+    params: Dict[str, Dict[str, float]] = {}
+    if not model_path.is_file():
+        return params
+    try:
+        root = ET.parse(model_path).getroot()
+    except ET.ParseError:
+        return params
+    for element in root.iter():
+        if xml_local_name(element.tag) != "SeriesElasticActuator":
+            continue
+        name = element.attrib.get("name")
+        if name not in sea_names:
+            continue
+        p: Dict[str, float] = {}
+        for prop in ("stiffness", "Kp", "Kd"):
+            text = child_text(element, prop)
+            if text:
+                try:
+                    p[prop] = float(text)
+                except ValueError:
+                    pass
+        if p:
+            params[name] = p
+    return params
+
+
+def sea_subtitle(sea_params: Dict[str, Dict[str, float]], cfg: SimulatorConfig) -> str:
+    """Build a subtitle string showing K/Kp/Kd for Knee and Ankle."""
+    parts: List[str] = []
+    for sea_name, label in [(cfg.sea_knee_name, "Knee"), (cfg.sea_ankle_name, "Ankle")]:
+        p = sea_params.get(sea_name, {})
+        k = p.get("stiffness")
+        kp = p.get("Kp")
+        kd = p.get("Kd")
+        if k is not None and kp is not None and kd is not None:
+            parts.append(f"{label}: K={k:g}, Kp={kp:g}, Kd={kd:g}")
+    return "   |   ".join(parts) if parts else ""
+
+
 def load_sea_f_opt(cfg: SimulatorConfig, missing: MissingReport) -> Dict[str, float]:
     model_path = resolve_project_path(cfg.model_file)
     sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
@@ -591,11 +634,19 @@ def plot_time_series(
     return True
 
 
-def finalize_time_axes(fig: plt.Figure, axes: np.ndarray, title: str) -> None:
-    fig.suptitle(title, fontsize=14)
+def finalize_time_axes(
+    fig: plt.Figure, axes: np.ndarray, title: str, subtitle: str = ""
+) -> None:
+    if subtitle:
+        fig.suptitle(title, fontsize=14, y=0.995)
+        fig.text(0.5, 0.97, subtitle, ha="center", fontsize=9, color="0.35")
+        top_margin = 0.94
+    else:
+        fig.suptitle(title, fontsize=14)
+        top_margin = 0.97
     for ax in axes[-1, :]:
         ax.set_xlabel("time [s]")
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.97))
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, top_margin))
 
 
 def save_figure(fig: plt.Figure, out_dir: Path, filename: str) -> None:
@@ -614,6 +665,7 @@ def plot_figure_1(
     tables: Dict[str, Optional[StoTable]],
     out_dir: Path,
     missing: MissingReport,
+    subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(4, 2, figsize=(14, 11), sharex=False)
     row_labels = [
@@ -692,7 +744,7 @@ def plot_figure_1(
         if plotted_overlay:
             axes[3, col].legend(loc="best", fontsize=8)
 
-    finalize_time_axes(fig, axes, "Time Signals: SEA, Control, Reserve")
+    finalize_time_axes(fig, axes, "Time Signals: SEA, Control, Reserve", subtitle)
     save_figure(fig, out_dir, "01_time_sea_control_reserve.png")
 
 
@@ -700,6 +752,7 @@ def plot_figure_2(
     tables: Dict[str, Optional[StoTable]],
     out_dir: Path,
     missing: MissingReport,
+    subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(5, 2, figsize=(14, 13), sharex=False)
     row_labels = [
@@ -792,7 +845,7 @@ def plot_figure_2(
         if plotted_overlay:
             axes[4, col].legend(loc="best", fontsize=8)
 
-    finalize_time_axes(fig, axes, "Time Signals: Joint and SEA Motor States")
+    finalize_time_axes(fig, axes, "Time Signals: Joint and SEA Motor States", subtitle)
     save_figure(fig, out_dir, "02_time_joint_motor_states.png")
 
 
@@ -1006,6 +1059,7 @@ def plot_figure_3(
     healthy: Optional[HealthyData],
     out_dir: Path,
     missing: MissingReport,
+    subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 8), sharex=False)
     for col, side in enumerate(SIDES):
@@ -1100,8 +1154,12 @@ def plot_figure_3(
             saturation_percentages=sat_pct,
         )
 
-    fig.suptitle("Gait Cycle: Torque-Angle and Power", fontsize=14)
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    if subtitle:
+        fig.suptitle("Gait Cycle: Torque-Angle and Power", fontsize=14, y=0.995)
+        fig.text(0.5, 0.965, subtitle, ha="center", fontsize=9, color="0.35")
+    else:
+        fig.suptitle("Gait Cycle: Torque-Angle and Power", fontsize=14)
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93 if subtitle else 0.95))
     save_figure(fig, out_dir, "03_gaitcycle_torque_angle_power.png")
 
 
@@ -1112,6 +1170,7 @@ def plot_figure_4(
     healthy: Optional[HealthyData],
     out_dir: Path,
     missing: MissingReport,
+    subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(3, 2, figsize=(14, 9), sharex=False)
     for col, side in enumerate(SIDES):
@@ -1227,8 +1286,12 @@ def plot_figure_4(
             saturation_percentages=sat_pct,
         )
 
-    fig.suptitle("Gait Cycle: Joint Angle, Velocity, Power", fontsize=14)
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))
+    if subtitle:
+        fig.suptitle("Gait Cycle: Joint Angle, Velocity, Power", fontsize=14, y=0.995)
+        fig.text(0.5, 0.965, subtitle, ha="center", fontsize=9, color="0.35")
+    else:
+        fig.suptitle("Gait Cycle: Joint Angle, Velocity, Power", fontsize=14)
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93 if subtitle else 0.95))
     save_figure(fig, out_dir, "04_gaitcycle_joint_velocity_power.png")
 
 
@@ -1237,6 +1300,7 @@ def plot_figure_5(
     sea_f_opt: Dict[str, float],
     out_dir: Path,
     missing: MissingReport,
+    subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(3, 2, figsize=(14, 10), sharex=False)
     axes[0, 0].set_ylabel("tau_input [N*m]")
@@ -1331,7 +1395,7 @@ def plot_figure_5(
         for row in range(3):
             mark_time_saturations(axes[row, col], sat_times)
 
-    finalize_time_axes(fig, axes, "SEA Motor Torque and Tracking Error")
+    finalize_time_axes(fig, axes, "SEA Motor Torque and Tracking Error", subtitle)
     save_figure(fig, out_dir, "05_time_tau_input_tracking_error.png")
 
 
@@ -1383,13 +1447,15 @@ def main() -> int:
     out_dir = next_output_dir(out_root)
     tables = load_tables(results_dir, args.prefix)
     events = load_events(events_path, missing)
-    sea_f_opt = load_sea_f_opt(SimulatorConfig(), missing)
+    cfg = SimulatorConfig()
+    sea_f_opt = load_sea_f_opt(cfg, missing)
+    subtitle = sea_subtitle(load_sea_params(cfg), cfg)
 
-    plot_figure_1(tables, out_dir, missing)
-    plot_figure_2(tables, out_dir, missing)
-    plot_figure_3(tables, events, args.gait_side, healthy, out_dir, missing)
-    plot_figure_4(tables, events, args.gait_side, healthy, out_dir, missing)
-    plot_figure_5(tables, sea_f_opt, out_dir, missing)
+    plot_figure_1(tables, out_dir, missing, subtitle)
+    plot_figure_2(tables, out_dir, missing, subtitle)
+    plot_figure_3(tables, events, args.gait_side, healthy, out_dir, missing, subtitle)
+    plot_figure_4(tables, events, args.gait_side, healthy, out_dir, missing, subtitle)
+    plot_figure_5(tables, sea_f_opt, out_dir, missing, subtitle)
 
     missing_path = out_dir / "missing_channels.txt"
     missing.write(missing_path)

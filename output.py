@@ -259,10 +259,12 @@ class OutputRecorder:
         self._sea_pros_map = sea_pros_map
         self._sea_props = sea_props
 
-        n_steps  = int((cfg.t_end - cfg.t_start) / cfg.dt) + 2
+        record_dt = float(getattr(cfg, "integration_dt", cfg.dt))
+        n_steps  = int((cfg.t_end - cfg.t_start) / record_dt) + 4
         n_coords = len(ctx.coord_names)
         n_sea    = len(sea_pros_map)
         n_res_all = len(getattr(ctx, "reserve_all_names", ctx.reserve_names))
+        n_so_diag = ctx.n_bio * 6 + 1
 
         self._rec_time          = np.full(n_steps, np.nan)
         self._rec_q             = np.full((n_steps, n_coords),       np.nan)
@@ -278,9 +280,10 @@ class OutputRecorder:
         self._rec_sea_torques   = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_sea_states    = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_sea_derivatives = np.full((n_steps, n_sea * 2),    np.nan)
-        self._rec_sea_diagnostics = np.full((n_steps, n_sea * 21),   np.nan)
+        self._rec_sea_diagnostics = np.full((n_steps, n_sea * 23),   np.nan)
         self._rec_power         = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_recruitment   = np.full((n_steps, 12),             np.nan)
+        self._rec_so_torque_diagnostics = np.full((n_steps, n_so_diag), np.nan)
         self._step_count        = 0
 
     @property
@@ -367,21 +370,20 @@ class OutputRecorder:
             qdot_ref_value = (qdot_ref or {}).get(coord_name, omega_j)
             outer_kp = cfg.sea_kp.get(coord_name, 0.0)
             outer_kd = cfg.sea_kd.get(coord_name, 0.0)
-            outer_pd_cmd = (
+            outer_pd_unscaled_cmd = (
                 outer_kp * (q_ref_value - theta_j)
                 + outer_kd * (qdot_ref_value - omega_j)
             )
+            sea_feasibility_scale = u_sea.get(
+                f"{coord_name}_feasibility_scale",
+                1.0,
+            )
+            outer_pd_cmd = outer_pd_unscaled_cmd * sea_feasibility_scale
             tau_ff_cmd = (tau_pros_ff or {}).get(coord_name, np.nan)
-            tau_cmd_raw = (
-                tau_ff_cmd + outer_pd_cmd
-                if np.isfinite(tau_ff_cmd)
-                else np.nan
-            )
-            tau_ref_minus_tau_cmd = (
-                tau_ref - tau_cmd_raw
-                if np.isfinite(tau_cmd_raw)
-                else np.nan
-            )
+            # The prosthetic outer loop is PD-only. tau_ff_cmd is retained as an
+            # inverse-dynamics oracle diagnostic, not as part of the SEA command.
+            tau_cmd_raw = outer_pd_cmd
+            tau_ref_minus_tau_cmd = tau_ref - tau_cmd_raw
             if props["impedance"]:
                 theta_m_ref = theta_j + tau_ref / K
                 omega_m_ref = omega_j
@@ -428,8 +430,8 @@ class OutputRecorder:
             self._rec_sea_states[k, i * 2 + 1]   = omega_m
             self._rec_power[k, i * 2]            = tau_spring * omega_j
             self._rec_power[k, i * 2 + 1]        = tau_input * omega_m
-            diag_base = i * 21
-            self._rec_sea_diagnostics[k, diag_base:diag_base + 21] = np.array([
+            diag_base = i * 23
+            self._rec_sea_diagnostics[k, diag_base:diag_base + 23] = np.array([
                 tau_ref,
                 tau_ff_cmd,
                 outer_pd_cmd,
@@ -451,6 +453,8 @@ class OutputRecorder:
                 Jm,
                 Bm,
                 K,
+                outer_pd_unscaled_cmd,
+                sea_feasibility_scale,
             ])
 
         if sea_derivatives is not None:
@@ -473,6 +477,24 @@ class OutputRecorder:
                 diag.get("residual_norm", np.nan),
                 diag.get("equilibrium_failures", np.nan),
             ])
+            so_blocks = [
+                "tau_target_by_coord",
+                "tau_muscle_by_coord",
+                "tau_reserve_by_coord",
+                "tau_delivered_by_coord",
+                "tau_residual_by_coord",
+                "muscle_row_capacity_by_coord",
+            ]
+            for block_idx, key in enumerate(so_blocks):
+                values = np.asarray(diag.get(key, np.nan), dtype=float)
+                if values.shape == (ctx.n_bio,):
+                    start = block_idx * ctx.n_bio
+                    self._rec_so_torque_diagnostics[
+                        k, start:start + ctx.n_bio
+                    ] = values
+            self._rec_so_torque_diagnostics[k, ctx.n_bio * len(so_blocks)] = (
+                diag.get("feasibility_scale", np.nan)
+            )
             interval = self._cfg.recruitment_diagnostics_interval
             if interval > 0 and k % interval == 0:
                 print(
@@ -637,6 +659,8 @@ class OutputRecorder:
                     f"{sea_name}_motor_inertia",
                     f"{sea_name}_motor_damping",
                     f"{sea_name}_spring_stiffness",
+                    f"{sea_name}_outer_pd_unscaled_cmd",
+                    f"{sea_name}_sea_feasibility_scale",
                 ])
             path = os.path.join(out, f"{pfx}_sea_diagnostics.sto")
             write_sto(
@@ -701,6 +725,29 @@ class OutputRecorder:
                 self._rec_recruitment[:k],
             )
             print(f"  -> Recruitment: {path}")
+
+        if getattr(cfg, "save_so_torque_diagnostics", False):
+            so_diag_cols = []
+            for prefix in [
+                "tau_target",
+                "tau_muscle",
+                "tau_reserve",
+                "tau_delivered",
+                "tau_residual",
+                "muscle_row_capacity",
+            ]:
+                so_diag_cols.extend([
+                    f"{prefix}_{coord_name}"
+                    for coord_name in ctx.bio_coord_names
+                ])
+            so_diag_cols.append("feasibility_scale")
+            path = os.path.join(out, f"{pfx}_so_torque_diagnostics.sto")
+            write_sto(
+                path, "SOTorqueDiagnostics",
+                self._rec_time[:k], so_diag_cols,
+                self._rec_so_torque_diagnostics[:k],
+            )
+            print(f"  -> SO tau diag : {path}")
 
         if cfg.save_gait_events:
             _write_gait_events_csv(cfg, ctx)
