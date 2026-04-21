@@ -255,6 +255,30 @@ def _parse_args():
         action="store_true",
         help="Enable prosthetic PD feasibility scaling for high-gain SEA runs.",
     )
+    parser.add_argument(
+        "--sea-kp-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee outer Kp [N*m/rad].",
+    )
+    parser.add_argument(
+        "--sea-kd-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee outer Kd [N*m*s/rad].",
+    )
+    parser.add_argument(
+        "--sea-kp-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle outer Kp [N*m/rad].",
+    )
+    parser.add_argument(
+        "--sea-kd-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle outer Kd [N*m*s/rad].",
+    )
 
     args = parser.parse_args()
 
@@ -275,6 +299,14 @@ def _parse_args():
         cfg.sea_motor_max_substeps = args.sea_motor_max_substeps
     if args.sea_feasibility_scaling:
         cfg.enable_sea_feasibility_scaling = True
+    if args.sea_kp_knee is not None:
+        cfg.sea_kp[cfg.pros_coords[0]] = args.sea_kp_knee
+    if args.sea_kd_knee is not None:
+        cfg.sea_kd[cfg.pros_coords[0]] = args.sea_kd_knee
+    if args.sea_kp_ankle is not None:
+        cfg.sea_kp[cfg.pros_coords[1]] = args.sea_kp_ankle
+    if args.sea_kd_ankle is not None:
+        cfg.sea_kd[cfg.pros_coords[1]] = args.sea_kd_ankle
 
     return cfg, args
 
@@ -356,6 +388,7 @@ if __name__ == "__main__":
         "t_start", "t_end", "dt",
         "output_dir", "output_prefix",
         "sea_forward_mode", "qp_solver",
+        "sea_kp", "sea_kd",
     }
     print("\nActive configuration:")
     for field_name, value in cfg.__dict__.items():

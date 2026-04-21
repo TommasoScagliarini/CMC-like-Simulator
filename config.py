@@ -88,8 +88,11 @@ class SimulatorConfig:
     # =========================================================================
     # SEA HIGH-LEVEL CONTROLLER  (outer PD, prosthetic side)
     #
-    #   τ_cmd = τ_ff + Kp*(q_ref – q) + Kd*(qdot_ref – qdot)
+    #   τ_cmd = Kp*(q_ref – q) + Kd*(qdot_ref – qdot)
     #   u     = clip(τ_cmd/F_opt, -1, +1)
+    #
+    # tau_ff from inverse dynamics may still be saved as an oracle diagnostic,
+    # but it is not part of the prosthetic outer-loop command.
     #
     # u is passed to the plugin's inner PD torque loop.
     # Units: [N·m/rad] for Kp, [N·m·s/rad] for Kd.
