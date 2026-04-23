@@ -279,6 +279,17 @@ def _parse_args():
         default=None,
         help="Override prosthetic ankle outer Kd [N*m*s/rad].",
     )
+    parser.add_argument(
+        "--disable-kinematics-lowpass",
+        action="store_true",
+        help="Disable IK low-pass preprocessing before spline construction.",
+    )
+    parser.add_argument(
+        "--kinematics-lowpass-cutoff",
+        type=float,
+        default=None,
+        help="Override IK low-pass cutoff frequency [Hz].",
+    )
 
     args = parser.parse_args()
 
@@ -307,6 +318,10 @@ def _parse_args():
         cfg.sea_kp[cfg.pros_coords[1]] = args.sea_kp_ankle
     if args.sea_kd_ankle is not None:
         cfg.sea_kd[cfg.pros_coords[1]] = args.sea_kd_ankle
+    if args.disable_kinematics_lowpass:
+        cfg.enable_kinematics_lowpass_filter = False
+    if args.kinematics_lowpass_cutoff is not None:
+        cfg.kinematics_lowpass_cutoff_hz = args.kinematics_lowpass_cutoff
 
     return cfg, args
 
@@ -389,6 +404,10 @@ if __name__ == "__main__":
         "output_dir", "output_prefix",
         "sea_forward_mode", "qp_solver",
         "sea_kp", "sea_kd",
+        "enable_kinematics_lowpass_filter",
+        "kinematics_lowpass_cutoff_hz",
+        "kinematics_lowpass_order",
+        "kinematics_resample_dt",
     }
     print("\nActive configuration:")
     for field_name, value in cfg.__dict__.items():

@@ -23,6 +23,7 @@ import os
 import subprocess
 import sys
 import time
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
@@ -524,6 +525,48 @@ def timeout_for_window(t_start: float, t_end: float, minimum: float) -> float:
     return max(minimum, 180.0 * max(0.01, t_end - t_start))
 
 
+def format_duration(seconds: float) -> str:
+    seconds = max(0.0, float(seconds))
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    secs = seconds - hours * 3600 - minutes * 60
+    if hours:
+        return f"{hours:d}h{minutes:02d}m{secs:04.1f}s"
+    if minutes:
+        return f"{minutes:d}m{secs:04.1f}s"
+    return f"{secs:.1f}s"
+
+
+class ProgressTracker:
+    def __init__(self, total_jobs: int, workers: int) -> None:
+        self.total_jobs = max(1, int(total_jobs))
+        self.workers = max(1, min(int(workers), self.total_jobs))
+        self.started_at = time.monotonic()
+        self._job_elapsed_s = deque(maxlen=max(24, self.workers * 4))
+
+    def update(self, job_elapsed_s: float) -> None:
+        if math.isfinite(job_elapsed_s) and job_elapsed_s > 0:
+            self._job_elapsed_s.append(float(job_elapsed_s))
+
+    def text(self, done_jobs: int) -> str:
+        done = max(0, min(int(done_jobs), self.total_jobs))
+        elapsed = time.monotonic() - self.started_at
+        pct = 100.0 * done / self.total_jobs
+        remaining = self.total_jobs - done
+        if remaining <= 0:
+            eta = 0.0
+        elif not self._job_elapsed_s:
+            eta = math.inf
+        else:
+            avg_job_s = sum(self._job_elapsed_s) / len(self._job_elapsed_s)
+            eta = avg_job_s * remaining / self.workers
+        eta_text = "n/a" if not math.isfinite(eta) else format_duration(eta)
+        return (
+            f"{pct:6.2f}% elapsed={format_duration(elapsed)} "
+            f"eta={eta_text}"
+        )
+
+
 def screen_one_window(
     candidate: Candidate,
     stage: str,
@@ -616,6 +659,7 @@ def run_stage(
         f"{len(windows)} window(s), {workers} worker(s)",
         flush=True,
     )
+    progress = ProgressTracker(total_jobs, workers)
 
     with ThreadPoolExecutor(max_workers=max(1, min(workers, total_jobs))) as pool:
         future_map = {}
@@ -645,6 +689,7 @@ def run_stage(
         for future in as_completed(future_map):
             candidate, _window_idx = future_map[future]
             row = future.result()
+            progress.update(float(row.get("elapsed_s", 0.0) or 0.0))
             per_candidate[candidate.run_id].append(row)
             done_jobs += 1
             if len(per_candidate[candidate.run_id]) == len(windows):
@@ -656,7 +701,9 @@ def run_stage(
                 status = "OK" if combined.get("acceptable") else "NO"
                 print(
                     f"[{stage} {len(rows):04d}/{len(candidates):04d} "
-                    f"jobs={done_jobs}/{total_jobs}] {status} "
+                    f"jobs={done_jobs}/{total_jobs} "
+                    f"{progress.text(done_jobs)}] "
+                    f"{status} "
                     f"{combined['run_id']} score={combined.get('score_total')}",
                     flush=True,
                 )
@@ -681,6 +728,7 @@ def run_full(
         f"[Sweep] full: {len(candidates)} candidate(s), {workers} worker(s)",
         flush=True,
     )
+    progress = ProgressTracker(len(candidates), workers)
     with ThreadPoolExecutor(max_workers=max(1, min(workers, len(candidates)))) as pool:
         future_map = {}
         for candidate in candidates:
@@ -699,11 +747,14 @@ def run_full(
 
         for future in as_completed(future_map):
             row = future.result()
+            progress.update(float(row.get("elapsed_s", 0.0) or 0.0))
             rows.append(row)
             write_csv(csv_path, rows)
             status = "OK" if row.get("acceptable") else "NO"
             print(
-                f"[full {len(rows):03d}/{len(candidates):03d}] {status} "
+                f"[full {len(rows):03d}/{len(candidates):03d} "
+                f"{progress.text(len(rows))}] "
+                f"{status} "
                 f"{row.get('run_id')} score={row.get('score_total')}",
                 flush=True,
             )

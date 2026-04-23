@@ -23,7 +23,7 @@ class SimulatorConfig:
 
     # C++ plugin basename WITHOUT OS extension.
     # Loader adds .dll / .dylib / .so automatically.
-    plugin_name: str = "plugins/SEA_Plugin_BlackBox_mCMC_impedence"
+    plugin_name: str = "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff"
 
     # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto)
     kinematics_file: str = "data/3DGaitModel2392_Kinematics_q.sto"
@@ -58,7 +58,7 @@ class SimulatorConfig:
     # single-step mode where T_control = dt (backward compatible).
     # =========================================================================
     use_control_window: bool = True
-    T_control: float = 0.003          # control window [s] (3 ms, CMC-like)
+    T_control: float = 0.001          # control window [s] (3 ms, CMC-like)
     integration_dt: float = 0.001     # integration substep [s]
     integration_scheme: str = "rk4_bypass"  # "semi_implicit_euler" | "rk4_bypass"
 
@@ -86,6 +86,23 @@ class SimulatorConfig:
     ])
 
     # =========================================================================
+    # KINEMATICS PRE-PROCESSING  (IK reference smoothing)
+    #
+    # The IK .sto provides positions only. Before building the spline used to
+    # derive q / qdot / qddot, the signal can be:
+    #   1. cleaned of duplicate timestamps,
+    #   2. resampled onto a uniform grid,
+    #   3. low-pass filtered with a zero-phase Butterworth filter.
+    #
+    # This reduces spurious high-frequency content that would otherwise be
+    # amplified by the spline derivatives, especially in qddot_ref.
+    # =========================================================================
+    enable_kinematics_lowpass_filter: bool = True
+    kinematics_lowpass_cutoff_hz: float = 6.0
+    kinematics_lowpass_order: int = 4
+    kinematics_resample_dt: float = 0.001
+
+    # =========================================================================
     # SEA HIGH-LEVEL CONTROLLER  (outer PD, prosthetic side)
     #
     #   τ_cmd = Kp*(q_ref – q) + Kd*(qdot_ref – qdot)
@@ -98,12 +115,12 @@ class SimulatorConfig:
     # Units: [N·m/rad] for Kp, [N·m·s/rad] for Kd.
     # =========================================================================
     sea_kp: Dict[str, float] = field(default_factory=lambda: {
-        "pros_knee_angle":  20,
-        "pros_ankle_angle": 20,
+        "pros_knee_angle":  160,
+        "pros_ankle_angle": 420,
     })
     sea_kd: Dict[str, float] = field(default_factory=lambda: {
-        "pros_knee_angle":  2,
-        "pros_ankle_angle": 2,
+        "pros_knee_angle":  12,
+        "pros_ankle_angle": 1,
     })
 
     # SEA spring stiffness [N·m/rad] — must match each plugin <stiffness> property.
@@ -118,7 +135,7 @@ class SimulatorConfig:
 
     sea_stiffness: Dict[str, float] = field(default_factory=lambda: {
         "SEA_Knee":  250.0,
-        "SEA_Ankle": 500.0,
+        "SEA_Ankle": 700.0,
     })
     # Optional CMC-like feasibility guard on the prosthetic high-level PD term.
     # It scales only the PD correction, never tau_ff, and is meant as a last
