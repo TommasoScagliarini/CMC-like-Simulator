@@ -14,6 +14,7 @@ annotated in the generated figures.
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
 import re
 import sys
@@ -37,6 +38,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from output import read_sto  # noqa: E402
 from config import SimulatorConfig  # noqa: E402
+from kinematics_interpolator import KinematicsInterpolator  # noqa: E402
 
 
 GAIT_GRID = np.linspace(0.0, 100.0, 101)
@@ -184,6 +186,26 @@ def load_healthy_data(
         "healthy power derived as healthy torque * derived healthy velocity",
     ]
     return HealthyData(healthy_dir, kin, forces, notes)
+
+
+def load_reference_kinematics(
+    reference_path: Optional[str],
+    cfg: SimulatorConfig,
+    missing: MissingReport,
+) -> Optional[KinematicsInterpolator]:
+    """Load the active kinematic reference with the same preprocessing as the simulator."""
+    raw_path = reference_path or cfg.kinematics_file
+    if not raw_path:
+        missing.add("reference kinematics: no reference path configured")
+        return None
+
+    ref_cfg = copy.deepcopy(cfg)
+    ref_cfg.kinematics_file = str(resolve_project_path(raw_path))
+    try:
+        return KinematicsInterpolator(ref_cfg)
+    except Exception as exc:
+        missing.add(f"reference kinematics: could not load {ref_cfg.kinematics_file}: {exc}")
+        return None
 
 
 def load_tables(results_dir: Path, prefix: str) -> Dict[str, Optional[StoTable]]:
@@ -355,6 +377,27 @@ def healthy_power_series(
         return None
     target_velocity = np.interp(torque[0], velocity[0], velocity[1])
     return torque[0], torque[1] * target_velocity, "healthy_joint_power_derived"
+
+
+def reference_angle_series(
+    reference: Optional[KinematicsInterpolator],
+    time: np.ndarray,
+    coord: str,
+    side_key: str,
+    missing: MissingReport,
+    figure: str,
+) -> Optional[Tuple[np.ndarray, np.ndarray, str]]:
+    if reference is None:
+        return None
+    if coord not in reference.coord_names:
+        note_missing(missing, figure, side_key, "kinematic ref", f"coordinate not found in reference: {coord}")
+        return None
+    try:
+        values = np.array([reference.get(float(t))[0][coord] for t in time], dtype=float)
+    except Exception as exc:
+        note_missing(missing, figure, side_key, "kinematic ref", f"could not evaluate reference: {exc}")
+        return None
+    return apply_joint_sign((time, values, f"{coord}_q_ref"), side_key)
 
 
 def torque_candidates(coord: str, sea: str) -> List[str]:
@@ -571,17 +614,68 @@ def load_sea_params(cfg: SimulatorConfig) -> Dict[str, Dict[str, float]]:
     return params
 
 
-def sea_subtitle(sea_params: Dict[str, Dict[str, float]], cfg: SimulatorConfig) -> str:
-    """Build a subtitle string showing K/Kp/Kd for Knee and Ankle."""
-    parts: List[str] = []
+def outer_loop_subtitle(cfg: SimulatorConfig) -> str:
+    """Build a subtitle string showing the active prosthetic outer-loop controller."""
+    parts = ["Outer loop: prosthetic PD torque"]
+    for coord, label in [("pros_knee_angle", "Knee"), ("pros_ankle_angle", "Ankle")]:
+        kp = cfg.sea_kp.get(coord)
+        kd = cfg.sea_kd.get(coord)
+        gains: List[str] = []
+        if kp is not None:
+            gains.append(f"Kp={kp:g}")
+        if kd is not None:
+            gains.append(f"Kd={kd:g}")
+        if gains:
+            parts.append(f"{label} " + ", ".join(gains))
+    return "   |   ".join(parts)
+
+
+def inner_loop_subtitle(sea_params: Dict[str, Dict[str, float]], cfg: SimulatorConfig) -> str:
+    """Build a subtitle string showing the active plugin and SEA inner-loop gains."""
+    plugin_name = Path(cfg.plugin_name).name
+    parts = [f"Inner loop: SEA plugin {plugin_name}"]
     for sea_name, label in [(cfg.sea_knee_name, "Knee"), (cfg.sea_ankle_name, "Ankle")]:
         p = sea_params.get(sea_name, {})
-        k = p.get("stiffness")
+        k = p.get("stiffness", cfg.sea_stiffness.get(sea_name))
         kp = p.get("Kp")
         kd = p.get("Kd")
-        if k is not None and kp is not None and kd is not None:
-            parts.append(f"{label}: K={k:g}, Kp={kp:g}, Kd={kd:g}")
-    return "   |   ".join(parts) if parts else ""
+        params: List[str] = []
+        if k is not None:
+            params.append(f"K={k:g}")
+        if kp is not None:
+            params.append(f"Kp={kp:g}")
+        if kd is not None:
+            params.append(f"Kd={kd:g}")
+        if params:
+            parts.append(f"{label} " + ", ".join(params))
+    return "   |   ".join(parts)
+
+
+def apply_figure_header(
+    fig: plt.Figure,
+    title: str,
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
+) -> float:
+    """Draw a 3-line header and return the top margin reserved for plots."""
+    fig.suptitle(title, fontsize=14, y=0.992)
+
+    subtitle_lines = [line for line in (outer_subtitle, inner_subtitle) if line]
+    if not subtitle_lines:
+        return 0.965
+
+    y_positions = [0.965, 0.941]
+    for y, line in zip(y_positions, subtitle_lines):
+        fig.text(
+            0.5,
+            y,
+            line,
+            ha="center",
+            va="top",
+            fontsize=8.8,
+            color="0.35",
+        )
+    return 0.885 if len(subtitle_lines) == 2 else 0.925
 
 
 def load_sea_f_opt(cfg: SimulatorConfig, missing: MissingReport) -> Dict[str, float]:
@@ -635,15 +729,13 @@ def plot_time_series(
 
 
 def finalize_time_axes(
-    fig: plt.Figure, axes: np.ndarray, title: str, subtitle: str = ""
+    fig: plt.Figure,
+    axes: np.ndarray,
+    title: str,
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
 ) -> None:
-    if subtitle:
-        fig.suptitle(title, fontsize=14, y=0.995)
-        fig.text(0.5, 0.97, subtitle, ha="center", fontsize=9, color="0.35")
-        top_margin = 0.94
-    else:
-        fig.suptitle(title, fontsize=14)
-        top_margin = 0.97
+    top_margin = apply_figure_header(fig, title, outer_subtitle, inner_subtitle)
     for ax in axes[-1, :]:
         ax.set_xlabel("time [s]")
     fig.tight_layout(rect=(0.0, 0.0, 1.0, top_margin))
@@ -665,7 +757,8 @@ def plot_figure_1(
     tables: Dict[str, Optional[StoTable]],
     out_dir: Path,
     missing: MissingReport,
-    subtitle: str = "",
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(4, 2, figsize=(14, 11), sharex=False)
     row_labels = [
@@ -744,7 +837,13 @@ def plot_figure_1(
         if plotted_overlay:
             axes[3, col].legend(loc="best", fontsize=8)
 
-    finalize_time_axes(fig, axes, "Time Signals: SEA, Control, Reserve", subtitle)
+    finalize_time_axes(
+        fig,
+        axes,
+        "Time Signals: SEA, Control, Reserve",
+        outer_subtitle,
+        inner_subtitle,
+    )
     save_figure(fig, out_dir, "01_time_sea_control_reserve.png")
 
 
@@ -752,7 +851,8 @@ def plot_figure_2(
     tables: Dict[str, Optional[StoTable]],
     out_dir: Path,
     missing: MissingReport,
-    subtitle: str = "",
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(5, 2, figsize=(14, 13), sharex=False)
     row_labels = [
@@ -845,7 +945,13 @@ def plot_figure_2(
         if plotted_overlay:
             axes[4, col].legend(loc="best", fontsize=8)
 
-    finalize_time_axes(fig, axes, "Time Signals: Joint and SEA Motor States", subtitle)
+    finalize_time_axes(
+        fig,
+        axes,
+        "Time Signals: Joint and SEA Motor States",
+        outer_subtitle,
+        inner_subtitle,
+    )
     save_figure(fig, out_dir, "02_time_joint_motor_states.png")
 
 
@@ -1059,7 +1165,8 @@ def plot_figure_3(
     healthy: Optional[HealthyData],
     out_dir: Path,
     missing: MissingReport,
-    subtitle: str = "",
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 8), sharex=False)
     for col, side in enumerate(SIDES):
@@ -1154,12 +1261,13 @@ def plot_figure_3(
             saturation_percentages=sat_pct,
         )
 
-    if subtitle:
-        fig.suptitle("Gait Cycle: Torque-Angle and Power", fontsize=14, y=0.995)
-        fig.text(0.5, 0.965, subtitle, ha="center", fontsize=9, color="0.35")
-    else:
-        fig.suptitle("Gait Cycle: Torque-Angle and Power", fontsize=14)
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93 if subtitle else 0.95))
+    top_margin = apply_figure_header(
+        fig,
+        "Gait Cycle: Torque-Angle and Power",
+        outer_subtitle,
+        inner_subtitle,
+    )
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, top_margin))
     save_figure(fig, out_dir, "03_gaitcycle_torque_angle_power.png")
 
 
@@ -1170,7 +1278,8 @@ def plot_figure_4(
     healthy: Optional[HealthyData],
     out_dir: Path,
     missing: MissingReport,
-    subtitle: str = "",
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(3, 2, figsize=(14, 9), sharex=False)
     for col, side in enumerate(SIDES):
@@ -1286,12 +1395,13 @@ def plot_figure_4(
             saturation_percentages=sat_pct,
         )
 
-    if subtitle:
-        fig.suptitle("Gait Cycle: Joint Angle, Velocity, Power", fontsize=14, y=0.995)
-        fig.text(0.5, 0.965, subtitle, ha="center", fontsize=9, color="0.35")
-    else:
-        fig.suptitle("Gait Cycle: Joint Angle, Velocity, Power", fontsize=14)
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93 if subtitle else 0.95))
+    top_margin = apply_figure_header(
+        fig,
+        "Gait Cycle: Joint Angle, Velocity, Power",
+        outer_subtitle,
+        inner_subtitle,
+    )
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, top_margin))
     save_figure(fig, out_dir, "04_gaitcycle_joint_velocity_power.png")
 
 
@@ -1300,7 +1410,8 @@ def plot_figure_5(
     sea_f_opt: Dict[str, float],
     out_dir: Path,
     missing: MissingReport,
-    subtitle: str = "",
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
 ) -> None:
     fig, axes = plt.subplots(3, 2, figsize=(14, 10), sharex=False)
     axes[0, 0].set_ylabel("tau_input [N*m]")
@@ -1395,8 +1506,127 @@ def plot_figure_5(
         for row in range(3):
             mark_time_saturations(axes[row, col], sat_times)
 
-    finalize_time_axes(fig, axes, "SEA Motor Torque and Tracking Error", subtitle)
+    finalize_time_axes(
+        fig,
+        axes,
+        "SEA Motor Torque and Tracking Error",
+        outer_subtitle,
+        inner_subtitle,
+    )
     save_figure(fig, out_dir, "05_time_tau_input_tracking_error.png")
+
+
+def plot_figure_6(
+    tables: Dict[str, Optional[StoTable]],
+    reference: Optional[KinematicsInterpolator],
+    out_dir: Path,
+    missing: MissingReport,
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
+) -> None:
+    fig, axes = plt.subplots(3, 2, figsize=(14, 10), sharex=False)
+    row_labels = [
+        "kinematic ref [rad]",
+        "simulated joint angle [rad]",
+        "simulation - kin ref [rad]",
+    ]
+    for row, label in enumerate(row_labels):
+        axes[row, 0].set_ylabel(label)
+
+    for col, side in enumerate(SIDES):
+        key = side["key"]
+        coord = side["coord"]
+        axes[0, col].set_title(side["title"])
+
+        joint_q = find_series(
+            tables["states"],
+            q_candidates(coord),
+            missing,
+            "figure 6",
+            key,
+            "joint angle",
+            "sim_output_states.sto",
+        )
+        joint_q = apply_joint_sign(joint_q, key)
+
+        kin_ref = None
+        if joint_q is not None:
+            kin_ref = reference_angle_series(
+                reference,
+                joint_q[0],
+                coord,
+                key,
+                missing,
+                "figure 6",
+            )
+        elif reference is None:
+            note_missing(missing, "figure 6", key, "kinematic ref", "reference kinematics not available")
+
+        if kin_ref is None:
+            annotate_missing(axes[0, col], "kinematic ref")
+        else:
+            time, values, _ = kin_ref
+            axes[0, col].plot(
+                time,
+                values,
+                label="kinematic ref",
+                color="tab:orange",
+                linewidth=1.3,
+            )
+            axes[0, col].grid(True, alpha=0.25)
+            axes[0, col].legend(loc="best", fontsize=8)
+
+        if joint_q is None:
+            annotate_missing(axes[1, col], "simulated joint angle")
+        else:
+            time, values, _ = joint_q
+            axes[1, col].plot(
+                time,
+                values,
+                label="simulated joint angle",
+                color="tab:blue",
+                linewidth=1.3,
+            )
+            axes[1, col].grid(True, alpha=0.25)
+            axes[1, col].legend(loc="best", fontsize=8)
+
+        if joint_q is None:
+            note_missing(missing, "figure 6", key, "simulation - kin ref", "simulated joint angle not available")
+            annotate_missing(axes[2, col], "simulated joint angle")
+        else:
+            kin_ref_joint = reference_angle_series(
+                reference,
+                joint_q[0],
+                coord,
+                key,
+                missing,
+                "figure 6",
+            )
+            if kin_ref_joint is None:
+                annotate_missing(axes[2, col], "kinematic ref")
+            else:
+                time, joint_values, _ = joint_q
+                _, ref_values, _ = kin_ref_joint
+                error = joint_values - ref_values
+                axes[2, col].plot(
+                    time,
+                    error,
+                    label="simulation - kin ref",
+                    color="tab:red",
+                    linewidth=1.3,
+                )
+                axes[2, col].axhline(0.0, color="0.3", linewidth=0.8, linestyle="--")
+                axes[2, col].grid(True, alpha=0.25)
+                axes[2, col].legend(loc="best", fontsize=8)
+
+    finalize_time_axes(
+        fig,
+        axes,
+        "Time Signals: Kinematic Reference vs Simulated Joint Angle",
+        outer_subtitle,
+        inner_subtitle,
+    )
+    save_figure(fig, out_dir, "06_time_joint_ref_sea_error.png")
 
 
 def parse_args() -> argparse.Namespace:
@@ -1418,6 +1648,11 @@ def parse_args() -> argparse.Namespace:
         default=default_cfg.plot_gait_side,
         choices=["left", "right", "all"],
         help="Gait event side to use for ankle/knee gait-cycle plots.",
+    )
+    parser.add_argument(
+        "--reference",
+        default=None,
+        help="Reference IK .sto file for kinematic comparison; defaults to config kinematics_file.",
     )
     return parser.parse_args()
 
@@ -1449,13 +1684,35 @@ def main() -> int:
     events = load_events(events_path, missing)
     cfg = SimulatorConfig()
     sea_f_opt = load_sea_f_opt(cfg, missing)
-    subtitle = sea_subtitle(load_sea_params(cfg), cfg)
+    sea_params = load_sea_params(cfg)
+    reference = load_reference_kinematics(args.reference, cfg, missing)
+    outer_subtitle = outer_loop_subtitle(cfg)
+    inner_subtitle = inner_loop_subtitle(sea_params, cfg)
 
-    plot_figure_1(tables, out_dir, missing, subtitle)
-    plot_figure_2(tables, out_dir, missing, subtitle)
-    plot_figure_3(tables, events, args.gait_side, healthy, out_dir, missing, subtitle)
-    plot_figure_4(tables, events, args.gait_side, healthy, out_dir, missing, subtitle)
-    plot_figure_5(tables, sea_f_opt, out_dir, missing, subtitle)
+    plot_figure_1(tables, out_dir, missing, outer_subtitle, inner_subtitle)
+    plot_figure_2(tables, out_dir, missing, outer_subtitle, inner_subtitle)
+    plot_figure_3(
+        tables,
+        events,
+        args.gait_side,
+        healthy,
+        out_dir,
+        missing,
+        outer_subtitle,
+        inner_subtitle,
+    )
+    plot_figure_4(
+        tables,
+        events,
+        args.gait_side,
+        healthy,
+        out_dir,
+        missing,
+        outer_subtitle,
+        inner_subtitle,
+    )
+    plot_figure_5(tables, sea_f_opt, out_dir, missing, outer_subtitle, inner_subtitle)
+    plot_figure_6(tables, reference, out_dir, missing, outer_subtitle, inner_subtitle)
 
     missing_path = out_dir / "missing_channels.txt"
     missing.write(missing_path)

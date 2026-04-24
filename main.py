@@ -342,6 +342,8 @@ def _run_plotter(cfg: SimulatorConfig) -> int:
         cfg.output_prefix,
         "--gait-side",
         cfg.plot_gait_side,
+        "--reference",
+        cfg.kinematics_file,
     ]
 
     print("\n[Main] Plotting results ...")
