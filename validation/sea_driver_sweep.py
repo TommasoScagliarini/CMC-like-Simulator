@@ -118,10 +118,10 @@ def parse_args() -> argparse.Namespace:
                    help="Print candidate grid and exit (no simulation)")
     p.add_argument("--quick-smoke", action="store_true",
                    help="Run 2-3 candidates on a tiny window for build check")
+    p.add_argument("--model-bundle", default=None)
     p.add_argument("--template",
-                   default="models/Adjusted_SEASEA - Copia_tuned.osim")
-    p.add_argument("--reference",
-                   default="data/3DGaitModel2392_Kinematics_q.sto")
+                   default="models/SEASEA/Adjusted_SEASEA - Copia_tuned.osim")
+    p.add_argument("--reference", default=None)
     p.add_argument("--screen-t-start", type=float, default=4.26)
     p.add_argument("--screen-t-end",   type=float, default=6.55)
     p.add_argument("--full-t-start",   type=float, default=4.26)
@@ -565,6 +565,7 @@ def subprocess_env() -> Dict[str, str]:
 def run_candidate(
     candidate: Candidate,
     template: Path,
+    model_bundle_dir: Path,
     sweep_root: Path,
     reference_path: Path,
 ) -> Dict[str, object]:
@@ -576,6 +577,7 @@ def run_candidate(
     cmd = [
         PYTHON_EXE,
         str(REPO_ROOT / "main.py"),
+        "--model-bundle", str(model_bundle_dir),
         "--model", str(model_path),
         "--output-dir", str(results_dir),
         "--t-start", fmt_xml(candidate.t_start),
@@ -625,6 +627,7 @@ def run_candidate(
 def run_batch(
     candidates: List[Candidate],
     template: Path,
+    model_bundle_dir: Path,
     sweep_root: Path,
     reference_path: Path,
     workers: int,
@@ -649,7 +652,7 @@ def run_batch(
     with ThreadPoolExecutor(max_workers=effective_workers) as pool:
         future_map = {
             pool.submit(
-                run_candidate, c, template, sweep_root, reference_path
+                run_candidate, c, template, model_bundle_dir, sweep_root, reference_path
             ): c
             for c in candidates
         }
@@ -885,7 +888,11 @@ def main() -> int:
     print(f"[Sweep] Python: {py}", flush=True)
 
     template = resolve(args.template)
-    reference_path = resolve(args.reference)
+    model_bundle_dir = resolve(args.model_bundle) if args.model_bundle else template.parent
+    reference_path = (
+        resolve(args.reference)
+        if args.reference else model_bundle_dir / "data" / "3DGaitModel2392_Kinematics_q.sto"
+    )
     props = parse_template_props(template)
     max_torque = args.max_motor_torque
 
@@ -923,7 +930,7 @@ def main() -> int:
             print("[Sweep] No valid smoke candidates", flush=True)
             return 1
         run_batch(
-            smoke, template, sweep_root, reference_path,
+            smoke, template, model_bundle_dir, sweep_root, reference_path,
             args.workers, csv_path, all_rows, label="smoke",
         )
         ok = all(r.get("complete") for r in all_rows)
@@ -949,7 +956,7 @@ def main() -> int:
         flush=True,
     )
     screen_rows = run_batch(
-        screen_candidates, template, sweep_root, reference_path,
+        screen_candidates, template, model_bundle_dir, sweep_root, reference_path,
         args.workers, csv_path, all_rows, label="screen",
     )
 
@@ -992,7 +999,7 @@ def main() -> int:
         flush=True,
     )
     full_rows = run_batch(
-        full_candidates, template, sweep_root, reference_path,
+        full_candidates, template, model_bundle_dir, sweep_root, reference_path,
         min(args.workers, len(full_candidates)),
         csv_path, all_rows, label="full",
     )

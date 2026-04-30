@@ -21,6 +21,7 @@ from scipy.interpolate import CubicSpline
 from scipy.signal import butter, sosfiltfilt
 
 from config import SimulatorConfig
+from path_resolver import resolve_simulator_paths
 
 
 class KinematicsInterpolator:
@@ -35,9 +36,11 @@ class KinematicsInterpolator:
     def __init__(self, cfg: SimulatorConfig) -> None:
         self._cfg = cfg
         self._translation_set = set(cfg.translation_coords)
+        resolved_paths = resolve_simulator_paths(cfg)
+        kinematics_path = resolved_paths.kinematics_path
 
-        print(f"[KinInterp] Reading {cfg.kinematics_file} ...")
-        time, coord_names, data = _read_sto(cfg.kinematics_file)
+        print(f"[KinInterp] Reading {kinematics_path} ...")
+        time, coord_names, data = _read_sto(str(kinematics_path))
 
         # Check that the file covers the simulation window
         if time[0] > cfg.t_start + 1e-6:

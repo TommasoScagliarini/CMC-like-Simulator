@@ -87,11 +87,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--quick-smoke", action="store_true")
+    parser.add_argument("--model-bundle", default=None)
     parser.add_argument(
         "--template",
-        default="models/Adjusted_SEASEA - Copia_tuned.osim",
+        default="models/SEASEA/Adjusted_SEASEA - Copia_tuned.osim",
     )
-    parser.add_argument("--reference", default="data/3DGaitModel2392_Kinematics_q.sto")
+    parser.add_argument("--reference", default=None)
     parser.add_argument("--screen-t-start", type=float, default=4.26)
     parser.add_argument("--screen-t-end", type=float, default=6.55)
     parser.add_argument("--full-t-start", type=float, default=4.26)
@@ -463,6 +464,7 @@ def subprocess_env() -> Dict[str, str]:
 def run_candidate(
     candidate: Candidate,
     template: Path,
+    model_bundle_dir: Path,
     sweep_root: Path,
     reference_path: Path,
 ) -> Dict[str, object]:
@@ -474,6 +476,8 @@ def run_candidate(
     cmd = [
         sys.executable,
         str(REPO_ROOT / "main.py"),
+        "--model-bundle",
+        str(model_bundle_dir),
         "--model",
         str(model_path),
         "--output-dir",
@@ -506,6 +510,7 @@ def run_candidate(
 def run_batch(
     candidates: List[Candidate],
     template: Path,
+    model_bundle_dir: Path,
     sweep_root: Path,
     reference_path: Path,
     workers: int,
@@ -518,7 +523,7 @@ def run_batch(
     completed_rows: List[Dict[str, object]] = []
     with ThreadPoolExecutor(max_workers=max(1, min(workers, len(candidates)))) as pool:
         future_map = {
-            pool.submit(run_candidate, candidate, template, sweep_root, reference_path): candidate
+            pool.submit(run_candidate, candidate, template, model_bundle_dir, sweep_root, reference_path): candidate
             for candidate in candidates
         }
         for future in as_completed(future_map):
@@ -725,7 +730,11 @@ def print_dry_run(props: Dict[str, Dict[str, float | bool]], omega_n: float, zet
 def main() -> int:
     args = parse_args()
     template = resolve(args.template)
-    reference_path = resolve(args.reference)
+    model_bundle_dir = resolve(args.model_bundle) if args.model_bundle else template.parent
+    reference_path = (
+        resolve(args.reference)
+        if args.reference else model_bundle_dir / "data" / "3DGaitModel2392_Kinematics_q.sto"
+    )
     props = parse_template_props(template)
 
     if args.dry_run:
@@ -752,7 +761,7 @@ def main() -> int:
             make_candidate("smoke", knee_k, ankle_k, props, 4.26, 4.30, args.omega_n, args.zeta)
             for knee_k, ankle_k in smoke_pairs
         ]
-        run_batch(smoke_candidates, template, sweep_root, reference_path, args.workers, csv_path, rows)
+        run_batch(smoke_candidates, template, model_bundle_dir, sweep_root, reference_path, args.workers, csv_path, rows)
         generate_report(report_path, sweep_root, rows, None, applied=False)
         print(f"[Sweep] Quick smoke complete. CSV: {csv_path}")
         return 0 if all(row.get("complete") for row in rows) else 1
@@ -771,7 +780,7 @@ def main() -> int:
         for k in GRID
     ]
 
-    stage_rows = run_batch(knee_candidates + ankle_candidates, template, sweep_root, reference_path, args.workers, csv_path, rows)
+    stage_rows = run_batch(knee_candidates + ankle_candidates, template, model_bundle_dir, sweep_root, reference_path, args.workers, csv_path, rows)
 
     knee_values = top_unique_values(
         [row for row in stage_rows if str(row.get("stage")) == "screen_knee"],
@@ -804,7 +813,7 @@ def main() -> int:
             combo_candidates.append(
                 make_candidate("screen_combo", knee_k, ankle_k, props, screen_t_start, screen_t_end, args.omega_n, args.zeta)
             )
-    combo_rows = run_batch(combo_candidates, template, sweep_root, reference_path, args.workers, csv_path, rows)
+    combo_rows = run_batch(combo_candidates, template, model_bundle_dir, sweep_root, reference_path, args.workers, csv_path, rows)
     for row in combo_rows:
         by_pair[(float(row["knee_K"]), float(row["ankle_K"]))] = row
 
@@ -825,7 +834,7 @@ def main() -> int:
     while idx < len(full_candidates):
         batch_size = 3 if idx == 0 else 1
         batch = full_candidates[idx: idx + batch_size]
-        new_rows = run_batch(batch, template, sweep_root, reference_path, min(args.workers, len(batch)), csv_path, rows)
+        new_rows = run_batch(batch, template, model_bundle_dir, sweep_root, reference_path, min(args.workers, len(batch)), csv_path, rows)
         full_rows.extend(new_rows)
         acceptable = [row for row in full_rows if row.get("acceptable")]
         if acceptable:

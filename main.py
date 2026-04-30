@@ -5,13 +5,16 @@ Entry point for the prosthetic gait simulator.
 
 Usage
 -----
-    python main.py [--config config_override.yaml]
+    python main.py
+    python main.py --setup
+    python main.py --setup path/to/setup.xml
     python main.py --plot
     python main.py --validate
     python main.py --log
 
-In the absence of a config file, SimulatorConfig defaults are used.
-Edit config.py directly to change file paths and parameters.
+By default the simulator uses the last valid setup XML that was loaded.
+If no valid last setup is available, a file picker opens.
+Edit config.py directly to change non-file parameters.
 
 Pipeline overview
 -----------------
@@ -47,9 +50,16 @@ import traceback
 from datetime import datetime
 
 from config import SimulatorConfig
-from model_loader import setup_model
 from kinematics_interpolator import KinematicsInterpolator
+from model_loader import setup_model
+from path_resolver import normalize_cli_existing_path, resolve_simulator_paths
 from simulation_runner import SimulationRunner
+from setup_io import (
+    ask_open_setup_xml_path,
+    read_last_setup_path,
+    read_setup_xml,
+    write_last_setup_state,
+)
 
 
 class _TeeStream:
@@ -165,6 +175,76 @@ def main(cfg: SimulatorConfig, log_simulation: bool = False) -> int:
     return _run_phase3(cfg, ctx, kin)
 
 
+def _apply_setup_to_config(cfg: SimulatorConfig, setup) -> None:
+    cfg.model_file = str(setup.model_file)
+    cfg.kinematics_file = str(setup.kinematics_file)
+    cfg.external_loads_xml = str(setup.external_loads_xml)
+    cfg.reserve_actuators_xml = str(setup.reserve_actuators_xml)
+    cfg.t_start = setup.t_start
+    cfg.t_end = setup.t_end
+    cfg.model_bundle_dir = str(setup.model_file.parent)
+
+
+def _has_direct_path_overrides(args: argparse.Namespace) -> bool:
+    return any(
+        getattr(args, field_name) is not None
+        for field_name in (
+            "model_bundle",
+            "model",
+            "kinematics",
+            "external_loads",
+            "reserve_actuators",
+        )
+    )
+
+
+def _prompt_for_valid_setup(initial_path: str | None = None):
+    prompt_path = initial_path
+    while True:
+        selected = ask_open_setup_xml_path(prompt_path)
+        if selected is None:
+            raise RuntimeError("Setup XML selection cancelled.")
+        try:
+            setup = read_setup_xml(selected)
+        except Exception as exc:
+            print(f"[Main] Selected setup XML is invalid:\n  {exc}")
+            prompt_path = str(selected)
+            continue
+        return str(selected), setup
+
+
+def _load_setup_from_args(args: argparse.Namespace):
+    if args.setup is not None:
+        if args.setup == "":
+            selected_path, setup = _prompt_for_valid_setup()
+        else:
+            selected_path = str(args.setup)
+            setup = read_setup_xml(selected_path)
+        write_last_setup_state(selected_path)
+        return selected_path, setup
+
+    if _has_direct_path_overrides(args):
+        print("[Main] Direct file overrides detected; skipping setup XML auto-load.")
+        return None, None
+
+    remembered_path = read_last_setup_path()
+    if remembered_path is not None:
+        try:
+            setup = read_setup_xml(remembered_path)
+        except Exception as exc:
+            print(f"[Main] Last setup XML is unavailable:\n  {exc}")
+        else:
+            selected_path = str(remembered_path)
+            write_last_setup_state(selected_path)
+            return selected_path, setup
+
+    selected_path, setup = _prompt_for_valid_setup(
+        str(remembered_path) if remembered_path is not None else None
+    )
+    write_last_setup_state(selected_path)
+    return selected_path, setup
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 #  CLI
 # ─────────────────────────────────────────────────────────────────────────────
@@ -172,11 +252,23 @@ def _parse_args():
     """
     Parse command-line arguments and return a config plus raw CLI args.
 
-    Currently supports --config for loading a YAML override file.
-    You can extend this with argparse options for individual parameters.
+    File inputs can come from a setup XML, from config.py, or from explicit
+    CLI overrides. CLI overrides always win.
     """
     parser = argparse.ArgumentParser(
         description="Prosthetic gait simulator (custom CMC replacement)"
+    )
+    parser.add_argument(
+        "--setup",
+        nargs="?",
+        const="",
+        default=None,
+        help="Load a simulator setup XML. Without a value, opens a file picker.",
+    )
+    parser.add_argument(
+        "--model-bundle",
+        default=None,
+        help="Override model bundle directory from config.py",
     )
     parser.add_argument(
         "--model",
@@ -187,6 +279,16 @@ def _parse_args():
         "--kinematics",
         default=None,
         help="Override kinematics (.sto) file path",
+    )
+    parser.add_argument(
+        "--external-loads",
+        default=None,
+        help="Override ExternalLoads (.xml) file path",
+    )
+    parser.add_argument(
+        "--reserve-actuators",
+        default=None,
+        help="Override reserve actuators (.xml) file path",
     )
     parser.add_argument(
         "--t-start",
@@ -295,8 +397,26 @@ def _parse_args():
 
     # Start from defaults and apply CLI overrides
     cfg = SimulatorConfig()
-    if args.model         is not None: cfg.model_file   = args.model
-    if args.kinematics    is not None: cfg.kinematics_file = args.kinematics
+    try:
+        setup_path, setup = _load_setup_from_args(args)
+    except RuntimeError as exc:
+        parser.exit(1, f"[Main] {exc}\n")
+    except Exception as exc:
+        parser.exit(1, f"[Main] ERROR loading setup XML:\n  {exc}\n")
+    if setup is not None:
+        _apply_setup_to_config(cfg, setup)
+        print(f"[Main] Using setup XML: {setup_path}")
+
+    if args.model_bundle  is not None:
+        cfg.model_bundle_dir = args.model_bundle
+        if args.model is None:
+            cfg.model_file = ""
+    if args.model         is not None: cfg.model_file   = normalize_cli_existing_path(args.model)
+    if args.kinematics    is not None: cfg.kinematics_file = normalize_cli_existing_path(args.kinematics)
+    if args.external_loads is not None:
+        cfg.external_loads_xml = normalize_cli_existing_path(args.external_loads)
+    if args.reserve_actuators is not None:
+        cfg.reserve_actuators_xml = normalize_cli_existing_path(args.reserve_actuators)
     if args.t_start       is not None: cfg.t_start      = args.t_start
     if args.t_end         is not None: cfg.t_end        = args.t_end
     if args.dt            is not None: cfg.dt           = args.dt
@@ -328,6 +448,7 @@ def _parse_args():
 
 def _run_plotter(cfg: SimulatorConfig) -> int:
     """Run plot/plotter.py with paths from the active simulator config."""
+    resolved_paths = resolve_simulator_paths(cfg)
     plotter_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         "plot",
@@ -336,6 +457,8 @@ def _run_plotter(cfg: SimulatorConfig) -> int:
     cmd = [
         sys.executable,
         plotter_path,
+        "--model-bundle",
+        cfg.model_bundle_dir,
         "--results-dir",
         cfg.output_dir,
         "--prefix",
@@ -343,8 +466,10 @@ def _run_plotter(cfg: SimulatorConfig) -> int:
         "--gait-side",
         cfg.plot_gait_side,
         "--reference",
-        cfg.kinematics_file,
+        str(resolved_paths.kinematics_path),
     ]
+    if cfg.model_file:
+        cmd.extend(["--model", str(resolved_paths.model_path)])
 
     print("\n[Main] Plotting results ...")
     try:
@@ -360,6 +485,7 @@ def _run_plotter(cfg: SimulatorConfig) -> int:
 
 def _run_validator(cfg: SimulatorConfig) -> int:
     """Run validation/validate_sim_results.py with the active config paths."""
+    resolved_paths = resolve_simulator_paths(cfg)
     validator_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         "validation",
@@ -370,17 +496,19 @@ def _run_validator(cfg: SimulatorConfig) -> int:
     cmd = [
         sys.executable,
         validator_path,
+        "--model-bundle",
+        cfg.model_bundle_dir,
         "--results-dir",
         cfg.output_dir,
         "--prefix",
         cfg.output_prefix,
-        "--model",
-        cfg.model_file,
         "--reference",
-        cfg.kinematics_file,
+        str(resolved_paths.kinematics_path),
         "--out",
         report_path,
     ]
+    if cfg.model_file:
+        cmd.extend(["--model", str(resolved_paths.model_path)])
 
     print("\n[Main] Validating results ...")
     try:
@@ -401,7 +529,8 @@ if __name__ == "__main__":
 
     # Print key configuration parameters
     _KEY_FIELDS = {
-        "model_file", "kinematics_file",
+        "model_bundle_dir", "model_file", "kinematics_file",
+        "external_loads_xml", "reserve_actuators_xml",
         "t_start", "t_end", "dt",
         "output_dir", "output_prefix",
         "sea_forward_mode", "qp_solver",

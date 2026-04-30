@@ -304,11 +304,13 @@ def collect_metrics(results_dir: Path, model_path: Path,
 
 
 def run_simulation(python_exe: str, model_path: Path, results_dir: Path,
-                   t_start: float, t_end: float, timeout_s: float) -> int:
+                   t_start: float, t_end: float, timeout_s: float,
+                   model_bundle_dir: Path) -> int:
     results_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         python_exe,
         str(REPO_ROOT / "main.py"),
+        "--model-bundle", str(model_bundle_dir),
         "--model", str(model_path),
         "--t-start", fmt_xml(t_start),
         "--t-end", fmt_xml(t_end),
@@ -336,6 +338,7 @@ def run_simulation(python_exe: str, model_path: Path, results_dir: Path,
 
 def screen_candidate(candidate: Candidate, template: Path, sweep_root: Path,
                      reference: Path, python_exe: str,
+                     model_bundle_dir: Path,
                      timeout_s: float) -> Dict[str, object]:
     model_path = sweep_root / "models" / f"{candidate.run_id}.osim"
     write_candidate_model(template, model_path, candidate)
@@ -355,7 +358,7 @@ def screen_candidate(candidate: Candidate, template: Path, sweep_root: Path,
     for idx, (t_start, t_end) in enumerate(SCREEN_WINDOWS, start=1):
         run_dir = sweep_root / "runs" / f"{candidate.run_id}_w{idx}"
         rc = run_simulation(
-            python_exe, model_path, run_dir, t_start, t_end, timeout_s
+            python_exe, model_path, run_dir, t_start, t_end, timeout_s, model_bundle_dir
         )
         metrics = collect_metrics(run_dir, model_path, reference)
         if rc != 0 or not metrics.get("complete", False):
@@ -429,8 +432,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Sweep SEA inner params with fixed high-level 100/20 gains."
     )
-    parser.add_argument("--template", default="models/Adjusted_SEASEA - Copia_tuned.osim")
-    parser.add_argument("--reference", default="data/3DGaitModel2392_Kinematics_q.sto")
+    parser.add_argument("--model-bundle", default=None)
+    parser.add_argument("--template", default="models/SEASEA/Adjusted_SEASEA - Copia_tuned.osim")
+    parser.add_argument("--reference", default=None)
     parser.add_argument("--python", default=sys.executable)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--top-n-full", type=int, default=8)
@@ -443,7 +447,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     template = resolve(args.template)
-    reference = resolve(args.reference)
+    model_bundle_dir = resolve(args.model_bundle) if args.model_bundle else template.parent
+    reference = resolve(args.reference) if args.reference else model_bundle_dir / "data" / "3DGaitModel2392_Kinematics_q.sto"
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     sweep_root = (
         resolve(args.sweep_root)
@@ -463,6 +468,7 @@ def main() -> int:
                 sweep_root,
                 reference,
                 args.python,
+                model_bundle_dir,
                 args.timeout_s,
             ): candidate
             for candidate in candidates
@@ -505,7 +511,7 @@ def main() -> int:
         start = time.monotonic()
         rc = run_simulation(
             args.python, model_path, full_dir, 4.26, 11.06,
-            max(args.timeout_s, 1200.0),
+            max(args.timeout_s, 1200.0), model_bundle_dir,
         )
         metrics = collect_metrics(full_dir, model_path, reference)
         full_row = dict(row)

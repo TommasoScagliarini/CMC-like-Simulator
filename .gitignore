@@ -1,13 +1,20 @@
-# Ignore contents of data/model/plugins folders, but keep the folders tracked
-models/*
-data/*
+# Ignore bundle-local data contents, but keep .osim files in models/ tracked
+models/**/data/**
+!models/**/data/
+!models/**/data/**/
+!models/**/data/.gitkeep
+!models/**/data/**/.gitkeep
+
+# Ignore plugin and result contents, but keep the folders tracked
 plugins/*
 results/*
 
 # Keep the folders themselves in the repository
 !models/.gitkeep
-!data/.gitkeep
 !plugins/.gitkeep
 
 # OpenSim log (can exceed GitHub 100 MB limit)
 opensim.log
+
+# Local state for the most recently used simulator setup XML
+.simulator_last_setup.json

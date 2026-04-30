@@ -24,6 +24,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from config import SimulatorConfig  # noqa: E402
 from output import read_sto  # noqa: E402
+from path_resolver import normalize_cli_existing_path, resolve_simulator_paths  # noqa: E402
 from validation.hpf_noise_metric import analyze_sto, load_f_opt_from_model  # noqa: E402
 from validation.validate_sim_results import (  # noqa: E402
     Check,
@@ -153,8 +154,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--results-dir", default=cfg.output_dir)
     parser.add_argument("--prefix", default=cfg.output_prefix)
-    parser.add_argument("--model", default=cfg.model_file)
-    parser.add_argument("--reference", default=cfg.kinematics_file)
+    parser.add_argument("--model-bundle", default=None)
+    parser.add_argument("--model", default=None)
+    parser.add_argument("--reference", default=None)
     parser.add_argument("--tracking-rms-deg", type=float, default=3.0)
     parser.add_argument("--tracking-max-deg", type=float, default=10.0)
     parser.add_argument("--hpf-max", type=float, default=0.05)
@@ -169,9 +171,18 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     cfg = SimulatorConfig()
+    if args.model_bundle is not None:
+        cfg.model_bundle_dir = args.model_bundle
+        if args.model is None:
+            cfg.model_file = ""
+    if args.model is not None:
+        cfg.model_file = normalize_cli_existing_path(args.model)
+    resolved_paths = resolve_simulator_paths(cfg)
     results_dir = resolve_path(args.results_dir)
-    model_path = resolve_path(args.model)
-    reference_path = resolve_path(args.reference)
+    model_path = resolved_paths.model_path
+    reference_path = (
+        resolve_path(args.reference) if args.reference else resolved_paths.kinematics_path
+    )
     prefix = args.prefix
 
     failures = 0

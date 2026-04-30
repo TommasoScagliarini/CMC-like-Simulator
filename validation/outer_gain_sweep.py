@@ -136,6 +136,7 @@ def candidate_base_row(candidate: Candidate) -> Dict[str, object]:
 
 def command_for_run(
     python_exe: str,
+    model_bundle_dir: Path,
     model_path: Path,
     results_dir: Path,
     candidate: Candidate,
@@ -145,6 +146,7 @@ def command_for_run(
     return [
         python_exe,
         str(REPO_ROOT / "main.py"),
+        "--model-bundle", str(model_bundle_dir),
         "--model", str(model_path),
         "--t-start", fmt_xml(t_start),
         "--t-end", fmt_xml(t_end),
@@ -158,6 +160,7 @@ def command_for_run(
 
 def run_simulation(
     python_exe: str,
+    model_bundle_dir: Path,
     model_path: Path,
     results_dir: Path,
     candidate: Candidate,
@@ -167,7 +170,7 @@ def run_simulation(
 ) -> int:
     results_dir.mkdir(parents=True, exist_ok=True)
     cmd = command_for_run(
-        python_exe, model_path, results_dir, candidate, t_start, t_end
+        python_exe, model_bundle_dir, model_path, results_dir, candidate, t_start, t_end
     )
     console = results_dir / "console.txt"
     with console.open("w", encoding="utf-8", errors="replace") as fh:
@@ -574,6 +577,7 @@ def screen_one_window(
     t_start: float,
     t_end: float,
     sweep_root: Path,
+    model_bundle_dir: Path,
     model_path: Path,
     reference_path: Path,
     python_exe: str,
@@ -583,7 +587,7 @@ def screen_one_window(
     run_dir = sweep_root / "runs" / stage / f"{candidate.run_id}_w{window_idx}"
     start = time.monotonic()
     rc = run_simulation(
-        python_exe, model_path, run_dir, candidate, t_start, t_end, timeout_s
+        python_exe, model_bundle_dir, model_path, run_dir, candidate, t_start, t_end, timeout_s
     )
     elapsed = time.monotonic() - start
     return collect_metrics(
@@ -644,6 +648,7 @@ def run_stage(
     candidates: Sequence[Candidate],
     windows: Sequence[tuple[float, float]],
     sweep_root: Path,
+    model_bundle_dir: Path,
     model_path: Path,
     reference_path: Path,
     python_exe: str,
@@ -674,6 +679,7 @@ def run_stage(
                     t_start,
                     t_end,
                     sweep_root,
+                    model_bundle_dir,
                     model_path,
                     reference_path,
                     python_exe,
@@ -715,6 +721,7 @@ def run_stage(
 def run_full(
     candidates: Sequence[Candidate],
     sweep_root: Path,
+    model_bundle_dir: Path,
     model_path: Path,
     reference_path: Path,
     python_exe: str,
@@ -738,6 +745,7 @@ def run_full(
                 _run_full_candidate,
                 candidate,
                 run_dir,
+                model_bundle_dir,
                 model_path,
                 reference_path,
                 python_exe,
@@ -765,6 +773,7 @@ def run_full(
 def _run_full_candidate(
     candidate: Candidate,
     run_dir: Path,
+    model_bundle_dir: Path,
     model_path: Path,
     reference_path: Path,
     python_exe: str,
@@ -773,7 +782,7 @@ def _run_full_candidate(
     t_start, t_end = FULL_WINDOW
     start = time.monotonic()
     rc = run_simulation(
-        python_exe, model_path, run_dir, candidate, t_start, t_end, timeout_s
+        python_exe, model_bundle_dir, model_path, run_dir, candidate, t_start, t_end, timeout_s
     )
     elapsed = time.monotonic() - start
     return collect_metrics(
@@ -786,6 +795,7 @@ def write_best_json(
     path: Path,
     rows: Sequence[Dict[str, object]],
     python_exe: str,
+    model_bundle_dir: Path,
     model_path: Path,
 ) -> None:
     best = sorted(rows, key=row_sort_key)
@@ -801,6 +811,7 @@ def write_best_json(
         rerun_dir = f"results/_outer_best_{candidate.run_id}"
         cmd = command_for_run(
             python_exe,
+            model_bundle_dir,
             model_path,
             Path(rerun_dir),
             candidate,
@@ -819,8 +830,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--python", default=sys.executable)
-    parser.add_argument("--template", default="models/Adjusted_SEASEA - Copia_tuned.osim")
-    parser.add_argument("--reference", default="data/3DGaitModel2392_Kinematics_q.sto")
+    parser.add_argument("--model-bundle", default=None)
+    parser.add_argument("--template", default="models/SEASEA/Adjusted_SEASEA - Copia_tuned.osim")
+    parser.add_argument("--reference", default=None)
     parser.add_argument("--sweep-root", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--quick-smoke", action="store_true")
@@ -838,7 +850,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     model_path = resolve(args.template)
-    reference_path = resolve(args.reference)
+    model_bundle_dir = resolve(args.model_bundle) if args.model_bundle else model_path.parent
+    reference_path = resolve(args.reference) if args.reference else model_bundle_dir / "data" / "3DGaitModel2392_Kinematics_q.sto"
 
     knee_kp_grid = parse_grid(args.knee_kp_grid, KNEE_KP_GRID)
     knee_kd_grid = parse_grid(args.knee_kd_grid, KNEE_KD_GRID)
@@ -894,6 +907,7 @@ def main() -> int:
         candidates,
         stage1_windows,
         sweep_root,
+        model_bundle_dir,
         model_path,
         reference_path,
         args.python,
@@ -929,6 +943,7 @@ def main() -> int:
         stage2_candidates,
         stage2_windows,
         sweep_root,
+        model_bundle_dir,
         model_path,
         reference_path,
         args.python,
@@ -948,6 +963,7 @@ def main() -> int:
             sweep_root / "best_candidates.json",
             ordered_stage2[: max(0, args.top_n_stage2)],
             args.python,
+            model_bundle_dir,
             model_path,
         )
         return 0 if ordered_stage2 else 1
@@ -968,6 +984,7 @@ def main() -> int:
     full_rows = run_full(
         full_candidates,
         sweep_root,
+        model_bundle_dir,
         model_path,
         reference_path,
         args.python,
@@ -980,6 +997,7 @@ def main() -> int:
         sweep_root / "best_candidates.json",
         ordered_full,
         args.python,
+        model_bundle_dir,
         model_path,
     )
 

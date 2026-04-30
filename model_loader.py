@@ -22,6 +22,7 @@ import numpy as np
 import opensim
 
 from config import SimulatorConfig
+from path_resolver import resolve_simulator_paths
 
 
 _DLL_DIR_HANDLES = []
@@ -463,12 +464,13 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         Ready-to-use topology snapshot.
     """
     # ── 1. C++ plugin ────────────────────────────────────────────────────────
-    _load_plugin(cfg.plugin_name)
-    _configure_geometry_search_paths(cfg.model_file)
+    paths = resolve_simulator_paths(cfg)
+    _load_plugin(str(paths.plugin_path))
+    _configure_geometry_search_paths(str(paths.model_path))
 
     # ── 2. OpenSim Model ─────────────────────────────────────────────────────
-    print(f"[ModelLoader] Loading model    : {cfg.model_file}")
-    model = opensim.Model(cfg.model_file)
+    print(f"[ModelLoader] Loading model    : {paths.model_path}")
+    model = opensim.Model(str(paths.model_path))
     model.setName("ProstheticGaitSim")
     model.setUseVisualizer(False)
 
@@ -491,7 +493,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     #   iterates the ForceSet to call computeForce() — ExternalForces that
     #   are not in the ForceSet produce zero GRF, leading to a native crash
     #   or wildly incorrect dynamics.
-    print(f"[ModelLoader] Loading GRF      : {cfg.external_loads_xml}")
+    print(f"[ModelLoader] Loading GRF      : {paths.external_loads_path}")
 
     # ── 3a. Remove stale ExternalForce objects baked into the .osim ──────────
     try:
@@ -511,18 +513,18 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
               "ExternalForce(s) from .osim may still be present")
 
     # ── 3b. Parse ExternalLoads XML → read .mot path + force definitions ────
-    ext_loads = opensim.ExternalLoads(cfg.external_loads_xml, True)
+    ext_loads = opensim.ExternalLoads(str(paths.external_loads_path), True)
     mot_file = ext_loads.getDataFileName()
 
     # Resolve relative .mot path against the XML's directory
     if not os.path.isabs(mot_file):
-        xml_dir = os.path.dirname(os.path.abspath(cfg.external_loads_xml))
+        xml_dir = os.path.dirname(os.path.abspath(str(paths.external_loads_path)))
         mot_file = os.path.join(xml_dir, mot_file)
 
     if not os.path.isfile(mot_file):
         raise FileNotFoundError(
             f"[ModelLoader] GRF data file not found: {mot_file}\n"
-            f"  (resolved from <datafile> in {cfg.external_loads_xml})"
+            f"  (resolved from <datafile> in {paths.external_loads_path})"
         )
     print(f"[ModelLoader] GRF datafile       : {mot_file}")
 
@@ -577,8 +579,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     # The ForceSet XML contains CoordinateActuators for every coordinate.
     # We load them all into the model; at QP-build time we will filter the ones
     # belonging to prosthetic coordinates out of the constraint matrix.
-    print(f"[ModelLoader] Loading reserves : {cfg.reserve_actuators_xml}")
-    reserve_fs = opensim.ForceSet(cfg.reserve_actuators_xml)
+    print(f"[ModelLoader] Loading reserves : {paths.reserve_actuators_path}")
+    reserve_fs = opensim.ForceSet(str(paths.reserve_actuators_path))
     for i in range(reserve_fs.getSize()):
         model.addForce(reserve_fs.get(i).clone())
 
@@ -677,7 +679,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
 
     # --- SEA actuator properties ---
     sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
-    sea_props = _read_sea_properties_from_osim(cfg.model_file, sea_names)
+    sea_props = _read_sea_properties_from_osim(str(paths.model_path), sea_names)
     sea_f_opt = {name: props["F_opt"] for name, props in sea_props.items()}
 
     # --- State variable indices (for setting q and qdot) ---

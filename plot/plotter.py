@@ -6,9 +6,10 @@ Read simulator .sto outputs and save ankle/knee diagnostic PNG plots.
 This script is intentionally a consumer of existing result channels. It does
 not derive missing simulator channels such as SEA motor states, reserve
 actuator torque, power, or gait-cycle events. Healthy reference files are
-loaded from data/health or data/healthy when available; reference velocity and
-power are derived only for plotting. Missing channels are reported and
-annotated in the generated figures.
+loaded from the active model bundle first, with a fallback to repo-level
+data/health or data/healthy when available; reference velocity and power are
+derived only for plotting. Missing channels are reported and annotated in the
+generated figures.
 """
 
 from __future__ import annotations
@@ -39,6 +40,11 @@ if str(REPO_ROOT) not in sys.path:
 from output import read_sto  # noqa: E402
 from config import SimulatorConfig  # noqa: E402
 from kinematics_interpolator import KinematicsInterpolator  # noqa: E402
+from path_resolver import (  # noqa: E402
+    normalize_cli_existing_path,
+    resolve_repo_path,
+    resolve_simulator_paths,
+)
 
 
 GAIT_GRID = np.linspace(0.0, 100.0, 101)
@@ -117,10 +123,7 @@ class MissingReport:
 
 
 def resolve_project_path(raw: str | Path) -> Path:
-    path = Path(raw)
-    if path.is_absolute():
-        return path
-    return REPO_ROOT / path
+    return resolve_repo_path(raw)
 
 
 def next_output_dir(out_root: Path) -> Path:
@@ -147,12 +150,8 @@ def load_table(path: Path) -> Optional[StoTable]:
     return StoTable(path, time, columns, data, in_degrees)
 
 
-def default_healthy_dir() -> Optional[Path]:
-    for rel_path in ("data/health", "data/healthy"):
-        path = REPO_ROOT / rel_path
-        if path.is_dir():
-            return path
-    return None
+def default_healthy_dir(cfg: SimulatorConfig) -> Optional[Path]:
+    return resolve_simulator_paths(cfg).healthy_dir
 
 
 def load_healthy_data(
@@ -200,7 +199,8 @@ def load_reference_kinematics(
         return None
 
     ref_cfg = copy.deepcopy(cfg)
-    ref_cfg.kinematics_file = str(resolve_project_path(raw_path))
+    if reference_path is not None:
+        ref_cfg.kinematics_file = str(resolve_project_path(raw_path))
     try:
         return KinematicsInterpolator(ref_cfg)
     except Exception as exc:
@@ -222,6 +222,13 @@ def load_tables(results_dir: Path, prefix: str) -> Dict[str, Optional[StoTable]]
         key: load_table(results_dir / f"{prefix}_{suffix}.sto")
         for key, suffix in suffixes.items()
     }
+
+
+def infer_result_time_range(tables: Dict[str, Optional[StoTable]]) -> Optional[Tuple[float, float]]:
+    for table in tables.values():
+        if table is not None and table.time.size:
+            return float(table.time[0]), float(table.time[-1])
+    return None
 
 
 def annotate_missing(ax: plt.Axes, message: str) -> None:
@@ -586,7 +593,7 @@ def child_text(element: ET.Element, child_name: str) -> Optional[str]:
 
 def load_sea_params(cfg: SimulatorConfig) -> Dict[str, Dict[str, float]]:
     """Load K, Kp, Kd from the model XML for each SEA actuator."""
-    model_path = resolve_project_path(cfg.model_file)
+    model_path = resolve_simulator_paths(cfg).model_path
     sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
     params: Dict[str, Dict[str, float]] = {}
     if not model_path.is_file():
@@ -679,7 +686,7 @@ def apply_figure_header(
 
 
 def load_sea_f_opt(cfg: SimulatorConfig, missing: MissingReport) -> Dict[str, float]:
-    model_path = resolve_project_path(cfg.model_file)
+    model_path = resolve_simulator_paths(cfg).model_path
     sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
     values: Dict[str, float] = {}
     if not model_path.is_file():
@@ -1644,6 +1651,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--prefix", default="sim_output", help="Result file prefix.")
     parser.add_argument(
+        "--model-bundle",
+        default=None,
+        help="Override model bundle directory from config.py.",
+    )
+    parser.add_argument(
+        "--model",
+        default=None,
+        help="Override model file (filename in bundle or explicit path).",
+    )
+    parser.add_argument(
         "--gait-side",
         default=default_cfg.plot_gait_side,
         choices=["left", "right", "all"],
@@ -1672,7 +1689,15 @@ def main() -> int:
     if not results_dir.is_dir():
         raise FileNotFoundError(f"Results directory not found: {results_dir}")
 
-    healthy_dir = resolve_project_path(args.healthy_dir) if args.healthy_dir else default_healthy_dir()
+    cfg = SimulatorConfig()
+    if args.model_bundle is not None:
+        cfg.model_bundle_dir = args.model_bundle
+        if args.model is None:
+            cfg.model_file = ""
+    if args.model is not None:
+        cfg.model_file = normalize_cli_existing_path(args.model)
+
+    healthy_dir = resolve_project_path(args.healthy_dir) if args.healthy_dir else default_healthy_dir(cfg)
     healthy = load_healthy_data(healthy_dir, missing)
     if healthy is not None:
         print(f"Healthy overlay loaded from: {healthy.directory}")
@@ -1681,8 +1706,10 @@ def main() -> int:
 
     out_dir = next_output_dir(out_root)
     tables = load_tables(results_dir, args.prefix)
+    result_time_range = infer_result_time_range(tables)
+    if result_time_range is not None:
+        cfg.t_start, cfg.t_end = result_time_range
     events = load_events(events_path, missing)
-    cfg = SimulatorConfig()
     sea_f_opt = load_sea_f_opt(cfg, missing)
     sea_params = load_sea_params(cfg)
     reference = load_reference_kinematics(args.reference, cfg, missing)

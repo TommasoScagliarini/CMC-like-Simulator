@@ -30,6 +30,7 @@ import opensim
 
 from config import SimulatorConfig
 from output import read_sto
+from path_resolver import normalize_cli_existing_path, resolve_simulator_paths
 
 
 def _library_variant_exists(path_without_ext: str) -> bool:
@@ -277,9 +278,10 @@ def run_visualizer(
 ) -> None:
     if cfg is None:
         cfg = SimulatorConfig()
+    resolved_paths = resolve_simulator_paths(cfg)
 
-    plugin_name = _resolve_project_path(cfg.plugin_name, library_basename=True)
-    model_file = _resolve_project_path(cfg.model_file)
+    plugin_name = _resolve_project_path(str(resolved_paths.plugin_path), library_basename=True)
+    model_file = str(resolved_paths.model_path)
     sto_path = _resolve_project_path(sto_path)
 
     # ── Load plugin ──────────────────────────────────────────────────────────
@@ -514,6 +516,11 @@ def main() -> int:
         help="Crop playback end time [s] (default: last frame in .sto)",
     )
     parser.add_argument(
+        "--model-bundle",
+        default=None,
+        help="Override model bundle directory from config.py.",
+    )
+    parser.add_argument(
         "--model",
         default=None,
         help="Override model file path from config.py",
@@ -542,13 +549,17 @@ def main() -> int:
     args = parser.parse_args()
 
     cfg = SimulatorConfig()
+    if args.model_bundle is not None:
+        cfg.model_bundle_dir = args.model_bundle
+        if args.model is None:
+            cfg.model_file = ""
     if args.model is not None:
-        cfg.model_file = args.model
+        cfg.model_file = normalize_cli_existing_path(args.model)
 
     sto_path = args.sto
     if sto_path is None:
         if args.ik:
-            sto_path = cfg.kinematics_file
+            sto_path = str(resolve_simulator_paths(cfg).kinematics_path)
         else:
             sto_path = os.path.join(cfg.output_dir, f"{cfg.output_prefix}_kinematics.sto")
 

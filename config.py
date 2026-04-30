@@ -18,20 +18,29 @@ class SimulatorConfig:
     # FILE PATHS  ← edit these to match your project layout
     # =========================================================================
 
-    # Biomechanical model (contains muscles + SEA CoordinateActuators)
-    model_file: str = "models/Adjusted_SEASEA - Copia_tuned.osim"
+    # Model bundle directory. Each bundle keeps its .osim files at the root
+    # and the supporting XML/STO files inside a local data/ folder.
+    model_bundle_dir: str = "models/SEASEA"
+
+    # Biomechanical model (contains muscles + SEA CoordinateActuators).
+    # If this is only a filename, it is resolved inside model_bundle_dir.
+    # Absolute or explicit repo-relative paths are also supported.
+    model_file: str = "Adjusted_SEASEA - Copia_tuned.osim"
 
     # C++ plugin basename WITHOUT OS extension.
     # Loader adds .dll / .dylib / .so automatically.
     plugin_name: str = "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff"
 
-    # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto)
+    # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto).
+    # Relative paths are resolved inside model_bundle_dir.
     kinematics_file: str = "data/3DGaitModel2392_Kinematics_q.sto"
 
-    # GRF ExternalLoads setup XML  (points to the .mot data file internally)
+    # GRF ExternalLoads setup XML  (points to the .mot data file internally).
+    # Relative paths are resolved inside model_bundle_dir.
     external_loads_xml: str = "data/Externall_Loads.xml"
 
-    # Reserve actuators ForceSet XML  (CMC_Actuators.xml)
+    # Reserve actuators ForceSet XML  (CMC_Actuators.xml).
+    # Relative paths are resolved inside model_bundle_dir.
     reserve_actuators_xml: str = "data/CMC_Actuators.xml"
 
     # Output directory (created automatically if missing)
@@ -41,8 +50,8 @@ class SimulatorConfig:
     # =========================================================================
     # SIMULATION TIME  [seconds]
     # =========================================================================
-    t_start: float = 4.26     # must be >= first time stamp in kinematics file
-    t_end:   float = 11.06    # must be <= last  time stamp in kinematics file
+    t_start: float = 16.9000 # must be >= first time stamp in kinematics file
+    t_end:   float = 22.9000 # must be <= last  time stamp in kinematics file
     dt:      float = 0.001    # integration step for validated plugin mode
 
     # =========================================================================

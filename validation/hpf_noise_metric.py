@@ -44,6 +44,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from output import read_sto  # noqa: E402
+from path_resolver import normalize_cli_existing_path, resolve_simulator_paths  # noqa: E402
 
 
 def hpf_energy_ratio(
@@ -316,6 +317,11 @@ def main() -> int:
         help="Seconds to skip at the start for transient (default: 0.1)",
     )
     parser.add_argument(
+        "--model-bundle",
+        default=None,
+        help="Model bundle directory used to resolve the default model path.",
+    )
+    parser.add_argument(
         "--model",
         default=None,
         help="Model .osim file for F_opt lookup (default: from config.py)",
@@ -329,11 +335,15 @@ def main() -> int:
     args = parser.parse_args()
 
     # Load F_opt
-    if args.model:
-        model_path = Path(args.model)
-    else:
-        from config import SimulatorConfig
-        model_path = REPO_ROOT / SimulatorConfig().model_file
+    from config import SimulatorConfig
+    cfg = SimulatorConfig()
+    if args.model_bundle is not None:
+        cfg.model_bundle_dir = args.model_bundle
+        if args.model is None:
+            cfg.model_file = ""
+    if args.model is not None:
+        cfg.model_file = normalize_cli_existing_path(args.model)
+    model_path = resolve_simulator_paths(cfg).model_path
 
     f_opt = load_f_opt_from_model(model_path)
     if f_opt:

@@ -26,6 +26,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from config import SimulatorConfig  # noqa: E402
 from output import read_sto  # noqa: E402
+from path_resolver import normalize_cli_existing_path, resolve_repo_path, resolve_simulator_paths  # noqa: E402
 
 
 ROTATION_HINTS = (
@@ -67,8 +68,7 @@ class Check:
 
 
 def resolve_path(raw: str | Path) -> Path:
-    path = Path(raw)
-    return path if path.is_absolute() else REPO_ROOT / path
+    return resolve_repo_path(raw)
 
 
 def load_table(path: Path) -> Optional[Table]:
@@ -681,13 +681,15 @@ def print_summary(checks: List[Check]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    cfg = SimulatorConfig()
     parser = argparse.ArgumentParser(
         description="Validate simulator outputs for SEA tautology and tracking diagnostics."
     )
     parser.add_argument("--results-dir", default="results")
     parser.add_argument("--prefix", default="sim_output")
-    parser.add_argument("--model", default=SimulatorConfig.model_file)
-    parser.add_argument("--reference", default=SimulatorConfig.kinematics_file)
+    parser.add_argument("--model-bundle", default=None)
+    parser.add_argument("--model", default=None)
+    parser.add_argument("--reference", default=None)
     parser.add_argument("--out", default=None)
     return parser.parse_args()
 
@@ -695,9 +697,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     cfg = SimulatorConfig()
+    if args.model_bundle is not None:
+        cfg.model_bundle_dir = args.model_bundle
+        if args.model is None:
+            cfg.model_file = ""
+    if args.model is not None:
+        cfg.model_file = normalize_cli_existing_path(args.model)
+    resolved_paths = resolve_simulator_paths(cfg)
     results_dir = resolve_path(args.results_dir)
-    model_path = resolve_path(args.model)
-    reference_path = resolve_path(args.reference) if args.reference else None
+    model_path = resolved_paths.model_path
+    reference_path = resolve_path(args.reference) if args.reference else resolved_paths.kinematics_path
 
     if not results_dir.is_dir():
         raise FileNotFoundError(f"Results directory not found: {results_dir}")
