@@ -151,6 +151,30 @@ class SimulationRunner:
             self._sea_props[sea_name] = dict(ctx.sea_props[sea_name])
             print(f"[Runner] SEA '{sea_name}' props: {self._sea_props[sea_name]}")
 
+        self._sea_integrated_state_items: list[tuple[str, str, int, str]] = []
+        for sea_name, _coord_name in self._sea_pros_map:
+            component_path = f"/forceset/{sea_name}"
+            component = ctx.model.getComponent(component_path)
+            state_map = getattr(ctx, "sea_state_sv_idx", {}).get(sea_name, {})
+            for state_name, sv_idx in sorted(state_map.items(), key=lambda item: item[1]):
+                output_name = f"{state_name}_dot"
+                try:
+                    component.getOutput(output_name)
+                except Exception as exc:
+                    raise RuntimeError(
+                        "[Runner] SEA state variable lacks derivative output: "
+                        f"{component_path}/{state_name} requires output "
+                        f"'{output_name}' for {cfg.integration_scheme}"
+                    ) from exc
+                self._sea_integrated_state_items.append(
+                    (sea_name, state_name, sv_idx, output_name)
+                )
+        print(
+            "[Runner] SEA RK4 state variables: "
+            f"{[(sea, name) for sea, name, _idx, _out in self._sea_integrated_state_items]}",
+            flush=True,
+        )
+
         # ── Output recorder ───────────────────────────────────────────────────
         self._recorder = OutputRecorder(
             cfg, ctx, self._sea_pros_map, self._sea_props,
@@ -560,12 +584,14 @@ class SimulationRunner:
         )
         if cfg.sea_forward_mode == "plugin":
             sea_plugin_outputs = self._sea_plugin_outputs_from_outputs(state)
-            sea_derivatives = self._sea_derivatives_from_plugin_outputs(
-                sea_plugin_outputs
+            sea_derivatives = self._sea_integrated_state_derivatives_from_outputs(
+                state
             )
         else:
             sea_plugin_outputs = np.full(len(self._sea_pros_map) * 3, np.nan)
-            sea_derivatives = np.full(len(self._sea_pros_map) * 2, np.nan)
+            sea_derivatives = np.full(
+                len(self._sea_integrated_state_items), np.nan
+            )
 
         if not np.all(np.isfinite(udot)):
             bad_coords = [
@@ -757,6 +783,26 @@ class SimulationRunner:
             self._sea_plugin_outputs_from_outputs(state)
         )
 
+    def _sea_integrated_state_derivatives_from_outputs(
+        self,
+        state: opensim.State,
+    ) -> np.ndarray:
+        """Return derivatives for every SEA state integrated by the bypass."""
+        values = np.zeros(len(self._sea_integrated_state_items), dtype=float)
+        for i, (sea_name, _state_name, _sv_idx, output_name) in enumerate(
+            self._sea_integrated_state_items
+        ):
+            component_path = f"/forceset/{sea_name}"
+            values[i] = self._component_output_float(
+                state, component_path, output_name
+            )
+        if not np.all(np.isfinite(values)):
+            raise FloatingPointError(
+                "Non-finite SEA integrated state derivatives: "
+                f"{values.tolist()}"
+            )
+        return values
+
     def _advance_plugin_state_substeps(
         self,
         state: opensim.State,
@@ -825,11 +871,11 @@ class SimulationRunner:
         model = ctx.model
         coord_set = model.getCoordinateSet()
         n_coords = len(ctx.coord_names)
-        n_sea = len(self._sea_pros_map)
+        n_plugin_states = len(self._sea_integrated_state_items)
 
         start_time, start_values = self._snapshot_state_variables(state)
 
-        y0 = np.zeros(n_coords * 2 + n_sea * 2)
+        y0 = np.zeros(n_coords * 2 + n_plugin_states)
         for i, name in enumerate(ctx.coord_names):
             coord = coord_set.get(name)
             y0[i] = coord.getValue(state)
@@ -837,13 +883,10 @@ class SimulationRunner:
 
         sv = model.getStateVariableValues(state)
         sea_base = n_coords * 2
-        for i, (sea_name, _coord_name) in enumerate(self._sea_pros_map):
-            ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
-            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
-            if ma_idx is not None:
-                y0[sea_base + i * 2] = sv.get(ma_idx)
-            if ms_idx is not None:
-                y0[sea_base + i * 2 + 1] = sv.get(ms_idx)
+        for i, (_sea_name, _state_name, sv_idx, _output_name) in enumerate(
+            self._sea_integrated_state_items
+        ):
+            y0[sea_base + i] = sv.get(sv_idx)
 
         def write_stage(y_values: np.ndarray, time_value: float) -> None:
             q_stage = {
@@ -857,13 +900,10 @@ class SimulationRunner:
             self._set_state(state, q_stage, qdot_stage, time_value)
 
             sea_values: Dict[int, float] = {}
-            for i, (sea_name, _coord_name) in enumerate(self._sea_pros_map):
-                ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
-                ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
-                if ma_idx is not None:
-                    sea_values[ma_idx] = float(y_values[sea_base + i * 2])
-                if ms_idx is not None:
-                    sea_values[ms_idx] = float(y_values[sea_base + i * 2 + 1])
+            for i, (_sea_name, _state_name, sv_idx, _output_name) in enumerate(
+                self._sea_integrated_state_items
+            ):
+                sea_values[sv_idx] = float(y_values[sea_base + i])
             self._set_sea_state_values(state, sea_values)
 
         def rhs(y_values: np.ndarray, time_value: float) -> np.ndarray:
@@ -891,15 +931,19 @@ class SimulationRunner:
                 )
 
             if self._cfg.sea_forward_mode == "plugin":
-                sea_derivatives = self._sea_state_derivatives_from_outputs(state)
+                sea_derivatives = self._sea_integrated_state_derivatives_from_outputs(
+                    state
+                )
             else:
-                sea_derivatives = np.zeros(n_sea * 2)
+                sea_derivatives = np.zeros(n_plugin_states)
 
             dy = np.zeros_like(y_values)
             dy[:n_coords] = y_values[n_coords:n_coords * 2]
             for i, name in enumerate(ctx.coord_names):
                 dy[n_coords + i] = udot[ctx.coord_mob_idx[name]]
-            dy[sea_base:sea_base + n_sea * 2] = sea_derivatives[:n_sea * 2]
+            dy[sea_base:sea_base + n_plugin_states] = sea_derivatives[
+                :n_plugin_states
+            ]
 
             if not np.all(np.isfinite(dy)):
                 raise FloatingPointError(
@@ -946,6 +990,9 @@ class SimulationRunner:
             model.realizeDynamics(state)
 
             sea_derivatives = self._sea_state_derivatives_from_outputs(state)
+            sea_integrated_derivatives = (
+                self._sea_integrated_state_derivatives_from_outputs(state)
+            )
 
             q_new: Dict[str, float] = {}
             qdot_new: Dict[str, float] = {}
@@ -961,6 +1008,21 @@ class SimulationRunner:
 
             sv = model.getStateVariableValues(state)
             sea_next: Dict[int, float] = {}
+            for (
+                deriv_idx,
+                (_sea_name, state_name, sv_idx, _output_name),
+            ) in enumerate(self._sea_integrated_state_items):
+                if state_name in {"motor_angle", "motor_speed"}:
+                    continue
+                value_next = sv.get(sv_idx) + sea_integrated_derivatives[deriv_idx] * h
+                if not np.isfinite(value_next):
+                    raise FloatingPointError(
+                        "Non-finite SEA state integration during plugin "
+                        f"substep {substep + 1}/{substeps} for "
+                        f"{_sea_name}/{state_name}"
+                    )
+                sea_next[sv_idx] = float(value_next)
+
             for i, (sea_name, _coord_name) in enumerate(self._sea_pros_map):
                 ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
                 ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
@@ -1050,6 +1112,27 @@ class SimulationRunner:
             fh.write(
                 f"sea_motor_max_substeps={self._cfg.sea_motor_max_substeps}\n"
             )
+            fh.write(
+                f"enable_grf_contact_filter="
+                f"{bool(getattr(self._cfg, 'enable_grf_contact_filter', False))}\n"
+            )
+            fh.write(
+                f"grf_contact_threshold_n="
+                f"{float(getattr(self._cfg, 'grf_contact_threshold_n', 20.0)):.10g}\n"
+            )
+            fh.write(
+                f"grf_min_contact_duration_s="
+                f"{float(getattr(self._cfg, 'grf_min_contact_duration_s', 0.0)):.10g}\n"
+            )
+            grf_source = getattr(self._ctx, "grf_unfiltered_data_file", "")
+            grf_loaded = getattr(self._ctx, "grf_data_file", "")
+            grf_filter_report = getattr(self._ctx, "grf_filter_report_file", "")
+            if grf_source:
+                fh.write(f"grf_source_file={grf_source}\n")
+            if grf_loaded:
+                fh.write(f"grf_loaded_file={grf_loaded}\n")
+            if grf_filter_report:
+                fh.write(f"grf_filter_report={grf_filter_report}\n")
             if failure_exc is not None:
                 fh.write(f"error_type={type(failure_exc).__name__}\n")
                 fh.write(f"error={failure_exc}\n")

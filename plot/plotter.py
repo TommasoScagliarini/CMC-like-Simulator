@@ -17,13 +17,18 @@ from __future__ import annotations
 import argparse
 import copy
 import csv
+import os
 import re
 import sys
+import tempfile
 from xml.etree import ElementTree as ET
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+
+os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "cmc_like_matplotlib"))
+os.environ.setdefault("XDG_CACHE_HOME", str(Path(tempfile.gettempdir()) / "cmc_like_cache"))
 
 import matplotlib
 
@@ -45,6 +50,7 @@ from path_resolver import (  # noqa: E402
     resolve_repo_path,
     resolve_simulator_paths,
 )
+from setup_io import read_last_setup_path, read_setup_xml  # noqa: E402
 
 
 GAIT_GRID = np.linspace(0.0, 100.0, 101)
@@ -128,8 +134,8 @@ def resolve_project_path(raw: str | Path) -> Path:
 
 def next_output_dir(out_root: Path) -> Path:
     out_root.mkdir(parents=True, exist_ok=True)
-    date_str = datetime.now().strftime("%d_%m_%Y")
-    pattern = re.compile(rf"^{re.escape(date_str)} - (\d+)$")
+    date_str = datetime.now().strftime("%m_%d_%Y")
+    pattern = re.compile(rf"^{re.escape(date_str)}_(\d+)$")
     existing = []
     for child in out_root.iterdir():
         if not child.is_dir():
@@ -138,7 +144,7 @@ def next_output_dir(out_root: Path) -> Path:
         if match:
             existing.append(int(match.group(1)))
     idx = max(existing, default=0) + 1
-    out_dir = out_root / f"{date_str} - {idx}"
+    out_dir = out_root / f"{date_str}_{idx}"
     out_dir.mkdir(parents=False, exist_ok=False)
     return out_dir
 
@@ -152,6 +158,29 @@ def load_table(path: Path) -> Optional[StoTable]:
 
 def default_healthy_dir(cfg: SimulatorConfig) -> Optional[Path]:
     return resolve_simulator_paths(cfg).healthy_dir
+
+
+def apply_setup_to_config(cfg: SimulatorConfig, setup_path: Path) -> None:
+    """Point plotting config at the same files used by a simulator setup XML."""
+    setup = read_setup_xml(setup_path)
+    cfg.model_bundle_dir = str(setup.model_file.parent)
+    cfg.model_file = str(setup.model_file)
+    cfg.kinematics_file = str(setup.kinematics_file)
+    cfg.external_loads_xml = str(setup.external_loads_xml)
+    cfg.reserve_actuators_xml = str(setup.reserve_actuators_xml)
+    cfg.t_start = setup.t_start
+    cfg.t_end = setup.t_end
+
+
+def fallback_setup_path(setup_path: Path) -> Optional[Path]:
+    """Recover from a stale last-setup filename when the bundle has one setup XML."""
+    if setup_path.is_file():
+        return setup_path
+    if not setup_path.parent.is_dir():
+        return None
+
+    candidates = sorted(setup_path.parent.glob("*setup*.xml"))
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def load_healthy_data(
@@ -200,12 +229,25 @@ def load_reference_kinematics(
 
     ref_cfg = copy.deepcopy(cfg)
     if reference_path is not None:
-        ref_cfg.kinematics_file = str(resolve_project_path(raw_path))
+        ref_cfg.kinematics_file = str(resolve_reference_path(raw_path, cfg))
+    else:
+        ref_cfg.kinematics_file = str(resolve_simulator_paths(cfg).kinematics_path)
     try:
         return KinematicsInterpolator(ref_cfg)
     except Exception as exc:
         missing.add(f"reference kinematics: could not load {ref_cfg.kinematics_file}: {exc}")
         return None
+
+
+def resolve_reference_path(raw: str | Path, cfg: SimulatorConfig) -> Path:
+    """Resolve explicit reference IK paths like the simulator resolves bundle inputs."""
+    path = Path(raw)
+    if path.is_absolute():
+        return path
+    repo_candidate = REPO_ROOT / path
+    if repo_candidate.is_file():
+        return repo_candidate
+    return resolve_simulator_paths(cfg).model_bundle_dir / path
 
 
 def load_tables(results_dir: Path, prefix: str) -> Dict[str, Optional[StoTable]]:
@@ -623,17 +665,49 @@ def load_sea_params(cfg: SimulatorConfig) -> Dict[str, Dict[str, float]]:
 
 def outer_loop_subtitle(cfg: SimulatorConfig) -> str:
     """Build a subtitle string showing the active prosthetic outer-loop controller."""
-    parts = ["Outer loop: prosthetic PD torque"]
+    mode = str(getattr(cfg, "sea_outer_controller_mode", "pd")).upper()
+    if mode == "CASCADE":
+        parts = ["Outer loop: prosthetic CASCADE position-P / velocity-PI"]
+    else:
+        parts = [f"Outer loop: prosthetic {mode} torque"]
     for coord, label in [("pros_knee_angle", "Knee"), ("pros_ankle_angle", "Ankle")]:
-        kp = cfg.sea_kp.get(coord)
-        kd = cfg.sea_kd.get(coord)
         gains: List[str] = []
-        if kp is not None:
-            gains.append(f"Kp={kp:g}")
-        if kd is not None:
-            gains.append(f"Kd={kd:g}")
+        if mode == "CASCADE":
+            kp_outer = getattr(cfg, "sea_cascade_kp_outer", {}).get(coord)
+            kp_inner = getattr(cfg, "sea_cascade_kp_inner", {}).get(coord)
+            ki_inner = getattr(cfg, "sea_cascade_ki_inner", {}).get(coord)
+            i_torque_limit = getattr(
+                cfg,
+                "sea_cascade_inner_i_torque_limit",
+                {},
+            ).get(coord)
+            if kp_outer is not None:
+                gains.append(f"Kp_outer={kp_outer:g}")
+            if kp_inner is not None:
+                gains.append(f"Kp_inner={kp_inner:g}")
+            if ki_inner is not None:
+                gains.append(f"Ki_inner={ki_inner:g}")
+            if i_torque_limit is not None:
+                gains.append(f"Ilim_tau={i_torque_limit:g}")
+        else:
+            kp = cfg.sea_kp.get(coord)
+            kd = cfg.sea_kd.get(coord)
+            ki = getattr(cfg, "sea_ki", {}).get(coord)
+            integral_limit = getattr(cfg, "sea_integral_limit", {}).get(coord)
+            if kp is not None:
+                gains.append(f"Kp={kp:g}")
+            if kd is not None:
+                gains.append(f"Kd={kd:g}")
+            if mode == "PID" and ki is not None:
+                gains.append(f"Ki={ki:g}")
+            if mode == "PID" and integral_limit is not None:
+                gains.append(f"Ilim={integral_limit:g}")
         if gains:
             parts.append(f"{label} " + ", ".join(gains))
+    if mode == "PID":
+        leak = getattr(cfg, "sea_integral_leak_s_inv", None)
+        if leak is not None:
+            parts.append(f"leak={leak:g} 1/s")
     return "   |   ".join(parts)
 
 
@@ -1008,7 +1082,18 @@ def load_events(path: Optional[Path], missing: MissingReport) -> Dict[str, List[
                 events["all"].append((start, end))
             else:
                 missing.add(f"gait cycle events: unsupported side '{side}' at row {row_num}")
+    if not any(events.values()):
+        missing.add(f"gait cycle events: no valid cycles found in {path}")
     return events
+
+
+def describe_events(events: Dict[str, List[Tuple[float, float]]]) -> str:
+    parts = []
+    for side in ("left", "right", "ankle", "knee", "all"):
+        count = len(events.get(side, []))
+        if count:
+            parts.append(f"{side}: {count}")
+    return ", ".join(parts) if parts else "no valid cycles"
 
 
 def cycles_for(
@@ -1649,6 +1734,19 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Directory containing healthy *Kinematics_q.sto and *Actuation_force.sto.",
     )
+    parser.add_argument(
+        "--setup",
+        default=None,
+        help=(
+            "Simulator setup XML to use for model and reference kinematics. "
+            "Defaults to the last setup loaded by the simulator when available."
+        ),
+    )
+    parser.add_argument(
+        "--no-last-setup",
+        action="store_true",
+        help="Ignore .simulator_last_setup.json and use config.py/CLI paths only.",
+    )
     parser.add_argument("--prefix", default="sim_output", help="Result file prefix.")
     parser.add_argument(
         "--model-bundle",
@@ -1671,6 +1769,29 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Reference IK .sto file for kinematic comparison; defaults to config kinematics_file.",
     )
+    parser.add_argument(
+        "--sea-outer-controller",
+        choices=["pd", "pid", "cascade"],
+        default=None,
+        help="Prosthetic outer controller mode used for the run.",
+    )
+    parser.add_argument("--sea-kp-knee", type=float, default=None)
+    parser.add_argument("--sea-kd-knee", type=float, default=None)
+    parser.add_argument("--sea-ki-knee", type=float, default=None)
+    parser.add_argument("--sea-integral-limit-knee", type=float, default=None)
+    parser.add_argument("--sea-kp-ankle", type=float, default=None)
+    parser.add_argument("--sea-kd-ankle", type=float, default=None)
+    parser.add_argument("--sea-ki-ankle", type=float, default=None)
+    parser.add_argument("--sea-integral-limit-ankle", type=float, default=None)
+    parser.add_argument("--sea-integral-leak", type=float, default=None)
+    parser.add_argument("--sea-cascade-kp-outer-knee", type=float, default=None)
+    parser.add_argument("--sea-cascade-kp-inner-knee", type=float, default=None)
+    parser.add_argument("--sea-cascade-ki-inner-knee", type=float, default=None)
+    parser.add_argument("--sea-cascade-inner-i-torque-limit-knee", type=float, default=None)
+    parser.add_argument("--sea-cascade-kp-outer-ankle", type=float, default=None)
+    parser.add_argument("--sea-cascade-kp-inner-ankle", type=float, default=None)
+    parser.add_argument("--sea-cascade-ki-inner-ankle", type=float, default=None)
+    parser.add_argument("--sea-cascade-inner-i-torque-limit-ankle", type=float, default=None)
     return parser.parse_args()
 
 
@@ -1690,12 +1811,69 @@ def main() -> int:
         raise FileNotFoundError(f"Results directory not found: {results_dir}")
 
     cfg = SimulatorConfig()
+    setup_path = resolve_project_path(args.setup) if args.setup else None
+    if setup_path is None and not args.no_last_setup:
+        setup_path = read_last_setup_path()
+    if setup_path is not None:
+        if not args.setup:
+            recovered_setup = fallback_setup_path(setup_path)
+            if recovered_setup is not None and recovered_setup != setup_path:
+                print(f"Last setup path not found, using bundle setup: {recovered_setup}")
+                setup_path = recovered_setup
+        try:
+            apply_setup_to_config(cfg, setup_path)
+            print(f"Simulator setup loaded from: {setup_path}")
+        except Exception as exc:
+            if args.setup:
+                raise
+            missing.add(f"simulator setup: could not load last setup {setup_path}: {exc}")
+
     if args.model_bundle is not None:
         cfg.model_bundle_dir = args.model_bundle
         if args.model is None:
             cfg.model_file = ""
     if args.model is not None:
         cfg.model_file = normalize_cli_existing_path(args.model)
+    if args.sea_outer_controller is not None:
+        cfg.sea_outer_controller_mode = args.sea_outer_controller
+    if args.sea_kp_knee is not None:
+        cfg.sea_kp[cfg.pros_coords[0]] = args.sea_kp_knee
+    if args.sea_kd_knee is not None:
+        cfg.sea_kd[cfg.pros_coords[0]] = args.sea_kd_knee
+    if args.sea_ki_knee is not None:
+        cfg.sea_ki[cfg.pros_coords[0]] = args.sea_ki_knee
+    if args.sea_integral_limit_knee is not None:
+        cfg.sea_integral_limit[cfg.pros_coords[0]] = args.sea_integral_limit_knee
+    if args.sea_kp_ankle is not None:
+        cfg.sea_kp[cfg.pros_coords[1]] = args.sea_kp_ankle
+    if args.sea_kd_ankle is not None:
+        cfg.sea_kd[cfg.pros_coords[1]] = args.sea_kd_ankle
+    if args.sea_ki_ankle is not None:
+        cfg.sea_ki[cfg.pros_coords[1]] = args.sea_ki_ankle
+    if args.sea_integral_limit_ankle is not None:
+        cfg.sea_integral_limit[cfg.pros_coords[1]] = args.sea_integral_limit_ankle
+    if args.sea_integral_leak is not None:
+        cfg.sea_integral_leak_s_inv = args.sea_integral_leak
+    if args.sea_cascade_kp_outer_knee is not None:
+        cfg.sea_cascade_kp_outer[cfg.pros_coords[0]] = args.sea_cascade_kp_outer_knee
+    if args.sea_cascade_kp_inner_knee is not None:
+        cfg.sea_cascade_kp_inner[cfg.pros_coords[0]] = args.sea_cascade_kp_inner_knee
+    if args.sea_cascade_ki_inner_knee is not None:
+        cfg.sea_cascade_ki_inner[cfg.pros_coords[0]] = args.sea_cascade_ki_inner_knee
+    if args.sea_cascade_inner_i_torque_limit_knee is not None:
+        cfg.sea_cascade_inner_i_torque_limit[cfg.pros_coords[0]] = (
+            args.sea_cascade_inner_i_torque_limit_knee
+        )
+    if args.sea_cascade_kp_outer_ankle is not None:
+        cfg.sea_cascade_kp_outer[cfg.pros_coords[1]] = args.sea_cascade_kp_outer_ankle
+    if args.sea_cascade_kp_inner_ankle is not None:
+        cfg.sea_cascade_kp_inner[cfg.pros_coords[1]] = args.sea_cascade_kp_inner_ankle
+    if args.sea_cascade_ki_inner_ankle is not None:
+        cfg.sea_cascade_ki_inner[cfg.pros_coords[1]] = args.sea_cascade_ki_inner_ankle
+    if args.sea_cascade_inner_i_torque_limit_ankle is not None:
+        cfg.sea_cascade_inner_i_torque_limit[cfg.pros_coords[1]] = (
+            args.sea_cascade_inner_i_torque_limit_ankle
+        )
 
     healthy_dir = resolve_project_path(args.healthy_dir) if args.healthy_dir else default_healthy_dir(cfg)
     healthy = load_healthy_data(healthy_dir, missing)
@@ -1709,9 +1887,19 @@ def main() -> int:
     result_time_range = infer_result_time_range(tables)
     if result_time_range is not None:
         cfg.t_start, cfg.t_end = result_time_range
+        print(f"Result time range: {cfg.t_start:.3f} - {cfg.t_end:.3f} s")
     events = load_events(events_path, missing)
+    if events_path is not None:
+        print(f"Gait events loaded from: {events_path}")
+        print(f"  - {describe_events(events)}")
     sea_f_opt = load_sea_f_opt(cfg, missing)
     sea_params = load_sea_params(cfg)
+    reference_path = (
+        resolve_reference_path(args.reference, cfg)
+        if args.reference is not None
+        else resolve_simulator_paths(cfg).kinematics_path
+    )
+    print(f"Reference kinematics: {reference_path}")
     reference = load_reference_kinematics(args.reference, cfg, missing)
     outer_subtitle = outer_loop_subtitle(cfg)
     inner_subtitle = inner_loop_subtitle(sea_params, cfg)

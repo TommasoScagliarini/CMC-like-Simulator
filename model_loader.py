@@ -97,6 +97,7 @@ class SimulationContext:
     sea_props:               Dict[str, dict]  = field(default_factory=dict)
     sea_motor_angle_sv_idx:  Dict[str, int]   = field(default_factory=dict)
     sea_motor_speed_sv_idx:  Dict[str, int]   = field(default_factory=dict)
+    sea_state_sv_idx:        Dict[str, Dict[str, int]] = field(default_factory=dict)
     pros_mob_indices:        np.ndarray = field(default_factory=lambda: np.array([], dtype=int))
 
     # ── GRF data (MUST stay alive for the entire simulation) ─────────────────
@@ -106,6 +107,8 @@ class SimulationContext:
     # Storing the reference here keeps it alive as long as SimulationContext exists.
     grf_storage: object = None   # opensim.Storage
     grf_data_file: str = ""
+    grf_unfiltered_data_file: str = ""
+    grf_filter_report_file: str = ""
     grf_vertical_force_columns: Dict[str, str] = field(default_factory=dict)
 
 
@@ -276,6 +279,219 @@ def _infer_external_force_side(force_name: str, applied_to_body: str) -> str | N
     return None
 
 
+def _read_mot_table(path: str) -> tuple[List[str], List[str], np.ndarray]:
+    """Read an OpenSim .mot/.sto table while preserving its header lines."""
+    header_lines: List[str] = []
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            header_lines.append(line.rstrip("\n"))
+            if line.strip().lower() == "endheader":
+                break
+
+        column_line = ""
+        for line in fh:
+            if line.strip():
+                column_line = line.strip()
+                break
+        if not column_line:
+            raise ValueError(f"No column header found in GRF file: {path}")
+
+        columns = column_line.split()
+        rows = []
+        for line in fh:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            values = stripped.split()
+            if len(values) == len(columns):
+                rows.append([float(value) for value in values])
+
+    if not rows:
+        raise ValueError(f"No numeric rows found in GRF file: {path}")
+
+    return header_lines, columns, np.array(rows, dtype=float)
+
+
+def _write_mot_table(
+    path: str,
+    header_lines: List[str],
+    columns: List[str],
+    data: np.ndarray,
+) -> None:
+    """Write an OpenSim table using the original header shape."""
+    with open(path, "w", encoding="utf-8") as fh:
+        for line in header_lines:
+            fh.write(line + "\n")
+        fh.write("\n")
+        fh.write("\t".join(columns) + "\n")
+        for row in data:
+            fh.write("\t".join(f"{value:.10f}" for value in row) + "\n")
+
+
+def _contact_segments(contact_mask: np.ndarray) -> List[tuple[int, int]]:
+    """Return contiguous true spans as half-open index ranges."""
+    segments: List[tuple[int, int]] = []
+    start: int | None = None
+    for idx, is_contact in enumerate(contact_mask):
+        if is_contact and start is None:
+            start = idx
+        elif not is_contact and start is not None:
+            segments.append((start, idx))
+            start = None
+    if start is not None:
+        segments.append((start, len(contact_mask)))
+    return segments
+
+
+def _identifier_axis_columns(
+    col_idx: Dict[str, int],
+    identifier: str,
+) -> List[int]:
+    return [
+        col_idx[name]
+        for axis in ("x", "y", "z")
+        for name in (f"{identifier}{axis}",)
+        if name in col_idx
+    ]
+
+
+def _filter_grf_storage_file(
+    cfg: SimulatorConfig,
+    ext_loads: opensim.ExternalLoads,
+    mot_file: str,
+) -> tuple[str, str]:
+    """
+    Create a run-local GRF file with only sustained contacts preserved.
+
+    The source .mot and ExternalLoads XML are never edited.  The filter is
+    intentionally opt-in and conservative: an ExternalForce group is skipped if
+    its vertical force column cannot produce at least one sustained contact.
+    """
+    threshold = float(getattr(cfg, "grf_contact_threshold_n", 20.0))
+    min_contact_duration_s = float(
+        getattr(cfg, "grf_min_contact_duration_s", 0.0)
+    )
+    if threshold < 0.0 or min_contact_duration_s < 0.0:
+        raise ValueError(
+            "[ModelLoader] GRF filter requires non-negative threshold and "
+            "minimum contact duration."
+        )
+
+    header_lines, columns, filtered = _read_mot_table(mot_file)
+    col_idx = {name: idx for idx, name in enumerate(columns)}
+    if "time" not in col_idx:
+        raise ValueError(f"[ModelLoader] GRF file has no time column: {mot_file}")
+
+    time = filtered[:, col_idx["time"]]
+    if len(time) > 1:
+        dt = float(np.median(np.diff(time)))
+    else:
+        dt = 0.0
+
+    report_lines = [
+        "GRF contact filter report",
+        f"source={mot_file}",
+        f"threshold_n={threshold:.10g}",
+        f"min_contact_duration_s={min_contact_duration_s:.10g}",
+        f"rows={filtered.shape[0]}",
+        "",
+    ]
+    processed = 0
+    total_zeroed_samples = 0
+
+    for i in range(ext_loads.getSize()):
+        ef_template = ext_loads.get(i)
+        force_id = ef_template.getForceIdentifier()
+        point_id = ef_template.getPointIdentifier()
+        torque_id = ef_template.getTorqueIdentifier()
+        vertical_col = f"{force_id}y"
+        vertical_idx = col_idx.get(vertical_col)
+        if vertical_idx is None:
+            report_lines.append(
+                f"{ef_template.getName()}: skipped, missing {vertical_col}"
+            )
+            continue
+
+        vertical = filtered[:, vertical_idx]
+        segments = _contact_segments(vertical > threshold)
+        valid_segments: List[tuple[int, int]] = []
+        short_segments = 0
+        for start, end in segments:
+            duration = max(0.0, float(time[end - 1] - time[start] + dt))
+            if duration >= min_contact_duration_s:
+                valid_segments.append((start, end))
+            else:
+                short_segments += 1
+
+        if not valid_segments:
+            report_lines.append(
+                f"{ef_template.getName()}: skipped, no sustained contacts "
+                f"(segments={len(segments)}, max_vy={float(np.max(vertical)):.6g})"
+            )
+            continue
+
+        keep = np.zeros(len(time), dtype=bool)
+        for start, end in valid_segments:
+            keep[start:end] = True
+
+        zero_rows = ~keep
+        force_cols = _identifier_axis_columns(col_idx, force_id)
+        point_cols = _identifier_axis_columns(col_idx, point_id)
+        torque_cols = _identifier_axis_columns(col_idx, torque_id)
+        zero_cols = sorted(set(force_cols + point_cols + torque_cols))
+        if not zero_cols:
+            report_lines.append(
+                f"{ef_template.getName()}: skipped, no force/point/torque columns"
+            )
+            continue
+
+        if np.any(zero_rows):
+            filtered[np.ix_(zero_rows, zero_cols)] = 0.0
+
+        processed += 1
+        zeroed_samples = int(np.count_nonzero(zero_rows))
+        total_zeroed_samples += zeroed_samples
+        kept_samples = int(np.count_nonzero(keep))
+        report_lines.append(
+            f"{ef_template.getName()}: processed, "
+            f"valid_contacts={len(valid_segments)}, "
+            f"short_contacts_removed={short_segments}, "
+            f"kept_samples={kept_samples}, "
+            f"zeroed_samples={zeroed_samples}, "
+            f"vertical_col={vertical_col}"
+        )
+
+    if processed == 0:
+        report_lines.append("")
+        report_lines.append("No force groups were filtered; using source GRF file.")
+        report_text = "\n".join(report_lines) + "\n"
+        report_dir = os.path.join(os.path.abspath(cfg.output_dir), "_grf_filter")
+        os.makedirs(report_dir, exist_ok=True)
+        stem = os.path.splitext(os.path.basename(mot_file))[0]
+        report_path = os.path.join(report_dir, f"{stem}_contact_filter_report.txt")
+        with open(report_path, "w", encoding="utf-8") as fh:
+            fh.write(report_text)
+        return mot_file, report_path
+
+    out_dir = os.path.join(os.path.abspath(cfg.output_dir), "_grf_filter")
+    os.makedirs(out_dir, exist_ok=True)
+    stem = os.path.splitext(os.path.basename(mot_file))[0]
+    filtered_file = os.path.join(out_dir, f"{stem}_contact_filtered.mot")
+    report_path = os.path.join(out_dir, f"{stem}_contact_filter_report.txt")
+    _write_mot_table(filtered_file, header_lines, columns, filtered)
+
+    report_lines.extend([
+        "",
+        f"processed_force_groups={processed}",
+        f"total_zeroed_samples={total_zeroed_samples}",
+        f"filtered_file={filtered_file}",
+    ])
+    with open(report_path, "w", encoding="utf-8") as fh:
+        fh.write("\n".join(report_lines) + "\n")
+
+    return filtered_file, report_path
+
+
 def _read_sea_properties_from_osim(
     model_file: str,
     sea_names: List[str],
@@ -327,6 +543,16 @@ def _read_sea_properties_from_osim(
             )
         return text.strip().lower() in {"true", "1", "yes"}
 
+    def optional_float(
+        element: ET.Element,
+        tag: str,
+        default: float,
+    ) -> float:
+        text = _child_text(element, tag)
+        if text is None or text == "":
+            return float(default)
+        return float(text)
+
     sea_props: Dict[str, dict] = {}
     missing = [name for name in sea_names if name not in sea_elements]
     if missing:
@@ -341,6 +567,10 @@ def _read_sea_properties_from_osim(
             "K": required_float(element, sea_name, "stiffness"),
             "Kp": required_float(element, sea_name, "Kp"),
             "Kd": required_float(element, sea_name, "Kd"),
+            "Ki": optional_float(element, "Ki", 0.0),
+            "integral_torque_limit": optional_float(
+                element, "integral_torque_limit", 100.0
+            ),
             "Bm": required_float(element, sea_name, "motor_damping"),
             "Jm": required_float(element, sea_name, "motor_inertia"),
             "F_opt": required_float(element, sea_name, "optimal_force"),
@@ -527,6 +757,17 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
             f"  (resolved from <datafile> in {paths.external_loads_path})"
         )
     print(f"[ModelLoader] GRF datafile       : {mot_file}")
+    unfiltered_mot_file = mot_file
+    grf_filter_report_file = ""
+    if getattr(cfg, "enable_grf_contact_filter", False):
+        mot_file, grf_filter_report_file = _filter_grf_storage_file(
+            cfg,
+            ext_loads,
+            mot_file,
+        )
+        if mot_file != unfiltered_mot_file:
+            print(f"[ModelLoader] GRF filtered file  : {mot_file}")
+        print(f"[ModelLoader] GRF filter report : {grf_filter_report_file}")
 
     # ── 3c. Load the GRF .mot data into an opensim.Storage ──────────────────
     # The Storage object holds the time-series of force/point/torque columns.
@@ -738,8 +979,20 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     # --- SEA motor state variable indices ---
     sea_motor_angle_sv_idx: Dict[str, int] = {}
     sea_motor_speed_sv_idx: Dict[str, int] = {}
+    sea_state_sv_idx: Dict[str, Dict[str, int]] = {
+        cfg.sea_knee_name: {},
+        cfg.sea_ankle_name: {},
+    }
     for sv_idx, sv_name in enumerate(sv_name_list):
         for sea_name in [cfg.sea_knee_name, cfg.sea_ankle_name]:
+            prefix = f"/forceset/{sea_name}/"
+            if sv_name.startswith(prefix):
+                state_name = sv_name[len(prefix):]
+                sea_state_sv_idx.setdefault(sea_name, {})[state_name] = sv_idx
+            elif f"/{sea_name}/" in sv_name:
+                state_name = sv_name.rsplit("/", 1)[-1]
+                sea_state_sv_idx.setdefault(sea_name, {})[state_name] = sv_idx
+
             if sv_name.endswith(f"{sea_name}/motor_angle"):
                 sea_motor_angle_sv_idx[sea_name] = sv_idx
             elif sv_name.endswith(f"{sea_name}/motor_speed"):
@@ -763,7 +1016,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     print(
         f"  SEA F_opt   : {sea_f_opt}\n"
         f"  SEA motor SV: angle={sea_motor_angle_sv_idx}, "
-        f"speed={sea_motor_speed_sv_idx}"
+        f"speed={sea_motor_speed_sv_idx}\n"
+        f"  SEA state SV: {sea_state_sv_idx}"
     )
 
     return SimulationContext(
@@ -798,8 +1052,11 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         sea_props             = sea_props,
         sea_motor_angle_sv_idx = sea_motor_angle_sv_idx,
         sea_motor_speed_sv_idx = sea_motor_speed_sv_idx,
+        sea_state_sv_idx       = sea_state_sv_idx,
         pros_mob_indices      = pros_mob_indices,
         grf_storage      = grf_storage,
         grf_data_file    = mot_file,
+        grf_unfiltered_data_file = unfiltered_mot_file,
+        grf_filter_report_file = grf_filter_report_file,
         grf_vertical_force_columns = grf_vertical_force_columns,
     )

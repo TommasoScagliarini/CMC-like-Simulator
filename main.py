@@ -358,6 +358,12 @@ def _parse_args():
         help="Enable prosthetic PD feasibility scaling for high-gain SEA runs.",
     )
     parser.add_argument(
+        "--sea-outer-controller",
+        choices=["pd", "pid", "cascade"],
+        default=None,
+        help="Select prosthetic outer controller mode.",
+    )
+    parser.add_argument(
         "--sea-kp-knee",
         type=float,
         default=None,
@@ -382,6 +388,96 @@ def _parse_args():
         help="Override prosthetic ankle outer Kd [N*m*s/rad].",
     )
     parser.add_argument(
+        "--sea-ki-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee outer Ki [N*m/(rad*s)].",
+    )
+    parser.add_argument(
+        "--sea-ki-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle outer Ki [N*m/(rad*s)].",
+    )
+    parser.add_argument(
+        "--sea-integral-limit-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee integral error limit [rad*s].",
+    )
+    parser.add_argument(
+        "--sea-integral-limit-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle integral error limit [rad*s].",
+    )
+    parser.add_argument(
+        "--sea-integral-leak",
+        type=float,
+        default=None,
+        help="Override prosthetic PID integral leak [1/s].",
+    )
+    parser.add_argument(
+        "--sea-cascade-kp-outer-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee cascade outer position P gain [1/s].",
+    )
+    parser.add_argument(
+        "--sea-cascade-kp-inner-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee cascade inner velocity P gain [N*m*s/rad].",
+    )
+    parser.add_argument(
+        "--sea-cascade-ki-inner-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee cascade inner velocity I gain [N*m/rad].",
+    )
+    parser.add_argument(
+        "--sea-cascade-inner-i-torque-limit-knee",
+        type=float,
+        default=None,
+        help="Override prosthetic knee cascade inner I torque clamp [N*m].",
+    )
+    parser.add_argument(
+        "--sea-cascade-kp-outer-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle cascade outer position P gain [1/s].",
+    )
+    parser.add_argument(
+        "--sea-cascade-kp-inner-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle cascade inner velocity P gain [N*m*s/rad].",
+    )
+    parser.add_argument(
+        "--sea-cascade-ki-inner-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle cascade inner velocity I gain [N*m/rad].",
+    )
+    parser.add_argument(
+        "--sea-cascade-inner-i-torque-limit-ankle",
+        type=float,
+        default=None,
+        help="Override prosthetic ankle cascade inner I torque clamp [N*m].",
+    )
+    parser.add_argument(
+        "--sea-u-lpf-knee",
+        type=float,
+        default=None,
+        help="LPF cutoff for prosthetic knee outer u [Hz]. <=0 disables.",
+    )
+    parser.add_argument(
+        "--sea-u-lpf-ankle",
+        type=float,
+        default=None,
+        help="LPF cutoff for prosthetic ankle outer u [Hz]. <=0 disables.",
+    )
+    parser.add_argument(
         "--disable-kinematics-lowpass",
         action="store_true",
         help="Disable IK low-pass preprocessing before spline construction.",
@@ -391,6 +487,32 @@ def _parse_args():
         type=float,
         default=None,
         help="Override IK low-pass cutoff frequency [Hz].",
+    )
+    parser.add_argument(
+        "--filter-grf",
+        action="store_true",
+        help=(
+            "Use a run-local filtered GRF .mot copy that removes short/noisy "
+            "contacts before loading ExternalLoads."
+        ),
+    )
+    parser.add_argument(
+        "--grf-contact-threshold",
+        type=float,
+        default=None,
+        help="Override vertical GRF contact threshold used by events/filter [N].",
+    )
+    parser.add_argument(
+        "--grf-min-contact-duration",
+        type=float,
+        default=None,
+        help="Override minimum sustained GRF contact duration [s].",
+    )
+    parser.add_argument(
+        "--grf-min-cycle-duration",
+        type=float,
+        default=None,
+        help="Override minimum gait-cycle duration for event CSV [s].",
     )
 
     args = parser.parse_args()
@@ -430,6 +552,8 @@ def _parse_args():
         cfg.sea_motor_max_substeps = args.sea_motor_max_substeps
     if args.sea_feasibility_scaling:
         cfg.enable_sea_feasibility_scaling = True
+    if args.sea_outer_controller is not None:
+        cfg.sea_outer_controller_mode = args.sea_outer_controller
     if args.sea_kp_knee is not None:
         cfg.sea_kp[cfg.pros_coords[0]] = args.sea_kp_knee
     if args.sea_kd_knee is not None:
@@ -438,10 +562,52 @@ def _parse_args():
         cfg.sea_kp[cfg.pros_coords[1]] = args.sea_kp_ankle
     if args.sea_kd_ankle is not None:
         cfg.sea_kd[cfg.pros_coords[1]] = args.sea_kd_ankle
+    if args.sea_ki_knee is not None:
+        cfg.sea_ki[cfg.pros_coords[0]] = args.sea_ki_knee
+    if args.sea_ki_ankle is not None:
+        cfg.sea_ki[cfg.pros_coords[1]] = args.sea_ki_ankle
+    if args.sea_integral_limit_knee is not None:
+        cfg.sea_integral_limit[cfg.pros_coords[0]] = args.sea_integral_limit_knee
+    if args.sea_integral_limit_ankle is not None:
+        cfg.sea_integral_limit[cfg.pros_coords[1]] = args.sea_integral_limit_ankle
+    if args.sea_integral_leak is not None:
+        cfg.sea_integral_leak_s_inv = args.sea_integral_leak
+    if args.sea_cascade_kp_outer_knee is not None:
+        cfg.sea_cascade_kp_outer[cfg.pros_coords[0]] = args.sea_cascade_kp_outer_knee
+    if args.sea_cascade_kp_inner_knee is not None:
+        cfg.sea_cascade_kp_inner[cfg.pros_coords[0]] = args.sea_cascade_kp_inner_knee
+    if args.sea_cascade_ki_inner_knee is not None:
+        cfg.sea_cascade_ki_inner[cfg.pros_coords[0]] = args.sea_cascade_ki_inner_knee
+    if args.sea_cascade_inner_i_torque_limit_knee is not None:
+        cfg.sea_cascade_inner_i_torque_limit[cfg.pros_coords[0]] = (
+            args.sea_cascade_inner_i_torque_limit_knee
+        )
+    if args.sea_cascade_kp_outer_ankle is not None:
+        cfg.sea_cascade_kp_outer[cfg.pros_coords[1]] = args.sea_cascade_kp_outer_ankle
+    if args.sea_cascade_kp_inner_ankle is not None:
+        cfg.sea_cascade_kp_inner[cfg.pros_coords[1]] = args.sea_cascade_kp_inner_ankle
+    if args.sea_cascade_ki_inner_ankle is not None:
+        cfg.sea_cascade_ki_inner[cfg.pros_coords[1]] = args.sea_cascade_ki_inner_ankle
+    if args.sea_cascade_inner_i_torque_limit_ankle is not None:
+        cfg.sea_cascade_inner_i_torque_limit[cfg.pros_coords[1]] = (
+            args.sea_cascade_inner_i_torque_limit_ankle
+        )
+    if args.sea_u_lpf_knee is not None:
+        cfg.sea_u_lpf_cutoff_hz[cfg.pros_coords[0]] = args.sea_u_lpf_knee
+    if args.sea_u_lpf_ankle is not None:
+        cfg.sea_u_lpf_cutoff_hz[cfg.pros_coords[1]] = args.sea_u_lpf_ankle
     if args.disable_kinematics_lowpass:
         cfg.enable_kinematics_lowpass_filter = False
     if args.kinematics_lowpass_cutoff is not None:
         cfg.kinematics_lowpass_cutoff_hz = args.kinematics_lowpass_cutoff
+    if args.filter_grf:
+        cfg.enable_grf_contact_filter = True
+    if args.grf_contact_threshold is not None:
+        cfg.grf_contact_threshold_n = args.grf_contact_threshold
+    if args.grf_min_contact_duration is not None:
+        cfg.grf_min_contact_duration_s = args.grf_min_contact_duration
+    if args.grf_min_cycle_duration is not None:
+        cfg.grf_min_cycle_duration_s = args.grf_min_cycle_duration
 
     return cfg, args
 
@@ -467,6 +633,42 @@ def _run_plotter(cfg: SimulatorConfig) -> int:
         cfg.plot_gait_side,
         "--reference",
         str(resolved_paths.kinematics_path),
+        "--sea-outer-controller",
+        cfg.sea_outer_controller_mode,
+        "--sea-kp-knee",
+        str(cfg.sea_kp.get(cfg.pros_coords[0], "")),
+        "--sea-kd-knee",
+        str(cfg.sea_kd.get(cfg.pros_coords[0], "")),
+        "--sea-ki-knee",
+        str(cfg.sea_ki.get(cfg.pros_coords[0], "")),
+        "--sea-integral-limit-knee",
+        str(cfg.sea_integral_limit.get(cfg.pros_coords[0], "")),
+        "--sea-kp-ankle",
+        str(cfg.sea_kp.get(cfg.pros_coords[1], "")),
+        "--sea-kd-ankle",
+        str(cfg.sea_kd.get(cfg.pros_coords[1], "")),
+        "--sea-ki-ankle",
+        str(cfg.sea_ki.get(cfg.pros_coords[1], "")),
+        "--sea-integral-limit-ankle",
+        str(cfg.sea_integral_limit.get(cfg.pros_coords[1], "")),
+        "--sea-integral-leak",
+        str(cfg.sea_integral_leak_s_inv),
+        "--sea-cascade-kp-outer-knee",
+        str(cfg.sea_cascade_kp_outer.get(cfg.pros_coords[0], "")),
+        "--sea-cascade-kp-inner-knee",
+        str(cfg.sea_cascade_kp_inner.get(cfg.pros_coords[0], "")),
+        "--sea-cascade-ki-inner-knee",
+        str(cfg.sea_cascade_ki_inner.get(cfg.pros_coords[0], "")),
+        "--sea-cascade-inner-i-torque-limit-knee",
+        str(cfg.sea_cascade_inner_i_torque_limit.get(cfg.pros_coords[0], "")),
+        "--sea-cascade-kp-outer-ankle",
+        str(cfg.sea_cascade_kp_outer.get(cfg.pros_coords[1], "")),
+        "--sea-cascade-kp-inner-ankle",
+        str(cfg.sea_cascade_kp_inner.get(cfg.pros_coords[1], "")),
+        "--sea-cascade-ki-inner-ankle",
+        str(cfg.sea_cascade_ki_inner.get(cfg.pros_coords[1], "")),
+        "--sea-cascade-inner-i-torque-limit-ankle",
+        str(cfg.sea_cascade_inner_i_torque_limit.get(cfg.pros_coords[1], "")),
     ]
     if cfg.model_file:
         cmd.extend(["--model", str(resolved_paths.model_path)])
@@ -534,11 +736,21 @@ if __name__ == "__main__":
         "t_start", "t_end", "dt",
         "output_dir", "output_prefix",
         "sea_forward_mode", "qp_solver",
-        "sea_kp", "sea_kd",
+        "sea_outer_controller_mode",
+        "sea_kp", "sea_kd", "sea_ki",
+        "sea_integral_limit", "sea_integral_leak_s_inv",
+        "sea_cascade_kp_outer",
+        "sea_cascade_kp_inner",
+        "sea_cascade_ki_inner",
+        "sea_cascade_inner_i_torque_limit",
         "enable_kinematics_lowpass_filter",
         "kinematics_lowpass_cutoff_hz",
         "kinematics_lowpass_order",
         "kinematics_resample_dt",
+        "enable_grf_contact_filter",
+        "grf_contact_threshold_n",
+        "grf_min_contact_duration_s",
+        "grf_min_cycle_duration_s",
     }
     print("\nActive configuration:")
     for field_name, value in cfg.__dict__.items():

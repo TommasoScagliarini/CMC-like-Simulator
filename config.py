@@ -50,8 +50,8 @@ class SimulatorConfig:
     # =========================================================================
     # SIMULATION TIME  [seconds]
     # =========================================================================
-    t_start: float = 16.9000 # must be >= first time stamp in kinematics file
-    t_end:   float = 22.9000 # must be <= last  time stamp in kinematics file
+    t_start: float = 4.2300  # must be >= first time stamp in kinematics file
+    t_end:   float = 11.0690 # must be <= last  time stamp in kinematics file
     dt:      float = 0.001    # integration step for validated plugin mode
 
     # =========================================================================
@@ -67,7 +67,7 @@ class SimulatorConfig:
     # single-step mode where T_control = dt (backward compatible).
     # =========================================================================
     use_control_window: bool = True
-    T_control: float = 0.001          # control window [s] (3 ms, CMC-like)
+    T_control: float = 0.001          # control window [s] (1 ms, CMC-like)
     integration_dt: float = 0.001     # integration substep [s]
     integration_scheme: str = "rk4_bypass"  # "semi_implicit_euler" | "rk4_bypass"
 
@@ -112,17 +112,27 @@ class SimulatorConfig:
     kinematics_resample_dt: float = 0.001
 
     # =========================================================================
-    # SEA HIGH-LEVEL CONTROLLER  (outer PD, prosthetic side)
+    # SEA HIGH-LEVEL CONTROLLER  (outer PD/PID/CASCADE, prosthetic side)
     #
-    #   τ_cmd = Kp*(q_ref – q) + Kd*(qdot_ref – qdot)
+    #   PD:  τ_cmd = Kp*(q_ref – q) + Kd*(qdot_ref – qdot)
+    #   PID: τ_cmd = PD + Ki*∫(q_ref – q)dt
+    #   CASCADE:
+    #        qdot_cas = qdot_ref + Kp_outer*(q_ref - q)
+    #        τ_cmd    = Kp_inner*(qdot_cas - qdot)
+    #                 + Ki_inner*∫(qdot_cas - qdot)dt
     #   u     = clip(τ_cmd/F_opt, -1, +1)
     #
     # tau_ff from inverse dynamics may still be saved as an oracle diagnostic,
     # but it is not part of the prosthetic outer-loop command.
     #
     # u is passed to the plugin's inner PD torque loop.
-    # Units: [N·m/rad] for Kp, [N·m·s/rad] for Kd.
+    # Units:
+    #   PD/PID: [N·m/rad] for Kp, [N·m·s/rad] for Kd,
+    #           [N·m/(rad·s)] for Ki.
+    #   CASCADE: [1/s] for Kp_outer, [N·m·s/rad] for Kp_inner,
+    #            [N·m/rad] for Ki_inner.
     # =========================================================================
+    sea_outer_controller_mode: str = "cascade"  # "pd" | "pid" | "cascade"
     sea_kp: Dict[str, float] = field(default_factory=lambda: {
         "pros_knee_angle":  160,
         "pros_ankle_angle": 420,
@@ -130,6 +140,41 @@ class SimulatorConfig:
     sea_kd: Dict[str, float] = field(default_factory=lambda: {
         "pros_knee_angle":  12,
         "pros_ankle_angle": 1,
+    })
+    sea_ki: Dict[str, float] = field(default_factory=lambda: {
+        "pros_knee_angle":  20.0,
+        "pros_ankle_angle": 60.0,
+    })
+    sea_integral_limit: Dict[str, float] = field(default_factory=lambda: {
+        "pros_knee_angle":  0.25,
+        "pros_ankle_angle": 0.25,
+    })
+    sea_integral_leak_s_inv: float = 0.1
+    sea_cascade_kp_outer: Dict[str, float] = field(default_factory=lambda: {
+        # Morning best 2026-05-18:
+        # full_ankle5_kpo18p85_kpi29p2_kii1377_kil50_apo47p125_api2p8275_aii213_ail200.
+        "pros_knee_angle":  18.85,
+        "pros_ankle_angle": 47.125,
+    })
+    sea_cascade_kp_inner: Dict[str, float] = field(default_factory=lambda: {
+        "pros_knee_angle":  29.2,
+        "pros_ankle_angle": 2.8275,
+    })
+    sea_cascade_ki_inner: Dict[str, float] = field(default_factory=lambda: {
+        "pros_knee_angle":  1377.0,
+        "pros_ankle_angle": 213.0,
+    })
+    sea_cascade_inner_i_torque_limit: Dict[str, float] = field(default_factory=lambda: {
+        "pros_knee_angle":  50.0,
+        "pros_ankle_angle": 200.0,
+    })
+
+    # First-order LPF on the SEA outer command u, applied per SEA in the Python
+    # outer controller before the value is injected into the model controls.
+    # A non-positive cutoff disables the filter on that SEA.
+    sea_u_lpf_cutoff_hz: Dict[str, float] = field(default_factory=lambda: {
+        "pros_knee_angle":  0.0,
+        "pros_ankle_angle": 0.0,
     })
 
     # SEA spring stiffness [N·m/rad] — must match each plugin <stiffness> property.
@@ -279,4 +324,9 @@ class SimulatorConfig:
 
     # GRF event extraction / plotting defaults
     grf_contact_threshold_n: float = 20.0
+    grf_min_contact_duration_s: float = 0.05
+    grf_min_cycle_duration_s: float = 0.30
+    # Optional runtime GRF cleaner. Disabled by default so existing datasets
+    # keep their historical ExternalLoads unless a run explicitly opts in.
+    enable_grf_contact_filter: bool = False
     plot_gait_side: str = "left"

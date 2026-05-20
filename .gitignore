@@ -4,10 +4,28 @@ models/**/data/**
 !models/**/data/**/
 !models/**/data/.gitkeep
 !models/**/data/**/.gitkeep
+models/*-raw/
 
 # Ignore plugin and result contents, but keep the folders tracked
 plugins/*
 results/*
+
+# Generated plots are reproducible from results/reports; keep plotter source.
+plot/**
+!plot/
+!plot/plotter.py
+
+# Local CMake/build products for experimental plugins and tools.
+tools/**/build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.o
+*.d
+*.dylib
+*.so
+*.dll
 
 # Keep the folders themselves in the repository
 !models/.gitkeep
@@ -18,3 +36,13 @@ opensim.log
 
 # Local state for the most recently used simulator setup XML
 .simulator_last_setup.json
+
+# System / editor / cache files
+.DS_Store
+__pycache__/
+*.pyc
+.vscode/
+.claude/
+
+# Documenti di handover generati localmente (snapshot temporanei)
+HANDOVER_LLM_*.md

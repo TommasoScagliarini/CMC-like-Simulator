@@ -15,6 +15,7 @@ import json
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -28,29 +29,117 @@ from xml.etree import ElementTree as ET
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-DEFAULT_PIPELINE_ROOT = (
-    Path.home() / "Desktop" / "Opensim OMNIBUS" / "model_pipeline_dir"
+AB06_CONVERTED_DEFAULT = (
+    REPO_ROOT
+    / "models"
+    / "AB06_SEASEA-raw"
+    / "data"
+    / "converted"
+    / "treadmill"
+    / "treadmill_01_01"
 )
-DEFAULT_MODEL = (
-    Path.home()
-    / "Downloads"
-    / "Archive"
-    / "TODO"
-    / "gait2176_L_TFP_ORIGINALE_newmarkers - SEASEA.osim"
+
+
+def first_existing(candidates: Iterable[Path], fallback: Path | None = None) -> Path | None:
+    for candidate in candidates:
+        if candidate is not None and candidate.expanduser().exists():
+            return candidate
+    return fallback
+
+
+def format_command(cmd: Iterable[str]) -> str:
+    parts = [str(part) for part in cmd]
+    if os.name == "nt":
+        return subprocess.list2cmdline(parts)
+    return shlex.join(parts)
+
+
+def default_opensim_cmd() -> Path | None:
+    from_path = shutil.which("opensim-cmd")
+    if from_path:
+        return Path(from_path)
+    windows_cmd = Path("C:/OpenSim-mCMC/bin/opensim-cmd.exe")
+    return windows_cmd if windows_cmd.is_file() else None
+
+
+def default_plugin() -> Path:
+    if sys.platform == "darwin":
+        candidates = [
+            REPO_ROOT / "plugins" / "libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+            REPO_ROOT / "plugins" / "SEA_Plugin_BlackBox_mCMC_impedence.dylib",
+        ]
+        fallback = candidates[0]
+    elif os.name == "nt":
+        candidates = [
+            REPO_ROOT / "plugins" / "SEA_Plugin_BlackBox_mCMC_impedence_ff.dll",
+            REPO_ROOT / "plugins" / "SEA_Plugin_BlackBox_mCMC_impedence.dll",
+        ]
+        fallback = candidates[0]
+    else:
+        candidates = [
+            REPO_ROOT / "plugins" / "libSEA_Plugin_BlackBox_mCMC_impedence_ff.so",
+            REPO_ROOT / "plugins" / "SEA_Plugin_BlackBox_mCMC_impedence_ff.so",
+        ]
+        fallback = candidates[0]
+    return first_existing(candidates, fallback) or fallback
+
+
+def default_support_data() -> Path:
+    candidates = [
+        REPO_ROOT / "models" / "SEASEA" / "data",
+        REPO_ROOT / "models" / "SEASEA - whealthy data" / "data",
+    ]
+    return first_existing(candidates, candidates[0]) or candidates[0]
+
+
+DEFAULT_PIPELINE_ROOT = REPO_ROOT / "results" / "opensim_sea_pipeline"
+DEFAULT_MODEL = first_existing(
+    [
+        REPO_ROOT / "models" / "AB06_SEASEA-raw" / "osimxml" / "AB06_SEASEA_marker_calibrated.osim",
+        REPO_ROOT / "models" / "AB06_SEASEA-raw" / "osimxml" / "AB06_SEASEA.osim",
+        REPO_ROOT / "models" / "SEASEA" / "Adjusted_SEASEA - Copia_tuned.osim",
+        Path.home()
+        / "Downloads"
+        / "Archive"
+        / "TODO"
+        / "gait2176_L_TFP_ORIGINALE_newmarkers - SEASEA.osim",
+    ],
+    REPO_ROOT / "models" / "AB06_SEASEA-raw" / "osimxml" / "AB06_SEASEA.osim",
 )
-DEFAULT_MARKER_SET = Path.home() / "Downloads" / "Archive" / "markers_remapped.xml"
-DEFAULT_TRC = Path.home() / "Downloads" / "Archive" / "ground_walking_cw.trc"
-DEFAULT_GRF = Path.home() / "Downloads" / "Archive" / "ground_walking_cw_fp.mot"
-DEFAULT_SUPPORT_DATA = REPO_ROOT / "models" / "SEASEA - whealthy data" / "data"
-DEFAULT_OPENSIM_CMD = Path("C:/OpenSim-mCMC/bin/opensim-cmd.exe")
-DEFAULT_PLUGIN = REPO_ROOT / "plugins" / "SEA_Plugin_BlackBox_mCMC_impedence_ff.dll"
-DEFAULT_LEGACY_RRA_TASKS = (
-    Path.home()
-    / "Desktop"
-    / "Opensim OMNIBUS"
-    / "3D_Model_Leg_and_Prosthesis_Completo_21_76"
-    / "RRA"
-    / "RRA_Tasks.xml"
+DEFAULT_MARKER_SET = first_existing(
+    [
+        DEFAULT_MODEL,
+        Path.home() / "Downloads" / "Archive" / "markers_remapped.xml",
+    ],
+    DEFAULT_MODEL,
+)
+DEFAULT_TRC = first_existing(
+    [
+        AB06_CONVERTED_DEFAULT / "treadmill_01_01.trc",
+        Path.home() / "Downloads" / "Archive" / "ground_walking_cw.trc",
+    ],
+    AB06_CONVERTED_DEFAULT / "treadmill_01_01.trc",
+)
+DEFAULT_GRF = first_existing(
+    [
+        AB06_CONVERTED_DEFAULT / "treadmill_01_01_grf.mot",
+        Path.home() / "Downloads" / "Archive" / "ground_walking_cw_fp.mot",
+    ],
+    AB06_CONVERTED_DEFAULT / "treadmill_01_01_grf.mot",
+)
+DEFAULT_SUPPORT_DATA = default_support_data()
+DEFAULT_OPENSIM_CMD = default_opensim_cmd()
+DEFAULT_PLUGIN = default_plugin()
+DEFAULT_LEGACY_RRA_TASKS = first_existing(
+    [
+        Path.home()
+        / "Desktop"
+        / "Opensim OMNIBUS"
+        / "3D_Model_Leg_and_Prosthesis_Completo_21_76"
+        / "RRA"
+        / "RRA_Tasks.xml",
+    ],
+    None,
 )
 
 WORKER_COUNT = 4
@@ -80,7 +169,7 @@ class Paths:
 
 @dataclass(frozen=True)
 class ToolConfig:
-    opensim_cmd: Path
+    opensim_cmd: Path | None
     plugin: Path
     model: Path
     marker_set: Path
@@ -89,6 +178,10 @@ class ToolConfig:
     support_data: Path
     legacy_rra_tasks: Path | None = None
     dry_run: bool = False
+    skip_scaling: bool = False
+    full_time_range: tuple[float, float] = FULL_TIME_RANGE
+    rra_time_range: tuple[float, float] = RRA_TIME_RANGE
+    external_force_specs: tuple[tuple[str, str, str, str, str], ...] = ()
 
 
 @dataclass
@@ -139,6 +232,10 @@ def fmt(value: float) -> str:
     return f"{value:.15g}"
 
 
+def range_label(time_range: tuple[float, float]) -> str:
+    return f"{time_range[0]:.3f}_{time_range[1]:.3f}".replace(".", "p").replace("-", "m")
+
+
 def ensure_absolute(path: Path) -> Path:
     return path.expanduser().resolve()
 
@@ -162,6 +259,16 @@ def require_dir(path: Path, label: str) -> Path:
     if not resolved.is_dir():
         raise FileNotFoundError(f"{label} not found: {resolved}")
     return resolved
+
+
+def opensim_python_library_name(plugin: Path) -> str:
+    """Return the library stem format expected by opensim.LoadOpenSimLibrary()."""
+    if plugin.suffix.lower() not in {".dll", ".dylib", ".so"}:
+        return str(plugin)
+    stem = plugin.stem
+    if stem.startswith("lib"):
+        stem = stem[3:]
+    return str(plugin.with_name(stem))
 
 
 def create_paths(root: Path) -> Paths:
@@ -214,6 +321,11 @@ def copy_inputs(cfg: ToolConfig, paths: Paths) -> dict[str, Path]:
     copied["support_dir"] = support_dir
     copied["cmc_actuators"] = support_dir / "CMC_Actuators.xml"
     copied["cmc_tasks"] = support_dir / "CMC_Tasks - modified Kp_Kv.xml"
+    for key in ("cmc_actuators", "cmc_tasks"):
+        if not copied[key].is_file():
+            raise FileNotFoundError(
+                f"Required support XML {copied[key].name} not found in {cfg.support_data}"
+            )
     return copied
 
 
@@ -304,9 +416,12 @@ def stability_for_window(
     return total / count if count else math.inf
 
 
-def select_scaling_windows(trc_path: Path) -> list[tuple[int, float, float, float]]:
+def select_scaling_windows(
+    trc_path: Path,
+    search_range: tuple[float, float] = FULL_TIME_RANGE,
+) -> list[tuple[int, float, float, float]]:
     _, times, rows = parse_trc(trc_path)
-    start, stop = FULL_TIME_RANGE
+    start, stop = search_range
     candidates: list[tuple[float, float, float]] = []
     current = start
     while current + SCALE_WINDOW_SECONDS <= stop + 1e-9:
@@ -461,15 +576,106 @@ def build_ik_setup(
     return write_xml(root, destination)
 
 
-def build_external_forces(destination: Path, grf_file: Path, kinematics_file: Path | None = None) -> Path:
+def storage_column_labels(path: Path) -> list[str]:
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    try:
+        header_index = lines.index("endheader") + 1
+    except ValueError as exc:
+        raise ValueError(f"Not an OpenSim storage file with endheader: {path}") from exc
+    for line in lines[header_index:]:
+        if line.strip():
+            return line.split()
+    raise ValueError(f"No column-label row found in storage file: {path}")
+
+
+def storage_has_triplet(labels: Iterable[str], prefix: str) -> bool:
+    label_set = set(labels)
+    return all(f"{prefix}{axis}" in label_set for axis in ("x", "y", "z"))
+
+
+def storage_has_load(labels: Iterable[str], force_id: str, point_id: str, torque_id: str) -> bool:
+    return (
+        storage_has_triplet(labels, force_id)
+        and storage_has_triplet(labels, point_id)
+        and storage_has_triplet(labels, torque_id)
+    )
+
+
+def model_body_names(model_file: Path) -> set[str]:
+    root = ET.fromstring(model_file.read_text(encoding="utf-8", errors="replace").lstrip())
+    return {node.attrib["name"] for node in root.iter("Body") if "name" in node.attrib}
+
+
+def default_external_load_bodies(model_file: Path) -> tuple[str, str]:
+    bodies = model_body_names(model_file)
+    left_body = "foot_l" if "foot_l" in bodies else "calcn_l"
+    right_body = "calcn_r" if "calcn_r" in bodies else "foot_r"
+    return left_body, right_body
+
+
+def infer_external_force_specs(
+    grf_file: Path,
+    model_file: Path | None = None,
+) -> tuple[tuple[str, str, str, str, str], ...]:
+    labels = storage_column_labels(grf_file)
+    left_body, right_body = (
+        default_external_load_bodies(model_file)
+        if model_file is not None
+        else ("foot_l", "calcn_r")
+    )
+
+    if storage_has_load(labels, "ground_force1_v", "ground_force1_p", "ground_torque1_") and storage_has_load(
+        labels, "ground_force2_v", "ground_force2_p", "ground_torque2_"
+    ):
+        return (
+            ("left_ground_force1", left_body, "ground_force1_v", "ground_force1_p", "ground_torque1_"),
+            ("right_ground_force2", right_body, "ground_force2_v", "ground_force2_p", "ground_torque2_"),
+        )
+
+    if storage_has_load(labels, "FP1_v", "FP1_p", "FP1_moment_") and storage_has_load(
+        labels, "FP2_v", "FP2_p", "FP2_moment_"
+    ):
+        return (
+            ("left_FP1", left_body, "FP1_v", "FP1_p", "FP1_moment_"),
+            ("right_FP2", right_body, "FP2_v", "FP2_p", "FP2_moment_"),
+        )
+
+    if storage_has_load(labels, "Treadmill_L_v", "Treadmill_L_p", "Treadmill_L_moment_") and storage_has_load(
+        labels, "Treadmill_R_v", "Treadmill_R_p", "Treadmill_R_moment_"
+    ):
+        return (
+            ("left_Treadmill_L", left_body, "Treadmill_L_v", "Treadmill_L_p", "Treadmill_L_moment_"),
+            ("right_Treadmill_R", right_body, "Treadmill_R_v", "Treadmill_R_p", "Treadmill_R_moment_"),
+        )
+
+    raise ValueError(
+        "Could not infer ExternalLoads identifiers from GRF columns. "
+        "Pass --external-force name,body,force_id,point_id,torque_id."
+    )
+
+
+def parse_external_force_spec(raw: str) -> tuple[str, str, str, str, str]:
+    parts = [part.strip() for part in raw.split(",")]
+    if len(parts) != 5 or any(not part for part in parts):
+        raise argparse.ArgumentTypeError(
+            "--external-force must be name,body,force_id,point_id,torque_id"
+        )
+    return tuple(parts)  # type: ignore[return-value]
+
+
+def build_external_forces(
+    destination: Path,
+    grf_file: Path,
+    kinematics_file: Path | None = None,
+    force_specs: Iterable[tuple[str, str, str, str, str]] | None = None,
+    model_file: Path | None = None,
+) -> Path:
     root = ET.Element("OpenSimDocument", Version=OPEN_SIM_XML_VERSION)
     loads = child(root, "ExternalLoads", name="externalloads")
     objects = child(loads, "objects")
 
-    force_specs = [
-        ("right_FP2", "calcn_r", "FP2_v", "FP2_p", "FP2_moment_"),
-        ("left_FP1", "foot_l", "FP1_v", "FP1_p", "FP1_moment_"),
-    ]
+    if force_specs is None:
+        force_specs = infer_external_force_specs(grf_file, model_file)
     for name, body, force_id, point_id, torque_id in force_specs:
         force = child(objects, "ExternalForce", name=name)
         child(force, "applied_to_body", body)
@@ -665,17 +871,49 @@ def build_simulator_setup(
 def run_opensim_tool(setup_xml: Path, worker_dir: Path, cfg: ToolConfig, label: str) -> CommandResult:
     worker_dir.mkdir(parents=True, exist_ok=True)
     log_path = worker_dir / f"{label}.log"
-    cmd = [
-        str(cfg.opensim_cmd),
-        "--library",
-        str(cfg.plugin),
-        "--log=info",
-        "run-tool",
-        str(setup_xml),
-    ]
+    if cfg.opensim_cmd is not None:
+        cmd = [
+            str(cfg.opensim_cmd),
+            "--library",
+            str(cfg.plugin),
+            "--log=info",
+            "run-tool",
+            str(setup_xml),
+        ]
+    else:
+        runner = f"""
+import sys
+import xml.etree.ElementTree as ET
+import opensim
+
+plugin = {opensim_python_library_name(cfg.plugin)!r}
+setup_xml = {str(setup_xml)!r}
+if plugin:
+    opensim.LoadOpenSimLibrary(plugin)
+
+root = ET.parse(setup_xml).getroot()
+tool_node = next((child for child in list(root) if isinstance(child.tag, str)), None)
+if tool_node is None:
+    raise RuntimeError(f"No OpenSim tool node found in {{setup_xml}}")
+
+tool_map = {{
+    "ScaleTool": opensim.ScaleTool,
+    "InverseKinematicsTool": opensim.InverseKinematicsTool,
+    "InverseDynamicsTool": opensim.InverseDynamicsTool,
+    "RRATool": opensim.RRATool,
+    "AnalyzeTool": opensim.AnalyzeTool,
+    "CMCTool": opensim.CMCTool,
+}}
+tool_class = tool_map.get(tool_node.tag)
+if tool_class is None:
+    raise RuntimeError(f"Unsupported OpenSim tool {{tool_node.tag!r}} in {{setup_xml}}")
+tool = tool_class(setup_xml)
+tool.run()
+"""
+        cmd = [sys.executable, "-c", runner]
     started = time.perf_counter()
     if cfg.dry_run:
-        text = "DRY RUN: " + " ".join(cmd)
+        text = "DRY RUN: " + format_command(cmd)
         log_path.write_text(text + "\n", encoding="utf-8")
         return CommandResult(0, text, 0.0)
 
@@ -949,8 +1187,8 @@ def run_scale_candidate_worker(args: tuple[ToolConfig, Path, Path, Path, Path, l
     return candidate
 
 
-def run_rra_candidate_worker(args: tuple[ToolConfig, Path, Path, Path, str, Path, Path, Path, str | None]) -> RraCandidate:
-    cfg, scaled_model, actuators, tasks, task_profile, external_forces, desired_kinematics, workers_dir, adjusted_body = args
+def run_rra_candidate_worker(args: tuple[ToolConfig, Path, Path, Path, str, Path, Path, Path, str | None, tuple[float, float]]) -> RraCandidate:
+    cfg, scaled_model, actuators, tasks, task_profile, external_forces, desired_kinematics, workers_dir, adjusted_body, rra_time_range = args
     body_name = adjusted_body or "no_com"
     name = f"{task_profile}_{body_name}"
     worker_dir = workers_dir / f"rra_{name}"
@@ -988,8 +1226,8 @@ def run_rra_candidate_worker(args: tuple[ToolConfig, Path, Path, Path, str, Path
         Path("results"),
         Path(output_model.name),
         adjusted_body,
-        RRA_TIME_RANGE[0],
-        RRA_TIME_RANGE[1],
+        rra_time_range[0],
+        rra_time_range[1],
     )
     result = run_opensim_tool(setup_xml, worker_dir, cfg, f"rra_{name}")
     candidate.command_returncode = result.returncode
@@ -1169,7 +1407,12 @@ def write_report(
     destination.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def run_smoke_test(setup_xml: Path, paths: Paths, dry_run: bool) -> int | None:
+def run_smoke_test(
+    setup_xml: Path,
+    paths: Paths,
+    time_range: tuple[float, float],
+    dry_run: bool,
+) -> int | None:
     smoke_dir = paths.final_dir / "smoke_results"
     smoke_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
@@ -1178,15 +1421,15 @@ def run_smoke_test(setup_xml: Path, paths: Paths, dry_run: bool) -> int | None:
         "--setup",
         str(setup_xml),
         "--t-start",
-        fmt(RRA_TIME_RANGE[0]),
+        fmt(time_range[0]),
         "--t-end",
-        fmt(min(RRA_TIME_RANGE[0] + 0.03, RRA_TIME_RANGE[1])),
+        fmt(min(time_range[0] + 0.03, time_range[1])),
         "--output-dir",
         str(smoke_dir),
     ]
     log_path = paths.logs_dir / "smoke_test.log"
     if dry_run:
-        log_path.write_text("DRY RUN: " + " ".join(cmd) + "\n", encoding="utf-8")
+        log_path.write_text("DRY RUN: " + format_command(cmd) + "\n", encoding="utf-8")
         return 0
     completed = subprocess.run(
         cmd,
@@ -1206,57 +1449,83 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
 
     copied = copy_inputs(cfg, paths)
     marker_names = parse_marker_names(copied["marker_set"])
-    windows = select_scaling_windows(copied["trc"])
-    (paths.logs_dir / "selected_scaling_windows.json").write_text(
-        json.dumps(
-            [
-                {"index": idx, "start": start, "end": end, "stability_mm_per_frame": score}
-                for idx, start, end, score in windows
-            ],
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    print(f"[pipeline] Running scaling candidates with {WORKER_COUNT} workers...")
-    scale_args = []
-    for idx, start, end, stability in windows:
-        for mode in ("marker_only", "measurements"):
-            scale_args.append(
-                (
-                    cfg,
-                    copied["model"],
-                    copied["marker_set"],
-                    copied["trc"],
-                    paths.workers_dir,
-                    marker_names,
-                    idx,
-                    mode,
-                    start,
-                    end,
-                    stability,
-                )
-            )
-    with concurrent.futures.ProcessPoolExecutor(max_workers=WORKER_COUNT) as pool:
-        scale_candidates = list(pool.map(run_scale_candidate_worker, scale_args))
-
-    summarize_scale_candidates(scale_candidates, paths.scaling_dir / "scaling_candidates.csv")
-    ok_scale_candidates = [c for c in scale_candidates if c.status == "ok" and c.output_model.is_file()]
-    if not ok_scale_candidates:
-        raise RuntimeError("No scaling candidate completed successfully.")
-
-    selected_scale = min(ok_scale_candidates, key=scale_selection_key)
-    if selected_scale.rms_marker_error_m is not None and selected_scale.rms_marker_error_m > RMS_TARGET_M:
-        print(
-            "[pipeline] WARNING: selected scaling RMS is above target: "
-            f"{selected_scale.rms_marker_error_m:.6f} m > {RMS_TARGET_M:.6f} m"
+    if cfg.skip_scaling:
+        print("[pipeline] Scaling skipped; using the input model as prepared SEA model.")
+        scaled_model = paths.scaling_dir / copied["model"].name
+        shutil.copy2(copied["model"], scaled_model)
+        selected_scale = ScaleCandidate(
+            index=0,
+            mode="skipped",
+            start=cfg.full_time_range[0],
+            end=cfg.full_time_range[1],
+            stability_mm_per_frame=math.nan,
+            worker_dir=paths.scaling_dir,
+            setup_xml=paths.scaling_dir / "Scale_skipped.xml",
+            output_model=scaled_model,
+            output_scale_file=paths.scaling_dir / "scale_factors_skipped.xml",
+            output_motion_file=paths.scaling_dir / "static_pose_skipped.mot",
         )
-    scaled_model, _ = promote_scale_candidate(selected_scale, paths)
+        selected_scale.status = "ok"
+        selected_scale.notes.append("Scaling skipped because the model was provided as already prepared.")
+        scale_candidates = [selected_scale]
+        summarize_scale_candidates(scale_candidates, paths.scaling_dir / "scaling_candidates.csv")
+        (paths.logs_dir / "selected_scaling_windows.json").write_text("[]\n", encoding="utf-8")
+    else:
+        windows = select_scaling_windows(copied["trc"], cfg.full_time_range)
+        (paths.logs_dir / "selected_scaling_windows.json").write_text(
+            json.dumps(
+                [
+                    {"index": idx, "start": start, "end": end, "stability_mm_per_frame": score}
+                    for idx, start, end, score in windows
+                ],
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        print(f"[pipeline] Running scaling candidates with {WORKER_COUNT} workers...")
+        scale_args = []
+        for idx, start, end, stability in windows:
+            for mode in ("marker_only", "measurements"):
+                scale_args.append(
+                    (
+                        cfg,
+                        copied["model"],
+                        copied["marker_set"],
+                        copied["trc"],
+                        paths.workers_dir,
+                        marker_names,
+                        idx,
+                        mode,
+                        start,
+                        end,
+                        stability,
+                    )
+                )
+        with concurrent.futures.ProcessPoolExecutor(max_workers=WORKER_COUNT) as pool:
+            scale_candidates = list(pool.map(run_scale_candidate_worker, scale_args))
+
+        summarize_scale_candidates(scale_candidates, paths.scaling_dir / "scaling_candidates.csv")
+        ok_scale_candidates = [c for c in scale_candidates if c.status == "ok" and c.output_model.is_file()]
+        if not ok_scale_candidates:
+            raise RuntimeError("No scaling candidate completed successfully.")
+
+        selected_scale = min(ok_scale_candidates, key=scale_selection_key)
+        if selected_scale.rms_marker_error_m is not None and selected_scale.rms_marker_error_m > RMS_TARGET_M:
+            print(
+                "[pipeline] WARNING: selected scaling RMS is above target: "
+                f"{selected_scale.rms_marker_error_m:.6f} m > {RMS_TARGET_M:.6f} m"
+            )
+        scaled_model, _ = promote_scale_candidate(selected_scale, paths)
+
+    force_specs = cfg.external_force_specs or infer_external_force_specs(copied["grf"], scaled_model)
 
     print("[pipeline] Running IK...")
-    full_ik_setup = paths.ik_dir / "IK_full_17_23_setup.xml"
+    full_label = range_label(cfg.full_time_range)
+    rra_label = range_label(cfg.rra_time_range)
+    full_ik_setup = paths.ik_dir / f"IK_full_{full_label}_setup.xml"
     full_ik_results = paths.ik_dir / "full"
-    full_ik_motion = "IK_full_17_23.mot"
+    full_ik_motion = f"IK_full_{full_label}.mot"
     build_ik_setup(
         full_ik_setup,
         scaled_model,
@@ -1264,16 +1533,16 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
         marker_names,
         full_ik_results,
         full_ik_motion,
-        FULL_TIME_RANGE[0],
-        FULL_TIME_RANGE[1],
+        cfg.full_time_range[0],
+        cfg.full_time_range[1],
     )
     full_ik_result = run_opensim_tool(full_ik_setup, paths.ik_dir, cfg, "ik_full")
     if full_ik_result.returncode != 0:
         raise RuntimeError("Full IK failed; inspect 02_ik/ik_full.log")
 
-    rra_ik_setup = paths.ik_dir / "IK_rra_window_setup.xml"
+    rra_ik_setup = paths.ik_dir / f"IK_rra_window_{rra_label}_setup.xml"
     rra_ik_results = paths.ik_dir / "rra_window"
-    rra_ik_motion = "IK_rra_window.mot"
+    rra_ik_motion = f"IK_rra_window_{rra_label}.mot"
     build_ik_setup(
         rra_ik_setup,
         scaled_model,
@@ -1281,19 +1550,38 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
         marker_names,
         rra_ik_results,
         rra_ik_motion,
-        RRA_TIME_RANGE[0],
-        RRA_TIME_RANGE[1],
+        cfg.rra_time_range[0],
+        cfg.rra_time_range[1],
     )
     rra_ik_result = run_opensim_tool(rra_ik_setup, paths.ik_dir, cfg, "ik_rra_window")
     if rra_ik_result.returncode != 0:
         raise RuntimeError("RRA-window IK failed; inspect 02_ik/ik_rra_window.log")
+    if cfg.dry_run:
+        write_report(
+            paths.pipeline_root / "pipeline_report.md",
+            scale_candidates,
+            selected_scale,
+            [],
+            None,
+            None,
+            None,
+        )
+        print("[pipeline] Dry run stopped before stages that need generated IK files.")
+        print(f"[pipeline] Report: {paths.pipeline_root / 'pipeline_report.md'}")
+        return 0
     full_kinematics = find_generated_file(paths.ik_dir, full_ik_results, full_ik_motion)
     rra_kinematics = find_generated_file(paths.ik_dir, rra_ik_results, rra_ik_motion)
     promote_ik_outputs(paths, full_kinematics, rra_kinematics, full_ik_setup, rra_ik_setup)
 
     print("[pipeline] Running ID diagnostic...")
     external_forces = paths.id_dir / "ExternalForces.xml"
-    build_external_forces(external_forces, copied["grf"], rra_kinematics)
+    build_external_forces(
+        external_forces,
+        copied["grf"],
+        rra_kinematics,
+        force_specs,
+        scaled_model,
+    )
     id_setup = paths.id_dir / "ID_setup.xml"
     build_id_setup(
         id_setup,
@@ -1301,8 +1589,8 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
         external_forces,
         rra_kinematics,
         paths.id_dir,
-        RRA_TIME_RANGE[0],
-        RRA_TIME_RANGE[1],
+        cfg.rra_time_range[0],
+        cfg.rra_time_range[1],
     )
     id_result = run_opensim_tool(id_setup, paths.id_dir, cfg, "id")
     if id_result.returncode != 0:
@@ -1320,7 +1608,13 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
         task_profiles.append(("legacy_rra_tasks", legacy_tasks))
 
     rra_external = paths.rra_dir / "ExternalForces.xml"
-    build_external_forces(rra_external, copied["grf"], rra_kinematics)
+    build_external_forces(
+        rra_external,
+        copied["grf"],
+        rra_kinematics,
+        force_specs,
+        scaled_model,
+    )
     rra_kin_copy = paths.rra_dir / rra_kinematics.name
     shutil.copy2(rra_kinematics, rra_kin_copy)
 
@@ -1338,6 +1632,7 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
                     rra_kin_copy,
                     paths.workers_dir,
                     body,
+                    cfg.rra_time_range,
                 )
             )
     with concurrent.futures.ProcessPoolExecutor(max_workers=WORKER_COUNT) as pool:
@@ -1377,11 +1672,15 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
         final_kinematics,
         final_external,
         final_actuators,
-        RRA_TIME_RANGE[0],
-        RRA_TIME_RANGE[1],
+        cfg.rra_time_range[0],
+        cfg.rra_time_range[1],
     )
 
-    smoke_returncode = run_smoke_test(simulator_setup, paths, cfg.dry_run) if run_smoke else None
+    smoke_returncode = (
+        run_smoke_test(simulator_setup, paths, cfg.rra_time_range, cfg.dry_run)
+        if run_smoke
+        else None
+    )
     write_report(
         paths.pipeline_root / "pipeline_report.md",
         scale_candidates,
@@ -1409,6 +1708,43 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--opensim-cmd", type=Path, default=DEFAULT_OPENSIM_CMD)
     parser.add_argument("--plugin", type=Path, default=DEFAULT_PLUGIN)
     parser.add_argument("--legacy-rra-tasks", type=Path, default=DEFAULT_LEGACY_RRA_TASKS)
+    parser.add_argument(
+        "--full-time-range",
+        type=float,
+        nargs=2,
+        metavar=("START", "END"),
+        default=FULL_TIME_RANGE,
+        help="Time range for the full IK pass.",
+    )
+    parser.add_argument(
+        "--rra-time-range",
+        type=float,
+        nargs=2,
+        metavar=("START", "END"),
+        default=RRA_TIME_RANGE,
+        help="Time range used for ID, RRA, final setup, and smoke test.",
+    )
+    parser.add_argument(
+        "--skip-scaling",
+        action="store_true",
+        help="Use --model as an already prepared/scaled SEA model and start from IK.",
+    )
+    parser.add_argument(
+        "--force-scaling",
+        action="store_true",
+        help="Run ScaleTool even when the marker set is embedded in the model.",
+    )
+    parser.add_argument(
+        "--external-force",
+        action="append",
+        type=parse_external_force_spec,
+        default=[],
+        metavar="NAME,BODY,FORCE_ID,POINT_ID,TORQUE_ID",
+        help=(
+            "ExternalForce mapping. Repeat for multiple forces. "
+            "If omitted, mappings are inferred from GRF columns."
+        ),
+    )
     parser.add_argument("--skip-smoke-test", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
@@ -1416,11 +1752,17 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    model = require_file(args.model, "Initial model")
+    marker_set = require_file(args.marker_set, "MarkerSet or model with embedded MarkerSet")
+    auto_skip_scaling = (
+        not args.force_scaling
+        and (args.skip_scaling or marker_set == model or marker_set.suffix.lower() == ".osim")
+    )
     cfg = ToolConfig(
-        opensim_cmd=require_file(args.opensim_cmd, "opensim-cmd"),
+        opensim_cmd=require_file(args.opensim_cmd, "opensim-cmd") if args.opensim_cmd else None,
         plugin=require_file(args.plugin, "SEA plugin"),
-        model=require_file(args.model, "Initial model"),
-        marker_set=require_file(args.marker_set, "MarkerSet"),
+        model=model,
+        marker_set=marker_set,
         trc=require_file(args.trc, "TRC"),
         grf=require_file(args.grf, "GRF MOT"),
         support_data=require_dir(args.support_data, "SEASEA support data"),
@@ -1428,6 +1770,10 @@ def main() -> int:
         if args.legacy_rra_tasks and ensure_absolute(args.legacy_rra_tasks).is_file()
         else None,
         dry_run=args.dry_run,
+        skip_scaling=auto_skip_scaling,
+        full_time_range=tuple(args.full_time_range),
+        rra_time_range=tuple(args.rra_time_range),
+        external_force_specs=tuple(args.external_force),
     )
     paths = create_paths(args.pipeline_root)
     return run_pipeline(cfg, paths, run_smoke=not args.skip_smoke_test)

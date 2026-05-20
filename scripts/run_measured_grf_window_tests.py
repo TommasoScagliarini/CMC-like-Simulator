@@ -952,7 +952,7 @@ def main() -> int:
         raise RuntimeError("No window tests selected.")
 
     cfg = ToolConfig(
-        opensim_cmd=require_file(args.opensim_cmd, "opensim-cmd"),
+        opensim_cmd=require_file(args.opensim_cmd, "opensim-cmd") if args.opensim_cmd else None,
         plugin=require_file(args.plugin, "SEA plugin"),
         model=require_file(args.scaled_model, "Scaled model"),
         marker_set=require_file(args.marker_set, "MarkerSet"),

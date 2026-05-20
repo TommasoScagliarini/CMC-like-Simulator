@@ -29,6 +29,8 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from model_loader import SimulationContext
 
+SEA_DIAGNOSTIC_WIDTH = 42
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  .sto writer
@@ -155,24 +157,53 @@ def _cycles_from_vertical_grf(
     threshold: float,
     t_start: float,
     t_end: float,
+    min_contact_duration_s: float = 0.0,
+    min_cycle_duration_s: float = 0.0,
 ) -> List[tuple]:
-    """Return complete heel-strike-to-heel-strike cycles from GRF crossings."""
-    edges: List[float] = []
+    """Return heel-strike-to-heel-strike cycles from sustained GRF contacts."""
+    contacts: List[tuple] = []
+    contact_start: Optional[float] = None
+
     for i in range(1, len(time)):
         was_contact = vertical_grf[i - 1] > threshold
         is_contact = vertical_grf[i] > threshold
-        if was_contact or not is_contact:
+
+        if not was_contact and is_contact:
+            denom = vertical_grf[i] - vertical_grf[i - 1]
+            frac = 0.0 if abs(denom) < 1e-12 else (threshold - vertical_grf[i - 1]) / denom
+            contact_start = float(time[i - 1] + frac * (time[i] - time[i - 1]))
             continue
-        denom = vertical_grf[i] - vertical_grf[i - 1]
-        frac = 0.0 if abs(denom) < 1e-12 else (threshold - vertical_grf[i - 1]) / denom
-        edge_time = time[i - 1] + frac * (time[i] - time[i - 1])
-        if t_start <= edge_time <= t_end:
-            edges.append(float(edge_time))
+
+        if was_contact and not is_contact and contact_start is not None:
+            denom = vertical_grf[i] - vertical_grf[i - 1]
+            frac = 0.0 if abs(denom) < 1e-12 else (threshold - vertical_grf[i - 1]) / denom
+            contact_end = float(time[i - 1] + frac * (time[i] - time[i - 1]))
+            contact_duration = contact_end - contact_start
+            if (
+                t_start <= contact_start <= t_end
+                and contact_duration >= min_contact_duration_s
+            ):
+                contacts.append((contact_start, contact_end))
+            contact_start = None
+
+    if contact_start is not None:
+        contact_end = min(float(time[-1]), t_end)
+        contact_duration = contact_end - contact_start
+        if (
+            t_start <= contact_start <= t_end
+            and contact_duration >= min_contact_duration_s
+        ):
+            contacts.append((contact_start, contact_end))
+
+    edges = [start for start, _end in contacts]
 
     return [
-        (edges[i], edges[i + 1])
+        (edges[i], edges[i + 1], contacts[i][1] - contacts[i][0])
         for i in range(len(edges) - 1)
-        if t_start <= edges[i] < edges[i + 1] <= t_end
+        if (
+            t_start <= edges[i] < edges[i + 1] <= t_end
+            and edges[i + 1] - edges[i] >= min_cycle_duration_s
+        )
     ]
 
 
@@ -182,6 +213,8 @@ def _write_gait_events_csv(cfg: SimulatorConfig, ctx: "SimulationContext") -> No
     pfx = cfg.output_prefix
     path = os.path.join(out, f"{pfx}_gait_events.csv")
     threshold = float(cfg.grf_contact_threshold_n)
+    min_contact_duration_s = float(getattr(cfg, "grf_min_contact_duration_s", 0.0))
+    min_cycle_duration_s = float(getattr(cfg, "grf_min_cycle_duration_s", 0.0))
     rows = []
 
     grf_file = getattr(ctx, "grf_data_file", "")
@@ -201,15 +234,21 @@ def _write_gait_events_csv(cfg: SimulatorConfig, ctx: "SimulationContext") -> No
                 threshold,
                 cfg.t_start,
                 cfg.t_end,
+                min_contact_duration_s,
+                min_cycle_duration_s,
             )
-            for start, end in cycles:
+            for start, end, contact_duration in cycles:
                 rows.append(
                     {
                         "side": side,
                         "cycle_start": f"{start:.8f}",
                         "cycle_end": f"{end:.8f}",
+                        "cycle_duration_s": f"{end - start:.8f}",
+                        "contact_duration_s": f"{contact_duration:.8f}",
                         "source_force": source_col,
                         "threshold_n": f"{threshold:.8f}",
+                        "min_contact_duration_s": f"{min_contact_duration_s:.8f}",
+                        "min_cycle_duration_s": f"{min_cycle_duration_s:.8f}",
                     }
                 )
 
@@ -220,8 +259,12 @@ def _write_gait_events_csv(cfg: SimulatorConfig, ctx: "SimulationContext") -> No
                 "side",
                 "cycle_start",
                 "cycle_end",
+                "cycle_duration_s",
+                "contact_duration_s",
                 "source_force",
                 "threshold_n",
+                "min_contact_duration_s",
+                "min_cycle_duration_s",
             ],
         )
         writer.writeheader()
@@ -230,7 +273,9 @@ def _write_gait_events_csv(cfg: SimulatorConfig, ctx: "SimulationContext") -> No
     counts = {side: sum(1 for row in rows if row["side"] == side) for side in ("left", "right")}
     print(
         f"  -> Gait events : {path} "
-        f"(left={counts['left']}, right={counts['right']}, threshold={threshold:g} N)"
+        f"(left={counts['left']}, right={counts['right']}, "
+        f"threshold={threshold:g} N, min_contact={min_contact_duration_s:g} s, "
+        f"min_cycle={min_cycle_duration_s:g} s)"
     )
 
 
@@ -265,6 +310,28 @@ class OutputRecorder:
         n_sea    = len(sea_pros_map)
         n_res_all = len(getattr(ctx, "reserve_all_names", ctx.reserve_names))
         n_so_diag = ctx.n_bio * 6 + 1
+        sea_state_map = getattr(ctx, "sea_state_sv_idx", {}) or {}
+        self._sea_state_items = []
+        for sea_name, _coord_name in sea_pros_map:
+            for state_name, sv_idx in sorted(
+                sea_state_map.get(sea_name, {}).items(),
+                key=lambda item: item[1],
+            ):
+                self._sea_state_items.append((sea_name, state_name, sv_idx))
+        if not self._sea_state_items:
+            for sea_name, _coord_name in sea_pros_map:
+                self._sea_state_items.append(
+                    (sea_name, "motor_angle", ctx.sea_motor_angle_sv_idx[sea_name])
+                )
+                self._sea_state_items.append(
+                    (sea_name, "motor_speed", ctx.sea_motor_speed_sv_idx[sea_name])
+                )
+        self._sea_state_col_idx = {
+            (sea_name, state_name): i
+            for i, (sea_name, state_name, _sv_idx) in enumerate(
+                self._sea_state_items
+            )
+        }
 
         self._rec_time          = np.full(n_steps, np.nan)
         self._rec_q             = np.full((n_steps, n_coords),       np.nan)
@@ -278,9 +345,16 @@ class OutputRecorder:
         self._rec_sea_controls  = np.full((n_steps, 2),              np.nan)
         self._rec_muscle_forces = np.full((n_steps, ctx.n_muscles),  np.nan)
         self._rec_sea_torques   = np.full((n_steps, n_sea * 2),      np.nan)
-        self._rec_sea_states    = np.full((n_steps, n_sea * 2),      np.nan)
-        self._rec_sea_derivatives = np.full((n_steps, n_sea * 2),    np.nan)
-        self._rec_sea_diagnostics = np.full((n_steps, n_sea * 23),   np.nan)
+        self._rec_sea_states    = np.full(
+            (n_steps, len(self._sea_state_items)), np.nan
+        )
+        self._rec_sea_derivatives = np.full(
+            (n_steps, len(self._sea_state_items)), np.nan
+        )
+        self._rec_sea_diagnostics = np.full(
+            (n_steps, n_sea * SEA_DIAGNOSTIC_WIDTH),
+            np.nan,
+        )
         self._rec_power         = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_recruitment   = np.full((n_steps, 12),             np.nan)
         self._rec_so_torque_diagnostics = np.full((n_steps, n_so_diag), np.nan)
@@ -343,6 +417,11 @@ class OutputRecorder:
 
         # ── SEA torques: spring (downstream) + motor (upstream) ─────────────
         sv = ctx.model.getStateVariableValues(state)
+        for col_idx, (_sea_name, _state_name, sv_idx) in enumerate(
+            self._sea_state_items
+        ):
+            self._rec_sea_states[k, col_idx] = sv.get(sv_idx)
+
         for i, (sea_name, coord_name) in enumerate(self._sea_pros_map):
             props = self._sea_props.get(sea_name)
             if props is None:
@@ -350,6 +429,8 @@ class OutputRecorder:
             K     = props["K"]
             Kp    = props["Kp"]
             Kd    = props["Kd"]
+            Ki    = props.get("Ki", 0.0)
+            integral_torque_limit = props.get("integral_torque_limit", 100.0)
             Bm    = props["Bm"]
             Jm    = props.get("Jm", np.nan)
             F_opt = props["F_opt"]
@@ -358,6 +439,29 @@ class OutputRecorder:
             ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
             theta_m = sv.get(ma_idx)
             omega_m = sv.get(ms_idx) if ms_idx is not None else 0.0
+            xi_col = self._sea_state_col_idx.get(
+                (sea_name, "torque_error_integral")
+            )
+            xi = (
+                self._rec_sea_states[k, xi_col]
+                if xi_col is not None
+                else 0.0
+            )
+            if not np.isfinite(xi):
+                xi = 0.0
+            if not np.isfinite(Ki):
+                Ki = 0.0
+            if not np.isfinite(integral_torque_limit):
+                integral_torque_limit = 0.0
+            integral_torque_limit = max(0.0, float(integral_torque_limit))
+            inner_integral_torque = float(np.clip(
+                Ki * xi,
+                -integral_torque_limit,
+                integral_torque_limit,
+            ))
+            xi_dot_plugin = np.nan
+            if sea_derivatives is not None and xi_col is not None and xi_col < len(sea_derivatives):
+                xi_dot_plugin = float(sea_derivatives[xi_col])
 
             theta_j = coord_set.get(coord_name).getValue(state)
             omega_j = coord_set.get(coord_name).getSpeedValue(state)
@@ -370,20 +474,75 @@ class OutputRecorder:
             qdot_ref_value = (qdot_ref or {}).get(coord_name, omega_j)
             outer_kp = cfg.sea_kp.get(coord_name, 0.0)
             outer_kd = cfg.sea_kd.get(coord_name, 0.0)
-            outer_pd_unscaled_cmd = (
-                outer_kp * (q_ref_value - theta_j)
-                + outer_kd * (qdot_ref_value - omega_j)
+            p_fallback = outer_kp * (q_ref_value - theta_j)
+            d_fallback = outer_kd * (qdot_ref_value - omega_j)
+            outer_p_cmd = u_sea.get(f"{coord_name}_outer_p_cmd", p_fallback)
+            outer_d_cmd = u_sea.get(f"{coord_name}_outer_d_cmd", d_fallback)
+            outer_i_cmd = u_sea.get(f"{coord_name}_outer_i_cmd", 0.0)
+            outer_pd_unscaled_cmd = u_sea.get(
+                f"{coord_name}_outer_pd_unscaled_cmd",
+                outer_p_cmd + outer_d_cmd,
             )
             sea_feasibility_scale = u_sea.get(
                 f"{coord_name}_feasibility_scale",
                 1.0,
             )
-            outer_pd_cmd = outer_pd_unscaled_cmd * sea_feasibility_scale
+            outer_pd_cmd = u_sea.get(
+                f"{coord_name}_outer_pd_cmd",
+                outer_pd_unscaled_cmd * sea_feasibility_scale,
+            )
             tau_ff_cmd = (tau_pros_ff or {}).get(coord_name, np.nan)
-            # The prosthetic outer loop is PD-only. tau_ff_cmd is retained as an
-            # inverse-dynamics oracle diagnostic, not as part of the SEA command.
-            tau_cmd_raw = outer_pd_cmd
+            # tau_ff_cmd is retained as an inverse-dynamics oracle diagnostic,
+            # not as part of the SEA command.
+            tau_cmd_raw = u_sea.get(
+                f"{coord_name}_outer_cmd",
+                (outer_pd_unscaled_cmd + outer_i_cmd) * sea_feasibility_scale,
+            )
             tau_ref_minus_tau_cmd = tau_ref - tau_cmd_raw
+            outer_integral_error = u_sea.get(
+                f"{coord_name}_outer_integral_error",
+                0.0,
+            )
+            outer_integral_clamped = u_sea.get(
+                f"{coord_name}_outer_integral_clamped",
+                0.0,
+            )
+            outer_anti_windup_active = u_sea.get(
+                f"{coord_name}_outer_anti_windup_active",
+                0.0,
+            )
+            outer_controller_mode_id = u_sea.get(
+                f"{coord_name}_outer_controller_mode_id",
+                0.0,
+            )
+            cascade_qdot_ref = u_sea.get(
+                f"{coord_name}_cascade_qdot_ref",
+                np.nan,
+            )
+            cascade_velocity_error = u_sea.get(
+                f"{coord_name}_cascade_velocity_error",
+                np.nan,
+            )
+            cascade_inner_p_cmd = u_sea.get(
+                f"{coord_name}_cascade_inner_p_cmd",
+                np.nan,
+            )
+            cascade_inner_i_cmd = u_sea.get(
+                f"{coord_name}_cascade_inner_i_cmd",
+                np.nan,
+            )
+            cascade_xi_v = u_sea.get(
+                f"{coord_name}_cascade_xi_v",
+                np.nan,
+            )
+            cascade_i_clamped = u_sea.get(
+                f"{coord_name}_cascade_i_clamped",
+                np.nan,
+            )
+            cascade_anti_windup_active = u_sea.get(
+                f"{coord_name}_cascade_anti_windup_active",
+                np.nan,
+            )
             if props["impedance"]:
                 theta_m_ref = theta_j + tau_ref / K
                 omega_m_ref = omega_j
@@ -396,7 +555,12 @@ class OutputRecorder:
             else:
                 inner_prop_term = Kp * (tau_ref - tau_spring)
                 inner_damp_term = -Kd * omega_m
-                tau_input_raw = inner_prop_term + inner_damp_term
+                tau_input_raw = (
+                    tau_ref
+                    + inner_prop_term
+                    + inner_integral_torque
+                    + inner_damp_term
+                )
 
             tau_input_python = max(-500.0, min(500.0, tau_input_raw))
             tau_input_plugin = np.nan
@@ -426,12 +590,13 @@ class OutputRecorder:
 
             self._rec_sea_torques[k, i * 2]     = tau_spring
             self._rec_sea_torques[k, i * 2 + 1] = tau_input
-            self._rec_sea_states[k, i * 2]       = theta_m
-            self._rec_sea_states[k, i * 2 + 1]   = omega_m
             self._rec_power[k, i * 2]            = tau_spring * omega_j
             self._rec_power[k, i * 2 + 1]        = tau_input * omega_m
-            diag_base = i * 23
-            self._rec_sea_diagnostics[k, diag_base:diag_base + 23] = np.array([
+            diag_base = i * SEA_DIAGNOSTIC_WIDTH
+            self._rec_sea_diagnostics[
+                k,
+                diag_base:diag_base + SEA_DIAGNOSTIC_WIDTH,
+            ] = np.array([
                 tau_ref,
                 tau_ff_cmd,
                 outer_pd_cmd,
@@ -455,6 +620,25 @@ class OutputRecorder:
                 K,
                 outer_pd_unscaled_cmd,
                 sea_feasibility_scale,
+                outer_p_cmd,
+                outer_d_cmd,
+                outer_i_cmd,
+                outer_integral_error,
+                outer_integral_clamped,
+                outer_anti_windup_active,
+                outer_controller_mode_id,
+                xi,
+                xi_dot_plugin,
+                inner_integral_torque,
+                Ki,
+                integral_torque_limit,
+                cascade_qdot_ref,
+                cascade_velocity_error,
+                cascade_inner_p_cmd,
+                cascade_inner_i_cmd,
+                cascade_xi_v,
+                cascade_i_clamped,
+                cascade_anti_windup_active,
             ])
 
         if sea_derivatives is not None:
@@ -607,10 +791,10 @@ class OutputRecorder:
             print(f"  -> SEA torques : {path}")
 
         if cfg.save_sea_states:
-            sea_state_cols = []
-            for sea_name, coord_name in self._sea_pros_map:
-                sea_state_cols.append(f"{sea_name}_motor_angle")
-                sea_state_cols.append(f"{sea_name}_motor_speed")
+            sea_state_cols = [
+                f"{sea_name}_{state_name}"
+                for sea_name, state_name, _sv_idx in self._sea_state_items
+            ]
             path = os.path.join(out, f"{pfx}_sea_states.sto")
             write_sto(
                 path, "SEAStates",
@@ -621,10 +805,10 @@ class OutputRecorder:
             print(f"  -> SEA states  : {path}")
 
         if getattr(cfg, "save_sea_derivatives", False):
-            sea_derivative_cols = []
-            for sea_name, coord_name in self._sea_pros_map:
-                sea_derivative_cols.append(f"{sea_name}_motor_angle_dot")
-                sea_derivative_cols.append(f"{sea_name}_motor_speed_dot")
+            sea_derivative_cols = [
+                f"{sea_name}_{state_name}_dot"
+                for sea_name, state_name, _sv_idx in self._sea_state_items
+            ]
             path = os.path.join(out, f"{pfx}_sea_derivatives.sto")
             write_sto(
                 path, "SEADerivatives",
@@ -661,6 +845,25 @@ class OutputRecorder:
                     f"{sea_name}_spring_stiffness",
                     f"{sea_name}_outer_pd_unscaled_cmd",
                     f"{sea_name}_sea_feasibility_scale",
+                    f"{sea_name}_outer_p_cmd",
+                    f"{sea_name}_outer_d_cmd",
+                    f"{sea_name}_outer_i_cmd",
+                    f"{sea_name}_outer_integral_error",
+                    f"{sea_name}_outer_integral_clamped",
+                    f"{sea_name}_outer_anti_windup_active",
+                    f"{sea_name}_outer_controller_mode_id",
+                    f"{sea_name}_torque_error_integral",
+                    f"{sea_name}_torque_error_integral_dot",
+                    f"{sea_name}_inner_integral_torque",
+                    f"{sea_name}_inner_integral_gain",
+                    f"{sea_name}_inner_integral_torque_limit",
+                    f"{sea_name}_cascade_qdot_ref",
+                    f"{sea_name}_cascade_velocity_error",
+                    f"{sea_name}_cascade_inner_p_cmd",
+                    f"{sea_name}_cascade_inner_i_cmd",
+                    f"{sea_name}_cascade_xi_v",
+                    f"{sea_name}_cascade_i_clamped",
+                    f"{sea_name}_cascade_anti_windup_active",
                 ])
             path = os.path.join(out, f"{pfx}_sea_diagnostics.sto")
             write_sto(
