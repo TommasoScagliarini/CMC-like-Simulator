@@ -183,9 +183,159 @@ class SimulationRunner:
         # ── Make output directory ─────────────────────────────────────────────
         os.makedirs(cfg.output_dir, exist_ok=True)
 
+        self._runtime_state: opensim.State | None = None
+        self._runtime_controls: opensim.Vector | None = None
+        self._runtime_time: float | None = None
+        self._runtime_step: int = 0
+        self._last_step_info: dict = {}
+
     # ─────────────────────────────────────────────────────────────────────────
     #  Public entry point
     # ─────────────────────────────────────────────────────────────────────────
+    @property
+    def state(self) -> opensim.State:
+        """Current mutable OpenSim state for step-wise integrations."""
+        if self._runtime_state is None:
+            raise RuntimeError("Runner state is not initialised; call reset_to_time().")
+        return self._runtime_state
+
+    @property
+    def current_time(self) -> float:
+        """Current simulation time for step-wise integrations."""
+        if self._runtime_time is None:
+            raise RuntimeError("Runner time is not initialised; call reset_to_time().")
+        return self._runtime_time
+
+    @property
+    def last_step_info(self) -> dict:
+        """Diagnostics from the latest public step_until() control window."""
+        return dict(self._last_step_info)
+
+    def reset_to_time(self, t: float) -> opensim.State:
+        """
+        Reset state, controls, controller memory, SO warm start, and bypass
+        resources for interactive/RL use without rebuilding the OpenSim model.
+        """
+        cfg = self._cfg
+        ctx = self._ctx
+        model = ctx.model
+        state = ctx.state
+        t = float(t)
+
+        q0, qdot0, _ = self._kin.get(t)
+        self._set_state(state, q0, qdot0, t)
+
+        self._q0_for_sea_init = q0
+        try:
+            self._init_muscle_states(state)
+        finally:
+            if hasattr(self, "_q0_for_sea_init"):
+                del self._q0_for_sea_init
+
+        self._runtime_state = state
+        self._runtime_controls = opensim.Vector(ctx.n_controls, 0.0)
+        self._runtime_time = t
+        self._runtime_step = 0
+        self._last_step_info = {}
+
+        self._matter = model.getMatterSubsystem()
+        self._n_mob = ctx.n_mob
+        self._e_vec = opensim.Vector(ctx.n_mob, 0.0)
+        self._Me_vec = opensim.Vector(ctx.n_mob, 0.0)
+
+        self._prosthesis_ctrl.reset()
+        self._so.remember_solution(
+            np.full(ctx.n_muscles, cfg.muscle_min_activation),
+            np.zeros(ctx.n_reserves),
+        )
+        model.realizeVelocity(state)
+        model.setControls(state, self._runtime_controls)
+        return state
+
+    def step_until(self, t_stop: float, record: bool = True) -> dict:
+        """
+        Advance the already-reset runner up to t_stop using the CMC-like loop.
+        This is the public stepping API for trajectory-level RL adapters.
+        """
+        cfg = self._cfg
+        if self._runtime_state is None or self._runtime_controls is None:
+            self.reset_to_time(cfg.t_start)
+
+        state = self.state
+        controls = self._runtime_controls
+        t = self.current_time
+        t_stop = float(t_stop)
+        if t_stop < t - 1e-12:
+            raise ValueError(
+                f"t_stop ({t_stop:.6g}) is earlier than current time ({t:.6g})."
+            )
+
+        _t_control, h_sub_nominal, n_substeps = self._control_loop_timing()
+
+        while t < t_stop - 1e-12:
+            (
+                a, u_res, u_sea,
+                tau_bio, tau_pros_ff_by_coord, tau_sea_cmd,
+                q_ref_win, qdot_ref_win,
+            ) = self._compute_controls_for_window(state, controls, t)
+            self._last_step_info = {
+                "time": t,
+                "u_sea": dict(u_sea),
+                "q_ref": dict(q_ref_win),
+                "qdot_ref": dict(qdot_ref_win),
+                "tau_pros_ff": dict(tau_pros_ff_by_coord),
+            }
+
+            for _sub in range(n_substeps):
+                if t >= t_stop - 1e-12:
+                    break
+                h_step = min(h_sub_nominal, t_stop - t)
+                udot, sea_plugin_outputs, sea_derivatives = (
+                    self._integrate_evaluate(state, controls, t)
+                )
+
+                if record:
+                    self._recorder.record(
+                        t, state, a, u_res, tau_bio, u_sea, udot,
+                        controls,
+                        q_ref=q_ref_win,
+                        qdot_ref=qdot_ref_win,
+                        tau_pros_ff=tau_pros_ff_by_coord,
+                        sea_derivatives=sea_derivatives,
+                        sea_plugin_outputs=sea_plugin_outputs,
+                        so_diagnostics=self._so.last_diagnostics,
+                    )
+
+                if getattr(
+                    cfg,
+                    "integration_scheme",
+                    "semi_implicit_euler",
+                ) == "rk4_bypass":
+                    t = self._advance_rk4_bypass_state(state, controls, h_step)
+                elif cfg.sea_forward_mode == "plugin":
+                    t = self._advance_plugin_state_substeps(
+                        state, controls, udot, h_step
+                    )
+                else:
+                    t = self._advance_legacy_euler_state(
+                        state, controls, udot, tau_sea_cmd, h_step
+                    )
+
+                self._runtime_time = t
+                self._runtime_step += 1
+
+        return self.last_step_info
+
+    def save_results(self) -> None:
+        """Public wrapper around the output recorder."""
+        self._recorder.save_results()
+
+    def reset_outputs(self) -> None:
+        """Clear recorded samples while keeping the same model/context."""
+        self._recorder = OutputRecorder(
+            self._cfg, self._ctx, self._sea_pros_map, self._sea_props,
+        )
+
     def run(self) -> None:
         """Execute the full simulation loop from t_start to t_end."""
         cfg   = self._cfg
@@ -375,6 +525,52 @@ class SimulationRunner:
     # ─────────────────────────────────────────────────────────────────────────
     #  Private helpers
     # ─────────────────────────────────────────────────────────────────────────
+    def _control_loop_timing(self) -> tuple[float, float, int]:
+        """Return (T_control, h_sub, n_substeps) for the configured loop."""
+        cfg = self._cfg
+        use_window = bool(getattr(cfg, "use_control_window", False))
+        h_int = float(getattr(cfg, "integration_dt", cfg.dt))
+        if use_window:
+            t_control = float(getattr(cfg, "T_control", h_int))
+            if t_control < h_int:
+                t_control = h_int
+        else:
+            t_control = h_int
+
+        n_substeps = max(1, int(round(t_control / h_int)))
+        h_sub = t_control / n_substeps
+        return t_control, h_sub, n_substeps
+
+    def _advance_legacy_euler_state(
+        self,
+        state: opensim.State,
+        controls: opensim.Vector,
+        udot: np.ndarray,
+        tau_sea_cmd: np.ndarray,
+        dt: float,
+    ) -> float:
+        """Legacy non-plugin fallback retained for run() parity."""
+        ctx = self._ctx
+        coord_set = ctx.model.getCoordinateSet()
+        q_new: Dict[str, float] = {}
+        qdot_new: Dict[str, float] = {}
+        for name in ctx.coord_names:
+            coord = coord_set.get(name)
+            q_cur = coord.getValue(state)
+            qdot_cur = coord.getSpeedValue(state)
+            qacc_cur = udot[ctx.coord_mob_idx[name]]
+
+            qdot_next = qdot_cur + qacc_cur * dt
+            q_new[name] = q_cur + qdot_next * dt
+            qdot_new[name] = qdot_next
+
+        t_new = float(state.getTime()) + dt
+        self._set_state(state, q_new, qdot_new, t_new)
+        self._update_sea_motor_state(state, tau_sea_cmd)
+        ctx.model.realizeVelocity(state)
+        ctx.model.setControls(state, controls)
+        return t_new
+
     def _compute_controls_for_window(
         self,
         state:    opensim.State,
