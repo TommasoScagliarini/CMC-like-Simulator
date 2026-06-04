@@ -31,7 +31,7 @@ from __future__ import annotations
 import copy
 import os
 import traceback
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
@@ -122,6 +122,17 @@ class CMCEnvConfig:
     action_mode: str = "delta"
     max_delta_rad: float | Mapping[str, float] | Sequence[float] = 0.35
     absolute_bounds_rad: Optional[Mapping[str, Tuple[float, float]]] = None
+    # Simulator-side reference low-pass. The policy only emits a raw smooth
+    # prosthetic reference; the simulator band-limits it to the same cutoff used
+    # for the experimental IK (KinematicsInterpolator) before the prosthesis
+    # controller tracks it. This removes the high-frequency content that excites
+    # the ~35 Hz knee SEA resonance (knee saturating limit-cycle), so generated
+    # trajectories load the SEA command like real IK does. Cutoff None -> reuse
+    # cfg.kinematics_lowpass_cutoff_hz. See
+    # reports/user/2026-06-01_knee_saturazione_env_rl_limit_cycle.md.
+    enable_pros_ref_lpf: bool = True
+    pros_ref_lpf_cutoff_hz: Optional[float] = None
+    pros_ref_lpf_zeta: float = 1.0
     random_init: bool = False
     episode_duration: Optional[float] = None
     rebuild_model_on_reset: bool = False
@@ -151,6 +162,11 @@ class ProstheticSegmentKinematics:
         self,
         base: KinematicsInterpolator,
         pros_coords: Sequence[str],
+        *,
+        ref_lpf_enable: bool = True,
+        ref_lpf_cutoff_hz: float = 6.0,
+        ref_lpf_zeta: float = 1.0,
+        control_dt: float = 0.001,
     ) -> None:
         self._base = base
         self._pros_coords = tuple(pros_coords)
@@ -158,6 +174,19 @@ class ProstheticSegmentKinematics:
         self._segment_t1: float | None = None
         self._segment_spline: PchipInterpolator | CubicHermiteSpline | None = None
         self._last_anchor = np.zeros(len(self._pros_coords), dtype=float)
+        # Simulator-side reference low-pass: the policy emits a raw smooth target
+        # trajectory; the simulator band-limits it to ref_lpf_cutoff_hz (matching
+        # the experimental IK low-pass) with a 2nd-order reference model. The
+        # reference fed to the prosthesis controller then has the same spectral
+        # content as real IK and never excites the ~35 Hz knee SEA resonance.
+        # Filter state (filtered position/velocity) is carried across segments so
+        # the served q/qdot/qddot are continuous and C2.
+        self._ref_lpf_enable = bool(ref_lpf_enable) and float(ref_lpf_cutoff_hz) > 0.0
+        self._ref_lpf_wn = 2.0 * np.pi * float(ref_lpf_cutoff_hz)
+        self._ref_lpf_zeta = float(ref_lpf_zeta)
+        self._ref_lpf_dt = float(control_dt) if control_dt and control_dt > 0.0 else 0.001
+        self._filt_q: np.ndarray | None = None
+        self._filt_v: np.ndarray | None = None
 
     @property
     def coord_names(self) -> list[str]:
@@ -167,6 +196,8 @@ class ProstheticSegmentKinematics:
         self._segment_t0 = None
         self._segment_t1 = None
         self._segment_spline = None
+        self._filt_q = None
+        self._filt_v = None
 
     def current_target(self, t: float) -> np.ndarray:
         q, _, _ = self.get(t)
@@ -204,22 +235,70 @@ class ProstheticSegmentKinematics:
 
         self._segment_t0 = float(times[0])
         self._segment_t1 = float(times[-1])
+
+        # Raw target trajectory produced by the policy (the "smooth reference").
         if derivatives is None:
-            self._segment_spline = PchipInterpolator(
+            raw_spline: PchipInterpolator | CubicHermiteSpline = PchipInterpolator(
                 times,
                 values,
                 axis=0,
                 extrapolate=True,
             )
         else:
-            self._segment_spline = CubicHermiteSpline(
+            raw_spline = CubicHermiteSpline(
                 times,
                 values,
                 derivatives,
                 axis=0,
                 extrapolate=True,
             )
-        self._last_anchor = values[-1].copy()
+
+        if not self._ref_lpf_enable:
+            self._segment_spline = raw_spline
+            self._last_anchor = values[-1].copy()
+            return
+
+        # Simulator-side 6 Hz band-limiting via a 2nd-order reference model:
+        #   qf_ddot = wn^2 (q_target - qf) - 2*zeta*wn*qf_dot
+        # integrated over the segment from the carried filter state. The served
+        # spline is built from the filtered (qf, qf_dot) samples, so q/qdot/qddot
+        # stay mutually consistent and band-limited like the experimental IK.
+        if self._filt_q is None or self._filt_v is None:
+            self._filt_q = np.asarray(raw_spline(times[0]), dtype=float).copy()
+            if derivatives is not None:
+                self._filt_v = np.asarray(derivatives[0], dtype=float).copy()
+            else:
+                self._filt_v = np.asarray(
+                    raw_spline.derivative(1)(times[0]), dtype=float
+                ).copy()
+
+        t0 = float(times[0])
+        t1 = float(times[-1])
+        n = max(2, int(np.ceil((t1 - t0) / self._ref_lpf_dt)))
+        t_fine = np.linspace(t0, t1, n + 1)
+        dt = (t1 - t0) / n
+        wn = self._ref_lpf_wn
+        two_zeta_wn = 2.0 * self._ref_lpf_zeta * wn
+        qf = self._filt_q.copy()
+        vf = self._filt_v.copy()
+        q_hist = np.empty((n + 1, len(self._pros_coords)), dtype=float)
+        v_hist = np.empty_like(q_hist)
+        q_hist[0] = qf
+        v_hist[0] = vf
+        for i in range(1, n + 1):
+            q_target = np.asarray(raw_spline(t_fine[i]), dtype=float)
+            af = wn * wn * (q_target - qf) - two_zeta_wn * vf
+            vf = vf + af * dt          # semi-implicit Euler (stable for wn*dt<<1)
+            qf = qf + vf * dt
+            q_hist[i] = qf
+            v_hist[i] = vf
+
+        self._segment_spline = CubicHermiteSpline(
+            t_fine, q_hist, v_hist, axis=0, extrapolate=True
+        )
+        self._filt_q = qf
+        self._filt_v = vf
+        self._last_anchor = q_hist[-1].copy()
 
     def get(self, t: float) -> tuple[CoordDict, CoordDict, CoordDict]:
         q, qdot, qddot = self._base.get(t)
@@ -416,7 +495,18 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self.cfg = cfg
         self.ctx = setup_model(cfg)
         self.base_kin = KinematicsInterpolator(cfg)
-        self.kin = ProstheticSegmentKinematics(self.base_kin, cfg.pros_coords)
+        ref_cutoff = self.env_cfg.pros_ref_lpf_cutoff_hz
+        if ref_cutoff is None:
+            # Match the experimental IK band by default.
+            ref_cutoff = float(getattr(cfg, "kinematics_lowpass_cutoff_hz", 6.0))
+        self.kin = ProstheticSegmentKinematics(
+            self.base_kin,
+            cfg.pros_coords,
+            ref_lpf_enable=self.env_cfg.enable_pros_ref_lpf,
+            ref_lpf_cutoff_hz=ref_cutoff,
+            ref_lpf_zeta=self.env_cfg.pros_ref_lpf_zeta,
+            control_dt=float(getattr(cfg, "dt", 0.001)),
+        )
         self.runner = SimulationRunner(cfg, self.ctx, self.kin)
 
     @staticmethod

@@ -25,6 +25,13 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+# The RL adapter was relocated under "Trajectory Generator/" alongside the SNN
+# trajectory-generator code. Keep it importable from there too; the repo root
+# still takes precedence so the simulator modules (config, simulation_runner,
+# ...) resolve against the canonical tree.
+_TRAJ_GEN_DIR = REPO_ROOT / "Trajectory Generator"
+if _TRAJ_GEN_DIR.is_dir() and str(_TRAJ_GEN_DIR) not in sys.path:
+    sys.path.append(str(_TRAJ_GEN_DIR))
 
 from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 

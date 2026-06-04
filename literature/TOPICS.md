@@ -1,0 +1,74 @@
+# TOPICS — cross-cutting index (topic -> papers)
+
+Auto-generated from each note's `topics:` front-matter. Ids link to [INDEX.md](INDEX.md) and `notes/Pxx_*.md`. Protocol: [README_FOR_LLM.md](README_FOR_LLM.md).
+
+- **action_param_tuning**: P01, P02
+- **action_space**: P04, P12, P13, P19, P22, S02
+- **adp_dhdp**: P02
+- **assistive_devices**: P16
+- **backup_policy**: P18
+- **bayesian_optimization**: P04, P17
+- **biomechanics**: P21
+- **bipedal**: P22
+- **cmdp**: P14, P15
+- **constrained_optimization**: P14, P19
+- **cost_of_transport**: P19
+- **cpp_inference**: D01
+- **curriculum**: P08
+- **drl_opensim**: P05, P06, P07, P08, P09, P11, D02
+- **env_api**: P06, P25, D02
+- **feasibility_review**: S02
+- **hierarchical_control**: P01, P04, P12, S02
+- **human_in_loop**: P01, P02, P03, P04, P05
+- **impedance_control**: P01, P02, P03, P20
+- **lagrangian**: P19
+- **legged_locomotion**: P15
+- **libtorch**: D01
+- **llm**: P24
+- **locomotion_rl**: P12, P13, P19, P22
+- **lyapunov**: P17, P18
+- **memory**: P22
+- **metabolic_cost**: P20, P21
+- **middleware**: P25
+- **model_based_rl**: P09, P12, P17
+- **motion_imitation**: P07, P08, P10, P11
+- **multi_agent_rl**: P05
+- **musculoskeletal**: P06, P07, P08, P09, P10, P11
+- **nn_repair**: P16
+- **online_rl**: P01, P02, P03
+- **osim_rl**: D02
+- **policy_gradient**: P14
+- **pomdp**: P05, P10, P22, S02
+- **prosthesis_ankle**: P16, P20
+- **prosthesis_knee**: P01, P02, P03, P04, P05
+- **recovery_policy**: P15
+- **reflex_control**: P09
+- **region_of_attraction**: P17
+- **review**: P07
+- **reward_design**: P03, P04, P06, P07, P08, P09, P10, P11, P12, P19, P22, S02
+- **reward_tracking**: P01
+- **rlvr**: P23, P24
+- **robotics**: P23
+- **runtime_verification**: P18
+- **safe_rl**: P14, P15, P16, P17, P18, P19, S02
+- **safety_bounds**: P01, P02
+- **sea_elastic**: P20
+- **shielding**: P15, P18
+- **sim_to_real**: P12, P13, P19, P22, P25
+- **software_integration**: P25, D01, S02
+- **stability_guarantees**: P17
+- **surrogate_energy**: P21
+- **symmetry**: P01, P03, P04, P05, P19
+- **torque_vs_position**: P13
+- **transfemoral**: P11
+- **trust_region**: P14
+- **verifiable**: P16, P23
+- **verifiable_rewards**: P24
+- **warm_start**: P10
+- **world_model**: P22, P23
+
+---
+### Notes on corpus gaps
+- **No SNN (spiking neural network) paper**: the corpus covers RL/DRL, hierarchy, reward, safety, memory, software — not the project's spiking-network choice.
+- Some themes named in the original indexes (BiLSTM exoskeletons, generic CBFs, IMU gait-mode classification) are *cited concepts*, not PDFs present.
+- **P25 file is mislabeled**: the 'Wrapyfi' PDF actually contains the iCub-simulator paper; the real Wrapyfi paper is missing.

@@ -284,10 +284,8 @@ soddisfare con i bounds correnti di muscoli/reserve.
 
 ### Propagati dal 2026-05-20
 
-- Decidere se promuovere configurazione D o restare a C per il motor driver.
 - Sweep `Kp_knee_motor` su valori intermedi tra 3.9 e 18 mantenendo ankle
   morning best.
-- Generare plot D vs C prima di eventuale promozione.
 - Validare la diagnosi di coupling knee-ankle isolando la dinamica knee dal
   feedback ankle.
 - Notch a 28 Hz sul feedback knee resta opzione aperta se si vuole evitare una

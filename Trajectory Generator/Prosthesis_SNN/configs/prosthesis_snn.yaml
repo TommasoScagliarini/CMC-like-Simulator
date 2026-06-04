@@ -1,0 +1,45 @@
+model:
+  input_size: 2
+  feature_names:
+    - phase_sin
+    - phase_cos
+  output_coords:
+    - pros_knee_angle
+    - pros_ankle_angle
+  output_channels:
+    - q
+    - qdot
+    - qddot
+  hidden_size: 128
+  num_layers: 1
+  beta: 0.5
+  threshold: 0.5
+  reset_mechanism: zero
+  encoding: latency
+  encoding_timesteps: 1
+  learn_beta: false
+  learn_threshold: false
+
+# Raw network outputs are not normalized. q is in radians, qdot in rad/s,
+# qddot in rad/s^2. Replace these per-(coord, channel) values once the
+# training dataset normalization is defined. A scalar value at the coord
+# level is broadcast across all channels for that coord.
+output_transform: identity
+output_scale:
+  pros_knee_angle:
+    q: 1.0
+    qdot: 1.0
+    qddot: 1.0
+  pros_ankle_angle:
+    q: 1.0
+    qdot: 1.0
+    qddot: 1.0
+output_offset:
+  pros_knee_angle:
+    q: 0.0
+    qdot: 0.0
+    qddot: 0.0
+  pros_ankle_angle:
+    q: 0.0
+    qdot: 0.0
+    qddot: 0.0

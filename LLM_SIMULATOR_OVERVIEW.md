@@ -38,6 +38,9 @@ I file principali sono:
 - `static_optimization.py`: recruitment muscoli/reserve.
 - `prosthesis_controller.py`: controller high-level dei due SEA.
 - `output.py`: salvataggio di stati, controlli, coppie e diagnostica.
+- `Trajectory Generator/`: area dedicata a rete neurale, policy, training e
+  generazione di traiettorie protesiche. Il root del simulatore resta dedicato
+  alla pipeline CMC-like/OpenSim.
 
 Ad ogni control window, normalmente a `T_control = 0.001 s`, il runner fa:
 
@@ -208,8 +211,9 @@ dalla banda e stabilita' del motor driver SEA nel plugin.
 
 ## Interfaccia RL / generazione traiettorie
 
-Il file `osim_trj_cmc_like.py` fornisce un adapter Gymnasium per RL a livello
-di traiettoria. In quell'env la policy non comanda muscoli, reserve o coppie.
+Il file `Trajectory Generator/osim_trj_cmc_like.py` fornisce un adapter
+Gymnasium per RL a livello di traiettoria. In quell'env la policy non comanda
+muscoli, reserve o coppie.
 La policy genera un segmento di traiettoria cinematica per:
 
 ```text
@@ -227,6 +231,10 @@ Questa distinzione e' importante:
 - `ProsthesisController` decide il comando SEA `u`;
 - il plugin SEA decide la risposta fisica motore+molla;
 - il lato biologico resta governato dal tracking CMC-like di `kin_ref`.
+
+Per convenzione operativa, tutto il lavoro relativo a rete neurale, policy,
+training e generatori appresi deve restare dentro `Trajectory Generator/`.
+Il root del simulatore non deve diventare il contenitore della rete.
 
 ## Invarianti importanti per un LLM
 
@@ -248,4 +256,3 @@ Assumere invece che:
   controller SEA high-level;
 - il plugin SEA applica la dinamica fisica low-level;
 - la compatibilita' Windows x86 e macOS arm64 e' un requisito del progetto.
-

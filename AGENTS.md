@@ -114,6 +114,9 @@ Bug storici su scaling PD e baseline molla documentati in [[DIVERGENZA_BUGFIXES]
 - `visualize.py`: visualizzatore post-simulazione. Importa `read_sto` da
   `output.py`, carica modello/plugin e riproduce la cinematica con il visualizer
   OpenSim. (introdotto in: [[2026-04-14_output_espansi_e_visualizzatore]])
+- `Trajectory Generator/`: perimetro dedicato a rete neurale, policy,
+  training e generazione di traiettorie protesiche. Il simulatore root resta
+  responsabile del CMC-like/OpenSim e dell'integrazione dinamica.
 
 
 ## Istruzioni operative per agenti
@@ -123,6 +126,9 @@ Bug storici su scaling PD e baseline molla documentati in [[DIVERGENZA_BUGFIXES]
   low-level plugin C++ dei SEA.
 - Non modificare il plugin C++ o la semantica del comando SEA senza una richiesta
   esplicita.
+- D'ora in poi tutto il lavoro relativo alla rete neurale, alla policy o al
+  training deve vivere dentro `Trajectory Generator/`. Non aggiungere logica di
+  rete nel root del simulatore salvo richiesta esplicita.
 - Questo progetto deve essere adatto sia per Windows x86 che per MacOS arm 64, ogni modifica al codice deve essere consistente per entrambi gli OS. 
 - Quando viene inserito il comando `start_day` leggi il contesto del progetto indficato in questo file `AGENTS.md` e i daily report presenti nella cartella `reports/daily/`
 - Quando viene inserito il comando `create_report`, scrivi in `reports/user/` un report Markdown.
@@ -137,4 +143,3 @@ Bug storici su scaling PD e baseline molla documentati in [[DIVERGENZA_BUGFIXES]
 - Esempio:
   `2026-04-14_daily-report.md`
 - Se esiste un TODO in un user report deve essere riportato anche nel daily report e propagato in quelli successivi finchè non viene esaurito.
-
