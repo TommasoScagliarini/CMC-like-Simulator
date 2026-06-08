@@ -24,6 +24,21 @@ public:
         surface_velocity, SimTK::Vec3,
         "Ground/treadmill surface velocity in ground [m/s].");
     OpenSim_DECLARE_PROPERTY(
+        residual_force_ratio, SimTK::Vec3,
+        "State-only residual force divided by instantaneous normal force.");
+    OpenSim_DECLARE_PROPERTY(
+        residual_moment_ratio_m, SimTK::Vec3,
+        "State-only free moment divided by instantaneous normal force [m].");
+    OpenSim_DECLARE_PROPERTY(
+        residual_penetration_reference_m, double,
+        "Reference penetration where the penetration residual is zero [m].");
+    OpenSim_DECLARE_PROPERTY(
+        residual_force_penetration_gain_per_m, SimTK::Vec3,
+        "Residual force-ratio gain versus penetration [1/m].");
+    OpenSim_DECLARE_PROPERTY(
+        residual_force_penetration_rate_gain_s_per_m, SimTK::Vec3,
+        "Residual force-ratio gain versus penetration rate [s/m].");
+    OpenSim_DECLARE_PROPERTY(
         stiffness, double, "Hertz contact stiffness.");
     OpenSim_DECLARE_PROPERTY(
         exponent, double, "Positive contact force-penetration exponent.");
@@ -54,6 +69,7 @@ protected:
 private:
     struct ContactResult {
         SimTK::Vec3 force{0};
+        SimTK::Vec3 freeMoment{0};
         SimTK::Vec3 momentAboutGround{0};
         SimTK::Vec3 contactPoint{0};
         SimTK::Vec3 sphereCenter{0};

@@ -16,6 +16,11 @@ void OnlineGRFSphereHalfSpaceForce::constructProperties() {
     constructProperty_plane_origin(Vec3(0));
     constructProperty_plane_normal(Vec3(0, 1, 0));
     constructProperty_surface_velocity(Vec3(0));
+    constructProperty_residual_force_ratio(Vec3(0));
+    constructProperty_residual_moment_ratio_m(Vec3(0));
+    constructProperty_residual_penetration_reference_m(0.0);
+    constructProperty_residual_force_penetration_gain_per_m(Vec3(0));
+    constructProperty_residual_force_penetration_rate_gain_s_per_m(Vec3(0));
     constructProperty_stiffness(1.0e6);
     constructProperty_exponent(1.5);
     constructProperty_dissipation(2.0);
@@ -79,9 +84,21 @@ OnlineGRFSphereHalfSpaceForce::calcContact(const State& state) const {
                                           + transition * transition)
         - get_viscous_friction() * tangentVelocity;
 
-    result.force = normalForce * normal + frictionForce;
+    const double physicalPenetration = std::max(0.0, penetrationRaw);
+    const Vec3 residualForceRatio =
+        get_residual_force_ratio()
+        + (physicalPenetration - get_residual_penetration_reference_m())
+            * get_residual_force_penetration_gain_per_m()
+        + penetrationRate
+            * get_residual_force_penetration_rate_gain_s_per_m();
+    result.force =
+        normalForce * normal
+        + frictionForce
+        + normalForce * residualForceRatio;
+    result.freeMoment = normalForce * get_residual_moment_ratio_m();
     result.contactPoint = center - get_sphere_radius() * normal;
-    result.momentAboutGround = result.contactPoint % result.force;
+    result.momentAboutGround =
+        result.contactPoint % result.force + result.freeMoment;
     result.sphereCenter = center;
     result.normal = normal;
     result.normalForce = normalForce;
@@ -100,7 +117,8 @@ void OnlineGRFSphereHalfSpaceForce::computeForce(
         state, frame, get_sphere_location(), result.force, bodyForces);
     applyTorque(
         state, frame,
-        (-get_sphere_radius() * result.normal) % result.force,
+        (-get_sphere_radius() * result.normal) % result.force
+            + result.freeMoment,
         bodyForces);
 }
 

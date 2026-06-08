@@ -23,7 +23,7 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -c "import
 
 ## 3) Compile check moduli baseline_MLP
 
-C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -m py_compile "Trajectory Generator\baseline_MLP\win_runtime.py" "Trajectory Generator\baseline_MLP\_bootstrap.py" "Trajectory Generator\baseline_MLP\env_factory.py" "Trajectory Generator\baseline_MLP\reward_function.py" "Trajectory Generator\baseline_MLP\tb_logging.py" "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" "Trajectory Generator\baseline_MLP\rollout_eval.py"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -m py_compile "Trajectory Generator\baseline_MLP\win_runtime.py" "Trajectory Generator\baseline_MLP\_bootstrap.py" "Trajectory Generator\baseline_MLP\env_factory.py" "Trajectory Generator\baseline_MLP\reward_function.py" "Trajectory Generator\baseline_MLP\tb_logging.py" "Trajectory Generator\baseline_MLP\process_watchdog.py" "Trajectory Generator\baseline_MLP\validate_online_grf_train_inference.py" "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" "Trajectory Generator\baseline_MLP\rollout_eval.py"
 
 
 ## 4) Tiny train (Fase A: single-process, num-env-runners 0)
@@ -92,6 +92,40 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajector
 
 # Checkpoint legacy senza feature onlineGRF:
 #   --grf-mode prescribed --no-online-grf-observation
+
+## 11b) Training IBRIDO: prescribed sul lato sano + online APPLICATA sul protesico
+#
+# La GRF online viene APPLICATA sul piede protesico (sinistra) cosi' che caviglia
+# e ginocchio lavorino contro una reazione al suolo reale (non un DOF libero); il
+# prescribed guida il lato sano (destra) e viene auto-disabilitato a sinistra.
+# Profilo di contatto: v2 (default). Le reserve NON sono penalizzate; la
+# penetrazione del piede protesico ha penalty leggera (>20 mm) e terminazione
+# (>28 mm). Osservazione onlineGRF attiva (default).
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_hybrid" --grf-mode online_sensor --online-grf-applied-side left --num-env-runners 0 --ray-num-cpus 1 --iterations 50 --episode-duration 2.0 --segment-duration 0.01 --startup-timeout-s 300 --iteration-timeout-s 900 --run-timeout-s 7200 --cleanup-timeout-s 30
+
+## 11c) Training IBRIDO overnight (~10 h) — iperparametri scalati ai worker
+#
+# Throughput misurato: ~1.15 s wall per env-step per worker (segment 0.01).
+# Batch scalato ai worker per tenere ~6-8 min/iter. Reserve NON penalizzate;
+# penetrazione protesica: penalty >20 mm, terminazione >28 mm. Checkpoint ogni 5.
+# NB: ogni worker carica modello+SO -> sorveglia RAM. Su macOS serve il plugin
+# onlineGRF .dylib gia' compilato (tools/online_grf_contact/README.md).
+
+# --- WINDOWS, 12 worker (~70 iter / ~290k env-step attesi) ---
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_hybrid_win" --grf-mode online_sensor --online-grf-applied-side left --num-env-runners 12 --ray-num-cpus 13 --iterations 80 --train-batch-size 4096 --minibatch-size 512 --num-epochs 10 --episode-duration 2.0 --segment-duration 0.01 --fcnet-hiddens 256 256 --seed 123 --checkpoint-every 5 --startup-timeout-s 600 --iteration-timeout-s 1800 --sample-timeout-s 1500 --checkpoint-timeout-s 240 --run-timeout-s 36000 --cleanup-timeout-s 60
+
+# --- macOS arm64, 5 worker (~60 iter / ~130k env-step attesi) ---
+conda run -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --setup-xml "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs/baseline_mlp_hybrid_mac" --grf-mode online_sensor --online-grf-applied-side left --num-env-runners 5 --ray-num-cpus 6 --iterations 80 --train-batch-size 2048 --minibatch-size 256 --num-epochs 10 --episode-duration 2.0 --segment-duration 0.01 --fcnet-hiddens 256 256 --seed 123 --checkpoint-every 5 --startup-timeout-s 600 --iteration-timeout-s 1800 --sample-timeout-s 1500 --checkpoint-timeout-s 240 --run-timeout-s 36000 --cleanup-timeout-s 60
+
+# Rollout con lo stesso schema (deve combaciare con il training):
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint "runs\baseline_mlp_hybrid\rl_module_best" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_hybrid_rollout" --grf-mode online_sensor --online-grf-applied-side left --episode-duration 2.0 --segment-duration 0.01 --record-outputs
+
+# Preflight obbligatorio prima di training/inference lunghi:
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\process_watchdog.py" --self-test --output-dir "results\watchdog_self_test_online_grf" --stall-timeout-s 1.5
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\process_watchdog.py" --heartbeat-file "results\online_grf_sensor_train_inference_watchdog.json" --summary-file "results\online_grf_sensor_train_inference_watchdog_summary.json" --startup-timeout-s 60 --stall-timeout-s 150 --run-timeout-s 600 --label "online_sensor train/inference contract" -- python "Trajectory Generator\baseline_MLP\validate_online_grf_train_inference.py" --grf-mode online_sensor --report "results\online_grf_training_inference_validation_sensor.json" --heartbeat-file "results\online_grf_sensor_train_inference_watchdog.json"
+
+# La modalita active deve produrre BLOCKED finche il gate fisico non e PASS:
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\validate_online_grf_train_inference.py" --grf-mode online --report "results\online_grf_training_inference_validation_active.json"
 
 
 ## 12) Validazione controllata 50 iterazioni (online_sensor + timeout)

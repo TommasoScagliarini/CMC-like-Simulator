@@ -40,13 +40,20 @@ from setup_io import read_setup_xml
 
 
 def _external_grf(setup, times: np.ndarray) -> Dict[str, np.ndarray]:
+    return {
+        side: values["force"]
+        for side, values in _external_wrench(setup, times).items()
+    }
+
+
+def _external_wrench(setup, times: np.ndarray) -> Dict[str, dict[str, np.ndarray]]:
     ext = opensim.ExternalLoads(str(setup.external_loads_xml), True)
     data_file = Path(ext.getDataFileName())
     if not data_file.is_absolute():
         data_file = setup.external_loads_xml.parent / data_file
     source_time, columns, data = _read_storage_table(str(data_file))
     col_idx = {name: i for i, name in enumerate(columns)}
-    result: Dict[str, np.ndarray] = {}
+    result: Dict[str, dict[str, np.ndarray]] = {}
     for i in range(ext.getSize()):
         force = ext.get(i)
         side = _infer_external_force_side(
@@ -55,19 +62,26 @@ def _external_grf(setup, times: np.ndarray) -> Dict[str, np.ndarray]:
         )
         if side not in {"left", "right"}:
             continue
-        identifier = force.getForceIdentifier()
-        values = np.column_stack(
-            [
-                data[:, col_idx[f"{identifier}{axis}"]]
-                for axis in ("x", "y", "z")
-            ]
-        )
-        result[side] = np.column_stack(
-            [
-                np.interp(times, source_time, values[:, axis])
-                for axis in range(3)
-            ]
-        )
+        def interpolate(identifier: str) -> np.ndarray:
+            values = np.column_stack(
+                [data[:, col_idx[f"{identifier}{axis}"]] for axis in ("x", "y", "z")]
+            )
+            return np.column_stack(
+                [
+                    np.interp(times, source_time, values[:, axis])
+                    for axis in range(3)
+                ]
+            )
+
+        force_values = interpolate(force.getForceIdentifier())
+        point_values = interpolate(force.getPointIdentifier())
+        free_torque = interpolate(force.getTorqueIdentifier())
+        result[side] = {
+            "force": force_values,
+            "cop": point_values,
+            "free_torque": free_torque,
+            "moment": np.cross(point_values, force_values) + free_torque,
+        }
     missing = {"left", "right"} - set(result)
     if missing:
         raise ValueError(f"Missing prescribed GRF sides: {sorted(missing)}")
@@ -183,14 +197,43 @@ def _calculate_grf(
     dissipation: float | None = None,
     friction: float | None = None,
 ) -> Dict[str, np.ndarray]:
+    return {
+        side: values["force"]
+        for side, values in _calculate_wrench(
+            profile,
+            samples,
+            ground_offset=ground_offset,
+            radius_scale=radius_scale,
+            stiffness=stiffness,
+            dissipation=dissipation,
+            friction=friction,
+        ).items()
+    }
+
+
+def _calculate_wrench(
+    profile: OnlineGRFProfile,
+    samples: dict,
+    *,
+    ground_offset: float = 0.0,
+    radius_scale: float = 1.0,
+    stiffness: float | None = None,
+    dissipation: float | None = None,
+    friction: float | None = None,
+) -> Dict[str, dict[str, np.ndarray]]:
     normal = np.asarray(profile.ground.normal, dtype=float)
     normal /= np.linalg.norm(normal)
     origin = np.asarray(profile.ground.origin, dtype=float) + ground_offset * normal
     surface_velocity = np.asarray(profile.ground.surface_velocity, dtype=float)
     material = profile.material
     result = {
-        "left": np.zeros_like(next(iter(samples["centers"].values()))),
-        "right": np.zeros_like(next(iter(samples["centers"].values()))),
+        side: {
+            "force": np.zeros_like(next(iter(samples["centers"].values()))),
+            "moment": np.zeros_like(next(iter(samples["centers"].values()))),
+            "weighted_cop": np.zeros_like(next(iter(samples["centers"].values()))),
+            "normal_force": np.zeros(len(next(iter(samples["centers"].values())))),
+        }
+        for side in ("left", "right")
     }
 
     for sphere in profile.spheres:
@@ -236,8 +279,165 @@ def _calculate_grf(
             / np.sqrt(slip * slip + sphere_transition * sphere_transition)[:, None]
             - sphere_material.viscous_friction * tangent
         )
-        result[sphere.side] += normal_force[:, None] * normal + friction_force
+        penetration_physical = np.maximum(0.0, penetration_raw)
+        residual_force_ratio = (
+            np.asarray(sphere.residual_force_ratio, dtype=float)
+            + (
+                penetration_physical
+                - sphere.residual_penetration_reference_m
+            )[:, None]
+            * np.asarray(
+                sphere.residual_force_penetration_gain_per_m,
+                dtype=float,
+            )
+            + (-normal_velocity)[:, None]
+            * np.asarray(
+                sphere.residual_force_penetration_rate_gain_s_per_m,
+                dtype=float,
+            )
+        )
+        residual_force = normal_force[:, None] * residual_force_ratio
+        residual_moment = normal_force[:, None] * np.asarray(
+            sphere.residual_moment_ratio_m,
+            dtype=float,
+        )
+        total_force = normal_force[:, None] * normal + friction_force + residual_force
+        contact_point = center - sphere.radius * radius_scale * normal
+        cop_point = contact_point + np.maximum(0.0, penetration_raw)[:, None] * normal
+        bucket = result[sphere.side]
+        bucket["force"] += total_force
+        bucket["moment"] += np.cross(contact_point, total_force) + residual_moment
+        bucket["weighted_cop"] += normal_force[:, None] * cop_point
+        bucket["normal_force"] += normal_force
+
+    for bucket in result.values():
+        cop = np.full_like(bucket["weighted_cop"], np.nan)
+        active = bucket["normal_force"] > 1.0e-12
+        cop[active] = (
+            bucket["weighted_cop"][active]
+            / bucket["normal_force"][active, None]
+        )
+        bucket["cop"] = cop
+        del bucket["weighted_cop"]
     return result
+
+
+def _vector_metrics(reference: np.ndarray, predicted: np.ndarray) -> dict:
+    error = predicted - reference
+    peak = np.maximum(np.max(np.abs(reference), axis=0), 1.0)
+    correlations = []
+    for axis in range(3):
+        if np.std(reference[:, axis]) < 1e-12 or np.std(predicted[:, axis]) < 1e-12:
+            correlations.append(float("nan"))
+        else:
+            correlations.append(
+                float(np.corrcoef(reference[:, axis], predicted[:, axis])[0, 1])
+            )
+    return {
+        "rmse": np.sqrt(np.mean(error * error, axis=0)).tolist(),
+        "nrmse_peak": (np.sqrt(np.mean(error * error, axis=0)) / peak).tolist(),
+        "p95_abs_error": np.percentile(np.abs(error), 95, axis=0).tolist(),
+        "correlation": correlations,
+    }
+
+
+def _wrench_metrics(
+    reference: Dict[str, dict[str, np.ndarray]],
+    predicted: Dict[str, dict[str, np.ndarray]],
+    time: np.ndarray,
+    mask: np.ndarray,
+    threshold: float,
+) -> dict:
+    report = {}
+    for side in ("left", "right"):
+        ref_force = reference[side]["force"][mask]
+        pred_force = predicted[side]["force"][mask]
+        contact = ref_force[:, 1] > threshold
+        cop_error = predicted[side]["cop"][mask] - reference[side]["cop"][mask]
+        finite_cop = contact & np.all(np.isfinite(cop_error), axis=1)
+        report[side] = {
+            "force": _vector_metrics(ref_force, pred_force),
+            "moment": _vector_metrics(
+                reference[side]["moment"][mask],
+                predicted[side]["moment"][mask],
+            ),
+            "cop": {
+                "contact_samples": int(np.count_nonzero(finite_cop)),
+                "rmse_m": (
+                    np.sqrt(np.mean(cop_error[finite_cop] ** 2, axis=0)).tolist()
+                    if np.any(finite_cop)
+                    else [float("nan")] * 3
+                ),
+                "p95_abs_error_m": (
+                    np.percentile(np.abs(cop_error[finite_cop]), 95, axis=0).tolist()
+                    if np.any(finite_cop)
+                    else [float("nan")] * 3
+                ),
+            },
+            "event_timing": _event_timing(
+                time[mask],
+                ref_force,
+                pred_force,
+                threshold,
+            ),
+        }
+    return report
+
+
+def _physical_metrics(
+    profile: OnlineGRFProfile,
+    samples: dict,
+    mask: np.ndarray,
+) -> dict:
+    """Report geometry-only penetration and slip, independent of force fit."""
+    normal = np.asarray(profile.ground.normal, dtype=float)
+    normal /= np.linalg.norm(normal)
+    origin = np.asarray(profile.ground.origin, dtype=float)
+    surface_velocity = np.asarray(profile.ground.surface_velocity, dtype=float)
+    report = {}
+    for side in ("left", "right"):
+        penetrations = []
+        slips = []
+        per_sphere = {}
+        for sphere in profile.spheres:
+            if sphere.side != side:
+                continue
+            center = samples["centers"][sphere.name][mask]
+            velocity = samples["velocities"][sphere.name][mask]
+            penetration = np.maximum(
+                0.0,
+                sphere.radius - (center - origin) @ normal,
+            )
+            relative_velocity = velocity - surface_velocity
+            normal_velocity = relative_velocity @ normal
+            tangent = relative_velocity - normal_velocity[:, None] * normal
+            slip = np.linalg.norm(tangent, axis=1)
+            penetrations.append(penetration)
+            slips.append(slip)
+            positive = penetration > 0.0
+            per_sphere[sphere.name] = {
+                "penetration_max_m": float(np.max(penetration)),
+                "contact_fraction": float(np.mean(positive)),
+            }
+        penetration_matrix = np.column_stack(penetrations)
+        slip_matrix = np.column_stack(slips)
+        active = penetration_matrix > 0.0
+        report[side] = {
+            "penetration_max_m": float(np.max(penetration_matrix)),
+            "penetration_p95_active_m": (
+                float(np.percentile(penetration_matrix[active], 95))
+                if np.any(active)
+                else 0.0
+            ),
+            "any_contact_fraction": float(np.mean(np.any(active, axis=1))),
+            "slip_speed_p95_active_m_per_s": (
+                float(np.percentile(slip_matrix[active], 95))
+                if np.any(active)
+                else 0.0
+            ),
+            "per_sphere": per_sphere,
+        }
+    return report
 
 
 def _contact_f1(reference: np.ndarray, predicted: np.ndarray, threshold: float) -> float:
@@ -461,7 +661,12 @@ def main() -> int:
         parameters = optimization.x
 
     calibrated = _profile_with_fit(profile, parameters)
-    predicted = _calculate_grf(calibrated, samples)
+    reference_wrench = _external_wrench(setup, times)
+    predicted_wrench = _calculate_wrench(calibrated, samples)
+    predicted = {
+        side: predicted_wrench[side]["force"]
+        for side in ("left", "right")
+    }
     report = {
         "setup": str(Path(args.setup).resolve()),
         "input_profile": str(Path(args.profile).resolve()),
@@ -483,6 +688,26 @@ def main() -> int:
         ),
         "holdout_metrics": _metrics(
             reference, predicted, times, holdout_mask, args.threshold
+        ),
+        "calibration_wrench_metrics": _wrench_metrics(
+            reference_wrench,
+            predicted_wrench,
+            times,
+            calibration_mask,
+            args.threshold,
+        ),
+        "holdout_wrench_metrics": _wrench_metrics(
+            reference_wrench,
+            predicted_wrench,
+            times,
+            holdout_mask,
+            args.threshold,
+        ),
+        "calibration_physical_metrics": _physical_metrics(
+            calibrated, samples, calibration_mask
+        ),
+        "holdout_physical_metrics": _physical_metrics(
+            calibrated, samples, holdout_mask
         ),
         "calibrated_profile": calibrated.to_dict(),
     }

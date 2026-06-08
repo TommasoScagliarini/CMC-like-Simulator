@@ -48,6 +48,17 @@ class SimulatorConfig:
     online_grf_profile_file: str = ""
     online_grf_contact_plugin: str = "plugins/OnlineGRFContact"
     online_grf_max_force_bw: float = 5.0
+    online_grf_max_penetration_m: float = 0.03
+    # Diagnostic opt-in: keep prescribed GRF data loaded as an oracle, but do
+    # not add the selected side's ExternalForce to the model dynamics.
+    prescribed_grf_disabled_sides: List[str] = field(default_factory=list)
+    # Hybrid GRF (meaningful only in grf_mode="online_sensor"): APPLY the online
+    # contact force (not just sense it) on the listed sides, while prescribed
+    # ExternalLoads keep driving the other side. Prescribed is auto-disabled on
+    # any side listed here, to avoid double-loading. Accepts 'left'/'right'.
+    # Use case: prescribed on the sound side + online contact on the prosthetic
+    # side, so the prosthetic ankle/knee work against a real ground reaction.
+    online_grf_applied_sides: List[str] = field(default_factory=list)
 
     # Reserve actuators ForceSet XML  (CMC_Actuators.xml).
     # Relative paths are resolved inside model_bundle_dir.

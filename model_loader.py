@@ -112,6 +112,8 @@ class SimulationContext:
     grf_filter_report_file: str = ""
     grf_vertical_force_columns: Dict[str, str] = field(default_factory=dict)
     grf_mode: str = "prescribed"
+    prescribed_grf_disabled_sides: List[str] = field(default_factory=list)
+    online_grf_applied_sides: List[str] = field(default_factory=list)
     online_grf_profile_file: str = ""
     online_grf_hs_confirmation_threshold_n: float = 0.0
     online_grf_force_paths: List[str] = field(default_factory=list)
@@ -767,6 +769,49 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
             f"{paths.external_loads_path}"
         )
     print(f"[ModelLoader] GRF mode         : {grf_mode}")
+    prescribed_grf_disabled_sides = {
+        str(side).strip().lower()
+        for side in getattr(cfg, "prescribed_grf_disabled_sides", [])
+        if str(side).strip()
+    }
+    invalid_disabled_sides = prescribed_grf_disabled_sides - {"left", "right"}
+    if invalid_disabled_sides:
+        raise ValueError(
+            "[ModelLoader] prescribed_grf_disabled_sides accepts only "
+            f"'left'/'right', got {sorted(invalid_disabled_sides)}."
+        )
+
+    # Hybrid: sides where the online contact is APPLIED (not just sensed).
+    online_grf_applied_sides = {
+        str(side).strip().lower()
+        for side in getattr(cfg, "online_grf_applied_sides", [])
+        if str(side).strip()
+    }
+    invalid_applied_sides = online_grf_applied_sides - {"left", "right"}
+    if invalid_applied_sides:
+        raise ValueError(
+            "[ModelLoader] online_grf_applied_sides accepts only "
+            f"'left'/'right', got {sorted(invalid_applied_sides)}."
+        )
+    if online_grf_applied_sides and grf_mode != "online_sensor":
+        raise ValueError(
+            "[ModelLoader] online_grf_applied_sides (hybrid per-side online "
+            f"contact) requires grf_mode='online_sensor', got {grf_mode!r}."
+        )
+    # Auto-disable prescribed on sides where the online contact is applied, so
+    # the two GRF sources never double-load the same foot.
+    prescribed_grf_disabled_sides |= online_grf_applied_sides
+
+    if prescribed_grf_disabled_sides:
+        print(
+            "[ModelLoader] Prescribed GRF disabled in dynamics for: "
+            + ", ".join(sorted(prescribed_grf_disabled_sides))
+        )
+    if online_grf_applied_sides:
+        print(
+            "[ModelLoader] Online GRF APPLIED (hybrid) for: "
+            + ", ".join(sorted(online_grf_applied_sides))
+        )
 
     # ── 3a. Remove stale ExternalForce objects baked into the .osim ──────────
     try:
@@ -831,6 +876,12 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
 
             if grf_mode == "online":
                 continue
+            if side in prescribed_grf_disabled_sides:
+                print(
+                    f"[ModelLoader]   '{ef_template.getName()}' -> skipped "
+                    f"(prescribed GRF disabled for {side}; storage kept as oracle)"
+                )
+                continue
             ef = opensim.ExternalForce(
                 grf_storage,
                 force_id,
@@ -869,10 +920,24 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
             model,
             profile,
             applies_force=(grf_mode == "online"),
+            apply_sides=(online_grf_applied_sides or None),
         )
+        if online_grf_applied_sides:
+            applied = sum(
+                1
+                for side in online_grf_force_sides.values()
+                if side in online_grf_applied_sides
+            )
+            status = (
+                f"hybrid: {applied} applied "
+                f"({','.join(sorted(online_grf_applied_sides))}), "
+                f"{len(online_grf_force_paths) - applied} sensor-only"
+            )
+        else:
+            status = "active" if grf_mode == "online" else "sensor-only"
         print(
             f"[ModelLoader] Online GRF      : {len(online_grf_force_paths)} "
-            f"contacts ({'active' if grf_mode == 'online' else 'sensor-only'})"
+            f"contacts ({status})"
         )
    
     # ── 4. Reserve Actuators ──────────────────────────────────────────────────
@@ -1119,6 +1184,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         grf_filter_report_file = grf_filter_report_file,
         grf_vertical_force_columns = grf_vertical_force_columns,
         grf_mode = grf_mode,
+        prescribed_grf_disabled_sides = sorted(prescribed_grf_disabled_sides),
+        online_grf_applied_sides = sorted(online_grf_applied_sides),
         online_grf_profile_file = online_grf_profile_file,
         online_grf_hs_confirmation_threshold_n = (
             online_grf_hs_confirmation_threshold_n

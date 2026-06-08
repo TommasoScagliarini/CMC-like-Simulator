@@ -307,9 +307,32 @@ def _parse_args():
         help="Override onlineGRF JSON profile path.",
     )
     parser.add_argument(
+        "--online-grf-max-penetration",
+        type=float,
+        default=None,
+        help="Abort active onlineGRF if any contact penetration exceeds this value [m].",
+    )
+    parser.add_argument(
         "--reserve-actuators",
         default=None,
         help="Override reserve actuators (.xml) file path",
+    )
+    parser.add_argument(
+        "--disable-prescribed-grf-side",
+        action="append",
+        choices=["left", "right"],
+        default=None,
+        help="Keep prescribed GRF as oracle but omit its ExternalForce from "
+        "dynamics for the given side. Repeatable.",
+    )
+    parser.add_argument(
+        "--online-grf-applied-side",
+        action="append",
+        choices=["left", "right"],
+        default=None,
+        help="Hybrid (grf_mode=online_sensor): APPLY the online contact on the "
+        "given side (prescribed auto-disabled there). Repeatable. Use for "
+        "prescribed on the sound side + online contact on the prosthetic side.",
     )
     parser.add_argument(
         "--t-start",
@@ -575,8 +598,18 @@ def _parse_args():
         cfg.online_grf_profile_file = normalize_cli_existing_path(
             args.online_grf_profile
         )
+    if args.online_grf_max_penetration is not None:
+        if args.online_grf_max_penetration <= 0.0:
+            parser.error("--online-grf-max-penetration must be positive.")
+        cfg.online_grf_max_penetration_m = args.online_grf_max_penetration
     if args.reserve_actuators is not None:
         cfg.reserve_actuators_xml = normalize_cli_existing_path(args.reserve_actuators)
+    if args.disable_prescribed_grf_side is not None:
+        cfg.prescribed_grf_disabled_sides = sorted(
+            set(args.disable_prescribed_grf_side)
+        )
+    if args.online_grf_applied_side is not None:
+        cfg.online_grf_applied_sides = sorted(set(args.online_grf_applied_side))
     if args.t_start       is not None: cfg.t_start      = args.t_start
     if args.t_end         is not None: cfg.t_end        = args.t_end
     if args.dt            is not None: cfg.dt           = args.dt
@@ -776,6 +809,7 @@ if __name__ == "__main__":
         "model_bundle_dir", "model_file", "kinematics_file",
         "external_loads_xml", "reserve_actuators_xml",
         "grf_mode", "online_grf_profile_file", "online_grf_contact_plugin",
+        "online_grf_max_force_bw", "online_grf_max_penetration_m",
         "t_start", "t_end", "dt",
         "output_dir", "output_prefix",
         "sea_forward_mode", "qp_solver",

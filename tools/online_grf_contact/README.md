@@ -9,9 +9,16 @@ The component:
 - attaches a contact sphere to any `PhysicalFrame`;
 - supports a moving ground-surface velocity for treadmill simulations;
 - supports a calibratable positive force-penetration exponent (`1.5` by default);
+- supports an optional bounded state-only residual scaled by normal force,
+  penetration, and penetration rate;
 - reports force, ground-origin moment, contact point, penetration, and slip;
 - reports contact values even when `appliesForce=false`, enabling sensor-only
-  validation while prescribed ExternalLoads still drive the model.
+validation while prescribed ExternalLoads still drive the model.
+
+The residual properties are zero by default, preserving the original contact
+law. They are intended for offline-calibrated corrections that remain purely
+state-based at runtime; do not encode time, gait phase, or prescribed-force
+lookups in them.
 
 ## Build
 

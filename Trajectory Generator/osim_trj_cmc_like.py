@@ -124,6 +124,9 @@ class CMCEnvConfig:
         Add normalized online GRF, contact, gait-event pulses, and heel-strike
         gait phase to the policy observation. Disabled by default so existing
         checkpoints keep their observation contract.
+    prescribed_grf_disabled_sides
+        Diagnostic opt-in. Keep prescribed GRF data as an oracle, but remove
+        the selected side's ExternalForce from the model dynamics.
     """
 
     setup_xml_path: Optional[str] = None
@@ -154,6 +157,19 @@ class CMCEnvConfig:
     grf_mode: Optional[str] = None
     online_grf_profile_file: Optional[str] = None
     include_online_grf_observation: bool = False
+    prescribed_grf_disabled_sides: Sequence[str] = ()
+    # Hybrid GRF: sides whose online contact is APPLIED (not just sensed), so the
+    # prosthetic ankle/knee work against a real ground reaction. Prescribed is
+    # auto-disabled on these sides by the loader. Use with grf_mode=online_sensor.
+    online_grf_applied_sides: Sequence[str] = ()
+    # Penetration shaping on the APPLIED prosthetic contact. The contact already
+    # bounds penetration physically; these are a light penalty + a clean
+    # termination as a safety net. Thresholds sit above v2's normal operating
+    # penetration (~17 mm) and below the runner's hard abort (online_grf_max_
+    # penetration_m, default 30 mm). Reserves are NOT penalised (uncontrollable).
+    grf_penetration_penalty_threshold_m: float = 0.020
+    grf_penetration_termination_m: float = 0.028
+    reward_grf_penetration_weight: float = 5.0
     pelvis_min_height: float = 0.55
     # Per-joint divergence guard on the *simulated* prosthetic angle q [rad].
     # Terminate (anti-divergence) if a prosthetic coordinate leaves these bounds.
@@ -454,6 +470,12 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "observation": obs_dict,
             "observation_feature_names": self.observation_feature_names,
             "grf_mode": self.cfg.grf_mode,
+            "prescribed_grf_disabled_sides": list(
+                getattr(self.cfg, "prescribed_grf_disabled_sides", [])
+            ),
+            "online_grf_applied_sides": list(
+                getattr(self.cfg, "online_grf_applied_sides", [])
+            ),
         }
         info.update(self._online_info_payload())
         return obs, info
@@ -521,9 +543,25 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         )
         if safety_loss:
             reward = float(reward - self.env_cfg.reward_safety_weight * safety_loss)
+
+        # Light, graded penalty on prosthetic-contact penetration beyond the soft
+        # threshold (punch-through shaping). Reserves are deliberately NOT
+        # penalised: they reflect the missing sound-side support, not policy
+        # quality. Large penetration is handled by the termination above.
+        penetration_m = self._applied_penetration_max()
+        penetration_loss = max(
+            0.0, penetration_m - self.env_cfg.grf_penetration_penalty_threshold_m
+        )
+        if penetration_loss:
+            reward = float(
+                reward
+                - self.env_cfg.reward_grf_penetration_weight * penetration_loss
+            )
         reward_terms.update(
             {
                 "safety_loss": float(safety_loss),
+                "grf_penetration_m": float(penetration_m),
+                "grf_penetration_loss": float(penetration_loss),
                 "terminated": float(bool(terminated)),
                 "truncated": float(bool(truncated)),
             }
@@ -541,6 +579,12 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "policy_segment_derivatives": segment_derivatives.copy(),
             "end_reason": end_reason,
             "grf_mode": self.cfg.grf_mode,
+            "prescribed_grf_disabled_sides": list(
+                getattr(self.cfg, "prescribed_grf_disabled_sides", [])
+            ),
+            "online_grf_applied_sides": list(
+                getattr(self.cfg, "online_grf_applied_sides", [])
+            ),
         }
         info.update(self._online_info_payload())
         if failure is not None:
@@ -652,6 +696,16 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             cfg.online_grf_profile_file = normalize_cli_existing_path(
                 self.env_cfg.online_grf_profile_file
             )
+        cfg.prescribed_grf_disabled_sides = [
+            str(side).strip().lower()
+            for side in self.env_cfg.prescribed_grf_disabled_sides
+            if str(side).strip()
+        ]
+        cfg.online_grf_applied_sides = [
+            str(side).strip().lower()
+            for side in self.env_cfg.online_grf_applied_sides
+            if str(side).strip()
+        ]
 
     @staticmethod
     def _disable_output_files(cfg: SimulatorConfig) -> None:
@@ -1099,10 +1153,32 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             return "dataset_end"
         return "episode_time_limit"
 
+    def _applied_penetration_max(self) -> float:
+        """Max contact penetration over the APPLIED online-GRF sides [m]."""
+        sides = [
+            str(side).strip().lower()
+            for side in getattr(self.cfg, "online_grf_applied_sides", [])
+            if str(side).strip()
+        ]
+        if not sides:
+            return 0.0
+        values = []
+        for side in sides:
+            grf_side = self._online_grf.get(side, {})
+            if isinstance(grf_side, Mapping):
+                values.append(float(grf_side.get("penetration", 0.0)))
+        return max(values) if values else 0.0
+
     def _unsafe_end_reason(self, obs: Mapping[str, float]) -> str | None:
         pelvis_ty = obs.get("pelvis_ty")
         if pelvis_ty is not None and pelvis_ty < self.env_cfg.pelvis_min_height:
             return "fall"
+
+        if (
+            self._applied_penetration_max()
+            > self.env_cfg.grf_penetration_termination_m
+        ):
+            return "grf_penetration"
 
         bounds = self.env_cfg.truncation_bounds_rad or {}
         for coord_name in self.cfg.pros_coords:

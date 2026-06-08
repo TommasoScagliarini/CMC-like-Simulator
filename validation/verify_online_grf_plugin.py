@@ -19,7 +19,7 @@ from model_loader import _load_plugin
 from online_grf import add_online_grf_forces, load_online_grf_profile, read_online_grf
 from path_resolver import resolve_repo_path
 from setup_io import read_setup_xml
-from validation.validate_online_grf import _calculate_grf, _sample_spheres
+from validation.validate_online_grf import _calculate_wrench, _sample_spheres
 
 
 def main() -> int:
@@ -38,7 +38,7 @@ def main() -> int:
     profile = load_online_grf_profile(args.profile)
     times = np.arange(setup.t_start, setup.t_end + args.sample_dt * 0.25, args.sample_dt)
     samples = _sample_spheres(setup, profile, times, args.sea_plugin)
-    expected = _calculate_grf(profile, samples)
+    expected = _calculate_wrench(profile, samples)
 
     _load_plugin(str(resolve_repo_path(args.sea_plugin)))
     _load_plugin(str(resolve_repo_path("plugins/OnlineGRFContact")))
@@ -52,8 +52,11 @@ def main() -> int:
     coord_set = model.getCoordinateSet()
 
     actual = {
-        "left": np.zeros_like(expected["left"]),
-        "right": np.zeros_like(expected["right"]),
+        side: {
+            key: np.zeros_like(expected[side][key])
+            for key in ("force", "moment")
+        }
+        for side in ("left", "right")
     }
     from config import SimulatorConfig
     from kinematics_interpolator import KinematicsInterpolator
@@ -77,18 +80,28 @@ def main() -> int:
                 coord.setSpeedValue(state, float(qdot[name]))
         grf = read_online_grf(model, state, force_paths, force_sides)
         for side in ("left", "right"):
-            actual[side][row] = grf["sides"][side]["force"]
+            for key in ("force", "moment"):
+                actual[side][key][row] = grf["sides"][side][key]
 
     report = {"samples": int(len(times)), "sample_dt": float(args.sample_dt), "sides": {}}
     maximum = 0.0
     for side in ("left", "right"):
-        error = actual[side] - expected[side]
-        side_maximum = float(np.max(np.abs(error)))
+        errors = {
+            key: actual[side][key] - expected[side][key]
+            for key in ("force", "moment")
+        }
+        side_maximum = max(
+            float(np.max(np.abs(error))) for error in errors.values()
+        )
         maximum = max(maximum, side_maximum)
         report["sides"][side] = {
-            "rmse_n": np.sqrt(np.mean(error * error, axis=0)).tolist(),
-            "max_abs_error_n": side_maximum,
+            key: {
+                "rmse": np.sqrt(np.mean(error * error, axis=0)).tolist(),
+                "max_abs_error": float(np.max(np.abs(error))),
+            }
+            for key, error in errors.items()
         }
+        report["sides"][side]["max_abs_error"] = side_maximum
     report["max_abs_error_n"] = maximum
     report["equivalent_within_1e-8_n"] = bool(maximum <= 1.0e-8)
 

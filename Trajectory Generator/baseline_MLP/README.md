@@ -44,7 +44,9 @@ stack SNN (skrl/snntorch resta solo in `envCMC-like`).
 | `reward_function.py` | **Unica fonte della reward**: `RewardConfig` + `compute_reward(losses, cfg)` + `RewardShapingWrapper`. Ricalcola la reward dai *loss* esposti dall'env e la sostituisce. |
 | `tb_logging.py` | TensorBoard: `RewardComponentsCallback` (componenti reward/loss → metriche env-runner) + `SummaryWriter` su `<output_dir>/tensorboard`. |
 | `train_ppo_mlp.py` | Entrypoint training supervisionato: timeout rigidi e cleanup dell'albero Ray, `PPOConfig` + loop `algo.train()` + checkpoint best/last + RLModule inference-only + `summary.json` + TensorBoard. |
-| `rollout_eval.py` | Carica l'RLModule da checkpoint, rollout deterministico (greedy), metriche; con `--record-outputs` salva .sto per `visualize.py`. |
+| `rollout_eval.py` | Carica l'RLModule nel figlio supervisionato, rollout deterministico, heartbeat per-step e metriche; con `--record-outputs` salva .sto per `visualize.py`. |
+| `process_watchdog.py` | Supervisore cross-platform con heartbeat, timeout di startup/stallo/run e self-test su figlio volutamente bloccato. |
+| `validate_online_grf_train_inference.py` | Gate profilo-specifico e smoke brevi del contratto onlineGRF usato da training/inference. |
 | `commands.txt` | Comandi PowerShell pronti (setup, smoke, train, rollout, tensorboard, reward custom). |
 
 ## Uso rapido
@@ -66,6 +68,10 @@ Dalla **root** del simulatore (vedi `commands.txt` per la lista completa):
   processi Ray discendenti. Sono configurabili con `--startup-timeout-s`,
   `--iteration-timeout-s`, `--checkpoint-timeout-s`, `--cleanup-timeout-s` e
   `--run-timeout-s`.
+- `rollout_eval.py` importa Torch/RLlib/OpenSim solo nel figlio supervisionato
+  e pubblica un heartbeat per ogni reset/step. Prima di run lunghi, eseguire il
+  self-test di `process_watchdog.py` e il gate
+  `validate_online_grf_train_inference.py`.
 - Ray vede per default solo `num_env_runners + 1` CPU, configurabile con
   `--ray-num-cpus`, evitando worker inattivi per tutte le CPU host.
 - I log standalone RLlib sono reindirizzati in `<output_dir>/rllib`; non viene
@@ -88,7 +94,14 @@ come sensore dalla rete durante training e inference.
 ```
 
 Il profilo predefinito è
-`online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_sensor_basis.json`.
+`online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_physical_basis_10mm_balanced.json`.
+In modalita `online_sensor` supera i criteri plugin/sensore e mantiene la
+penetrazione holdout sotto `15 mm`. Non e ancora autorizzato in modalita
+`online` attiva: il gate fisico completo fallisce per reserve `pelvis_ty`
+active/sensor p95 pari a `5.94x` rispetto al limite `1.5x`.
+Il precedente `online_sensor_basis` non supera questo gate per nuovi run: pur
+avendo un buon fit della forza, raggiunge circa `102 mm` di penetrazione
+sinistra.
 L'osservazione aggiunge per lato:
 
 - GRF normale normalizzata per body weight e stato di contatto;
@@ -104,6 +117,20 @@ Training e rollout di uno stesso checkpoint devono usare gli stessi flag GRF e
 lo stesso profilo. I checkpoint legacy addestrati senza queste feature richiedono
 esplicitamente `--grf-mode prescribed --no-online-grf-observation`. Questa
 integrazione non modifica ancora la reward.
+
+Per test diagnostici e possibile rimuovere dalla dinamica la `ExternalForce`
+prescribed di un lato, mantenendo comunque i dati prescribed caricati come oracle:
+
+```powershell
+... train_ppo_mlp.py ... --grf-mode online_sensor --disable-prescribed-grf-side left
+... rollout_eval.py ... --grf-mode online_sensor --disable-prescribed-grf-side left
+```
+
+Il flag e ripetibile per i due lati. Non azzera il sensore GRF online: il sensore
+continua a stimare il contatto virtuale, ma la forza prescribed selezionata non
+viene applicata al modello. Questa modalita puo quindi evidenziare compensazioni
+non fisiche tramite reserve; la reward corrente non penalizza direttamente ne le
+reserve ne la coerenza tra GRF online e forze applicate.
 
 ## Reward (`reward_function.py`)
 

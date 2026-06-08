@@ -41,7 +41,8 @@ import reward_function  # noqa: E402
 ENV_NAME = "cmc_traj_env"
 DEFAULT_NETWORK_GRF_MODE = "online_sensor"
 DEFAULT_NETWORK_ONLINE_GRF_PROFILE = (
-    "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_sensor_basis.json"
+    "online_grf_profiles/"
+    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
 )
 
 _CMC_ENV_FIELDS = {f.name for f in fields(CMCEnvConfig)}

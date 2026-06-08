@@ -37,7 +37,8 @@ from typing import Any  # noqa: E402
 _DEFAULT_SETUP_XML = r"models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
 _DEFAULT_GRF_MODE = "online_sensor"
 _DEFAULT_ONLINE_GRF_PROFILE = (
-    "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_sensor_basis.json"
+    "online_grf_profiles/"
+    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
 )
 _BASELINE_DIR = str(Path(__file__).resolve().parent)
 _SCRIPT_PATH = Path(__file__).resolve()
@@ -169,13 +170,17 @@ class _WindowsProcessJob:
 def _write_watchdog_state(output_dir: Path, phase: str, timeout_s: float) -> None:
     """Publish the current blocking phase for the external process watchdog."""
     path = output_dir / _WATCHDOG_FILENAME
+    now = time.time()
     payload = {
         "phase": phase,
         "timeout_s": float(timeout_s),
-        "started_at_unix_s": time.time(),
+        "started_at_unix_s": now,
+        "updated_at_unix_s": now,
         "pid": os.getpid(),
     }
-    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    temp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    temp_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    os.replace(temp_path, path)
 
 
 @contextmanager
@@ -286,6 +291,8 @@ def build_config(
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "include_online_grf_observation": args.online_grf_observation,
+        "prescribed_grf_disabled_sides": args.disable_prescribed_grf_side,
+        "online_grf_applied_sides": args.online_grf_applied_side,
     }
     # The reward seen by the agent is shaped by reward_function.py (single source
     # of truth); these overrides reach RewardShapingWrapper via make_cmc_env.
@@ -526,6 +533,8 @@ def run(args: argparse.Namespace) -> dict:
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_observation": bool(args.online_grf_observation),
+        "prescribed_grf_disabled_sides": list(args.disable_prescribed_grf_side),
+        "online_grf_applied_sides": list(args.online_grf_applied_side),
         "reward_config": (
             reward_function.RewardConfig.from_mapping(reward_overrides).to_dict()
             if _TRAINING_STACK_LOADED
@@ -647,12 +656,30 @@ def _supervised_child_env() -> dict[str, str]:
         prefix / "bin",
     ]
     existing = env.get("PATH", "").split(os.pathsep)
+    if prefix.parent.name.lower() == "envs":
+        conda_root = prefix.parents[1]
+        root_norm = os.path.normcase(os.path.abspath(conda_root))
+        prefix_norm = os.path.normcase(os.path.abspath(prefix))
+        existing = [
+            item
+            for item in existing
+            if not (
+                os.path.normcase(os.path.abspath(item)).startswith(
+                    root_norm + os.sep
+                )
+                and not os.path.normcase(os.path.abspath(item)).startswith(
+                    prefix_norm + os.sep
+                )
+                and Path(item).name.lower() != "condabin"
+            )
+        ]
     prepend = [
         str(path)
         for path in candidates
         if path.is_dir() and str(path).lower() not in {item.lower() for item in existing}
     ]
     env["PATH"] = os.pathsep.join(prepend + existing)
+    env["CONDA_PREFIX"] = str(prefix)
     return env
 
 
@@ -664,6 +691,7 @@ def run_supervised(args: argparse.Namespace) -> int:
     ).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     watchdog_path = output_dir / _WATCHDOG_FILENAME
+    watchdog_path.unlink(missing_ok=True)
 
     child_args = list(sys.argv[1:])
     if args.output_dir is None:
@@ -697,6 +725,17 @@ def run_supervised(args: argparse.Namespace) -> int:
                 timeout_error = (
                     f"Training run exceeded the {args.run_timeout_s:g} s total "
                     "wall-clock timeout."
+                )
+                break
+            if (
+                state is None
+                and args.startup_timeout_s > 0.0
+                and now - run_started > args.startup_timeout_s
+            ):
+                timed_out_phase = "initial_heartbeat"
+                timeout_error = (
+                    "Training worker did not publish its initial heartbeat "
+                    f"within {args.startup_timeout_s:g} s."
                 )
                 break
             if state is not None:
@@ -741,6 +780,18 @@ def run_supervised(args: argparse.Namespace) -> int:
     if windows_job is not None:
         windows_job.close()
     return int(process.returncode or 0)
+
+
+def _run_watchdog_probe(args: argparse.Namespace) -> None:
+    """Intentionally stall so the parent supervisor can prove it terminates us."""
+    output_dir = Path(args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _write_watchdog_state(
+        output_dir,
+        "intentional watchdog probe stall",
+        args.watchdog_probe_timeout_s,
+    )
+    time.sleep(max(30.0, args.watchdog_probe_timeout_s * 10.0))
 
 
 def parse_args() -> argparse.Namespace:
@@ -827,6 +878,25 @@ def parse_args() -> argparse.Namespace:
         "with legacy checkpoints.",
     )
     p.add_argument(
+        "--disable-prescribed-grf-side",
+        action="append",
+        choices=("left", "right"),
+        default=[],
+        help="Diagnostic opt-in: keep prescribed GRF as an oracle but remove "
+        "the selected side's ExternalForce from model dynamics. Repeat for "
+        "multiple sides.",
+    )
+    p.add_argument(
+        "--online-grf-applied-side",
+        action="append",
+        choices=("left", "right"),
+        default=[],
+        help="Hybrid GRF: APPLY the online contact (not just sense it) on the "
+        "given side so the prosthetic ankle/knee work against a real ground "
+        "reaction; prescribed is auto-disabled there. Use 'left' (prosthetic) "
+        "with --grf-mode online_sensor. Repeat for multiple sides.",
+    )
+    p.add_argument(
         "--reward-json",
         default=None,
         help="Reward overrides: a JSON file path or an inline JSON object of "
@@ -841,6 +911,13 @@ def parse_args() -> argparse.Namespace:
         "Use --no-tensorboard to disable.",
     )
     p.add_argument("--worker-process", action="store_true", help=argparse.SUPPRESS)
+    p.add_argument("--watchdog-probe", action="store_true", help=argparse.SUPPRESS)
+    p.add_argument(
+        "--watchdog-probe-timeout-s",
+        type=float,
+        default=1.5,
+        help=argparse.SUPPRESS,
+    )
     return p.parse_args()
 
 
@@ -848,6 +925,9 @@ def main() -> None:
     args = parse_args()
     if not args.worker_process:
         raise SystemExit(run_supervised(args))
+    if args.watchdog_probe:
+        _run_watchdog_probe(args)
+        return
     summary = run(args)
     print(json.dumps(summary, indent=2))
 

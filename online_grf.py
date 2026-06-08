@@ -126,6 +126,19 @@ class OnlineGRFSphere:
     location: tuple[float, float, float]
     radius: float
     material: OnlineGRFMaterial | None = None
+    residual_force_ratio: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    residual_moment_ratio_m: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    residual_penetration_reference_m: float = 0.0
+    residual_force_penetration_gain_per_m: tuple[float, float, float] = (
+        0.0,
+        0.0,
+        0.0,
+    )
+    residual_force_penetration_rate_gain_s_per_m: tuple[float, float, float] = (
+        0.0,
+        0.0,
+        0.0,
+    )
 
     @classmethod
     def from_mapping(cls, raw: Mapping[str, object]) -> "OnlineGRFSphere":
@@ -141,6 +154,12 @@ class OnlineGRFSphere:
             raise ValueError(f"Sphere {name!r} requires a frame component path.")
         if not math.isfinite(radius) or radius <= 0.0:
             raise ValueError(f"Sphere {name!r} radius must be positive.")
+        residual_reference = float(raw.get("residual_penetration_reference_m", 0.0))
+        if not math.isfinite(residual_reference) or residual_reference < 0.0:
+            raise ValueError(
+                f"sphere {name} residual_penetration_reference_m "
+                "must be finite and non-negative."
+            )
         return cls(
             name=name,
             side=side,
@@ -151,6 +170,29 @@ class OnlineGRFSphere:
                 OnlineGRFMaterial.from_mapping(raw["material"])
                 if raw.get("material") is not None
                 else None
+            ),
+            residual_force_ratio=_vec3(
+                raw.get("residual_force_ratio", (0.0, 0.0, 0.0)),
+                f"sphere {name} residual_force_ratio",
+            ),
+            residual_moment_ratio_m=_vec3(
+                raw.get("residual_moment_ratio_m", (0.0, 0.0, 0.0)),
+                f"sphere {name} residual_moment_ratio_m",
+            ),
+            residual_penetration_reference_m=residual_reference,
+            residual_force_penetration_gain_per_m=_vec3(
+                raw.get(
+                    "residual_force_penetration_gain_per_m",
+                    (0.0, 0.0, 0.0),
+                ),
+                f"sphere {name} residual_force_penetration_gain_per_m",
+            ),
+            residual_force_penetration_rate_gain_s_per_m=_vec3(
+                raw.get(
+                    "residual_force_penetration_rate_gain_s_per_m",
+                    (0.0, 0.0, 0.0),
+                ),
+                f"sphere {name} residual_force_penetration_rate_gain_s_per_m",
             ),
         )
 
@@ -164,6 +206,30 @@ class OnlineGRFSphere:
         }
         if self.material is not None:
             values["material"] = self.material.to_dict()
+        if any(value != 0.0 for value in self.residual_force_ratio):
+            values["residual_force_ratio"] = list(self.residual_force_ratio)
+        if any(value != 0.0 for value in self.residual_moment_ratio_m):
+            values["residual_moment_ratio_m"] = list(
+                self.residual_moment_ratio_m
+            )
+        if self.residual_penetration_reference_m != 0.0:
+            values["residual_penetration_reference_m"] = float(
+                self.residual_penetration_reference_m
+            )
+        if any(
+            value != 0.0
+            for value in self.residual_force_penetration_gain_per_m
+        ):
+            values["residual_force_penetration_gain_per_m"] = list(
+                self.residual_force_penetration_gain_per_m
+            )
+        if any(
+            value != 0.0
+            for value in self.residual_force_penetration_rate_gain_s_per_m
+        ):
+            values["residual_force_penetration_rate_gain_s_per_m"] = list(
+                self.residual_force_penetration_rate_gain_s_per_m
+            )
         return values
 
 
@@ -287,6 +353,27 @@ def _new_online_grf_force(
     _set_property(force, "plane_origin", profile.ground.origin)
     _set_property(force, "plane_normal", profile.ground.normal)
     _set_property(force, "surface_velocity", profile.ground.surface_velocity)
+    _set_property(force, "residual_force_ratio", sphere.residual_force_ratio)
+    _set_property(
+        force,
+        "residual_moment_ratio_m",
+        sphere.residual_moment_ratio_m,
+    )
+    _set_property(
+        force,
+        "residual_penetration_reference_m",
+        sphere.residual_penetration_reference_m,
+    )
+    _set_property(
+        force,
+        "residual_force_penetration_gain_per_m",
+        sphere.residual_force_penetration_gain_per_m,
+    )
+    _set_property(
+        force,
+        "residual_force_penetration_rate_gain_s_per_m",
+        sphere.residual_force_penetration_rate_gain_s_per_m,
+    )
     material = sphere.material or profile.material
     for name, value in material.to_dict().items():
         _set_property(force, name, value)
@@ -300,12 +387,26 @@ def add_online_grf_forces(
     profile: OnlineGRFProfile,
     *,
     applies_force: bool,
+    apply_sides: Iterable[str] | None = None,
 ) -> tuple[list[str], Dict[str, str]]:
-    """Add one registered onlineGRF force per profile sphere."""
+    """Add one registered onlineGRF force per profile sphere.
+
+    If ``apply_sides`` is given, the per-sphere ``appliesForce`` flag is set to
+    ``sphere.side in apply_sides`` (hybrid per-side application). Otherwise the
+    global ``applies_force`` is used for every sphere (legacy behaviour).
+    """
+    apply_set = (
+        None
+        if apply_sides is None
+        else {str(side).strip().lower() for side in apply_sides}
+    )
     force_paths: list[str] = []
     force_sides: Dict[str, str] = {}
     for sphere in profile.spheres:
-        force = _new_online_grf_force(model, sphere, profile, applies_force)
+        sphere_applies = (
+            applies_force if apply_set is None else (sphere.side in apply_set)
+        )
+        force = _new_online_grf_force(model, sphere, profile, sphere_applies)
         name = force.getName()
         model.addForce(force)
         force_paths.append(f"/forceset/{name}")
@@ -396,7 +497,7 @@ def read_online_grf(
         bucket["normal_force"] += normal_force
         bucket["penetration"] = max(bucket["penetration"], penetration)
         bucket["slip_speed"] = max(bucket["slip_speed"], slip_speed)
-        bucket["in_contact"] = bool(bucket["in_contact"] or normal_force > 1e-9)
+        bucket["in_contact"] = bool(bucket["in_contact"] or penetration > 0.0)
         per_sphere[name] = {
             "side": side,
             "force": force_vec.copy(),

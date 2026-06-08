@@ -70,6 +70,7 @@ All results are written as OpenSim-compatible .sto files into cfg.output_dir.
 from __future__ import annotations
 
 import os
+import json
 import time as _time
 from typing import Dict
 
@@ -439,6 +440,7 @@ class SimulationRunner:
             f"(~{n_windows_est} windows × {n_substeps} substeps "
             f"= {n_steps_est} steps)\n"
         )
+        self._write_progress_heartbeat("simulation", t, step, 0.0)
 
         while t < t_end - h_sub * 0.5:
 
@@ -523,6 +525,12 @@ class SimulationRunner:
 
             if step <= n_substeps:
                 print(f"[Runner] t={t:.4f} - first window OK", flush=True)
+                self._write_progress_heartbeat(
+                    "simulation",
+                    t,
+                    step,
+                    _time.perf_counter() - wall_t0,
+                )
 
             # Progress report every 50 steps
             if step % 50 == 0:
@@ -534,6 +542,7 @@ class SimulationRunner:
                     f"({progress:.1f}%)  "
                     f"elapsed={elapsed:.1f}s  ETA={eta:.0f}s"
                 )
+                self._write_progress_heartbeat("simulation", t, step, elapsed)
 
         # ── Save outputs ──────────────────────────────────────────────────────
         elapsed_total = _time.perf_counter() - wall_t0
@@ -551,6 +560,12 @@ class SimulationRunner:
         status_t = t if failure_exc is None else failure_t
         status_step = step if failure_exc is None else failure_step
         self._write_run_status(failure_exc, status_t, status_step, elapsed_total)
+        self._write_progress_heartbeat(
+            "complete" if failure_exc is None else "failed",
+            status_t,
+            status_step,
+            elapsed_total,
+        )
         if failure_exc is not None:
             raise RuntimeError(
                 "Simulation stopped early; partial results were saved to "
@@ -860,6 +875,16 @@ class SimulationRunner:
                     f"Online GRF exceeds {self._cfg.online_grf_max_force_bw:g} BW "
                     f"at t={t:.4f}: {peak:.1f} N > {max_force:.1f} N."
                 )
+            max_penetration = float(
+                getattr(self._cfg, "online_grf_max_penetration_m", 0.03)
+            )
+            for side in ("left", "right"):
+                penetration = float(grf["sides"][side]["penetration"])
+                if penetration > max_penetration:
+                    raise FloatingPointError(
+                        f"Online GRF penetration exceeds {max_penetration:g} m "
+                        f"at t={t:.4f} for {side}: {penetration:.6f} m."
+                    )
 
         events = []
         if self._online_event_detector is not None:
@@ -1379,6 +1404,42 @@ class SimulationRunner:
         model.setStateVariableValues(state, sv)
         state.setTime(float(time_value))
 
+    def _write_progress_heartbeat(
+        self,
+        phase: str,
+        t_value: float,
+        step: int,
+        wall_time: float,
+    ) -> None:
+        """Publish atomic progress when supervised through CMC_SIM_HEARTBEAT_FILE."""
+        raw_path = os.environ.get("CMC_SIM_HEARTBEAT_FILE", "").strip()
+        if not raw_path:
+            return
+        path = os.path.abspath(raw_path)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        now = _time.time()
+        duration = max(0.0, float(self._cfg.t_end - self._cfg.t_start))
+        progress = (
+            100.0 * (float(t_value) - float(self._cfg.t_start)) / duration
+            if duration > 0.0
+            else 100.0
+        )
+        payload = {
+            "phase": str(phase),
+            "progress": max(0.0, min(100.0, progress)),
+            "timeout_s": 0.0,
+            "started_at_unix_s": now,
+            "updated_at_unix_s": now,
+            "pid": os.getpid(),
+            "simulation_time_s": float(t_value),
+            "step": int(step),
+            "wall_time_s": float(wall_time),
+        }
+        temporary = f"{path}.{os.getpid()}.tmp"
+        with open(temporary, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, indent=2)
+        os.replace(temporary, path)
+
     def _write_run_status(
         self,
         failure_exc: Exception | None,
@@ -1420,9 +1481,27 @@ class SimulationRunner:
             fh.write(
                 f"grf_mode={getattr(self._ctx, 'grf_mode', 'prescribed')}\n"
             )
+            disabled_sides = getattr(
+                self._ctx, "prescribed_grf_disabled_sides", []
+            )
+            fh.write(
+                "prescribed_grf_disabled_sides="
+                + ",".join(sorted(str(side) for side in disabled_sides))
+                + "\n"
+            )
+            applied_sides = getattr(self._ctx, "online_grf_applied_sides", [])
+            fh.write(
+                "online_grf_applied_sides="
+                + ",".join(sorted(str(side) for side in applied_sides))
+                + "\n"
+            )
             online_profile = getattr(self._ctx, "online_grf_profile_file", "")
             if online_profile:
                 fh.write(f"online_grf_profile_file={online_profile}\n")
+            fh.write(
+                f"online_grf_max_penetration_m="
+                f"{float(getattr(self._cfg, 'online_grf_max_penetration_m', 0.03)):.10g}\n"
+            )
             fh.write(f"sea_motor_substeps={self._cfg.sea_motor_substeps}\n")
             fh.write(
                 f"sea_motor_max_substeps={self._cfg.sea_motor_max_substeps}\n"
