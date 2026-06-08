@@ -40,6 +40,25 @@ La calibrazione intensiva per `online_sensor` è disponibile in:
 Il materiale può essere configurato per singola sfera e include un esponente
 forza-penetrazione calibrabile, con default retrocompatibile `1.5`.
 
+### Validazione plugin macOS arm64
+
+Il TODO di portabilità macOS è stato chiuso il 2026-06-08. Il plugin
+`OnlineGRFContact` è stato compilato in Release contro
+`/Users/tommy/opensim-core-install`, installato localmente come
+`plugins/libOnlineGRFContact.dylib` e verificato come Mach-O arm64.
+
+Verifiche completate:
+
+- `LC_RPATH` punta alla stessa installazione OpenSim usata dal binding Python;
+- firma ad hoc valida e caricamento tramite `opensim.LoadOpenSimLibrary`;
+- registrazione del tipo custom `OnlineGRFSphereHalfSpaceForce`;
+- audit formula Python/plugin C++ equivalente entro `1e-8 N`, con errore
+  massimo `1.73e-12 N`;
+- smoke AB06 `online_sensor` e `online` senza ExternalLoads completati;
+- smoke adapter RL onlineGRF completato con heel strike confermati.
+
+Non sono state necessarie modifiche al sorgente C++ o al plugin SEA.
+
 ### Esito calibrazione AB06
 
 Il miglior profilo incluso per AB06 è

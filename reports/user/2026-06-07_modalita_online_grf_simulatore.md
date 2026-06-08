@@ -414,7 +414,9 @@ conda run -n envCMC-like python validation/calibrate_online_grf_basis.py `
   reserve più elevate e crescenti rispetto a `online_sensor`;
 - misurare e configurare la velocità reale del treadmill nei profili che la
   richiedono;
-- compilare e verificare il plugin su macOS arm64;
+- ~~compilare e verificare il plugin su macOS arm64~~ **chiuso il
+  2026-06-08**: build Release arm64, caricamento del tipo custom, audit
+  Python/C++ e smoke `online_sensor`/`online` completati;
 - definire se e come usare GRF ed eventi online nella reward o nella
   terminazione degli episodi; l'integrazione non invasiva in `info` e
   nell'osservazione opzionale è completata.

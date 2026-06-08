@@ -28,8 +28,37 @@ Copy-Item tools/online_grf_contact/build/Release/OnlineGRFContact.dll plugins/
 macOS arm64:
 
 ```bash
+export OPENSIM_INSTALL_DIR=/Users/tommy/opensim-core-install
+
 cmake -S tools/online_grf_contact -B tools/online_grf_contact/build \
-  -DOPENSIM_INSTALL_DIR=/path/to/OpenSim
-cmake --build tools/online_grf_contact/build --config Release
-cp tools/online_grf_contact/build/libOnlineGRFContact.dylib plugins/
+  -DCMAKE_BUILD_TYPE=Release \
+  -DOPENSIM_INSTALL_DIR="$OPENSIM_INSTALL_DIR"
+cmake --build tools/online_grf_contact/build --config Release --parallel
+cmake -E copy_if_different \
+  tools/online_grf_contact/build/libOnlineGRFContact.dylib \
+  plugins/libOnlineGRFContact.dylib
 ```
+
+Use the OpenSim installation that provides the active Python binding. The
+plugin and binding must use the same OpenSim/Simbody ABI.
+
+## macOS verification
+
+```bash
+file plugins/libOnlineGRFContact.dylib
+lipo -archs plugins/libOnlineGRFContact.dylib
+otool -L plugins/libOnlineGRFContact.dylib
+codesign --verify --verbose=4 plugins/libOnlineGRFContact.dylib
+
+/opt/anaconda3/envs/envCMC-like/bin/python -c \
+  "import opensim; opensim.LoadOpenSimLibrary('plugins/OnlineGRFContact'); assert opensim.OpenSimObject.newInstanceOfType('OnlineGRFSphereHalfSpaceForce') is not None"
+
+/opt/anaconda3/envs/envCMC-like/bin/python validation/verify_online_grf_plugin.py \
+  --setup models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml \
+  --profile online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_sensor_basis.json \
+  --report results/online_grf_plugin_audit.json
+```
+
+Verified on macOS arm64 on 2026-06-08. The Release dylib is arm64, has an
+OpenSim-library rpath, loads and registers the custom type, and passes the
+AB06 Python/C++ numerical-equivalence audit.
