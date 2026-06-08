@@ -213,12 +213,14 @@ class PPO_SNN(Agent):  # type: ignore[misc]
             self.memory.create_tensor(name="truncated", size=1, dtype=torch.bool)
             self.memory.create_tensor(name="log_prob", size=1, dtype=torch.float32)
             self.memory.create_tensor(name="values", size=1, dtype=torch.float32)
+            self.memory.create_tensor(name="next_values", size=1, dtype=torch.float32)
             self.memory.create_tensor(name="returns", size=1, dtype=torch.float32)
             self.memory.create_tensor(name="advantages", size=1, dtype=torch.float32)
             self._tensors_names = [
                 "states",
                 "actions",
                 "terminated",
+                "truncated",
                 "log_prob",
                 "values",
                 "returns",
@@ -257,6 +259,9 @@ class PPO_SNN(Agent):  # type: ignore[misc]
             if model is None or id(model) in seen:
                 continue
             model.train(train)
+            clear_cache = getattr(model, "_clear_cache", None)
+            if callable(clear_cache):
+                clear_cache()
             seen.add(id(model))
 
     def act(
@@ -271,19 +276,24 @@ class PPO_SNN(Agent):  # type: ignore[misc]
         rnn = {"rnn": self._rnn_initial_states["policy"]} if self._rnn else {}
         inputs = {"states": self._state_preprocessor(model_states), **rnn}
 
-        if timestep < self._random_timesteps:
-            actions, log_prob, outputs = self.policy.random_act(
-                inputs,
-                role="policy",
-            )
-        else:
-            actions, log_prob, outputs = self.policy.act(inputs, role="policy")
+        with torch.no_grad():
+            if timestep < self._random_timesteps:
+                actions, log_prob, outputs = self.policy.random_act(
+                    inputs,
+                    role="policy",
+                )
+            else:
+                actions, log_prob, outputs = self.policy.act(inputs, role="policy")
 
-        self._current_log_prob = log_prob
+        self._current_log_prob = self._detach_tensor(log_prob)
         if self._rnn:
-            self._rnn_final_states["policy"] = outputs.get("rnn", [])
+            self._rnn_final_states["policy"] = self._detach_rnn_states(
+                outputs.get("rnn", [])
+            )
         outputs = dict(outputs)
-        outputs["log_prob"] = log_prob
+        if self._rnn:
+            outputs["rnn"] = self._rnn_final_states["policy"]
+        outputs["log_prob"] = self._current_log_prob
         return actions, outputs
 
     def record_transition(
@@ -303,20 +313,33 @@ class PPO_SNN(Agent):  # type: ignore[misc]
     ) -> None:
         model_states = states if states is not None else observations
         model_next_states = next_states if next_states is not None else next_observations
+        memory_states = self._detach_tensor(model_states)
+        memory_next_states = self._detach_tensor(model_next_states)
+        memory_actions = self._detach_tensor(actions)
+        memory_rewards = self._detach_tensor(rewards)
+        memory_terminated = self._detach_tensor(terminated)
+        memory_truncated = self._detach_tensor(truncated)
 
-        super().record_transition(
-            observations=observations,
-            states=model_states,
-            actions=actions,
-            rewards=rewards,
-            next_observations=next_observations,
-            next_states=model_next_states,
-            terminated=terminated,
-            truncated=truncated,
-            infos=infos,
-            timestep=timestep,
-            timesteps=timesteps,
-        )
+        try:
+            super().record_transition(
+                observations=self._detach_tensor(observations),
+                states=memory_states,
+                actions=memory_actions,
+                rewards=memory_rewards,
+                next_observations=self._detach_tensor(next_observations),
+                next_states=memory_next_states,
+                terminated=memory_terminated,
+                truncated=memory_truncated,
+                infos=infos,
+                timestep=timestep,
+                timesteps=timesteps,
+            )
+        except TypeError as exc:
+            # skrl has changed Agent.record_transition signatures across
+            # releases. This agent owns the memory insert/update path below, so
+            # the parent hook is best-effort logging/bookkeeping only.
+            if "unexpected keyword argument" not in str(exc):
+                raise
 
         self._entropy_loss_scale = self._entropy_scheduler.get(timestep)
         self._track_info_scalars(infos)
@@ -328,39 +351,58 @@ class PPO_SNN(Agent):  # type: ignore[misc]
 
         value_outputs: Mapping[str, Any] = {}
         if self.memory is not None:
-            self._current_next_states = model_next_states
+            self._current_next_states = memory_next_states
             if self._rewards_shaper is not None:
-                rewards = self._rewards_shaper(rewards, timestep, timesteps)
+                memory_rewards = self._detach_tensor(
+                    self._rewards_shaper(memory_rewards, timestep, timesteps)
+                )
 
             rnn = {"rnn": self._rnn_initial_states["value"]} if self._rnn else {}
-            values, _, value_outputs = self.value.act(
-                {"states": self._state_preprocessor(model_states), **rnn},
-                role="value",
-            )
+            with torch.no_grad():
+                values, _, value_outputs = self.value.act(
+                    {"states": self._state_preprocessor(memory_states), **rnn},
+                    role="value",
+                )
             values = self._value_preprocessor(values, inverse=True)
+            next_rnn = {}
+            if self._rnn:
+                next_rnn = {
+                    "rnn": self._detach_rnn_states(value_outputs.get("rnn", []))
+                }
+            with torch.no_grad():
+                next_values, _, _ = self.value.act(
+                    {
+                        "states": self._state_preprocessor(memory_next_states),
+                        **next_rnn,
+                    },
+                    role="value",
+                )
+            next_values = self._value_preprocessor(next_values, inverse=True)
             rnn_states = self._memory_rnn_states()
 
             self.memory.add_samples(
-                states=model_states,
-                actions=actions,
-                rewards=rewards,
-                next_states=model_next_states,
-                terminated=terminated,
-                truncated=truncated,
+                states=memory_states,
+                actions=memory_actions,
+                rewards=memory_rewards,
+                next_states=memory_next_states,
+                terminated=memory_terminated,
+                truncated=memory_truncated,
                 log_prob=self._current_log_prob,
-                values=values,
+                values=self._detach_tensor(values),
+                next_values=self._detach_tensor(next_values),
                 **rnn_states,
             )
             for memory in getattr(self, "secondary_memories", ()):
                 memory.add_samples(
-                    states=model_states,
-                    actions=actions,
-                    rewards=rewards,
-                    next_states=model_next_states,
-                    terminated=terminated,
-                    truncated=truncated,
+                    states=memory_states,
+                    actions=memory_actions,
+                    rewards=memory_rewards,
+                    next_states=memory_next_states,
+                    terminated=memory_terminated,
+                    truncated=memory_truncated,
                     log_prob=self._current_log_prob,
-                    values=values,
+                    values=self._detach_tensor(values),
+                    next_values=self._detach_tensor(next_values),
                     **rnn_states,
                 )
 
@@ -368,8 +410,10 @@ class PPO_SNN(Agent):  # type: ignore[misc]
             if self.policy is self.value:
                 self._rnn_final_states["value"] = self._rnn_final_states["policy"]
             else:
-                self._rnn_final_states["value"] = value_outputs.get("rnn", [])
-            self._zero_finished_rnn_states(terminated, truncated)
+                self._rnn_final_states["value"] = self._detach_rnn_states(
+                    value_outputs.get("rnn", [])
+                )
+            self._zero_finished_rnn_states(memory_terminated, memory_truncated)
             self._rnn_initial_states = self._rnn_final_states
 
     def pre_interaction(self, *, timestep: int, timesteps: int) -> None:
@@ -390,27 +434,13 @@ class PPO_SNN(Agent):  # type: ignore[misc]
         if self._current_next_states is None:
             return
 
-        with torch.no_grad():
-            self.value.train(False)
-            rnn = {"rnn": self._rnn_initial_states["value"]} if self._rnn else {}
-            last_values, _, _ = self.value.act(
-                {
-                    "states": self._state_preprocessor(
-                        self._current_next_states.float()
-                    ),
-                    **rnn,
-                },
-                role="value",
-            )
-            self.value.train(True)
-        last_values = self._value_preprocessor(last_values, inverse=True)
-
         values = self.memory.get_tensor_by_name("values")
         returns, advantages = self._compute_gae(
             rewards=self.memory.get_tensor_by_name("rewards"),
             terminated=self.memory.get_tensor_by_name("terminated"),
+            truncated=self.memory.get_tensor_by_name("truncated"),
             values=values,
-            last_values=last_values,
+            next_values=self.memory.get_tensor_by_name("next_values"),
         )
 
         self.memory.set_tensor_by_name(
@@ -447,12 +477,17 @@ class PPO_SNN(Agent):  # type: ignore[misc]
                 (
                     sampled_states,
                     sampled_actions,
-                    sampled_dones,
+                    sampled_terminated,
+                    sampled_truncated,
                     sampled_log_prob,
                     sampled_values,
                     sampled_returns,
                     sampled_advantages,
                 ) = batch
+                sampled_dones = torch.logical_or(
+                    sampled_terminated,
+                    sampled_truncated,
+                )
 
                 rnn_policy, rnn_value = self._sampled_rnn_inputs(
                     sampled_rnn_batches,
@@ -511,6 +546,7 @@ class PPO_SNN(Agent):  # type: ignore[misc]
                 loss.backward()
                 self._clip_gradients()
                 self.optimizer.step()
+                self._clear_model_caches()
 
                 cumulative_policy_loss += float(policy_loss.item())
                 cumulative_value_loss += float(value_loss.item())
@@ -555,13 +591,13 @@ class PPO_SNN(Agent):  # type: ignore[misc]
         if not self._rnn:
             return {}
         states = {
-            f"rnn_policy_{index}": state.transpose(0, 1)
+            f"rnn_policy_{index}": state.detach().transpose(0, 1)
             for index, state in enumerate(self._rnn_initial_states["policy"])
         }
         if self.policy is not self.value:
             states.update(
                 {
-                    f"rnn_value_{index}": state.transpose(0, 1)
+                    f"rnn_value_{index}": state.detach().transpose(0, 1)
                     for index, state in enumerate(self._rnn_initial_states["value"])
                 }
             )
@@ -605,16 +641,29 @@ class PPO_SNN(Agent):  # type: ignore[misc]
         self,
         rewards: torch.Tensor,
         terminated: torch.Tensor,
+        truncated: torch.Tensor,
         values: torch.Tensor,
-        last_values: torch.Tensor,
+        next_values: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         advantages = torch.zeros_like(rewards)
-        advantage = torch.zeros_like(last_values)
+        advantage = torch.zeros_like(next_values[-1])
         for index in reversed(range(rewards.shape[0])):
-            next_values = last_values if index == rewards.shape[0] - 1 else values[index + 1]
-            non_terminal = terminated[index].logical_not().to(values.dtype)
-            delta = rewards[index] + self._discount_factor * next_values * non_terminal - values[index]
-            advantage = delta + self._discount_factor * self._lambda * non_terminal * advantage
+            bootstrap_mask = terminated[index].logical_not().to(values.dtype)
+            continuation_mask = torch.logical_not(
+                torch.logical_or(terminated[index], truncated[index])
+            ).to(values.dtype)
+            delta = (
+                rewards[index]
+                + self._discount_factor * next_values[index] * bootstrap_mask
+                - values[index]
+            )
+            advantage = (
+                delta
+                + self._discount_factor
+                * self._lambda
+                * continuation_mask
+                * advantage
+            )
             advantages[index] = advantage
 
         returns = advantages + values
@@ -653,6 +702,30 @@ class PPO_SNN(Agent):  # type: ignore[misc]
         if self.policy is not self.value:
             for state in self._rnn_final_states["value"]:
                 state[:, env_indices] = 0.0
+
+    @staticmethod
+    def _detach_tensor(value: Any) -> Any:
+        if isinstance(value, torch.Tensor):
+            return value.detach()
+        return value
+
+    @staticmethod
+    def _detach_rnn_states(states: Any) -> list[torch.Tensor]:
+        return [
+            state.detach()
+            for state in (states or [])
+            if isinstance(state, torch.Tensor)
+        ]
+
+    def _clear_model_caches(self) -> None:
+        seen: set[int] = set()
+        for model in self.models.values():
+            if model is None or id(model) in seen:
+                continue
+            clear_cache = getattr(model, "_clear_cache", None)
+            if callable(clear_cache):
+                clear_cache()
+            seen.add(id(model))
 
     def _track_info_scalars(self, infos: Any) -> None:
         if not hasattr(infos, "get") or not infos.get("log"):

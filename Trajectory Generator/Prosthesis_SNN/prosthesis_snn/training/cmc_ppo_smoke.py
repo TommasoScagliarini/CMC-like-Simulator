@@ -100,15 +100,13 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
                 f"{action_shape} for {len(pros_coords)} prosthetic coords"
             )
 
-        feature_names = tuple(f"obs_{index:03d}" for index in range(obs_dim))
-        snn_cfg = SNNConfig(
+        feature_names = tuple(env.observation_feature_names)
+        snn_cfg = SNNConfig.for_env_action(
             input_size=obs_dim,
             hidden_size=config.hidden_size,
             num_layers=config.num_layers,
-            # This mirrors numpy C-order flattening of env.action_space:
-            # [knot_1_coord_1, knot_1_coord_2, knot_2_coord_1, ...].
-            output_coords=tuple(f"knot_{index + 1}" for index in range(action_shape[0])),
-            output_channels=pros_coords,
+            policy_knots=action_shape[0],
+            pros_coords=pros_coords,
             feature_names=feature_names,
         )
         if snn_cfg.output_size != action_size:
@@ -191,6 +189,8 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
             next_obs, reward, terminated, truncated, step_info = env.step(env_action)
             if not np.all(np.isfinite(next_obs)) or not np.isfinite(reward):
                 raise AssertionError("non-finite observation or reward during smoke")
+            if tuple(step_info.get("observation_feature_names", ())) != feature_names:
+                raise RuntimeError("environment observation feature names changed")
 
             next_obs_tensor = _as_batch(next_obs, device)
             agent.record_transition(
@@ -232,9 +232,13 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
             model,
             metadata={
                 "entrypoint": "cmc_ppo_smoke",
-                "action_contract": "trajectory_knots",
+                "action_contract": "env_action",
                 "action_shape": list(action_shape),
                 "prosthetic_coords": list(pros_coords),
+                "feature_names": list(feature_names),
+                "setup_xml_path": config.setup_xml_path,
+                "env_config": _jsonable(asdict(env.env_cfg)),
+                "training_config": _jsonable(asdict(config)),
                 "config": asdict(config),
             },
         )
@@ -243,15 +247,11 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
             reference_checkpoint_path,
             device=device,
         )
-        predicted = reloaded.predict(obs_tensor.detach().cpu().numpy().reshape(-1))
-        flat_pred = np.array(
-            [
-                value
-                for channel_values in predicted.values()
-                for value in channel_values.values()
-            ],
-            dtype=float,
+        predicted_action = reloaded.predict_action(
+            obs_tensor.detach().cpu().numpy().reshape(-1),
+            action_shape=action_shape,
         )
+        flat_pred = np.asarray(predicted_action, dtype=float).reshape(-1)
         if flat_pred.shape != (action_size,) or not np.all(np.isfinite(flat_pred)):
             raise AssertionError("reloaded reference checkpoint produced bad outputs")
 
@@ -270,6 +270,7 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
             "reference_checkpoint_path": str(reference_checkpoint_path),
             "summary_path": str(summary_path),
             "observation_size": obs_dim,
+            "observation_feature_names": list(feature_names),
             "action_shape": list(action_shape),
             "prosthetic_coords": list(pros_coords),
             "output_coords": list(snn_cfg.output_coords),

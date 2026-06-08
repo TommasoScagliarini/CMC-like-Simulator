@@ -84,6 +84,7 @@ from outer_loop import OuterLoop
 from inverse_dynamics import InverseDynamicsComputer, compute_udot_bypass
 from static_optimization import StaticOptimizer
 from output import OutputRecorder
+from online_grf import StreamingGaitEventDetector, read_online_grf
 
 
 class SimulationRunner:
@@ -188,6 +189,25 @@ class SimulationRunner:
         self._runtime_time: float | None = None
         self._runtime_step: int = 0
         self._last_step_info: dict = {}
+        self._online_event_detector = None
+        if getattr(ctx, "online_grf_force_paths", []):
+            confirmation_threshold = float(
+                getattr(cfg, "online_grf_hs_confirmation_threshold_n", 0.0)
+            )
+            if confirmation_threshold <= 0.0:
+                confirmation_threshold = float(
+                    getattr(ctx, "online_grf_hs_confirmation_threshold_n", 0.0)
+                )
+            self._online_event_detector = StreamingGaitEventDetector(
+                cfg.grf_contact_threshold_n,
+                cfg.grf_min_contact_duration_s,
+                cfg.grf_min_cycle_duration_s,
+                (
+                    confirmation_threshold
+                    if confirmation_threshold > 0.0
+                    else None
+                ),
+            )
 
     # ─────────────────────────────────────────────────────────────────────────
     #  Public entry point
@@ -237,6 +257,8 @@ class SimulationRunner:
         self._runtime_time = t
         self._runtime_step = 0
         self._last_step_info = {}
+        if self._online_event_detector is not None:
+            self._online_event_detector.reset()
 
         self._matter = model.getMatterSubsystem()
         self._n_mob = ctx.n_mob
@@ -271,6 +293,7 @@ class SimulationRunner:
             )
 
         _t_control, h_sub_nominal, n_substeps = self._control_loop_timing()
+        step_online_events: list[dict] = []
 
         while t < t_stop - 1e-12:
             (
@@ -293,6 +316,13 @@ class SimulationRunner:
                 udot, sea_plugin_outputs, sea_derivatives = (
                     self._integrate_evaluate(state, controls, t)
                 )
+                online_grf, online_events = self._sample_online_grf(state, t)
+                if online_grf is not None:
+                    step_online_events.extend(online_events)
+                    self._last_step_info["online_grf"] = self._online_grf_info(
+                        online_grf
+                    )
+                    self._last_step_info["online_events"] = list(step_online_events)
 
                 if record:
                     self._recorder.record(
@@ -304,6 +334,8 @@ class SimulationRunner:
                         sea_derivatives=sea_derivatives,
                         sea_plugin_outputs=sea_plugin_outputs,
                         so_diagnostics=self._so.last_diagnostics,
+                        online_grf=online_grf,
+                        online_events=online_events,
                     )
 
                 if getattr(
@@ -431,6 +463,7 @@ class SimulationRunner:
                     udot, sea_plugin_outputs, sea_derivatives = (
                         self._integrate_evaluate(state, controls, t)
                     )
+                    online_grf, online_events = self._sample_online_grf(state, t)
 
                     self._recorder.record(
                         t, state, a, u_res, tau_bio, u_sea, udot,
@@ -441,6 +474,8 @@ class SimulationRunner:
                         sea_derivatives=sea_derivatives,
                         sea_plugin_outputs=sea_plugin_outputs,
                         so_diagnostics=self._so.last_diagnostics,
+                        online_grf=online_grf,
+                        online_events=online_events,
                     )
 
                     if getattr(
@@ -752,6 +787,84 @@ class SimulationRunner:
             tau_bio, tau_pros_ff_by_coord, tau_sea_cmd,
             q_ref, qdot_ref,
         )
+
+    @staticmethod
+    def _online_grf_info(grf: dict) -> dict:
+        """Return JSON-friendly left/right GRF data for step-wise callers."""
+        result = {}
+        for side in ("left", "right"):
+            item = grf["sides"][side]
+            result[side] = {
+                "force": np.asarray(item["force"], dtype=float).tolist(),
+                "moment": np.asarray(item["moment"], dtype=float).tolist(),
+                "cop": np.asarray(item["cop"], dtype=float).tolist(),
+                "normal_force": float(item["normal_force"]),
+                "penetration": float(item["penetration"]),
+                "slip_speed": float(item["slip_speed"]),
+                "in_contact": bool(item["in_contact"]),
+            }
+        return result
+
+    def _sample_online_grf(
+        self,
+        state: opensim.State,
+        t: float,
+    ) -> tuple[dict | None, list[dict]]:
+        """Read calculated GRF, validate active contacts, and detect events."""
+        ctx = self._ctx
+        force_paths = getattr(ctx, "online_grf_force_paths", [])
+        if not force_paths:
+            return None, []
+
+        grf = read_online_grf(
+            ctx.model,
+            state,
+            force_paths,
+            ctx.online_grf_force_sides,
+        )
+        vertical_forces = {}
+        for side in ("left", "right"):
+            item = grf["sides"][side]
+            force = np.asarray(item["force"], dtype=float)
+            scalar_values = np.asarray(
+                [
+                    item["normal_force"],
+                    item["penetration"],
+                    item["slip_speed"],
+                ],
+                dtype=float,
+            )
+            if not np.all(np.isfinite(force)) or not np.all(np.isfinite(scalar_values)):
+                raise FloatingPointError(
+                    f"Non-finite online GRF at t={t:.4f} for {side}."
+                )
+            vertical_forces[side] = float(force[1])
+
+        if getattr(ctx, "grf_mode", "prescribed") == "online":
+            mass = float(ctx.model.getTotalMass(state))
+            max_force = (
+                float(getattr(self._cfg, "online_grf_max_force_bw", 5.0))
+                * mass
+                * 9.80665
+            )
+            side_forces = [
+                np.asarray(grf["sides"][side]["force"], dtype=float)
+                for side in ("left", "right")
+            ]
+            peak = max(
+                *(float(np.linalg.norm(force)) for force in side_forces),
+                float(np.linalg.norm(side_forces[0] + side_forces[1])),
+            )
+            if peak > max_force:
+                raise FloatingPointError(
+                    f"Online GRF exceeds {self._cfg.online_grf_max_force_bw:g} BW "
+                    f"at t={t:.4f}: {peak:.1f} N > {max_force:.1f} N."
+                )
+
+        events = []
+        if self._online_event_detector is not None:
+            events = self._online_event_detector.update(t, vertical_forces)
+        return grf, events
 
     def _integrate_evaluate(
         self,
@@ -1304,6 +1417,12 @@ class SimulationRunner:
                 f"{getattr(self._cfg, 'integration_scheme', 'semi_implicit_euler')}\n"
             )
             fh.write(f"sea_forward_mode={self._cfg.sea_forward_mode}\n")
+            fh.write(
+                f"grf_mode={getattr(self._ctx, 'grf_mode', 'prescribed')}\n"
+            )
+            online_profile = getattr(self._ctx, "online_grf_profile_file", "")
+            if online_profile:
+                fh.write(f"online_grf_profile_file={online_profile}\n")
             fh.write(f"sea_motor_substeps={self._cfg.sea_motor_substeps}\n")
             fh.write(
                 f"sea_motor_max_substeps={self._cfg.sea_motor_max_substeps}\n"
@@ -1316,6 +1435,11 @@ class SimulationRunner:
                 f"grf_contact_threshold_n="
                 f"{float(getattr(self._cfg, 'grf_contact_threshold_n', 20.0)):.10g}\n"
             )
+            if self._online_event_detector is not None:
+                fh.write(
+                    f"online_grf_hs_confirmation_threshold_n="
+                    f"{self._online_event_detector.confirmation_threshold_n:.10g}\n"
+                )
             fh.write(
                 f"grf_min_contact_duration_s="
                 f"{float(getattr(self._cfg, 'grf_min_contact_duration_s', 0.0)):.10g}\n"

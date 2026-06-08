@@ -24,7 +24,9 @@ class ResolvedSimulatorPaths:
     model_path: Path
     plugin_path: Path
     kinematics_path: Path
-    external_loads_path: Path
+    external_loads_path: Path | None
+    online_grf_profile_path: Path | None
+    online_grf_contact_plugin_path: Path
     reserve_actuators_path: Path
     healthy_dir: Path | None
 
@@ -107,6 +109,14 @@ def _resolve_bundle_input_path(bundle_dir: Path, raw: str | Path) -> Path:
     return path if path.is_absolute() else bundle_dir / path
 
 
+def _resolve_optional_bundle_input_path(
+    bundle_dir: Path,
+    raw: str | Path | None,
+) -> Path | None:
+    text = "" if raw is None else str(raw).strip()
+    return None if not text else _resolve_bundle_input_path(bundle_dir, text)
+
+
 def _resolve_healthy_dir(bundle_dir: Path) -> Path | None:
     candidates = [
         bundle_dir / "data" / "health",
@@ -129,7 +139,15 @@ def resolve_simulator_paths(cfg: "SimulatorConfig") -> ResolvedSimulatorPaths:
         model_path=model_path,
         plugin_path=resolve_repo_path(cfg.plugin_name),
         kinematics_path=_resolve_bundle_input_path(bundle_dir, cfg.kinematics_file),
-        external_loads_path=_resolve_bundle_input_path(bundle_dir, cfg.external_loads_xml),
+        external_loads_path=_resolve_optional_bundle_input_path(
+            bundle_dir, cfg.external_loads_xml
+        ),
+        online_grf_profile_path=_resolve_optional_bundle_input_path(
+            bundle_dir, getattr(cfg, "online_grf_profile_file", "")
+        ),
+        online_grf_contact_plugin_path=resolve_repo_path(
+            getattr(cfg, "online_grf_contact_plugin", "plugins/OnlineGRFContact")
+        ),
         reserve_actuators_path=_resolve_bundle_input_path(bundle_dir, cfg.reserve_actuators_xml),
         healthy_dir=_resolve_healthy_dir(bundle_dir),
     )

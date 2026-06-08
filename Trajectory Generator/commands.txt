@@ -1,0 +1,74 @@
+# Trajectory Generator - comandi training/inference
+
+# Tutti i comandi sono pensati per PowerShell dalla root del simulatore:
+# C:\Users\tomma\Desktop\Opensim OMNIBUS\CMC-like-Simulator - Claude
+
+
+## 1) Setup ambiente envCMC-like
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m pip install -e "Trajectory Generator\Prosthesis_SNN[training]"
+
+
+## 2) Check dipendenze RL + OpenSim
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -c "import prosthesis_snn; import torch, snntorch, skrl, gymnasium, opensim; print('prosthesis_snn_ok'); print('torch', torch.__version__); print('snntorch', snntorch.__version__); print('skrl', skrl.__version__); print('gymnasium', gymnasium.__version__); print('opensim_ok')"
+
+
+## 3) Smoke test package SNN
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python "Trajectory Generator\Prosthesis_SNN\tests\smoke_test.py"
+
+
+## 4) Compile check moduli RL/env
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m py_compile "Trajectory Generator\osim_trj_cmc_like.py" "Trajectory Generator\Prosthesis_SNN\prosthesis_snn\training\ppo_snn.py" "Trajectory Generator\Prosthesis_SNN\prosthesis_snn\training\cmc_ppo_train.py" "Trajectory Generator\Prosthesis_SNN\prosthesis_snn\cmc_policy_rollout.py"
+
+
+## 5) Training tiny AB06 PI
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.training.cmc_ppo_train --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\_codex_rl_train_tiny" --timesteps 2 --rollouts 2 --episode-duration 0.004 --segment-duration 0.002 --hidden-size 16 --learning-epochs 1 --mini-batches 1 --device cpu
+
+# Output principali del training:
+# - agent.pt / reference.pt: alias dell'ultimo modello salvato
+# - last_agent.pt / last_reference.pt: ultimo modello salvato
+# - best_agent.pt / best_reference.pt: miglior episodio secondo episode_return
+
+
+## 6) Inference tiny dal checkpoint tiny
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.cmc_policy_rollout --checkpoint "runs\_codex_rl_train_tiny\best_reference.pt" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\_codex_rl_rollout_tiny" --timesteps 2 --episode-duration 0.004 --segment-duration 0.002 --device cpu
+
+
+## 7) Training smoke 50 ms
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.training.cmc_ppo_train --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\_codex_rl_train_50ms" --timesteps 5 --rollouts 2 --episode-duration 0.05 --segment-duration 0.01 --hidden-size 16 --learning-epochs 1 --mini-batches 1 --device cpu
+
+
+## 8) Training standard iniziale CPU
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.training.cmc_ppo_train --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\cmc_ppo_train_ab06_pi" --timesteps 100 --rollouts 16 --episode-duration 0.5 --segment-duration 0.01 --hidden-size 64 --learning-epochs 4 --mini-batches 2 --device cpu
+
+
+## 9) Inference/rollout standard da checkpoint scelto
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.cmc_policy_rollout --checkpoint "runs\cmc_ppo_train_ab06_pi\best_reference.pt" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\cmc_policy_rollout_ab06_pi" --timesteps 100 --episode-duration 0.5 --segment-duration 0.01 --device cpu
+
+
+## 10) Inference con salvataggio output simulatore
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.cmc_policy_rollout --checkpoint "runs\cmc_ppo_train_ab06_pi\best_reference.pt" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\cmc_policy_rollout_ab06_pi_recorded" --timesteps 100 --episode-duration 0.5 --segment-duration 0.01 --device cpu --record-outputs
+
+
+## 11) Riprendere training dall'ultimo agent salvato
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.training.cmc_ppo_train --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\cmc_ppo_train_ab06_pi_resume_last" --resume-agent-path "runs\cmc_ppo_train_ab06_pi\last_agent.pt" --timesteps 100 --rollouts 16 --episode-duration 0.5 --segment-duration 0.01 --hidden-size 64 --learning-epochs 4 --mini-batches 2 --device cpu
+
+
+## 12) Riprendere training dal best agent salvato
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.training.cmc_ppo_train --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\cmc_ppo_train_ab06_pi_resume_best" --resume-agent-path "runs\cmc_ppo_train_ab06_pi\best_agent.pt" --timesteps 100 --rollouts 16 --episode-duration 0.5 --segment-duration 0.01 --hidden-size 64 --learning-epochs 4 --mini-batches 2 --device cpu
+
+
+## 13) Inizializzare training da best_reference.pt
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-like python -m prosthesis_snn.training.cmc_ppo_train --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\cmc_ppo_train_ab06_pi_from_reference" --load-reference-path "runs\cmc_ppo_train_ab06_pi\best_reference.pt" --timesteps 100 --rollouts 16 --episode-duration 0.5 --segment-duration 0.01 --hidden-size 64 --learning-epochs 4 --mini-batches 2 --device cpu

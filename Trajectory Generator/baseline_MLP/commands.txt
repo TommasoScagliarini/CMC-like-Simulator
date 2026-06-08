@@ -1,0 +1,101 @@
+# baseline_MLP - comandi training/inference (Ray RLlib, nuovo API stack)
+#
+# Tutti i comandi sono pensati per PowerShell dalla ROOT del simulatore:
+#   C:\Users\tomma\Desktop\Opensim OMNIBUS\CMC-like-Simulator - Claude
+# Ambiente conda dedicato: envCMC-rllib (clone di envCMC-like + ray[rllib]).
+
+
+## 0) Setup ambiente envCMC-rllib (una tantum)
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe create --clone envCMC-like -n envCMC-rllib -y
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -m pip install "ray[rllib]"
+
+
+## 1) Smoke import (de-risk coesistenza torch + opensim + ray nello stesso processo)
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -c "import sys; sys.path.insert(0, r'Trajectory Generator\baseline_MLP'); import win_runtime; import ray; from ray.rllib.algorithms.ppo import PPOConfig; import torch, opensim, gymnasium; print('ok ray', ray.__version__, 'torch', torch.__version__, 'gym', gymnasium.__version__, 'opensim', opensim.__version__)"
+
+
+## 2) Env smoke (senza RLlib): build + reset + step
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -c "import sys; sys.path.insert(0, r'Trajectory Generator\baseline_MLP'); import env_factory; e=env_factory.make_cmc_env({'setup_xml_path': r'models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml','segment_duration':0.01,'episode_duration':0.05,'policy_knots':3}); o,i=e.reset(seed=0); print('obs', o.shape, 'act', e.action_space.shape); o,r,te,tr,inf=e.step(e.action_space.sample()); print('reward', float(r), 'terminated', te, 'truncated', tr); e.close()"
+
+
+## 3) Compile check moduli baseline_MLP
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -m py_compile "Trajectory Generator\baseline_MLP\win_runtime.py" "Trajectory Generator\baseline_MLP\_bootstrap.py" "Trajectory Generator\baseline_MLP\env_factory.py" "Trajectory Generator\baseline_MLP\reward_function.py" "Trajectory Generator\baseline_MLP\tb_logging.py" "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" "Trajectory Generator\baseline_MLP\rollout_eval.py"
+
+
+## 4) Tiny train (Fase A: single-process, num-env-runners 0)
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\_baseline_mlp_tiny" --num-env-runners 0 --ray-num-cpus 1 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --fcnet-hiddens 64 64 --startup-timeout-s 90 --iteration-timeout-s 90 --run-timeout-s 240 --cleanup-timeout-s 20
+
+# Output principali:
+# - checkpoint_last / checkpoint_best : checkpoint completi RLlib (per resume)
+# - rl_module_last  / rl_module_best  : RLModule inference-only (per rollout_eval)
+# - summary.json                      : metriche per-iterazione
+
+
+## 5) Tiny rollout dal checkpoint tiny
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint "runs\_baseline_mlp_tiny\rl_module_last" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\_baseline_mlp_rollout_tiny" --episode-duration 0.05 --segment-duration 0.01
+
+
+## 6) Training standard iniziale (Fase A, CPU)
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_ab06_pi" --num-env-runners 0 --ray-num-cpus 1 --iterations 50 --train-batch-size 2048 --minibatch-size 128 --num-epochs 10 --episode-duration 0.5 --segment-duration 0.01 --fcnet-hiddens 256 256 --startup-timeout-s 300 --iteration-timeout-s 900 --run-timeout-s 7200 --cleanup-timeout-s 30
+
+
+## 7) Training parallelo (Fase B: num-env-runners N)
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_ab06_pi_par" --num-env-runners 2 --ray-num-cpus 3 --iterations 50 --train-batch-size 2048 --minibatch-size 128 --num-epochs 10 --episode-duration 0.5 --segment-duration 0.01 --fcnet-hiddens 256 256 --startup-timeout-s 300 --iteration-timeout-s 900 --run-timeout-s 7200 --cleanup-timeout-s 30
+
+
+## 8) Rollout standard con salvataggio output simulatore (per visualize.py)
+
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint "runs\baseline_mlp_ab06_pi\rl_module_best" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_rollout_ab06_pi" --episode-duration 0.5 --segment-duration 0.01 --record-outputs
+
+
+## 9) TensorBoard (la reward e tutte le sue componenti, return, loss del learner)
+
+# Il training scrive eventi in <output-dir>\tensorboard (attivo di default;
+# disattiva con --no-tensorboard). Avvia TensorBoard sulla cartella runs\:
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python -m tensorboard.main --logdir "runs" --port 6006
+# poi apri http://localhost:6006
+# Scalari utili: reward/reward, reward/reference_score, reward/tracking_score,
+#   reward_loss/saturation_loss, env_runners/episode_return_mean,
+#   learners/default_policy/* (policy_loss, vf_loss, entropy, ...).
+
+
+## 10) Reward custom (override di reward_function.RewardConfig via --reward-json)
+
+# La reward e definita in reward_function.py ed e l'unica fonte usata da training
+# e rollout. I default riproducono ESATTAMENTE la reward originale dell'env.
+# Esempio: ridurre il peso del reference (F2) e alzare la penalita saturazione,
+# inline come oggetto JSON (PowerShell: usa virgolette singole esterne):
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_reward_test" --num-env-runners 0 --iterations 50 --episode-duration 0.5 --segment-duration 0.01 --reward-json '{\"blend_reference\": 0.35, \"blend_tracking\": 0.45, \"saturation_weight\": 0.5}'
+
+# In alternativa, salva gli override in un file e passane il path:
+#   --reward-json "Trajectory Generator\baseline_MLP\reward_overrides_example.json"
+# Lo stesso --reward-json va passato a rollout_eval.py per valutare con la stessa reward.
+
+
+## 11) Training con heel strike / gait phase da onlineGRF (sensor-only)
+
+# Questo e ora il default della baseline MLP/RLlib: le GRF prescribed guidano
+# la dinamica; onlineGRF fornisce alla rete GRF normalizzate, contatto, eventi
+# heel-strike/toe-off e fase gait stimata.
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_online_grf" --num-env-runners 0 --ray-num-cpus 1 --iterations 50 --episode-duration 2.0 --segment-duration 0.01 --startup-timeout-s 300 --iteration-timeout-s 900 --run-timeout-s 7200 --cleanup-timeout-s 30
+
+# Il rollout deve mantenere lo stesso schema osservativo del training:
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint "runs\baseline_mlp_online_grf\rl_module_best" --setup-xml "models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml" --output-dir "runs\baseline_mlp_online_grf_rollout" --episode-duration 2.0 --segment-duration 0.01 --record-outputs
+
+# Checkpoint legacy senza feature onlineGRF:
+#   --grf-mode prescribed --no-online-grf-observation
+
+
+## 12) Validazione controllata 50 iterazioni (online_sensor + timeout)
+
+# Configurazione usata il 2026-06-07 per verificare pipeline, critic, return,
+# stabilita, TensorBoard ed end_reason senza lasciare il PC bloccato.
+C:\Users\tomma\anaconda3\Scripts\conda.exe run -n envCMC-rllib python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --output-dir "runs\_baseline_mlp_50iter_online_sensor" --iterations 50 --num-env-runners 1 --ray-num-cpus 2 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --fcnet-hiddens 64 64 --checkpoint-every 10 --startup-timeout-s 90 --iteration-timeout-s 90 --run-timeout-s 900 --sample-timeout-s 60 --checkpoint-timeout-s 120 --cleanup-timeout-s 20

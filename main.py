@@ -178,8 +178,13 @@ def main(cfg: SimulatorConfig, log_simulation: bool = False) -> int:
 def _apply_setup_to_config(cfg: SimulatorConfig, setup) -> None:
     cfg.model_file = str(setup.model_file)
     cfg.kinematics_file = str(setup.kinematics_file)
-    cfg.external_loads_xml = str(setup.external_loads_xml)
+    cfg.external_loads_xml = (
+        "" if setup.external_loads_xml is None else str(setup.external_loads_xml)
+    )
     cfg.reserve_actuators_xml = str(setup.reserve_actuators_xml)
+    cfg.grf_mode = getattr(setup, "grf_mode", "prescribed")
+    profile = getattr(setup, "online_grf_profile_file", None)
+    cfg.online_grf_profile_file = "" if profile is None else str(profile)
     cfg.t_start = setup.t_start
     cfg.t_end = setup.t_end
     cfg.model_bundle_dir = str(setup.model_file.parent)
@@ -284,6 +289,22 @@ def _parse_args():
         "--external-loads",
         default=None,
         help="Override ExternalLoads (.xml) file path",
+    )
+    parser.add_argument(
+        "--no-external-loads",
+        action="store_true",
+        help="Run online GRF mode without a prescribed-GRF validation oracle.",
+    )
+    parser.add_argument(
+        "--grf-mode",
+        choices=["prescribed", "online_sensor", "online"],
+        default=None,
+        help="Select prescribed GRF, non-applying online sensor, or active online GRF.",
+    )
+    parser.add_argument(
+        "--online-grf-profile",
+        default=None,
+        help="Override onlineGRF JSON profile path.",
     )
     parser.add_argument(
         "--reserve-actuators",
@@ -503,6 +524,15 @@ def _parse_args():
         help="Override vertical GRF contact threshold used by events/filter [N].",
     )
     parser.add_argument(
+        "--online-grf-hs-confirmation-threshold",
+        type=float,
+        default=None,
+        help=(
+            "Override onlineGRF heel-strike confirmation threshold [N]. "
+            "<=0 uses the model-specific profile value."
+        ),
+    )
+    parser.add_argument(
         "--grf-min-contact-duration",
         type=float,
         default=None,
@@ -537,6 +567,14 @@ def _parse_args():
     if args.kinematics    is not None: cfg.kinematics_file = normalize_cli_existing_path(args.kinematics)
     if args.external_loads is not None:
         cfg.external_loads_xml = normalize_cli_existing_path(args.external_loads)
+    if args.no_external_loads:
+        cfg.external_loads_xml = ""
+    if args.grf_mode is not None:
+        cfg.grf_mode = args.grf_mode
+    if args.online_grf_profile is not None:
+        cfg.online_grf_profile_file = normalize_cli_existing_path(
+            args.online_grf_profile
+        )
     if args.reserve_actuators is not None:
         cfg.reserve_actuators_xml = normalize_cli_existing_path(args.reserve_actuators)
     if args.t_start       is not None: cfg.t_start      = args.t_start
@@ -604,6 +642,10 @@ def _parse_args():
         cfg.enable_grf_contact_filter = True
     if args.grf_contact_threshold is not None:
         cfg.grf_contact_threshold_n = args.grf_contact_threshold
+    if args.online_grf_hs_confirmation_threshold is not None:
+        cfg.online_grf_hs_confirmation_threshold_n = (
+            args.online_grf_hs_confirmation_threshold
+        )
     if args.grf_min_contact_duration is not None:
         cfg.grf_min_contact_duration_s = args.grf_min_contact_duration
     if args.grf_min_cycle_duration is not None:
@@ -733,6 +775,7 @@ if __name__ == "__main__":
     _KEY_FIELDS = {
         "model_bundle_dir", "model_file", "kinematics_file",
         "external_loads_xml", "reserve_actuators_xml",
+        "grf_mode", "online_grf_profile_file", "online_grf_contact_plugin",
         "t_start", "t_end", "dt",
         "output_dir", "output_prefix",
         "sea_forward_mode", "qp_solver",
@@ -749,6 +792,7 @@ if __name__ == "__main__":
         "kinematics_resample_dt",
         "enable_grf_contact_filter",
         "grf_contact_threshold_n",
+        "online_grf_hs_confirmation_threshold_n",
         "grf_min_contact_duration_s",
         "grf_min_cycle_duration_s",
     }

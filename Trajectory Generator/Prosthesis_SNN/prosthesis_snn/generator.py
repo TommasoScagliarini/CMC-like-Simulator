@@ -103,12 +103,20 @@ class ReferenceGenerator:
         self,
         features: Mapping[str, Any] | Sequence[float] | np.ndarray,
     ) -> dict[str, dict[str, float]]:
-        """Run one inference step and return per-channel coordinate dicts.
+        """Run one inference step and return the configured nested output.
 
-        Return shape: ``{channel_name: {coord_name: float}}`` keyed by every
-        entry of ``cfg.output_channels``. For the default config this is
-        ``{"q": {...}, "qdot": {...}, "qddot": {...}}``.
+        Return shape: ``{output_channel: {output_coord: float}}``. For the
+        default env-action config this is
+        ``{"pros_knee_angle": {"knot_1": ...}, ...}``.
         """
+        values = self.predict_flat(features)
+        return self._unpack_values(values)
+
+    def predict_flat(
+        self,
+        features: Mapping[str, Any] | Sequence[float] | np.ndarray,
+    ) -> np.ndarray:
+        """Run one inference step and return the flat transformed output."""
         x_np = as_feature_vector(features, self.cfg.feature_names)
         x = torch.as_tensor(x_np, dtype=torch.float32, device=self.device).unsqueeze(0)
         if self.mem is None:
@@ -124,7 +132,32 @@ class ReferenceGenerator:
             self.reset(batch_size=1)
             return self._predict_tensor(x.cpu())
 
-    def _predict_tensor(self, x: torch.Tensor) -> dict[str, dict[str, float]]:
+    def predict_action(
+        self,
+        features: Mapping[str, Any] | Sequence[float] | np.ndarray,
+        action_shape: Sequence[int] | None = None,
+    ) -> np.ndarray:
+        """Run inference and return an action matrix matching the trajectory env.
+
+        The default shape is ``(policy_knots, n_prosthetic_coords)``, derived
+        from ``cfg.output_coords`` and ``cfg.output_channels``. Values are the
+        raw env action values after any configured output transform/scale.
+        """
+        if self.cfg.output_contract != "env_action":
+            raise ValueError(
+                "predict_action requires an env_action SNNConfig; "
+                f"got {self.cfg.output_contract!r}."
+            )
+        shape = tuple(int(item) for item in (action_shape or self.cfg.action_shape))
+        if int(np.prod(shape)) != self.cfg.output_size:
+            raise ValueError(
+                f"action shape {shape} does not match output size "
+                f"{self.cfg.output_size}."
+            )
+        values = self.predict_flat(features)
+        return values.reshape(shape).astype(np.float32)
+
+    def _predict_tensor(self, x: torch.Tensor) -> np.ndarray:
         with torch.no_grad():
             out, self.mem = self.model(x, self.mem)
             if out.dim() == 2:
@@ -133,6 +166,9 @@ class ReferenceGenerator:
                 values = out[-1, 0]
             values = self._apply_output_transform(values.detach().cpu().numpy())
 
+        return values
+
+    def _unpack_values(self, values: np.ndarray) -> dict[str, dict[str, float]]:
         coords = self.cfg.output_coords
         channels = self.cfg.output_channels
         n_channels = len(channels)

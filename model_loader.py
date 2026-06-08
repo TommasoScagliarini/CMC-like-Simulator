@@ -22,6 +22,7 @@ import numpy as np
 import opensim
 
 from config import SimulatorConfig
+from online_grf import GRF_MODES, add_online_grf_forces, load_online_grf_profile
 from path_resolver import resolve_simulator_paths
 
 
@@ -110,6 +111,11 @@ class SimulationContext:
     grf_unfiltered_data_file: str = ""
     grf_filter_report_file: str = ""
     grf_vertical_force_columns: Dict[str, str] = field(default_factory=dict)
+    grf_mode: str = "prescribed"
+    online_grf_profile_file: str = ""
+    online_grf_hs_confirmation_threshold_n: float = 0.0
+    online_grf_force_paths: List[str] = field(default_factory=list)
+    online_grf_force_sides: Dict[str, str] = field(default_factory=dict)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -182,7 +188,7 @@ def _configure_windows_dll_search_path() -> None:
 
 def _load_plugin(plugin_name: str) -> None:
     """
-    Load the SEA C++ shared library via OpenSim's plugin loader.
+    Load an OpenSim C++ shared library via OpenSim's plugin loader.
 
     opensim.LoadOpenSimLibrary() already applies the platform-specific
     naming convention internally:
@@ -695,7 +701,25 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     """
     # ── 1. C++ plugin ────────────────────────────────────────────────────────
     paths = resolve_simulator_paths(cfg)
+    grf_mode = str(getattr(cfg, "grf_mode", "prescribed")).strip().lower()
+    if grf_mode not in GRF_MODES:
+        raise ValueError(
+            f"[ModelLoader] grf_mode must be one of {sorted(GRF_MODES)}, "
+            f"got {grf_mode!r}."
+        )
     _load_plugin(str(paths.plugin_path))
+    if grf_mode != "prescribed":
+        if paths.online_grf_profile_path is None:
+            raise ValueError(
+                f"[ModelLoader] grf_mode={grf_mode!r} requires "
+                "online_grf_profile_file."
+            )
+        if not paths.online_grf_profile_path.is_file():
+            raise FileNotFoundError(
+                "[ModelLoader] onlineGRF profile not found: "
+                f"{paths.online_grf_profile_path}"
+            )
+        _load_plugin(str(paths.online_grf_contact_plugin_path))
     _configure_geometry_search_paths(str(paths.model_path))
 
     # ── 2. OpenSim Model ─────────────────────────────────────────────────────
@@ -723,7 +747,26 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     #   iterates the ForceSet to call computeForce() — ExternalForces that
     #   are not in the ForceSet produce zero GRF, leading to a native crash
     #   or wildly incorrect dynamics.
-    print(f"[ModelLoader] Loading GRF      : {paths.external_loads_path}")
+    if grf_mode in {"prescribed", "online_sensor"}:
+        if paths.external_loads_path is None:
+            raise ValueError(
+                f"[ModelLoader] grf_mode={grf_mode!r} requires "
+                "external_loads_xml."
+            )
+        if not paths.external_loads_path.is_file():
+            raise FileNotFoundError(
+                f"[ModelLoader] ExternalLoads XML not found: "
+                f"{paths.external_loads_path}"
+            )
+    elif (
+        paths.external_loads_path is not None
+        and not paths.external_loads_path.is_file()
+    ):
+        raise FileNotFoundError(
+            f"[ModelLoader] Optional ExternalLoads oracle not found: "
+            f"{paths.external_loads_path}"
+        )
+    print(f"[ModelLoader] GRF mode         : {grf_mode}")
 
     # ── 3a. Remove stale ExternalForce objects baked into the .osim ──────────
     try:
@@ -742,79 +785,95 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         print("[ModelLoader] WARNING: updForceSet() unavailable - "
               "ExternalForce(s) from .osim may still be present")
 
-    # ── 3b. Parse ExternalLoads XML → read .mot path + force definitions ────
-    ext_loads = opensim.ExternalLoads(str(paths.external_loads_path), True)
-    mot_file = ext_loads.getDataFileName()
-
-    # Resolve relative .mot path against the XML's directory
-    if not os.path.isabs(mot_file):
-        xml_dir = os.path.dirname(os.path.abspath(str(paths.external_loads_path)))
-        mot_file = os.path.join(xml_dir, mot_file)
-
-    if not os.path.isfile(mot_file):
-        raise FileNotFoundError(
-            f"[ModelLoader] GRF data file not found: {mot_file}\n"
-            f"  (resolved from <datafile> in {paths.external_loads_path})"
-        )
-    print(f"[ModelLoader] GRF datafile       : {mot_file}")
-    unfiltered_mot_file = mot_file
+    # ── 3b. Optional prescribed ExternalLoads / validation oracle ───────────
+    ext_loads = None
+    grf_storage = None
+    mot_file = ""
+    unfiltered_mot_file = ""
     grf_filter_report_file = ""
-    if getattr(cfg, "enable_grf_contact_filter", False):
-        mot_file, grf_filter_report_file = _filter_grf_storage_file(
-            cfg,
-            ext_loads,
-            mot_file,
-        )
-        if mot_file != unfiltered_mot_file:
-            print(f"[ModelLoader] GRF filtered file  : {mot_file}")
-        print(f"[ModelLoader] GRF filter report : {grf_filter_report_file}")
-
-    # ── 3c. Load the GRF .mot data into an opensim.Storage ──────────────────
-    # The Storage object holds the time-series of force/point/torque columns.
-    # By passing it directly to the ExternalForce constructor, the data
-    # binding is immediate — no deferred name-based lookup that could fail
-    # if the .mot header contains a stale internal path.
-    grf_storage = opensim.Storage(mot_file)
-    print(f"[ModelLoader] GRF Storage loaded : "
-          f"{grf_storage.getSize()} rows, "
-          f"{grf_storage.getColumnLabels().getSize() - 1} columns")
     grf_vertical_force_columns: Dict[str, str] = {}
+    if paths.external_loads_path is not None:
+        print(f"[ModelLoader] Loading GRF XML  : {paths.external_loads_path}")
+        ext_loads = opensim.ExternalLoads(str(paths.external_loads_path), True)
+        mot_file = ext_loads.getDataFileName()
+        if not os.path.isabs(mot_file):
+            xml_dir = os.path.dirname(os.path.abspath(str(paths.external_loads_path)))
+            mot_file = os.path.join(xml_dir, mot_file)
+        if not os.path.isfile(mot_file):
+            raise FileNotFoundError(
+                f"[ModelLoader] GRF data file not found: {mot_file}\n"
+                f"  (resolved from <datafile> in {paths.external_loads_path})"
+            )
+        print(f"[ModelLoader] GRF datafile     : {mot_file}")
+        unfiltered_mot_file = mot_file
+        if getattr(cfg, "enable_grf_contact_filter", False):
+            mot_file, grf_filter_report_file = _filter_grf_storage_file(
+                cfg, ext_loads, mot_file
+            )
+            if mot_file != unfiltered_mot_file:
+                print(f"[ModelLoader] GRF filtered file: {mot_file}")
+            print(f"[ModelLoader] GRF filter report: {grf_filter_report_file}")
 
-    # ── 3d. Create each ExternalForce with the Storage constructor ──────────
-    # ExternalForce(Storage, force_id, point_id, torque_id) binds the data
-    # directly at construction time.  The remaining properties (applied_to_body,
-    # force_expressed_in_body, point_expressed_in_body) must be set manually.
-    for i in range(ext_loads.getSize()):
-        ef_template = ext_loads.get(i)
-        force_id = ef_template.getForceIdentifier()
-        side = _infer_external_force_side(
-            ef_template.getName(),
-            ef_template.get_applied_to_body(),
+        grf_storage = opensim.Storage(mot_file)
+        print(
+            f"[ModelLoader] GRF Storage loaded: {grf_storage.getSize()} rows, "
+            f"{grf_storage.getColumnLabels().getSize() - 1} columns"
         )
-        if side in {"left", "right"}:
-            # Current GRF files use OpenSim's y-up convention and columns like
-            # ground_force1_vx/ground_force1_vy/ground_force1_vz.
-            grf_vertical_force_columns[side] = f"{force_id}y"
+        for i in range(ext_loads.getSize()):
+            ef_template = ext_loads.get(i)
+            force_id = ef_template.getForceIdentifier()
+            side = _infer_external_force_side(
+                ef_template.getName(),
+                ef_template.get_applied_to_body(),
+            )
+            if side in {"left", "right"}:
+                grf_vertical_force_columns[side] = f"{force_id}y"
 
-        ef = opensim.ExternalForce(
-            grf_storage,
-            force_id,
-            ef_template.getPointIdentifier(),
-            ef_template.getTorqueIdentifier(),
-        )
-        ef.setName(ef_template.getName())
-        ef.set_applied_to_body(ef_template.get_applied_to_body())
-        ef.set_force_expressed_in_body(
-            ef_template.get_force_expressed_in_body()
-        )
-        ef.set_point_expressed_in_body(
-            ef_template.get_point_expressed_in_body()
-        )
+            if grf_mode == "online":
+                continue
+            ef = opensim.ExternalForce(
+                grf_storage,
+                force_id,
+                ef_template.getPointIdentifier(),
+                ef_template.getTorqueIdentifier(),
+            )
+            ef.setName(ef_template.getName())
+            ef.set_applied_to_body(ef_template.get_applied_to_body())
+            ef.set_force_expressed_in_body(
+                ef_template.get_force_expressed_in_body()
+            )
+            ef.set_point_expressed_in_body(
+                ef_template.get_point_expressed_in_body()
+            )
+            model.addForce(ef)
+            print(
+                f"[ModelLoader]   '{ef.getName()}' -> addForce OK "
+                f"(applied_to: {ef.get_applied_to_body()}, "
+                f"force_id: {ef.getForceIdentifier()})"
+            )
+        if grf_mode == "online":
+            print("[ModelLoader] Prescribed GRF retained as validation oracle only.")
 
-        model.addForce(ef)
-        print(f"[ModelLoader]   '{ef.getName()}' -> addForce OK  "
-              f"(applied_to: {ef.get_applied_to_body()}, "
-              f"force_id: {ef.getForceIdentifier()})")
+    # ── 3c. Online contacts ─────────────────────────────────────────────────
+    online_grf_force_paths: List[str] = []
+    online_grf_force_sides: Dict[str, str] = {}
+    online_grf_profile_file = ""
+    online_grf_hs_confirmation_threshold_n = 0.0
+    if grf_mode != "prescribed":
+        online_grf_profile_file = str(paths.online_grf_profile_path)
+        profile = load_online_grf_profile(online_grf_profile_file)
+        online_grf_hs_confirmation_threshold_n = float(
+            profile.heel_strike_confirmation_threshold_n or 0.0
+        )
+        online_grf_force_paths, online_grf_force_sides = add_online_grf_forces(
+            model,
+            profile,
+            applies_force=(grf_mode == "online"),
+        )
+        print(
+            f"[ModelLoader] Online GRF      : {len(online_grf_force_paths)} "
+            f"contacts ({'active' if grf_mode == 'online' else 'sensor-only'})"
+        )
    
     # ── 4. Reserve Actuators ──────────────────────────────────────────────────
     # The ForceSet XML contains CoordinateActuators for every coordinate.
@@ -1059,4 +1118,11 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         grf_unfiltered_data_file = unfiltered_mot_file,
         grf_filter_report_file = grf_filter_report_file,
         grf_vertical_force_columns = grf_vertical_force_columns,
+        grf_mode = grf_mode,
+        online_grf_profile_file = online_grf_profile_file,
+        online_grf_hs_confirmation_threshold_n = (
+            online_grf_hs_confirmation_threshold_n
+        ),
+        online_grf_force_paths = online_grf_force_paths,
+        online_grf_force_sides = online_grf_force_sides,
     )

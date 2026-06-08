@@ -12,11 +12,13 @@ Lab, skrl, and OpenSim at runtime import time.
 - Spiking encoders: direct, rate, and latency.
 - Rectangular surrogate gradient.
 - Portable LIF backbone and non-spiking LIF output head.
-- `ProsthesisReferenceSNN` for prosthetic reference outputs.
+- `ProsthesisReferenceSNN` for env-aligned prosthetic trajectory actions.
 - `ReferenceGenerator` for checkpoint loading and inference.
-- Minimal CMC-like PPO/SNN training smoke entrypoint.
-- `ReferenceProvider` adapters matching the CMC-like simulator style:
-  `get(t, state=None) -> (q_ref, qdot_ref, qddot_ref)`.
+- Minimal CMC-like PPO/SNN training and rollout entrypoints.
+- `SNNProsthesisActionProvider` for direct
+  `CMCLikeProsthesisTrajectoryEnv.step(action)` integration.
+- Legacy `ReferenceProvider` adapters for direct
+  `get(t, state=None) -> (q_ref, qdot_ref, qddot_ref)` configs.
 - Documentation for unresolved integration decisions.
 
 ## What Is Not Included
@@ -54,7 +56,8 @@ The smoke test checks:
 
 - SNN inference shape for batch size 1 and batch size N.
 - `ReferenceGenerator.predict(...)`.
-- Hybrid provider behavior: biological references are preserved while
+- `ReferenceGenerator.predict_action(...)` and action-provider output shape.
+- Legacy hybrid provider behavior: biological references are preserved while
   prosthetic references are overridden.
 - Training helper imports without requiring `skrl` for core inference.
 
@@ -72,7 +75,31 @@ After training, export an inference-only checkpoint with
 contains only the reference SNN weights, config, output scaling/offset, and
 metadata, and can be loaded with `ReferenceGenerator.from_checkpoint(...)`.
 
-A minimal CMC-like end-to-end smoke is available:
+A production-minimal CMC-like PPO training entrypoint is available:
+
+```powershell
+python -m prosthesis_snn.training.cmc_ppo_train --setup-xml path/to/setup.xml
+```
+
+It builds `CMCLikeProsthesisTrajectoryEnv`, uses the env's real
+`observation_feature_names`, trains the SNN actor-critic with the current
+trajectory action contract, and writes `agent.pt`, `reference.pt`,
+`last_agent.pt`, `last_reference.pt`, `best_agent.pt`, `best_reference.pt`,
+and `summary.json` under the chosen output directory. `agent.pt` and
+`reference.pt` are compatibility aliases for the last saved model; use
+`best_reference.pt` for inference when you want the best completed episode by
+episode return.
+
+The exported inference checkpoint can be rolled out with:
+
+```powershell
+python -m prosthesis_snn.cmc_policy_rollout --checkpoint runs/example/best_reference.pt --setup-xml path/to/setup.xml
+```
+
+The rollout command checks that checkpoint feature names and env action shape
+match exactly before stepping the env.
+
+A smaller legacy CMC-like end-to-end smoke is also available:
 
 ```powershell
 python -m prosthesis_snn.training.cmc_ppo_smoke --setup-xml path/to/setup.xml
@@ -100,7 +127,22 @@ The PyPI wheel for `torch` can conflict with OpenSim/conda OpenMP runtimes
 ## Current Integration Direction
 
 The future simulator integration should replace direct dependence on
-`KinematicsInterpolator` with a provider abstraction:
+`KinematicsInterpolator` with one of two explicit adapters.
+
+For the current CMC-like trajectory env, the default SNN output is the env
+action itself:
+
+```python
+action = generator.predict_action(features)
+obs, reward, terminated, truncated, info = env.step(action)
+```
+
+The flat SNN output is laid out like NumPy C-order flattening of
+`env.action_space`: `(policy_knots, n_prosthetic_coords)`, with columns
+`pros_knee_angle`, `pros_ankle_angle`.
+
+The older direct-reference path is still available for configs whose
+`output_contract` is `kinematic_reference`:
 
 ```python
 q_ref, qdot_ref, qddot_ref = reference_provider.get(t, state)

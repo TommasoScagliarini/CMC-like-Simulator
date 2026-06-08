@@ -3,6 +3,28 @@
 This file collects the open decisions that should be resolved before the SNN is
 integrated into the current OpenSim/CMC-like project.
 
+## Current contract update - 2026-06-04
+
+The env/SNN conflict is resolved in favor of the current
+`CMCLikeProsthesisTrajectoryEnv` action contract.
+
+- The default SNN output contract is now `env_action`.
+- The flat SNN output is reshaped to
+  `(policy_knots, n_prosthetic_coords)` before `env.step(action)`.
+- Output rows are `knot_1..knot_N`; columns are `pros_knee_angle` and
+  `pros_ankle_angle`.
+- The SNN does not emit direct `qdot/qddot` by default. The env converts action
+  knots into a prosthetic position segment and derives coherent
+  `q_ref/qdot_ref/qddot_ref` through interpolation and its simulator-side
+  reference LPF.
+- Use `ReferenceGenerator.predict_action(...)` or
+  `SNNProsthesisActionProvider` for env integration.
+- `SNNProsthesisReferenceProvider` is now only for explicit
+  `kinematic_reference` configs and rejects env-action checkpoints.
+
+Older notes below that describe `(q, qdot, qddot) x (knee, ankle)` as the
+default output are superseded by this section.
+
 ## Resolved decisions
 
 The following decisions have been taken and are now load-bearing for the

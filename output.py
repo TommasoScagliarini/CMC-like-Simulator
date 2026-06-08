@@ -20,7 +20,6 @@ from typing import Dict, List, Optional, TYPE_CHECKING
 import numpy as np
 
 from config import SimulatorConfig
-
 try:
     import opensim
 except ModuleNotFoundError:
@@ -30,6 +29,18 @@ if TYPE_CHECKING:
     from model_loader import SimulationContext
 
 SEA_DIAGNOSTIC_WIDTH = 42
+
+
+def _online_grf_column_names() -> List[str]:
+    from online_grf import online_grf_column_names
+
+    return online_grf_column_names()
+
+
+def _flatten_online_grf(grf: dict) -> np.ndarray:
+    from online_grf import flatten_online_grf
+
+    return flatten_online_grf(grf)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -279,6 +290,34 @@ def _write_gait_events_csv(cfg: SimulatorConfig, ctx: "SimulationContext") -> No
     )
 
 
+def _write_online_gait_events_csv(
+    cfg: SimulatorConfig,
+    rows: List[dict],
+) -> None:
+    """Write streaming gait events detected from calculated online GRF."""
+    path = os.path.join(
+        cfg.output_dir,
+        f"{cfg.output_prefix}_gait_events_online.csv",
+    )
+    fieldnames = [
+        "time",
+        "confirmed_time",
+        "side",
+        "event",
+        "cycle_duration_s",
+        "contact_duration_s",
+        "threshold_n",
+        "confirmation_threshold_n",
+        "confirmation_latency_s",
+    ]
+    with open(path, "w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({name: row.get(name, "") for name in fieldnames})
+    print(f"  -> Online events: {path} ({len(rows)} events)")
+
+
 class OutputRecorder:
     """
     Pre-allocates output buffers, records one row per simulation step,
@@ -358,6 +397,11 @@ class OutputRecorder:
         self._rec_power         = np.full((n_steps, n_sea * 2),      np.nan)
         self._rec_recruitment   = np.full((n_steps, 12),             np.nan)
         self._rec_so_torque_diagnostics = np.full((n_steps, n_so_diag), np.nan)
+        self._rec_online_grf = np.full(
+            (n_steps, len(_online_grf_column_names())),
+            np.nan,
+        )
+        self._online_gait_events: List[dict] = []
         self._step_count        = 0
 
     @property
@@ -380,6 +424,8 @@ class OutputRecorder:
         sea_derivatives: Optional[np.ndarray] = None,
         sea_plugin_outputs: Optional[np.ndarray] = None,
         so_diagnostics: Optional[dict] = None,
+        online_grf: Optional[dict] = None,
+        online_events: Optional[List[dict]] = None,
     ) -> None:
         """Append one row to all output buffers."""
         ctx = self._ctx
@@ -398,6 +444,14 @@ class OutputRecorder:
         self._rec_activations[k]  = a
         self._rec_u_res[k]        = u_res
         self._rec_tau_bio[k]      = tau_bio
+        if online_grf is not None:
+            self._rec_online_grf[k] = _flatten_online_grf(online_grf)
+        if online_events:
+            threshold = float(getattr(cfg, "grf_contact_threshold_n", 20.0))
+            for event in online_events:
+                row = dict(event)
+                row["threshold_n"] = threshold
+                self._online_gait_events.append(row)
         self._rec_sea_controls[k, 0] = u_sea.get(cfg.pros_coords[0], 0.0)
         self._rec_sea_controls[k, 1] = u_sea.get(cfg.pros_coords[1], 0.0)
 
@@ -952,7 +1006,23 @@ class OutputRecorder:
             )
             print(f"  -> SO tau diag : {path}")
 
+        if (
+            getattr(cfg, "save_online_grf", True)
+            and getattr(ctx, "online_grf_force_paths", [])
+        ):
+            path = os.path.join(out, f"{pfx}_online_grf.sto")
+            write_sto(
+                path,
+                "OnlineGroundReactionForces",
+                self._rec_time[:k],
+                _online_grf_column_names(),
+                self._rec_online_grf[:k],
+            )
+            print(f"  -> Online GRF  : {path}")
+
         if cfg.save_gait_events:
             _write_gait_events_csv(cfg, ctx)
+            if getattr(ctx, "online_grf_force_paths", []):
+                _write_online_gait_events_csv(cfg, self._online_gait_events)
 
         print(f"\n[Runner] All results saved to: {os.path.abspath(out)}")

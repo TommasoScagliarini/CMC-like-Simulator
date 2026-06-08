@@ -3,13 +3,14 @@ model:
   feature_names:
     - phase_sin
     - phase_cos
+  output_contract: env_action
   output_coords:
+    - knot_1
+    - knot_2
+    - knot_3
+  output_channels:
     - pros_knee_angle
     - pros_ankle_angle
-  output_channels:
-    - q
-    - qdot
-    - qddot
   hidden_size: 128
   num_layers: 1
   beta: 0.5
@@ -18,28 +19,29 @@ model:
   encoding: latency
   encoding_timesteps: 1
   learn_beta: false
-  learn_threshold: false
+  learn_threshold: true
 
-# Raw network outputs are not normalized. q is in radians, qdot in rad/s,
-# qddot in rad/s^2. Replace these per-(coord, channel) values once the
-# training dataset normalization is defined. A scalar value at the coord
-# level is broadcast across all channels for that coord.
+# Raw network outputs are env action values. In delta/absolute env modes they
+# are normalized in [-1, 1]; in raw mode they are absolute radians. Replace
+# these per-(knot, coord) values once training normalization is defined.
 output_transform: identity
 output_scale:
-  pros_knee_angle:
-    q: 1.0
-    qdot: 1.0
-    qddot: 1.0
-  pros_ankle_angle:
-    q: 1.0
-    qdot: 1.0
-    qddot: 1.0
+  knot_1:
+    pros_knee_angle: 1.0
+    pros_ankle_angle: 1.0
+  knot_2:
+    pros_knee_angle: 1.0
+    pros_ankle_angle: 1.0
+  knot_3:
+    pros_knee_angle: 1.0
+    pros_ankle_angle: 1.0
 output_offset:
-  pros_knee_angle:
-    q: 0.0
-    qdot: 0.0
-    qddot: 0.0
-  pros_ankle_angle:
-    q: 0.0
-    qdot: 0.0
-    qddot: 0.0
+  knot_1:
+    pros_knee_angle: 0.0
+    pros_ankle_angle: 0.0
+  knot_2:
+    pros_knee_angle: 0.0
+    pros_ankle_angle: 0.0
+  knot_3:
+    pros_knee_angle: 0.0
+    pros_ankle_angle: 0.0

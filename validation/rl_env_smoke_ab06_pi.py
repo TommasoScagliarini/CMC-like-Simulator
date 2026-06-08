@@ -37,6 +37,9 @@ from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 
 
 SETUP_XML = "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml"
+ONLINE_GRF_PROFILE = (
+    "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_sensor_basis.json"
+)
 RECORDED_OUTPUT_DIR = "results/_rl_env_ab06_pi_smoke_20260529"
 EXISTING_RESULTS_DIR = "results"
 
@@ -78,6 +81,7 @@ def _make_env(
     recorded_output: bool = False,
     segment_duration: float = 0.002,
     episode_duration: float = 0.002,
+    online_grf: bool = False,
 ) -> CMCLikeProsthesisTrajectoryEnv:
     return CMCLikeProsthesisTrajectoryEnv(
         CMCEnvConfig(
@@ -91,6 +95,9 @@ def _make_env(
             output_dir=RECORDED_OUTPUT_DIR if recorded_output else None,
             rebuild_model_on_reset=False,
             fail_fast=True,
+            grf_mode="online_sensor" if online_grf else None,
+            online_grf_profile_file=ONLINE_GRF_PROFILE if online_grf else None,
+            include_online_grf_observation=online_grf,
         )
     )
 
@@ -114,10 +121,12 @@ def _assert_step_ok(
     _assert_finite_obs(obs, label)
     if not math.isfinite(float(reward)):
         raise AssertionError(f"{label}: reward is not finite: {reward}")
-    if truncated:
-        raise AssertionError(f"{label}: truncated=True, info={info}")
-    if not terminated:
-        raise AssertionError(f"{label}: expected terminated=True for short episode")
+    if terminated:
+        raise AssertionError(f"{label}: terminated=True, info={info}")
+    if not truncated:
+        raise AssertionError(f"{label}: expected truncated=True for short episode")
+    if info.get("end_reason") != "episode_time_limit":
+        raise AssertionError(f"{label}: unexpected end_reason={info.get('end_reason')}")
     if abs(float(info["time"]) - expected_time) > 5e-7:
         raise AssertionError(
             f"{label}: time {info['time']} != expected {expected_time}"
@@ -271,6 +280,60 @@ def run_recorded_output_smoke() -> None:
             raise AssertionError(f"No finite numeric values in {path}")
 
 
+def run_online_grf_observation_smoke() -> None:
+    env = _make_env(
+        segment_duration=0.08,
+        episode_duration=0.08,
+        online_grf=True,
+    )
+    try:
+        obs, info = env.reset(seed=4)
+        _assert_finite_obs(obs, "online_grf_reset")
+        if info.get("grf_mode") != "online_sensor":
+            raise AssertionError(f"unexpected grf_mode: {info.get('grf_mode')}")
+
+        feature_names = tuple(env.observation_feature_names)
+        required_features = {
+            "online_left_normal_grf_bw",
+            "online_left_heel_strike",
+            "online_left_gait_phase",
+            "online_right_normal_grf_bw",
+            "online_right_heel_strike",
+            "online_right_gait_phase",
+        }
+        missing = required_features.difference(feature_names)
+        if missing:
+            raise AssertionError(f"missing onlineGRF observation features: {missing}")
+
+        action = np.zeros(env.action_space.shape, dtype=np.float32)
+        obs, reward, terminated, truncated, info = env.step(action)
+        _assert_step_ok(
+            obs,
+            reward,
+            terminated,
+            truncated,
+            info,
+            expected_time=12.07,
+            label="online_grf_observation",
+        )
+        gait = info.get("online_gait")
+        if not isinstance(gait, dict) or not gait.get("available"):
+            raise AssertionError(f"missing online_gait payload: {gait}")
+        events = info.get("online_events")
+        if not isinstance(events, list) or not any(
+            event.get("event") == "heel_strike" for event in events
+        ):
+            raise AssertionError(f"missing confirmed heel strike: {events}")
+        for side in ("left", "right"):
+            normal_bw = float(gait["sides"][side]["normal_force_bw"])
+            if not math.isfinite(normal_bw) or normal_bw < 0.0:
+                raise AssertionError(f"invalid {side} normal_force_bw={normal_bw}")
+        print("online_grf_events", events)
+        print("online_grf_observation_shape", obs.shape)
+    finally:
+        env.close()
+
+
 def inspect_existing_results(max_files: int = 10) -> None:
     """Check already-written simulator .sto outputs without using them as inputs."""
     results_dir = REPO_ROOT / EXISTING_RESULTS_DIR
@@ -315,6 +378,11 @@ def main() -> None:
         help="Inspect already-written results/sim_output_*.sto files without constructing the AB06 env.",
     )
     parser.add_argument(
+        "--online-grf",
+        action="store_true",
+        help="Also verify online_sensor GRF/events in the RL observation and info.",
+    )
+    parser.add_argument(
         "--max-result-files",
         type=int,
         default=10,
@@ -332,6 +400,8 @@ def main() -> None:
     run_single_step_smoke()
     run_reset_reuse_benchmark()
     run_action_sanity()
+    if args.online_grf:
+        run_online_grf_observation_smoke()
     if args.recorded_output:
         run_recorded_output_smoke()
     print("rl_env_smoke_ab06_pi_ok")

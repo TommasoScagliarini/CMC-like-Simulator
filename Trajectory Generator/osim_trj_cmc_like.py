@@ -67,6 +67,7 @@ except ModuleNotFoundError:  # pragma: no cover - small import-time fallback.
 from config import SimulatorConfig
 from kinematics_interpolator import KinematicsInterpolator
 from model_loader import setup_model
+from path_resolver import normalize_cli_existing_path
 from setup_io import read_last_setup_path, read_setup_xml
 from simulation_runner import SimulationRunner
 
@@ -114,6 +115,15 @@ class CMCEnvConfig:
         them on close.
     save_outputs_on_close
         Save recorder outputs from the current episode when close() is called.
+    grf_mode
+        Optional override of the setup GRF mode: prescribed, online_sensor, or
+        online. If omitted, use the setup XML/default simulator mode.
+    online_grf_profile_file
+        Optional onlineGRF profile override, required by online_sensor/online.
+    include_online_grf_observation
+        Add normalized online GRF, contact, gait-event pulses, and heel-strike
+        gait phase to the policy observation. Disabled by default so existing
+        checkpoints keep their observation contract.
     """
 
     setup_xml_path: Optional[str] = None
@@ -141,13 +151,32 @@ class CMCEnvConfig:
     save_outputs_on_close: bool = False
     output_dir: Optional[str] = None
     output_prefix: str = "rl_episode"
+    grf_mode: Optional[str] = None
+    online_grf_profile_file: Optional[str] = None
+    include_online_grf_observation: bool = False
     pelvis_min_height: float = 0.55
-    max_abs_pros_q_rad: float = 4.0
+    # Per-joint divergence guard on the *simulated* prosthetic angle q [rad].
+    # Terminate (anti-divergence) if a prosthetic coordinate leaves these bounds.
+    # Wide on purpose: catches a blown-up simulation, not gait-band deviations
+    # (those are shaped softly in the reward, not terminated). Keyed by coord name
+    # so knee/ankle can be asymmetric.
+    # pros_knee_angle is flexion-negative here (IK ~[-1.06,-0.13]), pros_ankle_angle
+    # ~[-0.13, 0.40]; bounds are wide guards around those measured ranges.
+    truncation_bounds_rad: Mapping[str, Tuple[float, float]] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": (-2.0, 0.0),
+            "pros_ankle_angle": (-0.9, 0.9),
+        }
+    )
     reward_tracking_weight: float = 8.0
     reward_reference_weight: float = 6.0
     reward_bio_weight: float = 2.0
     reward_effort_weight: float = 0.05
     reward_smoothness_weight: float = 0.1
+    reward_saturation_weight: float = 0.1
+    reward_safety_weight: float = 2.0
+    truncation_penalty: float = 1.0
+    sea_u_saturation_threshold: float = 0.98
 
 
 class ProstheticSegmentKinematics:
@@ -378,7 +407,12 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._last_u_sea: Dict[str, float] = {}
         self._last_policy_endpoint = np.zeros(2, dtype=float)
         self._last_policy_knots = np.zeros((self.env_cfg.policy_knots, 2))
+        self._observation_feature_names: tuple[str, ...] | None = None
         self._last_info: dict = {}
+        self._body_weight_n = 1.0
+        self._online_grf: dict = {}
+        self._online_events: list[dict] = []
+        self._online_gait_sides: dict[str, dict[str, float | None]] = {}
         self._closed = False
 
         self._delta_scale = self._resolve_delta_scale()
@@ -393,6 +427,12 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             shape=obs.shape,
             dtype=np.float32,
         )
+
+    @property
+    def observation_feature_names(self) -> tuple[str, ...]:
+        if self._observation_feature_names is None:
+            raise RuntimeError("Observation schema has not been initialised yet.")
+        return self._observation_feature_names
 
     def reset(self, seed=None, options=None):
         try:
@@ -409,7 +449,14 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             self._build_simulator()
         self._initialise_episode()
         obs, obs_dict = self._get_observation()
-        return obs, {"time": self.t, "observation": obs_dict}
+        info = {
+            "time": self.t,
+            "observation": obs_dict,
+            "observation_feature_names": self.observation_feature_names,
+            "grf_mode": self.cfg.grf_mode,
+        }
+        info.update(self._online_info_payload())
+        return obs, info
 
     def step(self, action):
         action_arr = self._validate_action(action)
@@ -422,9 +469,9 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self.kin.set_segment(segment_times, segment_values, segment_derivatives)
         self._last_policy_endpoint = segment_values[-1].copy()
 
-        truncated = False
         failure: Exception | None = None
         failure_traceback = ""
+        step_info: dict = {}
 
         try:
             step_info = self.runner.step_until(
@@ -437,24 +484,65 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         except Exception as exc:  # Native OpenSim faults cannot always be caught.
             if self.env_cfg.fail_fast:
                 raise
-            truncated = True
             failure = exc
             failure_traceback = traceback.format_exc()
 
+        self._update_online_gait_state(step_info)
         obs, obs_dict = self._get_observation()
         reward, reward_terms = self._get_reward(obs_dict)
-        terminated = self.t >= self._episode_end - 1e-12
-        truncated = truncated or self._is_truncated(obs_dict)
+        unsafe_reason = self._unsafe_end_reason(obs_dict)
+        reached_horizon = self.t >= self._episode_end - 1e-12
+
+        # Gymnasium semantics:
+        # - unsafe states belong to the task/MDP and are true terminations;
+        # - time limits and numerical failures are external truncations.
+        # Unsafe events take priority if they coincide with the horizon.
+        if unsafe_reason is not None:
+            terminated = True
+            truncated = False
+            end_reason = unsafe_reason
+        elif failure is not None:
+            terminated = False
+            truncated = True
+            end_reason = "numerical_failure"
+        elif reached_horizon:
+            terminated = False
+            truncated = True
+            end_reason = self._horizon_end_reason()
+        else:
+            terminated = False
+            truncated = False
+            end_reason = None
+
+        safety_loss = (
+            float(self.env_cfg.truncation_penalty)
+            if unsafe_reason is not None
+            else 0.0
+        )
+        if safety_loss:
+            reward = float(reward - self.env_cfg.reward_safety_weight * safety_loss)
+        reward_terms.update(
+            {
+                "safety_loss": float(safety_loss),
+                "terminated": float(bool(terminated)),
+                "truncated": float(bool(truncated)),
+            }
+        )
 
         info = {
             "time": self.t,
             "target_time": target_t,
             "observation": obs_dict,
+            "observation_feature_names": self.observation_feature_names,
             "reward_terms": reward_terms,
+            "log": self._log_scalars(reward_terms),
             "policy_segment_times": segment_times.copy(),
             "policy_segment_values": segment_values.copy(),
             "policy_segment_derivatives": segment_derivatives.copy(),
+            "end_reason": end_reason,
+            "grf_mode": self.cfg.grf_mode,
         }
+        info.update(self._online_info_payload())
         if failure is not None:
             info["failure"] = f"{type(failure).__name__}: {failure}"
             info["failure_traceback"] = failure_traceback
@@ -481,6 +569,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         if setup_path is not None:
             setup = read_setup_xml(setup_path)
             self._apply_setup_to_config(cfg, setup)
+        self._apply_grf_overrides(cfg)
 
         if self.env_cfg.output_dir is not None:
             cfg.output_dir = self.env_cfg.output_dir
@@ -494,6 +583,18 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         self.cfg = cfg
         self.ctx = setup_model(cfg)
+        if (
+            self.env_cfg.include_online_grf_observation
+            and not getattr(self.ctx, "online_grf_force_paths", [])
+        ):
+            raise ValueError(
+                "include_online_grf_observation=True requires grf_mode "
+                "'online_sensor' or 'online' with a valid onlineGRF profile."
+            )
+        self._body_weight_n = max(
+            1e-9,
+            float(self.ctx.model.getTotalMass(self.ctx.state)) * 9.80665,
+        )
         self.base_kin = KinematicsInterpolator(cfg)
         ref_cutoff = self.env_cfg.pros_ref_lpf_cutoff_hz
         if ref_cutoff is None:
@@ -533,11 +634,24 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
     def _apply_setup_to_config(cfg: SimulatorConfig, setup) -> None:
         cfg.model_file = str(setup.model_file)
         cfg.kinematics_file = str(setup.kinematics_file)
-        cfg.external_loads_xml = str(setup.external_loads_xml)
+        cfg.external_loads_xml = (
+            "" if setup.external_loads_xml is None else str(setup.external_loads_xml)
+        )
         cfg.reserve_actuators_xml = str(setup.reserve_actuators_xml)
         cfg.t_start = float(setup.t_start)
         cfg.t_end = float(setup.t_end)
         cfg.model_bundle_dir = str(setup.model_file.parent)
+        cfg.grf_mode = str(getattr(setup, "grf_mode", "prescribed"))
+        profile = getattr(setup, "online_grf_profile_file", None)
+        cfg.online_grf_profile_file = "" if profile is None else str(profile)
+
+    def _apply_grf_overrides(self, cfg: SimulatorConfig) -> None:
+        if self.env_cfg.grf_mode is not None:
+            cfg.grf_mode = str(self.env_cfg.grf_mode).strip().lower()
+        if self.env_cfg.online_grf_profile_file is not None:
+            cfg.online_grf_profile_file = normalize_cli_existing_path(
+                self.env_cfg.online_grf_profile_file
+            )
 
     @staticmethod
     def _disable_output_files(cfg: SimulatorConfig) -> None:
@@ -602,6 +716,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._last_policy_knots[:] = 0.0
         self._last_u_sea = {}
         self._last_info = {}
+        self._reset_online_gait_state()
 
     # ------------------------------------------------------------------
     # Action mapping
@@ -705,7 +820,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         obs: dict[str, float] = {}
         duration = max(self._episode_end - self._episode_start, self.cfg.dt)
-        obs["phase"] = (self.t - self._episode_start) / duration
+        phase = (self.t - self._episode_start) / duration
+        obs["phase"] = phase
+        obs["phase_sin"] = float(np.sin(2.0 * np.pi * phase))
+        obs["phase_cos"] = float(np.cos(2.0 * np.pi * phase))
 
         for coord_name in self.cfg.pros_coords:
             obs[coord_name] = q(coord_name)
@@ -732,10 +850,132 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         for i, coord_name in enumerate(self.cfg.pros_coords):
             obs[f"{coord_name}_previous_endpoint"] = self._last_policy_endpoint[i]
-            obs[f"{coord_name}_sea_u"] = self._last_u_sea.get(coord_name, 0.0)
+            sea_u = float(self._last_u_sea.get(coord_name, 0.0))
+            sea_u_abs = abs(sea_u)
+            obs[f"{coord_name}_sea_u"] = sea_u
+            obs[f"{coord_name}_sea_u_abs"] = sea_u_abs
+            obs[f"{coord_name}_sea_u_saturated"] = float(
+                sea_u_abs >= self.env_cfg.sea_u_saturation_threshold
+            )
 
-        arr = np.fromiter(obs.values(), dtype=np.float32, count=len(obs))
+        if self.env_cfg.include_online_grf_observation:
+            gait = self._online_gait_info()
+            for side in ("left", "right"):
+                side_info = gait["sides"][side]
+                prefix = f"online_{side}"
+                obs[f"{prefix}_normal_grf_bw"] = float(
+                    side_info["normal_force_bw"]
+                )
+                obs[f"{prefix}_in_contact"] = float(side_info["in_contact"])
+                obs[f"{prefix}_heel_strike"] = float(side_info["heel_strike"])
+                obs[f"{prefix}_toe_off"] = float(side_info["toe_off"])
+                obs[f"{prefix}_gait_phase"] = float(side_info["gait_phase"])
+                obs[f"{prefix}_cycle_duration_s"] = float(
+                    side_info["cycle_duration_s"]
+                )
+
+        names = tuple(obs.keys())
+        if self._observation_feature_names is None:
+            self._observation_feature_names = names
+        elif names != self._observation_feature_names:
+            raise RuntimeError(
+                "Observation schema changed during the episode: "
+                f"{names} != {self._observation_feature_names}"
+            )
+
+        arr = np.asarray(
+            [obs[name] for name in self._observation_feature_names],
+            dtype=np.float32,
+        )
         return arr, obs
+
+    def _reset_online_gait_state(self) -> None:
+        self._online_grf = {}
+        self._online_events = []
+        self._online_gait_sides = {
+            side: {
+                "last_heel_strike_time": None,
+                "last_toe_off_time": None,
+                "cycle_duration_s": 0.0,
+            }
+            for side in ("left", "right")
+        }
+
+    def _update_online_gait_state(self, step_info: Mapping[str, object]) -> None:
+        online_grf = step_info.get("online_grf")
+        self._online_grf = dict(online_grf) if isinstance(online_grf, Mapping) else {}
+
+        events = step_info.get("online_events")
+        self._online_events = [
+            dict(event)
+            for event in events
+            if isinstance(event, Mapping)
+        ] if isinstance(events, Sequence) else []
+
+        for event in self._online_events:
+            side = str(event.get("side", "")).lower()
+            if side not in self._online_gait_sides:
+                continue
+            event_name = str(event.get("event", "")).lower()
+            event_time = float(event.get("time", self.t))
+            if event_name == "heel_strike":
+                self._online_gait_sides[side]["last_heel_strike_time"] = event_time
+                cycle_duration = event.get("cycle_duration_s")
+                if cycle_duration is not None and float(cycle_duration) > 0.0:
+                    self._online_gait_sides[side]["cycle_duration_s"] = float(
+                        cycle_duration
+                    )
+            elif event_name == "toe_off":
+                self._online_gait_sides[side]["last_toe_off_time"] = event_time
+
+    def _online_gait_info(self) -> dict:
+        event_names = {
+            side: {
+                str(event.get("event", "")).lower()
+                for event in self._online_events
+                if str(event.get("side", "")).lower() == side
+            }
+            for side in ("left", "right")
+        }
+        sides: dict[str, dict[str, float | bool | None]] = {}
+        for side in ("left", "right"):
+            grf_side = self._online_grf.get(side, {})
+            if not isinstance(grf_side, Mapping):
+                grf_side = {}
+            normal_force_n = float(grf_side.get("normal_force", 0.0))
+            state = self._online_gait_sides.get(side, {})
+            last_hs = state.get("last_heel_strike_time")
+            cycle_duration = float(state.get("cycle_duration_s") or 0.0)
+            if last_hs is None or cycle_duration <= 0.0:
+                phase = 0.0
+            else:
+                phase = float(
+                    np.clip((self.t - float(last_hs)) / cycle_duration, 0.0, 1.0)
+                )
+            sides[side] = {
+                "normal_force_n": normal_force_n,
+                "normal_force_bw": normal_force_n / self._body_weight_n,
+                "in_contact": bool(grf_side.get("in_contact", False)),
+                "heel_strike": "heel_strike" in event_names[side],
+                "toe_off": "toe_off" in event_names[side],
+                "last_heel_strike_time": last_hs,
+                "last_toe_off_time": state.get("last_toe_off_time"),
+                "cycle_duration_s": cycle_duration,
+                "gait_phase": phase,
+            }
+        return {
+            "available": bool(getattr(self.ctx, "online_grf_force_paths", [])),
+            "sides": sides,
+        }
+
+    def _online_info_payload(self) -> dict:
+        if not getattr(self.ctx, "online_grf_force_paths", []):
+            return {}
+        return {
+            "online_grf": copy.deepcopy(self._online_grf),
+            "online_events": copy.deepcopy(self._online_events),
+            "online_gait": self._online_gait_info(),
+        }
 
     def _bio_context_coords(self) -> Iterable[str]:
         # The prosthesis is on the left side, but the left hip remains a
@@ -791,7 +1031,19 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             self._last_u_sea.get(coord_name, 0.0)
             for coord_name in self.cfg.pros_coords
         ]
-        effort_loss = float(np.mean(np.square(u_values)))
+        u_values_arr = np.asarray(u_values, dtype=float)
+        u_abs = np.abs(u_values_arr)
+        effort_loss = float(np.mean(np.square(u_values_arr)))
+        sat_den = max(1e-6, 1.0 - self.env_cfg.sea_u_saturation_threshold)
+        saturation = np.clip(
+            (u_abs - self.env_cfg.sea_u_saturation_threshold) / sat_den,
+            0.0,
+            1.0,
+        )
+        saturation_loss = float(np.mean(np.square(saturation)))
+        saturation_fraction = float(
+            np.mean(u_abs >= self.env_cfg.sea_u_saturation_threshold)
+        )
 
         if self._last_policy_knots.shape[0] > 1:
             smoothness_loss = float(
@@ -810,6 +1062,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         penalty = (
             self.env_cfg.reward_effort_weight * effort_loss
             + self.env_cfg.reward_smoothness_weight * smoothness_loss
+            + self.env_cfg.reward_saturation_weight * saturation_loss
         )
         reward = float(
             np.clip(
@@ -827,6 +1080,9 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "bio_loss": float(bio_loss),
             "effort_loss": float(effort_loss),
             "smoothness_loss": float(smoothness_loss),
+            "saturation_loss": float(saturation_loss),
+            "u_abs_max": float(np.max(u_abs)) if u_abs.size else 0.0,
+            "u_saturation_fraction": float(saturation_fraction),
             "tracking_score": float(tracking_score),
             "reference_score": float(reference_score),
             "bio_score": float(bio_score),
@@ -834,18 +1090,41 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         }
         return reward, terms
 
-    def _is_truncated(self, obs: Mapping[str, float]) -> bool:
+    @staticmethod
+    def _log_scalars(reward_terms: Mapping[str, float]) -> dict[str, float]:
+        return {f"Reward/{key}": float(value) for key, value in reward_terms.items()}
+
+    def _horizon_end_reason(self) -> str:
+        if self._episode_end >= float(self.cfg.t_end) - 1e-12:
+            return "dataset_end"
+        return "episode_time_limit"
+
+    def _unsafe_end_reason(self, obs: Mapping[str, float]) -> str | None:
         pelvis_ty = obs.get("pelvis_ty")
         if pelvis_ty is not None and pelvis_ty < self.env_cfg.pelvis_min_height:
-            return True
+            return "fall"
 
+        bounds = self.env_cfg.truncation_bounds_rad or {}
         for coord_name in self.cfg.pros_coords:
             value = obs.get(coord_name)
             if value is None:
                 continue
-            if abs(value) > self.env_cfg.max_abs_pros_q_rad:
-                return True
-        return False
+            lo_hi = bounds.get(coord_name)
+            if lo_hi is None:
+                continue
+            low, high = lo_hi
+            if value < low or value > high:
+                return f"joint_divergence:{coord_name}"
+        return None
+
+    def _is_truncated(self, obs: Mapping[str, float]) -> bool:
+        """Backward-compatible unsafe-state probe.
+
+        Historically these unsafe states were labelled as truncations. Keep the
+        helper for external diagnostics, but ``step`` now reports them as true
+        Gymnasium terminations.
+        """
+        return self._unsafe_end_reason(obs) is not None
 
 
 # Backward-compatible name close to the original file.

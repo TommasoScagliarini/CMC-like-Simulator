@@ -153,7 +153,7 @@ def test_longer_rollout(segment_duration: float, episode_duration: float) -> Non
 
     assert rec["nonfinite"] == 0, "non-finite obs/reward during rollout"
     assert monotonic, "simulation time not strictly increasing"
-    assert rec["terminated"] and not rec["truncated"], "episode did not terminate cleanly"
+    assert rec["truncated"] and not rec["terminated"], "episode did not truncate cleanly"
     # The controller clamps u to [-1, 1] internally; this just guards the contract.
     assert all(v <= 1.0 + 1e-6 for v in rec["max_u"].values()), "|u| exceeded 1"
     print("Test L: PASS")

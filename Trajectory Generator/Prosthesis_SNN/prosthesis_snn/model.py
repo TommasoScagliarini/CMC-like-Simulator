@@ -109,13 +109,14 @@ class SNNBackbone(nn.Module):
 
 class ProsthesisReferenceSNN(nn.Module):
     """
-    SNN that predicts prosthetic kinematic references.
+    SNN that predicts prosthetic trajectory actions or kinematic references.
 
     The model returns a flat tensor of size `cfg.output_size`, which equals
     `len(output_coords) * len(output_channels)`. With the default config this
-    is 6 = 2 joints × 3 channels (q, qdot, qddot). The downstream
-    `ReferenceGenerator` is responsible for unpacking the flat output into
-    per-channel coordinate dictionaries.
+    is 6 = 3 trajectory knots x 2 prosthetic coordinates, matching the
+    CMC-like trajectory env action. The downstream `ReferenceGenerator` can
+    unpack the flat output into nested dictionaries or reshape it into an env
+    action matrix.
 
     Memory slots are explicit so the caller can carry membrane state across
     simulator timesteps and reset it at gait-cycle or episode boundaries.

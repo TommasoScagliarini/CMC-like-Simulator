@@ -27,10 +27,12 @@ LAST_SETUP_STATE_PATH = REPO_ROOT / ".simulator_last_setup.json"
 class SimulationSetup:
     model_file: Path
     kinematics_file: Path
-    external_loads_xml: Path
+    external_loads_xml: Path | None
     reserve_actuators_xml: Path
     t_start: float
     t_end: float
+    grf_mode: str = "prescribed"
+    online_grf_profile_file: Path | None = None
 
 
 def _xml_local_name(tag: str) -> str:
@@ -129,10 +131,12 @@ def _resolve_time_range(
 def build_simulation_setup(
     model_file: str | Path,
     kinematics_file: str | Path,
-    external_loads_xml: str | Path,
+    external_loads_xml: str | Path | None,
     reserve_actuators_xml: str | Path,
     t_start: float | str | None = None,
     t_end: float | str | None = None,
+    grf_mode: str = "prescribed",
+    online_grf_profile_file: str | Path | None = None,
 ) -> SimulationSetup:
     resolved_model = _validate_existing_file("Model file", model_file, (".osim",))
     resolved_kinematics = _validate_existing_file(
@@ -140,11 +144,29 @@ def build_simulation_setup(
         kinematics_file,
         (".sto", ".mot"),
     )
-    resolved_external = _validate_existing_file(
-        "External loads XML",
-        external_loads_xml,
-        (".xml",),
+    resolved_grf_mode = str(grf_mode).strip().lower()
+    if resolved_grf_mode not in {"prescribed", "online_sensor", "online"}:
+        raise ValueError(f"Unsupported grf_mode: {grf_mode!r}")
+    external_text = "" if external_loads_xml is None else str(external_loads_xml).strip()
+    resolved_external = (
+        _validate_existing_file("External loads XML", external_text, (".xml",))
+        if external_text
+        else None
     )
+    if resolved_external is None and resolved_grf_mode != "online":
+        raise ValueError(f"grf_mode={resolved_grf_mode!r} requires ExternalLoads XML.")
+    profile_text = (
+        ""
+        if online_grf_profile_file is None
+        else str(online_grf_profile_file).strip()
+    )
+    resolved_profile = (
+        _validate_existing_file("onlineGRF profile", profile_text, (".json",))
+        if profile_text
+        else None
+    )
+    if resolved_grf_mode != "prescribed" and resolved_profile is None:
+        raise ValueError(f"grf_mode={resolved_grf_mode!r} requires an onlineGRF profile.")
     resolved_reserve = _validate_existing_file(
         "Reserve actuators XML",
         reserve_actuators_xml,
@@ -163,6 +185,8 @@ def build_simulation_setup(
         reserve_actuators_xml=resolved_reserve,
         t_start=resolved_t_start,
         t_end=resolved_t_end,
+        grf_mode=resolved_grf_mode,
+        online_grf_profile_file=resolved_profile,
     )
 
 
@@ -180,6 +204,8 @@ def write_setup_xml(setup: SimulationSetup, destination: str | Path) -> Path:
         "kinematics_file": setup.kinematics_file,
         "external_loads_xml": setup.external_loads_xml,
         "reserve_actuators_xml": setup.reserve_actuators_xml,
+        "grf_mode": setup.grf_mode,
+        "online_grf_profile_file": setup.online_grf_profile_file,
         "t_start": _format_float(setup.t_start),
         "t_end": _format_float(setup.t_end),
     }
@@ -188,7 +214,7 @@ def write_setup_xml(setup: SimulationSetup, destination: str | Path) -> Path:
         child.text = (
             _repo_relative_or_absolute(path)
             if isinstance(path, Path)
-            else str(path)
+            else ("" if path is None else str(path))
         )
 
     tree = ET.ElementTree(root)
@@ -222,7 +248,6 @@ def read_setup_xml(setup_xml_path: str | Path) -> SimulationSetup:
     required = (
         "model_file",
         "kinematics_file",
-        "external_loads_xml",
         "reserve_actuators_xml",
     )
     missing = [name for name in required if not values.get(name)]
@@ -235,10 +260,20 @@ def read_setup_xml(setup_xml_path: str | Path) -> SimulationSetup:
     return build_simulation_setup(
         _resolve_saved_path(values["model_file"]),
         _resolve_saved_path(values["kinematics_file"]),
-        _resolve_saved_path(values["external_loads_xml"]),
+        (
+            _resolve_saved_path(values["external_loads_xml"])
+            if values.get("external_loads_xml")
+            else None
+        ),
         _resolve_saved_path(values["reserve_actuators_xml"]),
         values.get("t_start"),
         values.get("t_end"),
+        values.get("grf_mode", "prescribed"),
+        (
+            _resolve_saved_path(values["online_grf_profile_file"])
+            if values.get("online_grf_profile_file")
+            else None
+        ),
     )
 
 

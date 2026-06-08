@@ -1,10 +1,12 @@
-"""Reference-provider adapters for future CMC-like simulator integration."""
+"""Reference and action-provider adapters for simulator integration."""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Mapping
 from typing import Any
+
+import numpy as np
 
 from .features import phase_features
 from .generator import ReferenceGenerator
@@ -39,16 +41,13 @@ class DictReferenceProvider(ReferenceProvider):
 
 class SNNProsthesisReferenceProvider(ReferenceProvider):
     """
-    Reference provider that emits prosthetic knee/ankle (q, qdot, qddot)
-    references read directly from the SNN output.
+    Provider for legacy SNNs that emit direct `(q, qdot, qddot)` references.
 
-    Per the resolved design (see docs/TODO_integration.md, "Resolved
-    decisions"), the network predicts all three channels independently and
-    coherence between them is enforced *softly* via the RL reward — not by
-    post-processing inside the provider. If the configured ``output_channels``
-    does not include a channel name, the corresponding dictionary is returned
-    empty so that downstream hybrid providers do not override biological
-    values for that channel.
+    The current env-aligned SNN contract emits trajectory-env actions with
+    shape `(policy_knots, n_prosthetic_coords)`. Use
+    `SNNProsthesisActionProvider` or `ReferenceGenerator.predict_action` for
+    that path. This provider rejects env-action configs so a trajectory
+    checkpoint cannot silently fail to override prosthetic refs.
     """
 
     def __init__(
@@ -56,6 +55,12 @@ class SNNProsthesisReferenceProvider(ReferenceProvider):
         generator: ReferenceGenerator,
         feature_builder: Callable[[float, Any], Mapping[str, float]] | None = None,
     ) -> None:
+        if generator.cfg.output_contract != "kinematic_reference":
+            raise ValueError(
+                "SNNProsthesisReferenceProvider requires a "
+                "kinematic_reference config. Env-aligned checkpoints emit "
+                "trajectory actions; use SNNProsthesisActionProvider instead."
+            )
         self.generator = generator
         self.feature_builder = feature_builder or (
             lambda t, state: phase_features(t)
@@ -71,6 +76,40 @@ class SNNProsthesisReferenceProvider(ReferenceProvider):
         qdot_ref = dict(predicted.get("qdot", {}))
         qddot_ref = dict(predicted.get("qddot", {}))
         return q_ref, qdot_ref, qddot_ref
+
+
+class SNNProsthesisActionProvider:
+    """
+    Provider for env-aligned SNNs that emit `env.step(action)` matrices.
+
+    The returned action has shape `(policy_knots, n_prosthetic_coords)`, exactly
+    matching `CMCLikeProsthesisTrajectoryEnv.action_space`.
+    """
+
+    def __init__(
+        self,
+        generator: ReferenceGenerator,
+        feature_builder: Callable[
+            [float, Any], Mapping[str, float] | np.ndarray
+        ] | None = None,
+        action_shape: tuple[int, int] | None = None,
+    ) -> None:
+        if generator.cfg.output_contract != "env_action":
+            raise ValueError(
+                "SNNProsthesisActionProvider requires an env_action config."
+            )
+        self.generator = generator
+        self.feature_builder = feature_builder or (
+            lambda t, state: phase_features(t)
+        )
+        self.action_shape = action_shape or generator.cfg.action_shape
+
+    def reset(self) -> None:
+        self.generator.reset()
+
+    def get_action(self, t: float, state: Any = None) -> np.ndarray:
+        features = self.feature_builder(t, state)
+        return self.generator.predict_action(features, self.action_shape)
 
 
 class HybridReferenceProvider(ReferenceProvider):

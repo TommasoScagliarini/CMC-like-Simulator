@@ -23,7 +23,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as ETp
 
 import numpy as np
 import opensim

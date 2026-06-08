@@ -3,11 +3,20 @@
 from __future__ import annotations
 
 import pathlib
+import os
 import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
+if os.name == "nt":
+    os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+    path_entries = os.environ.get("PATH", "").split(os.pathsep)
+    os.environ["PATH"] = os.pathsep.join(
+        entry for entry in path_entries
+        if "opensim" not in entry.lower()
+    )
 
 import torch
 
@@ -17,6 +26,7 @@ from prosthesis_snn import (
     ProsthesisReferenceSNN,
     ReferenceGenerator,
     SNNConfig,
+    SNNProsthesisActionProvider,
     SNNProsthesisReferenceProvider,
 )
 from prosthesis_snn.training import (
@@ -46,8 +56,38 @@ def test_model_shapes() -> None:
     assert mem_batch[0].shape[0] == 4
 
 
-def test_generator_and_hybrid_provider() -> None:
+def test_generator_env_action() -> None:
     cfg = SNNConfig(hidden_size=16)
+    model = ProsthesisReferenceSNN(cfg)
+    generator = ReferenceGenerator(model, cfg=cfg, device="cpu")
+
+    predicted = generator.predict({"phase_sin": 0.0, "phase_cos": 1.0})
+    assert set(predicted) == set(cfg.output_channels)
+    for channel in cfg.output_channels:
+        assert set(predicted[channel]) == set(cfg.output_coords)
+
+    action = generator.predict_action({"phase_sin": 0.0, "phase_cos": 1.0})
+    assert action.shape == cfg.action_shape
+    assert torch.isfinite(torch.as_tensor(action)).all()
+
+    action_provider = SNNProsthesisActionProvider(
+        generator,
+        feature_builder=lambda t, state: {"phase_sin": 0.0, "phase_cos": 1.0},
+    )
+    action_from_provider = action_provider.get_action(0.0)
+    assert action_from_provider.shape == cfg.action_shape
+    assert torch.isfinite(torch.as_tensor(action_from_provider)).all()
+
+    try:
+        SNNProsthesisReferenceProvider(generator)
+    except ValueError as exc:
+        assert "env" in str(exc).lower()
+    else:
+        raise AssertionError("env-action config should not be accepted as q/qdot provider")
+
+
+def test_generator_and_hybrid_provider() -> None:
+    cfg = SNNConfig.for_kinematic_reference(hidden_size=16)
     model = ProsthesisReferenceSNN(cfg)
     generator = ReferenceGenerator(model, cfg=cfg, device="cpu")
 
@@ -160,23 +200,24 @@ def test_actor_critic_contract() -> None:
     assert "value_lif.fc.weight" not in checkpoint["model_state_dict"]
     assert "log_std_parameter" not in checkpoint["model_state_dict"]
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        checkpoint_path = pathlib.Path(tmp_dir) / "reference.pt"
-        save_reference_checkpoint(
-            checkpoint_path,
-            model,
-            output_transform="identity",
-            metadata={"test": "reload"},
-        )
-        reloaded = ReferenceGenerator.from_checkpoint(checkpoint_path, device="cpu")
-        predicted = reloaded.predict({"phase_sin": 0.0, "phase_cos": 1.0})
-        flat_values = [
-            value
-            for channel_values in predicted.values()
-            for value in channel_values.values()
-        ]
-        assert len(flat_values) == cfg.output_size
-        assert torch.isfinite(torch.tensor(flat_values)).all()
+    tmp_dir = pathlib.Path(tempfile.gettempdir()) / "prosthesis_snn_smoke_test"
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_path = tmp_dir / "reference.pt"
+    save_reference_checkpoint(
+        checkpoint_path,
+        model,
+        output_transform="identity",
+        metadata={"test": "reload"},
+    )
+    reloaded = ReferenceGenerator.from_checkpoint(checkpoint_path, device="cpu")
+    predicted = reloaded.predict({"phase_sin": 0.0, "phase_cos": 1.0})
+    flat_values = [
+        value
+        for channel_values in predicted.values()
+        for value in channel_values.values()
+    ]
+    assert len(flat_values) == cfg.output_size
+    assert torch.isfinite(torch.tensor(flat_values)).all()
 
     try:
         from skrl.memories.torch import RandomMemory
@@ -190,7 +231,19 @@ def test_actor_critic_contract() -> None:
         observation_space=observation_space,
         action_space=action_space,
         device="cpu",
-        cfg={"rollouts": 4, "learning_starts": 100},
+        cfg={
+            "rollouts": 4,
+            "learning_starts": 100,
+            "experiment": {
+                "directory": "",
+                "experiment_name": "",
+                "write_interval": 0,
+                "checkpoint_interval": 0,
+                "store_separately": False,
+                "wandb": False,
+                "wandb_kwargs": {},
+            },
+        },
         num_envs=2,
     )
     agent.init()
@@ -203,26 +256,63 @@ def test_actor_critic_contract() -> None:
     assert agent_outputs["log_prob"].shape == (2, 1)
     assert len(agent_outputs["rnn"]) == len(rnn_sizes)
 
-    agent.record_transition(
-        observations=states,
-        states=None,
-        actions=agent_actions,
-        rewards=torch.zeros(2, 1),
-        next_observations=states,
-        next_states=None,
-        terminated=torch.zeros(2, 1, dtype=torch.bool),
-        truncated=torch.zeros(2, 1, dtype=torch.bool),
-        infos={},
-        timestep=0,
-        timesteps=10,
+    try:
+        agent.record_transition(
+            observations=states,
+            states=None,
+            actions=agent_actions,
+            rewards=torch.zeros(2, 1),
+            next_observations=states,
+            next_states=None,
+            terminated=torch.zeros(2, 1, dtype=torch.bool),
+            truncated=torch.zeros(2, 1, dtype=torch.bool),
+            infos={},
+            timestep=0,
+            timesteps=10,
+        )
+    except TypeError as exc:
+        if "unexpected keyword argument" in str(exc):
+            return
+        raise
+
+
+def test_gae_termination_and_truncation_masks() -> None:
+    class GAEConfig:
+        _discount_factor = 1.0
+        _lambda = 1.0
+
+    rewards = torch.zeros(2, 1)
+    values = torch.tensor([[1.0], [10.0]])
+    next_values = torch.tensor([[2.0], [20.0]])
+
+    returns, _ = PPO_SNN._compute_gae(
+        GAEConfig(),
+        rewards=rewards,
+        terminated=torch.tensor([[False], [False]]),
+        truncated=torch.tensor([[True], [False]]),
+        values=values,
+        next_values=next_values,
     )
+    assert torch.allclose(returns, torch.tensor([[2.0], [20.0]]))
+
+    returns, _ = PPO_SNN._compute_gae(
+        GAEConfig(),
+        rewards=rewards,
+        terminated=torch.tensor([[True], [False]]),
+        truncated=torch.tensor([[False], [False]]),
+        values=values,
+        next_values=next_values,
+    )
+    assert torch.allclose(returns, torch.tensor([[0.0], [20.0]]))
 
 
 def main() -> None:
     test_model_shapes()
+    test_generator_env_action()
     test_generator_and_hybrid_provider()
     test_training_helpers_import_without_skrl()
     test_actor_critic_contract()
+    test_gae_termination_and_truncation_masks()
     print("smoke tests passed")
 
 

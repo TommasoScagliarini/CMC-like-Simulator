@@ -39,6 +39,16 @@ class SimulatorConfig:
     # Relative paths are resolved inside model_bundle_dir.
     external_loads_xml: str = "data/Externall_Loads.xml"
 
+    # Ground-reaction-force runtime mode:
+    #   prescribed    -> existing ExternalLoads drive the dynamics
+    #   online_sensor -> ExternalLoads drive dynamics; online contacts are sensors
+    #   online        -> online contacts drive dynamics; ExternalLoads are optional
+    #                    and used only as a validation oracle
+    grf_mode: str = "prescribed"
+    online_grf_profile_file: str = ""
+    online_grf_contact_plugin: str = "plugins/OnlineGRFContact"
+    online_grf_max_force_bw: float = 5.0
+
     # Reserve actuators ForceSet XML  (CMC_Actuators.xml).
     # Relative paths are resolved inside model_bundle_dir.
     reserve_actuators_xml: str = "data/CMC_Actuators.xml"
@@ -321,9 +331,12 @@ class SimulatorConfig:
     save_so_torque_diagnostics: bool = True # per-coordinate SO tau/residuals
     save_power:            bool = True # SEA joint + motor power
     save_gait_events:      bool = True # gait cycles from GRF threshold crossings
+    save_online_grf:       bool = True # calculated left/right GRF, moment and COP
 
     # GRF event extraction / plotting defaults
     grf_contact_threshold_n: float = 20.0
+    # <= 0 uses the model-specific value stored in the onlineGRF profile.
+    online_grf_hs_confirmation_threshold_n: float = 0.0
     grf_min_contact_duration_s: float = 0.05
     grf_min_cycle_duration_s: float = 0.30
     # Optional runtime GRF cleaner. Disabled by default so existing datasets
