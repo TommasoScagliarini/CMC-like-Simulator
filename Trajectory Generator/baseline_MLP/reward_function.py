@@ -19,8 +19,9 @@ Because the reward is re-derived from the losses, the env's own
 ``reward_*_weight`` config fields **no longer affect the agent's reward**; they
 only feed the env's now-discarded internal reward. Tune the reward here instead.
 
-Defaults reproduce the env's original reward **exactly**, so behaviour is
-unchanged until you pass overrides (via ``env_config["reward"]`` / ``--reward-json``).
+Defaults preserve the legacy baseline shaping. New physical terms remain
+opt-in until enabled by a training YAML or reward override, so old checkpoint
+evaluation does not silently change when the env gains a new diagnostic loss.
 """
 
 from __future__ import annotations
@@ -39,29 +40,43 @@ REFERENCE_LOSS = "reference_loss"
 BIO_LOSS = "bio_loss"
 EFFORT_LOSS = "effort_loss"
 SMOOTHNESS_LOSS = "smoothness_loss"
+COMMAND_RATE_LOSS = "command_rate_loss"
+SEGMENT_DELTA_LOSS = "segment_delta_loss"
+QDOT_REF_LOSS = "qdot_ref_loss"
+QDDOT_REF_LOSS = "qddot_ref_loss"
+JERK_REF_LOSS = "jerk_ref_loss"
+REFERENCE_GOVERNOR_LOSS = "reference_governor_loss"
+U_RATE_LOSS = "u_rate_loss"
 SATURATION_LOSS = "saturation_loss"
+SEA_SATURATION_LOSS = "sea_saturation_loss"
+SEA_TORQUE_ERROR_LOSS = "sea_torque_error_loss"
+SEA_MOTOR_SPEED_LOSS = "sea_motor_speed_loss"
+SEA_MOTOR_ACCEL_LOSS = "sea_motor_accel_loss"
+SEA_MOTOR_POWER_LOSS = "sea_motor_power_loss"
 SAFETY_LOSS = "safety_loss"
+GRF_PENETRATION_LOSS = "grf_penetration_loss"
+SOUND_IMITATION_LOSS = "sound_imitation_loss"
+SERVED_IMITATION_LOSS = "served_imitation_loss"
 
 
 @dataclass
 class RewardConfig:
     """Weights and blend coefficients of the scalar reward.
 
-    Defaults match the env's original reward
-    (``osim_trj_cmc_like.CMCLikeProsthesisTrajectoryEnv._get_reward`` + the safety
-    term applied in ``step``):
+    Defaults preserve the original baseline reward structure:
 
         tracking_score  = 1 / (1 + tracking_weight  * tracking_loss)
         reference_score = 1 / (1 + reference_weight * reference_loss)
         bio_score       = 1 / (1 + bio_weight       * bio_loss)
         penalty = effort_weight*effort_loss + smoothness_weight*smoothness_loss
-                  + saturation_weight*saturation_loss
+                  + saturation_weight*saturation_loss + optional physical terms
         base   = clip(blend_tracking*tracking_score + blend_reference*reference_score
                       + blend_bio*bio_score - penalty, clip_low, clip_high)
         reward = base - safety_weight * safety_loss
 
-    The ``safety_loss`` is non-zero only on an unsafe task termination (fall or
-    joint divergence) and is already provided by the env in ``reward_terms``.
+    ``safety_loss`` and ``grf_penetration_loss`` are provided by the env in
+    ``reward_terms`` and applied after clipping when their central weights are
+    enabled.
     """
 
     # Loss -> score sharpness (higher = reward decays faster with the loss).
@@ -73,9 +88,26 @@ class RewardConfig:
     effort_weight: float = 0.05
     smoothness_weight: float = 0.1
     saturation_weight: float = 0.1
+    command_rate_weight: float = 0.0
+    # Optional component-level command/reference penalties. These are additive
+    # to command_rate_weight, which preserves the legacy aggregate loss.
+    segment_delta_weight: float = 0.0
+    qdot_ref_weight: float = 0.0
+    qddot_ref_weight: float = 0.0
+    jerk_ref_weight: float = 0.0
+    reference_governor_weight: float = 0.0
+    u_rate_weight: float = 0.0
+    sea_saturation_weight: float = 0.0
+    sea_torque_error_weight: float = 0.0
+    sea_motor_speed_weight: float = 0.0
+    sea_motor_accel_weight: float = 0.0
+    sea_motor_power_weight: float = 0.0
 
-    # Safety penalty (subtracted after clipping; lets the reward go negative).
+    # Safety/contact penalties subtracted after clipping. Penetration defaults
+    # to zero for checkpoint compatibility; production configs enable it
+    # explicitly when the online prosthetic contact is applied.
     safety_weight: float = 2.0
+    grf_penetration_weight: float = 0.0
 
     # Convex-ish blend of the three positive scores.
     blend_tracking: float = 0.25
@@ -100,12 +132,24 @@ class RewardConfig:
     oob_q_min: tuple[float, ...] = (-1.35, -0.5)
     oob_q_max: tuple[float, ...] = (0.0, 0.5)
 
+    # Reward objective selector. "ex_novo" (default) = the blend above, UNCHANGED.
+    # "imitation" = pre-training reward where the prosthetic joints mirror the
+    # sound (contralateral) leg anti-phase (uses ``sound_imitation_loss`` from the
+    # env). See the 2026-06-10 imitation-reward report.
+    reward_mode: str = "ex_novo"
+    imitation_weight: float = 8.0          # loss -> score sharpness (imitation)
+    served_imitation_weight: float = 8.0   # target -> served-reference quality
+    blend_served_imitation: float = 0.0    # legacy imitation remains unchanged
+    blend_imitation: float = 0.8           # sound-leg imitation score weight
+    blend_imitation_tracking: float = 0.2  # SEA execution-quality weight
+
     @classmethod
     def from_mapping(cls, data: Mapping[str, Any] | None) -> "RewardConfig":
         """Build from a dict; unknown keys are ignored, missing keys defaulted.
 
-        Scalar fields are coerced to float; sequence fields (the oob bounds) to a
-        tuple of floats.
+        String fields (e.g. ``reward_mode``) are kept as strings; sequence fields
+        (the oob bounds) become tuples of floats; everything else is coerced to
+        float.
         """
         if not data:
             return cls()
@@ -114,7 +158,9 @@ class RewardConfig:
         for key, value in data.items():
             if key not in known:
                 continue
-            if isinstance(value, (list, tuple)):
+            if isinstance(value, str):
+                kwargs[key] = value
+            elif isinstance(value, (list, tuple)):
                 kwargs[key] = tuple(float(x) for x in value)
             else:
                 kwargs[key] = float(value)
@@ -123,7 +169,9 @@ class RewardConfig:
     def to_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {}
         for key, value in asdict(self).items():
-            if isinstance(value, (list, tuple)):
+            if isinstance(value, str):
+                out[key] = value
+            elif isinstance(value, (list, tuple)):
                 out[key] = [float(x) for x in value]
             else:
                 out[key] = float(value)
@@ -172,32 +220,72 @@ def compute_reward(
     tracking_score = _score(reward_terms.get(TRACKING_LOSS, 0.0), cfg.tracking_weight)
     reference_score = _score(reward_terms.get(REFERENCE_LOSS, 0.0), cfg.reference_weight)
     bio_score = _score(reward_terms.get(BIO_LOSS, 0.0), cfg.bio_weight)
+    imitation_score = _score(
+        reward_terms.get(SOUND_IMITATION_LOSS, 0.0), cfg.imitation_weight
+    )
+    served_imitation_score = _score(
+        reward_terms.get(SERVED_IMITATION_LOSS, 0.0),
+        cfg.served_imitation_weight,
+    )
 
+    # Shared penalty/safety/out-of-band terms (identical in both reward modes).
     penalty = (
         cfg.effort_weight * float(reward_terms.get(EFFORT_LOSS, 0.0))
         + cfg.smoothness_weight * float(reward_terms.get(SMOOTHNESS_LOSS, 0.0))
         + cfg.saturation_weight * float(reward_terms.get(SATURATION_LOSS, 0.0))
+        + cfg.command_rate_weight * float(reward_terms.get(COMMAND_RATE_LOSS, 0.0))
+        + cfg.segment_delta_weight
+        * float(reward_terms.get(SEGMENT_DELTA_LOSS, 0.0))
+        + cfg.qdot_ref_weight * float(reward_terms.get(QDOT_REF_LOSS, 0.0))
+        + cfg.qddot_ref_weight * float(reward_terms.get(QDDOT_REF_LOSS, 0.0))
+        + cfg.jerk_ref_weight * float(reward_terms.get(JERK_REF_LOSS, 0.0))
+        + cfg.reference_governor_weight
+        * float(reward_terms.get(REFERENCE_GOVERNOR_LOSS, 0.0))
+        + cfg.u_rate_weight * float(reward_terms.get(U_RATE_LOSS, 0.0))
+        + cfg.sea_saturation_weight
+        * float(reward_terms.get(SEA_SATURATION_LOSS, 0.0))
+        + cfg.sea_torque_error_weight
+        * float(reward_terms.get(SEA_TORQUE_ERROR_LOSS, 0.0))
+        + cfg.sea_motor_speed_weight
+        * float(reward_terms.get(SEA_MOTOR_SPEED_LOSS, 0.0))
+        + cfg.sea_motor_accel_weight
+        * float(reward_terms.get(SEA_MOTOR_ACCEL_LOSS, 0.0))
+        + cfg.sea_motor_power_weight
+        * float(reward_terms.get(SEA_MOTOR_POWER_LOSS, 0.0))
     )
-
-    base = (
-        cfg.blend_tracking * tracking_score
-        + cfg.blend_reference * reference_score
-        + cfg.blend_bio * bio_score
-        - penalty
-    )
-    base = min(cfg.clip_high, max(cfg.clip_low, base))
-
     safety_term = cfg.safety_weight * float(reward_terms.get(SAFETY_LOSS, 0.0))
-
+    grf_penetration_term = cfg.grf_penetration_weight * float(
+        reward_terms.get(GRF_PENETRATION_LOSS, 0.0)
+    )
     if reference is not None and cfg.oob_weight:
         oob_loss = out_of_band_loss(reference, cfg)
     else:
         oob_loss = 0.0
     oob_term = cfg.oob_weight * oob_loss
 
-    # Safety and out-of-band are subtracted AFTER the clip: they stay active (with
-    # gradient) even once the positive reward has saturated to clip_low.
-    reward = base - safety_term - oob_term
+    # Positive base differs by mode. ex_novo (default) is UNCHANGED; imitation
+    # rewards mirroring the sound leg (anti-phase) instead of the prosthetic IK
+    # reference (no reference/bio terms: reference is the abandoned IK target, bio
+    # is uncontrollable by the policy).
+    if cfg.reward_mode == "imitation":
+        base = (
+            cfg.blend_served_imitation * served_imitation_score
+            + cfg.blend_imitation * imitation_score
+            + cfg.blend_imitation_tracking * tracking_score
+            - penalty
+        )
+    else:
+        base = (
+            cfg.blend_tracking * tracking_score
+            + cfg.blend_reference * reference_score
+            + cfg.blend_bio * bio_score
+            - penalty
+        )
+    base = min(cfg.clip_high, max(cfg.clip_low, base))
+
+    # Safety, contact feasibility and out-of-band are subtracted AFTER the clip:
+    # they stay active even once the positive reward has saturated to clip_low.
+    reward = base - safety_term - grf_penetration_term - oob_term
 
     components = {
         "reward": float(reward),
@@ -205,8 +293,34 @@ def compute_reward(
         "tracking_score": float(tracking_score),
         "reference_score": float(reference_score),
         "bio_score": float(bio_score),
+        "imitation_score": float(imitation_score),
+        "served_imitation_score": float(served_imitation_score),
+        "sound_imitation_loss": float(reward_terms.get(SOUND_IMITATION_LOSS, 0.0)),
+        "served_imitation_loss": float(
+            reward_terms.get(SERVED_IMITATION_LOSS, 0.0)
+        ),
+        "command_rate_loss": float(reward_terms.get(COMMAND_RATE_LOSS, 0.0)),
+        "segment_delta_loss": float(reward_terms.get(SEGMENT_DELTA_LOSS, 0.0)),
+        "qdot_ref_loss": float(reward_terms.get(QDOT_REF_LOSS, 0.0)),
+        "qddot_ref_loss": float(reward_terms.get(QDDOT_REF_LOSS, 0.0)),
+        "jerk_ref_loss": float(reward_terms.get(JERK_REF_LOSS, 0.0)),
+        "reference_governor_loss": float(
+            reward_terms.get(REFERENCE_GOVERNOR_LOSS, 0.0)
+        ),
+        "u_rate_loss": float(reward_terms.get(U_RATE_LOSS, 0.0)),
+        "sea_saturation_loss": float(reward_terms.get(SEA_SATURATION_LOSS, 0.0)),
+        "sea_torque_error_loss": float(
+            reward_terms.get(SEA_TORQUE_ERROR_LOSS, 0.0)
+        ),
+        "sea_motor_speed_loss": float(reward_terms.get(SEA_MOTOR_SPEED_LOSS, 0.0)),
+        "sea_motor_accel_loss": float(reward_terms.get(SEA_MOTOR_ACCEL_LOSS, 0.0)),
+        "sea_motor_power_loss": float(reward_terms.get(SEA_MOTOR_POWER_LOSS, 0.0)),
         "penalty": float(penalty),
         "safety_term": float(safety_term),
+        "grf_penetration_loss": float(
+            reward_terms.get(GRF_PENETRATION_LOSS, 0.0)
+        ),
+        "grf_penetration_term": float(grf_penetration_term),
         "oob_loss": float(oob_loss),
         "oob_term": float(oob_term),
     }

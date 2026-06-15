@@ -20,12 +20,12 @@ class SimulatorConfig:
 
     # Model bundle directory. Each bundle keeps its .osim files at the root
     # and the supporting XML/STO files inside a local data/ folder.
-    model_bundle_dir: str = "models/SEASEA"
+    model_bundle_dir: str = "models/AB06_SEASEA_Threadmill"
 
     # Biomechanical model (contains muscles + SEA CoordinateActuators).
     # If this is only a filename, it is resolved inside model_bundle_dir.
     # Absolute or explicit repo-relative paths are also supported.
-    model_file: str = "Adjusted_SEASEA - Copia_tuned.osim"
+    model_file: str = "AB06_SEASEA_stiff321_500_pi.osim"
 
     # C++ plugin basename WITHOUT OS extension.
     # Loader adds .dll / .dylib / .so automatically.
@@ -33,11 +33,11 @@ class SimulatorConfig:
 
     # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto).
     # Relative paths are resolved inside model_bundle_dir.
-    kinematics_file: str = "data/3DGaitModel2392_Kinematics_q.sto"
+    kinematics_file: str = "data/IK_results_AB06_SEASEA.mot"
 
     # GRF ExternalLoads setup XML  (points to the .mot data file internally).
     # Relative paths are resolved inside model_bundle_dir.
-    external_loads_xml: str = "data/Externall_Loads.xml"
+    external_loads_xml: str = "data/ExternalForces.xml"
 
     # Ground-reaction-force runtime mode:
     #   prescribed    -> existing ExternalLoads drive the dynamics
@@ -71,8 +71,8 @@ class SimulatorConfig:
     # =========================================================================
     # SIMULATION TIME  [seconds]
     # =========================================================================
-    t_start: float = 4.2300  # must be >= first time stamp in kinematics file
-    t_end:   float = 11.0690 # must be <= last  time stamp in kinematics file
+    t_start: float = 11.99  # must be >= first time stamp in kinematics file
+    t_end:   float = 21.0   # must be <= last  time stamp in kinematics file
     dt:      float = 0.001    # integration step for validated plugin mode
 
     # =========================================================================
@@ -146,7 +146,7 @@ class SimulatorConfig:
     # tau_ff from inverse dynamics may still be saved as an oracle diagnostic,
     # but it is not part of the prosthetic outer-loop command.
     #
-    # u is passed to the plugin's inner PD torque loop.
+    # u is passed to the plugin's inner PI torque loop.
     # Units:
     #   PD/PID: [N·m/rad] for Kp, [N·m·s/rad] for Kd,
     #           [N·m/(rad·s)] for Ki.
@@ -209,8 +209,8 @@ class SimulatorConfig:
     sea_forward_mode: str = "plugin"
 
     sea_stiffness: Dict[str, float] = field(default_factory=lambda: {
-        "SEA_Knee":  250.0,
-        "SEA_Ankle": 700.0,
+        "SEA_Knee":  321.0,
+        "SEA_Ankle": 500.0,
     })
     # Optional CMC-like feasibility guard on the prosthetic high-level PD term.
     # It scales only the PD correction, never tau_ff, and is meant as a last

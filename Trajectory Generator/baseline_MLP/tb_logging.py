@@ -34,7 +34,25 @@ _LOSS_KEYS = (
     "bio_loss",
     "effort_loss",
     "smoothness_loss",
+    "command_rate_loss",
+    "segment_delta_loss",
+    "qdot_ref_loss",
+    "qddot_ref_loss",
+    "jerk_ref_loss",
+    "reference_governor_loss",
+    "reference_velocity_limit_fraction",
+    "reference_acceleration_limit_fraction",
+    "reference_jerk_limit_fraction",
+    "u_rate_loss",
     "saturation_loss",
+    "sea_saturation_loss",
+    "sea_torque_error_loss",
+    "sea_motor_speed_loss",
+    "sea_motor_accel_loss",
+    "sea_motor_power_loss",
+    "sea_tau_input_saturation_fraction",
+    "sound_imitation_loss",
+    "served_imitation_loss",
     "safety_loss",
     "u_abs_max",
     "u_saturation_fraction",
@@ -80,6 +98,14 @@ class RewardComponentsCallback(RLlibCallback):
             for key in _LOSS_KEYS:
                 if key in terms:
                     self._log(metrics_logger, f"reward_loss/{key}", terms[key])
+            for key, value in terms.items():
+                if (
+                    key.startswith("pros_knee_angle_sea_")
+                    or key.startswith("pros_ankle_angle_sea_")
+                    or "_reference_" in key
+                    or key.endswith("_imitation_loss")
+                ):
+                    self._log(metrics_logger, f"reward_diagnostic/{key}", value)
 
         gait = info.get("online_gait")
         if isinstance(gait, dict):
@@ -158,6 +184,7 @@ def log_result_scalars(writer, result: Mapping[str, Any], step: int) -> int:
             if (
                 key.startswith("reward/")
                 or key.startswith("reward_loss/")
+                or key.startswith("reward_diagnostic/")
                 or key.startswith("gait/")
                 or key.startswith("episode_end/")
             ):

@@ -255,6 +255,7 @@ def load_tables(results_dir: Path, prefix: str) -> Dict[str, Optional[StoTable]]
         "sea_torques": "sea_torques",
         "sea_controls": "sea_controls",
         "states": "states",
+        "kinematics_reference": "kinematics_reference",
         "reserve_torques": "reserve_torques",
         "sea_states": "sea_states",
         "sea_diagnostics": "sea_diagnostics",
@@ -447,6 +448,23 @@ def reference_angle_series(
         note_missing(missing, figure, side_key, "kinematic ref", f"could not evaluate reference: {exc}")
         return None
     return apply_joint_sign((time, values, f"{coord}_q_ref"), side_key)
+
+
+def recorded_reference_angle_series(
+    table: Optional[StoTable],
+    time: np.ndarray,
+    coord: str,
+    side_key: str,
+) -> Optional[Tuple[np.ndarray, np.ndarray, str]]:
+    """Return the reference actually served to the controller, when recorded."""
+    if table is None:
+        return None
+    series = table.series([f"{coord}_q_ref"])
+    if series is None:
+        return None
+    source_time, source_values, column = series
+    values = np.interp(time, source_time, source_values)
+    return apply_joint_sign((time, values, column), side_key)
 
 
 def torque_candidates(coord: str, sea: str) -> List[str]:
@@ -1642,15 +1660,24 @@ def plot_figure_6(
         joint_q = apply_joint_sign(joint_q, key)
 
         kin_ref = None
+        kin_ref_label = "served kinematic ref"
         if joint_q is not None:
-            kin_ref = reference_angle_series(
-                reference,
+            kin_ref = recorded_reference_angle_series(
+                tables["kinematics_reference"],
                 joint_q[0],
                 coord,
                 key,
-                missing,
-                "figure 6",
             )
+            if kin_ref is None:
+                kin_ref_label = "prescribed kinematic ref (fallback)"
+                kin_ref = reference_angle_series(
+                    reference,
+                    joint_q[0],
+                    coord,
+                    key,
+                    missing,
+                    "figure 6",
+                )
         elif reference is None:
             note_missing(missing, "figure 6", key, "kinematic ref", "reference kinematics not available")
 
@@ -1661,7 +1688,7 @@ def plot_figure_6(
             axes[0, col].plot(
                 time,
                 values,
-                label="kinematic ref",
+                label=kin_ref_label,
                 color="tab:orange",
                 linewidth=1.3,
             )
@@ -1686,24 +1713,16 @@ def plot_figure_6(
             note_missing(missing, "figure 6", key, "simulation - kin ref", "simulated joint angle not available")
             annotate_missing(axes[2, col], "simulated joint angle")
         else:
-            kin_ref_joint = reference_angle_series(
-                reference,
-                joint_q[0],
-                coord,
-                key,
-                missing,
-                "figure 6",
-            )
-            if kin_ref_joint is None:
+            if kin_ref is None:
                 annotate_missing(axes[2, col], "kinematic ref")
             else:
                 time, joint_values, _ = joint_q
-                _, ref_values, _ = kin_ref_joint
+                _, ref_values, _ = kin_ref
                 error = joint_values - ref_values
                 axes[2, col].plot(
                     time,
                     error,
-                    label="simulation - kin ref",
+                    label=f"simulation - {kin_ref_label}",
                     color="tab:red",
                     linewidth=1.3,
                 )

@@ -88,6 +88,18 @@ from output import OutputRecorder
 from online_grf import StreamingGaitEventDetector, read_online_grf
 
 
+class SegmentWallClockTimeout(RuntimeError):
+    """Raised when ``step_until`` exceeds its per-call wall-clock budget.
+
+    Used by RL adapters to truncate a *degenerate* episode (a simulation state
+    that integrates pathologically slowly, e.g. Static Optimization falling back
+    to bounded least-squares) instead of letting a single slow worker stall the
+    whole synchronous-sampling iteration. This is a deliberate guard, not a
+    numerical fault, so callers should always truncate gracefully on it,
+    independent of ``fail_fast``.
+    """
+
+
 class SimulationRunner:
     """
     Orchestrates the full simulation loop.
@@ -247,11 +259,14 @@ class SimulationRunner:
         self._set_state(state, q0, qdot0, t)
 
         self._q0_for_sea_init = q0
+        self._qdot0_for_sea_init = qdot0
         try:
             self._init_muscle_states(state)
         finally:
             if hasattr(self, "_q0_for_sea_init"):
                 del self._q0_for_sea_init
+            if hasattr(self, "_qdot0_for_sea_init"):
+                del self._qdot0_for_sea_init
 
         self._runtime_state = state
         self._runtime_controls = opensim.Vector(ctx.n_controls, 0.0)
@@ -275,10 +290,21 @@ class SimulationRunner:
         model.setControls(state, self._runtime_controls)
         return state
 
-    def step_until(self, t_stop: float, record: bool = True) -> dict:
+    def step_until(
+        self,
+        t_stop: float,
+        record: bool = True,
+        wall_timeout_s: float = 0.0,
+    ) -> dict:
         """
         Advance the already-reset runner up to t_stop using the CMC-like loop.
         This is the public stepping API for trajectory-level RL adapters.
+
+        ``wall_timeout_s`` (> 0) caps the real wall-clock time spent inside this
+        call. The budget is checked between control sub-steps; if a degenerate
+        simulation state makes the integration crawl, the call raises
+        :class:`SegmentWallClockTimeout` so an RL adapter can truncate the
+        episode instead of letting one slow worker gate synchronous sampling.
         """
         cfg = self._cfg
         if self._runtime_state is None or self._runtime_controls is None:
@@ -295,6 +321,11 @@ class SimulationRunner:
 
         _t_control, h_sub_nominal, n_substeps = self._control_loop_timing()
         step_online_events: list[dict] = []
+        sea_segment_samples: list[dict[str, dict[str, float]]] = []
+        wall_timeout_s = float(wall_timeout_s)
+        wall_deadline = (
+            _time.monotonic() + wall_timeout_s if wall_timeout_s > 0.0 else None
+        )
 
         while t < t_stop - 1e-12:
             (
@@ -313,9 +344,21 @@ class SimulationRunner:
             for _sub in range(n_substeps):
                 if t >= t_stop - 1e-12:
                     break
+                if wall_deadline is not None and _time.monotonic() > wall_deadline:
+                    raise SegmentWallClockTimeout(
+                        f"step_until exceeded its {wall_timeout_s:g} s wall-clock "
+                        f"budget at sim time t={t:.6g}s (target {t_stop:.6g}s)."
+                    )
                 h_step = min(h_sub_nominal, t_stop - t)
                 udot, sea_plugin_outputs, sea_derivatives = (
                     self._integrate_evaluate(state, controls, t)
+                )
+                sea_segment_samples.append(
+                    self._sea_runtime_diagnostics(
+                        state,
+                        u_sea,
+                        sea_plugin_outputs,
+                    )
                 )
                 online_grf, online_events = self._sample_online_grf(state, t)
                 if online_grf is not None:
@@ -357,6 +400,9 @@ class SimulationRunner:
                 self._runtime_time = t
                 self._runtime_step += 1
 
+        self._last_step_info["sea_segment_diagnostics"] = (
+            self._summarize_sea_segment_diagnostics(sea_segment_samples)
+        )
         return self.last_step_info
 
     def save_results(self) -> None:
@@ -407,8 +453,12 @@ class SimulationRunner:
 
         # Make q0 available to _init_muscle_states for SEA motor angle init
         self._q0_for_sea_init = q0
-        self._init_muscle_states(state)
-        del self._q0_for_sea_init
+        self._qdot0_for_sea_init = qdot0
+        try:
+            self._init_muscle_states(state)
+        finally:
+            del self._q0_for_sea_init
+            del self._qdot0_for_sea_init
 
         # Pre-allocate the full OpenSim controls vector (reused every step)
         controls = opensim.Vector(ctx.n_controls, 0.0)
@@ -1012,13 +1062,17 @@ class SimulationRunner:
         # inside the BlackBox plugin during Stage::Dynamics.
         # Setting motor_angle = joint_angle (assuming gear_ratio≈1) zeroes the
         # initial spring deflection and avoids extreme initial spring forces.
-        pros_knee_idx  = None
-        pros_ankle_idx = None
+        pros_knee_idx = pros_ankle_idx = None
+        pros_knee_speed_idx = pros_ankle_speed_idx = None
         for sv_idx, sv_name in enumerate(sv_names):
             if sv_name.endswith("SEA_Knee/motor_angle"):
                 pros_knee_idx = sv_idx
             elif sv_name.endswith("SEA_Ankle/motor_angle"):
                 pros_ankle_idx = sv_idx
+            elif sv_name.endswith("SEA_Knee/motor_speed"):
+                pros_knee_speed_idx = sv_idx
+            elif sv_name.endswith("SEA_Ankle/motor_speed"):
+                pros_ankle_speed_idx = sv_idx
 
         # q0 is the IK reference at t_start — built just before this call
         # by the caller (run()) and stored temporarily here.
@@ -1036,6 +1090,18 @@ class SimulationRunner:
                 print(f"[Runner] SEA_Ankle motor_angle = "
                       f"{q0_sea.get(self._cfg.pros_coords[1], 0.0):.4f} rad",
                       flush=True)
+        if hasattr(self, "_qdot0_for_sea_init"):
+            qdot0_sea = self._qdot0_for_sea_init
+            if pros_knee_speed_idx is not None:
+                sv.set(
+                    pros_knee_speed_idx,
+                    qdot0_sea.get(self._cfg.pros_coords[0], 0.0),
+                )
+            if pros_ankle_speed_idx is not None:
+                sv.set(
+                    pros_ankle_speed_idx,
+                    qdot0_sea.get(self._cfg.pros_coords[1], 0.0),
+                )
 
         # Write all changes to the state at once
         model.setStateVariableValues(state, sv)
@@ -1072,6 +1138,141 @@ class SimulationRunner:
                 f"Could not read output '{output_name}' from "
                 f"'{component_path}'"
             ) from exc
+
+    def _sea_runtime_diagnostics(
+        self,
+        state: opensim.State,
+        u_sea: Dict[str, float],
+        sea_plugin_outputs: np.ndarray,
+    ) -> dict[str, dict[str, float]]:
+        """Return physical SEA diagnostics for one integration substep."""
+        ctx = self._ctx
+        sv = ctx.model.getStateVariableValues(state)
+        coord_set = ctx.model.getCoordinateSet()
+        diagnostics: dict[str, dict[str, float]] = {}
+        for i, (sea_name, coord_name) in enumerate(self._sea_pros_map):
+            props = self._sea_props[sea_name]
+            K = float(props["K"])
+            Kp = float(props["Kp"])
+            Kd = float(props["Kd"])
+            Ki = float(props.get("Ki", 0.0))
+            integral_limit = max(
+                0.0,
+                float(props.get("integral_torque_limit", 100.0)),
+            )
+            Bm = float(props["Bm"])
+            Jm = max(1e-9, float(props["Jm"]))
+            F_opt = float(props["F_opt"])
+
+            coord = coord_set.get(coord_name)
+            theta_j = float(coord.getValue(state))
+            omega_j = float(coord.getSpeedValue(state))
+            theta_m = float(sv.get(ctx.sea_motor_angle_sv_idx[sea_name]))
+            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+            omega_m = float(sv.get(ms_idx)) if ms_idx is not None else 0.0
+            tau_spring = K * (theta_m - theta_j)
+            tau_ref = float(u_sea.get(coord_name, 0.0)) * F_opt
+
+            if bool(props.get("impedance", False)):
+                theta_m_ref = theta_j + tau_ref / max(abs(K), 1e-9)
+                tau_input_raw = (
+                    tau_spring
+                    + Bm * omega_m
+                    + Kp * (theta_m_ref - theta_m)
+                    + Kd * (omega_j - omega_m)
+                )
+            else:
+                xi_idx = ctx.sea_state_sv_idx.get(sea_name, {}).get(
+                    "torque_error_integral"
+                )
+                xi = float(sv.get(xi_idx)) if xi_idx is not None else 0.0
+                integral_torque = float(
+                    np.clip(Ki * xi, -integral_limit, integral_limit)
+                )
+                tau_input_raw = (
+                    tau_ref
+                    + Kp * (tau_ref - tau_spring)
+                    + integral_torque
+                    - Kd * omega_m
+                )
+
+            base = i * 3
+            tau_input = (
+                float(sea_plugin_outputs[base])
+                if len(sea_plugin_outputs) > base
+                and np.isfinite(sea_plugin_outputs[base])
+                else float(np.clip(tau_input_raw, -500.0, 500.0))
+            )
+            motor_accel = (
+                float(sea_plugin_outputs[base + 2])
+                if len(sea_plugin_outputs) > base + 2
+                and np.isfinite(sea_plugin_outputs[base + 2])
+                else (tau_input - tau_spring - Bm * omega_m) / Jm
+            )
+            diagnostics[coord_name] = {
+                "tau_input_raw_nm": float(tau_input_raw),
+                "tau_input_nm": float(tau_input),
+                "tau_input_saturated": float(abs(tau_input) >= 500.0 - 1e-9),
+                "torque_error_nm": float(tau_ref - tau_spring),
+                "motor_speed_rad_s": float(omega_m),
+                "motor_accel_rad_s2": float(motor_accel),
+                "motor_power_w": float(tau_input * omega_m),
+            }
+        return diagnostics
+
+    @staticmethod
+    def _summarize_sea_segment_diagnostics(
+        samples: list[dict[str, dict[str, float]]],
+    ) -> dict:
+        """Reduce substep SEA samples to compact segment-level RMS/max metrics."""
+        if not samples:
+            return {"sample_count": 0, "joints": {}}
+        coord_names = sorted(
+            {
+                coord_name
+                for sample in samples
+                for coord_name in sample
+            }
+        )
+        joints: dict[str, dict[str, float]] = {}
+        for coord_name in coord_names:
+            rows = [
+                sample[coord_name]
+                for sample in samples
+                if coord_name in sample
+            ]
+            if not rows:
+                continue
+
+            def values(key: str) -> np.ndarray:
+                return np.asarray([float(row[key]) for row in rows], dtype=float)
+
+            raw = values("tau_input_raw_nm")
+            tau_input = values("tau_input_nm")
+            saturated = values("tau_input_saturated")
+            torque_error = values("torque_error_nm")
+            motor_speed = values("motor_speed_rad_s")
+            motor_accel = values("motor_accel_rad_s2")
+            motor_power = values("motor_power_w")
+
+            def rms(data: np.ndarray) -> float:
+                return float(np.sqrt(np.mean(np.square(data))))
+
+            joints[coord_name] = {
+                "sample_count": float(len(rows)),
+                "tau_input_raw_rms_nm": rms(raw),
+                "tau_input_raw_abs_max_nm": float(np.max(np.abs(raw))),
+                "tau_input_abs_max_nm": float(np.max(np.abs(tau_input))),
+                "tau_input_saturation_fraction": float(np.mean(saturated)),
+                "torque_error_rms_nm": rms(torque_error),
+                "motor_speed_rms_rad_s": rms(motor_speed),
+                "motor_speed_abs_max_rad_s": float(np.max(np.abs(motor_speed))),
+                "motor_accel_rms_rad_s2": rms(motor_accel),
+                "motor_accel_abs_max_rad_s2": float(np.max(np.abs(motor_accel))),
+                "motor_power_rms_w": rms(motor_power),
+                "motor_power_abs_max_w": float(np.max(np.abs(motor_power))),
+            }
+        return {"sample_count": int(len(samples)), "joints": joints}
 
     def _sea_plugin_outputs_from_outputs(self, state: opensim.State) -> np.ndarray:
         """Return tau_input and motor derivatives exposed by the SEA plugin."""

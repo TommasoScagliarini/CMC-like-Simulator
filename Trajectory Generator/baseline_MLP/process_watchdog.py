@@ -100,6 +100,47 @@ class _WindowsProcessJob:
             self._handle = None
 
 
+def atomic_write_json(
+    path: str | Path,
+    payload: dict[str, Any],
+    *,
+    retries: int = 6,
+    delay_s: float = 0.05,
+) -> bool:
+    """Best-effort atomic JSON write that tolerates the Windows replace race.
+
+    On Windows ``os.replace`` raises ``PermissionError`` (WinError 5) when the
+    destination is momentarily held open by another process — exactly the case
+    here, where the external supervisor reads the heartbeat while the supervised
+    process replaces it. The supervisor's read is brief, so a short retry almost
+    always wins. This never raises: a missed advisory heartbeat is harmless (the
+    supervisor's stall timeout tolerates the occasional gap), whereas a crash in
+    the hot step loop is not. Returns True if the file was updated.
+    """
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = target.with_name(f".{target.name}.{os.getpid()}.tmp")
+    try:
+        temp_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    except OSError:
+        return False
+    for attempt in range(max(1, retries)):
+        try:
+            os.replace(temp_path, target)
+            return True
+        except PermissionError:
+            if attempt < retries - 1:
+                time.sleep(delay_s)
+                continue
+        except OSError:
+            break
+    try:
+        temp_path.unlink(missing_ok=True)
+    except OSError:
+        pass
+    return False
+
+
 def write_heartbeat(
     path: str | Path,
     phase: str,
@@ -109,8 +150,6 @@ def write_heartbeat(
     extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Atomically publish process progress for an external supervisor."""
-    heartbeat_path = Path(path)
-    heartbeat_path.parent.mkdir(parents=True, exist_ok=True)
     now = time.time()
     payload: dict[str, Any] = {
         "phase": str(phase),
@@ -122,11 +161,7 @@ def write_heartbeat(
     }
     if extra:
         payload.update(extra)
-    temp_path = heartbeat_path.with_name(
-        f".{heartbeat_path.name}.{os.getpid()}.tmp"
-    )
-    temp_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    os.replace(temp_path, heartbeat_path)
+    atomic_write_json(path, payload)
     return payload
 
 

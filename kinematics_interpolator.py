@@ -87,6 +87,17 @@ class KinematicsInterpolator:
             f"{len(time)} samples{ready_suffix}."
         )
 
+    @property
+    def time_bounds(self) -> Tuple[float, float]:
+        """(t_start, t_end) of the interpolation domain [s].
+
+        Read from the spline knots so callers can clamp shifted queries (e.g. the
+        anti-phase sound-leg target ``get(t - T/2)``) and avoid extrapolating
+        beyond the IK data window.
+        """
+        spline = next(iter(self._splines.values()))
+        return float(spline.x[0]), float(spline.x[-1])
+
     def _lowpass_and_resample(
         self,
         time: np.ndarray,

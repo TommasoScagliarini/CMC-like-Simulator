@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
-from scipy.interpolate import CubicHermiteSpline, PchipInterpolator
+from scipy.interpolate import BPoly, CubicHermiteSpline, CubicSpline, PchipInterpolator
 
 try:
     from gymnasium import Env, spaces
@@ -69,7 +69,7 @@ from kinematics_interpolator import KinematicsInterpolator
 from model_loader import setup_model
 from path_resolver import normalize_cli_existing_path
 from setup_io import read_last_setup_path, read_setup_xml
-from simulation_runner import SimulationRunner
+from simulation_runner import SegmentWallClockTimeout, SimulationRunner
 
 
 CoordDict = Dict[str, float]
@@ -101,6 +101,8 @@ class CMCEnvConfig:
         names and values are (low, high) in radians.
     random_init
         Start each episode from a random time in the setup window.
+    episode_start_offset_s
+        Deterministic offset from setup t_start when random_init is disabled.
     episode_duration
         Optional maximum episode duration [s]. If omitted, use setup t_end.
     rebuild_model_on_reset
@@ -132,9 +134,20 @@ class CMCEnvConfig:
     setup_xml_path: Optional[str] = None
     segment_duration: float = 0.05
     policy_knots: int = 4
-    action_mode: str = "delta"
+    action_mode: str = "absolute"
     max_delta_rad: float | Mapping[str, float] | Sequence[float] = 0.35
-    absolute_bounds_rad: Optional[Mapping[str, Tuple[float, float]]] = None
+    # Absolute action bounds [rad] per prosthetic coord (used by
+    # action_mode="absolute"): the policy emits an ABSOLUTE trajectory, not a
+    # deviation from the prescribed IK. Bounds give ex-novo exploration room
+    # beyond the experimental IK range while staying inside the anti-divergence
+    # truncation guards (truncation_bounds_rad): pros_knee_angle is
+    # flexion-negative (IK ~[-1.06,-0.13]); pros_ankle_angle ~[-0.13,0.40].
+    absolute_bounds_rad: Optional[Mapping[str, Tuple[float, float]]] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": (-1.5, 0.0),
+            "pros_ankle_angle": (-0.7, 0.7),
+        }
+    )
     # Simulator-side reference low-pass. The policy only emits a raw smooth
     # prosthetic reference; the simulator band-limits it to the same cutoff used
     # for the experimental IK (KinematicsInterpolator) before the prosthesis
@@ -144,12 +157,58 @@ class CMCEnvConfig:
     # cfg.kinematics_lowpass_cutoff_hz. See
     # reports/user/2026-06-01_knee_saturazione_env_rl_limit_cycle.md.
     enable_pros_ref_lpf: bool = True
+    pros_ref_model: str = "second_order"
     pros_ref_lpf_cutoff_hz: Optional[float] = None
     pros_ref_lpf_zeta: float = 1.0
+    # Hard reference governor applied inside the continuous reference model.
+    # Limits include a small margin over the 6 Hz-filtered sound-leg IK maxima,
+    # so feasible imitation is preserved while policy-generated steps cannot
+    # excite the SEA with non-experimental velocity/acceleration transients.
+    enable_pros_ref_governor: bool = True
+    pros_ref_velocity_limit_rad_s: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 6.0,
+            "pros_ankle_angle": 3.5,
+        }
+    )
+    pros_ref_acceleration_limit_rad_s2: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 60.0,
+            "pros_ankle_angle": 55.0,
+        }
+    )
+    pros_ref_jerk_limit_rad_s3: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 3000.0,
+            "pros_ankle_angle": 2750.0,
+        }
+    )
+    # Sound-side (biological) gait-cycle phase clock. The sound leg follows the
+    # prescribed GRF/kinematics — a fixed clock — so its heel strikes are
+    # deterministic and recoverable offline from the prescribed vertical GRF. The
+    # env builds a sawtooth phase phi in [0,1) that resets at each sound heel
+    # strike (shifted by gait_clock_phase_offset, a cycle fraction in [0,1) so the
+    # reset point is tunable: 0.0=heel strike, ~0.6=toe-off, ...) and exposes
+    # (sin, cos)(2*pi*phi) in the observation. This is the pacemaker the policy
+    # reads to keep the (free) prosthetic leg coordinated with the sound leg. It
+    # is INDEPENDENT of the online GRF event detector (unreliable on the
+    # prosthetic side); the sound side is prescribed and deterministic.
+    gait_clock_enable: bool = True
+    gait_clock_side: str = "right"
+    gait_clock_phase_offset: float = 0.0
     random_init: bool = False
+    episode_start_offset_s: float = 0.0
     episode_duration: Optional[float] = None
     rebuild_model_on_reset: bool = False
     fail_fast: bool = True
+    # Wall-clock budget (real seconds) for a single env step's simulation
+    # (``runner.step_until`` over one segment). A *degenerate* state can make the
+    # CMC-like integration crawl (e.g. Static Optimization bounded least-squares
+    # fallback); when one segment exceeds this budget the episode is truncated
+    # gracefully (``end_reason="step_wall_timeout"``) regardless of ``fail_fast``,
+    # so one slow worker cannot stall synchronous RL sampling. A healthy segment
+    # runs in well under a second; the default is hugely generous. 0 disables.
+    step_wall_timeout_s: float = 30.0
     record_outputs: bool = False
     save_outputs_on_close: bool = False
     output_dir: Optional[str] = None
@@ -193,6 +252,74 @@ class CMCEnvConfig:
     reward_safety_weight: float = 2.0
     truncation_penalty: float = 1.0
     sea_u_saturation_threshold: float = 0.98
+    # Observation is split into a REALISTIC "actor" prefix (signals a real
+    # instrumented prosthesis could sense: prosthetic joint encoders, SEA motor
+    # states, prosthetic-foot load, the controller's own clock/command memory) and
+    # a PRIVILEGED "critic-only" suffix (full pelvis/contralateral state + IK
+    # reference). When False (default) the env emits ONLY the actor prefix -> a
+    # realistic Box(n_actor) that trains on the stock DefaultModelConfig pipeline.
+    # When True the env emits the full superset Box(n_full) = [actor | privileged];
+    # this REQUIRES the custom asymmetric RLModule (policy reads obs[:n_actor], the
+    # value head reads the full vector). The full ordered dict is always kept in
+    # info["observation"] regardless of this flag.
+    critic_privileged_observation: bool = False
+    actor_cyclic_phase_only: bool = False
+    include_reference_state_observation: bool = False
+    # Sound-leg imitation target (used only when reward_function shapes the reward
+    # in "imitation" mode; the env always emits ``sound_imitation_loss`` so the
+    # ex-novo reward is unchanged). A periodic phase-normalized template is built
+    # from complete sound-leg gait cycles. Per-joint shifts are calibrated against
+    # the measured prosthetic-side IK; the scalar shift remains the fallback.
+    imitation_phase_shift: float = 0.5
+    imitation_phase_shifts: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 0.465,
+            "pros_ankle_angle": 0.452,
+        }
+    )
+    imitation_phase_samples: int = 200
+    imitation_initialize_to_target: bool = False
+    imitation_vel_weight: float = 0.02
+    imitation_sound_coords: Mapping[str, str] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": "knee_angle_r",
+            "pros_ankle_angle": "ankle_angle_r",
+        }
+    )
+    # Physical command-rate normalizers. Losses are dimensionless and emitted
+    # separately so reward_function.py can tune them without changing the plant.
+    command_delta_scale_rad: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 0.05,
+            "pros_ankle_angle": 0.04,
+        }
+    )
+    command_velocity_scale_rad_s: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 6.0,
+            "pros_ankle_angle": 5.0,
+        }
+    )
+    command_acceleration_scale_rad_s2: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 200.0,
+            "pros_ankle_angle": 200.0,
+        }
+    )
+    command_jerk_scale_rad_s3: Mapping[str, float] = field(
+        default_factory=lambda: {
+            "pros_knee_angle": 3000.0,
+            "pros_ankle_angle": 2750.0,
+        }
+    )
+    sea_u_rate_scale: float = 0.2
+    # SEA stress normalizers for the segment-level diagnostics returned by the
+    # SimulationRunner. The motor torque clamp itself is fixed by the plugin.
+    sea_tau_input_soft_limit_nm: float = 400.0
+    sea_tau_input_clamp_nm: float = 500.0
+    sea_motor_speed_scale_rad_s: float = 100.0
+    sea_motor_accel_scale_rad_s2: float = 50000.0
+    sea_motor_power_scale_w: float = 50000.0
 
 
 class ProstheticSegmentKinematics:
@@ -209,29 +336,66 @@ class ProstheticSegmentKinematics:
         pros_coords: Sequence[str],
         *,
         ref_lpf_enable: bool = True,
+        ref_model: str = "second_order",
         ref_lpf_cutoff_hz: float = 6.0,
         ref_lpf_zeta: float = 1.0,
+        ref_governor_enable: bool = True,
+        ref_velocity_limits: Sequence[float] | None = None,
+        ref_acceleration_limits: Sequence[float] | None = None,
+        ref_jerk_limits: Sequence[float] | None = None,
         control_dt: float = 0.001,
     ) -> None:
         self._base = base
         self._pros_coords = tuple(pros_coords)
         self._segment_t0: float | None = None
         self._segment_t1: float | None = None
-        self._segment_spline: PchipInterpolator | CubicHermiteSpline | None = None
+        self._segment_spline: PchipInterpolator | CubicHermiteSpline | BPoly | None = None
         self._last_anchor = np.zeros(len(self._pros_coords), dtype=float)
         # Simulator-side reference low-pass: the policy emits a raw smooth target
         # trajectory; the simulator band-limits it to ref_lpf_cutoff_hz (matching
         # the experimental IK low-pass) with a 2nd-order reference model. The
         # reference fed to the prosthesis controller then has the same spectral
-        # content as real IK and never excites the ~35 Hz knee SEA resonance.
-        # Filter state (filtered position/velocity) is carried across segments so
-        # the served q/qdot/qddot are continuous and C2.
+        # content as real IK. Filter state (filtered position/velocity) is carried
+        # across segments so served position and velocity are continuous; the
+        # optional governor bounds velocity and acceleration.
         self._ref_lpf_enable = bool(ref_lpf_enable) and float(ref_lpf_cutoff_hz) > 0.0
+        self._ref_model = str(ref_model).strip().lower()
+        if self._ref_model not in {"second_order", "butterworth3_jerk_limited"}:
+            raise ValueError(
+                "ref_model must be 'second_order' or 'butterworth3_jerk_limited'."
+            )
         self._ref_lpf_wn = 2.0 * np.pi * float(ref_lpf_cutoff_hz)
         self._ref_lpf_zeta = float(ref_lpf_zeta)
         self._ref_lpf_dt = float(control_dt) if control_dt and control_dt > 0.0 else 0.001
+        self._ref_governor_enable = bool(ref_governor_enable)
+        self._ref_velocity_limits = self._positive_limits(
+            ref_velocity_limits, "ref_velocity_limits"
+        )
+        self._ref_acceleration_limits = self._positive_limits(
+            ref_acceleration_limits, "ref_acceleration_limits"
+        )
+        self._ref_jerk_limits = self._positive_limits(
+            ref_jerk_limits, "ref_jerk_limits"
+        )
         self._filt_q: np.ndarray | None = None
         self._filt_v: np.ndarray | None = None
+        self._filt_a: np.ndarray | None = None
+        self._last_governor_diagnostics: dict[str, object] = {}
+
+    def _positive_limits(
+        self,
+        values: Sequence[float] | None,
+        label: str,
+    ) -> np.ndarray:
+        if values is None:
+            return np.full(len(self._pros_coords), np.inf, dtype=float)
+        limits = np.asarray(values, dtype=float)
+        expected = (len(self._pros_coords),)
+        if limits.shape != expected or not np.all(np.isfinite(limits)):
+            raise ValueError(f"{label} must contain {expected[0]} finite values.")
+        if np.any(limits <= 0.0):
+            raise ValueError(f"{label} values must be > 0.")
+        return limits
 
     @property
     def coord_names(self) -> list[str]:
@@ -243,6 +407,15 @@ class ProstheticSegmentKinematics:
         self._segment_spline = None
         self._filt_q = None
         self._filt_v = None
+        self._filt_a = None
+        self._last_governor_diagnostics = {}
+
+    @property
+    def reference_governor_diagnostics(self) -> dict[str, object]:
+        diagnostics: dict[str, object] = {}
+        for key, value in self._last_governor_diagnostics.items():
+            diagnostics[key] = value.copy() if isinstance(value, np.ndarray) else value
+        return diagnostics
 
     def current_target(self, t: float) -> np.ndarray:
         q, _, _ = self.get(t)
@@ -301,6 +474,11 @@ class ProstheticSegmentKinematics:
         if not self._ref_lpf_enable:
             self._segment_spline = raw_spline
             self._last_anchor = values[-1].copy()
+            self._last_governor_diagnostics = {}
+            return
+
+        if self._ref_model == "butterworth3_jerk_limited":
+            self._set_third_order_segment(times, values, derivatives, raw_spline)
             return
 
         # Simulator-side 6 Hz band-limiting via a 2nd-order reference model:
@@ -316,6 +494,12 @@ class ProstheticSegmentKinematics:
                 self._filt_v = np.asarray(
                     raw_spline.derivative(1)(times[0]), dtype=float
                 ).copy()
+            if self._ref_governor_enable:
+                self._filt_v = np.clip(
+                    self._filt_v,
+                    -self._ref_velocity_limits,
+                    self._ref_velocity_limits,
+                )
 
         t0 = float(times[0])
         t1 = float(times[-1])
@@ -328,15 +512,43 @@ class ProstheticSegmentKinematics:
         vf = self._filt_v.copy()
         q_hist = np.empty((n + 1, len(self._pros_coords)), dtype=float)
         v_hist = np.empty_like(q_hist)
+        a_hist = np.zeros_like(q_hist)
+        target_error_hist = np.zeros_like(q_hist)
+        velocity_limited = np.zeros_like(q_hist, dtype=bool)
+        acceleration_limited = np.zeros_like(q_hist, dtype=bool)
         q_hist[0] = qf
         v_hist[0] = vf
+        target_error_hist[0] = np.asarray(raw_spline(t_fine[0]), dtype=float) - qf
         for i in range(1, n + 1):
             q_target = np.asarray(raw_spline(t_fine[i]), dtype=float)
             af = wn * wn * (q_target - qf) - two_zeta_wn * vf
-            vf = vf + af * dt          # semi-implicit Euler (stable for wn*dt<<1)
-            qf = qf + vf * dt
+            if self._ref_governor_enable:
+                limited_af = np.clip(
+                    af,
+                    -self._ref_acceleration_limits,
+                    self._ref_acceleration_limits,
+                )
+                acceleration_limited[i] = np.abs(limited_af - af) > 1e-12
+                af = limited_af
+            previous_vf = vf.copy()
+            next_vf = previous_vf + af * dt
+            if self._ref_governor_enable:
+                limited_vf = np.clip(
+                    next_vf,
+                    -self._ref_velocity_limits,
+                    self._ref_velocity_limits,
+                )
+                velocity_limited[i] = np.abs(limited_vf - next_vf) > 1e-12
+                next_vf = limited_vf
+            vf = next_vf
+            # Trapezoidal position update keeps q and qdot mutually consistent.
+            # CubicHermiteSpline then reproduces the bounded acceleration instead
+            # of creating a 4x qddot spike from a semi-implicit position update.
+            qf = qf + 0.5 * (previous_vf + vf) * dt
             q_hist[i] = qf
             v_hist[i] = vf
+            a_hist[i] = (vf - previous_vf) / dt
+            target_error_hist[i] = q_target - qf
 
         self._segment_spline = CubicHermiteSpline(
             t_fine, q_hist, v_hist, axis=0, extrapolate=True
@@ -344,6 +556,144 @@ class ProstheticSegmentKinematics:
         self._filt_q = qf
         self._filt_v = vf
         self._last_anchor = q_hist[-1].copy()
+        self._last_governor_diagnostics = {
+            "target_error_rms_rad": np.sqrt(
+                np.mean(np.square(target_error_hist), axis=0)
+            ),
+            "velocity_limit_fraction": float(np.mean(velocity_limited)),
+            "acceleration_limit_fraction": float(np.mean(acceleration_limited)),
+            "served_velocity_abs_max_rad_s": np.max(np.abs(v_hist), axis=0),
+            "served_acceleration_abs_max_rad_s2": np.max(np.abs(a_hist), axis=0),
+            "served_jerk_abs_max_rad_s3": np.zeros(len(self._pros_coords)),
+            "jerk_limit_fraction": 0.0,
+        }
+
+    def _set_third_order_segment(
+        self,
+        times: np.ndarray,
+        values: np.ndarray,
+        derivatives: np.ndarray | None,
+        raw_spline: PchipInterpolator | CubicHermiteSpline,
+    ) -> None:
+        """Serve a C2, jerk-limited third-order reference over one policy step."""
+        if self._filt_q is None or self._filt_v is None or self._filt_a is None:
+            self._filt_q = np.asarray(raw_spline(times[0]), dtype=float).copy()
+            if derivatives is not None:
+                self._filt_v = np.asarray(derivatives[0], dtype=float).copy()
+            else:
+                self._filt_v = np.asarray(
+                    raw_spline.derivative(1)(times[0]), dtype=float
+                ).copy()
+            # There is no previously served acceleration at reset. Starting from
+            # zero avoids turning the first policy endpoint into an artificial
+            # qddot impulse; the jerk-limited model then builds acceleration
+            # continuously from the physical reset pose and velocity.
+            self._filt_a = np.zeros(len(self._pros_coords), dtype=float)
+            if self._ref_governor_enable:
+                self._filt_v = np.clip(
+                    self._filt_v, -self._ref_velocity_limits, self._ref_velocity_limits
+                )
+                self._filt_a = np.clip(
+                    self._filt_a,
+                    -self._ref_acceleration_limits,
+                    self._ref_acceleration_limits,
+                )
+
+        t0 = float(times[0])
+        t1 = float(times[-1])
+        n = max(2, int(np.ceil((t1 - t0) / self._ref_lpf_dt)))
+        t_fine = np.linspace(t0, t1, n + 1)
+        dt = (t1 - t0) / n
+        wc = self._ref_lpf_wn
+        q_command = np.asarray(values[-1], dtype=float)
+
+        qf = self._filt_q.copy()
+        vf = self._filt_v.copy()
+        af = self._filt_a.copy()
+        q_hist = np.empty((n + 1, len(self._pros_coords)), dtype=float)
+        v_hist = np.empty_like(q_hist)
+        a_hist = np.empty_like(q_hist)
+        j_hist = np.zeros_like(q_hist)
+        target_error_hist = np.empty_like(q_hist)
+        velocity_limited = np.zeros_like(q_hist, dtype=bool)
+        acceleration_limited = np.zeros_like(q_hist, dtype=bool)
+        jerk_limited = np.zeros_like(q_hist, dtype=bool)
+        q_hist[0], v_hist[0], a_hist[0] = qf, vf, af
+        target_error_hist[0] = q_command - qf
+
+        for i in range(1, n + 1):
+            raw_jerk = (
+                wc**3 * (q_command - qf)
+                - 2.0 * wc**2 * vf
+                - 2.0 * wc * af
+            )
+            if self._ref_governor_enable:
+                jerk = np.clip(raw_jerk, -self._ref_jerk_limits, self._ref_jerk_limits)
+                jerk_limited[i] = np.abs(jerk - raw_jerk) > 1e-12
+                a_low = np.maximum(
+                    -self._ref_acceleration_limits,
+                    af - self._ref_jerk_limits * dt,
+                )
+                a_high = np.minimum(
+                    self._ref_acceleration_limits,
+                    af + self._ref_jerk_limits * dt,
+                )
+                # For linearly changing acceleration, constrain the endpoint
+                # acceleration so the trapezoidal velocity update stays bounded.
+                a_high = np.minimum(
+                    a_high,
+                    2.0 * (self._ref_velocity_limits - vf) / dt - af,
+                )
+                a_low = np.maximum(
+                    a_low,
+                    2.0 * (-self._ref_velocity_limits - vf) / dt - af,
+                )
+                feasible = a_low <= a_high
+                raw_a_next = af + jerk * dt
+                a_next = np.where(
+                    feasible,
+                    np.minimum(np.maximum(raw_a_next, a_low), a_high),
+                    np.clip(
+                        raw_a_next,
+                        -self._ref_acceleration_limits,
+                        self._ref_acceleration_limits,
+                    ),
+                )
+                acceleration_limited[i] = np.abs(a_next - raw_a_next) > 1e-12
+                jerk = (a_next - af) / dt
+            else:
+                jerk = raw_jerk
+                a_next = af + jerk * dt
+
+            v_next = vf + 0.5 * (af + a_next) * dt
+            if self._ref_governor_enable:
+                limited_v = np.clip(
+                    v_next, -self._ref_velocity_limits, self._ref_velocity_limits
+                )
+                velocity_limited[i] = np.abs(limited_v - v_next) > 1e-12
+                v_next = limited_v
+            q_next = qf + vf * dt + 0.5 * af * dt**2 + jerk * dt**3 / 6.0
+
+            qf, vf, af = q_next, v_next, a_next
+            q_hist[i], v_hist[i], a_hist[i], j_hist[i] = qf, vf, af, jerk
+            target_error_hist[i] = q_command - qf
+
+        self._segment_spline = BPoly.from_derivatives(
+            t_fine,
+            [[q_hist[i], v_hist[i], a_hist[i]] for i in range(len(t_fine))],
+        )
+        self._filt_q, self._filt_v, self._filt_a = qf, vf, af
+        self._last_anchor = q_hist[-1].copy()
+        self._last_governor_diagnostics = {
+            "reference_model": self._ref_model,
+            "target_error_rms_rad": np.sqrt(np.mean(np.square(target_error_hist), axis=0)),
+            "velocity_limit_fraction": float(np.mean(velocity_limited)),
+            "acceleration_limit_fraction": float(np.mean(acceleration_limited)),
+            "jerk_limit_fraction": float(np.mean(jerk_limited)),
+            "served_velocity_abs_max_rad_s": np.max(np.abs(v_hist), axis=0),
+            "served_acceleration_abs_max_rad_s2": np.max(np.abs(a_hist), axis=0),
+            "served_jerk_abs_max_rad_s3": np.max(np.abs(j_hist), axis=0),
+        }
 
     def get(self, t: float) -> tuple[CoordDict, CoordDict, CoordDict]:
         q, qdot, qddot = self._base.get(t)
@@ -366,6 +716,232 @@ class ProstheticSegmentKinematics:
         return q, qdot, qddot
 
 
+class GaitPhaseClock:
+    """Phase clock locked to the sound-side gait cycle.
+
+    The sound (biological) leg follows the prescribed GRF/kinematics — a fixed
+    clock — so its heel strikes are deterministic and recoverable offline from
+    the prescribed vertical GRF. This builds a sawtooth gait phase ``phi`` in
+    ``[0, 1)`` that resets at each sound heel strike (optionally shifted by
+    ``phase_offset``, a cycle fraction, so the reset point can be tuned to
+    toe-off / mid-stance) and exposes ``(sin, cos)(2*pi*phi)``. It is the
+    pacemaker the policy reads to keep the free prosthetic leg coordinated
+    (anti-phase) with the sound leg. It does NOT depend on the online GRF event
+    detector (which is unreliable on the prosthetic side).
+
+    Out of the detected-strike range the phase is extrapolated with the nearest
+    cycle period, so a long episode that runs past the last detected strike keeps
+    a continuous, well-defined phase.
+    """
+
+    def __init__(self, heel_strike_times, *, phase_offset: float = 0.0) -> None:
+        hs = np.asarray(
+            sorted(float(t) for t in heel_strike_times), dtype=float
+        )
+        if hs.size:
+            hs = hs[np.isfinite(hs)]
+        if hs.size > 1:
+            # Drop non-increasing duplicates defensively.
+            keep = np.concatenate(([True], np.diff(hs) > 1e-9))
+            hs = hs[keep]
+        self._hs = hs
+        self._offset = float(phase_offset) % 1.0
+        self.available = bool(self._hs.size >= 2)
+
+    @property
+    def heel_strike_times(self) -> np.ndarray:
+        return self._hs
+
+    @property
+    def n_cycles(self) -> int:
+        return int(max(0, self._hs.size - 1))
+
+    @property
+    def mean_period(self) -> float:
+        if self._hs.size < 2:
+            return 0.0
+        return float(np.mean(np.diff(self._hs)))
+
+    def _phase_cycle_raw(self, t: float) -> float:
+        """Fraction since the bracketing heel strike. May be <0 (before the
+        first strike) or >=1 (after the last), extrapolated with the nearest
+        cycle period; ``phase`` wraps it back into ``[0, 1)``."""
+        hs = self._hs
+        t = float(t)
+        if t < hs[0]:
+            period = hs[1] - hs[0]
+            return (t - hs[0]) / period
+        if t >= hs[-1]:
+            period = hs[-1] - hs[-2]
+            return (t - hs[-1]) / period
+        k = int(np.searchsorted(hs, t, side="right")) - 1
+        period = hs[k + 1] - hs[k]
+        return (t - hs[k]) / period
+
+    def phase(self, t: float) -> float:
+        """Sound-side gait phase in ``[0, 1)`` (0 at the reset point)."""
+        if not self.available:
+            return 0.0
+        x = self._phase_cycle_raw(t) - self._offset
+        return float(x - np.floor(x))
+
+    def raw_phase(self, t: float) -> float:
+        """Heel-strike-relative phase in ``[0, 1)`` without display offset."""
+        if not self.available:
+            return 0.0
+        x = self._phase_cycle_raw(t)
+        return float(x - np.floor(x))
+
+    def local_period(self, t: float) -> float:
+        """Period of the cycle bracketing *t*, extrapolated at the edges."""
+        if not self.available:
+            return 0.0
+        hs = self._hs
+        t = float(t)
+        if t < hs[0]:
+            return float(hs[1] - hs[0])
+        if t >= hs[-1]:
+            return float(hs[-1] - hs[-2])
+        k = int(np.searchsorted(hs, t, side="right")) - 1
+        return float(hs[k + 1] - hs[k])
+
+    def phase_sin_cos(self, t: float) -> tuple[float, float]:
+        ang = 2.0 * np.pi * self.phase(t)
+        return float(np.sin(ang)), float(np.cos(ang))
+
+
+class PhaseBasedImitationTarget:
+    """Periodic sound-leg target indexed by local gait phase.
+
+    Complete sound-side cycles in the requested simulation window are resampled
+    on a common phase grid and averaged. Periodic cubic splines then provide
+    mutually consistent position and velocity targets without querying before
+    the IK domain or clamping an initial prefix.
+    """
+
+    def __init__(
+        self,
+        base_kin: KinematicsInterpolator,
+        gait_clock: GaitPhaseClock,
+        sound_coords: Mapping[str, str],
+        phase_shifts: Mapping[str, float],
+        *,
+        fallback_phase_shift: float = 0.5,
+        phase_samples: int = 200,
+        time_window: tuple[float, float] | None = None,
+    ) -> None:
+        self._base_kin = base_kin
+        self._clock = gait_clock
+        self._sound_coords = dict(sound_coords)
+        self._phase_shifts = {
+            coord: float(phase_shifts.get(coord, fallback_phase_shift)) % 1.0
+            for coord in sound_coords
+        }
+        self._splines: dict[str, CubicSpline] = {}
+        self._cycle_count = 0
+        self._period_mean = 0.0
+        self._period_min = 0.0
+        self._period_max = 0.0
+
+        n_phase = max(16, int(phase_samples))
+        if not gait_clock.available:
+            return
+        hs = gait_clock.heel_strike_times
+        t0, t1 = base_kin.time_bounds
+        cycles = [
+            (float(a), float(b))
+            for a, b in zip(hs[:-1], hs[1:])
+            if a >= t0 - 1e-9 and b <= t1 + 1e-9 and b > a
+        ]
+        if time_window is not None:
+            w0, w1 = (float(time_window[0]), float(time_window[1]))
+            local = [
+                cycle
+                for cycle in cycles
+                if cycle[1] >= w0 - 1e-9 and cycle[0] <= w1 + 1e-9
+            ]
+            if local:
+                cycles = local
+        if not cycles:
+            return
+
+        periods = np.asarray([b - a for a, b in cycles], dtype=float)
+        median_period = float(np.median(periods))
+        if median_period > 0.0:
+            keep = np.abs(periods - median_period) <= 0.25 * median_period
+            filtered = [cycle for cycle, use in zip(cycles, keep) if bool(use)]
+            if filtered:
+                cycles = filtered
+                periods = np.asarray([b - a for a, b in cycles], dtype=float)
+
+        phase = np.linspace(0.0, 1.0, n_phase, endpoint=False)
+        samples: dict[str, list[np.ndarray]] = {
+            coord: [] for coord in self._sound_coords
+        }
+        for start, end in cycles:
+            period = end - start
+            rows = {coord: np.empty(n_phase, dtype=float) for coord in samples}
+            for i, phi in enumerate(phase):
+                q, _, _ = base_kin.get(start + float(phi) * period)
+                for coord, sound_name in self._sound_coords.items():
+                    if sound_name in q:
+                        rows[coord][i] = q[sound_name]
+                    else:
+                        rows[coord][i] = np.nan
+            for coord, values in rows.items():
+                if np.all(np.isfinite(values)):
+                    samples[coord].append(values)
+
+        phase_periodic = np.append(phase, 1.0)
+        for coord, cycle_values in samples.items():
+            if not cycle_values:
+                continue
+            mean_values = np.mean(np.vstack(cycle_values), axis=0)
+            periodic_values = np.append(mean_values, mean_values[0])
+            self._splines[coord] = CubicSpline(
+                phase_periodic,
+                periodic_values,
+                bc_type="periodic",
+            )
+
+        self._cycle_count = len(cycles)
+        self._period_mean = float(np.mean(periods))
+        self._period_min = float(np.min(periods))
+        self._period_max = float(np.max(periods))
+
+    @property
+    def available(self) -> bool:
+        return bool(self._splines)
+
+    def get(self, t: float) -> tuple[CoordDict, CoordDict, dict[str, float]]:
+        """Return prosthetic target q, qdot, and target phase per coordinate."""
+        q_target: CoordDict = {}
+        qdot_target: CoordDict = {}
+        phases: dict[str, float] = {}
+        if not self.available:
+            return q_target, qdot_target, phases
+
+        raw_phase = self._clock.raw_phase(t)
+        period = max(self._clock.local_period(t), 1e-9)
+        for coord, spline in self._splines.items():
+            target_phase = (raw_phase - self._phase_shifts[coord]) % 1.0
+            q_target[coord] = float(spline(target_phase))
+            qdot_target[coord] = float(spline(target_phase, 1) / period)
+            phases[coord] = float(target_phase)
+        return q_target, qdot_target, phases
+
+    def summary(self) -> dict[str, object]:
+        return {
+            "available": bool(self.available),
+            "cycle_count": int(self._cycle_count),
+            "period_mean_s": float(self._period_mean),
+            "period_min_s": float(self._period_min),
+            "period_max_s": float(self._period_max),
+            "phase_shifts": dict(self._phase_shifts),
+            "coordinates": sorted(self._splines),
+        }
+
+
 class CMCLikeProsthesisTrajectoryEnv(Env):
     """
     RL environment that asks a policy for prosthetic trajectory segments.
@@ -375,13 +951,16 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
     A Box with shape (policy_knots, 2). Columns follow cfg.pros_coords:
     [pros_knee_angle, pros_ankle_angle].
 
-    In the default "delta" mode, each action value is in [-1, 1] and is
-    converted to:
+    In the default "absolute" mode, each action value is in [-1, 1] and is
+    mapped to an ABSOLUTE prosthetic angle (a generated trajectory, not a
+    deviation from the prescribed IK), per coordinate, over
+    cfg.absolute_bounds_rad:
 
-        q_policy(t_k) = q_kin_ref(t_k) + action[k, j] * max_delta_rad[j]
+        q_policy(t_k) = low_j + 0.5 * (action[k, j] + 1) * (high_j - low_j)
 
-    The environment prepends a continuity anchor at the current prosthetic
-    target and interpolates the full knot set with PCHIP.
+    ("delta" mode — q_kin_ref + action * max_delta_rad — and "raw" mode remain
+    available for diagnostics.) The environment prepends a continuity anchor at
+    the current prosthetic target and interpolates the full knot set with PCHIP.
 
     Observation
     -----------
@@ -421,14 +1000,22 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self.t = 0.0
         self._step_index = 0
         self._last_u_sea: Dict[str, float] = {}
+        self._last_u_rate_loss = 0.0
         self._last_policy_endpoint = np.zeros(2, dtype=float)
         self._last_policy_knots = np.zeros((self.env_cfg.policy_knots, 2))
+        self._last_command_rate_terms: dict[str, float] = {}
+        self._last_sea_segment_diagnostics: dict = {}
         self._observation_feature_names: tuple[str, ...] | None = None
+        self._actor_feature_names: tuple[str, ...] | None = None
+        self._privileged_feature_names: tuple[str, ...] | None = None
+        self._n_actor: int = 0
         self._last_info: dict = {}
         self._body_weight_n = 1.0
         self._online_grf: dict = {}
         self._online_events: list[dict] = []
         self._online_gait_sides: dict[str, dict[str, float | None]] = {}
+        self._gait_clock: GaitPhaseClock | None = None
+        self._imitation_target: PhaseBasedImitationTarget | None = None
         self._closed = False
 
         self._delta_scale = self._resolve_delta_scale()
@@ -446,9 +1033,38 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
     @property
     def observation_feature_names(self) -> tuple[str, ...]:
+        """Full ordered feature names (actor prefix followed by privileged suffix)."""
         if self._observation_feature_names is None:
             raise RuntimeError("Observation schema has not been initialised yet.")
         return self._observation_feature_names
+
+    @property
+    def actor_feature_names(self) -> tuple[str, ...]:
+        """Realistic feature names making up the actor prefix obs[:n_actor]."""
+        if self._actor_feature_names is None:
+            raise RuntimeError("Observation schema has not been initialised yet.")
+        return self._actor_feature_names
+
+    @property
+    def privileged_feature_names(self) -> tuple[str, ...]:
+        """Privileged (critic-only) feature names, i.e. obs[n_actor:n_obs]."""
+        if self._privileged_feature_names is None:
+            raise RuntimeError("Observation schema has not been initialised yet.")
+        return self._privileged_feature_names
+
+    @property
+    def n_actor(self) -> int:
+        """Length of the realistic actor prefix in the full observation vector."""
+        if self._observation_feature_names is None:
+            raise RuntimeError("Observation schema has not been initialised yet.")
+        return self._n_actor
+
+    @property
+    def n_obs(self) -> int:
+        """Length of the full (actor + privileged) observation vector."""
+        if self._observation_feature_names is None:
+            raise RuntimeError("Observation schema has not been initialised yet.")
+        return len(self._observation_feature_names)
 
     def reset(self, seed=None, options=None):
         try:
@@ -469,6 +1085,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "time": self.t,
             "observation": obs_dict,
             "observation_feature_names": self.observation_feature_names,
+            "reset_diagnostics": self._reset_diagnostics_payload(),
             "grf_mode": self.cfg.grf_mode,
             "prescribed_grf_disabled_sides": list(
                 getattr(self.cfg, "prescribed_grf_disabled_sides", [])
@@ -476,6 +1093,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "online_grf_applied_sides": list(
                 getattr(self.cfg, "online_grf_applied_sides", [])
             ),
+            "gait_clock": self._gait_clock_summary(),
+            "imitation_target": self._imitation_target_summary(),
         }
         info.update(self._online_info_payload())
         return obs, info
@@ -489,20 +1108,42 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             self._action_to_segment(action_arr, target_t)
         )
         self.kin.set_segment(segment_times, segment_values, segment_derivatives)
+        self._last_command_rate_terms = self._command_rate_terms(
+            segment_times,
+            segment_values,
+            segment_derivatives,
+        )
         self._last_policy_endpoint = segment_values[-1].copy()
 
         failure: Exception | None = None
         failure_traceback = ""
+        wall_timeout = False
         step_info: dict = {}
 
         try:
             step_info = self.runner.step_until(
                 target_t,
                 record=self.env_cfg.record_outputs,
+                wall_timeout_s=self.env_cfg.step_wall_timeout_s,
             )
             self.t = self.runner.current_time
-            self._last_u_sea = dict(step_info.get("u_sea", {}))
+            next_u_sea = dict(step_info.get("u_sea", {}))
+            self._last_u_rate_loss = self._u_rate_loss(
+                self._last_u_sea,
+                next_u_sea,
+            )
+            self._last_u_sea = next_u_sea
+            self._last_sea_segment_diagnostics = dict(
+                step_info.get("sea_segment_diagnostics", {})
+            )
             self._step_index += 1
+        except SegmentWallClockTimeout as exc:
+            # Deliberate guard: a degenerate, pathologically slow segment. Always
+            # truncate gracefully (even with fail_fast) so a single slow worker
+            # cannot gate synchronous RL sampling.
+            wall_timeout = True
+            failure = exc
+            failure_traceback = traceback.format_exc()
         except Exception as exc:  # Native OpenSim faults cannot always be caught.
             if self.env_cfg.fail_fast:
                 raise
@@ -523,6 +1164,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             terminated = True
             truncated = False
             end_reason = unsafe_reason
+        elif wall_timeout:
+            terminated = False
+            truncated = True
+            end_reason = "step_wall_timeout"
         elif failure is not None:
             terminated = False
             truncated = True
@@ -577,6 +1222,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "policy_segment_times": segment_times.copy(),
             "policy_segment_values": segment_values.copy(),
             "policy_segment_derivatives": segment_derivatives.copy(),
+            "reference_governor_diagnostics": (
+                self.kin.reference_governor_diagnostics
+            ),
+            "imitation_target": self._imitation_target_payload(),
+            "sea_segment_diagnostics": copy.deepcopy(
+                self._last_sea_segment_diagnostics
+            ),
             "end_reason": end_reason,
             "grf_mode": self.cfg.grf_mode,
             "prescribed_grf_disabled_sides": list(
@@ -648,11 +1300,35 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             self.base_kin,
             cfg.pros_coords,
             ref_lpf_enable=self.env_cfg.enable_pros_ref_lpf,
+            ref_model=self.env_cfg.pros_ref_model,
             ref_lpf_cutoff_hz=ref_cutoff,
             ref_lpf_zeta=self.env_cfg.pros_ref_lpf_zeta,
+            ref_governor_enable=self.env_cfg.enable_pros_ref_governor,
+            ref_velocity_limits=[
+                self.env_cfg.pros_ref_velocity_limit_rad_s[name]
+                for name in cfg.pros_coords
+            ],
+            ref_acceleration_limits=[
+                self.env_cfg.pros_ref_acceleration_limit_rad_s2[name]
+                for name in cfg.pros_coords
+            ],
+            ref_jerk_limits=[
+                self.env_cfg.pros_ref_jerk_limit_rad_s3[name]
+                for name in cfg.pros_coords
+            ],
             control_dt=float(getattr(cfg, "dt", 0.001)),
         )
         self.runner = SimulationRunner(cfg, self.ctx, self.kin)
+        self._gait_clock = self._build_gait_clock()
+        self._imitation_target = PhaseBasedImitationTarget(
+            self.base_kin,
+            self._gait_clock,
+            self.env_cfg.imitation_sound_coords,
+            self.env_cfg.imitation_phase_shifts,
+            fallback_phase_shift=float(self.env_cfg.imitation_phase_shift),
+            phase_samples=int(self.env_cfg.imitation_phase_samples),
+            time_window=(float(cfg.t_start), float(cfg.t_end)),
+        )
 
     @staticmethod
     def _validate_runtime_path(cfg: SimulatorConfig) -> None:
@@ -730,6 +1406,165 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             if hasattr(cfg, name):
                 setattr(cfg, name, False)
 
+    def _build_gait_clock(self) -> GaitPhaseClock:
+        """Build the sound-side gait-phase clock from the prescribed GRF.
+
+        Disabled or missing data -> an unavailable clock whose phase is a
+        constant 0.0 (harmless extra observation features), so the env still runs
+        in pure-online GRF setups without a prescribed sound-side force.
+        """
+        if not self.env_cfg.gait_clock_enable:
+            return GaitPhaseClock([])
+        side = str(self.env_cfg.gait_clock_side).strip().lower()
+        hs = self._load_sound_heel_strikes(side)
+        return GaitPhaseClock(
+            hs, phase_offset=float(self.env_cfg.gait_clock_phase_offset)
+        )
+
+    def _load_sound_heel_strikes(self, side: str) -> list[float]:
+        """Sound-side heel-strike times [s] from the prescribed vertical GRF.
+
+        Reuses the exact threshold-crossing detection the simulator uses for its
+        own gait-event export (``output._cycles_from_vertical_grf``), so the RL
+        clock and the simulator agree on what a heel strike is. Detection spans
+        the full GRF file (not just the setup window) so random-init / long
+        episodes anywhere in the dataset get a valid phase.
+        """
+        ctx = self.ctx
+        cfg = self.cfg
+        grf_file = getattr(ctx, "grf_data_file", "")
+        grf_columns = getattr(ctx, "grf_vertical_force_columns", {})
+        source_col = (
+            grf_columns.get(side) if isinstance(grf_columns, Mapping) else None
+        )
+        if not (grf_file and os.path.isfile(grf_file) and source_col):
+            return []
+        # Lazy import to avoid any import-order coupling with the simulator I/O.
+        from output import _cycles_from_vertical_grf, _read_storage_table
+
+        time, col_names, data = _read_storage_table(grf_file)
+        col_idx = {name: i for i, name in enumerate(col_names)}
+        idx = col_idx.get(source_col)
+        if idx is None or time.size < 2:
+            return []
+        cycles = _cycles_from_vertical_grf(
+            time,
+            data[:, idx],
+            float(cfg.grf_contact_threshold_n),
+            float(time[0]),
+            float(time[-1]),
+            float(getattr(cfg, "grf_min_contact_duration_s", 0.0)),
+            float(getattr(cfg, "grf_min_cycle_duration_s", 0.0)),
+        )
+        if not cycles:
+            return []
+        # cycles[i] = (heel_strike_i, heel_strike_{i+1}, contact_duration_i);
+        # the heel-strike edges are the cycle boundaries.
+        return [float(cycles[0][0])] + [float(c[1]) for c in cycles]
+
+    def _gait_clock_summary(self) -> dict:
+        clock = self._gait_clock
+        if clock is None:
+            return {"available": False, "n_cycles": 0, "mean_period_s": 0.0}
+        return {
+            "available": bool(clock.available),
+            "n_cycles": int(clock.n_cycles),
+            "mean_period_s": float(clock.mean_period),
+            "side": str(self.env_cfg.gait_clock_side),
+            "phase_offset": float(self.env_cfg.gait_clock_phase_offset),
+            "phase": float(clock.phase(self.t)),
+        }
+
+    def _imitation_target_summary(self) -> dict:
+        target = self._imitation_target
+        if target is None:
+            return {"available": False}
+        return target.summary()
+
+    def imitation_target(
+        self,
+        t: float,
+    ) -> tuple[CoordDict, CoordDict, dict[str, float]]:
+        """Return the periodic phase-based imitation target at time *t*."""
+        target = self._imitation_target
+        if target is not None and target.available:
+            return target.get(t)
+
+        q_sound, qd_sound, _ = self.base_kin.get(t)
+        q_target: CoordDict = {}
+        qdot_target: CoordDict = {}
+        for coord_name, sound_name in self.env_cfg.imitation_sound_coords.items():
+            if sound_name in q_sound:
+                q_target[coord_name] = float(q_sound[sound_name])
+                qdot_target[coord_name] = float(qd_sound[sound_name])
+        return q_target, qdot_target, {}
+
+    def _imitation_target_payload(self) -> dict:
+        q_target, qdot_target, phases = self.imitation_target(self.t)
+        return {
+            "q": q_target,
+            "qdot": qdot_target,
+            "phase": phases,
+        }
+
+    def _reset_diagnostics_payload(self) -> dict:
+        """Return aligned target, prescribed, served, physical, and SEA reset state."""
+        ctx = self.ctx
+        if ctx is None:
+            return {}
+
+        sv = ctx.model.getStateVariableValues(self.runner.state)
+        q_target, qdot_target, target_phases = self.imitation_target(self.t)
+        q_base, qdot_base, _ = self.base_kin.get(self.t)
+        q_ref, qdot_ref, qddot_ref = self.kin.get(self.t)
+
+        joints: dict[str, dict[str, float]] = {}
+        for coord_name in self.cfg.pros_coords:
+            q_actual = float(sv.get(ctx.q_sv_idx[coord_name]))
+            qdot_actual = float(sv.get(ctx.qdot_sv_idx[coord_name]))
+            joints[coord_name] = {
+                "target_q": float(q_target.get(coord_name, q_actual)),
+                "target_qdot": float(qdot_target.get(coord_name, qdot_actual)),
+                "target_phase": float(target_phases.get(coord_name, 0.0)),
+                "prescribed_q": float(q_base.get(coord_name, q_actual)),
+                "prescribed_qdot": float(qdot_base.get(coord_name, qdot_actual)),
+                "served_q": float(q_ref.get(coord_name, q_actual)),
+                "served_qdot": float(qdot_ref.get(coord_name, qdot_actual)),
+                "served_qddot": float(qddot_ref.get(coord_name, 0.0)),
+                "actual_q": q_actual,
+                "actual_qdot": qdot_actual,
+            }
+
+        sea: dict[str, dict[str, float]] = {}
+        for sea_name in (self.cfg.sea_knee_name, self.cfg.sea_ankle_name):
+            values: dict[str, float] = {}
+            ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
+            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+            if ma_idx is not None:
+                values["motor_angle"] = float(sv.get(ma_idx))
+            if ms_idx is not None:
+                values["motor_speed"] = float(sv.get(ms_idx))
+            sea[sea_name] = values
+
+        gait_clock = self._gait_clock
+        return {
+            "time": float(self.t),
+            "episode_start_offset_s": float(self.env_cfg.episode_start_offset_s),
+            "imitation_initialize_to_target": bool(
+                self.env_cfg.imitation_initialize_to_target
+            ),
+            "gait_phase": (
+                float(gait_clock.phase(self.t)) if gait_clock is not None else 0.0
+            ),
+            "gait_raw_phase": (
+                float(gait_clock.raw_phase(self.t))
+                if gait_clock is not None
+                else 0.0
+            ),
+            "joints": joints,
+            "sea": sea,
+        }
+
     def _initialise_episode(self) -> None:
         cfg = self.cfg
         ctx = self.ctx
@@ -744,7 +1579,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         if self.env_cfg.random_init and max_start > cfg.t_start:
             self._episode_start = float(self._rng.uniform(cfg.t_start, max_start))
         else:
-            self._episode_start = float(cfg.t_start)
+            requested_start = float(cfg.t_start) + max(
+                0.0, float(self.env_cfg.episode_start_offset_s)
+            )
+            self._episode_start = min(requested_start, float(max_start))
 
         if self.env_cfg.episode_duration is None:
             self._episode_end = float(cfg.t_end)
@@ -757,18 +1595,46 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self.t = self._episode_start
         self._step_index = 0
         self.kin.clear_segment()
+        if self.env_cfg.imitation_initialize_to_target:
+            t_next = min(self.t + float(cfg.dt), self._episode_end)
+            if t_next > self.t:
+                q0, qd0, _ = self.imitation_target(self.t)
+                q1, qd1, _ = self.imitation_target(t_next)
+                if all(name in q0 and name in q1 for name in cfg.pros_coords):
+                    values = np.asarray(
+                        [
+                            [q0[name] for name in cfg.pros_coords],
+                            [q1[name] for name in cfg.pros_coords],
+                        ],
+                        dtype=float,
+                    )
+                    derivatives = np.asarray(
+                        [
+                            [qd0[name] for name in cfg.pros_coords],
+                            [qd1[name] for name in cfg.pros_coords],
+                        ],
+                        dtype=float,
+                    )
+                    self.kin.set_segment(
+                        np.asarray([self.t, t_next], dtype=float),
+                        values,
+                        derivatives,
+                    )
 
         self.runner.reset_to_time(self.t)
         if self.env_cfg.record_outputs:
             self.runner.reset_outputs()
 
-        q_ref, _, _ = self.base_kin.get(self.t)
+        q_ref, _, _ = self.kin.get(self.t)
         self._last_policy_endpoint = np.array(
             [q_ref[name] for name in cfg.pros_coords],
             dtype=float,
         )
         self._last_policy_knots[:] = 0.0
         self._last_u_sea = {}
+        self._last_u_rate_loss = 0.0
+        self._last_command_rate_terms = {}
+        self._last_sea_segment_diagnostics = {}
         self._last_info = {}
         self._reset_online_gait_state()
 
@@ -852,6 +1718,159 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         segment_derivatives[0, :] = anchor_derivative
         return times, segment_values, segment_derivatives
 
+    def _coord_scales(self, values: Mapping[str, float], fallback: float) -> np.ndarray:
+        return np.asarray(
+            [
+                max(1e-9, float(values.get(coord_name, fallback)))
+                for coord_name in self.cfg.pros_coords
+            ],
+            dtype=float,
+        )
+
+    @staticmethod
+    def _bounded_normalized_square(values: np.ndarray, scales: np.ndarray) -> float:
+        normalized = np.asarray(values, dtype=float) / np.asarray(scales, dtype=float)
+        return float(np.mean(np.clip(np.square(normalized), 0.0, 25.0)))
+
+    def _command_rate_terms(
+        self,
+        times: np.ndarray,
+        values: np.ndarray,
+        derivatives: np.ndarray,
+    ) -> dict[str, float]:
+        delta_scales = self._coord_scales(
+            self.env_cfg.command_delta_scale_rad,
+            0.05,
+        )
+        velocity_scales = self._coord_scales(
+            self.env_cfg.command_velocity_scale_rad_s,
+            5.0,
+        )
+        acceleration_scales = self._coord_scales(
+            self.env_cfg.command_acceleration_scale_rad_s2,
+            200.0,
+        )
+        jerk_scales = self._coord_scales(
+            self.env_cfg.command_jerk_scale_rad_s3,
+            3000.0,
+        )
+        segment_delta_loss = self._bounded_normalized_square(
+            np.diff(values, axis=0),
+            delta_scales,
+        )
+        served_derivatives = np.empty_like(derivatives)
+        served_accelerations = np.empty_like(derivatives)
+        for i, time_value in enumerate(times):
+            _, qdot_ref, qddot_ref = self.kin.get(float(time_value))
+            served_derivatives[i, :] = [
+                qdot_ref[name] for name in self.cfg.pros_coords
+            ]
+            served_accelerations[i, :] = [
+                qddot_ref[name] for name in self.cfg.pros_coords
+            ]
+        qdot_ref_loss = self._bounded_normalized_square(
+            served_derivatives,
+            velocity_scales,
+        )
+        qddot_ref_loss = self._bounded_normalized_square(
+            served_accelerations,
+            acceleration_scales,
+        )
+        terms = {
+            "segment_delta_loss": float(segment_delta_loss),
+            "qdot_ref_loss": float(qdot_ref_loss),
+            "qddot_ref_loss": float(qddot_ref_loss),
+        }
+        governor = self.kin.reference_governor_diagnostics
+        target_error_rms = np.asarray(
+            governor.get(
+                "target_error_rms_rad",
+                np.zeros(len(self.cfg.pros_coords)),
+            ),
+            dtype=float,
+        )
+        velocity_limit_fraction = float(
+            governor.get("velocity_limit_fraction", 0.0)
+        )
+        acceleration_limit_fraction = float(
+            governor.get("acceleration_limit_fraction", 0.0)
+        )
+        jerk_limit_fraction = float(governor.get("jerk_limit_fraction", 0.0))
+        served_jerk_max = np.asarray(
+            governor.get(
+                "served_jerk_abs_max_rad_s3",
+                np.zeros(len(self.cfg.pros_coords)),
+            ),
+            dtype=float,
+        )
+        jerk_ref_loss = self._bounded_normalized_square(
+            served_jerk_max,
+            jerk_scales,
+        )
+        terms["jerk_ref_loss"] = float(jerk_ref_loss)
+        # Penalize only actual hard-limit intervention. The target-error RMS is
+        # logged diagnostically but includes the intended phase lag of the 6 Hz
+        # reference model and therefore is not itself an incompatibility.
+        terms["reference_governor_loss"] = float(
+            (
+                velocity_limit_fraction
+                + acceleration_limit_fraction
+                + jerk_limit_fraction
+            )
+            / 3.0
+        )
+        terms["reference_velocity_limit_fraction"] = velocity_limit_fraction
+        terms["reference_acceleration_limit_fraction"] = (
+            acceleration_limit_fraction
+        )
+        terms["reference_jerk_limit_fraction"] = jerk_limit_fraction
+        served_velocity_max = np.asarray(
+            governor.get(
+                "served_velocity_abs_max_rad_s",
+                np.zeros(len(self.cfg.pros_coords)),
+            ),
+            dtype=float,
+        )
+        served_acceleration_max = np.asarray(
+            governor.get(
+                "served_acceleration_abs_max_rad_s2",
+                np.zeros(len(self.cfg.pros_coords)),
+            ),
+            dtype=float,
+        )
+        for i, coord_name in enumerate(self.cfg.pros_coords):
+            terms[f"{coord_name}_reference_target_error_rms_rad"] = float(
+                target_error_rms[i]
+            )
+            terms[f"{coord_name}_reference_velocity_abs_max_rad_s"] = float(
+                served_velocity_max[i]
+            )
+            terms[f"{coord_name}_reference_acceleration_abs_max_rad_s2"] = float(
+                served_acceleration_max[i]
+            )
+            terms[f"{coord_name}_reference_jerk_abs_max_rad_s3"] = float(
+                served_jerk_max[i]
+            )
+        return terms
+
+    def _u_rate_loss(
+        self,
+        previous: Mapping[str, float],
+        current: Mapping[str, float],
+    ) -> float:
+        if not previous:
+            return 0.0
+        scale = max(1e-9, float(self.env_cfg.sea_u_rate_scale))
+        delta = np.asarray(
+            [
+                float(current.get(coord_name, 0.0))
+                - float(previous.get(coord_name, 0.0))
+                for coord_name in self.cfg.pros_coords
+            ],
+            dtype=float,
+        )
+        return float(np.mean(np.clip(np.square(delta / scale), 0.0, 25.0)))
+
     # ------------------------------------------------------------------
     # Observation, reward, termination
     # ------------------------------------------------------------------
@@ -863,7 +1882,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         model = ctx.model
         state = self.runner.state
         sv = model.getStateVariableValues(state)
-        q_ref, qdot_ref, _ = self.kin.get(self.t)
+        q_ref, qdot_ref, qddot_ref = self.kin.get(self.t)
         q_base, _, _ = self.base_kin.get(self.t)
 
         def q(name: str) -> float:
@@ -872,76 +1891,160 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         def qd(name: str) -> float:
             return float(sv.get(ctx.qdot_sv_idx[name]))
 
-        obs: dict[str, float] = {}
-        duration = max(self._episode_end - self._episode_start, self.cfg.dt)
-        phase = (self.t - self._episode_start) / duration
-        obs["phase"] = phase
-        obs["phase_sin"] = float(np.sin(2.0 * np.pi * phase))
-        obs["phase_cos"] = float(np.cos(2.0 * np.pi * phase))
+        # The observation is split into a REALISTIC "actor" prefix (only signals a
+        # real instrumented prosthesis could sense) and a PRIVILEGED "critic-only"
+        # suffix (full physical state + IK reference). The actor dict is built first
+        # so its features always occupy the prefix obs[:n_actor]; an asymmetric
+        # critic reads the full vector while the policy reads only the prefix. See
+        # the 2026-06-10 observation-space report.
+        actor: dict[str, float] = {}
+        priv: dict[str, float] = {}
 
+        # --- ACTOR (realistic) ---------------------------------------------
+        if not self.env_cfg.actor_cyclic_phase_only:
+            duration = max(self._episode_end - self._episode_start, self.cfg.dt)
+            phase = (self.t - self._episode_start) / duration
+            actor["phase"] = phase
+            actor["phase_sin"] = float(np.sin(2.0 * np.pi * phase))
+            actor["phase_cos"] = float(np.cos(2.0 * np.pi * phase))
+
+        # Sound-side gait-cycle clock (the pacemaker): deterministic phase from the
+        # prescribed sound-leg heel strikes, exposed as (sin, cos) to avoid the
+        # 1->0 wrap discontinuity. Constant 0 when unavailable. NOTE: this is the
+        # ONE known privileged input kept in the actor on an INTERIM basis -- it
+        # reads the contralateral (sound) leg. To be migrated to ipsilateral-load /
+        # IMU entrainment once the online GRF detector is validated; do not treat it
+        # as a fully realistic signal.
+        gait_phase = (
+            self._gait_clock.phase(self.t)
+            if self._gait_clock is not None
+            else 0.0
+        )
+        gait_angle = 2.0 * np.pi * gait_phase
+        if not self.env_cfg.actor_cyclic_phase_only:
+            actor["gait_phase"] = float(gait_phase)
+        actor["gait_phase_sin"] = float(np.sin(gait_angle))
+        actor["gait_phase_cos"] = float(np.cos(gait_angle))
+
+        # Prosthetic joints: measured angle + velocity (joint/motor encoder).
         for coord_name in self.cfg.pros_coords:
-            obs[coord_name] = q(coord_name)
-            obs[f"{coord_name}_vel"] = qd(coord_name)
-            obs[f"{coord_name}_target"] = q_ref[coord_name]
-            obs[f"{coord_name}_target_vel"] = qdot_ref[coord_name]
-            obs[f"{coord_name}_tracking_error"] = (
-                q_ref[coord_name] - obs[coord_name]
-            )
+            actor[coord_name] = q(coord_name)
+            actor[f"{coord_name}_vel"] = qd(coord_name)
 
+        # SEA motor internal states (motor encoder).
         for sea_name in (self.cfg.sea_knee_name, self.cfg.sea_ankle_name):
             ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
             ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
             if ma_idx is not None:
-                obs[f"{sea_name}_motor_angle"] = float(sv.get(ma_idx))
+                actor[f"{sea_name}_motor_angle"] = float(sv.get(ma_idx))
             if ms_idx is not None:
-                obs[f"{sea_name}_motor_speed"] = float(sv.get(ms_idx))
+                actor[f"{sea_name}_motor_speed"] = float(sv.get(ms_idx))
 
-        for coord_name in self._bio_context_coords():
-            if coord_name in ctx.q_sv_idx:
-                obs[coord_name] = q(coord_name)
-                obs[f"{coord_name}_vel"] = qd(coord_name)
-                obs[f"{coord_name}_kin_ref"] = q_base.get(coord_name, 0.0)
+        # Prosthetic-foot load (instrumented foot). The prosthesis is on the LEFT
+        # side, so only ``online_left_*`` is sensable on-device; ``online_right_*``
+        # (sound foot) is privileged and lives in the critic suffix below.
+        gait = None
+        if self.env_cfg.include_online_grf_observation:
+            gait = self._online_gait_info()
+            left_info = gait["sides"]["left"]
+            actor["online_left_normal_grf_bw"] = float(
+                left_info["normal_force_bw"]
+            )
+            actor["online_left_in_contact"] = float(left_info["in_contact"])
+            actor["online_left_heel_strike"] = float(left_info["heel_strike"])
+            actor["online_left_toe_off"] = float(left_info["toe_off"])
+            left_phase = float(left_info["gait_phase"])
+            if self.env_cfg.actor_cyclic_phase_only:
+                left_phase_angle = 2.0 * np.pi * left_phase
+                actor["online_left_gait_phase_sin"] = float(np.sin(left_phase_angle))
+                actor["online_left_gait_phase_cos"] = float(np.cos(left_phase_angle))
+            else:
+                actor["online_left_gait_phase"] = left_phase
+            actor["online_left_cycle_duration_s"] = float(
+                left_info["cycle_duration_s"]
+            )
 
+        # Command memory (controller's own last command / internal state).
         for i, coord_name in enumerate(self.cfg.pros_coords):
-            obs[f"{coord_name}_previous_endpoint"] = self._last_policy_endpoint[i]
+            actor[f"{coord_name}_previous_endpoint"] = self._last_policy_endpoint[i]
+            if self.env_cfg.include_reference_state_observation:
+                actor[f"{coord_name}_served_ref"] = float(q_ref[coord_name])
+                actor[f"{coord_name}_served_ref_vel"] = float(qdot_ref[coord_name])
+                actor[f"{coord_name}_served_ref_accel"] = float(qddot_ref[coord_name])
             sea_u = float(self._last_u_sea.get(coord_name, 0.0))
             sea_u_abs = abs(sea_u)
-            obs[f"{coord_name}_sea_u"] = sea_u
-            obs[f"{coord_name}_sea_u_abs"] = sea_u_abs
-            obs[f"{coord_name}_sea_u_saturated"] = float(
+            actor[f"{coord_name}_sea_u"] = sea_u
+            actor[f"{coord_name}_sea_u_abs"] = sea_u_abs
+            actor[f"{coord_name}_sea_u_saturated"] = float(
                 sea_u_abs >= self.env_cfg.sea_u_saturation_threshold
             )
 
-        if self.env_cfg.include_online_grf_observation:
-            gait = self._online_gait_info()
-            for side in ("left", "right"):
-                side_info = gait["sides"][side]
-                prefix = f"online_{side}"
-                obs[f"{prefix}_normal_grf_bw"] = float(
-                    side_info["normal_force_bw"]
-                )
-                obs[f"{prefix}_in_contact"] = float(side_info["in_contact"])
-                obs[f"{prefix}_heel_strike"] = float(side_info["heel_strike"])
-                obs[f"{prefix}_toe_off"] = float(side_info["toe_off"])
-                obs[f"{prefix}_gait_phase"] = float(side_info["gait_phase"])
-                obs[f"{prefix}_cycle_duration_s"] = float(
-                    side_info["cycle_duration_s"]
-                )
-
-        names = tuple(obs.keys())
-        if self._observation_feature_names is None:
-            self._observation_feature_names = names
-        elif names != self._observation_feature_names:
-            raise RuntimeError(
-                "Observation schema changed during the episode: "
-                f"{names} != {self._observation_feature_names}"
+        # --- PRIVILEGED (critic-only) --------------------------------------
+        # IK reference for the prosthetic joints. Privileged AND anti-ex-novo, so
+        # out of the actor. Whether it ALSO leaves the critic is deferred to the
+        # reward/policy redesign; for now it stays in the privileged bucket. (Moving
+        # this triplet back to the actor later is just relocating these three lines.)
+        for coord_name in self.cfg.pros_coords:
+            priv[f"{coord_name}_target"] = q_ref[coord_name]
+            priv[f"{coord_name}_target_vel"] = qdot_ref[coord_name]
+            priv[f"{coord_name}_tracking_error"] = (
+                q_ref[coord_name] - actor[coord_name]
             )
 
-        arr = np.asarray(
-            [obs[name] for name in self._observation_feature_names],
+        # Biological context: full pelvis 6-DOF + contralateral joints, not sensable
+        # from the prosthesis alone.
+        for coord_name in self._bio_context_coords():
+            if coord_name in ctx.q_sv_idx:
+                priv[coord_name] = q(coord_name)
+                priv[f"{coord_name}_vel"] = qd(coord_name)
+                priv[f"{coord_name}_kin_ref"] = q_base.get(coord_name, 0.0)
+
+        # Sound-side foot load.
+        if self.env_cfg.include_online_grf_observation and gait is not None:
+            right_info = gait["sides"]["right"]
+            priv["online_right_normal_grf_bw"] = float(
+                right_info["normal_force_bw"]
+            )
+            priv["online_right_in_contact"] = float(right_info["in_contact"])
+            priv["online_right_heel_strike"] = float(right_info["heel_strike"])
+            priv["online_right_toe_off"] = float(right_info["toe_off"])
+            priv["online_right_gait_phase"] = float(right_info["gait_phase"])
+            priv["online_right_cycle_duration_s"] = float(
+                right_info["cycle_duration_s"]
+            )
+
+        full_obs = {**actor, **priv}
+        actor_names = tuple(actor.keys())
+        full_names = tuple(full_obs.keys())
+        if self._observation_feature_names is None:
+            self._actor_feature_names = actor_names
+            self._privileged_feature_names = tuple(priv.keys())
+            self._observation_feature_names = full_names
+            self._n_actor = len(actor_names)
+        else:
+            if full_names != self._observation_feature_names:
+                raise RuntimeError(
+                    "Observation schema changed during the episode: "
+                    f"{full_names} != {self._observation_feature_names}"
+                )
+            if actor_names != self._actor_feature_names:
+                raise RuntimeError(
+                    "Actor observation schema changed during the episode: "
+                    f"{actor_names} != {self._actor_feature_names}"
+                )
+
+        full_arr = np.asarray(
+            [full_obs[name] for name in self._observation_feature_names],
             dtype=np.float32,
         )
-        return arr, obs
+        # Symmetric (realistic) mode returns only the actor prefix; asymmetric mode
+        # returns the full superset. The DICT is always the full ordered obs, so
+        # info["observation"] stays complete for diagnostics/termination either way.
+        if self.env_cfg.critic_privileged_observation:
+            arr = full_arr
+        else:
+            arr = full_arr[: self._n_actor]
+        return arr, full_obs
 
     def _reset_online_gait_state(self) -> None:
         self._online_grf = {}
@@ -1051,6 +2154,77 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         pros = set(self.cfg.pros_coords)
         return [name for name in preferred if name not in pros]
 
+    def _sea_reward_terms(self) -> dict[str, float]:
+        """Normalize segment-level physical SEA diagnostics into reward losses."""
+        diagnostics = self._last_sea_segment_diagnostics
+        joints = diagnostics.get("joints") if isinstance(diagnostics, Mapping) else None
+        if not isinstance(joints, Mapping):
+            return {
+                "sea_saturation_loss": 0.0,
+                "sea_torque_error_loss": 0.0,
+                "sea_motor_speed_loss": 0.0,
+                "sea_motor_accel_loss": 0.0,
+                "sea_motor_power_loss": 0.0,
+                "sea_tau_input_saturation_fraction": 0.0,
+            }
+
+        soft = float(self.env_cfg.sea_tau_input_soft_limit_nm)
+        clamp = max(soft + 1e-9, float(self.env_cfg.sea_tau_input_clamp_nm))
+        speed_scale = max(1e-9, float(self.env_cfg.sea_motor_speed_scale_rad_s))
+        accel_scale = max(1e-9, float(self.env_cfg.sea_motor_accel_scale_rad_s2))
+        power_scale = max(1e-9, float(self.env_cfg.sea_motor_power_scale_w))
+        losses = {
+            "sea_saturation_loss": [],
+            "sea_torque_error_loss": [],
+            "sea_motor_speed_loss": [],
+            "sea_motor_accel_loss": [],
+            "sea_motor_power_loss": [],
+            "sea_tau_input_saturation_fraction": [],
+        }
+        terms: dict[str, float] = {}
+        for sea_name, coord_name in zip(
+            (self.cfg.sea_knee_name, self.cfg.sea_ankle_name),
+            self.cfg.pros_coords,
+        ):
+            values = joints.get(coord_name)
+            if not isinstance(values, Mapping):
+                continue
+            raw_rms = float(values.get("tau_input_raw_rms_nm", 0.0))
+            sat_fraction = float(values.get("tau_input_saturation_fraction", 0.0))
+            torque_error_rms = float(values.get("torque_error_rms_nm", 0.0))
+            motor_speed_rms = float(values.get("motor_speed_rms_rad_s", 0.0))
+            motor_accel_rms = float(values.get("motor_accel_rms_rad_s2", 0.0))
+            motor_power_rms = float(values.get("motor_power_rms_w", 0.0))
+            proximity = max(0.0, raw_rms - soft) / (clamp - soft)
+            f_opt = max(1e-9, float(self.ctx.sea_f_opt.get(sea_name, 1.0)))
+
+            losses["sea_saturation_loss"].append(
+                min(25.0, proximity * proximity + sat_fraction)
+            )
+            losses["sea_torque_error_loss"].append(
+                min(25.0, (torque_error_rms / f_opt) ** 2)
+            )
+            losses["sea_motor_speed_loss"].append(
+                min(25.0, (motor_speed_rms / speed_scale) ** 2)
+            )
+            losses["sea_motor_accel_loss"].append(
+                min(25.0, (motor_accel_rms / accel_scale) ** 2)
+            )
+            losses["sea_motor_power_loss"].append(
+                min(25.0, (motor_power_rms / power_scale) ** 2)
+            )
+            losses["sea_tau_input_saturation_fraction"].append(sat_fraction)
+            prefix = f"{coord_name}_sea"
+            for key, value in values.items():
+                try:
+                    terms[f"{prefix}_{key}"] = float(value)
+                except (TypeError, ValueError):
+                    continue
+
+        for key, values in losses.items():
+            terms[key] = float(np.mean(values)) if values else 0.0
+        return terms
+
     def _get_reward(self, obs: Mapping[str, float]) -> tuple[float, dict]:
         ctx = self.ctx
         if ctx is None:
@@ -1105,6 +2279,21 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             )
         else:
             smoothness_loss = 0.0
+        command_rate_terms = dict(self._last_command_rate_terms)
+        command_rate_terms["u_rate_loss"] = float(self._last_u_rate_loss)
+        command_rate_loss = float(
+            np.mean(
+                [
+                    command_rate_terms.get("segment_delta_loss", 0.0),
+                    command_rate_terms.get("qdot_ref_loss", 0.0),
+                    command_rate_terms.get("qddot_ref_loss", 0.0),
+                    command_rate_terms.get("jerk_ref_loss", 0.0),
+                    command_rate_terms.get("reference_governor_loss", 0.0),
+                    command_rate_terms.get("u_rate_loss", 0.0),
+                ]
+            )
+        )
+        sea_reward_terms = self._sea_reward_terms()
 
         tracking_score = 1.0 / (
             1.0 + self.env_cfg.reward_tracking_weight * tracking_loss
@@ -1128,13 +2317,52 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 1.0,
             )
         )
+
+        # Periodic, phase-based sound-leg imitation target. Position and velocity
+        # come from the same periodic spline, so the target is coherent at the
+        # episode start and never needs an out-of-domain time clamp.
+        q_sound, qd_sound, target_phases = self.imitation_target(self.t)
+        vel_w = float(self.env_cfg.imitation_vel_weight)
+        sound_imitation_loss = 0.0
+        served_imitation_loss = 0.0
+        imitation_coord_terms: dict[str, float] = {}
+        for coord_name in self.cfg.pros_coords:
+            if coord_name not in q_sound:
+                continue
+            q_cur = float(sv.get(ctx.q_sv_idx[coord_name]))
+            qd_cur = float(sv.get(ctx.qdot_sv_idx[coord_name]))
+            coord_loss = (q_sound[coord_name] - q_cur) ** 2
+            coord_loss += vel_w * (qd_sound[coord_name] - qd_cur) ** 2
+            sound_imitation_loss += coord_loss
+            served_coord_loss = (q_sound[coord_name] - q_ref[coord_name]) ** 2
+            served_coord_loss += vel_w * (
+                qd_sound[coord_name] - qdot_ref[coord_name]
+            ) ** 2
+            served_imitation_loss += served_coord_loss
+            imitation_coord_terms[f"{coord_name}_imitation_loss"] = float(coord_loss)
+            imitation_coord_terms[
+                f"{coord_name}_served_imitation_loss"
+            ] = float(served_coord_loss)
+            imitation_coord_terms[f"{coord_name}_imitation_target_q"] = float(
+                q_sound[coord_name]
+            )
+            imitation_coord_terms[f"{coord_name}_imitation_target_qdot"] = float(
+                qd_sound[coord_name]
+            )
+            imitation_coord_terms[f"{coord_name}_imitation_target_phase"] = float(
+                target_phases.get(coord_name, 0.0)
+            )
+
         terms = {
             "tracking_loss": float(tracking_loss),
             "reference_loss": float(reference_loss),
             "bio_loss": float(bio_loss),
             "effort_loss": float(effort_loss),
             "smoothness_loss": float(smoothness_loss),
+            "command_rate_loss": float(command_rate_loss),
             "saturation_loss": float(saturation_loss),
+            "sound_imitation_loss": float(sound_imitation_loss),
+            "served_imitation_loss": float(served_imitation_loss),
             "u_abs_max": float(np.max(u_abs)) if u_abs.size else 0.0,
             "u_saturation_fraction": float(saturation_fraction),
             "tracking_score": float(tracking_score),
@@ -1142,6 +2370,9 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "bio_score": float(bio_score),
             "penalty": float(penalty),
         }
+        terms.update(command_rate_terms)
+        terms.update(sea_reward_terms)
+        terms.update(imitation_coord_terms)
         return reward, terms
 
     @staticmethod
@@ -1170,9 +2401,19 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         return max(values) if values else 0.0
 
     def _unsafe_end_reason(self, obs: Mapping[str, float]) -> str | None:
-        pelvis_ty = obs.get("pelvis_ty")
-        if pelvis_ty is not None and pelvis_ty < self.env_cfg.pelvis_min_height:
-            return "fall"
+        # Termination reads the physical STATE directly (like _get_reward), not the
+        # observation array: in realistic (actor-only) mode pelvis_ty and the
+        # privileged coords are not in the policy's obs, but "fall"/"joint_divergence"
+        # must trigger identically. ``obs`` is unused and kept for the call signature.
+        ctx = self.ctx
+        sv = None
+        if ctx is not None and getattr(self, "runner", None) is not None:
+            sv = ctx.model.getStateVariableValues(self.runner.state)
+
+        if sv is not None and "pelvis_ty" in ctx.q_sv_idx:
+            pelvis_ty = float(sv.get(ctx.q_sv_idx["pelvis_ty"]))
+            if pelvis_ty < self.env_cfg.pelvis_min_height:
+                return "fall"
 
         if (
             self._applied_penetration_max()
@@ -1181,16 +2422,17 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             return "grf_penetration"
 
         bounds = self.env_cfg.truncation_bounds_rad or {}
-        for coord_name in self.cfg.pros_coords:
-            value = obs.get(coord_name)
-            if value is None:
-                continue
-            lo_hi = bounds.get(coord_name)
-            if lo_hi is None:
-                continue
-            low, high = lo_hi
-            if value < low or value > high:
-                return f"joint_divergence:{coord_name}"
+        if sv is not None:
+            for coord_name in self.cfg.pros_coords:
+                if coord_name not in ctx.q_sv_idx:
+                    continue
+                lo_hi = bounds.get(coord_name)
+                if lo_hi is None:
+                    continue
+                value = float(sv.get(ctx.q_sv_idx[coord_name]))
+                low, high = lo_hi
+                if value < low or value > high:
+                    return f"joint_divergence:{coord_name}"
         return None
 
     def _is_truncated(self, obs: Mapping[str, float]) -> bool:

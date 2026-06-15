@@ -1,0 +1,80 @@
+# =============================================================================
+# training_cfg.yaml — sorgente unica dei parametri di training (baseline_MLP)
+# =============================================================================
+# Letto da train_ppo_mlp.py come DEFAULT degli argomenti: un flag CLI esplicito
+# (es. --lr 5e-4) VINCE su questo file. Le varianti si ottengono cambiando poche
+# chiavi qui o via override CLI; su macOS usare --config training_cfg.mac.yaml.
+#
+# Il rollout NON legge questo file: legge lo snapshot training_cfg.resolved.yaml
+# scritto dal training nella cartella del run, così env/rete/reward combaciano
+# sempre con cio' che e' stato allenato.
+#
+# Nota float: scrivere i decimali come 0.0001 o 1.0e-4 (NON "1e-4", che in YAML
+# verrebbe letto come stringa).
+# =============================================================================
+
+model:                              # rete neurale (larghezza uniforme)
+  num_hidden_layers: 2              # numero di hidden layer
+  dim_hidden_layers: 256            # neuroni per layer -> fcnet_hiddens = [dim]*num
+  fcnet_activation: tanh            # tanh | relu | elu | swish | silu
+  asymmetric_actor_critic: false    # critico privilegiato (obs piena) + attore realistico
+  seed: 123
+
+ppo:                                # iperparametri PPO
+  train_batch_size: 4096
+  minibatch_size: 512
+  num_epochs: 10
+  lr: 0.0001
+  gamma: 0.95
+  lam: 0.9
+  clip_param: 0.2
+
+parallelism:                        # Ray (default Windows; macOS via --config)
+  num_env_runners: 12
+  ray_num_cpus: 13
+
+simulation:                         # env CMC-like
+  setup_xml: models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml
+  segment_duration: 0.01            # passo di controllo / granularita' azione [s]
+  episode_duration: 2.0             # durata episodio [s]
+  policy_knots: 3                   # knot futuri emessi dalla policy
+  pros_ref_governor: true           # limiti duri sul riferimento servito al SEA
+  pros_knee_ref_velocity_limit_rad_s: 6.0
+  pros_ankle_ref_velocity_limit_rad_s: 3.5
+  pros_knee_ref_acceleration_limit_rad_s2: 60.0
+  pros_ankle_ref_acceleration_limit_rad_s2: 55.0
+  random_init: false
+  step_wall_timeout_s: 60.0         # budget wall-clock per env-step [s] (0 = off)
+  # action_mode/max_delta_rad NON inclusi: "absolute" e' l'unica modalita' di
+  # produzione; "delta"/"raw" restano solo come flag CLI per diagnostica.
+
+grf:                                # ground reaction force (ibrida protesica)
+  grf_mode: online_sensor           # prescribed | online_sensor | online
+  online_grf_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json
+  online_grf_observation: true      # esponi GRF/eventi/fase alla policy
+  online_grf_applied_side: [left]   # applica il contatto online sul lato protesico
+  disable_prescribed_grf_side: []   # diagnostico: rimuovi ExternalForce prescribed
+
+reward:                             # campi nativi di RewardConfig (override --reward-json)
+  reward_mode: ex_novo              # ex_novo | imitation
+
+supervision:                        # timeout / restart da checkpoint
+  iterations: 40
+  iteration_timeout_s: 3600.0
+  sample_timeout_s: 3000.0
+  startup_timeout_s: 600.0
+  checkpoint_timeout_s: 240.0
+  cleanup_timeout_s: 60.0
+  max_consecutive_skips: 5
+  max_consecutive_crash_restarts: 5
+  child_self_timeout: true
+  checkpoint_every: 1
+
+logging:
+  tensorboard: true
+  progress: true
+  verbose_workers: false
+
+run:                                # identita' del run (di norma override per-lancio)
+  output_dir: null
+  resume_from: null

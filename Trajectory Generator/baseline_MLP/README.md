@@ -42,6 +42,9 @@ stack SNN (skrl/snntorch resta solo in `envCMC-like`).
 | `_bootstrap.py` | Mette `baseline_MLP/`, `Trajectory Generator/` e la repo root su `sys.path`. |
 | `env_factory.py` | `make_cmc_env(dict)` (RLlib env creator, con `FlattenClipAction` + `RewardShapingWrapper`) + `register_cmc_env()`. |
 | `reward_function.py` | **Unica fonte della reward**: `RewardConfig` + `compute_reward(losses, cfg)` + `RewardShapingWrapper`. Ricalcola la reward dai *loss* esposti dall'env e la sostituisce. |
+| `training_cfg.yaml` | **Sorgente unica dei parametri** (rete + simulazione + PPO + Ray + reward + supervisione). Letto come default da training e (per match) dal rollout. |
+| `training_config.py` | Loader del YAML: `load`, `to_argparse_defaults` (YAML → default argparse), `dump_resolved` (snapshot del run) e `load_resolved_for_checkpoint` (auto-match in rollout). |
+| `asymmetric_rl_module.py` | Custom RLModule per l'asymmetric actor-critic: policy su `obs[:n_actor]`, value sul vettore pieno. |
 | `tb_logging.py` | TensorBoard: `RewardComponentsCallback` (componenti reward/loss → metriche env-runner) + `SummaryWriter` su `<output_dir>/tensorboard`. |
 | `train_ppo_mlp.py` | Entrypoint training supervisionato: timeout rigidi e cleanup dell'albero Ray, `PPOConfig` + loop `algo.train()` + checkpoint best/last + RLModule inference-only + `summary.json` + TensorBoard. |
 | `rollout_eval.py` | Carica l'RLModule nel figlio supervisionato, rollout deterministico, heartbeat per-step e metriche; con `--record-outputs` salva .sto per `visualize.py`. |
@@ -49,25 +52,66 @@ stack SNN (skrl/snntorch resta solo in `envCMC-like`).
 | `validate_online_grf_train_inference.py` | Gate profilo-specifico e smoke brevi del contratto onlineGRF usato da training/inference. |
 | `commands.txt` | Comandi PowerShell pronti (setup, smoke, train, rollout, tensorboard, reward custom). |
 
+## Configurazione (`training_cfg.yaml`)
+
+Tutti i parametri di **rete** e **simulazione** vivono in un unico file,
+`training_cfg.yaml`, che è la **sorgente di riferimento** per lanciare un
+training. I comandi passano solo `--output-dir` e gli eventuali override.
+
+- **Precedenza**: il YAML fornisce i *default*; un flag CLI esplicito (es.
+  `--lr 5e-4`) **vince** sul YAML. Per una config alternativa (es. macOS) usare
+  `--config <file.yaml>`.
+- **Sezioni**: `model` (rete), `ppo`, `parallelism` (Ray), `simulation` (env),
+  `grf`, `reward`, `supervision` (timeout/restart), `logging`, `run`.
+- **Rete come num/dim**: si esprime con `num_hidden_layers` e `dim_hidden_layers`
+  (larghezza uniforme) → `fcnet_hiddens = [dim] * num`; `fcnet_activation` è
+  configurabile (default `tanh`). Override CLI: `--num-hidden-layers`,
+  `--dim-hidden-layers`, `--fcnet-activation`.
+- **Asymmetric actor-critic**: flag `--asymmetric-actor-critic` (chiave YAML
+  `model.asymmetric_actor_critic`; alias deprecato `--critic-privileged-observation`).
+- **`action_mode`**: `absolute` è l'unica modalità di produzione e **non** è nel
+  YAML; `delta`/`raw` restano flag CLI solo per diagnostica.
+- **Snapshot + rollout auto-match**: il training scrive la config risolta (YAML +
+  override) in `<output_dir>/training_cfg.resolved.yaml`. `rollout_eval.py`, dato
+  `--checkpoint`, la **carica automaticamente** dalla cartella del run, così
+  env/rete/reward/`action_mode` combaciano sempre con il training senza
+  ri-specificare i flag. `--no-auto-config` disattiva l'auto-load, `--config`
+  forza un file; i checkpoint **legacy** senza snapshot richiedono i flag a mano.
+
 ## Uso rapido
 
 Dalla **root** del simulatore (vedi `commands.txt` per la lista completa):
 
 ```powershell
-# tiny train (single-process)
-... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --num-env-runners 0 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --fcnet-hiddens 64 64 --startup-timeout-s 90 --iteration-timeout-s 90 --run-timeout-s 240 --output-dir runs\_baseline_mlp_tiny
+# training di riferimento: tutti i parametri da training_cfg.yaml
+... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --output-dir runs\baseline_mlp_hybrid_win
 
-# rollout dal checkpoint
-... python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint runs\_baseline_mlp_tiny\rl_module_last --episode-duration 0.05 --segment-duration 0.01
+# tiny train (single-process): override del YAML per un run rapido
+... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --num-env-runners 0 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --num-hidden-layers 2 --dim-hidden-layers 64 --startup-timeout-s 90 --iteration-timeout-s 90 --output-dir runs\_baseline_mlp_tiny
+
+# resume manuale da un checkpoint completo RLlib
+... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --resume-from "Trajectory Generator\runs\_baseline_mlp_tiny\checkpoint_last" --iterations 2 --output-dir runs\_baseline_mlp_tiny
+
+# rollout dal checkpoint: env/rete/reward auto-caricati dallo snapshot del run
+... python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint runs\_baseline_mlp_tiny\rl_module_last --episode-duration 0.05
 ```
 
 ## Staging (riduce il rischio su Windows)
 
-- L'entrypoint avvia il training in un processo figlio supervisionato. I timeout
-  di startup, iterazione, checkpoint, cleanup e run totale terminano anche i
-  processi Ray discendenti. Sono configurabili con `--startup-timeout-s`,
-  `--iteration-timeout-s`, `--checkpoint-timeout-s`, `--cleanup-timeout-s` e
-  `--run-timeout-s`.
+- L'entrypoint avvia il training in un processo figlio supervisionato. Se
+  `algo.train()` supera `--iteration-timeout-s`, il child scrive
+  `stop_reason="iteration_timeout"` ed esce; il supervisor elimina l'intero
+  process tree Ray e rilancia un child fresco da `checkpoint_last`, avanzando
+  alla successiva iterazione logica. Dopo `--max-consecutive-skips` timeout
+  consecutivi il run termina con `aborted_consecutive_skips`.
+- Se il child termina per un crash nativo/non riportato (per esempio una access
+  violation di Ray), il supervisor riconosce che `summary.json` non è stata
+  aggiornata, elimina gli eventuali discendenti Ray e ritenta la stessa
+  iterazione da `checkpoint_last`. `--max-consecutive-crash-restarts` limita i
+  tentativi senza avanzamento del checkpoint.
+- `--resume-from <checkpoint>` ripristina manualmente lo stato completo RLlib.
+  Usare `--checkpoint-every 1` per perdere al massimo una singola iterazione in
+  caso di restart.
 - `rollout_eval.py` importa Torch/RLlib/OpenSim solo nel figlio supervisionato
   e pubblica un heartbeat per ogni reset/step. Prima di run lunghi, eseguire il
   self-test di `process_watchdog.py` e il gate
@@ -82,6 +126,36 @@ Dalla **root** del simulatore (vedi `commands.txt` per la lista completa):
   shim torch/OpenSim via `worker_process_setup_hook`; i path del setup XML sono
   risolti ad assoluti. Se il clash torch/OpenSim nei worker dovesse persistere,
   fallback a `--num-env-runners 0` (più lento ma corretto).
+
+## Robustezza anti-stallo e progress (dal 2026-06-09)
+
+Tre difese a livelli contro l'episodio degenere che blocca il sampling sincrono
+(causa dello spreco notturno del 2026-06-08):
+
+- **Guardia wall-time per env-step (`--step-wall-timeout-s`, default 30 s).** Un
+  singolo segmento di simulazione patologicamente lento (es. fallback bounded
+  least-squares della Static Optimization) viene troncato con grazia
+  (`end_reason="step_wall_timeout"`, conteggiato in `episode_end/*`), **anche con
+  `fail_fast=True`**, così un worker lento non gata l'intera iterazione. Vale per
+  training e rollout. `0` disabilita.
+- **Self-guard monotonic del child (`--child-self-timeout`, default ON).** Un
+  thread daemon hard-exita il processo di training (codice 124, dump degli stack
+  in `faulthandler.log`, `summary.json` con `iteration_timeout`) quando
+  `algo.train()` sfora il budget, anche se il main thread è bloccato in
+  `ray.wait`. Il clock monotonic evita falsi timeout durante sleep/sospensione.
+- **Supervisor restart da checkpoint.** Dopo un `iteration_timeout` termina
+  l'intero albero del child, registra lo skip in `supervisor_state.json` e
+  riparte da `checkpoint_last`. Dopo un crash nativo/non riportato ritenta
+  invece la stessa iterazione, con limite anti-loop. Non tenta più di
+  interrompere `algo.train()` uccidendo soltanto gli EnvRunner, perché RLlib li
+  ricrea automaticamente.
+
+- **Progress bar live (`--progress`, default ON).** Barra in-place con percentuale,
+  contatore iterazioni/step, elapsed ed ETA, aggiornata anche durante i lunghi
+  `algo.train()` (refresh in place su TTY, update periodici se rediretto a file;
+  fallback ASCII su console senza Unicode). Le metriche complete per-iterazione
+  vanno in `<output_dir>/train_iterations.jsonl`; il rollout mostra step/ETA e la
+  riga finale con `end_reason`. `--no-progress` per logging semplice.
 
 ## GRF online e gait cycle
 
@@ -113,10 +187,11 @@ Il payload completo resta disponibile in `info["online_grf"]`,
 `info["online_events"]` e `info["online_gait"]`. Gli eventi e le GRF normalizzate
 sono anche registrati sotto `gait/*` in TensorBoard.
 
-Training e rollout di uno stesso checkpoint devono usare gli stessi flag GRF e
-lo stesso profilo. I checkpoint legacy addestrati senza queste feature richiedono
-esplicitamente `--grf-mode prescribed --no-online-grf-observation`. Questa
-integrazione non modifica ancora la reward.
+Training e rollout di uno stesso checkpoint usano gli stessi flag GRF e lo stesso
+profilo: poiché `rollout_eval.py` **auto-carica** la config risolta dal run
+(`training_cfg.resolved.yaml`), la corrispondenza è automatica. I checkpoint
+legacy senza snapshot richiedono esplicitamente `--grf-mode prescribed
+--no-online-grf-observation`. Questa integrazione non modifica ancora la reward.
 
 Per test diagnostici e possibile rimuovere dalla dinamica la `ExternalForce`
 prescribed di un lato, mantenendo comunque i dati prescribed caricati come oracle:
@@ -139,8 +214,8 @@ tutta la baseline (training e rollout) tramite `RewardShapingWrapper`, applicato
 `make_cmc_env`. Confine netto:
 
 - **l'env** (`osim_trj_cmc_like.py`) calcola i *loss* fisici per-step (tracking,
-  reference, biologico, effort, smoothness, saturazione SEA, safety) e li espone in
-  `info["reward_terms"]`. **Non viene toccato.**
+  reference, biologico, effort, smoothness, command/reference rate, stress SEA,
+  penetrazione GRF e safety) e li espone in `info["reward_terms"]`.
 - **`reward_function.py`** combina quei loss nello scalare reward (lo shaping che si
   tuna qui). `RewardShapingWrapper` ricalcola la reward dai loss e **sostituisce**
   quella interna dell'env.
@@ -189,6 +264,15 @@ Override via `--reward-json` (file o JSON inline) su `train_ppo_mlp.py` e
 
 `summary.json` (training) e `rollout_summary.json` (rollout) registrano la
 `reward_config` effettivamente usata.
+
+I termini command/reference-rate restano disponibili sia come aggregato
+`command_rate_loss` sia separatamente (`segment_delta_loss`, `qdot_ref_loss`,
+`qddot_ref_loss`, `jerk_ref_loss`, `reference_governor_loss`, `u_rate_loss`).
+I relativi pesi separati hanno default zero, quindi non alterano i checkpoint
+legacy; permettono pero di colpire direttamente una singola causa, ad esempio
+jerk o alternanza del comando. La penalita morbida `grf_penetration_loss` e
+anch'essa pesata qui; le configurazioni che applicano il contatto online devono
+abilitare esplicitamente `grf_penetration_weight`.
 
 ## TensorBoard
 

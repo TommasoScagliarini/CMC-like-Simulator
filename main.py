@@ -13,7 +13,7 @@ Usage
     python main.py --log
 
 By default the simulator uses the last valid setup XML that was loaded.
-If no valid last setup is available, a file picker opens.
+If no valid last setup is available, it uses the repository AB06 PI setup.
 Edit config.py directly to change non-file parameters.
 
 Pipeline overview

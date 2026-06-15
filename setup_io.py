@@ -21,6 +21,12 @@ SETUP_XML_VERSION = "40000"
 SETUP_ROOT_TAG = "OpenSimDocument"
 SETUP_NODE_TAG = "CMC_Simulator_Setup"
 LAST_SETUP_STATE_PATH = REPO_ROOT / ".simulator_last_setup.json"
+DEFAULT_SETUP_XML_PATH = (
+    REPO_ROOT
+    / "models"
+    / "AB06_SEASEA_Threadmill"
+    / "AB06_SEASEA_stiff321_500_pi_setup.xml"
+)
 
 
 @dataclass(frozen=True)
@@ -278,17 +284,23 @@ def read_setup_xml(setup_xml_path: str | Path) -> SimulationSetup:
 
 
 def read_last_setup_path() -> Path | None:
+    default_path = (
+        DEFAULT_SETUP_XML_PATH.resolve()
+        if DEFAULT_SETUP_XML_PATH.is_file()
+        else None
+    )
     if not LAST_SETUP_STATE_PATH.is_file():
-        return None
+        return default_path
     try:
         payload = json.loads(LAST_SETUP_STATE_PATH.read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError):
-        return None
+        return default_path
 
     raw = payload.get("setup_xml_path")
     if not isinstance(raw, str) or not raw.strip():
-        return None
-    return resolve_repo_path(raw).resolve()
+        return default_path
+    saved_path = resolve_repo_path(raw).resolve()
+    return saved_path if saved_path.is_file() else default_path
 
 
 def write_last_setup_state(setup_xml_path: str | Path) -> Path:

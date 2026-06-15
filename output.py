@@ -376,6 +376,8 @@ class OutputRecorder:
         self._rec_q             = np.full((n_steps, n_coords),       np.nan)
         self._rec_qdot          = np.full((n_steps, n_coords),       np.nan)
         self._rec_qddot         = np.full((n_steps, n_coords),       np.nan)
+        self._rec_q_ref         = np.full((n_steps, n_coords),       np.nan)
+        self._rec_qdot_ref      = np.full((n_steps, n_coords),       np.nan)
         self._rec_activations   = np.full((n_steps, ctx.n_muscles),  np.nan)
         self._rec_u_res         = np.full((n_steps, ctx.n_reserves), np.nan)
         self._rec_reserve_controls = np.full((n_steps, n_res_all),   np.nan)
@@ -440,6 +442,10 @@ class OutputRecorder:
             self._rec_q[k, i]     = coord.getValue(state)
             self._rec_qdot[k, i]  = coord.getSpeedValue(state)
             self._rec_qddot[k, i] = udot[ctx.coord_mob_idx[name]]
+            if q_ref is not None and name in q_ref:
+                self._rec_q_ref[k, i] = q_ref[name]
+            if qdot_ref is not None and name in qdot_ref:
+                self._rec_qdot_ref[k, i] = qdot_ref[name]
 
         self._rec_activations[k]  = a
         self._rec_u_res[k]        = u_res
@@ -812,6 +818,23 @@ class OutputRecorder:
                 in_degrees=False,
             )
             print(f"  -> Kinematics  : {path}")
+
+            reference_col_names = []
+            reference_data = np.empty((k, len(ctx.coord_names) * 2))
+            for i, name in enumerate(ctx.coord_names):
+                reference_col_names.extend([
+                    f"{name}_q_ref", f"{name}_qdot_ref",
+                ])
+                reference_data[:, i * 2] = self._rec_q_ref[:k, i]
+                reference_data[:, i * 2 + 1] = self._rec_qdot_ref[:k, i]
+            path = os.path.join(out, f"{pfx}_kinematics_reference.sto")
+            write_sto(
+                path, "KinematicsReference",
+                self._rec_time[:k], reference_col_names,
+                reference_data,
+                in_degrees=False,
+            )
+            print(f"  -> Kin ref     : {path}")
 
         if cfg.save_tau_bio:
             path = os.path.join(out, f"{pfx}_tau_bio.sto")
