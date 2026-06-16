@@ -85,6 +85,8 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "gamma": float,
         "lam": float,
         "clip_param": float,
+        "vf_clip_param": _opt(float),
+        "vf_loss_coeff": _opt(float),
     },
     "parallelism": {
         "num_env_runners": int,
@@ -117,6 +119,8 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "actor_cyclic_phase_only": _to_bool,
         "include_reference_state_observation": _to_bool,
         "imitation_initialize_to_target": _to_bool,
+        "reward_reference_range_floor": float,
+        "reward_reference_velocity_range_floor": float,
     },
     "grf": {
         "grf_mode": str,

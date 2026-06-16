@@ -21,6 +21,8 @@ import numpy as np
 THIS_DIR = Path(__file__).resolve().parent
 TRAJ_GEN_DIR = THIS_DIR.parent
 REPO_ROOT = TRAJ_GEN_DIR.parent
+RUNS_ROOT = TRAJ_GEN_DIR / "runs"
+ROLLOUT_RUNS_ROOT = RUNS_ROOT / "rollout"
 for path in (THIS_DIR, TRAJ_GEN_DIR, REPO_ROOT):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
@@ -45,10 +47,23 @@ DEFAULT_ONLINE_GRF_PROFILE = (
 def _resolve_output_dir(value: str | None) -> Path:
     if value:
         path = Path(value)
-        if not path.is_absolute():
-            path = TRAJ_GEN_DIR / path
+        if path.is_absolute():
+            resolved = path.resolve()
+            try:
+                rel = resolved.relative_to(RUNS_ROOT.resolve())
+            except ValueError:
+                return resolved
+            if rel.parts and rel.parts[0].lower() == "rollout":
+                return resolved
+            return (ROLLOUT_RUNS_ROOT / rel).resolve()
+        parts = path.parts
+        if parts and parts[0].lower() == "runs":
+            parts = parts[1:]
+        if parts and parts[0].lower() == "rollout":
+            parts = parts[1:]
+        path = ROLLOUT_RUNS_ROOT / (Path(*parts) if parts else Path())
     else:
-        path = TRAJ_GEN_DIR / "runs" / f"imitation_oracle_{datetime.now():%Y%m%d_%H%M%S}"
+        path = ROLLOUT_RUNS_ROOT / f"imitation_oracle_{datetime.now():%Y%m%d_%H%M%S}"
     return path.resolve()
 
 

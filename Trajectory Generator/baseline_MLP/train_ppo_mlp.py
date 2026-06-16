@@ -49,28 +49,125 @@ _DEFAULT_ONLINE_GRF_PROFILE = (
 _BASELINE_DIR = str(Path(__file__).resolve().parent)
 _SCRIPT_PATH = Path(__file__).resolve()
 _TRAJ_GEN_DIR = _SCRIPT_PATH.parents[1]   # .../Trajectory Generator
-_RUNS_ROOT = _TRAJ_GEN_DIR / "runs"       # run artifacts live here (moved 2026-06-09)
+_RUNS_ROOT = _TRAJ_GEN_DIR / "runs"
+_TRAINING_RUNS_ROOT = _RUNS_ROOT / "training"
 _WATCHDOG_FILENAME = "watchdog_state.json"
 _SUPERVISOR_STATE_FILENAME = "supervisor_state.json"
 
 
-def _resolve_output_dir(output_dir, default_stem):
-    """Resolve ``--output-dir`` so artifacts always land under
-    ``Trajectory Generator/runs`` regardless of the current working directory.
+def _strip_runs_prefix(path: Path, category: str) -> Path:
+    parts = path.parts
+    if parts and parts[0].lower() == "runs":
+        parts = parts[1:]
+    if parts and parts[0].lower() == category.lower():
+        parts = parts[1:]
+    return Path(*parts) if parts else Path()
 
-    A relative path is taken relative to the Trajectory Generator directory, so
-    the historical ``runs\\foo`` arguments keep pointing at the moved folder; an
-    absolute path is honored as-is. The returned path is absolute (pyarrow's
-    ``from_uri`` rejects relative paths) and CWD-independent so the supervisor
-    and the worker child always agree on the same directory.
-    """
+
+def _under(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def _resolve_category_output_dir(output_dir, default_stem, category_root, category):
     if output_dir:
         path = Path(output_dir)
-        if not path.is_absolute():
-            path = _TRAJ_GEN_DIR / path
+        if path.is_absolute():
+            resolved = path.resolve()
+            if _under(resolved, _RUNS_ROOT) and not _under(resolved, category_root):
+                rel = _strip_runs_prefix(resolved.relative_to(_RUNS_ROOT), category)
+                return (category_root / rel).resolve()
+            return resolved
+        rel = _strip_runs_prefix(path, category)
+        path = category_root / rel
     else:
-        path = _RUNS_ROOT / f"{default_stem}_{datetime.now():%Y%m%d_%H%M%S}"
+        path = category_root / f"{default_stem}_{datetime.now():%Y%m%d_%H%M%S}"
     return path.resolve()
+
+
+def _strategy_name_from_reward_mode(reward_mode: str | None) -> str:
+    if str(reward_mode or "").lower() == "imitation":
+        return "imitation"
+    return "ExNovo"
+
+
+def _sanitize_name_suffix(value: str | None) -> str:
+    if value is None:
+        return ""
+    suffix = str(value).strip()
+    if not suffix:
+        return ""
+    invalid = '<>:"/\\|?*'
+    suffix = "".join(
+        "_" if char in invalid or ord(char) < 32 else char for char in suffix
+    ).strip(" .")
+    if not suffix:
+        return ""
+    return suffix if suffix.startswith("_") else f"_{suffix}"
+
+
+def _unique_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    for index in range(2, 1000):
+        candidate = Path(f"{path}_{index:02d}")
+        if not candidate.exists():
+            return candidate
+    raise RuntimeError(f"Could not find a free output directory name for {path}")
+
+
+def _load_reward_json_for_run_name(spec: str | None) -> dict[str, Any]:
+    if not spec:
+        return {}
+    path = Path(spec)
+    text = path.read_text(encoding="utf-8") if path.exists() else spec
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError("reward override must be a JSON object of RewardConfig fields")
+    return data
+
+
+def _resolved_reward_mode_for_run_name(
+    args: argparse.Namespace,
+    cfg_reward: dict[str, Any],
+) -> str:
+    reward = dict(cfg_reward or {})
+    reward.update(_load_reward_json_for_run_name(args.reward_json))
+    if args.reward_mode is not None:
+        reward["reward_mode"] = args.reward_mode
+    return str(reward.get("reward_mode", "ex_novo"))
+
+
+def _default_training_output_dir(
+    reward_mode: str | None,
+    name_suffix: str | None = None,
+    *,
+    now: datetime | None = None,
+) -> Path:
+    current = now or datetime.now()
+    strategy = _strategy_name_from_reward_mode(reward_mode)
+    suffix = _sanitize_name_suffix(name_suffix)
+    folder = f"MLP_{strategy}_training_{current:%m-%d-%Y}{suffix}"
+    return _unique_path((_TRAINING_RUNS_ROOT / folder).resolve())
+
+
+def _resolve_output_dir(output_dir, default_stem):
+    """Resolve ``--output-dir`` so artifacts always land under
+    ``Trajectory Generator/runs/training`` regardless of the current working
+    directory.
+
+    A relative path is taken relative to the training runs directory. Historical
+    ``runs\\foo`` arguments are treated as ``runs\\training\\foo``; absolute paths
+    outside ``Trajectory Generator/runs`` are honored as-is. The returned path is
+    absolute (pyarrow's ``from_uri`` rejects relative paths) and CWD-independent
+    so the supervisor and the worker child always agree on the same directory.
+    """
+    return _resolve_category_output_dir(
+        output_dir, default_stem, _TRAINING_RUNS_ROOT, "training"
+    )
 _TRAINING_STACK_LOADED = False
 
 
@@ -571,6 +668,10 @@ def build_config(
         "actor_cyclic_phase_only": args.actor_cyclic_phase_only,
         "include_reference_state_observation": args.include_reference_state_observation,
         "imitation_initialize_to_target": args.imitation_initialize_to_target,
+        "reward_reference_range_floor": args.reward_reference_range_floor,
+        "reward_reference_velocity_range_floor": (
+            args.reward_reference_velocity_range_floor
+        ),
         "random_init": args.random_init,
         "episode_start_offset_s": args.episode_start_offset_s,
         "rebuild_model_on_reset": False,
@@ -588,6 +689,20 @@ def build_config(
     # of truth); these overrides reach RewardShapingWrapper via make_cmc_env.
     if reward_overrides:
         env_config["reward"] = reward_overrides
+
+    training_kwargs = {
+        "train_batch_size": args.train_batch_size,
+        "minibatch_size": args.minibatch_size,
+        "num_epochs": args.num_epochs,
+        "lr": args.lr,
+        "gamma": args.gamma,
+        "lambda_": args.lam,
+        "clip_param": args.clip_param,
+    }
+    if args.vf_clip_param is not None:
+        training_kwargs["vf_clip_param"] = args.vf_clip_param
+    if args.vf_loss_coeff is not None:
+        training_kwargs["vf_loss_coeff"] = args.vf_loss_coeff
 
     config = (
         PPOConfig()
@@ -609,15 +724,7 @@ def build_config(
         )
         .learners(num_learners=0)  # learner in the main process (CPU)
         .resources(num_cpus_for_main_process=1, num_gpus=0)
-        .training(
-            train_batch_size=args.train_batch_size,
-            minibatch_size=args.minibatch_size,
-            num_epochs=args.num_epochs,
-            lr=args.lr,
-            gamma=args.gamma,
-            lambda_=args.lam,
-            clip_param=args.clip_param,
-        )
+        .training(**training_kwargs)
         .reporting(
             min_sample_timesteps_per_iteration=args.train_batch_size,
             metrics_num_episodes_for_smoothing=min(
@@ -729,10 +836,11 @@ def _resolve_resume_path(value: str | None) -> Path | None:
     """Resolve ``--resume-from`` accepting both path conventions.
 
     Relative paths are tried against the CWD first (``Trajectory
-    Generator\\runs\\...`` from the simulator root) and then against the
-    Trajectory Generator directory (``runs\\...``), mirroring ``--output-dir``
-    after the 2026-06-09 move of ``runs/``. Missing paths fall back to the CWD
-    candidate so the child's existing not-found error stays meaningful.
+    Generator\\runs\\...`` from the simulator root), then against the Trajectory
+    Generator directory, then against ``Trajectory Generator\\runs\\training``.
+    Thus the historical ``runs\\foo\\checkpoint_last`` form still resolves after
+    training artifacts moved under ``runs\\training``. Missing paths fall back to
+    the CWD candidate so the child's existing not-found error stays meaningful.
     """
     if not value:
         return None
@@ -745,6 +853,11 @@ def _resolve_resume_path(value: str | None) -> Path | None:
     traj_candidate = (_TRAJ_GEN_DIR / path).resolve()
     if traj_candidate.exists():
         return traj_candidate
+    training_candidate = (
+        _TRAINING_RUNS_ROOT / _strip_runs_prefix(path, "training")
+    ).resolve()
+    if training_candidate.exists():
+        return training_candidate
     return cwd_candidate
 
 
@@ -1769,6 +1882,12 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--setup-xml", default=_DEFAULT_SETUP_XML)
     p.add_argument("--output-dir")
+    p.add_argument(
+        "--name",
+        default=None,
+        help="Optional suffix for the auto-generated training output directory "
+        "(e.g. --name _example). Ignored when --output-dir is provided.",
+    )
     p.add_argument("--segment-duration", type=float, default=0.01)
     p.add_argument("--episode-duration", type=float, default=0.5)
     p.add_argument(
@@ -1828,6 +1947,18 @@ def parse_args() -> argparse.Namespace:
         default=True,
         help="Initialize served reference directly at the anti-phase target. "
         "Disable for a physically continuous C2 transition from the reset pose.",
+    )
+    p.add_argument(
+        "--reward-reference-range-floor",
+        type=float,
+        default=0.05,
+        help="Minimum q range used to normalize reward tracking/reference losses.",
+    )
+    p.add_argument(
+        "--reward-reference-velocity-range-floor",
+        type=float,
+        default=0.1,
+        help="Minimum qdot range used to normalize reward tracking losses.",
     )
     p.add_argument("--iterations", type=int, default=1)
     p.add_argument("--num-env-runners", type=int, default=0)
@@ -1924,6 +2055,18 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--gamma", type=float, default=0.95)
     p.add_argument("--lam", type=float, default=0.9)
     p.add_argument("--clip-param", type=float, default=0.2)
+    p.add_argument(
+        "--vf-clip-param",
+        type=float,
+        default=None,
+        help="RLlib PPO value-function clipping parameter. None keeps RLlib default.",
+    )
+    p.add_argument(
+        "--vf-loss-coeff",
+        type=float,
+        default=None,
+        help="RLlib PPO value-function loss coefficient. None keeps RLlib default.",
+    )
     p.add_argument(
         "--num-hidden-layers",
         type=int,
@@ -2056,6 +2199,9 @@ def parse_args() -> argparse.Namespace:
     p.set_defaults(**{k: v for k, v in cfg_defaults.items() if k in valid_dests})
     args = p.parse_args()
     args._cfg_reward = cfg_reward
+    if args.output_dir is None:
+        reward_mode = _resolved_reward_mode_for_run_name(args, cfg_reward)
+        args.output_dir = str(_default_training_output_dir(reward_mode, args.name))
     return args
 
 

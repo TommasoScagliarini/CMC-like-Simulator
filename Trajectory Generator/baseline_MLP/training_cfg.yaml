@@ -1,65 +1,83 @@
-# =============================================================================
-# training_cfg.yaml — sorgente unica dei parametri di training (baseline_MLP)
-# =============================================================================
-# Letto da train_ppo_mlp.py come DEFAULT degli argomenti: un flag CLI esplicito
-# (es. --lr 5e-4) VINCE su questo file. Le varianti si ottengono cambiando poche
-# chiavi qui o via override CLI; su macOS usare --config training_cfg.mac.yaml.
-#
-# Il rollout NON legge questo file: legge lo snapshot training_cfg.resolved.yaml
-# scritto dal training nella cartella del run, così env/rete/reward combaciano
-# sempre con cio' che e' stato allenato.
-#
-# Nota float: scrivere i decimali come 0.0001 o 1.0e-4 (NON "1e-4", che in YAML
-# verrebbe letto come stringa).
-# =============================================================================
+# Training imitativo V4: policy 100 Hz, singolo q_cmd e reference model C2.
 
-model:                              # rete neurale (larghezza uniforme)
-  num_hidden_layers: 2              # numero di hidden layer
-  dim_hidden_layers: 256            # neuroni per layer -> fcnet_hiddens = [dim]*num
-  fcnet_activation: tanh            # tanh | relu | elu | swish | silu
-  asymmetric_actor_critic: false    # critico privilegiato (obs piena) + attore realistico
+model:
+  num_hidden_layers: 2
+  dim_hidden_layers: 256
+  fcnet_activation: tanh
+  asymmetric_actor_critic: false
   seed: 123
 
-ppo:                                # iperparametri PPO
+ppo:
   train_batch_size: 4096
   minibatch_size: 512
   num_epochs: 10
   lr: 0.0001
-  gamma: 0.95
+  gamma: 0.99
   lam: 0.9
   clip_param: 0.2
+  vf_clip_param: 10.0
+  vf_loss_coeff: 1.0
 
-parallelism:                        # Ray (default Windows; macOS via --config)
+parallelism:
   num_env_runners: 12
   ray_num_cpus: 13
 
-simulation:                         # env CMC-like
+simulation:
   setup_xml: models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml
-  segment_duration: 0.01            # passo di controllo / granularita' azione [s]
-  episode_duration: 2.0             # durata episodio [s]
-  policy_knots: 3                   # knot futuri emessi dalla policy
-  pros_ref_governor: true           # limiti duri sul riferimento servito al SEA
+  segment_duration: 0.01
+  episode_duration: 5.0
+  episode_start_offset_s: 1.0
+  iterations: 40
+  policy_knots: 1
+  pros_ref_governor: true
+  pros_ref_model: butterworth3_jerk_limited
+  pros_ref_cutoff_hz: 4.0
   pros_knee_ref_velocity_limit_rad_s: 6.0
   pros_ankle_ref_velocity_limit_rad_s: 3.5
   pros_knee_ref_acceleration_limit_rad_s2: 60.0
   pros_ankle_ref_acceleration_limit_rad_s2: 55.0
+  pros_knee_ref_jerk_limit_rad_s3: 3000.0
+  pros_ankle_ref_jerk_limit_rad_s3: 2750.0
+  actor_cyclic_phase_only: true
+  include_reference_state_observation: true
+  # Keep the full prescribed pose coherent at reset; imitation remains the reward target.
+  imitation_initialize_to_target: false
+  reward_reference_range_floor: 0.05
+  reward_reference_velocity_range_floor: 0.1
   random_init: false
-  step_wall_timeout_s: 60.0         # budget wall-clock per env-step [s] (0 = off)
-  # action_mode/max_delta_rad NON inclusi: "absolute" e' l'unica modalita' di
-  # produzione; "delta"/"raw" restano solo come flag CLI per diagnostica.
+  step_wall_timeout_s: 60.0
 
-grf:                                # ground reaction force (ibrida protesica)
-  grf_mode: online_sensor           # prescribed | online_sensor | online
+grf:
+  grf_mode: online_sensor
   online_grf_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json
-  online_grf_observation: true      # esponi GRF/eventi/fase alla policy
-  online_grf_applied_side: [left]   # applica il contatto online sul lato protesico
-  disable_prescribed_grf_side: []   # diagnostico: rimuovi ExternalForce prescribed
+  online_grf_observation: true
+  online_grf_applied_side: [left]
+  disable_prescribed_grf_side: []
 
-reward:                             # campi nativi di RewardConfig (override --reward-json)
-  reward_mode: ex_novo              # ex_novo | imitation
+reward:
+  reward_mode: imitation
+  imitation_weight: 4.0
+  served_imitation_weight: 8.0
+  imitation_knee_position_weight: 1.0
+  imitation_ankle_position_weight: 2.0
+  imitation_knee_velocity_weight: 0.02
+  imitation_ankle_velocity_weight: 0.04
+  blend_served_imitation: 0.80
+  blend_imitation: 0.20
+  blend_imitation_tracking: 0
+  oob_q_min: [-1.40, -0.60]
+  oob_q_max: [0.0, 0.60]
+  smoothness_weight: 0.02
+  command_rate_weight: 0.05
+  sea_saturation_weight: 0.10
+  sea_torque_error_weight: 0.01
+  sea_motor_speed_weight: 0.01
+  sea_motor_accel_weight: 0.005
+  sea_motor_power_weight: 0.005
+  # The env emits the soft penetration loss; reward_function.py owns its weight.
+  grf_penetration_weight: 5.0
 
-supervision:                        # timeout / restart da checkpoint
-  iterations: 40
+supervision:
   iteration_timeout_s: 3600.0
   sample_timeout_s: 3000.0
   startup_timeout_s: 600.0
@@ -75,6 +93,6 @@ logging:
   progress: true
   verbose_workers: false
 
-run:                                # identita' del run (di norma override per-lancio)
+run:
   output_dir: null
   resume_from: null

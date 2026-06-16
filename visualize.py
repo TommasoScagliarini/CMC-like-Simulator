@@ -6,31 +6,58 @@ Post-simulation playback of kinematics using the Simbody visualizer.
 Usage
 -----
     python visualize.py                          # defaults
+    python visualize.py --mlp                    # latest MLP rollout
     python visualize.py --speed 0.5              # half-speed
     python visualize.py --sto results/other.sto  # custom file
     python visualize.py --loop                   # repeat forever
-    python visualize.py --save-video             # save MP4 to results/video/
+    python visualize.py --mlp --save             # save MP4 to runs/visualize/
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import glob
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from datetime import datetime
-from xml.etree import ElementTree as ETp
+from dataclasses import dataclass
+from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import numpy as np
-import opensim
 
 from config import SimulatorConfig
 from output import read_sto
-from path_resolver import normalize_cli_existing_path, resolve_simulator_paths
+from path_resolver import (
+    normalize_cli_existing_path,
+    resolve_repo_path,
+    resolve_simulator_paths,
+)
+from setup_io import read_setup_xml
+
+
+REPO_ROOT = Path(__file__).resolve().parent
+TRAJ_GEN_DIR = REPO_ROOT / "Trajectory Generator"
+MLP_ROLLOUT_ROOT = TRAJ_GEN_DIR / "runs" / "rollout"
+VISUALIZE_RUNS_ROOT = TRAJ_GEN_DIR / "runs" / "visualize"
+ROLLOUT_KINEMATICS_NAME = "rollout_episode_kinematics.sto"
+
+
+def _import_opensim():
+    try:
+        import opensim
+    except Exception as exc:
+        raise RuntimeError(
+            "OpenSim Python bindings are not available in this environment. "
+            "Activate the OpenSim/CMC environment before running the visualizer."
+        ) from exc
+    return opensim
 
 
 def _library_variant_exists(path_without_ext: str) -> bool:
@@ -65,6 +92,160 @@ def _resolve_project_path(path: str, library_basename: bool = False) -> str:
     return candidates[0]
 
 
+@dataclass(frozen=True)
+class MlpRolloutContext:
+    rollout_dir: Path
+    summary_path: Path
+    sim_outputs_dir: Path
+    kinematics_path: Path
+    summary: dict
+
+
+def _read_json_dict(path: Path) -> dict:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _rollout_timestamp(rollout_dir: Path, summary_path: Path) -> float:
+    try:
+        return summary_path.stat().st_mtime
+    except OSError:
+        pass
+    try:
+        return rollout_dir.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+def _valid_mlp_rollout_context(rollout_dir: Path) -> MlpRolloutContext | None:
+    summary_path = rollout_dir / "rollout_summary.json"
+    sim_outputs_dir = rollout_dir / "sim_outputs"
+    kinematics_path = sim_outputs_dir / ROLLOUT_KINEMATICS_NAME
+    if not summary_path.is_file() or not kinematics_path.is_file():
+        return None
+    summary = _read_json_dict(summary_path)
+    if summary.get("ok") is False:
+        return None
+    return MlpRolloutContext(
+        rollout_dir=rollout_dir.resolve(),
+        summary_path=summary_path.resolve(),
+        sim_outputs_dir=sim_outputs_dir.resolve(),
+        kinematics_path=kinematics_path.resolve(),
+        summary=summary,
+    )
+
+
+def latest_mlp_rollout_context(
+    rollout_root: Path = MLP_ROLLOUT_ROOT,
+) -> MlpRolloutContext:
+    if not rollout_root.is_dir():
+        raise FileNotFoundError(f"MLP rollout root not found: {rollout_root}")
+
+    candidates: list[tuple[float, str, MlpRolloutContext]] = []
+    for child in rollout_root.iterdir():
+        if not child.is_dir():
+            continue
+        context = _valid_mlp_rollout_context(child)
+        if context is None:
+            continue
+        candidates.append(
+            (
+                _rollout_timestamp(context.rollout_dir, context.summary_path),
+                context.rollout_dir.name.lower(),
+                context,
+            )
+        )
+    if not candidates:
+        raise FileNotFoundError(
+            f"No valid MLP rollout found in {rollout_root}. "
+            f"Expected rollout_summary.json and sim_outputs/{ROLLOUT_KINEMATICS_NAME}."
+        )
+    candidates.sort(key=lambda item: (item[0], item[1]))
+    return candidates[-1][2]
+
+
+def _sanitize_name_suffix(name_suffix: str | None) -> str:
+    if not name_suffix:
+        return ""
+    suffix = re.sub(r"[^A-Za-z0-9_.-]+", "_", name_suffix.strip())
+    suffix = suffix.strip("._-")
+    if not suffix:
+        return ""
+    return suffix if suffix.startswith("_") else f"_{suffix}"
+
+
+def _unique_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    for index in range(2, 1000):
+        candidate = path.with_name(f"{path.name}_{index:02d}")
+        if not candidate.exists():
+            return candidate
+    raise RuntimeError(f"Could not find a free output directory name for {path}")
+
+
+def _visualize_name_from_rollout(
+    rollout_name: str,
+    name_suffix: str | None,
+) -> str:
+    lower = rollout_name.lower()
+    index = lower.find("rollout")
+    if index >= 0:
+        base = f"{rollout_name[:index]}visualize{rollout_name[index + len('rollout'):]}"
+    else:
+        base = f"{rollout_name}_visualize"
+    return f"{base}{_sanitize_name_suffix(name_suffix)}"
+
+
+def _resolve_visualize_output_dir(
+    output_dir: str | None,
+    mlp_context: MlpRolloutContext | None,
+    name_suffix: str | None,
+) -> Path:
+    if output_dir:
+        raw = Path(output_dir).expanduser()
+        if raw.is_absolute():
+            return raw.resolve()
+        parts = raw.parts
+        if len(parts) >= 2 and parts[0].lower() == "runs" and parts[1].lower() == "visualize":
+            raw = Path(*parts[2:]) if len(parts) > 2 else Path()
+        elif (
+            len(parts) >= 3
+            and parts[0].lower() == "trajectory generator"
+            and parts[1].lower() == "runs"
+            and parts[2].lower() == "visualize"
+        ):
+            raw = Path(*parts[3:]) if len(parts) > 3 else Path()
+        return (VISUALIZE_RUNS_ROOT / raw).resolve()
+
+    if mlp_context is not None:
+        folder = _visualize_name_from_rollout(mlp_context.rollout_dir.name, name_suffix)
+    else:
+        folder = f"visualize_{datetime.now():%m-%d-%Y}{_sanitize_name_suffix(name_suffix)}"
+    return _unique_path((VISUALIZE_RUNS_ROOT / folder).resolve())
+
+
+def _apply_setup_to_config(cfg: SimulatorConfig, setup_xml_path: str | Path) -> Path:
+    setup_path = resolve_repo_path(setup_xml_path).resolve()
+    setup = read_setup_xml(setup_path)
+    cfg.model_file = str(setup.model_file)
+    cfg.kinematics_file = str(setup.kinematics_file)
+    cfg.external_loads_xml = (
+        "" if setup.external_loads_xml is None else str(setup.external_loads_xml)
+    )
+    cfg.reserve_actuators_xml = str(setup.reserve_actuators_xml)
+    cfg.grf_mode = getattr(setup, "grf_mode", "prescribed")
+    profile = getattr(setup, "online_grf_profile_file", None)
+    cfg.online_grf_profile_file = "" if profile is None else str(profile)
+    cfg.t_start = setup.t_start
+    cfg.t_end = setup.t_end
+    cfg.model_bundle_dir = str(setup.model_file.parent)
+    return setup_path
+
+
 def _xml_local_name(tag: str) -> str:
     """Return an XML tag name without a namespace, if present."""
     return tag.rsplit("}", 1)[-1]
@@ -93,12 +274,16 @@ def _mesh_exists(mesh_file: str, search_dirs: list[str]) -> bool:
 def _configure_geometry_search_paths(
     extra_dirs: list[str] | None = None,
     model_file: str | None = None,
+    opensim_module=None,
 ) -> list[str]:
     """
     Register geometry directories so OpenSim can resolve mesh filenames used
     by the model.  The workspace Geometry folder is added first, then common
     OpenSim installation paths.
     """
+    if opensim_module is None:
+        opensim_module = _import_opensim()
+
     candidate_dirs: list[str] = []
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -165,7 +350,7 @@ def _configure_geometry_search_paths(
         if key in seen or not os.path.isdir(abs_path):
             continue
         seen.add(key)
-        opensim.ModelVisualizer.addDirToGeometrySearchPaths(abs_path)
+        opensim_module.ModelVisualizer.addDirToGeometrySearchPaths(abs_path)
         added_dirs.append(abs_path)
         print(f"[Viz] Geometry path added: {abs_path}")
 
@@ -189,7 +374,7 @@ def _configure_geometry_search_paths(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Video capture helpers (macOS)
+#  Video capture helpers
 # ─────────────────────────────────────────────────────────────────────────────
 _SWIFT_FIND_WINDOW = """\
 import CoreGraphics
@@ -206,8 +391,8 @@ for w in wl {
 """
 
 
-def _find_simbody_window_id() -> int | None:
-    """Return the CGWindowID of the Simbody visualizer, or None."""
+def _find_macos_simbody_window_id() -> int | None:
+    """Return the macOS CGWindowID of the Simbody visualizer, or None."""
     try:
         r = subprocess.run(
             ["swift", "-e", _SWIFT_FIND_WINDOW],
@@ -219,18 +404,123 @@ def _find_simbody_window_id() -> int | None:
         return None
 
 
-def _capture_frame(window_id: int | None, dest: str) -> bool:
+def _find_windows_simbody_window_id() -> int | None:
+    """Return the Windows HWND of the Simbody visualizer, or None."""
+    if os.name != "nt":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+    except Exception:
+        return None
+
+    user32 = ctypes.windll.user32
+    matches: list[int] = []
+    needles = ("simbody", "visualizer", "opensim")
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def enum_proc(hwnd, _lparam):
+        if not user32.IsWindowVisible(hwnd):
+            return True
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length <= 0:
+            return True
+        buffer = ctypes.create_unicode_buffer(length + 1)
+        user32.GetWindowTextW(hwnd, buffer, length + 1)
+        title = buffer.value.lower()
+        if any(needle in title for needle in needles):
+            matches.append(int(hwnd))
+            return False
+        return True
+
+    try:
+        user32.EnumWindows(enum_proc, 0)
+    except Exception:
+        return None
+    return matches[0] if matches else None
+
+
+def _find_simbody_window_id() -> int | None:
+    if sys.platform == "darwin":
+        return _find_macos_simbody_window_id()
+    if os.name == "nt":
+        return _find_windows_simbody_window_id()
+    return None
+
+
+def _windows_window_bbox(window_id: int | None) -> tuple[int, int, int, int] | None:
+    if os.name != "nt" or window_id is None:
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+    except Exception:
+        return None
+
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
+    rect = wintypes.RECT()
+    ok = ctypes.windll.user32.GetWindowRect(wintypes.HWND(window_id), ctypes.byref(rect))
+    if not ok:
+        return None
+    bbox = (int(rect.left), int(rect.top), int(rect.right), int(rect.bottom))
+    if bbox[2] <= bbox[0] or bbox[3] <= bbox[1]:
+        return None
+    return bbox
+
+
+def _capture_frame_macos(window_id: int | None, dest: str) -> bool:
     """Capture a single frame to a PNG file via macOS screencapture."""
+    if shutil.which("screencapture") is None:
+        return False
     cmd = ["screencapture", "-x"]
     if window_id is not None:
         cmd += ["-l", str(window_id)]
     cmd.append(dest)
     try:
-        subprocess.run(cmd, check=True, timeout=10,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(
+            cmd,
+            check=True,
+            timeout=10,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         return True
     except Exception:
         return False
+
+
+def _capture_frame_pillow(window_id: int | None, dest: str) -> bool:
+    try:
+        from PIL import ImageGrab
+    except Exception:
+        return False
+
+    bbox = _windows_window_bbox(window_id)
+    try:
+        image = ImageGrab.grab(bbox=bbox)
+        image.save(dest)
+        return True
+    except Exception:
+        return False
+
+
+def _capture_frame(window_id: int | None, dest: str) -> bool:
+    """Capture a single frame to a PNG file using the current platform backend."""
+    if sys.platform == "darwin":
+        if _capture_frame_macos(window_id, dest):
+            return True
+        return _capture_frame_pillow(window_id, dest)
+    if os.name == "nt":
+        return _capture_frame_pillow(window_id, dest)
+    return _capture_frame_pillow(window_id, dest)
+
+
+def _ffmpeg_path() -> str | None:
+    return shutil.which("ffmpeg")
 
 
 def _frames_to_mp4(
@@ -239,8 +529,12 @@ def _frames_to_mp4(
     fps: float,
 ) -> bool:
     """Combine numbered PNGs into an MP4 using ffmpeg."""
+    ffmpeg = _ffmpeg_path()
+    if ffmpeg is None:
+        print("[Viz] ERROR: ffmpeg not found. Install ffmpeg and add it to PATH.")
+        return False
     cmd = [
-        "ffmpeg", "-y",
+        ffmpeg, "-y",
         "-r", str(fps),
         "-i", os.path.join(frame_dir, "frame_%06d.png"),
         "-vcodec", "libx264",
@@ -254,9 +548,6 @@ def _frames_to_mp4(
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
         return True
-    except FileNotFoundError:
-        print("[Viz] ERROR: ffmpeg not found. Install it with: brew install ffmpeg")
-        return False
     except subprocess.CalledProcessError as exc:
         print(f"[Viz] ERROR: ffmpeg failed (exit {exc.returncode})")
         return False
@@ -275,9 +566,14 @@ def run_visualizer(
     geometry_dirs: list[str] | None = None,
     save_video: bool = False,
     video_fps: float = 30.0,
+    video_output_dir: str | None = None,
 ) -> None:
     if cfg is None:
         cfg = SimulatorConfig()
+    if save_video and _ffmpeg_path() is None:
+        raise RuntimeError("ffmpeg not found. Install ffmpeg and add it to PATH.")
+
+    opensim = _import_opensim()
     resolved_paths = resolve_simulator_paths(cfg)
 
     plugin_name = _resolve_project_path(str(resolved_paths.plugin_path), library_basename=True)
@@ -289,7 +585,11 @@ def run_visualizer(
     opensim.LoadOpenSimLibrary(plugin_name)
 
     # ── Make the workspace Geometry folder visible to the visualizer ───────
-    _configure_geometry_search_paths(geometry_dirs, model_file=model_file)
+    _configure_geometry_search_paths(
+        geometry_dirs,
+        model_file=model_file,
+        opensim_module=opensim,
+    )
 
     # ── Load model WITH visualizer ───────────────────────────────────────────
     print(f"[Viz] Loading model : {model_file}")
@@ -308,6 +608,8 @@ def run_visualizer(
         data = data[mask]
 
     n_frames = len(times)
+    if n_frames == 0:
+        raise RuntimeError("No frames available after applying the requested time crop.")
     print(f"[Viz] Frames: {n_frames}, t=[{times[0]:.3f} .. {times[-1]:.3f}] s")
 
     # ── Decimate frames ─────────────────────────────────────────────────────
@@ -333,7 +635,7 @@ def run_visualizer(
 
     # Map .sto columns → Coordinate objects
     coord_set = model.getCoordinateSet()
-    col_coord_map: list[tuple[int, opensim.Coordinate]] = []
+    col_coord_map: list[tuple[int, object]] = []
     for ci, name in enumerate(col_names):
         try:
             coord = coord_set.get(name)
@@ -449,7 +751,11 @@ def run_visualizer(
             fps = 30.0
         print(f"[Viz] Captured {captured_count}/{n_frames} frames")
 
-        video_dir = os.path.join(cfg.output_dir, "video")
+        if captured_count == 0:
+            shutil.rmtree(frame_dir, ignore_errors=True)
+            raise RuntimeError("Video capture failed: 0 frames were captured.")
+
+        video_dir = video_output_dir or os.path.join(cfg.output_dir, "video")
         os.makedirs(video_dir, exist_ok=True)
         timestamp = datetime.now().strftime("%H%M%S_%d%m%Y")
         video_path = os.path.join(video_dir, f"{timestamp}.mp4")
@@ -462,6 +768,8 @@ def run_visualizer(
 
         if ok:
             print(f"[Viz] Video saved: {video_path}")
+        else:
+            raise RuntimeError("Video encoding failed.")
         return
 
     print("[Viz] Playback complete. Close the visualizer window to exit.")
@@ -479,6 +787,14 @@ def run_visualizer(
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Visualize simulation kinematics with the Simbody viewer"
+    )
+    parser.add_argument(
+        "--mlp",
+        action="store_true",
+        help=(
+            "Use the latest baseline-MLP rollout in "
+            "Trajectory Generator/runs/rollout as input."
+        ),
     )
     parser.add_argument(
         "--sto",
@@ -532,11 +848,16 @@ def main() -> int:
         help="Additional mesh directory to add to OpenSim geometry search paths.",
     )
     parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Alias for --save-video.",
+    )
+    parser.add_argument(
         "--save-video",
         action="store_true",
-        help="Capture each frame and encode as MP4 in results/video/. "
-             "Requires ffmpeg (brew install ffmpeg). Playback will be slower "
-             "during capture; the output video plays at the correct FPS.",
+        help="Capture each frame and encode as MP4. Requires ffmpeg. "
+             "Playback will be slower during capture; the output video plays "
+             "at the correct FPS.",
     )
     parser.add_argument(
         "--video-fps",
@@ -544,11 +865,33 @@ def main() -> int:
         default=30.0,
         help="Target FPS for video recording (default: 30). The .sto data is "
              "decimated to this rate before capture to avoid overwhelming "
-             "screencapture. Ignored when --save-video is not set.",
+             "screen capture. Ignored when neither --save nor --save-video is set.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=None,
+        help=(
+            "Video output directory. Relative paths are resolved under "
+            "Trajectory Generator/runs/visualize. Overrides automatic naming."
+        ),
+    )
+    parser.add_argument(
+        "--name",
+        default=None,
+        help="Optional suffix for the automatically named visualize run folder.",
     )
     args = parser.parse_args()
 
     cfg = SimulatorConfig()
+    mlp_context: MlpRolloutContext | None = None
+    if args.mlp:
+        mlp_context = latest_mlp_rollout_context()
+        print(f"[Viz] MLP rollout loaded from: {mlp_context.rollout_dir}")
+        setup_xml_path = mlp_context.summary.get("setup_xml_path")
+        if isinstance(setup_xml_path, str) and setup_xml_path.strip():
+            setup_path = _apply_setup_to_config(cfg, setup_xml_path)
+            print(f"[Viz] Simulator setup loaded from: {setup_path}")
+
     if args.model_bundle is not None:
         cfg.model_bundle_dir = args.model_bundle
         if args.model is None:
@@ -560,8 +903,20 @@ def main() -> int:
     if sto_path is None:
         if args.ik:
             sto_path = str(resolve_simulator_paths(cfg).kinematics_path)
+        elif mlp_context is not None:
+            sto_path = str(mlp_context.kinematics_path)
         else:
             sto_path = os.path.join(cfg.output_dir, f"{cfg.output_prefix}_kinematics.sto")
+
+    save_video = bool(args.save or args.save_video)
+    video_output_dir: Path | None = None
+    if save_video:
+        video_output_dir = _resolve_visualize_output_dir(
+            args.output_dir,
+            mlp_context,
+            args.name,
+        )
+        print(f"[Viz] Video output dir: {video_output_dir}")
 
     try:
         run_visualizer(
@@ -572,10 +927,14 @@ def main() -> int:
             t_end=args.t_end,
             cfg=cfg,
             geometry_dirs=args.geometry_dir,
-            save_video=args.save_video,
+            save_video=save_video,
             video_fps=args.video_fps,
+            video_output_dir=str(video_output_dir) if video_output_dir is not None else None,
         )
     except FileNotFoundError as exc:
+        print(f"[Viz] ERROR: {exc}")
+        return 1
+    except RuntimeError as exc:
         print(f"[Viz] ERROR: {exc}")
         return 1
     except KeyboardInterrupt:

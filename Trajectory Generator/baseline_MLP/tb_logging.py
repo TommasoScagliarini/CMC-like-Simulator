@@ -30,12 +30,17 @@ _SMOOTHING_WINDOW = 100
 # Loss terms produced by the env in ``info["reward_terms"]`` worth logging.
 _LOSS_KEYS = (
     "tracking_loss",
+    "tracking_position_loss",
+    "tracking_velocity_loss",
     "reference_loss",
+    "reference_position_loss",
     "bio_loss",
+    "bio_position_loss",
     "effort_loss",
     "smoothness_loss",
     "command_rate_loss",
     "segment_delta_loss",
+    "segment_knot_delta_loss",
     "qdot_ref_loss",
     "qddot_ref_loss",
     "jerk_ref_loss",
@@ -103,7 +108,14 @@ class RewardComponentsCallback(RLlibCallback):
                     key.startswith("pros_knee_angle_sea_")
                     or key.startswith("pros_ankle_angle_sea_")
                     or "_reference_" in key
+                    or "_tracking_" in key
+                    or "_bio_" in key
+                    or key.endswith("_reward_q_range")
+                    or key.endswith("_reward_qdot_range")
+                    or key.startswith("grf_penetration_")
                     or key.endswith("_imitation_loss")
+                    or "_imitation_position_" in key
+                    or "_imitation_velocity_" in key
                 ):
                     self._log(metrics_logger, f"reward_diagnostic/{key}", value)
 

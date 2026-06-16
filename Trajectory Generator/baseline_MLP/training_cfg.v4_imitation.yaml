@@ -15,6 +15,8 @@ ppo:
   gamma: 0.99
   lam: 0.9
   clip_param: 0.2
+  vf_clip_param: 10.0
+  vf_loss_coeff: 1.0
 
 parallelism:
   num_env_runners: 12
@@ -40,6 +42,8 @@ simulation:
   include_reference_state_observation: true
   # Keep the full prescribed pose coherent at reset; imitation remains the reward target.
   imitation_initialize_to_target: false
+  reward_reference_range_floor: 0.05
+  reward_reference_velocity_range_floor: 0.1
   random_init: false
   step_wall_timeout_s: 60.0
 
@@ -54,6 +58,10 @@ reward:
   reward_mode: imitation
   imitation_weight: 4.0
   served_imitation_weight: 8.0
+  imitation_knee_position_weight: 1.0
+  imitation_ankle_position_weight: 2.0
+  imitation_knee_velocity_weight: 0.02
+  imitation_ankle_velocity_weight: 0.04
   blend_served_imitation: 0.80
   blend_imitation: 0.20
   blend_imitation_tracking: 0

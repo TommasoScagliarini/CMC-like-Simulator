@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import copy
 import csv
+import json
 import os
 import re
 import sys
@@ -39,6 +40,7 @@ import numpy as np
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
+TRAJ_GEN_ROLLOUT_ROOT = REPO_ROOT / "Trajectory Generator" / "runs" / "rollout"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -102,6 +104,16 @@ class HealthyData:
     notes: List[str]
 
 
+@dataclass
+class MlpRolloutContext:
+    rollout_dir: Path
+    sim_outputs_dir: Path
+    summary_path: Path
+    trace_path: Path
+    summary: Dict[str, object]
+    reward_mode: str
+
+
 class MissingReport:
     def __init__(self) -> None:
         self._items: List[str] = []
@@ -132,17 +144,24 @@ def resolve_project_path(raw: str | Path) -> Path:
     return resolve_repo_path(raw)
 
 
+def plot_output_index(dirname: str, date_str: str) -> Optional[int]:
+    """Extract N from MM_DD_YYYY_N, allowing descriptive suffixes after N."""
+    match = re.match(rf"^{re.escape(date_str)}_(\d+)(?:$|[\s_-].*)", dirname)
+    if match is None:
+        return None
+    return int(match.group(1))
+
+
 def next_output_dir(out_root: Path) -> Path:
     out_root.mkdir(parents=True, exist_ok=True)
     date_str = datetime.now().strftime("%m_%d_%Y")
-    pattern = re.compile(rf"^{re.escape(date_str)}_(\d+)$")
     existing = []
     for child in out_root.iterdir():
         if not child.is_dir():
             continue
-        match = pattern.match(child.name)
-        if match:
-            existing.append(int(match.group(1)))
+        idx = plot_output_index(child.name, date_str)
+        if idx is not None:
+            existing.append(idx)
     idx = max(existing, default=0) + 1
     out_dir = out_root / f"{date_str}_{idx}"
     out_dir.mkdir(parents=False, exist_ok=False)
@@ -265,6 +284,80 @@ def load_tables(results_dir: Path, prefix: str) -> Dict[str, Optional[StoTable]]
         key: load_table(results_dir / f"{prefix}_{suffix}.sto")
         for key, suffix in suffixes.items()
     }
+
+
+def read_json_dict(path: Path) -> Dict[str, object]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def rollout_timestamp(rollout_dir: Path, summary_path: Path) -> float:
+    try:
+        return summary_path.stat().st_mtime
+    except OSError:
+        pass
+    try:
+        return rollout_dir.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+def valid_mlp_rollout_context(rollout_dir: Path) -> Optional[MlpRolloutContext]:
+    summary_path = rollout_dir / "rollout_summary.json"
+    trace_path = rollout_dir / "rollout_policy_trace.json"
+    sim_outputs_dir = rollout_dir / "sim_outputs"
+    if not summary_path.is_file() or not trace_path.is_file():
+        return None
+    if not sim_outputs_dir.is_dir():
+        return None
+
+    summary = read_json_dict(summary_path)
+    if summary.get("ok") is False:
+        return None
+    reward = summary.get("reward_config")
+    reward_mode = "unknown"
+    if isinstance(reward, dict):
+        reward_mode = str(reward.get("reward_mode", "unknown"))
+    return MlpRolloutContext(
+        rollout_dir=rollout_dir.resolve(),
+        sim_outputs_dir=sim_outputs_dir.resolve(),
+        summary_path=summary_path.resolve(),
+        trace_path=trace_path.resolve(),
+        summary=summary,
+        reward_mode=reward_mode,
+    )
+
+
+def latest_mlp_rollout_context(
+    rollout_root: Path = TRAJ_GEN_ROLLOUT_ROOT,
+) -> MlpRolloutContext:
+    if not rollout_root.is_dir():
+        raise FileNotFoundError(f"MLP rollout root not found: {rollout_root}")
+
+    candidates: List[Tuple[float, str, MlpRolloutContext]] = []
+    for child in rollout_root.iterdir():
+        if not child.is_dir():
+            continue
+        context = valid_mlp_rollout_context(child)
+        if context is None:
+            continue
+        candidates.append(
+            (
+                rollout_timestamp(context.rollout_dir, context.summary_path),
+                context.rollout_dir.name.lower(),
+                context,
+            )
+        )
+    if not candidates:
+        raise FileNotFoundError(
+            f"No valid MLP rollout found in {rollout_root}. "
+            "Expected rollout_summary.json, rollout_policy_trace.json and sim_outputs/."
+        )
+    candidates.sort(key=lambda item: (item[0], item[1]))
+    return candidates[-1][2]
 
 
 def infer_result_time_range(tables: Dict[str, Optional[StoTable]]) -> Optional[Tuple[float, float]]:
@@ -497,6 +590,11 @@ def q_candidates(coord: str) -> List[str]:
     return [f"{coord}_q"]
 
 
+def sound_q_candidates(side_key: str) -> List[str]:
+    raw_coord = "knee_angle_r" if side_key == "knee" else "ankle_angle_r"
+    return [f"{raw_coord}_q", raw_coord]
+
+
 def qdot_candidates(coord: str) -> List[str]:
     return [f"{coord}_qdot"]
 
@@ -652,7 +750,7 @@ def child_text(element: ET.Element, child_name: str) -> Optional[str]:
 
 
 def load_sea_params(cfg: SimulatorConfig) -> Dict[str, Dict[str, float]]:
-    """Load K, Kp, Kd from the model XML for each SEA actuator."""
+    """Load inner-loop properties from the model XML for each SEA actuator."""
     model_path = resolve_simulator_paths(cfg).model_path
     sea_names = [cfg.sea_knee_name, cfg.sea_ankle_name]
     params: Dict[str, Dict[str, float]] = {}
@@ -669,7 +767,7 @@ def load_sea_params(cfg: SimulatorConfig) -> Dict[str, Dict[str, float]]:
         if name not in sea_names:
             continue
         p: Dict[str, float] = {}
-        for prop in ("stiffness", "Kp", "Kd"):
+        for prop in ("stiffness", "Kp", "Kd", "Ki", "integral_torque_limit"):
             text = child_text(element, prop)
             if text:
                 try:
@@ -729,15 +827,43 @@ def outer_loop_subtitle(cfg: SimulatorConfig) -> str:
     return "   |   ".join(parts)
 
 
+def plugin_display_name(cfg: SimulatorConfig) -> str:
+    configured = str(getattr(cfg, "plugin_name", "") or "").strip()
+    configured_name = Path(configured).name if configured else "unknown"
+    try:
+        plugin_path = resolve_simulator_paths(cfg).plugin_path
+    except Exception:
+        return f"{configured_name} (configured, unresolved)"
+
+    candidates = [plugin_path]
+    if not plugin_path.suffix:
+        candidates.extend(
+            [
+                plugin_path.with_suffix(".dll"),
+                plugin_path.with_suffix(".dylib"),
+                plugin_path.with_suffix(".so"),
+                plugin_path.parent / f"lib{plugin_path.name}.dylib",
+                plugin_path.parent / f"lib{plugin_path.name}.so",
+            ]
+        )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.name
+    return f"{plugin_path.name} (configured, file not found)"
+
+
 def inner_loop_subtitle(sea_params: Dict[str, Dict[str, float]], cfg: SimulatorConfig) -> str:
     """Build a subtitle string showing the active plugin and SEA inner-loop gains."""
-    plugin_name = Path(cfg.plugin_name).name
-    parts = [f"Inner loop: SEA plugin {plugin_name}"]
+    has_pi = any(abs(float(p.get("Ki", 0.0) or 0.0)) > 0.0 for p in sea_params.values())
+    plugin_label = "PI plugin" if has_pi else f"plugin {plugin_display_name(cfg)}"
+    parts = [f"Inner loop: SEA {plugin_label}"]
     for sea_name, label in [(cfg.sea_knee_name, "Knee"), (cfg.sea_ankle_name, "Ankle")]:
         p = sea_params.get(sea_name, {})
         k = p.get("stiffness", cfg.sea_stiffness.get(sea_name))
         kp = p.get("Kp")
         kd = p.get("Kd")
+        ki = p.get("Ki")
+        i_limit = p.get("integral_torque_limit")
         params: List[str] = []
         if k is not None:
             params.append(f"K={k:g}")
@@ -745,6 +871,10 @@ def inner_loop_subtitle(sea_params: Dict[str, Dict[str, float]], cfg: SimulatorC
             params.append(f"Kp={kp:g}")
         if kd is not None:
             params.append(f"Kd={kd:g}")
+        if ki is not None and abs(float(ki)) > 0.0:
+            params.append(f"Ki={ki:g}")
+        if i_limit is not None and abs(float(ki or 0.0)) > 0.0:
+            params.append(f"Ilim_tau={i_limit:g}")
         if params:
             parts.append(f"{label} " + ", ".join(params))
     return "   |   ".join(parts)
@@ -850,6 +980,140 @@ def interpolate_like(
     target_time: np.ndarray,
 ) -> np.ndarray:
     return np.interp(target_time, source[0], source[1])
+
+
+def load_policy_trace(path: Path, missing: MissingReport) -> List[dict]:
+    if not path.is_file():
+        missing.add(f"figure 7 / all / policy trace: file not found: {path}")
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        missing.add(f"figure 7 / all / policy trace: could not read JSON: {exc}")
+        return []
+    if not isinstance(data, list):
+        missing.add("figure 7 / all / policy trace: expected a JSON list")
+        return []
+    return [item for item in data if isinstance(item, dict)]
+
+
+def policy_trace_series(
+    trace: Sequence[dict],
+    coord_index: int,
+    side_key: str,
+    missing: MissingReport,
+) -> Optional[Tuple[np.ndarray, np.ndarray, str]]:
+    times: List[float] = []
+    values: List[float] = []
+    for item in trace:
+        segment_times = item.get("policy_segment_times")
+        segment_values = item.get("policy_segment_values")
+        if not isinstance(segment_times, list) or not isinstance(segment_values, list):
+            continue
+        for t_raw, row in zip(segment_times, segment_values):
+            if not isinstance(row, list) or len(row) <= coord_index:
+                continue
+            try:
+                t = float(t_raw)
+                value = float(row[coord_index])
+            except (TypeError, ValueError):
+                continue
+            if np.isfinite(t) and np.isfinite(value):
+                times.append(t)
+                values.append(value)
+
+    if not times:
+        note_missing(
+            missing,
+            "figure 7",
+            side_key,
+            "policy trajectory",
+            "no finite policy_segment_times/policy_segment_values in trace",
+        )
+        return None
+
+    time_arr = np.asarray(times, dtype=float)
+    value_arr = np.asarray(values, dtype=float)
+    order = np.argsort(time_arr)
+    time_arr, value_arr = unique_time_series(time_arr[order], value_arr[order])
+    return apply_joint_sign((time_arr, value_arr, "policy_segment_values"), side_key)
+
+
+def figure7_policy_sign(side_key: str) -> float:
+    return joint_sign(side_key)
+
+
+def served_policy_reference_series(
+    tables: Dict[str, Optional[StoTable]],
+    coord: str,
+    side_key: str,
+    missing: MissingReport,
+) -> Optional[Tuple[np.ndarray, np.ndarray, str]]:
+    table = tables.get("kinematics_reference")
+    if table is None:
+        note_missing(
+            missing,
+            "figure 7",
+            side_key,
+            "policy C2 served reference",
+            "file not found: rollout_episode_kinematics_reference.sto",
+        )
+        return None
+    series = table.series([f"{coord}_q_ref"])
+    if series is None:
+        note_missing(
+            missing,
+            "figure 7",
+            side_key,
+            "policy C2 served reference",
+            f"column not found: {coord}_q_ref",
+        )
+        return None
+    time, values, column = series
+    time, values = unique_time_series(time, values)
+    return time, values * figure7_policy_sign(side_key), column
+
+
+def shifted_healthy_target_series(
+    trace: Sequence[dict],
+    coord: str,
+    side_key: str,
+    missing: MissingReport,
+) -> Optional[Tuple[np.ndarray, np.ndarray, str]]:
+    times: List[float] = []
+    values: List[float] = []
+    for item in trace:
+        target = item.get("imitation_target_q")
+        if not isinstance(target, dict) or coord not in target:
+            continue
+        try:
+            t = float(item.get("time"))
+            value = float(target[coord])
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(t) and np.isfinite(value):
+            times.append(t)
+            values.append(value)
+
+    if not times:
+        note_missing(
+            missing,
+            "figure 7",
+            side_key,
+            "shifted healthy target",
+            f"no finite imitation_target_q[{coord!r}] in policy trace",
+        )
+        return None
+
+    time_arr = np.asarray(times, dtype=float)
+    value_arr = np.asarray(values, dtype=float)
+    order = np.argsort(time_arr)
+    time_arr, value_arr = unique_time_series(time_arr[order], value_arr[order])
+    return (
+        time_arr,
+        value_arr * figure7_policy_sign(side_key),
+        f"imitation_target_q[{coord}]",
+    )
 
 
 def plot_figure_1(
@@ -1740,12 +2004,134 @@ def plot_figure_6(
     save_figure(fig, out_dir, "06_time_joint_ref_sea_error.png")
 
 
+def plot_figure_7(
+    tables: Dict[str, Optional[StoTable]],
+    mlp_context: MlpRolloutContext,
+    out_dir: Path,
+    missing: MissingReport,
+    outer_subtitle: str = "",
+    inner_subtitle: str = "",
+) -> None:
+    trace = load_policy_trace(mlp_context.trace_path, missing)
+    fig, axes = plt.subplots(3, 2, figsize=(14, 10), sharex=False)
+    row_labels = [
+        "policy C2 and target [rad]",
+        "sound leg raw [rad]",
+        "shifted sound leg - policy C2 [rad]",
+    ]
+    for row, label in enumerate(row_labels):
+        axes[row, 0].set_ylabel(label)
+
+    reward_mode = mlp_context.reward_mode
+    for col, side in enumerate(SIDES):
+        key = side["key"]
+        coord = side["coord"]
+        axes[0, col].set_title(side["title"])
+        policy = served_policy_reference_series(
+            tables,
+            coord,
+            key,
+            missing,
+        )
+        shifted_target = shifted_healthy_target_series(
+            trace,
+            coord,
+            key,
+            missing,
+        )
+        healthy_raw = find_series(
+            tables["states"],
+            sound_q_candidates(key),
+            missing,
+            "figure 7",
+            key,
+            "sound leg raw angle",
+            "rollout_episode_states.sto",
+        )
+        healthy_raw = apply_joint_sign(healthy_raw, key)
+
+        if policy is None:
+            annotate_missing(axes[0, col], "policy C2 served reference")
+        else:
+            time, values, _ = policy
+            axes[0, col].plot(
+                time,
+                values,
+                label=f"policy C2 served ref ({reward_mode})",
+                color="tab:blue",
+                linewidth=1.3,
+            )
+            if shifted_target is not None:
+                target_values = interpolate_like(shifted_target, time)
+                axes[0, col].plot(
+                    time,
+                    target_values,
+                    label="shifted sound leg target",
+                    color=HEALTHY_COLOR,
+                    linestyle=HEALTHY_LINESTYLE,
+                    linewidth=1.2,
+                )
+            axes[0, col].grid(True, alpha=0.25)
+            axes[0, col].legend(loc="best", fontsize=8)
+
+        if healthy_raw is None:
+            annotate_missing(axes[1, col], "sound leg raw angle")
+        else:
+            time, values, column = healthy_raw
+            axes[1, col].plot(
+                time,
+                values,
+                label=f"sound leg raw ({column})",
+                color=HEALTHY_COLOR,
+                linestyle=HEALTHY_LINESTYLE,
+                linewidth=1.3,
+            )
+            axes[1, col].grid(True, alpha=0.25)
+            axes[1, col].legend(loc="best", fontsize=8)
+
+        if policy is None:
+            annotate_missing(axes[2, col], "policy C2 served reference")
+        elif shifted_target is None:
+            annotate_missing(axes[2, col], "shifted sound leg target")
+        else:
+            time, policy_values, _ = policy
+            target_values = interpolate_like(shifted_target, time)
+            error = target_values - policy_values
+            axes[2, col].plot(
+                time,
+                error,
+                label=f"shifted sound leg - policy C2 ({reward_mode})",
+                color="tab:red",
+                linewidth=1.3,
+            )
+            axes[2, col].axhline(0.0, color="0.3", linewidth=0.8, linestyle="--")
+            axes[2, col].grid(True, alpha=0.25)
+            axes[2, col].legend(loc="best", fontsize=8)
+
+    finalize_time_axes(
+        fig,
+        axes,
+        f"MLP C2-Filtered Policy vs Shifted Sound Leg Target (reward_mode={reward_mode})",
+        outer_subtitle,
+        inner_subtitle,
+    )
+    save_figure(fig, out_dir, "07_mlp_policy_vs_sound_leg_error.png")
+
+
 def parse_args() -> argparse.Namespace:
     default_cfg = SimulatorConfig()
     parser = argparse.ArgumentParser(
         description="Plot ankle/knee diagnostics from simulator .sto outputs."
     )
-    parser.add_argument("--results-dir", default="results", help="Directory containing .sto results.")
+    parser.add_argument(
+        "--mlp",
+        action="store_true",
+        help=(
+            "Use the latest baseline-MLP rollout in "
+            "Trajectory Generator/runs/rollout as input."
+        ),
+    )
+    parser.add_argument("--results-dir", default=None, help="Directory containing .sto results.")
     parser.add_argument("--out-root", default="plot", help="Root directory for dated PNG folders.")
     parser.add_argument("--events", default=None, help="CSV with side,cycle_start,cycle_end gait-cycle events.")
     parser.add_argument(
@@ -1766,7 +2152,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Ignore .simulator_last_setup.json and use config.py/CLI paths only.",
     )
-    parser.add_argument("--prefix", default="sim_output", help="Result file prefix.")
+    parser.add_argument("--prefix", default=None, help="Result file prefix.")
     parser.add_argument(
         "--model-bundle",
         default=None,
@@ -1816,12 +2202,24 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    results_dir = resolve_project_path(args.results_dir)
+    mlp_context: Optional[MlpRolloutContext] = None
+    if args.mlp:
+        mlp_context = latest_mlp_rollout_context()
+        print(f"MLP rollout loaded from: {mlp_context.rollout_dir}")
+        print(f"  - reward_mode: {mlp_context.reward_mode}")
+
+    if args.results_dir is not None:
+        results_dir = resolve_project_path(args.results_dir)
+    elif mlp_context is not None:
+        results_dir = mlp_context.sim_outputs_dir
+    else:
+        results_dir = resolve_project_path("results")
+    prefix = args.prefix or ("rollout_episode" if mlp_context is not None else "sim_output")
     out_root = resolve_project_path(args.out_root)
     if args.events:
         events_path = resolve_project_path(args.events)
     else:
-        default_events = results_dir / f"{args.prefix}_gait_events.csv"
+        default_events = results_dir / f"{prefix}_gait_events.csv"
         events_path = default_events if default_events.is_file() else None
 
     missing = MissingReport()
@@ -1902,7 +2300,7 @@ def main() -> int:
             print(f"  - {note}")
 
     out_dir = next_output_dir(out_root)
-    tables = load_tables(results_dir, args.prefix)
+    tables = load_tables(results_dir, prefix)
     result_time_range = infer_result_time_range(tables)
     if result_time_range is not None:
         cfg.t_start, cfg.t_end = result_time_range
@@ -1947,6 +2345,15 @@ def main() -> int:
     )
     plot_figure_5(tables, sea_f_opt, out_dir, missing, outer_subtitle, inner_subtitle)
     plot_figure_6(tables, reference, out_dir, missing, outer_subtitle, inner_subtitle)
+    if mlp_context is not None:
+        plot_figure_7(
+            tables,
+            mlp_context,
+            out_dir,
+            missing,
+            outer_subtitle,
+            inner_subtitle,
+        )
 
     missing_path = out_dir / "missing_channels.txt"
     missing.write(missing_path)

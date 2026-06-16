@@ -119,6 +119,17 @@ def make_cmc_env(env_config: Mapping[str, Any] | None = None) -> gym.Env:
     """
     raw = dict(env_config or {})
     reward_cfg = reward_function.reward_config_from_mapping(raw.get("reward"))
+    raw["include_imitation_target_observation"] = (
+        reward_cfg.reward_mode == "imitation"
+    )
+    raw["imitation_position_weights"] = {
+        "pros_knee_angle": reward_cfg.imitation_knee_position_weight,
+        "pros_ankle_angle": reward_cfg.imitation_ankle_position_weight,
+    }
+    raw["imitation_velocity_weights"] = {
+        "pros_knee_angle": reward_cfg.imitation_knee_velocity_weight,
+        "pros_ankle_angle": reward_cfg.imitation_ankle_velocity_weight,
+    }
     if reward_cfg.reward_mode == "imitation":
         raw.setdefault("imitation_initialize_to_target", True)
     cfg = build_env_config(raw)  # "reward" is not a CMCEnvConfig field -> ignored

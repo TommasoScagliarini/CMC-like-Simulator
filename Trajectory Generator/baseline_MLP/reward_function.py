@@ -1,9 +1,10 @@
 """Single source of truth for the baseline-MLP reward.
 
-The CMC-like env (``osim_trj_cmc_like.py``) computes the **physics-derived loss
-terms** of each step (tracking, reference, biological, effort, smoothness, SEA
-saturation, safety) and exposes them all in ``info["reward_terms"]``. The scalar
-reward is just a *tunable combination* of those losses.
+The CMC-like env (``osim_trj_cmc_like.py``) computes the dimensionless
+**physics-derived loss terms** of each step (tracking, reference, biological,
+effort, smoothness, SEA saturation, safety) and exposes them all in
+``info["reward_terms"]``. The scalar reward is just a *tunable combination* of
+those losses.
 
 This module owns that combination. ``RewardShapingWrapper`` recomputes the scalar
 reward from ``info["reward_terms"]`` and replaces the env's reward, so the whole
@@ -12,7 +13,7 @@ env, the ``SimulationRunner``, the Static Optimization path and the SEA C++ plug
 are **not modified**: we only re-shape the reward downstream of the env.
 
 Boundary:
-  * **env** -> raw per-step *losses* (what physically happened). Unchanged.
+  * **env** -> dimensionless per-step *losses* plus raw diagnostics with units.
   * **reward_function.py** -> the scalar *reward* (the shaping you tune here).
 
 Because the reward is re-derived from the losses, the env's own
@@ -139,6 +140,10 @@ class RewardConfig:
     reward_mode: str = "ex_novo"
     imitation_weight: float = 8.0          # loss -> score sharpness (imitation)
     served_imitation_weight: float = 8.0   # target -> served-reference quality
+    imitation_knee_position_weight: float = 1.0
+    imitation_ankle_position_weight: float = 1.0
+    imitation_knee_velocity_weight: float = 0.02
+    imitation_ankle_velocity_weight: float = 0.02
     blend_served_imitation: float = 0.0    # legacy imitation remains unchanged
     blend_imitation: float = 0.8           # sound-leg imitation score weight
     blend_imitation_tracking: float = 0.2  # SEA execution-quality weight
@@ -182,27 +187,39 @@ def _score(loss: float, weight: float) -> float:
     return 1.0 / (1.0 + weight * float(loss))
 
 
-def out_of_band_loss(reference, cfg: RewardConfig) -> float:
-    """Mean squared excursion of the commanded reference outside the gait band.
+def _out_of_band_losses(reference, cfg: RewardConfig) -> tuple[float, float]:
+    """Dimensionless and raw excursion of the commanded reference outside the gait band.
 
     ``reference``: array ``(n_points, n_pros)`` of commanded reference q [rad] in
     ``cfg.pros_coords`` order (knee, ankle) — i.e. ``info["policy_segment_values"]`` —
     or a single ``(n_pros,)`` row. Per coordinate, only the part of q outside
-    ``[oob_q_min, oob_q_max]`` is penalised (zero while in band). Columns without a
-    matching bound are ignored.
+    ``[oob_q_min, oob_q_max]`` is penalised (zero while in band). The first
+    returned loss is normalized by the band width; the second is raw q^2 for
+    diagnostics only.
     """
     ref = np.asarray(reference, dtype=float)
     if ref.ndim == 1:
         ref = ref.reshape(1, -1)
     n = min(ref.shape[1], len(cfg.oob_q_min), len(cfg.oob_q_max))
     if n == 0:
-        return 0.0
+        return 0.0, 0.0
     ref = ref[:, :n]
     low = np.asarray(cfg.oob_q_min[:n], dtype=float)
     high = np.asarray(cfg.oob_q_max[:n], dtype=float)
     over = np.clip(ref - high, 0.0, None)
     under = np.clip(low - ref, 0.0, None)
-    return float(np.mean(over ** 2 + under ** 2))
+    excursion = over + under
+    band = np.maximum(1e-9, high - low)
+    normalized = excursion / band
+    return (
+        float(np.mean(np.clip(np.square(normalized), 0.0, 25.0))),
+        float(np.mean(np.square(excursion))),
+    )
+
+
+def out_of_band_loss(reference, cfg: RewardConfig) -> float:
+    """Dimensionless mean squared excursion outside the gait band."""
+    return _out_of_band_losses(reference, cfg)[0]
 
 
 def compute_reward(
@@ -258,9 +275,10 @@ def compute_reward(
         reward_terms.get(GRF_PENETRATION_LOSS, 0.0)
     )
     if reference is not None and cfg.oob_weight:
-        oob_loss = out_of_band_loss(reference, cfg)
+        oob_loss, oob_raw_loss = _out_of_band_losses(reference, cfg)
     else:
         oob_loss = 0.0
+        oob_raw_loss = 0.0
     oob_term = cfg.oob_weight * oob_loss
 
     # Positive base differs by mode. ex_novo (default) is UNCHANGED; imitation
@@ -295,12 +313,28 @@ def compute_reward(
         "bio_score": float(bio_score),
         "imitation_score": float(imitation_score),
         "served_imitation_score": float(served_imitation_score),
+        "tracking_loss": float(reward_terms.get(TRACKING_LOSS, 0.0)),
+        "tracking_position_loss": float(
+            reward_terms.get("tracking_position_loss", 0.0)
+        ),
+        "tracking_velocity_loss": float(
+            reward_terms.get("tracking_velocity_loss", 0.0)
+        ),
+        "reference_loss": float(reward_terms.get(REFERENCE_LOSS, 0.0)),
+        "reference_position_loss": float(
+            reward_terms.get("reference_position_loss", 0.0)
+        ),
+        "bio_loss": float(reward_terms.get(BIO_LOSS, 0.0)),
+        "bio_position_loss": float(reward_terms.get("bio_position_loss", 0.0)),
         "sound_imitation_loss": float(reward_terms.get(SOUND_IMITATION_LOSS, 0.0)),
         "served_imitation_loss": float(
             reward_terms.get(SERVED_IMITATION_LOSS, 0.0)
         ),
         "command_rate_loss": float(reward_terms.get(COMMAND_RATE_LOSS, 0.0)),
         "segment_delta_loss": float(reward_terms.get(SEGMENT_DELTA_LOSS, 0.0)),
+        "segment_knot_delta_loss": float(
+            reward_terms.get("segment_knot_delta_loss", 0.0)
+        ),
         "qdot_ref_loss": float(reward_terms.get(QDOT_REF_LOSS, 0.0)),
         "qddot_ref_loss": float(reward_terms.get(QDDOT_REF_LOSS, 0.0)),
         "jerk_ref_loss": float(reward_terms.get(JERK_REF_LOSS, 0.0)),
@@ -322,6 +356,7 @@ def compute_reward(
         ),
         "grf_penetration_term": float(grf_penetration_term),
         "oob_loss": float(oob_loss),
+        "oob_raw_loss": float(oob_raw_loss),
         "oob_term": float(oob_term),
     }
     return float(reward), components

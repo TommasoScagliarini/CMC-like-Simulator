@@ -250,6 +250,8 @@ class CMCEnvConfig:
     reward_smoothness_weight: float = 0.1
     reward_saturation_weight: float = 0.1
     reward_safety_weight: float = 2.0
+    reward_reference_range_floor: float = 0.05
+    reward_reference_velocity_range_floor: float = 0.1
     truncation_penalty: float = 1.0
     sea_u_saturation_threshold: float = 0.98
     # Observation is split into a REALISTIC "actor" prefix (signals a real
@@ -265,6 +267,7 @@ class CMCEnvConfig:
     critic_privileged_observation: bool = False
     actor_cyclic_phase_only: bool = False
     include_reference_state_observation: bool = False
+    include_imitation_target_observation: bool = False
     # Sound-leg imitation target (used only when reward_function shapes the reward
     # in "imitation" mode; the env always emits ``sound_imitation_loss`` so the
     # ex-novo reward is unchanged). A periodic phase-normalized template is built
@@ -279,7 +282,14 @@ class CMCEnvConfig:
     )
     imitation_phase_samples: int = 200
     imitation_initialize_to_target: bool = False
+    # Per-coordinate imitation losses are normalized by ranges measured on the
+    # active target/reference, then weighted here. Empty mappings preserve the
+    # legacy defaults: unit position weight and imitation_vel_weight for qdot.
+    imitation_position_weights: Mapping[str, float] = field(default_factory=dict)
+    imitation_velocity_weights: Mapping[str, float] = field(default_factory=dict)
     imitation_vel_weight: float = 0.02
+    imitation_position_range_floor_rad: float = 1e-3
+    imitation_velocity_range_floor_rad_s: float = 1e-3
     imitation_sound_coords: Mapping[str, str] = field(
         default_factory=lambda: {
             "pros_knee_angle": "knee_angle_r",
@@ -1016,6 +1026,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._online_gait_sides: dict[str, dict[str, float | None]] = {}
         self._gait_clock: GaitPhaseClock | None = None
         self._imitation_target: PhaseBasedImitationTarget | None = None
+        self._reference_position_ranges: dict[str, float] = {}
+        self._reference_velocity_ranges: dict[str, float] = {}
+        self._imitation_position_ranges_rad: dict[str, float] = {}
+        self._imitation_velocity_ranges_rad_s: dict[str, float] = {}
         self._closed = False
 
         self._delta_scale = self._resolve_delta_scale()
@@ -1095,6 +1109,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             ),
             "gait_clock": self._gait_clock_summary(),
             "imitation_target": self._imitation_target_summary(),
+            "reward_reference_ranges": self._reference_range_summary(),
         }
         info.update(self._online_info_payload())
         return obs, info
@@ -1194,8 +1209,18 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         # penalised: they reflect the missing sound-side support, not policy
         # quality. Large penetration is handled by the termination above.
         penetration_m = self._applied_penetration_max()
-        penetration_loss = max(
-            0.0, penetration_m - self.env_cfg.grf_penetration_penalty_threshold_m
+        penetration_excess_m = max(
+            0.0,
+            penetration_m - self.env_cfg.grf_penetration_penalty_threshold_m,
+        )
+        penetration_scale_m = max(
+            1e-9,
+            self.env_cfg.grf_penetration_termination_m
+            - self.env_cfg.grf_penetration_penalty_threshold_m,
+        )
+        penetration_loss = min(
+            25.0,
+            (penetration_excess_m / penetration_scale_m) ** 2,
         )
         if penetration_loss:
             reward = float(
@@ -1206,6 +1231,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             {
                 "safety_loss": float(safety_loss),
                 "grf_penetration_m": float(penetration_m),
+                "grf_penetration_excess_m": float(penetration_excess_m),
+                "grf_penetration_scale_m": float(penetration_scale_m),
                 "grf_penetration_loss": float(penetration_loss),
                 "terminated": float(bool(terminated)),
                 "truncated": float(bool(truncated)),
@@ -1329,6 +1356,14 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             phase_samples=int(self.env_cfg.imitation_phase_samples),
             time_window=(float(cfg.t_start), float(cfg.t_end)),
         )
+        (
+            self._reference_position_ranges,
+            self._reference_velocity_ranges,
+        ) = self._build_reference_error_ranges()
+        (
+            self._imitation_position_ranges_rad,
+            self._imitation_velocity_ranges_rad_s,
+        ) = self._build_imitation_error_ranges()
 
     @staticmethod
     def _validate_runtime_path(cfg: SimulatorConfig) -> None:
@@ -1479,7 +1514,131 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         target = self._imitation_target
         if target is None:
             return {"available": False}
-        return target.summary()
+        summary = target.summary()
+        summary["position_ranges_rad"] = dict(self._imitation_position_ranges_rad)
+        summary["velocity_ranges_rad_s"] = dict(
+            self._imitation_velocity_ranges_rad_s
+        )
+        return summary
+
+    def _reference_range_summary(self) -> dict[str, dict[str, float]]:
+        return {
+            "position_ranges": dict(self._reference_position_ranges),
+            "velocity_ranges": dict(self._reference_velocity_ranges),
+        }
+
+    def _reward_reference_coords(self) -> list[str]:
+        coords: list[str] = []
+        for coord_name in list(self.cfg.pros_coords) + list(self._bio_context_coords()):
+            if coord_name not in coords:
+                coords.append(coord_name)
+        return coords
+
+    def _build_reference_error_ranges(self) -> tuple[dict[str, float], dict[str, float]]:
+        """Measure base-reference q/qdot ranges used by reward losses."""
+        coords = self._reward_reference_coords()
+        q_samples: dict[str, list[float]] = {name: [] for name in coords}
+        qdot_samples: dict[str, list[float]] = {name: [] for name in coords}
+        t0 = max(float(self.cfg.t_start), float(self.base_kin.time_bounds[0]))
+        t1 = min(float(self.cfg.t_end), float(self.base_kin.time_bounds[1]))
+        if not np.isfinite(t0) or not np.isfinite(t1) or t1 < t0:
+            t0, t1 = (float(v) for v in self.base_kin.time_bounds)
+        n = max(16, int(self.env_cfg.imitation_phase_samples))
+        for sample_t in np.linspace(t0, t1, n, endpoint=True):
+            q_ref, qdot_ref, _ = self.base_kin.get(float(sample_t))
+            for coord_name in coords:
+                q_value = q_ref.get(coord_name)
+                qdot_value = qdot_ref.get(coord_name)
+                if q_value is not None and np.isfinite(q_value):
+                    q_samples[coord_name].append(float(q_value))
+                if qdot_value is not None and np.isfinite(qdot_value):
+                    qdot_samples[coord_name].append(float(qdot_value))
+
+        pos_floor = max(1e-9, float(self.env_cfg.reward_reference_range_floor))
+        vel_floor = max(
+            1e-9,
+            float(self.env_cfg.reward_reference_velocity_range_floor),
+        )
+        return (
+            {
+                coord_name: self._finite_range(values, pos_floor)
+                for coord_name, values in q_samples.items()
+            },
+            {
+                coord_name: self._finite_range(values, vel_floor)
+                for coord_name, values in qdot_samples.items()
+            },
+        )
+
+    def _build_imitation_error_ranges(self) -> tuple[dict[str, float], dict[str, float]]:
+        """Measure target q/qdot ranges used to normalize imitation errors."""
+        q_samples: dict[str, list[float]] = {name: [] for name in self.cfg.pros_coords}
+        qdot_samples: dict[str, list[float]] = {
+            name: [] for name in self.cfg.pros_coords
+        }
+        t0 = max(float(self.cfg.t_start), float(self.base_kin.time_bounds[0]))
+        t1 = min(float(self.cfg.t_end), float(self.base_kin.time_bounds[1]))
+        if not np.isfinite(t0) or not np.isfinite(t1) or t1 < t0:
+            t0, t1 = (float(v) for v in self.base_kin.time_bounds)
+        n = max(16, int(self.env_cfg.imitation_phase_samples))
+        times = np.linspace(t0, t1, n, endpoint=True)
+        for sample_t in times:
+            q_target, qdot_target, _ = self.imitation_target(float(sample_t))
+            for coord_name in self.cfg.pros_coords:
+                q_value = q_target.get(coord_name)
+                qdot_value = qdot_target.get(coord_name)
+                if q_value is not None and np.isfinite(q_value):
+                    q_samples[coord_name].append(float(q_value))
+                if qdot_value is not None and np.isfinite(qdot_value):
+                    qdot_samples[coord_name].append(float(qdot_value))
+
+        pos_floor = max(1e-9, float(self.env_cfg.imitation_position_range_floor_rad))
+        vel_floor = max(1e-9, float(self.env_cfg.imitation_velocity_range_floor_rad_s))
+        return (
+            {
+                coord_name: self._finite_range(values, pos_floor)
+                for coord_name, values in q_samples.items()
+            },
+            {
+                coord_name: self._finite_range(values, vel_floor)
+                for coord_name, values in qdot_samples.items()
+            },
+        )
+
+    @staticmethod
+    def _finite_range(values: Sequence[float], floor: float) -> float:
+        arr = np.asarray(values, dtype=float)
+        arr = arr[np.isfinite(arr)]
+        if arr.size < 2:
+            return float(floor)
+        span = float(np.max(arr) - np.min(arr))
+        if not np.isfinite(span):
+            return float(floor)
+        return max(float(floor), span)
+
+    @staticmethod
+    def _normalized_square(error: float, scale: float) -> float:
+        normalized = float(error) / max(1e-9, float(scale))
+        return float(np.clip(normalized * normalized, 0.0, 25.0))
+
+    @staticmethod
+    def _coord_weight(
+        weights: Mapping[str, float],
+        coord_name: str,
+        fallback: float,
+    ) -> float:
+        raw = (
+            weights.get(coord_name, fallback)
+            if isinstance(weights, Mapping)
+            else fallback
+        )
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            value = float(fallback)
+        if not np.isfinite(value):
+            value = float(fallback)
+        return max(0.0, value)
 
     def imitation_target(
         self,
@@ -1758,6 +1917,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             np.diff(values, axis=0),
             delta_scales,
         )
+        if values.shape[0] > 2:
+            segment_knot_delta_loss = self._bounded_normalized_square(
+                np.diff(values[1:], axis=0),
+                delta_scales,
+            )
+        else:
+            segment_knot_delta_loss = 0.0
         served_derivatives = np.empty_like(derivatives)
         served_accelerations = np.empty_like(derivatives)
         for i, time_value in enumerate(times):
@@ -1778,6 +1944,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         )
         terms = {
             "segment_delta_loss": float(segment_delta_loss),
+            "segment_knot_delta_loss": float(segment_knot_delta_loss),
             "qdot_ref_loss": float(qdot_ref_loss),
             "qddot_ref_loss": float(qddot_ref_loss),
         }
@@ -1925,6 +2092,23 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             actor["gait_phase"] = float(gait_phase)
         actor["gait_phase_sin"] = float(np.sin(gait_angle))
         actor["gait_phase_cos"] = float(np.cos(gait_angle))
+
+        # Imitation-only target exposed to the actor. The flag is controlled by
+        # env_factory from reward_mode, so ex-novo keeps the original actor schema.
+        if self.env_cfg.include_imitation_target_observation:
+            q_imitation, qdot_imitation, _ = self.imitation_target(self.t)
+            actor["healthy_knee_angle_imitation_target"] = float(
+                q_imitation.get("pros_knee_angle", q("pros_knee_angle"))
+            )
+            actor["healthy_knee_angle_imitation_target_vel"] = float(
+                qdot_imitation.get("pros_knee_angle", qd("pros_knee_angle"))
+            )
+            actor["healthy_ankle_angle_imitation_target"] = float(
+                q_imitation.get("pros_ankle_angle", q("pros_ankle_angle"))
+            )
+            actor["healthy_ankle_angle_imitation_target_vel"] = float(
+                qdot_imitation.get("pros_ankle_angle", qd("pros_ankle_angle"))
+            )
 
         # Prosthetic joints: measured angle + velocity (joint/motor encoder).
         for coord_name in self.cfg.pros_coords:
@@ -2234,26 +2418,101 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         q_base, _, _ = self.base_kin.get(self.t)
         sv = ctx.model.getStateVariableValues(self.runner.state)
 
-        pros_q_loss = 0.0
-        pros_v_loss = 0.0
-        reference_loss = 0.0
+        tracking_position_losses: list[float] = []
+        tracking_velocity_losses: list[float] = []
+        reference_position_losses: list[float] = []
+        tracking_coord_terms: dict[str, float] = {}
         for coord_name in self.cfg.pros_coords:
             q_cur = float(sv.get(ctx.q_sv_idx[coord_name]))
             qd_cur = float(sv.get(ctx.qdot_sv_idx[coord_name]))
-            pros_q_loss += (q_ref[coord_name] - q_cur) ** 2
-            pros_v_loss += 0.02 * (qdot_ref[coord_name] - qd_cur) ** 2
-            reference_loss += (q_base[coord_name] - q_cur) ** 2
-        tracking_loss = pros_q_loss + pros_v_loss
+            q_scale = float(
+                self._reference_position_ranges.get(
+                    coord_name,
+                    self.env_cfg.reward_reference_range_floor,
+                )
+            )
+            qdot_scale = float(
+                self._reference_velocity_ranges.get(
+                    coord_name,
+                    self.env_cfg.reward_reference_velocity_range_floor,
+                )
+            )
+            tracking_q_error = q_ref[coord_name] - q_cur
+            tracking_qdot_error = qdot_ref[coord_name] - qd_cur
+            reference_q_error = q_base.get(coord_name, q_cur) - q_cur
+            tracking_position_losses.append(
+                self._normalized_square(tracking_q_error, q_scale)
+            )
+            tracking_velocity_losses.append(
+                self._normalized_square(tracking_qdot_error, qdot_scale)
+            )
+            reference_position_losses.append(
+                self._normalized_square(reference_q_error, q_scale)
+            )
+            tracking_coord_terms[f"{coord_name}_tracking_position_loss"] = float(
+                tracking_position_losses[-1]
+            )
+            tracking_coord_terms[f"{coord_name}_tracking_velocity_loss"] = float(
+                tracking_velocity_losses[-1]
+            )
+            tracking_coord_terms[f"{coord_name}_reference_position_loss"] = float(
+                reference_position_losses[-1]
+            )
+            tracking_coord_terms[f"{coord_name}_tracking_q_error"] = float(
+                tracking_q_error
+            )
+            tracking_coord_terms[f"{coord_name}_tracking_qdot_error"] = float(
+                tracking_qdot_error
+            )
+            tracking_coord_terms[f"{coord_name}_reference_q_error"] = float(
+                reference_q_error
+            )
+            tracking_coord_terms[f"{coord_name}_reward_q_range"] = float(q_scale)
+            tracking_coord_terms[f"{coord_name}_reward_qdot_range"] = float(
+                qdot_scale
+            )
 
-        bio_loss = 0.0
-        bio_count = 0
+        tracking_position_loss = (
+            float(np.mean(tracking_position_losses))
+            if tracking_position_losses
+            else 0.0
+        )
+        tracking_velocity_loss = (
+            float(np.mean(tracking_velocity_losses))
+            if tracking_velocity_losses
+            else 0.0
+        )
+        tracking_loss = float(
+            np.mean([tracking_position_loss, tracking_velocity_loss])
+        )
+        reference_position_loss = (
+            float(np.mean(reference_position_losses))
+            if reference_position_losses
+            else 0.0
+        )
+        reference_loss = float(reference_position_loss)
+
+        bio_position_losses: list[float] = []
+        bio_coord_terms: dict[str, float] = {}
         for coord_name in self._bio_context_coords():
             if coord_name in ctx.q_sv_idx:
                 q_cur = float(sv.get(ctx.q_sv_idx[coord_name]))
-                bio_loss += (q_base.get(coord_name, q_cur) - q_cur) ** 2
-                bio_count += 1
-        if bio_count:
-            bio_loss /= float(bio_count)
+                q_error = q_base.get(coord_name, q_cur) - q_cur
+                q_scale = float(
+                    self._reference_position_ranges.get(
+                        coord_name,
+                        self.env_cfg.reward_reference_range_floor,
+                    )
+                )
+                loss = self._normalized_square(q_error, q_scale)
+                bio_position_losses.append(loss)
+                bio_coord_terms[f"{coord_name}_bio_position_loss"] = float(loss)
+                bio_coord_terms[f"{coord_name}_bio_q_error"] = float(q_error)
+                bio_coord_terms[f"{coord_name}_reward_q_range"] = float(q_scale)
+        bio_position_loss = (
+            float(np.mean(bio_position_losses)) if bio_position_losses else 0.0
+        )
+        bio_loss = float(bio_position_loss)
 
         u_values = [
             self._last_u_sea.get(coord_name, 0.0)
@@ -2273,14 +2532,11 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             np.mean(u_abs >= self.env_cfg.sea_u_saturation_threshold)
         )
 
-        if self._last_policy_knots.shape[0] > 1:
-            smoothness_loss = float(
-                np.mean(np.square(np.diff(self._last_policy_knots, axis=0)))
-            )
-        else:
-            smoothness_loss = 0.0
         command_rate_terms = dict(self._last_command_rate_terms)
         command_rate_terms["u_rate_loss"] = float(self._last_u_rate_loss)
+        smoothness_loss = float(
+            command_rate_terms.get("segment_knot_delta_loss", 0.0)
+        )
         command_rate_loss = float(
             np.mean(
                 [
@@ -2322,7 +2578,6 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         # come from the same periodic spline, so the target is coherent at the
         # episode start and never needs an out-of-domain time clamp.
         q_sound, qd_sound, target_phases = self.imitation_target(self.t)
-        vel_w = float(self.env_cfg.imitation_vel_weight)
         sound_imitation_loss = 0.0
         served_imitation_loss = 0.0
         imitation_coord_terms: dict[str, float] = {}
@@ -2331,18 +2586,73 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 continue
             q_cur = float(sv.get(ctx.q_sv_idx[coord_name]))
             qd_cur = float(sv.get(ctx.qdot_sv_idx[coord_name]))
-            coord_loss = (q_sound[coord_name] - q_cur) ** 2
-            coord_loss += vel_w * (qd_sound[coord_name] - qd_cur) ** 2
+            pos_scale = float(
+                self._imitation_position_ranges_rad.get(
+                    coord_name,
+                    self.env_cfg.imitation_position_range_floor_rad,
+                )
+            )
+            vel_scale = float(
+                self._imitation_velocity_ranges_rad_s.get(
+                    coord_name,
+                    self.env_cfg.imitation_velocity_range_floor_rad_s,
+                )
+            )
+            pos_w = self._coord_weight(
+                self.env_cfg.imitation_position_weights,
+                coord_name,
+                1.0,
+            )
+            vel_w = self._coord_weight(
+                self.env_cfg.imitation_velocity_weights,
+                coord_name,
+                float(self.env_cfg.imitation_vel_weight),
+            )
+            pos_loss = self._normalized_square(q_sound[coord_name] - q_cur, pos_scale)
+            vel_loss = self._normalized_square(
+                qd_sound[coord_name] - qd_cur,
+                vel_scale,
+            )
+            coord_loss = pos_w * pos_loss + vel_w * vel_loss
             sound_imitation_loss += coord_loss
-            served_coord_loss = (q_sound[coord_name] - q_ref[coord_name]) ** 2
-            served_coord_loss += vel_w * (
-                qd_sound[coord_name] - qdot_ref[coord_name]
-            ) ** 2
+            served_pos_loss = self._normalized_square(
+                q_sound[coord_name] - q_ref[coord_name],
+                pos_scale,
+            )
+            served_vel_loss = self._normalized_square(
+                qd_sound[coord_name] - qdot_ref[coord_name],
+                vel_scale,
+            )
+            served_coord_loss = pos_w * served_pos_loss + vel_w * served_vel_loss
             served_imitation_loss += served_coord_loss
             imitation_coord_terms[f"{coord_name}_imitation_loss"] = float(coord_loss)
             imitation_coord_terms[
                 f"{coord_name}_served_imitation_loss"
             ] = float(served_coord_loss)
+            imitation_coord_terms[
+                f"{coord_name}_imitation_position_loss"
+            ] = float(pos_loss)
+            imitation_coord_terms[
+                f"{coord_name}_imitation_velocity_loss"
+            ] = float(vel_loss)
+            imitation_coord_terms[
+                f"{coord_name}_served_imitation_position_loss"
+            ] = float(served_pos_loss)
+            imitation_coord_terms[
+                f"{coord_name}_served_imitation_velocity_loss"
+            ] = float(served_vel_loss)
+            imitation_coord_terms[
+                f"{coord_name}_imitation_position_weight"
+            ] = float(pos_w)
+            imitation_coord_terms[
+                f"{coord_name}_imitation_velocity_weight"
+            ] = float(vel_w)
+            imitation_coord_terms[
+                f"{coord_name}_imitation_position_range_rad"
+            ] = float(pos_scale)
+            imitation_coord_terms[
+                f"{coord_name}_imitation_velocity_range_rad_s"
+            ] = float(vel_scale)
             imitation_coord_terms[f"{coord_name}_imitation_target_q"] = float(
                 q_sound[coord_name]
             )
@@ -2355,8 +2665,12 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         terms = {
             "tracking_loss": float(tracking_loss),
+            "tracking_position_loss": float(tracking_position_loss),
+            "tracking_velocity_loss": float(tracking_velocity_loss),
             "reference_loss": float(reference_loss),
+            "reference_position_loss": float(reference_position_loss),
             "bio_loss": float(bio_loss),
+            "bio_position_loss": float(bio_position_loss),
             "effort_loss": float(effort_loss),
             "smoothness_loss": float(smoothness_loss),
             "command_rate_loss": float(command_rate_loss),
@@ -2372,6 +2686,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         }
         terms.update(command_rate_terms)
         terms.update(sea_reward_terms)
+        terms.update(tracking_coord_terms)
+        terms.update(bio_coord_terms)
         terms.update(imitation_coord_terms)
         return reward, terms
 

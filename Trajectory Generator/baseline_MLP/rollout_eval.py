@@ -2,14 +2,15 @@
 
 Loads the exported inference RLModule (``rl_module_best`` / ``rl_module_last``
 directory written by ``train_ppo_mlp.py``), runs a greedy rollout on the
-CMC-like env, and reports quality metrics. With ``--record-outputs`` the env
-writes .sto files that the simulator's existing ``visualize.py`` can replay.
+CMC-like env, and reports quality metrics. By default the env writes .sto files
+that the simulator's existing ``visualize.py`` can replay; use
+``--no-record-outputs`` for metric-only evaluation.
 
 Loading only the RLModule (not the full Algorithm) keeps eval lightweight and
 needs no Ray cluster / env registration.
 
 Run from the repository root, e.g.:
-  python "Trajectory Generator\\baseline_MLP\\rollout_eval.py" --checkpoint runs\\...\\rl_module_best --setup-xml ...
+  python "Trajectory Generator\\baseline_MLP\\rollout_eval.py"
 """
 
 from __future__ import annotations
@@ -36,26 +37,158 @@ _DEFAULT_ONLINE_GRF_PROFILE = (
 )
 _SCRIPT_PATH = Path(__file__).resolve()
 _TRAJ_GEN_DIR = _SCRIPT_PATH.parents[1]   # .../Trajectory Generator
-_RUNS_ROOT = _TRAJ_GEN_DIR / "runs"       # run artifacts live here (moved 2026-06-09)
+_RUNS_ROOT = _TRAJ_GEN_DIR / "runs"
+_TRAINING_RUNS_ROOT = _RUNS_ROOT / "training"
+_ROLLOUT_RUNS_ROOT = _RUNS_ROOT / "rollout"
 _WATCHDOG_FILENAME = "watchdog_state.json"
+
+
+def _strip_runs_prefix(path: Path, category: str) -> Path:
+    parts = path.parts
+    if parts and parts[0].lower() == "runs":
+        parts = parts[1:]
+    if parts and parts[0].lower() == category.lower():
+        parts = parts[1:]
+    return Path(*parts) if parts else Path()
+
+
+def _under(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def _read_json_dict(path: Path) -> dict:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _sanitize_name_suffix(value: str | None) -> str:
+    if value is None:
+        return ""
+    suffix = str(value).strip()
+    if not suffix:
+        return ""
+    invalid = '<>:"/\\|?*'
+    suffix = "".join(
+        "_" if char in invalid or ord(char) < 32 else char for char in suffix
+    ).strip(" .")
+    if not suffix:
+        return ""
+    return suffix if suffix.startswith("_") else f"_{suffix}"
+
+
+def _unique_path(path: Path) -> Path:
+    if not path.exists():
+        return path
+    for index in range(2, 1000):
+        candidate = Path(f"{path}_{index:02d}")
+        if not candidate.exists():
+            return candidate
+    raise RuntimeError(f"Could not find a free output directory name for {path}")
+
+
+def _training_run_timestamp(run_dir: Path) -> float:
+    summary_path = run_dir / "summary.json"
+    if summary_path.exists():
+        try:
+            return summary_path.stat().st_mtime
+        except OSError:
+            pass
+    try:
+        return run_dir.stat().st_mtime
+    except OSError:
+        return 0.0
+
+
+def _latest_training_checkpoint() -> Path:
+    if not _TRAINING_RUNS_ROOT.is_dir():
+        raise FileNotFoundError(
+            f"Training runs directory not found: {_TRAINING_RUNS_ROOT}. "
+            "Pass --checkpoint explicitly."
+        )
+    candidates: list[tuple[float, str, Path]] = []
+    for run_dir in _TRAINING_RUNS_ROOT.iterdir():
+        if not run_dir.is_dir():
+            continue
+        checkpoint = run_dir / "rl_module_best"
+        if not checkpoint.is_dir():
+            continue
+        summary_path = run_dir / "summary.json"
+        if summary_path.exists() and _read_json_dict(summary_path).get("ok") is False:
+            continue
+        candidates.append(
+            (_training_run_timestamp(run_dir), run_dir.name.lower(), checkpoint)
+        )
+    if not candidates:
+        raise FileNotFoundError(
+            f"No valid training run with rl_module_best found in "
+            f"{_TRAINING_RUNS_ROOT}. Pass --checkpoint explicitly."
+        )
+    candidates.sort(key=lambda item: (item[0], item[1]))
+    return candidates[-1][2].resolve()
+
+
+def _resolve_category_output_dir(output_dir, default_stem, category_root, category):
+    if output_dir:
+        path = Path(output_dir)
+        if path.is_absolute():
+            resolved = path.resolve()
+            if _under(resolved, _RUNS_ROOT) and not _under(resolved, category_root):
+                rel = _strip_runs_prefix(resolved.relative_to(_RUNS_ROOT), category)
+                return (category_root / rel).resolve()
+            return resolved
+        rel = _strip_runs_prefix(path, category)
+        path = category_root / rel
+    else:
+        path = category_root / f"{default_stem}_{datetime.now():%Y%m%d_%H%M%S}"
+    return path.resolve()
 
 
 def _resolve_output_dir(output_dir, default_stem):
     """Resolve ``--output-dir`` so artifacts always land under
-    ``Trajectory Generator/runs`` regardless of the current working directory.
+    ``Trajectory Generator/runs/rollout`` regardless of the current working
+    directory.
 
-    A relative path is taken relative to the Trajectory Generator directory (so
-    the historical ``runs\\foo`` arguments keep pointing at the moved folder); an
-    absolute path is honored as-is. CWD-independent so the supervisor and the
-    worker child always agree on the same directory.
+    A relative path is taken relative to the rollout runs directory. Historical
+    ``runs\\foo`` arguments are treated as ``runs\\rollout\\foo``; absolute paths
+    outside ``Trajectory Generator/runs`` are honored as-is. CWD-independent so
+    the supervisor and the worker child always agree on the same directory.
     """
-    if output_dir:
-        path = Path(output_dir)
-        if not path.is_absolute():
-            path = _TRAJ_GEN_DIR / path
+    return _resolve_category_output_dir(
+        output_dir, default_stem, _ROLLOUT_RUNS_ROOT, "rollout"
+    )
+
+
+def _checkpoint_run_dir(checkpoint: Path) -> Path:
+    checkpoint = checkpoint.resolve()
+    if checkpoint.name.startswith(("rl_module_", "checkpoint_")):
+        return checkpoint.parent
+    return checkpoint
+
+
+def _rollout_name_from_training_run(run_name: str, name_suffix: str | None) -> str:
+    lower = run_name.lower()
+    index = lower.find("training")
+    if index >= 0:
+        base = f"{run_name[:index]}rollout{run_name[index + len('training'):]}"
     else:
-        path = _RUNS_ROOT / f"{default_stem}_{datetime.now():%Y%m%d_%H%M%S}"
-    return path.resolve()
+        base = f"{run_name}_rollout"
+    return f"{base}{_sanitize_name_suffix(name_suffix)}"
+
+
+def _default_rollout_output_dir(
+    checkpoint: Path,
+    name_suffix: str | None = None,
+) -> Path:
+    run_dir = _checkpoint_run_dir(checkpoint)
+    folder = _rollout_name_from_training_run(run_dir.name, name_suffix)
+    return _unique_path((_ROLLOUT_RUNS_ROOT / folder).resolve())
 
 
 def _resolve_input_path(value: str) -> Path:
@@ -76,8 +209,14 @@ def _resolve_input_path(value: str) -> Path:
     traj_candidate = (_TRAJ_GEN_DIR / path).resolve()
     if traj_candidate.exists():
         return traj_candidate
+    training_candidate = (
+        _TRAINING_RUNS_ROOT / _strip_runs_prefix(path, "training")
+    ).resolve()
+    if training_candidate.exists():
+        return training_candidate
     raise FileNotFoundError(
-        f"Path {value!r} not found; tried {cwd_candidate} and {traj_candidate}."
+        f"Path {value!r} not found; tried {cwd_candidate}, {traj_candidate}, "
+        f"and {training_candidate}."
     )
 _INFERENCE_STACK_LOADED = False
 
@@ -205,6 +344,10 @@ def run(args: argparse.Namespace) -> dict:
         "actor_cyclic_phase_only": args.actor_cyclic_phase_only,
         "include_reference_state_observation": args.include_reference_state_observation,
         "imitation_initialize_to_target": args.imitation_initialize_to_target,
+        "reward_reference_range_floor": args.reward_reference_range_floor,
+        "reward_reference_velocity_range_floor": (
+            args.reward_reference_velocity_range_floor
+        ),
         "random_init": False,
         "fail_fast": True,
         "record_outputs": args.record_outputs,
@@ -459,9 +602,9 @@ def run(args: argparse.Namespace) -> dict:
 def run_supervised(args: argparse.Namespace) -> int:
     output_dir = _resolve_output_dir(args.output_dir, "rollout_eval")
     output_dir.mkdir(parents=True, exist_ok=True)
-    child_args = list(sys.argv[1:])
-    if args.output_dir is None:
-        child_args.extend(["--output-dir", str(output_dir)])
+    child_args = [value for value in sys.argv[1:] if value != "--worker-process"]
+    child_args.extend(["--checkpoint", str(args.checkpoint)])
+    child_args.extend(["--output-dir", str(output_dir)])
     child_args.append("--worker-process")
     result = process_watchdog.supervise_process(
         [sys.executable, str(_SCRIPT_PATH), *child_args],
@@ -488,16 +631,27 @@ def parse_args() -> argparse.Namespace:
     pre.add_argument("--no-auto-config", action="store_true")
     pre_args, _ = pre.parse_known_args()
 
+    help_requested = any(value in ("-h", "--help") for value in sys.argv[1:])
+    default_checkpoint: Path | None = None
+    checkpoint_for_snapshot = pre_args.checkpoint
+    default_checkpoint_error: Exception | None = None
+    if checkpoint_for_snapshot is None and not help_requested:
+        try:
+            default_checkpoint = _latest_training_checkpoint()
+            checkpoint_for_snapshot = str(default_checkpoint)
+        except (FileNotFoundError, OSError) as exc:
+            default_checkpoint_error = exc
+
     layered_defaults: dict = {}
     cfg_reward: dict = {}
-    if pre_args.checkpoint and not pre_args.no_auto_config:
+    if checkpoint_for_snapshot and not pre_args.no_auto_config:
         # Resolve the checkpoint the same way --checkpoint is resolved later (the
         # "runs\..." convention maps to "Trajectory Generator\runs\..."), so the
         # sibling training_cfg.resolved.yaml is actually found.
         try:
-            ckpt_path = _resolve_input_path(pre_args.checkpoint)
+            ckpt_path = _resolve_input_path(checkpoint_for_snapshot)
         except (FileNotFoundError, OSError):
-            ckpt_path = pre_args.checkpoint
+            ckpt_path = checkpoint_for_snapshot
         snapshot = training_config.load_resolved_for_checkpoint(ckpt_path)
         if snapshot:
             flat, reward = training_config.to_argparse_defaults(snapshot)
@@ -512,7 +666,14 @@ def parse_args() -> argparse.Namespace:
     layered_defaults.pop("output_dir", None)
 
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--checkpoint", required=True, help="rl_module_* directory")
+    p.add_argument(
+        "--checkpoint",
+        default=str(default_checkpoint) if default_checkpoint is not None else None,
+        help=(
+            "rl_module_* directory. If omitted, the latest valid run in "
+            "Trajectory Generator/runs/training is used."
+        ),
+    )
     p.add_argument(
         "--config",
         default=None,
@@ -527,6 +688,14 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--setup-xml", default=_DEFAULT_SETUP_XML)
     p.add_argument("--output-dir")
+    p.add_argument(
+        "--name",
+        default=None,
+        help=(
+            "Optional suffix for the auto-generated rollout folder name "
+            "(e.g. --name _example). Ignored when --output-dir is provided."
+        ),
+    )
     p.add_argument("--segment-duration", type=float, default=0.01)
     p.add_argument("--episode-duration", type=float, default=0.5)
     p.add_argument(
@@ -586,9 +755,29 @@ def parse_args() -> argparse.Namespace:
         default=True,
         help="Must match training.",
     )
+    p.add_argument(
+        "--reward-reference-range-floor",
+        type=float,
+        default=0.05,
+        help="Must match training.",
+    )
+    p.add_argument(
+        "--reward-reference-velocity-range-floor",
+        type=float,
+        default=0.1,
+        help="Must match training.",
+    )
     p.add_argument("--max-steps", type=int, default=10000)
     p.add_argument("--seed", type=int, default=123)
-    p.add_argument("--record-outputs", action="store_true")
+    p.add_argument(
+        "--record-outputs",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Write detailed simulator outputs under <output-dir>/sim_outputs "
+            "(default: on). Use --no-record-outputs for metric-only rollout."
+        ),
+    )
     p.add_argument(
         "--grf-mode",
         choices=("prescribed", "online_sensor", "online"),
@@ -697,6 +886,23 @@ def parse_args() -> argparse.Namespace:
     valid_dests = {action.dest for action in p._actions}
     p.set_defaults(**{k: v for k, v in layered_defaults.items() if k in valid_dests})
     args = p.parse_args()
+    if args.checkpoint is None:
+        message = (
+            str(default_checkpoint_error)
+            if default_checkpoint_error is not None
+            else "No checkpoint was provided and no default checkpoint was found."
+        )
+        p.error(f"{message} Pass --checkpoint explicitly.")
+    if args.output_dir is None:
+        try:
+            checkpoint_path = _resolve_input_path(args.checkpoint)
+        except (FileNotFoundError, OSError) as exc:
+            p.error(
+                "Cannot resolve checkpoint for automatic rollout output naming: "
+                f"{exc}"
+            )
+        args.checkpoint = str(checkpoint_path)
+        args.output_dir = str(_default_rollout_output_dir(checkpoint_path, args.name))
     args._cfg_reward = cfg_reward
     return args
 

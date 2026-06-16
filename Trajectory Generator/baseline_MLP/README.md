@@ -47,7 +47,7 @@ stack SNN (skrl/snntorch resta solo in `envCMC-like`).
 | `asymmetric_rl_module.py` | Custom RLModule per l'asymmetric actor-critic: policy su `obs[:n_actor]`, value sul vettore pieno. |
 | `tb_logging.py` | TensorBoard: `RewardComponentsCallback` (componenti reward/loss → metriche env-runner) + `SummaryWriter` su `<output_dir>/tensorboard`. |
 | `train_ppo_mlp.py` | Entrypoint training supervisionato: timeout rigidi e cleanup dell'albero Ray, `PPOConfig` + loop `algo.train()` + checkpoint best/last + RLModule inference-only + `summary.json` + TensorBoard. |
-| `rollout_eval.py` | Carica l'RLModule nel figlio supervisionato, rollout deterministico, heartbeat per-step e metriche; con `--record-outputs` salva .sto per `visualize.py`. |
+| `rollout_eval.py` | Carica l'RLModule nel figlio supervisionato, rollout deterministico, heartbeat per-step e metriche; di default salva .sto per `visualize.py` (`--no-record-outputs` per metriche leggere). |
 | `process_watchdog.py` | Supervisore cross-platform con heartbeat, timeout di startup/stallo/run e self-test su figlio volutamente bloccato. |
 | `validate_online_grf_train_inference.py` | Gate profilo-specifico e smoke brevi del contratto onlineGRF usato da training/inference. |
 | `commands.txt` | Comandi PowerShell pronti (setup, smoke, train, rollout, tensorboard, reward custom). |
@@ -56,7 +56,8 @@ stack SNN (skrl/snntorch resta solo in `envCMC-like`).
 
 Tutti i parametri di **rete** e **simulazione** vivono in un unico file,
 `training_cfg.yaml`, che è la **sorgente di riferimento** per lanciare un
-training. I comandi passano solo `--output-dir` e gli eventuali override.
+training. Il comando default non richiede flag: output-dir e nome run vengono
+generati automaticamente; eventuali flag CLI restano override.
 
 - **Precedenza**: il YAML fornisce i *default*; un flag CLI esplicito (es.
   `--lr 5e-4`) **vince** sul YAML. Per una config alternativa (es. macOS) usare
@@ -71,12 +72,25 @@ training. I comandi passano solo `--output-dir` e gli eventuali override.
   `model.asymmetric_actor_critic`; alias deprecato `--critic-privileged-observation`).
 - **`action_mode`**: `absolute` è l'unica modalità di produzione e **non** è nel
   YAML; `delta`/`raw` restano flag CLI solo per diagnostica.
+- **Layout risultati**: training in `Trajectory Generator/runs/training`;
+  rollout e oracle diagnostici in `Trajectory Generator/runs/rollout`.
+- **Nome training default**: `MLP_[strategy]_training_[MM-DD-YYYY]`, con
+  `strategy` derivata da `reward.reward_mode` (`imitation` oppure `ExNovo`).
+  `--name _suffix` aggiunge un suffisso custom; se il nome esiste gia vengono
+  usati `_02`, `_03`, ecc.
+- **Nome rollout default**: se non passi `--checkpoint`, viene usato l'ultimo
+  training valido in `runs/training`; la cartella rollout copia il nome del
+  training sostituendo `training` con `rollout` (oppure aggiungendo `_rollout`
+  ai run legacy). Anche qui `--name _suffix` e collisioni `_02`, `_03` sono
+  gestiti automaticamente.
 - **Snapshot + rollout auto-match**: il training scrive la config risolta (YAML +
-  override) in `<output_dir>/training_cfg.resolved.yaml`. `rollout_eval.py`, dato
-  `--checkpoint`, la **carica automaticamente** dalla cartella del run, così
-  env/rete/reward/`action_mode` combaciano sempre con il training senza
-  ri-specificare i flag. `--no-auto-config` disattiva l'auto-load, `--config`
-  forza un file; i checkpoint **legacy** senza snapshot richiedono i flag a mano.
+  override) in `<output_dir>/training_cfg.resolved.yaml`. `rollout_eval.py`
+  sceglie l'ultimo checkpoint `rl_module_best` se `--checkpoint` manca e carica
+  automaticamente lo snapshot dalla cartella del run, cosi env/rete/reward/
+  `action_mode` combaciano sempre con il training senza ri-specificare i flag.
+  `--checkpoint` resta l'override esplicito, `--no-auto-config` disattiva
+  l'auto-load, `--config` forza un file; i checkpoint **legacy** senza snapshot
+  richiedono i flag a mano.
 
 ## Uso rapido
 
@@ -84,16 +98,25 @@ Dalla **root** del simulatore (vedi `commands.txt` per la lista completa):
 
 ```powershell
 # training di riferimento: tutti i parametri da training_cfg.yaml
-... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --output-dir runs\baseline_mlp_hybrid_win
+python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py"
+
+# training con suffisso custom sul nome auto-generato
+python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --name _example
 
 # tiny train (single-process): override del YAML per un run rapido
-... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --num-env-runners 0 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --num-hidden-layers 2 --dim-hidden-layers 64 --startup-timeout-s 90 --iteration-timeout-s 90 --output-dir runs\_baseline_mlp_tiny
+... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --num-env-runners 0 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --num-hidden-layers 2 --dim-hidden-layers 64 --startup-timeout-s 90 --iteration-timeout-s 90 --name _tiny
 
 # resume manuale da un checkpoint completo RLlib
-... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --resume-from "Trajectory Generator\runs\_baseline_mlp_tiny\checkpoint_last" --iterations 2 --output-dir runs\_baseline_mlp_tiny
+... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --resume-from "Trajectory Generator\runs\training\_baseline_mlp_tiny\checkpoint_last" --iterations 2 --output-dir runs\training\_baseline_mlp_tiny
 
-# rollout dal checkpoint: env/rete/reward auto-caricati dallo snapshot del run
-... python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint runs\_baseline_mlp_tiny\rl_module_last --episode-duration 0.05
+# rollout di riferimento: ultimo training valido, output .sto completi
+python "Trajectory Generator\baseline_MLP\rollout_eval.py"
+
+# rollout leggero senza .sto
+python "Trajectory Generator\baseline_MLP\rollout_eval.py" --no-record-outputs
+
+# rollout manuale da checkpoint specifico
+... python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint runs\training\_baseline_mlp_tiny\rl_module_last --output-dir runs\rollout\_baseline_mlp_tiny_rollout --episode-duration 0.05
 ```
 
 ## Staging (riduce il rischio su Windows)
@@ -290,7 +313,7 @@ Il training scrive eventi in `<output_dir>/tensorboard` (attivo di default;
 - `learners/default_policy/*` — `policy_loss`, `vf_loss`, `entropy`, KL, ...
 
 ```powershell
-... python -m tensorboard.main --logdir runs --port 6006   # http://localhost:6006
+... python -m tensorboard.main --logdir runs\training --port 6006   # http://localhost:6006
 ```
 
 Le componenti reward arrivano in TensorBoard tramite `RewardComponentsCallback`
@@ -306,7 +329,7 @@ training controllato da `50` iterazioni sul simulatore OpenSim reale con
 `online_sensor`, un EnvRunner, batch `4`, orizzonte `0.08 s` e timeout totale
 `900 s`.
 
-Il run `runs/_baseline_mlp_50iter_online_sensor` ha completato `50/50`
+Il run `runs/training/_baseline_mlp_50iter_online_sensor` ha completato `50/50`
 iterazioni in `716.42 s`, senza timeout o processi Ray residui. Tutte le
 metriche core sono finite; il return medio passa da `2.4356` nelle prime 10
 iterazioni a `2.6363` nelle ultime 10. Il value loss passa da `2.8313` a
