@@ -1,0 +1,96 @@
+# Manual annotations for the generated historical runs registry.
+# This file is intentionally tracked. Put human corrections here instead of
+# editing historical_runs.index.json by hand.
+
+version: 1
+
+runs:
+  baseline_mlp_imit_v4_c2_4hz_obs_target:
+    title: V4 imitation with target observation
+    platform: win
+    lineage: v4_obs_target_reward_norm
+    lineage_order: 1
+    best_return: 244.08135666176585
+    best_iteration: 40
+    notes:
+      - First 40 logical iterations of the V4 imitation obs-target run.
+      - This is the parent of the reward-normalized continuation.
+    report_refs:
+      - reports/daily/2026-06-16_daily-report.md
+      - reports/user/2026-06-16_reward_adimensionale_normalizzazione_completa.md
+
+  baseline_mlp_imit_v4_c2_4hz_obs_target_resume_reward_norm:
+    title: Reward-normalized continuation of V4 obs-target
+    platform: win
+    lineage: v4_obs_target_reward_norm
+    lineage_order: 2
+    parent_run: baseline_mlp_imit_v4_c2_4hz_obs_target
+    best_return: 277.75698812995
+    best_iteration: 59
+    notes:
+      - Logical continuation of the 40-iteration V4 obs-target run with the dimensionless reward.
+      - "Treat the two folders as one experiment chain: 40 iterations plus 20 resume iterations."
+    report_refs:
+      - reports/daily/2026-06-16_daily-report.md
+      - reports/user/2026-06-16_reward_adimensionale_normalizzazione_completa.md
+
+  MLP_imitation_training_06-16-2026:
+    title: Interrupted default MLP imitation run
+    platform: win
+    lineage: interrupted_default_2026_06_16
+    lineage_order: 1
+    notes:
+      - Interrupted by user; keep as provenance only.
+      - Do not use as a completed baseline.
+    report_refs:
+      - reports/daily/2026-06-16_daily-report.md
+
+report_only:
+  - id: baseline_mlp_50iter_online_sensor
+    date: 2026-06-05
+    platform: unknown
+    summary: Controlled 50-iteration baseline MLP/RLlib run with online_sensor documented in reports; current run folder is not present under runs/training.
+    report_refs:
+      - reports/daily/2026-06-05_daily-report.md
+      - reports/user/2026-06-05_baseline_mlp_rllib_ppo_single_agent.md
+
+  - id: baseline_mlp_training_stabilization_50iter
+    date: 2026-06-07
+    platform: win
+    summary: Stabilized RLlib MLP training reached a real 50-iteration run with checkpoints, TensorBoard, and finite metrics.
+    report_refs:
+      - reports/daily/2026-06-07_daily-report.md
+      - reports/user/2026-06-07_stabilizzazione_training_rllib_mlp.md
+
+  - id: baseline_mlp_hybrid_full_gait_diagnostic
+    date: 2026-06-08
+    platform: win
+    summary: First full-gait hybrid MLP diagnostic training; useful for GRF hybrid architecture decisions, not a final imitation baseline.
+    report_refs:
+      - reports/daily/2026-06-08_daily-report.md
+      - reports/user/2026-06-08_training_full_gait_diagnostico_mlp.md
+
+  - id: baseline_mlp_hybrid_win_timeout
+    date: 2026-06-09
+    platform: win
+    summary: Overnight hybrid run timed out around iterations 41-43; best/last checkpoints were usable for rollout diagnostics.
+    report_refs:
+      - reports/daily/2026-06-09_daily-report.md
+      - reports/user/2026-06-09_training_ibrido_notturno_stallo_timeout_iterazione.md
+
+  - id: baseline_mlp_imit_win_40iter
+    date: 2026-06-10
+    platform: win
+    summary: First long imitation training with sound-leg anti-phase reward; native Ray crash occurred and was resumed from checkpoint.
+    report_refs:
+      - reports/daily/2026-06-10_daily-report.md
+      - reports/daily/2026-06-11_daily-report.md
+      - reports/user/2026-06-10_reward_imitation_gamba_sana.md
+
+  - id: baseline_mlp_imit_v4_c2_4hz
+    date: 2026-06-15
+    platform: win
+    summary: V4 C2/jerk-limited imitation training line before reward normalization; current tracked folders cover the obs-target and reward-normalized continuation.
+    report_refs:
+      - reports/daily/2026-06-15_daily-report.md
+      - reports/user/2026-06-15_target_imitativo_observation_space.md

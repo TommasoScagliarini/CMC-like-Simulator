@@ -515,6 +515,10 @@ class _TrainingMonitor:
                     "checkpoint_best": str(self._output_dir / "checkpoint_best"),
                     "rl_module_last": str(self._output_dir / "rl_module_last"),
                     "rl_module_best": str(self._output_dir / "rl_module_best"),
+                    "finished_at": datetime.now()
+                    .astimezone()
+                    .isoformat(timespec="seconds"),
+                    **_runtime_summary_fields(),
                 }
             )
             summary_path.write_text(
@@ -873,6 +877,42 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _platform_tag() -> str:
+    if sys.platform.startswith("win"):
+        return "win"
+    if sys.platform == "darwin":
+        return "mac"
+    if sys.platform.startswith("linux"):
+        return "linux"
+    return sys.platform or "unknown"
+
+
+def _runtime_summary_fields() -> dict[str, str]:
+    return {
+        "platform": _platform_tag(),
+        "python_version": sys.version.split()[0],
+        "updated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+    }
+
+
+def _stamp_summary_finished(summary: dict[str, Any]) -> None:
+    now = datetime.now().astimezone().isoformat(timespec="seconds")
+    summary.setdefault("started_at", now)
+    summary["finished_at"] = now
+    summary.update(_runtime_summary_fields())
+
+
+def _update_history_best_effort(enabled: bool) -> None:
+    if not enabled:
+        return
+    try:
+        import update_historical_runs
+
+        update_historical_runs.update_history()
+    except Exception as exc:  # noqa: BLE001 - history must never fail training
+        print(f"[history] WARNING: could not update historical runs: {exc}", flush=True)
+
+
 def run(args: argparse.Namespace) -> dict:
     output_dir = _resolve_output_dir(args.output_dir, "baseline_mlp")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -903,6 +943,7 @@ def run(args: argparse.Namespace) -> dict:
     iteration_start = max(1, int(args.iteration_start or 0))
     iterations_completed_this_process = 0
     start_time = time.perf_counter()
+    started_at = datetime.now().astimezone().isoformat(timespec="seconds")
 
     monitor = _TrainingMonitor(
         output_dir,
@@ -1149,6 +1190,9 @@ def run(args: argparse.Namespace) -> dict:
         "interrupted": interrupted,
         "timed_out": False,
         "error": error,
+        "started_at": started_at,
+        "finished_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        **_runtime_summary_fields(),
         "elapsed_wall_time_s": time.perf_counter() - start_time,
         "output_dir": str(output_dir),
         "rllib_log_root": str(output_dir / "rllib"),
@@ -1195,6 +1239,7 @@ def run(args: argparse.Namespace) -> dict:
         "rl_module_best": str(output_dir / "rl_module_best"),
     }
     _write_json(output_dir / "summary.json", summary)
+    _update_history_best_effort(args.update_history)
 
     if tb_writer is not None:
         try:
@@ -1577,7 +1622,9 @@ def run_supervised(args: argparse.Namespace) -> int:
                     "crash_restarts": crash_restarts,
                 }
             )
+            _stamp_summary_finished(summary)
             _write_json(summary_path, summary)
+            _update_history_best_effort(args.update_history)
             _write_json(
                 supervisor_state_path,
                 {
@@ -1649,7 +1696,9 @@ def run_supervised(args: argparse.Namespace) -> int:
                         "crash_restarts": crash_restarts,
                     }
                 )
+                _stamp_summary_finished(summary)
                 _write_json(summary_path, summary)
+                _update_history_best_effort(args.update_history)
                 _write_json(
                     supervisor_state_path,
                     {
@@ -1737,7 +1786,9 @@ def run_supervised(args: argparse.Namespace) -> int:
                         "restart_count": restart_count,
                     }
                 )
+                _stamp_summary_finished(summary)
                 _write_json(summary_path, summary)
+                _update_history_best_effort(args.update_history)
                 _write_json(
                     supervisor_state_path,
                     {
@@ -1769,7 +1820,9 @@ def run_supervised(args: argparse.Namespace) -> int:
                         "restart_count": restart_count,
                     }
                 )
+                _stamp_summary_finished(summary)
                 _write_json(summary_path, summary)
+                _update_history_best_effort(args.update_history)
                 _write_json(
                     supervisor_state_path,
                     {
@@ -1835,7 +1888,9 @@ def run_supervised(args: argparse.Namespace) -> int:
                 f"{crash_restart_count} crash restart(s), "
                 f"{restart_count} total restart(s)."
             )
+        _stamp_summary_finished(summary)
         _write_json(summary_path, summary)
+        _update_history_best_effort(args.update_history)
         _write_json(
             supervisor_state_path,
             {
@@ -2040,6 +2095,14 @@ def parse_args() -> argparse.Namespace:
         default=True,
         help="Live in-place progress bar with percent, iteration counter, "
         "elapsed and ETA (default: on). Use --no-progress for plain logging.",
+    )
+    p.add_argument(
+        "--update-history",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Update Trajectory Generator/runs/historical_runs.md after the "
+        "training summary is written (default: on). Use --no-update-history "
+        "for diagnostics that should not touch the registry.",
     )
     p.add_argument(
         "--verbose-workers",
