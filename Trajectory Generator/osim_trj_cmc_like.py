@@ -67,7 +67,7 @@ except ModuleNotFoundError:  # pragma: no cover - small import-time fallback.
 from config import SimulatorConfig
 from kinematics_interpolator import KinematicsInterpolator
 from model_loader import setup_model
-from path_resolver import normalize_cli_existing_path
+from path_resolver import normalize_cli_existing_path, resolve_repo_path
 from setup_io import read_last_setup_path, read_setup_xml
 from simulation_runner import SegmentWallClockTimeout, SimulationRunner
 
@@ -1381,7 +1381,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
     def _resolve_setup_path(self) -> Optional[Path]:
         raw = self.env_cfg.setup_xml_path
         if raw:
-            return Path(raw)
+            return resolve_repo_path(raw)
         last = read_last_setup_path()
         return last if last is not None else None
 

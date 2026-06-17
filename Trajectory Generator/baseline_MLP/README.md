@@ -94,29 +94,35 @@ generati automaticamente; eventuali flag CLI restano override.
 
 ## Uso rapido
 
-Dalla **root** del simulatore (vedi `commands.txt` per la lista completa):
+Dalla **root** del simulatore (vedi `commands.txt` per la lista completa).
+I path relativi usano `/`: funzionano in PowerShell e sono necessari su macOS.
 
 ```powershell
 # training di riferimento: tutti i parametri da training_cfg.yaml
-python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py"
+python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py"
 
 # training con suffisso custom sul nome auto-generato
-python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --name _example
+python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --name _example
 
 # tiny train (single-process): override del YAML per un run rapido
-... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --num-env-runners 0 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --num-hidden-layers 2 --dim-hidden-layers 64 --startup-timeout-s 90 --iteration-timeout-s 90 --name _tiny
+... python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --num-env-runners 0 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --num-hidden-layers 2 --dim-hidden-layers 64 --startup-timeout-s 90 --iteration-timeout-s 90 --name _tiny
 
 # resume manuale da un checkpoint completo RLlib
-... python "Trajectory Generator\baseline_MLP\train_ppo_mlp.py" --resume-from "Trajectory Generator\runs\training\_baseline_mlp_tiny\checkpoint_last" --iterations 2 --output-dir runs\training\_baseline_mlp_tiny
+... python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --resume-from "Trajectory Generator/runs/training/_baseline_mlp_tiny/checkpoint_last" --iterations 2 --output-dir runs/training/_baseline_mlp_tiny
 
 # rollout di riferimento: ultimo training valido, output .sto completi
-python "Trajectory Generator\baseline_MLP\rollout_eval.py"
+python "Trajectory Generator/baseline_MLP/rollout_eval.py"
 
 # rollout leggero senza .sto
-python "Trajectory Generator\baseline_MLP\rollout_eval.py" --no-record-outputs
+python "Trajectory Generator/baseline_MLP/rollout_eval.py" --no-record-outputs
 
 # rollout manuale da checkpoint specifico
-... python "Trajectory Generator\baseline_MLP\rollout_eval.py" --checkpoint runs\training\_baseline_mlp_tiny\rl_module_last --output-dir runs\rollout\_baseline_mlp_tiny_rollout --episode-duration 0.05
+... python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint runs/training/_baseline_mlp_tiny/rl_module_last --output-dir runs/rollout/_baseline_mlp_tiny_rollout --episode-duration 0.05
+
+# plot e visualizer dall'ultimo rollout valido
+python "plot/plotter.py" --mlp
+python "visualize.py" --mlp
+python "visualize.py" --mlp --save
 ```
 
 ## Staging (riduce il rischio su Windows)
@@ -313,7 +319,7 @@ Il training scrive eventi in `<output_dir>/tensorboard` (attivo di default;
 - `learners/default_policy/*` — `policy_loss`, `vf_loss`, `entropy`, KL, ...
 
 ```powershell
-... python -m tensorboard.main --logdir runs\training --port 6006   # http://localhost:6006
+... python -m tensorboard.main --logdir runs/training --port 6006   # http://localhost:6006
 ```
 
 Le componenti reward arrivano in TensorBoard tramite `RewardComponentsCallback`

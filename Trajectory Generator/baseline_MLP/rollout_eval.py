@@ -10,7 +10,7 @@ Loading only the RLModule (not the full Algorithm) keeps eval lightweight and
 needs no Ray cluster / env registration.
 
 Run from the repository root, e.g.:
-  python "Trajectory Generator\\baseline_MLP\\rollout_eval.py"
+  python "Trajectory Generator/baseline_MLP/rollout_eval.py"
 """
 
 from __future__ import annotations
@@ -43,8 +43,17 @@ _ROLLOUT_RUNS_ROOT = _RUNS_ROOT / "rollout"
 _WATCHDOG_FILENAME = "watchdog_state.json"
 
 
+def _cli_path(value: str | Path) -> Path:
+    text = str(value)
+    if sys.platform != "win32":
+        text = text.replace("\\", "/")
+    return Path(text).expanduser()
+
+
 def _strip_runs_prefix(path: Path, category: str) -> Path:
     parts = path.parts
+    if parts and parts[0].lower() == "trajectory generator":
+        parts = parts[1:]
     if parts and parts[0].lower() == "runs":
         parts = parts[1:]
     if parts and parts[0].lower() == category.lower():
@@ -136,7 +145,7 @@ def _latest_training_checkpoint() -> Path:
 
 def _resolve_category_output_dir(output_dir, default_stem, category_root, category):
     if output_dir:
-        path = Path(output_dir)
+        path = _cli_path(output_dir)
         if path.is_absolute():
             resolved = path.resolve()
             if _under(resolved, _RUNS_ROOT) and not _under(resolved, category_root):
@@ -200,7 +209,7 @@ def _resolve_input_path(value: str) -> Path:
     working after the 2026-06-09 move of ``runs/`` — mirroring how
     ``--output-dir`` is resolved. Absolute paths are honored as-is.
     """
-    path = Path(value).expanduser()
+    path = _cli_path(value)
     if path.is_absolute():
         return path.resolve()
     cwd_candidate = (Path.cwd() / path).resolve()

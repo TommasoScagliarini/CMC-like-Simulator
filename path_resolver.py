@@ -6,6 +6,7 @@ Centralized path resolution for model bundles and repo-relative resources.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -15,6 +16,23 @@ if TYPE_CHECKING:
 
 
 REPO_ROOT = Path(__file__).resolve().parent
+
+
+def normalize_cli_path_text(raw: str | Path) -> str:
+    """Normalize command-line paths accepted on both Windows and POSIX.
+
+    Windows accepts forward slashes in most Python-facing paths, but POSIX treats
+    backslashes as literal filename characters. Re-map Windows-style separators
+    only off Windows so commands copied from PowerShell still resolve on macOS.
+    """
+    text = os.fspath(raw)
+    if os.name != "nt":
+        text = text.replace("\\", "/")
+    return text
+
+
+def cli_path(raw: str | Path) -> Path:
+    return Path(normalize_cli_path_text(raw)).expanduser()
 
 
 @dataclass(frozen=True)
@@ -32,7 +50,7 @@ class ResolvedSimulatorPaths:
 
 
 def resolve_repo_path(raw: str | Path) -> Path:
-    path = Path(raw)
+    path = cli_path(raw)
     return path if path.is_absolute() else REPO_ROOT / path
 
 
@@ -43,7 +61,7 @@ def normalize_cli_existing_path(raw: str | Path) -> str:
     This preserves bundle-relative filenames such as ``Adjusted_SEASEA.osim`` or
     ``data/3DGaitModel2392_Kinematics_q.sto`` when no repo-level file exists.
     """
-    text = str(raw)
+    text = normalize_cli_path_text(raw)
     path = Path(text)
     if path.is_absolute():
         return str(path)
@@ -52,6 +70,7 @@ def normalize_cli_existing_path(raw: str | Path) -> str:
 
 
 def _looks_like_explicit_path(raw: str) -> bool:
+    raw = normalize_cli_path_text(raw)
     return raw.startswith(".") or "/" in raw or "\\" in raw
 
 
@@ -105,7 +124,7 @@ def _resolve_model_path(bundle_dir: Path, model_file: str | None) -> Path:
 
 
 def _resolve_bundle_input_path(bundle_dir: Path, raw: str | Path) -> Path:
-    path = Path(raw)
+    path = cli_path(raw)
     return path if path.is_absolute() else bundle_dir / path
 
 

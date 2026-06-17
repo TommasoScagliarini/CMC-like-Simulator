@@ -28,6 +28,7 @@ evaluation does not silently change when the env gains a new diagnostic loss.
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, Mapping
@@ -375,7 +376,9 @@ def load_reward_overrides(spec: str | None) -> dict | None:
     """
     if not spec:
         return None
-    path = Path(spec)
+    text = str(spec)
+    path_text = text.replace("\\", "/") if os.name != "nt" else text
+    path = Path(path_text)
     text = path.read_text(encoding="utf-8") if path.exists() else spec
     data = json.loads(text)
     if not isinstance(data, dict):

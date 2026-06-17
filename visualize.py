@@ -35,6 +35,7 @@ import numpy as np
 from config import SimulatorConfig
 from output import read_sto
 from path_resolver import (
+    normalize_cli_path_text,
     normalize_cli_existing_path,
     resolve_repo_path,
     resolve_simulator_paths,
@@ -76,6 +77,7 @@ def _library_variant_exists(path_without_ext: str) -> bool:
 
 def _resolve_project_path(path: str, library_basename: bool = False) -> str:
     """Resolve repo-relative defaults even if visualize.py is launched elsewhere."""
+    path = normalize_cli_path_text(path)
     if os.path.isabs(path):
         return path
 
@@ -206,7 +208,7 @@ def _resolve_visualize_output_dir(
     name_suffix: str | None,
 ) -> Path:
     if output_dir:
-        raw = Path(output_dir).expanduser()
+        raw = Path(normalize_cli_path_text(output_dir)).expanduser()
         if raw.is_absolute():
             return raw.resolve()
         parts = raw.parts
@@ -380,19 +382,167 @@ _SWIFT_FIND_WINDOW = """\
 import CoreGraphics
 let wl = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) \
     as! [[String:Any]]
+let needles = ["simbody", "opensim", "visualizer"]
+func number(_ value: Any?) -> Double {
+    if let v = value as? Double { return v }
+    if let v = value as? Int { return Double(v) }
+    if let v = value as? CGFloat { return Double(v) }
+    return 0.0
+}
+var bestWindow = 0
+var bestArea = 0.0
 for w in wl {
     let owner = w["kCGWindowOwnerName"] as? String ?? ""
-    if owner.lowercased().contains("simbody") \
-       || owner.lowercased().contains("visuali") {
-        let wid = w["kCGWindowNumber"] as? Int ?? 0
-        if wid > 0 { print(wid); break }
+    let title = w["kCGWindowName"] as? String ?? ""
+    let haystack = (owner + " " + title).lowercased()
+    if !needles.contains(where: { haystack.contains($0) }) { continue }
+    let layer = w["kCGWindowLayer"] as? Int ?? 0
+    if layer != 0 { continue }
+    let wid = w["kCGWindowNumber"] as? Int ?? 0
+    guard let bounds = w["kCGWindowBounds"] as? [String:Any] else { continue }
+    let width = number(bounds["Width"])
+    let height = number(bounds["Height"])
+    let area = width * height
+    if wid > 0 && width > 100 && height > 100 && area > bestArea {
+        bestWindow = wid
+        bestArea = area
     }
 }
+if bestWindow > 0 { print(bestWindow) }
 """
+
+_OBJC_FIND_WINDOW_SOURCE = r"""#import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
+#include <stdlib.h>
+
+static double numberValue(id value) {
+    if ([value respondsToSelector:@selector(doubleValue)]) {
+        return [value doubleValue];
+    }
+    return 0.0;
+}
+
+int main(int argc, const char * argv[]) {
+    int targetPid = argc > 1 ? atoi(argv[1]) : -1;
+    NSArray *needles = @[@"simbody", @"opensim", @"visualizer"];
+    NSArray *windows = CFBridgingRelease(
+        CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID)
+    );
+    int bestWindow = 0;
+    double bestScore = 0.0;
+    for (NSDictionary *w in windows) {
+        NSNumber *windowNumber = w[(id)kCGWindowNumber];
+        NSNumber *layer = w[(id)kCGWindowLayer];
+        NSNumber *ownerPid = w[(id)kCGWindowOwnerPID];
+        NSDictionary *bounds = w[(id)kCGWindowBounds];
+        if (!windowNumber || !bounds || layer.intValue != 0) {
+            continue;
+        }
+        double width = numberValue(bounds[@"Width"]);
+        double height = numberValue(bounds[@"Height"]);
+        double area = width * height;
+        if (width <= 100.0 || height <= 100.0 || area <= 0.0) {
+            continue;
+        }
+        NSString *owner = w[(id)kCGWindowOwnerName] ?: @"";
+        NSString *title = w[(id)kCGWindowName] ?: @"";
+        NSString *haystack = [[NSString stringWithFormat:@"%@ %@", owner, title] lowercaseString];
+        BOOL textMatch = NO;
+        for (NSString *needle in needles) {
+            if ([haystack containsString:needle]) {
+                textMatch = YES;
+                break;
+            }
+        }
+        BOOL pidMatch = targetPid > 0 && ownerPid && ownerPid.intValue == targetPid;
+        if (!textMatch && !pidMatch) {
+            continue;
+        }
+        double score = area + (textMatch ? 1000000000000.0 : 0.0) + (pidMatch ? 100000000000.0 : 0.0);
+        if (score > bestScore) {
+            bestScore = score;
+            bestWindow = windowNumber.intValue;
+        }
+    }
+    if (bestWindow > 0) {
+        printf("%d\n", bestWindow);
+        return 0;
+    }
+    return 1;
+}
+"""
+
+_MACOS_WINDOW_HELPER_PATH: str | None = None
+_MACOS_WINDOW_HELPER_FAILED = False
+
+
+def _macos_window_helper_path() -> str | None:
+    """Build a tiny CoreGraphics helper that prints the Simbody CGWindowID."""
+    global _MACOS_WINDOW_HELPER_PATH, _MACOS_WINDOW_HELPER_FAILED
+
+    if _MACOS_WINDOW_HELPER_PATH and os.path.isfile(_MACOS_WINDOW_HELPER_PATH):
+        return _MACOS_WINDOW_HELPER_PATH
+    if _MACOS_WINDOW_HELPER_FAILED:
+        return None
+
+    clang = shutil.which("clang") or ("/usr/bin/clang" if os.path.isfile("/usr/bin/clang") else None)
+    if clang is None:
+        _MACOS_WINDOW_HELPER_FAILED = True
+        return None
+
+    helper_dir = Path(tempfile.gettempdir()) / "opensim_viz_helpers"
+    source_path = helper_dir / "find_simbody_window.m"
+    binary_path = helper_dir / "find_simbody_window"
+    try:
+        helper_dir.mkdir(parents=True, exist_ok=True)
+        source_path.write_text(_OBJC_FIND_WINDOW_SOURCE, encoding="utf-8")
+        subprocess.run(
+            [
+                clang,
+                "-fobjc-arc",
+                "-framework",
+                "Foundation",
+                "-framework",
+                "CoreGraphics",
+                str(source_path),
+                "-o",
+                str(binary_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+    except Exception:
+        _MACOS_WINDOW_HELPER_FAILED = True
+        return None
+
+    _MACOS_WINDOW_HELPER_PATH = str(binary_path)
+    return _MACOS_WINDOW_HELPER_PATH
+
+
+def _find_macos_simbody_window_id_objc() -> int | None:
+    helper = _macos_window_helper_path()
+    if helper is None:
+        return None
+    try:
+        r = subprocess.run(
+            [helper, str(os.getpid())],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        wid = r.stdout.strip()
+        return int(wid) if wid else None
+    except Exception:
+        return None
 
 
 def _find_macos_simbody_window_id() -> int | None:
     """Return the macOS CGWindowID of the Simbody visualizer, or None."""
+    wid = _find_macos_simbody_window_id_objc()
+    if wid is not None:
+        return wid
     try:
         r = subprocess.run(
             ["swift", "-e", _SWIFT_FIND_WINDOW],
@@ -448,6 +598,17 @@ def _find_simbody_window_id() -> int | None:
     return None
 
 
+def _wait_for_simbody_window_id(timeout_s: float = 8.0) -> int | None:
+    deadline = time.monotonic() + max(0.0, timeout_s)
+    while True:
+        window_id = _find_simbody_window_id()
+        if window_id is not None:
+            return window_id
+        if time.monotonic() >= deadline:
+            return None
+        time.sleep(0.25)
+
+
 def _windows_window_bbox(window_id: int | None) -> tuple[int, int, int, int] | None:
     if os.name != "nt" or window_id is None:
         return None
@@ -474,12 +635,9 @@ def _windows_window_bbox(window_id: int | None) -> tuple[int, int, int, int] | N
 
 def _capture_frame_macos(window_id: int | None, dest: str) -> bool:
     """Capture a single frame to a PNG file via macOS screencapture."""
-    if shutil.which("screencapture") is None:
+    if shutil.which("screencapture") is None or window_id is None:
         return False
-    cmd = ["screencapture", "-x"]
-    if window_id is not None:
-        cmd += ["-l", str(window_id)]
-    cmd.append(dest)
+    cmd = ["screencapture", "-x", "-l", str(window_id), dest]
     try:
         subprocess.run(
             cmd,
@@ -511,9 +669,7 @@ def _capture_frame_pillow(window_id: int | None, dest: str) -> bool:
 def _capture_frame(window_id: int | None, dest: str) -> bool:
     """Capture a single frame to a PNG file using the current platform backend."""
     if sys.platform == "darwin":
-        if _capture_frame_macos(window_id, dest):
-            return True
-        return _capture_frame_pillow(window_id, dest)
+        return _capture_frame_macos(window_id, dest)
     if os.name == "nt":
         return _capture_frame_pillow(window_id, dest)
     return _capture_frame_pillow(window_id, dest)
@@ -673,9 +829,16 @@ def run_visualizer(
         simbody_viz.drawFrameNow(state)
         time.sleep(0.5)  # let the window appear
 
-        window_id = _find_simbody_window_id()
+        window_id = _wait_for_simbody_window_id()
         if window_id is not None:
             print(f"[Viz] Found Simbody window (id={window_id})")
+        elif sys.platform == "darwin":
+            shutil.rmtree(frame_dir, ignore_errors=True)
+            raise RuntimeError(
+                "Simbody/OpenSim visualizer window not found on macOS; "
+                "refusing to capture the full screen. Bring the visualizer "
+                "window on screen and retry."
+            )
         else:
             print("[Viz] WARNING: Simbody window not found, "
                   "capturing full screen instead")

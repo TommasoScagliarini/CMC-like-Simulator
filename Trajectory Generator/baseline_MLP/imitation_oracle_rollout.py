@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -44,9 +45,16 @@ DEFAULT_ONLINE_GRF_PROFILE = (
 )
 
 
+def _cli_path(value: str | Path) -> Path:
+    text = os.fspath(value)
+    if os.name != "nt":
+        text = text.replace("\\", "/")
+    return Path(text).expanduser()
+
+
 def _resolve_output_dir(value: str | None) -> Path:
     if value:
-        path = Path(value)
+        path = _cli_path(value)
         if path.is_absolute():
             resolved = path.resolve()
             try:
@@ -57,6 +65,8 @@ def _resolve_output_dir(value: str | None) -> Path:
                 return resolved
             return (ROLLOUT_RUNS_ROOT / rel).resolve()
         parts = path.parts
+        if parts and parts[0].lower() == "trajectory generator":
+            parts = parts[1:]
         if parts and parts[0].lower() == "runs":
             parts = parts[1:]
         if parts and parts[0].lower() == "rollout":
@@ -78,7 +88,7 @@ def _setup_with_knee_kp(
 ) -> str:
     if knee_kp is None:
         return setup_xml
-    setup_path = Path(setup_xml)
+    setup_path = _cli_path(setup_xml)
     if not setup_path.is_absolute():
         setup_path = REPO_ROOT / setup_path
     setup_tree = ET.parse(setup_path)

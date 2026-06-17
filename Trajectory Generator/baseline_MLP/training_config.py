@@ -17,6 +17,7 @@ torch/OpenSim shim are loaded.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any, Callable
@@ -31,6 +32,13 @@ RESOLVED_CONFIG_NAME = "training_cfg.resolved.yaml"
 # (output_dir/resume_from): the snapshot describes the reproducible config, not
 # the invocation, and the rollout must not inherit the training run's output dir.
 _SNAPSHOT_SKIP_SECTIONS = {"run"}
+
+
+def _cli_path(value: str | Path) -> Path:
+    text = os.fspath(value)
+    if os.name != "nt":
+        text = text.replace("\\", "/")
+    return Path(text).expanduser()
 
 
 def _warn(message: str) -> None:
@@ -157,7 +165,7 @@ def resolve_config_path(value: str | Path | None) -> Path:
     CWD first, then this module's directory; ``None`` -> the default path."""
     if value is None:
         return DEFAULT_CONFIG_PATH
-    path = Path(value)
+    path = _cli_path(value)
     if path.is_absolute():
         return path
     cwd_candidate = Path.cwd() / path
@@ -169,7 +177,7 @@ def resolve_config_path(value: str | Path | None) -> Path:
 def load(path: str | Path) -> dict[str, Any]:
     """Load a YAML config into a dict. A missing *default* file yields ``{}`` (the
     built-in argparse defaults then apply); a missing *explicit* file is an error."""
-    path = Path(path)
+    path = _cli_path(path)
     if not path.is_file():
         if path.resolve() == DEFAULT_CONFIG_PATH.resolve():
             return {}
@@ -265,7 +273,7 @@ def dump_resolved(
             nested[section] = section_dict
     nested["reward"] = _resolve_reward(reward_overrides)
 
-    path = Path(path)
+    path = _cli_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
         handle.write("# Resolved training config (auto-generated): YAML + CLI overrides.\n")
@@ -282,7 +290,7 @@ def load_resolved_for_checkpoint(checkpoint_dir: str | Path | None) -> dict[str,
     Returns ``None`` if no snapshot is found (legacy run)."""
     if not checkpoint_dir:
         return None
-    base = Path(checkpoint_dir)
+    base = _cli_path(checkpoint_dir)
     try:
         base = base.resolve()
     except OSError:

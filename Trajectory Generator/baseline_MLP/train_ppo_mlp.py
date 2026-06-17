@@ -11,7 +11,7 @@ Staging:
     Windows torch/OpenSim shim is applied in each worker via a setup hook.
 
 Run from the repository root, e.g.:
-  python "Trajectory Generator\\baseline_MLP\\train_ppo_mlp.py" --setup-xml ...
+  python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --setup-xml ...
 """
 
 from __future__ import annotations
@@ -55,8 +55,17 @@ _WATCHDOG_FILENAME = "watchdog_state.json"
 _SUPERVISOR_STATE_FILENAME = "supervisor_state.json"
 
 
+def _cli_path(value: str | Path) -> Path:
+    text = os.fspath(value)
+    if os.name != "nt":
+        text = text.replace("\\", "/")
+    return Path(text).expanduser()
+
+
 def _strip_runs_prefix(path: Path, category: str) -> Path:
     parts = path.parts
+    if parts and parts[0].lower() == "trajectory generator":
+        parts = parts[1:]
     if parts and parts[0].lower() == "runs":
         parts = parts[1:]
     if parts and parts[0].lower() == category.lower():
@@ -74,7 +83,7 @@ def _under(path: Path, root: Path) -> bool:
 
 def _resolve_category_output_dir(output_dir, default_stem, category_root, category):
     if output_dir:
-        path = Path(output_dir)
+        path = _cli_path(output_dir)
         if path.is_absolute():
             resolved = path.resolve()
             if _under(resolved, _RUNS_ROOT) and not _under(resolved, category_root):
@@ -122,7 +131,7 @@ def _unique_path(path: Path) -> Path:
 def _load_reward_json_for_run_name(spec: str | None) -> dict[str, Any]:
     if not spec:
         return {}
-    path = Path(spec)
+    path = _cli_path(spec)
     text = path.read_text(encoding="utf-8") if path.exists() else spec
     data = json.loads(text)
     if not isinstance(data, dict):
@@ -848,7 +857,7 @@ def _resolve_resume_path(value: str | None) -> Path | None:
     """
     if not value:
         return None
-    path = Path(value).expanduser()
+    path = _cli_path(value)
     if path.is_absolute():
         return path.resolve()
     cwd_candidate = (Path.cwd() / path).resolve()

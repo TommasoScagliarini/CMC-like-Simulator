@@ -81,7 +81,10 @@ def _resolve_setup_xml(value: Any) -> Any:
     """
     if not value:
         return value
-    path = Path(value)
+    text = os.fspath(value)
+    if os.name != "nt":
+        text = text.replace("\\", "/")
+    path = Path(text)
     if not path.is_absolute():
         path = (_bootstrap.REPO_ROOT / path).resolve()
     return str(path)
