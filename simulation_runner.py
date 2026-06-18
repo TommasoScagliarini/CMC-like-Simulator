@@ -1210,6 +1210,8 @@ class SimulationRunner:
                 else (tau_input - tau_spring - Bm * omega_m) / Jm
             )
             diagnostics[coord_name] = {
+                "time_s": float(state.getTime()),
+                "tau_spring_nm": float(tau_spring),
                 "tau_input_raw_nm": float(tau_input_raw),
                 "tau_input_nm": float(tau_input),
                 "tau_input_saturated": float(abs(tau_input) >= 500.0 - 1e-9),
@@ -1247,6 +1249,8 @@ class SimulationRunner:
             def values(key: str) -> np.ndarray:
                 return np.asarray([float(row[key]) for row in rows], dtype=float)
 
+            time_s = values("time_s")
+            tau_spring = values("tau_spring_nm")
             raw = values("tau_input_raw_nm")
             tau_input = values("tau_input_nm")
             saturated = values("tau_input_saturated")
@@ -1256,10 +1260,29 @@ class SimulationRunner:
             motor_power = values("motor_power_w")
 
             def rms(data: np.ndarray) -> float:
+                if data.size == 0:
+                    return 0.0
                 return float(np.sqrt(np.mean(np.square(data))))
+
+            dt = np.diff(time_s)
+            tau_spring_diff = np.diff(tau_spring)
+            valid_dt = dt > 1e-12
+            tau_spring_rate = (
+                tau_spring_diff[valid_dt] / dt[valid_dt]
+                if np.any(valid_dt)
+                else np.asarray([], dtype=float)
+            )
 
             joints[coord_name] = {
                 "sample_count": float(len(rows)),
+                "tau_spring_rms_nm": rms(tau_spring),
+                "tau_spring_abs_max_nm": float(np.max(np.abs(tau_spring))),
+                "tau_spring_rate_rms_nm_s": rms(tau_spring_rate),
+                "tau_spring_rate_abs_max_nm_s": (
+                    float(np.max(np.abs(tau_spring_rate)))
+                    if tau_spring_rate.size
+                    else 0.0
+                ),
                 "tau_input_raw_rms_nm": rms(raw),
                 "tau_input_raw_abs_max_nm": float(np.max(np.abs(raw))),
                 "tau_input_abs_max_nm": float(np.max(np.abs(tau_input))),

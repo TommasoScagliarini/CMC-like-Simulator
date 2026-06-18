@@ -52,9 +52,12 @@ U_RATE_LOSS = "u_rate_loss"
 SATURATION_LOSS = "saturation_loss"
 SEA_SATURATION_LOSS = "sea_saturation_loss"
 SEA_TORQUE_ERROR_LOSS = "sea_torque_error_loss"
+SEA_TAU_SPRING_EFFORT_LOSS = "sea_tau_spring_effort_loss"
+SEA_TAU_SPRING_RATE_LOSS = "sea_tau_spring_rate_loss"
 SEA_MOTOR_SPEED_LOSS = "sea_motor_speed_loss"
 SEA_MOTOR_ACCEL_LOSS = "sea_motor_accel_loss"
 SEA_MOTOR_POWER_LOSS = "sea_motor_power_loss"
+POLICY_ACTION_CLIP_LOSS = "policy_action_clip_loss"
 SAFETY_LOSS = "safety_loss"
 GRF_PENETRATION_LOSS = "grf_penetration_loss"
 SOUND_IMITATION_LOSS = "sound_imitation_loss"
@@ -101,9 +104,12 @@ class RewardConfig:
     u_rate_weight: float = 0.0
     sea_saturation_weight: float = 0.0
     sea_torque_error_weight: float = 0.0
+    sea_tau_spring_effort_weight: float = 0.0
+    sea_tau_spring_rate_weight: float = 0.0
     sea_motor_speed_weight: float = 0.0
     sea_motor_accel_weight: float = 0.0
     sea_motor_power_weight: float = 0.0
+    policy_action_clip_weight: float = 0.0
 
     # Safety/contact penalties subtracted after clipping. Penetration defaults
     # to zero for checkpoint compatibility; production configs enable it
@@ -264,12 +270,18 @@ def compute_reward(
         * float(reward_terms.get(SEA_SATURATION_LOSS, 0.0))
         + cfg.sea_torque_error_weight
         * float(reward_terms.get(SEA_TORQUE_ERROR_LOSS, 0.0))
+        + cfg.sea_tau_spring_effort_weight
+        * float(reward_terms.get(SEA_TAU_SPRING_EFFORT_LOSS, 0.0))
+        + cfg.sea_tau_spring_rate_weight
+        * float(reward_terms.get(SEA_TAU_SPRING_RATE_LOSS, 0.0))
         + cfg.sea_motor_speed_weight
         * float(reward_terms.get(SEA_MOTOR_SPEED_LOSS, 0.0))
         + cfg.sea_motor_accel_weight
         * float(reward_terms.get(SEA_MOTOR_ACCEL_LOSS, 0.0))
         + cfg.sea_motor_power_weight
         * float(reward_terms.get(SEA_MOTOR_POWER_LOSS, 0.0))
+        + cfg.policy_action_clip_weight
+        * float(reward_terms.get(POLICY_ACTION_CLIP_LOSS, 0.0))
     )
     safety_term = cfg.safety_weight * float(reward_terms.get(SAFETY_LOSS, 0.0))
     grf_penetration_term = cfg.grf_penetration_weight * float(
@@ -347,9 +359,24 @@ def compute_reward(
         "sea_torque_error_loss": float(
             reward_terms.get(SEA_TORQUE_ERROR_LOSS, 0.0)
         ),
+        "sea_tau_spring_effort_loss": float(
+            reward_terms.get(SEA_TAU_SPRING_EFFORT_LOSS, 0.0)
+        ),
+        "sea_tau_spring_rate_loss": float(
+            reward_terms.get(SEA_TAU_SPRING_RATE_LOSS, 0.0)
+        ),
         "sea_motor_speed_loss": float(reward_terms.get(SEA_MOTOR_SPEED_LOSS, 0.0)),
         "sea_motor_accel_loss": float(reward_terms.get(SEA_MOTOR_ACCEL_LOSS, 0.0)),
         "sea_motor_power_loss": float(reward_terms.get(SEA_MOTOR_POWER_LOSS, 0.0)),
+        "policy_action_clip_loss": float(
+            reward_terms.get(POLICY_ACTION_CLIP_LOSS, 0.0)
+        ),
+        "policy_action_clip_fraction": float(
+            reward_terms.get("policy_action_clip_fraction", 0.0)
+        ),
+        "policy_action_clip_abs_max": float(
+            reward_terms.get("policy_action_clip_abs_max", 0.0)
+        ),
         "penalty": float(penalty),
         "safety_term": float(safety_term),
         "grf_penetration_loss": float(
@@ -391,8 +418,10 @@ def load_reward_overrides(spec: str | None) -> dict | None:
 class RewardShapingWrapper(gym.Wrapper):
     """Replace the env reward with ``compute_reward`` over ``info['reward_terms']``.
 
-    The action is forwarded unchanged (this is a pure reward transform). The
-    out-of-band penalty uses the commanded reference of the step
+    The action is forwarded unchanged to the wrapped env; if an inner
+    ``ActionWrapper`` clips it, this wrapper logs the raw-vs-bound excursion
+    against the advertised action space. The out-of-band penalty uses the
+    commanded reference of the step
     (``info['policy_segment_values']``). The recomputed components are added to
     ``info['reward_components']`` and mirrored into ``info['log']`` (prefixed
     ``RewardShaped/``) for logging; the env's original scalar is preserved as
@@ -406,18 +435,72 @@ class RewardShapingWrapper(gym.Wrapper):
         super().__init__(env)
         self.reward_config = reward_config or RewardConfig()
 
+    def _action_clip_terms(self, action) -> dict[str, float]:
+        space = getattr(self.env, "action_space", None)
+        low = getattr(space, "low", None)
+        high = getattr(space, "high", None)
+        if low is None or high is None:
+            return {
+                POLICY_ACTION_CLIP_LOSS: 0.0,
+                "policy_action_clip_fraction": 0.0,
+                "policy_action_clip_abs_max": 0.0,
+            }
+        raw = np.asarray(action, dtype=float)
+        try:
+            low_arr = np.broadcast_to(np.asarray(low, dtype=float), raw.shape)
+            high_arr = np.broadcast_to(np.asarray(high, dtype=float), raw.shape)
+        except ValueError:
+            return {
+                POLICY_ACTION_CLIP_LOSS: 0.0,
+                "policy_action_clip_fraction": 0.0,
+                "policy_action_clip_abs_max": 0.0,
+            }
+
+        finite_bounds = np.isfinite(low_arr) | np.isfinite(high_arr)
+        if not np.any(finite_bounds):
+            return {
+                POLICY_ACTION_CLIP_LOSS: 0.0,
+                "policy_action_clip_fraction": 0.0,
+                "policy_action_clip_abs_max": 0.0,
+            }
+
+        clipped = np.clip(raw, low_arr, high_arr)
+        delta = np.abs(raw - clipped)
+        valid = finite_bounds & np.isfinite(delta)
+        if not np.any(valid):
+            return {
+                POLICY_ACTION_CLIP_LOSS: 0.0,
+                "policy_action_clip_fraction": 0.0,
+                "policy_action_clip_abs_max": 0.0,
+            }
+
+        clipped_delta = delta[valid]
+        squared = np.square(clipped_delta)
+        bounded = squared / (1.0 + squared)
+        return {
+            POLICY_ACTION_CLIP_LOSS: float(np.mean(bounded)),
+            "policy_action_clip_fraction": float(
+                np.mean(clipped_delta > 1e-9)
+            ),
+            "policy_action_clip_abs_max": float(np.max(clipped_delta)),
+        }
+
     def step(self, action):
+        action_clip_terms = self._action_clip_terms(action)
         obs, env_reward, terminated, truncated, info = self.env.step(action)
         terms = info.get("reward_terms") if isinstance(info, dict) else None
         if not terms:
             return obs, env_reward, terminated, truncated, info
 
+        terms = dict(terms)
+        terms.update(action_clip_terms)
         reference = info.get("policy_segment_values")
         reward, components = compute_reward(
             terms, self.reward_config, reference=reference
         )
 
         info = dict(info)
+        info["reward_terms"] = terms
         info["reward_components"] = components
         info["reward_env_original"] = float(env_reward)
         log = dict(info.get("log") or {})

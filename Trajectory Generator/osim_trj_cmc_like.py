@@ -1622,6 +1622,14 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         return float(np.clip(normalized * normalized, 0.0, 25.0))
 
     @staticmethod
+    def _bounded_unit_square(value: float, scale: float) -> float:
+        normalized = float(value) / max(1e-9, float(scale))
+        squared = normalized * normalized
+        if not np.isfinite(squared):
+            return 1.0
+        return float(squared / (1.0 + squared))
+
+    @staticmethod
     def _coord_weight(
         weights: Mapping[str, float],
         coord_name: str,
@@ -2346,6 +2354,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             return {
                 "sea_saturation_loss": 0.0,
                 "sea_torque_error_loss": 0.0,
+                "sea_tau_spring_effort_loss": 0.0,
+                "sea_tau_spring_rate_loss": 0.0,
                 "sea_motor_speed_loss": 0.0,
                 "sea_motor_accel_loss": 0.0,
                 "sea_motor_power_loss": 0.0,
@@ -2360,6 +2370,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         losses = {
             "sea_saturation_loss": [],
             "sea_torque_error_loss": [],
+            "sea_tau_spring_effort_loss": [],
+            "sea_tau_spring_rate_loss": [],
             "sea_motor_speed_loss": [],
             "sea_motor_accel_loss": [],
             "sea_motor_power_loss": [],
@@ -2376,17 +2388,31 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             raw_rms = float(values.get("tau_input_raw_rms_nm", 0.0))
             sat_fraction = float(values.get("tau_input_saturation_fraction", 0.0))
             torque_error_rms = float(values.get("torque_error_rms_nm", 0.0))
+            tau_spring_rms = float(values.get("tau_spring_rms_nm", 0.0))
+            tau_spring_rate_rms = float(
+                values.get("tau_spring_rate_rms_nm_s", 0.0)
+            )
             motor_speed_rms = float(values.get("motor_speed_rms_rad_s", 0.0))
             motor_accel_rms = float(values.get("motor_accel_rms_rad_s2", 0.0))
             motor_power_rms = float(values.get("motor_power_rms_w", 0.0))
             proximity = max(0.0, raw_rms - soft) / (clamp - soft)
-            f_opt = max(1e-9, float(self.ctx.sea_f_opt.get(sea_name, 1.0)))
+            f_opt = max(1e-9, abs(float(self.ctx.sea_f_opt.get(sea_name, 1.0))))
+            tau_rate_scale = f_opt / max(
+                1e-9,
+                abs(float(self.env_cfg.segment_duration)),
+            )
 
             losses["sea_saturation_loss"].append(
                 min(25.0, proximity * proximity + sat_fraction)
             )
             losses["sea_torque_error_loss"].append(
                 min(25.0, (torque_error_rms / f_opt) ** 2)
+            )
+            losses["sea_tau_spring_effort_loss"].append(
+                self._bounded_unit_square(tau_spring_rms, f_opt)
+            )
+            losses["sea_tau_spring_rate_loss"].append(
+                self._bounded_unit_square(tau_spring_rate_rms, tau_rate_scale)
             )
             losses["sea_motor_speed_loss"].append(
                 min(25.0, (motor_speed_rms / speed_scale) ** 2)
