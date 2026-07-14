@@ -46,6 +46,10 @@ class SimulatorConfig:
     #                    and used only as a validation oracle
     grf_mode: str = "prescribed"
     online_grf_profile_file: str = ""
+    # Optional second online-GRF profile used only for HS/TO event detection.
+    # The primary profile above remains the physical/sensor stream and may be
+    # applied to dynamics; this detector stream is always sensor-only.
+    online_grf_detector_profile_file: str = ""
     online_grf_contact_plugin: str = "plugins/OnlineGRFContact"
     online_grf_max_force_bw: float = 5.0
     online_grf_max_penetration_m: float = 0.03

@@ -26,7 +26,7 @@ from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 SETUP_XML = "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml"
 PROFILE = (
     "online_grf_profiles/"
-    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+    "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
 
 

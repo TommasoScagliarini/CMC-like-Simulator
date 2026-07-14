@@ -1,0 +1,760 @@
+
+=== 2026-07-12T19:52:44.769719 phase='training stack imports' pre-timeout stack dump after 30s ===
+
+=== 2026-07-12T19:52:46.532495 phase='ray.init' pre-timeout stack dump after 30s ===
+
+=== 2026-07-12T19:52:52.117965 phase='PPOConfig.build_algo' pre-timeout stack dump after 30s ===
+
+=== 2026-07-12T19:53:00.911920 phase='actor warm-start transplant' pre-timeout stack dump after 30s ===
+
+=== 2026-07-12T19:53:01.019280 phase='algo.train iteration 1' pre-timeout stack dump after 30s ===
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>
+Timeout (0:00:30)!
+Thread 0x00000003a4dc3000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/queue.py", line 180 in get
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 269 in _run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/tensorboard/summary/writer/event_file_writer.py", line 244 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003eb027000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039a0fb000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000003990ef000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016ed07000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00000001fc39de80 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 3223 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 107 in wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 22 in auto_init_wrapper
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 939 in _fetch_result
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/utils/actor_manager.py", line 484 in foreach_actor
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/env/env_runner_group.py", line 876 in foreach_env_runner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/execution/rollout_ops.py", line 107 in synchronous_parallel_sample
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410 in training_step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 3660 in _run_one_training_iteration
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/rllib/algorithms/algorithm.py", line 1219 in step
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/trainable/trainable.py", line 321 in train
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1283 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2639 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2646 in <module>

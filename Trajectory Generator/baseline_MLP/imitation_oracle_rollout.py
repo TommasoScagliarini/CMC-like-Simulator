@@ -41,7 +41,7 @@ DEFAULT_SETUP = (
 )
 DEFAULT_ONLINE_GRF_PROFILE = (
     "online_grf_profiles/"
-    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+    "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
 
 

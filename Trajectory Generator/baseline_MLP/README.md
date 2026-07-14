@@ -47,7 +47,9 @@ stack SNN (skrl/snntorch resta solo in `envCMC-like`).
 | `asymmetric_rl_module.py` | Custom RLModule per l'asymmetric actor-critic: policy su `obs[:n_actor]`, value sul vettore pieno. |
 | `tb_logging.py` | TensorBoard: `RewardComponentsCallback` (componenti reward/loss → metriche env-runner) + `SummaryWriter` su `<output_dir>/tensorboard`. |
 | `train_ppo_mlp.py` | Entrypoint training supervisionato: timeout rigidi e cleanup dell'albero Ray, `PPOConfig` + loop `algo.train()` + checkpoint best/last + RLModule inference-only + `summary.json` + TensorBoard. |
-| `rollout_eval.py` | Carica l'RLModule nel figlio supervisionato, rollout deterministico, heartbeat per-step e metriche; di default salva .sto per `visualize.py` (`--no-record-outputs` per metriche leggere). |
+| `rollout_eval.py` | Carica l'RLModule nel figlio supervisionato, rollout deterministico o stocastico, heartbeat per-step e metriche; di default salva .sto per `visualize.py` (`--no-record-outputs` per metriche leggere). |
+| `exploration_noise.py` | Utility NumPy condivise per sigma scalare/vettoriale e rumore gaussiano mantenuto per piu step nei probe diagnostici. |
+| `project_actor_update.py` | Proietta un aggiornamento actor-only entro un budget esplicito sulla variazione della media nominale. |
 | `process_watchdog.py` | Supervisore cross-platform con heartbeat, timeout di startup/stallo/run e self-test su figlio volutamente bloccato. |
 | `validate_online_grf_train_inference.py` | Gate profilo-specifico e smoke brevi del contratto onlineGRF usato da training/inference. |
 | `commands.txt` | Comandi PowerShell pronti (setup, smoke, train, rollout, tensorboard, reward custom). |
@@ -70,6 +72,16 @@ generati automaticamente; eventuali flag CLI restano override.
   `--dim-hidden-layers`, `--fcnet-activation`.
 - **Asymmetric actor-critic**: flag `--asymmetric-actor-critic` (chiave YAML
   `model.asymmetric_actor_critic`; alias deprecato `--critic-privileged-observation`).
+- **Contratto actor deployable ex-novo**: `include_controller_state_observation:
+  true` espone previous endpoint, reference servita e comando SEA grezzo, cioe'
+  lo stato Markoviano di slew limiter, governor e reward di command-rate.
+  `include_controller_diagnostic_observation: false` mantiene invece `abs(u)` e
+  saturazione nel critic: sono derivabili dal comando grezzo. Target IK, sound
+  side e stato biologico restano sempre critic-only.
+- **Warm-up critic-only**: `--freeze-actor` stacca l'intera distribuzione actor
+  dal grafo dei gradienti e registra il digest prima/dopo ogni iterazione. Il
+  critic caldo va continuato da `checkpoint_last`; gli export `rl_module_*`
+  sono inference-only e rimuovono intenzionalmente il value tower.
 - **`action_mode`**: `absolute` è l'unica modalità di produzione e **non** è nel
   YAML; `delta`/`raw` restano flag CLI solo per diagnostica.
 - **Layout risultati**: training in `Trajectory Generator/runs/training`;
@@ -116,8 +128,14 @@ python "Trajectory Generator/baseline_MLP/rollout_eval.py"
 # rollout leggero senza .sto
 python "Trajectory Generator/baseline_MLP/rollout_eval.py" --no-record-outputs
 
+# trace JSON leggero senza output .sto del simulatore
+python "Trajectory Generator/baseline_MLP/rollout_eval.py" --no-record-outputs --record-policy-trace
+
 # rollout manuale da checkpoint specifico
 ... python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint runs/training/_baseline_mlp_tiny/rl_module_last --output-dir runs/rollout/_baseline_mlp_tiny_rollout --episode-duration 0.05
+
+# probe diagnostico con lo stesso draw gaussiano mantenuto per 50 ms a 100 Hz
+... python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint runs/training/_baseline_mlp_tiny/rl_module_last --action-selection stochastic_held --exploration-noise-hold-steps 5 --no-record-outputs
 
 # plot e visualizer dall'ultimo rollout valido
 python "plot/plotter.py" --mlp
@@ -301,7 +319,34 @@ I relativi pesi separati hanno default zero, quindi non alterano i checkpoint
 legacy; permettono pero di colpire direttamente una singola causa, ad esempio
 jerk o alternanza del comando. La penalita morbida `grf_penetration_loss` e
 anch'essa pesata qui; le configurazioni che applicano il contatto online devono
-abilitare esplicitamente `grf_penetration_weight`.
+abilitare esplicitamente `grf_penetration_weight`. Nell'env la loss parte oltre
+12 mm di penetrazione sul contatto online applicato e diventa terminazione a
+17 mm: la finestra intercetta i burst con ribaltamento COP-caviglia osservati
+in `asym100`, lasciando fuori l'envelope `sym60` verificata.
+
+La configurazione ex-novo applica inoltre un ledger di supporto protesico:
+
+- il carico e' solo un segnale di confidenza debole, saturo a `0.20 BW`;
+- il credito denso si ferma dopo `0.04 BW*s` di evidenza e resta provvisorio;
+- un `TO` FSM valido conferma il credito e riceve un bonus temporale nella
+  finestra di stance `0.79-1.26 s`, modulato dalla qualita' media della
+  penetrazione durante la stance;
+- una terminazione, un timeout o un ciclo fallito prima del `TO` recupera
+  integralmente il credito provvisorio tramite clawback.
+- dopo il primo evento FSM accettato, i termini stance/swing seguono lo stato
+  FSM e non gli eventi grezzi rifiutati; il detector diretto resta fallback
+  solo durante `WAIT_HS` o se il payload FSM non e' disponibile.
+
+Per `training_exnovo_cfg.yaml` il probe fisico `training_like` dall'esatto
+inizio episodio ha mostrato che il guard globale a `17 mm` termina anche la
+traiettoria zero-delta prima del `TO`. Il probe full-episode ha poi validato
+`25 mm` con `500/500` step, due cicli validi e un picco di `22.95 mm`. Solo per
+questa configurazione le soglie congelate sono quindi `15 mm` per la loss e
+`25 mm` per la terminazione, mentre
+`grf_penetration_weight = 0.05` mantiene la penetrazione come termine morbido
+debole. I default globali e i vecchi snapshot restano a `12/17 mm`; anche i
+nuovi campi reward hanno default zero per compatibilita' con i checkpoint
+legacy.
 
 ## TensorBoard
 

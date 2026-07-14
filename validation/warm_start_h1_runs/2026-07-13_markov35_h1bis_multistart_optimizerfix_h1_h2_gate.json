@@ -1,0 +1,120 @@
+{
+  "date": "2026-07-13",
+  "status": "pass_for_controlled_training_continuation",
+  "candidate_checkpoint": "validation/warm_start_h1_runs/2026-07-13_markov35_h1bis_multistart_kl001_epoch1_lr5e7_optimizerfix/rl_module_last",
+  "source_h0_checkpoint": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last",
+  "frozen_contract": {
+    "actor_features": 35,
+    "critic_features": 84,
+    "sigma": 0.005,
+    "freeze_logstd": true,
+    "grf_penetration_termination_m": 0.025,
+    "gait_clock_enable": false,
+    "include_reference_state_observation": true,
+    "include_controller_state_observation": true,
+    "include_controller_diagnostic_observation": false
+  },
+  "h1": {
+    "training_ok": true,
+    "iterations": 1,
+    "num_epochs": 1,
+    "configured_learning_rate": 5e-07,
+    "optimizer_learning_rate_before_override": 0.00009999999747378752,
+    "optimizer_learning_rate_after_override": 5e-07,
+    "clip_param": 0.05,
+    "kl_coeff": 1.0,
+    "kl_target": 0.01,
+    "mean_kl_loss": 0.0005523327272385359,
+    "start_step_coverage": {
+      "offset_1.756870983805102": 1576,
+      "offset_1.956870983805102": 1260,
+      "offset_2.156870983805102": 1260
+    },
+    "source_actor_digest": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+    "candidate_actor_digest": "654b2d180177ed9a00d77e94a45e8248989d8281de8e2641209c0d6130616c20",
+    "max_parameter_abs_diff": 3.891997039318085e-06,
+    "logstd_exact": true,
+    "empirical_kl": {
+      "minus_0.20_s": 0.0006680708029307425,
+      "nominal": 0.0006049638031981885,
+      "plus_0.20_s": 0.0006478221621364355
+    }
+  },
+  "h2": [
+    {
+      "probe": "deterministic_minus_0.20_s",
+      "steps": 500,
+      "episode_return": 40.954626939250566,
+      "valid_cycle_count": 2,
+      "grf_penetration_max_m": 0.02382465585761014,
+      "penetration_margin_m": 0.001175344142389861,
+      "action_clipped_fraction": 0.0,
+      "pass": true
+    },
+    {
+      "probe": "deterministic_nominal",
+      "steps": 500,
+      "episode_return": 54.605906425663164,
+      "valid_cycle_count": 3,
+      "grf_penetration_max_m": 0.02409671457585447,
+      "penetration_margin_m": 0.0009032854241455308,
+      "action_clipped_fraction": 0.0,
+      "pass": true
+    },
+    {
+      "probe": "deterministic_plus_0.20_s",
+      "steps": 500,
+      "episode_return": 55.69228453621963,
+      "valid_cycle_count": 2,
+      "grf_penetration_max_m": 0.024285116747461026,
+      "penetration_margin_m": 0.0007148832525389751,
+      "action_clipped_fraction": 0.0,
+      "pass": true
+    },
+    {
+      "probe": "stochastic_sigma_0.005_seed_123",
+      "steps": 500,
+      "episode_return": 62.77910143810253,
+      "valid_cycle_count": 3,
+      "grf_penetration_max_m": 0.023108234599922083,
+      "penetration_margin_m": 0.0018917654000779182,
+      "action_clipped_fraction": 0.0,
+      "pass": true
+    },
+    {
+      "probe": "stochastic_sigma_0.005_seed_124",
+      "steps": 500,
+      "episode_return": 47.662004676911025,
+      "valid_cycle_count": 2,
+      "grf_penetration_max_m": 0.023900701681296006,
+      "penetration_margin_m": 0.0010992983187039952,
+      "action_clipped_fraction": 0.0,
+      "pass": true
+    },
+    {
+      "probe": "stochastic_sigma_0.005_seed_125",
+      "steps": 500,
+      "episode_return": 51.04836178869941,
+      "valid_cycle_count": 2,
+      "grf_penetration_max_m": 0.024171883699035824,
+      "penetration_margin_m": 0.0008281163009641775,
+      "action_clipped_fraction": 0.0,
+      "pass": true
+    }
+  ],
+  "gate_checks": {
+    "all_start_offsets_sampled": true,
+    "rllib_kl_at_or_below_0.01": true,
+    "empirical_kl_at_or_below_0.01": true,
+    "logstd_unchanged": true,
+    "all_rollouts_500_steps": true,
+    "all_rollouts_have_valid_cycle": true,
+    "all_rollouts_below_25_mm": true,
+    "all_rollouts_zero_action_clipping": true
+  },
+  "limitations": [
+    "This gate validates one controlled PPO actor update, not a long training run.",
+    "The actor observation contract is deployable by construction, but hardware deployment is not validated.",
+    "The smallest H2 penetration margin is 0.714883 mm, so the 25 mm guard remains active and must not be relaxed."
+  ]
+}

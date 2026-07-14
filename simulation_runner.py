@@ -203,13 +203,29 @@ class SimulationRunner:
         self._runtime_step: int = 0
         self._last_step_info: dict = {}
         self._online_event_detector = None
-        if getattr(ctx, "online_grf_force_paths", []):
+        self._online_event_force_paths = list(
+            getattr(ctx, "online_grf_detector_force_paths", [])
+            or getattr(ctx, "online_grf_force_paths", [])
+        )
+        self._online_event_force_sides = dict(
+            getattr(ctx, "online_grf_detector_force_sides", {})
+            or getattr(ctx, "online_grf_force_sides", {})
+        )
+        if self._online_event_force_paths:
             confirmation_threshold = float(
                 getattr(cfg, "online_grf_hs_confirmation_threshold_n", 0.0)
             )
             if confirmation_threshold <= 0.0:
                 confirmation_threshold = float(
-                    getattr(ctx, "online_grf_hs_confirmation_threshold_n", 0.0)
+                    getattr(
+                        ctx,
+                        (
+                            "online_grf_detector_hs_confirmation_threshold_n"
+                            if getattr(ctx, "online_grf_detector_force_paths", [])
+                            else "online_grf_hs_confirmation_threshold_n"
+                        ),
+                        0.0,
+                    )
                 )
             self._online_event_detector = StreamingGaitEventDetector(
                 cfg.grf_contact_threshold_n,
@@ -339,6 +355,7 @@ class SimulationRunner:
                 "q_ref": dict(q_ref_win),
                 "qdot_ref": dict(qdot_ref_win),
                 "tau_pros_ff": dict(tau_pros_ff_by_coord),
+                "so_diagnostics": dict(self._so.last_diagnostics),
             }
 
             for _sub in range(n_substeps):
@@ -905,6 +922,35 @@ class SimulationRunner:
                 )
             vertical_forces[side] = float(force[1])
 
+        detector_grf = None
+        detector_paths = getattr(ctx, "online_grf_detector_force_paths", [])
+        if detector_paths:
+            detector_grf = read_online_grf(
+                ctx.model,
+                state,
+                detector_paths,
+                ctx.online_grf_detector_force_sides,
+            )
+            vertical_forces = {}
+            for side in ("left", "right"):
+                item = detector_grf["sides"][side]
+                force = np.asarray(item["force"], dtype=float)
+                scalar_values = np.asarray(
+                    [
+                        item["normal_force"],
+                        item["penetration"],
+                        item["slip_speed"],
+                    ],
+                    dtype=float,
+                )
+                if not np.all(np.isfinite(force)) or not np.all(
+                    np.isfinite(scalar_values)
+                ):
+                    raise FloatingPointError(
+                        f"Non-finite detector online GRF at t={t:.4f} for {side}."
+                    )
+                vertical_forces[side] = float(force[1])
+
         if getattr(ctx, "grf_mode", "prescribed") == "online":
             mass = float(ctx.model.getTotalMass(state))
             max_force = (
@@ -939,6 +985,10 @@ class SimulationRunner:
         events = []
         if self._online_event_detector is not None:
             events = self._online_event_detector.update(t, vertical_forces)
+        if detector_grf is not None:
+            self._last_step_info["online_grf_detector"] = self._online_grf_info(
+                detector_grf
+            )
         return grf, events
 
     def _integrate_evaluate(
@@ -1218,6 +1268,7 @@ class SimulationRunner:
                 "torque_error_nm": float(tau_ref - tau_spring),
                 "motor_speed_rad_s": float(omega_m),
                 "motor_accel_rad_s2": float(motor_accel),
+                "joint_power_w": float(tau_spring * omega_j),
                 "motor_power_w": float(tau_input * omega_m),
             }
         return diagnostics
@@ -1257,6 +1308,7 @@ class SimulationRunner:
             torque_error = values("torque_error_nm")
             motor_speed = values("motor_speed_rad_s")
             motor_accel = values("motor_accel_rad_s2")
+            joint_power = values("joint_power_w")
             motor_power = values("motor_power_w")
 
             def rms(data: np.ndarray) -> float:
@@ -1292,6 +1344,14 @@ class SimulationRunner:
                 "motor_speed_abs_max_rad_s": float(np.max(np.abs(motor_speed))),
                 "motor_accel_rms_rad_s2": rms(motor_accel),
                 "motor_accel_abs_max_rad_s2": float(np.max(np.abs(motor_accel))),
+                "joint_power_rms_w": rms(joint_power),
+                "joint_power_mean_w": float(np.mean(joint_power)),
+                "joint_power_positive_mean_w": float(
+                    np.mean(np.maximum(joint_power, 0.0))
+                ),
+                "joint_power_negative_mean_w": float(
+                    np.mean(np.minimum(joint_power, 0.0))
+                ),
                 "motor_power_rms_w": rms(motor_power),
                 "motor_power_abs_max_w": float(np.max(np.abs(motor_power))),
             }

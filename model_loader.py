@@ -115,9 +115,13 @@ class SimulationContext:
     prescribed_grf_disabled_sides: List[str] = field(default_factory=list)
     online_grf_applied_sides: List[str] = field(default_factory=list)
     online_grf_profile_file: str = ""
+    online_grf_detector_profile_file: str = ""
     online_grf_hs_confirmation_threshold_n: float = 0.0
+    online_grf_detector_hs_confirmation_threshold_n: float = 0.0
     online_grf_force_paths: List[str] = field(default_factory=list)
     online_grf_force_sides: Dict[str, str] = field(default_factory=dict)
+    online_grf_detector_force_paths: List[str] = field(default_factory=list)
+    online_grf_detector_force_sides: Dict[str, str] = field(default_factory=dict)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -721,6 +725,12 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
                 "[ModelLoader] onlineGRF profile not found: "
                 f"{paths.online_grf_profile_path}"
             )
+        detector_path = getattr(paths, "online_grf_detector_profile_path", None)
+        if detector_path is not None and not detector_path.is_file():
+            raise FileNotFoundError(
+                "[ModelLoader] onlineGRF detector profile not found: "
+                f"{detector_path}"
+            )
         _load_plugin(str(paths.online_grf_contact_plugin_path))
     _configure_geometry_search_paths(str(paths.model_path))
 
@@ -909,7 +919,11 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     online_grf_force_paths: List[str] = []
     online_grf_force_sides: Dict[str, str] = {}
     online_grf_profile_file = ""
+    online_grf_detector_force_paths: List[str] = []
+    online_grf_detector_force_sides: Dict[str, str] = {}
+    online_grf_detector_profile_file = ""
     online_grf_hs_confirmation_threshold_n = 0.0
+    online_grf_detector_hs_confirmation_threshold_n = 0.0
     if grf_mode != "prescribed":
         online_grf_profile_file = str(paths.online_grf_profile_path)
         profile = load_online_grf_profile(online_grf_profile_file)
@@ -939,6 +953,29 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
             f"[ModelLoader] Online GRF      : {len(online_grf_force_paths)} "
             f"contacts ({status})"
         )
+        detector_path = getattr(paths, "online_grf_detector_profile_path", None)
+        if detector_path is not None:
+            online_grf_detector_profile_file = str(detector_path)
+            detector_profile = load_online_grf_profile(
+                online_grf_detector_profile_file
+            )
+            online_grf_detector_hs_confirmation_threshold_n = float(
+                detector_profile.heel_strike_confirmation_threshold_n or 0.0
+            )
+            (
+                online_grf_detector_force_paths,
+                online_grf_detector_force_sides,
+            ) = add_online_grf_forces(
+                model,
+                detector_profile,
+                applies_force=False,
+                name_prefix="online_grf_detector_",
+            )
+            print(
+                "[ModelLoader] Online GRF detector: "
+                f"{len(online_grf_detector_force_paths)} contacts "
+                "(sensor-only)"
+            )
    
     # ── 4. Reserve Actuators ──────────────────────────────────────────────────
     # The ForceSet XML contains CoordinateActuators for every coordinate.
@@ -1187,9 +1224,15 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         prescribed_grf_disabled_sides = sorted(prescribed_grf_disabled_sides),
         online_grf_applied_sides = sorted(online_grf_applied_sides),
         online_grf_profile_file = online_grf_profile_file,
+        online_grf_detector_profile_file = online_grf_detector_profile_file,
         online_grf_hs_confirmation_threshold_n = (
             online_grf_hs_confirmation_threshold_n
         ),
+        online_grf_detector_hs_confirmation_threshold_n = (
+            online_grf_detector_hs_confirmation_threshold_n
+        ),
         online_grf_force_paths = online_grf_force_paths,
         online_grf_force_sides = online_grf_force_sides,
+        online_grf_detector_force_paths = online_grf_detector_force_paths,
+        online_grf_detector_force_sides = online_grf_detector_force_sides,
     )

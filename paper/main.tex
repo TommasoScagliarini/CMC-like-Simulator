@@ -1,0 +1,88 @@
+% !TEX root = main.tex
+\documentclass[journal]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+%\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{cite}
+
+\graphicspath{{figures/}}
+
+\definecolor{draftblue}{rgb}{0.0,0.2,0.65}
+\definecolor{draftred}{rgb}{0.65,0.0,0.0}
+
+\newcommand{\draftnote}[1]{\textcolor{draftred}{\textit{#1}}}
+\newcommand{\paperplaceholder}[1]{\noindent\textit{#1}}
+
+\newcommand{\inputsectionorplaceholder}[2]{%
+  \IfFileExists{sections/#1.tex}{%
+    \input{sections/#1}%
+  }{%
+    \section{#2}%
+    \label{sec:#1}%
+    \paperplaceholder{TODO: draft Section ``#2'' in a separate file under
+    \texttt{sections/}.}%
+  }%
+}
+
+\begin{document}
+
+\title{Learning Kinematic Reference Trajectories for a Series-Elastic
+Transfemoral Prosthesis in a Muscle-Driven Simulation}
+
+\author{
+\IEEEauthorblockN{Tommaso Scagliarini}
+\IEEEauthorblockA{
+Affiliation to be added\\
+Email to be added}
+}
+
+\maketitle
+
+\begin{abstract}
+This manuscript develops and validates an architecture for reinforcement-learned
+prosthetic reference generation in a muscle-driven OpenSim simulation. The
+learned policy is designed to generate knee and ankle kinematic references for a
+series-elastic transfemoral prosthesis, while a band-limited reference interface,
+a fixed cascade/PI controller, and a CMC-like biological tracking loop determine
+whether those references are physically feasible. Current experiments use
+imitation pretraining as the first stage toward ex-novo prosthetic trajectory
+generation. \draftnote{Replace this placeholder abstract after the final
+baseline ladder, multi-seed results, and quantitative physical-validity metrics
+are available.}
+\end{abstract}
+
+\begin{IEEEkeywords}
+Reinforcement learning, prosthetics, trajectory generation, series-elastic
+actuators, musculoskeletal simulation, OpenSim.
+\end{IEEEkeywords}
+
+\inputsectionorplaceholder{section_1_introduction}{Introduction}
+\inputsectionorplaceholder{section_2_related_work}{Related Work}
+\input{sections/section_3}
+\inputsectionorplaceholder{section_4_rl_trajectory_generator}{RL Trajectory Generator}
+\inputsectionorplaceholder{section_5_experimental_setup}{Experimental Setup}
+\inputsectionorplaceholder{section_6_results}{Results}
+\inputsectionorplaceholder{section_7_discussion}{Discussion}
+\inputsectionorplaceholder{section_8_limitations_future_work}{Limitations and Future Work}
+\inputsectionorplaceholder{section_9_conclusion}{Conclusion}
+
+% Add the bibliography file once the citation database for this manuscript is
+% consolidated, for example:
+% \bibliographystyle{IEEEtran}
+% \bibliography{bibliography}
+
+\end{document}

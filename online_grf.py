@@ -336,6 +336,8 @@ def _new_online_grf_force(
     sphere: OnlineGRFSphere,
     profile: OnlineGRFProfile,
     applies_force: bool,
+    *,
+    name_prefix: str = "online_grf_",
 ) -> opensim.Force:
     obj = opensim.OpenSimObject.newInstanceOfType(ONLINE_GRF_COMPONENT_TYPE)
     if obj is None:
@@ -346,7 +348,7 @@ def _new_online_grf_force(
     force = opensim.Force.safeDownCast(obj)
     if force is None:
         raise RuntimeError(f"{ONLINE_GRF_COMPONENT_TYPE} is not an OpenSim Force.")
-    force.setName(f"online_grf_{sphere.name}")
+    force.setName(f"{name_prefix}{sphere.name}")
     _set_property(force, "appliesForce", applies_force)
     _set_property(force, "sphere_location", sphere.location)
     _set_property(force, "sphere_radius", sphere.radius)
@@ -388,6 +390,7 @@ def add_online_grf_forces(
     *,
     applies_force: bool,
     apply_sides: Iterable[str] | None = None,
+    name_prefix: str = "online_grf_",
 ) -> tuple[list[str], Dict[str, str]]:
     """Add one registered onlineGRF force per profile sphere.
 
@@ -406,7 +409,13 @@ def add_online_grf_forces(
         sphere_applies = (
             applies_force if apply_set is None else (sphere.side in apply_set)
         )
-        force = _new_online_grf_force(model, sphere, profile, sphere_applies)
+        force = _new_online_grf_force(
+            model,
+            sphere,
+            profile,
+            sphere_applies,
+            name_prefix=name_prefix,
+        )
         name = force.getName()
         model.addForce(force)
         force_paths.append(f"/forceset/{name}")

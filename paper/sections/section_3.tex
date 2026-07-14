@@ -1,0 +1,300 @@
+% !TEX root = ../main.tex
+\section{Simulation Testbed}
+\label{sec:simulation-testbed}
+
+\draftnote{TO BE REVIEWED}
+
+% This section describes the physical testbed used to evaluate learned prosthetic
+% reference trajectories and to validate the control strategy. 
+% The testbed is necessary for the evaluation of the trajectory: the learned policy
+% does not directly actuate muscles, or motor torques. Instead, it
+% provides a prosthetic kinematic reference used by the control chain (cascade controller and motor drive) while the biological-side is driven by sperimental prescribed kinematic references. The simulator (based on OpenSim's \textit{Computed Muscles Control}) makes it possible by decoupling the prosthetic side from the biological one. This separation is
+% central to the paper: a learned trajectory is meaningful only if it can be
+% realized by a physical series-elastic prosthesis inside a muscle-driven gait
+% simulation.
+\noindent 
+This section describes the physical testbed used both to evaluate learned
+prosthetic reference trajectories and to validate the prosthetic control chain.
+The learned policy does not directly command muscles or motor torques.
+Instead, it provides a prosthetic kinematic reference that is tracked through the
+controllers. On the biological side,
+experimental kinematics are used as prescribed tracking references: the simulator (based on OpenSim's \textit{Computed Muscles Control}) computes the generalized force demand and distributes it through muscle recruitment and residual actuators. Therefore the prosthetic and biological coordinates are treated by two distinct control paths. The prosthetic side is driven by the
+learned reference and SEA controller, whereas the biological side is tracked from
+experimental kinematics through muscle-driven recruitment. Both sides remain
+coupled in the same forward-dynamics OpenSim simulation. This separation is
+central to the paper: a learned trajectory is meaningful only if it can be
+realized by a physical series-elastic prosthesis inside a muscle-driven gait
+simulation.
+
+\subsection{Series-Elastic Prosthesis Model}
+\label{subsec:sea-model}
+
+\noindent
+Series-elastic actuators consist of an electric motor connected to the joint through a torsional spring in series. Thus, the joint is not directly driven by the motor, but is actuated through the deflection of the spring. SEAs were selected to actuate the transfemoral prosthesis for two main reasons:
+\begin{enumerate}
+  \item The spring can store and release energy during the gait cycle. This may improve energy efficiency compared with conventional motor actuation and provides intrinsic compliance, allowing the actuator to attenuate impacts during gait.
+  \item SEAs are mechanically simpler than variable stiffness actuators.
+\end{enumerate}
+\noindent
+Each SEA was implemented as a custom OpenSim plugin. This choice preserves compatibility with the OpenSim software suite.
+
+The SEA plant is described by two physical motor-side state variables:
+\begin{equation}
+  \theta_m,\quad \omega_m ,
+\end{equation}
+where \(\theta_m\) is the motor-side angle, \(\omega_m\) is the motor angular
+velocity, joint coordinate angle is denoted by \(\theta_j\). The
+elastic torque transmitted through the series spring is
+\begin{equation}
+  \tau_s = K(\theta_m - \theta_j),
+  \label{eq:sea-spring}
+\end{equation}
+where \(K\) is the spring stiffness. 
+\newline The SEA dynamics are
+\begin{equation}
+\dot{\theta}_m = \omega_m,\qquad
+J_m\dot{\omega}_m = \tau_m - \tau_s - B_m\omega_m .
+\label{eq:sea-dynamics}
+\end{equation}
+Here \(J_m\) is the motor inertia, \(B_m\) is the motor damping, and
+\(\tau_m\) is the motor-side torque.
+\newline 
+Thus, the prosthetic joint is actuated by the torque transmitted through the
+elastic element, rather than being directly driven by the motor. The resulting
+torque-generation dynamics are therefore determined by the coupled behavior of
+the motor and compliant transmission, with motor inertia, damping, and spring
+stiffness governing the rate at which torque can be developed and delivered to
+the joint.
+
+\noindent The actuators are dimensioned as follows:
+
+\begin{table}[!h]
+  \centering
+  \footnotesize
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    SEA &
+    \makecell{\(K\)\\\(\mathrm{N\,m/rad}\)} &
+    \makecell{\(J_m\)\\\(\mathrm{kg\,m^2}\)} &
+    \makecell{\(B_m\)\\\(\mathrm{N\,m\,s/rad}\)} &
+    \makecell{\(F_{\mathrm{opt}}\)\\\(\mathrm{N\,m}\)} \\
+    \midrule
+    Knee  & 321 & 0.01 & 0.1 & 100 \\
+    Ankle & 500 & 0.01 & 0.1 & 250 \\
+    \bottomrule
+  \end{tabular}
+  \vspace{0.5em}
+  \caption{SEA parameters adopted.}
+  \label{tab:sea-plant-parameters}
+\end{table}
+
+Thus, the prosthetic joint is actuated by the torque transmitted through the elastic element, rather than being directly driven by the motor. The resulting torque-generation dynamics are therefore determined by the coupled behavior of the motor and compliant transmission, with motor inertia, damping, and spring stiffness governing the rate at which torque can be developed and delivered to the joint.
+
+\paperplaceholder{Figure placeholder. Fig.~2 should show the two-body SEA
+schematic with \(\theta_j\), \(\theta_m\), \(K\), \(B_m\), \(J_m\),
+\(\tau_s\), and \(\tau_m\).}
+
+
+\subsection{CMC-Like Muscle-Driven Simulation}
+\label{subsec:cmc-like-simulation}
+
+\noindent The prosthetic model has been evaluated using a custom simulator based on OpenSim's \textit{Computed Muscle Control} (CMC) tool. OpenSim Computed Muscle Control is a forward-dynamics tracking method that computes the muscle excitations required for a musculoskeletal model to follow a prescribed kinematic trajectory. At each time step, the simulated state is compared with the reference motion, desired accelerations are generated through a tracking controller, and muscle recruitment is solved to produce the generalized forces needed to realize those accelerations. Reserve actuators may be included as residual support when the modeled muscles cannot fully satisfy the required dynamics.
+The limitation of the original CMC is that it does not allow to impose a custom control law on a subset of model coordinates.
+
+\paperplaceholder{Figure placeholder. Fig.~3 should show the CMC loop}
+
+The integration step is \(1\,\mathrm{ms}\), and the
+validated forward-dynamics path uses the C++ SEA plugin with the
+\texttt{rk4\_bypass} integration scheme.
+
+The kinematic reference is read from the inverse-kinematics file and
+preprocessed before it is used by the controller. The trajectory is resampled on
+a \(1\,\mathrm{ms}\) grid and low-pass filtered with a zero-phase Butterworth
+filter at \(6\,\mathrm{Hz}\). This preprocessing keeps the spline derivatives
+usable for acceleration-level tracking and avoids injecting high-frequency IK
+noise into the inverse-dynamics and static-optimization stages.
+
+At each control instant, the CMC-like biological tracking loop computes desired
+accelerations for the non-prosthetic coordinates:
+\begin{equation}
+\ddot{q}_{\mathrm{des}} =
+\ddot{q}_{\mathrm{ref}}
++ K_{p,b}(q_{\mathrm{ref}} - q)
++ K_{d,b}(\dot{q}_{\mathrm{ref}} - \dot{q}).
+\label{eq:bio-outer-loop}
+\end{equation}
+The default biological gains are \(K_{p,b}=100\) and \(K_{d,b}=20\), with
+lower translation gains on the pelvis coordinates (\(25/10\)) to reduce
+root-coordinate drift without forcing the muscle-driven joints through the
+reserve actuators. The prosthetic coordinates are excluded from this biological
+outer loop and from the biological static-optimization problem; they are handled
+by the SEA controller.
+
+The generalized force request is computed using a zero-actuator
+inverse-dynamics projection. First, all muscle, reserve, and SEA controls are
+removed. The baseline acceleration \(\ddot{q}_0\) is computed at the current
+state with the actuator contributions zeroed. The acceleration deficit is then
+projected through the configuration-dependent mass matrix:
+\begin{equation}
+\tau = M(q)\left(\ddot{q}_{\mathrm{des}} - \ddot{q}_0\right).
+\label{eq:id-projection}
+\end{equation}
+The resulting generalized-force vector is split into a biological component and
+a prosthetic component:
+\begin{equation}
+\tau_{\mathrm{bio}} = \tau[\mathcal{I}_{\mathrm{bio}}],
+\qquad
+\tau_{\mathrm{pros}} = \tau[\mathcal{I}_{\mathrm{pros}}].
+\label{eq:force-split}
+\end{equation}
+Only \(\tau_{\mathrm{bio}}\) is passed to the muscle recruitment step. The
+prosthetic component is retained as a diagnostic inverse-dynamics oracle, but it
+is not used as a feed-forward command in the current prosthetic controller.
+
+Biological recruitment is solved with a muscle-first static-optimization
+problem. The optimizer distributes \(\tau_{\mathrm{bio}}\) across muscle
+activations and reserve actuator controls:
+\begin{equation}
+\begin{aligned}
+\min_{a,u_r}\quad
+& \sum_i a_i^2 + w_r \sum_j u_{r,j}^2 \\
+\mathrm{s.t.}\quad
+& A_m(q,\dot{q},l_f)(a-a_{\min})
+  + R_r(u_r \odot F_{\mathrm{opt},r})
+  = \tau_{\mathrm{bio}}, \\
+& a_{\min} \leq a_i \leq a_{\max}, \\
+& -u_{r,\max} \leq u_{r,j} \leq u_{r,\max}.
+\end{aligned}
+\label{eq:static-optimization}
+\end{equation}
+The reserve weight is set to \(w_r=10^6\). Thus, reserves remain available to
+close unmodeled or infeasible residual directions, but they are strongly
+discouraged from becoming the primary tracking mechanism. In the analysis,
+reserve usage is treated as a fidelity gauge rather than as a success metric:
+low reserve usage indicates that the simulated motion is supported by the
+model's muscles and prosthesis, whereas high reserve usage exposes a dynamic
+inconsistency, a contact-model deficit, or an unmodeled actuation demand.
+
+The CMC-like loop therefore provides two pieces of information that are
+essential for evaluating learned prosthetic trajectories. First, it determines
+whether the biological side can remain muscle-driven while the prosthesis
+follows the generated reference. Second, it makes reserve and residual loads
+available as quantitative diagnostics of physical validity. This prevents the
+RL policy from being judged only by kinematic tracking or reward return.
+
+\paperplaceholder{Figure placeholder. Fig.~1 should include the full testbed
+flow: IK spline \(\rightarrow\) biological outer-loop accelerations
+\(\rightarrow\) zero-actuator inverse dynamics \(\rightarrow\) static
+optimization \(\rightarrow\) prosthetic cascade \(\rightarrow\) SEA plugin
+\(\rightarrow\) OpenSim state update.}
+
+\paperplaceholder{Table placeholder. Table~IV should summarize the AB06 model,
+simulation window, time step, prosthetic coordinates, biological tracking gains,
+static-optimization weights, and GRF mode.}
+
+\subsection{Cascade/PI Prosthetic Reference Tracking}
+\label{subsec:prosthetic-controller}
+
+The two SEA coordinates are driven by a fixed high-level prosthetic tracking
+controller implemented in Python. This controller receives the prosthetic
+kinematic reference \((q_{\mathrm{ref}},\dot{q}_{\mathrm{ref}})\), compares it
+with the current prosthetic coordinate state \((q,\dot{q})\), and computes the
+normalized SEA command \(u\) sent to the C++ plugin. The current validated mode
+is a position-to-velocity cascade followed by an inner velocity PI loop.
+
+For each prosthetic coordinate, the outer proportional position loop computes a
+desired cascade velocity:
+\begin{equation}
+\dot{q}_{\mathrm{cas}} =
+\dot{q}_{\mathrm{ref}}
++ K_{p,o}(q_{\mathrm{ref}} - q).
+\label{eq:cascade-velocity}
+\end{equation}
+The inner loop then converts the velocity tracking error into a torque command:
+\begin{equation}
+e_v = \dot{q}_{\mathrm{cas}} - \dot{q},
+\label{eq:velocity-error}
+\end{equation}
+\begin{equation}
+\tau_{\mathrm{cmd}} =
+K_{p,i}e_v
++ K_{i,i}\int e_v\,dt.
+\label{eq:cascade-torque}
+\end{equation}
+The integral contribution is clamped per joint to prevent wind-up. Finally, the
+controller normalizes the requested torque by the corresponding SEA optimal
+force:
+\begin{equation}
+u =
+\operatorname{clip}\left(
+\frac{\tau_{\mathrm{cmd}}}{F_{\mathrm{opt}}},
+-1,1
+\right).
+\label{eq:sea-command}
+\end{equation}
+This \(u\) is the only prosthetic command injected into OpenSim. The C++ plugin
+converts it into a desired spring torque,
+\begin{equation}
+\tau_{\mathrm{ref}} = F_{\mathrm{opt}}u.
+\label{eq:spring-reference}
+\end{equation}
+
+Inside the plugin, the actuator drive closes a motor-side spring-torque servo.
+Let \(\xi\) denote the integrated spring-torque tracking error. In the
+non-impedance mode used by the validated model, the raw motor torque is
+\begin{equation}
+\tau_{m,\mathrm{raw}} =
+\tau_{\mathrm{ref}}
++ K_p(\tau_{\mathrm{ref}}-\tau_s)
++ \operatorname{sat}(K_i\xi,\pm L_i)
+- K_d\omega_m ,
+\label{eq:motor-servo}
+\end{equation}
+with
+\begin{equation}
+\dot{\xi} = \tau_{\mathrm{ref}} - \tau_s.
+\label{eq:integral-state}
+\end{equation}
+The integral contribution is limited to \(\pm L_i\), and the integrator is
+frozen when either the integral contribution or the motor torque is saturated in
+the direction of the error. The motor torque applied to the rotor is
+\begin{equation}
+\tau_m =
+\operatorname{clip}(\tau_{m,\mathrm{raw}}, -500, 500)\,\mathrm{N\,m}.
+\label{eq:motor-clamp}
+\end{equation}
+This \(\tau_m\) drives the SEA dynamics in Eq.~\eqref{eq:sea-dynamics}; the
+joint still receives the spring torque \(\tau_s\) defined in
+Eq.~\eqref{eq:sea-spring}.
+
+The cascade gains used in the current configuration are reported in Table~III.
+The knee uses \(K_{p,o}=18.85\,\mathrm{s^{-1}}\),
+\(K_{p,i}=29.2\,\mathrm{N\,m\,s/rad}\),
+\(K_{i,i}=1377\,\mathrm{N\,m/rad}\), and a \(50\,\mathrm{N\,m}\) inner
+integral torque limit. The ankle uses
+\(K_{p,o}=47.125\,\mathrm{s^{-1}}\),
+\(K_{p,i}=2.8275\,\mathrm{N\,m\,s/rad}\),
+\(K_{i,i}=213\,\mathrm{N\,m/rad}\), and a \(200\,\mathrm{N\,m}\) inner
+integral torque limit. The embedded actuator-drive gains are
+\((K_p,K_d,K_i)=(18,11,190)\) for the knee and \((11.3,11,123)\) for the
+ankle, with \(L_i=100\,\mathrm{N\,m}\) for both joints.
+
+This controller is deliberately not a learned low-level policy. It is a fixed,
+validated tracking interface between the generated kinematic reference and the
+SEA plant. Its role is to expose the correct failure mode to the trajectory
+generator: when the reference is too aggressive, the controller cannot hide that
+fact. It produces larger \(u\), larger motor torque demand, increased spring
+tracking error, or saturation. Conversely, a feasible reference remains
+trackable without changing the low-level SEA parameters. This is why the
+reference governor introduced in Section~IV is part of the action interface
+rather than a post-hoc smoothing operation.
+
+\paperplaceholder{Table placeholder. Table~III should report cascade gains,
+cascade integral limits, actuator-drive gains, actuator-drive integral and
+motor-torque limits, reference-governor velocity/acceleration/jerk limits, and
+the normalized command limits.}
+
+\draftnote{Before moving this section to a final submission template, verify all
+reported numerical gains against the final model/config snapshot used for the
+experiments, and decide whether ``series-elastic actuator'' or ``SEA'' is used
+as the dominant term.}

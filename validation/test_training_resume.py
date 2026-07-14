@@ -16,6 +16,36 @@ import train_ppo_mlp  # noqa: E402
 
 
 class ResumeSelectionTests(unittest.TestCase):
+    def test_resume_learning_rate_override_updates_actual_optimizer(self) -> None:
+        class Optimizer:
+            lr = 1e-4
+
+        class Learner:
+            optimizer = Optimizer()
+
+            def get_optimizers_for_module(self, module_id):
+                self.module_id = module_id
+                return [("default_optimizer", self.optimizer)]
+
+            @staticmethod
+            def _get_optimizer_lr(optimizer):
+                return optimizer.lr
+
+            @staticmethod
+            def _set_optimizer_lr(optimizer, lr):
+                optimizer.lr = lr
+
+        learner = Learner()
+        report = train_ppo_mlp._set_optimizer_learning_rate_on_learner(
+            learner,
+            learning_rate=5e-7,
+        )
+
+        self.assertEqual(learner.module_id, "default_policy")
+        self.assertEqual(report[0]["before"], 1e-4)
+        self.assertEqual(report[0]["after"], 5e-7)
+        self.assertEqual(learner.optimizer.lr, 5e-7)
+
     def test_iteration_history_upsert_replaces_duplicate_logical_iteration(self) -> None:
         old = {"iteration": 38, "episode_return_mean": 1.0}
         newer = {"iteration": 38, "episode_return_mean": 2.0}

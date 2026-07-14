@@ -36,6 +36,7 @@ from pathlib import Path
 from typing import Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
+import opensim
 from scipy.interpolate import BPoly, CubicHermiteSpline, CubicSpline, PchipInterpolator
 
 try:
@@ -68,11 +69,17 @@ from config import SimulatorConfig
 from kinematics_interpolator import KinematicsInterpolator
 from model_loader import setup_model
 from path_resolver import normalize_cli_existing_path, resolve_repo_path
+from prosthetic_phase_fsm import ProstheticPhaseFSM, ProstheticPhaseFSMConfig
 from setup_io import read_last_setup_path, read_setup_xml
 from simulation_runner import SegmentWallClockTimeout, SimulationRunner
 
 
 CoordDict = Dict[str, float]
+
+
+def _vec3_to_array(vec) -> np.ndarray:
+    """Convert an OpenSim/SimTK Vec3-like object to a NumPy array."""
+    return np.asarray([float(vec.get(i)) for i in range(3)], dtype=float)
 
 
 @dataclass(frozen=True)
@@ -99,6 +106,12 @@ class CMCEnvConfig:
     absolute_bounds_rad
         Bounds used by action_mode == "absolute"; keys are prosthetic coord
         names and values are (low, high) in radians.
+    target_slew_rate_limit_rad_s
+        Optional max rate for the policy-generated prosthetic target [rad/s].
+        The raw policy target is still logged through reward diagnostics, but
+        the segment served to the reference model is clamped target-to-target
+        from the previously accepted target and between future knots.
+        Non-positive values disable the limiter for that coordinate.
     random_init
         Start each episode from a random time in the setup window.
     episode_start_offset_s
@@ -136,6 +149,9 @@ class CMCEnvConfig:
     policy_knots: int = 4
     action_mode: str = "absolute"
     max_delta_rad: float | Mapping[str, float] | Sequence[float] = 0.35
+    target_slew_rate_limit_rad_s: (
+        float | Mapping[str, float] | Sequence[float] | None
+    ) = None
     # Absolute action bounds [rad] per prosthetic coord (used by
     # action_mode="absolute"): the policy emits an ABSOLUTE trajectory, not a
     # deviation from the prescribed IK. Bounds give ex-novo exploration room
@@ -215,20 +231,27 @@ class CMCEnvConfig:
     output_prefix: str = "rl_episode"
     grf_mode: Optional[str] = None
     online_grf_profile_file: Optional[str] = None
+    online_grf_detector_profile_file: Optional[str] = None
     include_online_grf_observation: bool = False
     prescribed_grf_disabled_sides: Sequence[str] = ()
     # Hybrid GRF: sides whose online contact is APPLIED (not just sensed), so the
     # prosthetic ankle/knee work against a real ground reaction. Prescribed is
     # auto-disabled on these sides by the loader. Use with grf_mode=online_sensor.
     online_grf_applied_sides: Sequence[str] = ()
-    # Penetration shaping on the APPLIED prosthetic contact. The contact already
-    # bounds penetration physically; these are a light penalty + a clean
-    # termination as a safety net. Thresholds sit above v2's normal operating
-    # penetration (~17 mm) and below the runner's hard abort (online_grf_max_
-    # penetration_m, default 30 mm). Reserves are NOT penalised (uncontrollable).
-    grf_penetration_penalty_threshold_m: float = 0.020
-    grf_penetration_termination_m: float = 0.028
+    # Penetration shaping on the APPLIED prosthetic contact. The soft threshold
+    # stays just above the healthy/sym60 contact envelope (~11.5 mm) and below
+    # the asym100 COP-flip burst (~13-15 mm). The termination threshold remains
+    # below the runner's hard abort (online_grf_max_penetration_m, default
+    # 30 mm) so invalid contact is attributed cleanly to the env guard.
+    # Reserves are NOT penalised (uncontrollable).
+    grf_penetration_penalty_threshold_m: float = 0.012
+    grf_penetration_termination_m: float = 0.017
     reward_grf_penetration_weight: float = 5.0
+    # Contact-patch feasibility guard on the GRF moment about the prosthetic
+    # ankle axis. Healthy prescribed data can show tiny negative transients;
+    # only a sustained negative moment beyond tau_tol is penalised.
+    grf_ankle_moment_flip_tau_tol_nm: float = 8.0
+    grf_ankle_moment_flip_force_threshold_n: float = 50.0
     pelvis_min_height: float = 0.55
     # Per-joint divergence guard on the *simulated* prosthetic angle q [rad].
     # Terminate (anti-divergence) if a prosthetic coordinate leaves these bounds.
@@ -267,7 +290,24 @@ class CMCEnvConfig:
     critic_privileged_observation: bool = False
     actor_cyclic_phase_only: bool = False
     include_reference_state_observation: bool = False
+    include_controller_state_observation: bool = True
+    include_controller_diagnostic_observation: bool = True
+    deployable_minimal_observation: bool = False
     include_imitation_target_observation: bool = False
+    phase_min_stance_duration_s: float = 0.05
+    phase_min_swing_duration_s: float = 0.20
+    phase_landing_window_start_s: float = 0.55
+    phase_landing_window_end_s: float = 1.10
+    phase_stance_hard_timeout_s: float = 2.20
+    phase_swing_hard_timeout_s: float = 1.30
+    phase_landing_force_full_credit_bw: float = 0.65
+    phase_min_stance_contact_fraction: float = 0.0
+    phase_min_stance_load_bw_s: float = 0.0
+    phase_min_cycle_knee_excursion_rad: float = 0.0
+    phase_hs_event_credit: float = 0.10
+    phase_to_event_credit: float = 0.20
+    phase_cycle_complete_bonus: float = 0.70
+    phase_failure_extra_penalty: float = 0.05
     # Sound-leg imitation target (used only when reward_function shapes the reward
     # in "imitation" mode; the env always emits ``sound_imitation_loss`` so the
     # ex-novo reward is unchanged). A periodic phase-normalized template is built
@@ -1013,6 +1053,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._last_u_rate_loss = 0.0
         self._last_policy_endpoint = np.zeros(2, dtype=float)
         self._last_policy_knots = np.zeros((self.env_cfg.policy_knots, 2))
+        self._target_slew_rate_limit = self._resolve_target_slew_rate_limit()
+        self._last_target_slew_terms: dict[str, float] = {}
         self._last_command_rate_terms: dict[str, float] = {}
         self._last_sea_segment_diagnostics: dict = {}
         self._observation_feature_names: tuple[str, ...] | None = None
@@ -1022,8 +1064,11 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._last_info: dict = {}
         self._body_weight_n = 1.0
         self._online_grf: dict = {}
+        self._online_grf_detector: dict = {}
         self._online_events: list[dict] = []
         self._online_gait_sides: dict[str, dict[str, float | None]] = {}
+        self._phase_fsm = ProstheticPhaseFSM(self._phase_fsm_config())
+        self._phase_fsm_payload: dict = self._phase_fsm.payload()
         self._gait_clock: GaitPhaseClock | None = None
         self._imitation_target: PhaseBasedImitationTarget | None = None
         self._reference_position_ranges: dict[str, float] = {}
@@ -1043,6 +1088,30 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             high=np.inf,
             shape=obs.shape,
             dtype=np.float32,
+        )
+
+    def _phase_fsm_config(self) -> ProstheticPhaseFSMConfig:
+        return ProstheticPhaseFSMConfig(
+            min_stance_duration_s=float(self.env_cfg.phase_min_stance_duration_s),
+            min_swing_duration_s=float(self.env_cfg.phase_min_swing_duration_s),
+            landing_window_start_s=float(self.env_cfg.phase_landing_window_start_s),
+            landing_window_end_s=float(self.env_cfg.phase_landing_window_end_s),
+            stance_hard_timeout_s=float(self.env_cfg.phase_stance_hard_timeout_s),
+            swing_hard_timeout_s=float(self.env_cfg.phase_swing_hard_timeout_s),
+            landing_force_full_credit_bw=float(
+                self.env_cfg.phase_landing_force_full_credit_bw
+            ),
+            min_stance_contact_fraction=float(
+                self.env_cfg.phase_min_stance_contact_fraction
+            ),
+            min_stance_load_bw_s=float(self.env_cfg.phase_min_stance_load_bw_s),
+            min_cycle_knee_excursion_rad=float(
+                self.env_cfg.phase_min_cycle_knee_excursion_rad
+            ),
+            hs_event_credit=float(self.env_cfg.phase_hs_event_credit),
+            toe_off_event_credit=float(self.env_cfg.phase_to_event_credit),
+            cycle_complete_bonus=float(self.env_cfg.phase_cycle_complete_bonus),
+            failure_extra_penalty=float(self.env_cfg.phase_failure_extra_penalty),
         )
 
     @property
@@ -1097,6 +1166,9 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         obs, obs_dict = self._get_observation()
         info = {
             "time": self.t,
+            "episode_start_offset_s": float(
+                self._episode_start - self.cfg.t_start
+            ),
             "observation": obs_dict,
             "observation_feature_names": self.observation_feature_names,
             "reset_diagnostics": self._reset_diagnostics_payload(),
@@ -1110,6 +1182,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "gait_clock": self._gait_clock_summary(),
             "imitation_target": self._imitation_target_summary(),
             "reward_reference_ranges": self._reference_range_summary(),
+            "phase_fsm": copy.deepcopy(self._phase_fsm_payload),
         }
         info.update(self._online_info_payload())
         return obs, info
@@ -1166,6 +1239,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             failure_traceback = traceback.format_exc()
 
         self._update_online_gait_state(step_info)
+        self._update_phase_fsm()
         obs, obs_dict = self._get_observation()
         reward, reward_terms = self._get_reward(obs_dict)
         unsafe_reason = self._unsafe_end_reason(obs_dict)
@@ -1222,6 +1296,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             25.0,
             (penetration_excess_m / penetration_scale_m) ** 2,
         )
+        ankle_moment_terms = self._grf_ankle_moment_flip_terms()
         if penetration_loss:
             reward = float(
                 reward
@@ -1234,14 +1309,19 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 "grf_penetration_excess_m": float(penetration_excess_m),
                 "grf_penetration_scale_m": float(penetration_scale_m),
                 "grf_penetration_loss": float(penetration_loss),
+                **ankle_moment_terms,
                 "terminated": float(bool(terminated)),
                 "truncated": float(bool(truncated)),
+                **self._phase_fsm_reward_terms(),
             }
         )
 
         info = {
             "time": self.t,
             "target_time": target_t,
+            "episode_start_offset_s": float(
+                self._episode_start - self.cfg.t_start
+            ),
             "observation": obs_dict,
             "observation_feature_names": self.observation_feature_names,
             "reward_terms": reward_terms,
@@ -1256,6 +1336,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "sea_segment_diagnostics": copy.deepcopy(
                 self._last_sea_segment_diagnostics
             ),
+            "so_diagnostics": copy.deepcopy(step_info.get("so_diagnostics", {})),
+            "phase_fsm": copy.deepcopy(self._phase_fsm_payload),
             "end_reason": end_reason,
             "grf_mode": self.cfg.grf_mode,
             "prescribed_grf_disabled_sides": list(
@@ -1399,6 +1481,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         cfg.grf_mode = str(getattr(setup, "grf_mode", "prescribed"))
         profile = getattr(setup, "online_grf_profile_file", None)
         cfg.online_grf_profile_file = "" if profile is None else str(profile)
+        cfg.online_grf_detector_profile_file = ""
 
     def _apply_grf_overrides(self, cfg: SimulatorConfig) -> None:
         if self.env_cfg.grf_mode is not None:
@@ -1406,6 +1489,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         if self.env_cfg.online_grf_profile_file is not None:
             cfg.online_grf_profile_file = normalize_cli_existing_path(
                 self.env_cfg.online_grf_profile_file
+            )
+        if self.env_cfg.online_grf_detector_profile_file is not None:
+            cfg.online_grf_detector_profile_file = normalize_cli_existing_path(
+                self.env_cfg.online_grf_detector_profile_file
             )
         cfg.prescribed_grf_disabled_sides = [
             str(side).strip().lower()
@@ -1716,7 +1803,9 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         gait_clock = self._gait_clock
         return {
             "time": float(self.t),
-            "episode_start_offset_s": float(self.env_cfg.episode_start_offset_s),
+            "episode_start_offset_s": float(
+                self._episode_start - self.cfg.t_start
+            ),
             "imitation_initialize_to_target": bool(
                 self.env_cfg.imitation_initialize_to_target
             ),
@@ -1801,9 +1890,12 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._last_u_sea = {}
         self._last_u_rate_loss = 0.0
         self._last_command_rate_terms = {}
+        self._last_target_slew_terms = {}
         self._last_sea_segment_diagnostics = {}
         self._last_info = {}
         self._reset_online_gait_state()
+        self._phase_fsm.reset()
+        self._phase_fsm_payload = self._phase_fsm.payload()
 
     # ------------------------------------------------------------------
     # Action mapping
@@ -1828,6 +1920,28 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         if arr.shape != (2,):
             raise ValueError("max_delta_rad must be scalar, mapping, or length-2.")
         return arr.astype(float)
+
+    def _resolve_target_slew_rate_limit(self) -> np.ndarray:
+        value = self.env_cfg.target_slew_rate_limit_rad_s
+        pros = self._base_simulator_config.pros_coords
+        if value is None:
+            return np.full(len(pros), np.inf, dtype=float)
+        if isinstance(value, Mapping):
+            arr = np.array([float(value.get(name, 0.0)) for name in pros], dtype=float)
+        else:
+            arr = np.asarray(value, dtype=float)
+            if arr.ndim == 0:
+                arr = np.full(len(pros), float(arr), dtype=float)
+            elif arr.shape != (len(pros),):
+                raise ValueError(
+                    "target_slew_rate_limit_rad_s must be scalar, mapping, "
+                    "or length-2."
+                )
+            else:
+                arr = arr.astype(float)
+        if not np.all(np.isfinite(arr)):
+            raise ValueError("target_slew_rate_limit_rad_s contains non-finite values.")
+        return np.where(arr > 0.0, arr, np.inf)
 
     def _validate_action(self, action) -> np.ndarray:
         arr = np.asarray(action, dtype=float)
@@ -1874,16 +1988,95 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             raise ValueError(f"Unsupported action_mode: {self.env_cfg.action_mode}")
 
         q_anchor, qdot_anchor, _ = self.kin.get(self.t)
-        anchor = np.array([q_anchor[name] for name in cfg.pros_coords], dtype=float)
+        continuity_anchor = np.array(
+            [q_anchor[name] for name in cfg.pros_coords],
+            dtype=float,
+        )
+        # The slew limiter is target-to-target. Anchoring it to the filtered
+        # reference output would put the limiter inside the governor feedback
+        # loop and reduce the configured rate by roughly an order of magnitude.
+        target_anchor = np.asarray(self._last_policy_endpoint, dtype=float)
+        values, self._last_target_slew_terms = self._limit_target_slew(
+            values,
+            future,
+            target_anchor,
+        )
         anchor_derivative = np.array(
             [qdot_anchor[name] for name in cfg.pros_coords],
             dtype=float,
         )
         times = np.concatenate(([self.t], future))
-        segment_values = np.vstack((anchor, values))
+        segment_values = np.vstack((continuity_anchor, values))
         segment_derivatives = np.gradient(segment_values, times, axis=0)
         segment_derivatives[0, :] = anchor_derivative
         return times, segment_values, segment_derivatives
+
+    def _limit_target_slew(
+        self,
+        raw_values: np.ndarray,
+        future_times: np.ndarray,
+        anchor: np.ndarray,
+    ) -> tuple[np.ndarray, dict[str, float]]:
+        limits = np.asarray(self._target_slew_rate_limit, dtype=float)
+        enabled = np.isfinite(limits)
+        raw = np.asarray(raw_values, dtype=float)
+        limited = raw.copy()
+        if not np.any(enabled):
+            return limited, {
+                "target_slew_limit_enabled": 0.0,
+                "target_slew_limited_fraction": 0.0,
+                "target_slew_abs_delta_raw_max_rad": 0.0,
+                "target_slew_abs_delta_served_max_rad": 0.0,
+                "target_slew_excess_abs_max_rad": 0.0,
+                "target_slew_excess_loss": 0.0,
+            }
+
+        previous = np.asarray(anchor, dtype=float).copy()
+        previous_time = float(self.t)
+        limited_count = 0
+        limited_total = int(np.count_nonzero(enabled) * raw.shape[0])
+        raw_delta_abs_max = 0.0
+        served_delta_abs_max = 0.0
+        excess_abs_max = 0.0
+        excess_losses: list[float] = []
+
+        for i, time_value in enumerate(np.asarray(future_times, dtype=float)):
+            dt = max(1e-9, float(time_value) - previous_time)
+            max_delta = limits * dt
+            desired_delta = raw[i] - previous
+            clipped_delta = desired_delta.copy()
+            clipped_delta[enabled] = np.clip(
+                desired_delta[enabled],
+                -max_delta[enabled],
+                max_delta[enabled],
+            )
+            limited[i] = previous + clipped_delta
+
+            abs_raw = np.abs(desired_delta[enabled])
+            abs_served = np.abs(clipped_delta[enabled])
+            excess = np.maximum(0.0, abs_raw - max_delta[enabled])
+            raw_delta_abs_max = max(raw_delta_abs_max, float(np.max(abs_raw)))
+            served_delta_abs_max = max(served_delta_abs_max, float(np.max(abs_served)))
+            excess_abs_max = max(excess_abs_max, float(np.max(excess)))
+            limited_count += int(np.count_nonzero(excess > 1e-12))
+            denom = np.maximum(max_delta[enabled], 1e-9)
+            excess_losses.extend(np.square(excess / denom).tolist())
+
+            previous = limited[i]
+            previous_time = float(time_value)
+
+        limited_fraction = (
+            float(limited_count) / float(limited_total) if limited_total else 0.0
+        )
+        excess_loss = float(np.mean(excess_losses)) if excess_losses else 0.0
+        return limited, {
+            "target_slew_limit_enabled": 1.0,
+            "target_slew_limited_fraction": limited_fraction,
+            "target_slew_abs_delta_raw_max_rad": raw_delta_abs_max,
+            "target_slew_abs_delta_served_max_rad": served_delta_abs_max,
+            "target_slew_excess_abs_max_rad": excess_abs_max,
+            "target_slew_excess_loss": min(25.0, excess_loss),
+        }
 
     def _coord_scales(self, values: Mapping[str, float], fallback: float) -> np.ndarray:
         return np.asarray(
@@ -1956,6 +2149,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "qdot_ref_loss": float(qdot_ref_loss),
             "qddot_ref_loss": float(qddot_ref_loss),
         }
+        terms.update(self._last_target_slew_terms)
         governor = self.kin.reference_governor_diagnostics
         target_error_rms = np.asarray(
             governor.get(
@@ -2090,16 +2284,17 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         # reads the contralateral (sound) leg. To be migrated to ipsilateral-load /
         # IMU entrainment once the online GRF detector is validated; do not treat it
         # as a fully realistic signal.
-        gait_phase = (
-            self._gait_clock.phase(self.t)
-            if self._gait_clock is not None
-            else 0.0
-        )
-        gait_angle = 2.0 * np.pi * gait_phase
-        if not self.env_cfg.actor_cyclic_phase_only:
-            actor["gait_phase"] = float(gait_phase)
-        actor["gait_phase_sin"] = float(np.sin(gait_angle))
-        actor["gait_phase_cos"] = float(np.cos(gait_angle))
+        if not self.env_cfg.deployable_minimal_observation:
+            gait_phase = (
+                self._gait_clock.phase(self.t)
+                if self._gait_clock is not None
+                else 0.0
+            )
+            gait_angle = 2.0 * np.pi * gait_phase
+            if not self.env_cfg.actor_cyclic_phase_only:
+                actor["gait_phase"] = float(gait_phase)
+            actor["gait_phase_sin"] = float(np.sin(gait_angle))
+            actor["gait_phase_cos"] = float(np.cos(gait_angle))
 
         # Imitation-only target exposed to the actor. The flag is controlled by
         # env_factory from reward_mode, so ex-novo keeps the original actor schema.
@@ -2121,16 +2316,18 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         # Prosthetic joints: measured angle + velocity (joint/motor encoder).
         for coord_name in self.cfg.pros_coords:
             actor[coord_name] = q(coord_name)
-            actor[f"{coord_name}_vel"] = qd(coord_name)
+            if not self.env_cfg.deployable_minimal_observation:
+                actor[f"{coord_name}_vel"] = qd(coord_name)
 
         # SEA motor internal states (motor encoder).
-        for sea_name in (self.cfg.sea_knee_name, self.cfg.sea_ankle_name):
-            ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
-            ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
-            if ma_idx is not None:
-                actor[f"{sea_name}_motor_angle"] = float(sv.get(ma_idx))
-            if ms_idx is not None:
-                actor[f"{sea_name}_motor_speed"] = float(sv.get(ms_idx))
+        if not self.env_cfg.deployable_minimal_observation:
+            for sea_name in (self.cfg.sea_knee_name, self.cfg.sea_ankle_name):
+                ma_idx = ctx.sea_motor_angle_sv_idx.get(sea_name)
+                ms_idx = ctx.sea_motor_speed_sv_idx.get(sea_name)
+                if ma_idx is not None:
+                    actor[f"{sea_name}_motor_angle"] = float(sv.get(ma_idx))
+                if ms_idx is not None:
+                    actor[f"{sea_name}_motor_speed"] = float(sv.get(ms_idx))
 
         # Prosthetic-foot load (instrumented foot). The prosthesis is on the LEFT
         # side, so only ``online_left_*`` is sensable on-device; ``online_right_*``
@@ -2155,21 +2352,47 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             actor["online_left_cycle_duration_s"] = float(
                 left_info["cycle_duration_s"]
             )
+            actor.update(self._phase_fsm.observation())
 
-        # Command memory (controller's own last command / internal state).
-        for i, coord_name in enumerate(self.cfg.pros_coords):
-            actor[f"{coord_name}_previous_endpoint"] = self._last_policy_endpoint[i]
-            if self.env_cfg.include_reference_state_observation:
-                actor[f"{coord_name}_served_ref"] = float(q_ref[coord_name])
-                actor[f"{coord_name}_served_ref_vel"] = float(qdot_ref[coord_name])
-                actor[f"{coord_name}_served_ref_accel"] = float(qddot_ref[coord_name])
-            sea_u = float(self._last_u_sea.get(coord_name, 0.0))
-            sea_u_abs = abs(sea_u)
-            actor[f"{coord_name}_sea_u"] = sea_u
-            actor[f"{coord_name}_sea_u_abs"] = sea_u_abs
-            actor[f"{coord_name}_sea_u_saturated"] = float(
-                sea_u_abs >= self.env_cfg.sea_u_saturation_threshold
-            )
+        # Controller state is deployable and restores the Markov state hidden by
+        # the target slew limiter, reference governor, and command-rate reward.
+        # Keep derived diagnostics separate: abs(u) and saturation add no state
+        # beyond raw u and can otherwise become redundant imitation shortcuts.
+        if not self.env_cfg.deployable_minimal_observation:
+            controller_state: dict[str, float] = {}
+            controller_diagnostics: dict[str, float] = {}
+            for i, coord_name in enumerate(self.cfg.pros_coords):
+                controller_state[f"{coord_name}_previous_endpoint"] = (
+                    self._last_policy_endpoint[i]
+                )
+                if self.env_cfg.include_reference_state_observation:
+                    controller_state[f"{coord_name}_served_ref"] = float(
+                        q_ref[coord_name]
+                    )
+                    controller_state[f"{coord_name}_served_ref_vel"] = float(
+                        qdot_ref[coord_name]
+                    )
+                    controller_state[f"{coord_name}_served_ref_accel"] = float(
+                        qddot_ref[coord_name]
+                    )
+                sea_u = float(self._last_u_sea.get(coord_name, 0.0))
+                controller_state[f"{coord_name}_sea_u"] = sea_u
+                sea_u_abs = abs(sea_u)
+                controller_diagnostics[f"{coord_name}_sea_u_abs"] = sea_u_abs
+                controller_diagnostics[f"{coord_name}_sea_u_saturated"] = float(
+                    sea_u_abs >= self.env_cfg.sea_u_saturation_threshold
+                )
+            if self.env_cfg.include_controller_state_observation:
+                actor.update(controller_state)
+            else:
+                priv.update(controller_state)
+            if (
+                self.env_cfg.include_controller_state_observation
+                and self.env_cfg.include_controller_diagnostic_observation
+            ):
+                actor.update(controller_diagnostics)
+            else:
+                priv.update(controller_diagnostics)
 
         # --- PRIVILEGED (critic-only) --------------------------------------
         # IK reference for the prosthetic joints. Privileged AND anti-ex-novo, so
@@ -2240,6 +2463,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
     def _reset_online_gait_state(self) -> None:
         self._online_grf = {}
+        self._online_grf_detector = {}
         self._online_events = []
         self._online_gait_sides = {
             side: {
@@ -2253,6 +2477,12 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
     def _update_online_gait_state(self, step_info: Mapping[str, object]) -> None:
         online_grf = step_info.get("online_grf")
         self._online_grf = dict(online_grf) if isinstance(online_grf, Mapping) else {}
+        online_grf_detector = step_info.get("online_grf_detector")
+        self._online_grf_detector = (
+            dict(online_grf_detector)
+            if isinstance(online_grf_detector, Mapping)
+            else {}
+        )
 
         events = step_info.get("online_events")
         self._online_events = [
@@ -2277,6 +2507,112 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             elif event_name == "toe_off":
                 self._online_gait_sides[side]["last_toe_off_time"] = event_time
 
+    def _phase_grf_sides(self) -> Mapping[str, object]:
+        detector_sides = self._online_grf_detector.get("left")
+        if isinstance(detector_sides, Mapping):
+            return self._online_grf_detector
+        return self._online_grf
+
+    def _update_phase_fsm(self) -> None:
+        grf = self._phase_grf_sides()
+        left = grf.get("left") if isinstance(grf, Mapping) else None
+        if not isinstance(left, Mapping):
+            left = {}
+        normal_force_n = float(left.get("normal_force", 0.0) or 0.0)
+        normal_force_bw = normal_force_n / max(1e-9, self._body_weight_n)
+        sv = self.ctx.model.getStateVariableValues(self.runner.state)
+        knee_q = float(sv.get(self.ctx.q_sv_idx["pros_knee_angle"]))
+        ankle_q = float(sv.get(self.ctx.q_sv_idx["pros_ankle_angle"]))
+        self._phase_fsm_payload = self._phase_fsm.update(
+            time_s=float(self.t),
+            events=self._online_events,
+            normal_force_bw=normal_force_bw,
+            in_contact=bool(left.get("in_contact", False)),
+            prosthetic_knee_angle_rad=knee_q,
+            prosthetic_ankle_angle_rad=ankle_q,
+        )
+
+    def _phase_fsm_reward_terms(self) -> dict[str, float]:
+        payload = self._phase_fsm_payload
+        return {
+            "phase_fsm_state_id": float(payload.get("state_id", 0.0) or 0.0),
+            "phase_event_progress_score": float(
+                payload.get("phase_event_progress_score", 0.0) or 0.0
+            ),
+            "landing_window_contact_score": float(
+                payload.get("landing_window_contact_score", 0.0) or 0.0
+            ),
+            "landing_window_active": float(
+                payload.get("landing_window_active", 0.0) or 0.0
+            ),
+            "invalid_event_loss": float(payload.get("invalid_event_loss", 0.0) or 0.0),
+            "contact_validity_loss": float(
+                payload.get("contact_validity_loss", 0.0) or 0.0
+            ),
+            "invalid_event_count": float(
+                payload.get("invalid_event_count", 0.0) or 0.0
+            ),
+            "phase_valid_hs_count": float(payload.get("valid_hs_count", 0.0) or 0.0),
+            "phase_valid_to_count": float(payload.get("valid_to_count", 0.0) or 0.0),
+            "phase_valid_cycle_count": float(
+                payload.get("valid_cycle_count", 0.0) or 0.0
+            ),
+            "phase_cycle_progress_credit": float(
+                payload.get("cycle_progress_credit", 0.0) or 0.0
+            ),
+            "phase_pending_cycle_credit": float(
+                payload.get("pending_cycle_credit", 0.0) or 0.0
+            ),
+            "phase_cycle_complete_bonus": float(
+                payload.get("phase_cycle_complete_bonus", 0.0) or 0.0
+            ),
+            "phase_clawback_penalty": float(
+                payload.get("phase_clawback_penalty", 0.0) or 0.0
+            ),
+            "phase_failure_extra_penalty": float(
+                payload.get("phase_failure_extra_penalty", 0.0) or 0.0
+            ),
+            "phase_cycle_failed_this_step": float(
+                payload.get("phase_cycle_failed_this_step", 0.0) or 0.0
+            ),
+            "phase_stance_elapsed_s": float(
+                payload.get("stance_elapsed_s", 0.0) or 0.0
+            ),
+            "phase_swing_elapsed_s": float(payload.get("swing_elapsed_s", 0.0) or 0.0),
+            "phase_timeout_exceeded": float(
+                payload.get("timeout_exceeded", 0.0) or 0.0
+            ),
+            "phase_timeout_side": float(payload.get("timeout_side", 0.0) or 0.0),
+            "phase_last_period_s": float(payload.get("last_period_s", 0.0) or 0.0),
+            "phase_previous_period_s": float(
+                payload.get("previous_period_s", 0.0) or 0.0
+            ),
+            "phase_last_stance_fraction": float(
+                payload.get("last_stance_fraction", 0.0) or 0.0
+            ),
+            "phase_stance_contact_time_s": float(
+                payload.get("stance_contact_time_s", 0.0) or 0.0
+            ),
+            "phase_stance_load_integral_bw_s": float(
+                payload.get("stance_load_integral_bw_s", 0.0) or 0.0
+            ),
+            "phase_stance_contact_fraction": float(
+                payload.get("stance_contact_fraction", 0.0) or 0.0
+            ),
+            "phase_stance_mean_load_bw": float(
+                payload.get("stance_mean_load_bw", 0.0) or 0.0
+            ),
+            "phase_cycle_knee_excursion_rad": float(
+                payload.get("cycle_knee_excursion_rad", 0.0) or 0.0
+            ),
+            "phase_cycle_ankle_excursion_rad": float(
+                payload.get("cycle_ankle_excursion_rad", 0.0) or 0.0
+            ),
+            "phase_cycle_rejected_this_step": float(
+                payload.get("cycle_rejected_this_step", 0.0) or 0.0
+            ),
+        }
+
     def _online_gait_info(self) -> dict:
         event_names = {
             side: {
@@ -2288,7 +2624,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         }
         sides: dict[str, dict[str, float | bool | None]] = {}
         for side in ("left", "right"):
-            grf_side = self._online_grf.get(side, {})
+            grf_source = self._phase_grf_sides()
+            grf_side = grf_source.get(side, {}) if isinstance(grf_source, Mapping) else {}
             if not isinstance(grf_side, Mapping):
                 grf_side = {}
             normal_force_n = float(grf_side.get("normal_force", 0.0))
@@ -2322,6 +2659,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             return {}
         return {
             "online_grf": copy.deepcopy(self._online_grf),
+            "online_grf_detector": copy.deepcopy(self._online_grf_detector),
             "online_events": copy.deepcopy(self._online_events),
             "online_gait": self._online_gait_info(),
         }
@@ -2741,6 +3079,115 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             if isinstance(grf_side, Mapping):
                 values.append(float(grf_side.get("penetration", 0.0)))
         return max(values) if values else 0.0
+
+    def _prosthetic_ankle_center_axis_ground(
+        self,
+    ) -> tuple[np.ndarray, np.ndarray] | None:
+        """Return prosthetic ankle center and axis in ground coordinates."""
+        if self.ctx is None or getattr(self, "runner", None) is None:
+            return None
+        try:
+            model = self.ctx.model
+            state = self.runner.state
+            model.realizePosition(state)
+            tibia = model.getBodySet().get("tibia_pylon")
+            ankle_station = opensim.Vec3(0.0, -0.43, 0.0)
+            axis_station = opensim.Vec3(0.0, -0.43, 1.0)
+            ankle_center = _vec3_to_array(
+                tibia.findStationLocationInGround(state, ankle_station)
+            )
+            axis_tip = _vec3_to_array(
+                tibia.findStationLocationInGround(state, axis_station)
+            )
+            axis = axis_tip - ankle_center
+            axis_norm = float(np.linalg.norm(axis))
+            if not np.isfinite(axis_norm) or axis_norm <= 1e-12:
+                return None
+            return ankle_center, axis / axis_norm
+        except Exception:
+            return None
+
+    def _grf_ankle_moment_flip_terms(self) -> dict[str, float]:
+        """Loss for online GRF moment with the wrong sign about the pros ankle.
+
+        tau_GRF_about_ankle = ankle_axis . (M_ground - ankle_center x F)
+        Penalise only the applied left online contact when it produces a negative
+        ankle moment beyond ``tau_tol`` under real stance load.
+        """
+        tau_tol = max(1e-9, float(self.env_cfg.grf_ankle_moment_flip_tau_tol_nm))
+        force_threshold = max(
+            0.0,
+            float(self.env_cfg.grf_ankle_moment_flip_force_threshold_n),
+        )
+        terms = {
+            "grf_ankle_moment_flip_available": 0.0,
+            "grf_ankle_moment_flip_active": 0.0,
+            "grf_ankle_moment_flip_tau_nm": 0.0,
+            "grf_ankle_moment_flip_tau_tol_nm": tau_tol,
+            "grf_ankle_moment_flip_force_n": 0.0,
+            "grf_ankle_moment_flip_force_threshold_n": force_threshold,
+            "grf_ankle_moment_flip_cop_z_minus_ankle_z_m": 0.0,
+            "grf_ankle_moment_flip_excess_nm": 0.0,
+            "grf_ankle_moment_flip_raw_loss_nm2": 0.0,
+            "grf_ankle_moment_flip_loss": 0.0,
+        }
+        applied_sides = {
+            str(side).strip().lower()
+            for side in getattr(self.cfg, "online_grf_applied_sides", [])
+            if str(side).strip()
+        }
+        if "left" not in applied_sides:
+            return terms
+        grf_side = self._online_grf.get("left", {})
+        if not isinstance(grf_side, Mapping):
+            return terms
+
+        force = np.asarray(grf_side.get("force", (0.0, 0.0, 0.0)), dtype=float)
+        moment_ground = np.asarray(
+            grf_side.get("moment", (0.0, 0.0, 0.0)),
+            dtype=float,
+        )
+        if force.shape != (3,) or moment_ground.shape != (3,):
+            return terms
+        if not np.all(np.isfinite(force)) or not np.all(np.isfinite(moment_ground)):
+            return terms
+
+        try:
+            normal_force_n = float(grf_side.get("normal_force"))
+        except (TypeError, ValueError):
+            normal_force_n = max(0.0, float(force[1]))
+        if not np.isfinite(normal_force_n):
+            normal_force_n = max(0.0, float(force[1]))
+        ankle_center_axis = self._prosthetic_ankle_center_axis_ground()
+        if ankle_center_axis is None:
+            return terms
+        ankle_center, ankle_axis = ankle_center_axis
+        moment_about_ankle = moment_ground - np.cross(ankle_center, force)
+        tau_nm = float(np.dot(moment_about_ankle, ankle_axis))
+
+        cop = np.asarray(grf_side.get("cop", (np.nan, np.nan, np.nan)), dtype=float)
+        if cop.shape == (3,) and np.all(np.isfinite(cop)):
+            dz = float(cop[2] - ankle_center[2])
+        else:
+            dz = 0.0
+
+        active = bool(normal_force_n >= force_threshold)
+        excess_nm = max(0.0, -tau_nm - tau_tol) if active else 0.0
+        raw_loss_nm2 = excess_nm**2
+        loss = min(25.0, raw_loss_nm2 / max(1e-9, tau_tol**2))
+        terms.update(
+            {
+                "grf_ankle_moment_flip_available": 1.0,
+                "grf_ankle_moment_flip_active": float(active),
+                "grf_ankle_moment_flip_tau_nm": float(tau_nm),
+                "grf_ankle_moment_flip_force_n": float(normal_force_n),
+                "grf_ankle_moment_flip_cop_z_minus_ankle_z_m": float(dz),
+                "grf_ankle_moment_flip_excess_nm": float(excess_nm),
+                "grf_ankle_moment_flip_raw_loss_nm2": float(raw_loss_nm2),
+                "grf_ankle_moment_flip_loss": float(loss),
+            }
+        )
+        return terms
 
     def _unsafe_end_reason(self, obs: Mapping[str, float]) -> str | None:
         # Termination reads the physical STATE directly (like _get_reward), not the

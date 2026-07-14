@@ -37,6 +37,7 @@ sono cambiati.
 Report utente:
 
 ```text
+reports/user/2026-06-13_progettazione_training_imitativo_v4_frequenze_reference_model_c2.md
 reports/user/2026-06-14_allineamento_windows_plugin_pi.md
 reports/user/2026-06-14_validazione_simulatore.md
 reports/user/2026-06-14_analisi_frequenziale_configurazione_pi.md
@@ -543,4 +544,3 @@ lungo V4.
       `sea_stiffness`, riuso `InverseDynamicsSolver` e SNN come RLModule.
 - [ ] Proseguire la revisione della letteratura e i TODO storici SEA ancora
       applicabili.
-

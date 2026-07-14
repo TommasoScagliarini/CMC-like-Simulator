@@ -1,0 +1,2069 @@
+{
+  "ok": true,
+  "test_id": "compressive_stance",
+  "status": "PASS",
+  "gate_role": "negative_gate",
+  "output_dir": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/reward_audit_runs/2026-07-10_fsm_phase_expectation_synthetic/compressive_stance",
+  "config": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+  "pass_criteria": {
+    "no_to": true,
+    "no_valid_cycles": true,
+    "episode_return_negative": true,
+    "provisional_credit_clawed_back": true,
+    "no_to_confirmation_credit": true,
+    "terminal_contact_credit_zero": true
+  },
+  "metrics": {
+    "reward_mean": -0.39,
+    "reward_min": -2.25,
+    "phase_timeout_penalty_term_mean": 0.0,
+    "phase_stance_timeout_loss_mean": 0.0,
+    "phase_swing_timeout_loss_mean": 0.0,
+    "phase_event_progress_score_mean": 0.02,
+    "contact_load_score_mean": 0.4,
+    "landing_window_contact_score_mean": 0.0,
+    "swing_unloading_loss_mean": 0.0,
+    "valid_hs_count_final": 1.0,
+    "valid_to_count_final": 0.0,
+    "valid_cycle_count_final": 0.0,
+    "episode_return": -1.95,
+    "contact_support_clawback_max": 0.2,
+    "contact_support_to_score_max": 0.0,
+    "contact_load_score_last": 0.0
+  },
+  "notes": [
+    "Synthetic H2 failure: monotonic load/penetration, no prosthetic TO, terminal penetration guard.",
+    "Dense support credit must stop after minimum evidence and be clawed back at failure."
+  ],
+  "subcases": {
+    "compressive_stance": {
+      "steps": 5,
+      "episode_return": -1.95,
+      "reward_mean": -0.39,
+      "reward_min": -2.25,
+      "reward_max": 0.2,
+      "final_fsm": {
+        "state_id": 1.0,
+        "state_name": "STANCE_AFTER_HS",
+        "expected_next_event": "toe_off",
+        "stance_elapsed_s": 0.36,
+        "swing_elapsed_s": 0.0,
+        "cycle_progress_credit": 0.25,
+        "pending_cycle_credit": 0.1,
+        "phase_event_progress_score": 0.0,
+        "phase_cycle_complete_bonus": 0.0,
+        "phase_clawback_penalty": 0.0,
+        "phase_failure_extra_penalty": 0.0,
+        "phase_cycle_failed_this_step": 0.0,
+        "valid_hs_count": 1.0,
+        "valid_to_count": 0.0,
+        "valid_cycle_count": 0.0,
+        "invalid_event_this_step": 0.0,
+        "invalid_event_count": 0.0,
+        "invalid_event_type": "",
+        "invalid_event_loss": 0.0,
+        "contact_validity_loss": 0.0,
+        "landing_window_active": 0.0,
+        "landing_window_contact_score": 0.0,
+        "cycle_completed_this_step": 0.0,
+        "timeout_exceeded": 0.0,
+        "timeout_side": 0.0,
+        "last_period_s": 0.0,
+        "previous_period_s": 0.0,
+        "last_stance_fraction": 0.0,
+        "stance_contact_time_s": 0.36,
+        "stance_load_integral_bw_s": 0.13499999999999998,
+        "stance_contact_fraction": 1.0,
+        "stance_mean_load_bw": 0.37499999999999994,
+        "cycle_knee_excursion_rad": 0.03999999999999998,
+        "cycle_ankle_excursion_rad": 0.04,
+        "cycle_rejected_this_step": 0.0,
+        "cycle_reject_reason": ""
+      },
+      "trace_stats": {
+        "ankle_rad": {
+          "mean": 0.06,
+          "min": 0.04,
+          "max": 0.08,
+          "last": 0.08
+        },
+        "contact_load_dense_active": {
+          "mean": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_load_evidence_complete": {
+          "mean": 0.6,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "contact_load_score": {
+          "mean": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_support_clawback_penalty": {
+          "mean": 0.04,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.2
+        },
+        "contact_support_clawback_term": {
+          "mean": 0.04,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.2
+        },
+        "contact_support_pending_dense_reward": {
+          "mean": 0.13999999999999999,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.0
+        },
+        "contact_support_to_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "fsm_state_id": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "grf_slip_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "grf_slip_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "in_contact": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "invalid_event_count": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "knee_rad": {
+          "mean": -0.22000000000000003,
+          "min": -0.24,
+          "max": -0.2,
+          "last": -0.24
+        },
+        "landing_window_contact_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "normal_force_bw": {
+          "mean": 0.35,
+          "min": 0.2,
+          "max": 0.5,
+          "last": 0.5
+        },
+        "oob_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "oob_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_clawback_penalty": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_cycle_ankle_excursion_rad": {
+          "mean": 0.02,
+          "min": 0.0,
+          "max": 0.04,
+          "last": 0.04
+        },
+        "phase_cycle_complete_bonus": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_cycle_knee_excursion_rad": {
+          "mean": 0.01999999999999999,
+          "min": 0.0,
+          "max": 0.03999999999999998,
+          "last": 0.03999999999999998
+        },
+        "phase_cycle_rejected_this_step": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_event_progress_score": {
+          "mean": 0.02,
+          "min": 0.0,
+          "max": 0.1,
+          "last": 0.0
+        },
+        "phase_failure_extra_penalty": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_regular_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_stance_contact_fraction": {
+          "mean": 0.8,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "phase_stance_load_integral_bw_s": {
+          "mean": 0.06499999999999999,
+          "min": 0.0,
+          "max": 0.13499999999999998,
+          "last": 0.13499999999999998
+        },
+        "phase_stance_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_swing_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_timeout_penalty_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_valid_cycle_count": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_valid_hs_count": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "phase_valid_to_count": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_joint_range_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_joint_range_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reward": {
+          "mean": -0.39,
+          "min": -2.25,
+          "max": 0.2,
+          "last": -2.25
+        },
+        "reward_base": {
+          "mean": 0.06000000000000001,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.0
+        },
+        "reward_without_grf_slip": {
+          "mean": -0.39,
+          "min": -2.25,
+          "max": 0.2,
+          "last": -2.25
+        },
+        "step": {
+          "mean": 3.0,
+          "min": 1.0,
+          "max": 5.0,
+          "last": 5.0
+        },
+        "swing_unloading_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "time": {
+          "mean": 0.192,
+          "min": 0.0,
+          "max": 0.36,
+          "last": 0.36
+        }
+      },
+      "reward_terms_stats": {
+        "bio_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_load_confidence_full_bw": {
+          "mean": 0.2,
+          "min": 0.2,
+          "max": 0.2,
+          "last": 0.2
+        },
+        "contact_load_dense_active": {
+          "mean": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_load_evidence_complete": {
+          "mean": 0.6,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "contact_load_loss": {
+          "mean": 0.6,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "contact_load_penetration_full_reward_m": {
+          "mean": 0.01,
+          "min": 0.01,
+          "max": 0.01,
+          "last": 0.01
+        },
+        "contact_load_penetration_m": {
+          "mean": 0.00982,
+          "min": 0.002,
+          "max": 0.0221,
+          "last": 0.0221
+        },
+        "contact_load_penetration_quality": {
+          "mean": 0.7000000000000001,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_load_penetration_zero_reward_m": {
+          "mean": 0.012,
+          "min": 0.012,
+          "max": 0.012,
+          "last": 0.012
+        },
+        "contact_load_raw_score": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "contact_load_score": {
+          "mean": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_overload_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_clawback_penalty": {
+          "mean": 0.04,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.2
+        },
+        "contact_support_dense_confirmed_reward": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_mean_penetration_quality": {
+          "mean": 0.95,
+          "min": 0.8750000000000001,
+          "max": 1.0,
+          "last": 0.8750000000000001
+        },
+        "contact_support_min_penetration_quality": {
+          "mean": 0.8000000000000002,
+          "min": 0.5000000000000004,
+          "max": 1.0,
+          "last": 0.5000000000000004
+        },
+        "contact_support_pending_dense_reward": {
+          "mean": 0.13999999999999999,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.0
+        },
+        "contact_support_stance_duration_s": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_to_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_to_timing_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_validity_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "effort_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "fsm_morphology_phase": {
+          "mean": 0.12151898734177216,
+          "min": 0.0,
+          "max": 0.2278481012658228,
+          "last": 0.2278481012658228
+        },
+        "grf_penetration_loss": {
+          "mean": 0.2,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "grf_slip_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "invalid_event_count": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "invalid_event_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "landing_window_active": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "landing_window_contact_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_excursion_rad": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_max_rad": {
+          "mean": 0.2567253677392709,
+          "min": 0.13129437254160004,
+          "max": 0.362383044543119,
+          "last": 0.362383044543119
+        },
+        "morphology_ankle_min_rad": {
+          "mean": -0.03835930035800507,
+          "min": -0.14950848677197975,
+          "max": 0.06224555559358988,
+          "last": 0.06224555559358988
+        },
+        "morphology_ankle_raw_loss_rad2": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_value_rad": {
+          "mean": 0.06,
+          "min": 0.04,
+          "max": 0.08,
+          "last": 0.08
+        },
+        "morphology_available": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "morphology_knee_excursion_rad": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_knee_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_knee_max_rad": {
+          "mean": -0.10294348156427342,
+          "min": -0.13501788967915948,
+          "max": -0.0445700074404253,
+          "last": -0.12303848967637462
+        },
+        "morphology_knee_min_rad": {
+          "mean": -0.548771274279271,
+          "min": -0.6478878843345114,
+          "max": -0.40220172515957475,
+          "last": -0.5201134783059038
+        },
+        "morphology_knee_raw_loss_rad2": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_knee_value_rad": {
+          "mean": -0.22000000000000003,
+          "min": -0.24,
+          "max": -0.2,
+          "last": -0.24
+        },
+        "morphology_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_phase": {
+          "mean": 0.12151898734177216,
+          "min": 0.0,
+          "max": 0.2278481012658228,
+          "last": 0.2278481012658228
+        },
+        "morphology_phase_fsm_available": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "morphology_phase_source_id": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "pelvis_height_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_clawback_penalty": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_cycle_ankle_excursion_rad": {
+          "mean": 0.02,
+          "min": 0.0,
+          "max": 0.04,
+          "last": 0.04
+        },
+        "phase_cycle_complete_bonus": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_cycle_failed_this_step": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_cycle_knee_excursion_rad": {
+          "mean": 0.01999999999999999,
+          "min": 0.0,
+          "max": 0.03999999999999998,
+          "last": 0.03999999999999998
+        },
+        "phase_cycle_progress_credit": {
+          "mean": 0.25,
+          "min": 0.25,
+          "max": 0.25,
+          "last": 0.25
+        },
+        "phase_cycle_rejected_this_step": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_event_order_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_event_progress_score": {
+          "mean": 0.02,
+          "min": 0.0,
+          "max": 0.1,
+          "last": 0.0
+        },
+        "phase_failure_extra_penalty": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_fsm_state_id": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "phase_last_period_s": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_last_stance_fraction": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_pending_cycle_credit": {
+          "mean": 0.1,
+          "min": 0.1,
+          "max": 0.1,
+          "last": 0.1
+        },
+        "phase_period_hard_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_period_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_periodicity_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_previous_period_s": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_regular_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_regularity_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_stance_contact_fraction": {
+          "mean": 0.8,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "phase_stance_contact_time_s": {
+          "mean": 0.192,
+          "min": 0.0,
+          "max": 0.36,
+          "last": 0.36
+        },
+        "phase_stance_elapsed_s": {
+          "mean": 0.192,
+          "min": 0.0,
+          "max": 0.36,
+          "last": 0.36
+        },
+        "phase_stance_fraction_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_stance_hard_timeout_s": {
+          "mean": 2.2,
+          "min": 2.2,
+          "max": 2.2,
+          "last": 2.2
+        },
+        "phase_stance_load_integral_bw_s": {
+          "mean": 0.06499999999999999,
+          "min": 0.0,
+          "max": 0.13499999999999998,
+          "last": 0.13499999999999998
+        },
+        "phase_stance_mean_load_bw": {
+          "mean": 0.255,
+          "min": 0.0,
+          "max": 0.37499999999999994,
+          "last": 0.37499999999999994
+        },
+        "phase_stance_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_swing_elapsed_s": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_swing_hard_timeout_s": {
+          "mean": 1.1,
+          "min": 1.1,
+          "max": 1.1,
+          "last": 1.1
+        },
+        "phase_swing_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_timeout_exceeded": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_timeout_side": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_valid_cycle_count": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_valid_hs_count": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "phase_valid_to_count": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_ankle_q_rad": {
+          "mean": 0.06,
+          "min": 0.04,
+          "max": 0.08,
+          "last": 0.08
+        },
+        "prosthetic_joint_range_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_joint_range_raw_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_knee_q_rad": {
+          "mean": -0.22000000000000003,
+          "min": -0.24,
+          "max": -0.2,
+          "last": -0.24
+        },
+        "prosthetic_normal_force_bw": {
+          "mean": 0.35,
+          "min": 0.2,
+          "max": 0.5,
+          "last": 0.5
+        },
+        "prosthetic_phase_expectation_source_id": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "prosthetic_slip_speed_m_s": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_stance_expected": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "prosthetic_swing_expected": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reference_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reserve_norm_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reserve_norm_nm": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reserve_residual_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "residual_norm_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "residual_norm_nm": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "safety_loss": {
+          "mean": 0.2,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "saturation_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "smoothness_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "swing_unloading_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "terminated": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "tracking_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        }
+      },
+      "reward_components_stats": {
+        "bio_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "bio_position_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "bio_score": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "command_rate_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_load_dense_active": {
+          "mean": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_load_evidence_complete": {
+          "mean": 0.6,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "contact_load_loss": {
+          "mean": 0.6,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "contact_load_penetration_quality": {
+          "mean": 0.7000000000000001,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_load_raw_score": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "contact_load_score": {
+          "mean": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 0.0
+        },
+        "contact_overload_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_clawback_penalty": {
+          "mean": 0.04,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.2
+        },
+        "contact_support_clawback_term": {
+          "mean": 0.04,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.2
+        },
+        "contact_support_dense_confirmed_reward": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_mean_penetration_quality": {
+          "mean": 0.95,
+          "min": 0.8750000000000001,
+          "max": 1.0,
+          "last": 0.8750000000000001
+        },
+        "contact_support_min_penetration_quality": {
+          "mean": 0.8000000000000002,
+          "min": 0.5000000000000004,
+          "max": 1.0,
+          "last": 0.5000000000000004
+        },
+        "contact_support_pending_dense_reward": {
+          "mean": 0.13999999999999999,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.0
+        },
+        "contact_support_stance_duration_s": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_to_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_support_to_timing_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "contact_validity_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "exnovo_task_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "fsm_morphology_phase": {
+          "mean": 0.12151898734177216,
+          "min": 0.0,
+          "max": 0.2278481012658228,
+          "last": 0.2278481012658228
+        },
+        "grf_ankle_moment_flip_excess_nm": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "grf_ankle_moment_flip_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "grf_ankle_moment_flip_raw_loss_nm2": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "grf_ankle_moment_flip_tau_nm": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "grf_ankle_moment_flip_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "grf_penetration_loss": {
+          "mean": 0.2,
+          "min": 0.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "grf_penetration_term": {
+          "mean": 0.01,
+          "min": 0.0,
+          "max": 0.05,
+          "last": 0.05
+        },
+        "grf_slip_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "imitation_score": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "invalid_event_count": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "invalid_event_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "jerk_ref_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "landing_window_contact_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_excursion_rad": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_max_rad": {
+          "mean": 0.2567253677392709,
+          "min": 0.13129437254160004,
+          "max": 0.362383044543119,
+          "last": 0.362383044543119
+        },
+        "morphology_ankle_min_rad": {
+          "mean": -0.03835930035800507,
+          "min": -0.14950848677197975,
+          "max": 0.06224555559358988,
+          "last": 0.06224555559358988
+        },
+        "morphology_ankle_raw_loss_rad2": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_ankle_value_rad": {
+          "mean": 0.06,
+          "min": 0.04,
+          "max": 0.08,
+          "last": 0.08
+        },
+        "morphology_available": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "morphology_knee_excursion_rad": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_knee_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_knee_max_rad": {
+          "mean": -0.10294348156427342,
+          "min": -0.13501788967915948,
+          "max": -0.0445700074404253,
+          "last": -0.12303848967637462
+        },
+        "morphology_knee_min_rad": {
+          "mean": -0.548771274279271,
+          "min": -0.6478878843345114,
+          "max": -0.40220172515957475,
+          "last": -0.5201134783059038
+        },
+        "morphology_knee_raw_loss_rad2": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_knee_value_rad": {
+          "mean": -0.22000000000000003,
+          "min": -0.24,
+          "max": -0.2,
+          "last": -0.24
+        },
+        "morphology_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "morphology_phase": {
+          "mean": 0.12151898734177216,
+          "min": 0.0,
+          "max": 0.2278481012658228,
+          "last": 0.2278481012658228
+        },
+        "morphology_phase_fsm_available": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "morphology_phase_source_id": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "morphology_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "oob_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "oob_raw_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "oob_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "pelvis_height_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "penalty": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_clawback_penalty": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_clawback_penalty_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_cycle_complete_bonus": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_cycle_failed_this_step": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_event_order_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_event_progress_score": {
+          "mean": 0.02,
+          "min": 0.0,
+          "max": 0.1,
+          "last": 0.0
+        },
+        "phase_failure_extra_penalty": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_pending_cycle_credit": {
+          "mean": 0.1,
+          "min": 0.1,
+          "max": 0.1,
+          "last": 0.1
+        },
+        "phase_period_hard_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_period_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_periodicity_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_regular_score": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_regularity_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_stance_fraction_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_stance_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_swing_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_timeout_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "phase_timeout_penalty_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "policy_action_clip_abs_max": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "policy_action_clip_fraction": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "policy_action_clip_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_joint_range_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_joint_range_raw_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "prosthetic_joint_range_term": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "qddot_ref_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "qdot_ref_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reference_governor_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reference_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reference_position_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reference_score": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "reserve_norm_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reserve_residual_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "residual_norm_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "reward": {
+          "mean": -0.39,
+          "min": -2.25,
+          "max": 0.2,
+          "last": -2.25
+        },
+        "reward_base": {
+          "mean": 0.06000000000000001,
+          "min": 0.0,
+          "max": 0.2,
+          "last": 0.0
+        },
+        "safety_term": {
+          "mean": 0.4,
+          "min": 0.0,
+          "max": 2.0,
+          "last": 2.0
+        },
+        "sea_motor_accel_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "sea_motor_power_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "sea_motor_speed_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "sea_saturation_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "sea_tau_spring_effort_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "sea_tau_spring_rate_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "sea_torque_error_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "segment_delta_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "segment_knot_delta_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "served_imitation_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "served_imitation_score": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "sound_imitation_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "swing_unloading_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "tracking_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "tracking_position_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "tracking_score": {
+          "mean": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "last": 1.0
+        },
+        "tracking_velocity_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        },
+        "u_rate_loss": {
+          "mean": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "last": 0.0
+        }
+      }
+    }
+  },
+  "trace_stats": {
+    "ankle_rad": {
+      "mean": 0.06,
+      "min": 0.04,
+      "max": 0.08,
+      "last": 0.08
+    },
+    "contact_load_dense_active": {
+      "mean": 0.4,
+      "min": 0.0,
+      "max": 1.0,
+      "last": 0.0
+    },
+    "contact_load_evidence_complete": {
+      "mean": 0.6,
+      "min": 0.0,
+      "max": 1.0,
+      "last": 1.0
+    },
+    "contact_load_score": {
+      "mean": 0.4,
+      "min": 0.0,
+      "max": 1.0,
+      "last": 0.0
+    },
+    "contact_support_clawback_penalty": {
+      "mean": 0.04,
+      "min": 0.0,
+      "max": 0.2,
+      "last": 0.2
+    },
+    "contact_support_clawback_term": {
+      "mean": 0.04,
+      "min": 0.0,
+      "max": 0.2,
+      "last": 0.2
+    },
+    "contact_support_pending_dense_reward": {
+      "mean": 0.13999999999999999,
+      "min": 0.0,
+      "max": 0.2,
+      "last": 0.0
+    },
+    "contact_support_to_score": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "fsm_state_id": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "last": 1.0
+    },
+    "grf_slip_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "grf_slip_term": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "in_contact": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "last": 1.0
+    },
+    "invalid_event_count": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "knee_rad": {
+      "mean": -0.22000000000000003,
+      "min": -0.24,
+      "max": -0.2,
+      "last": -0.24
+    },
+    "landing_window_contact_score": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "morphology_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "morphology_term": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "normal_force_bw": {
+      "mean": 0.35,
+      "min": 0.2,
+      "max": 0.5,
+      "last": 0.5
+    },
+    "oob_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "oob_term": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_clawback_penalty": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_cycle_ankle_excursion_rad": {
+      "mean": 0.02,
+      "min": 0.0,
+      "max": 0.04,
+      "last": 0.04
+    },
+    "phase_cycle_complete_bonus": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_cycle_knee_excursion_rad": {
+      "mean": 0.01999999999999999,
+      "min": 0.0,
+      "max": 0.03999999999999998,
+      "last": 0.03999999999999998
+    },
+    "phase_cycle_rejected_this_step": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_event_progress_score": {
+      "mean": 0.02,
+      "min": 0.0,
+      "max": 0.1,
+      "last": 0.0
+    },
+    "phase_failure_extra_penalty": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_regular_score": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_stance_contact_fraction": {
+      "mean": 0.8,
+      "min": 0.0,
+      "max": 1.0,
+      "last": 1.0
+    },
+    "phase_stance_load_integral_bw_s": {
+      "mean": 0.06499999999999999,
+      "min": 0.0,
+      "max": 0.13499999999999998,
+      "last": 0.13499999999999998
+    },
+    "phase_stance_timeout_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_swing_timeout_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_timeout_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_timeout_penalty_term": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_valid_cycle_count": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "phase_valid_hs_count": {
+      "mean": 1.0,
+      "min": 1.0,
+      "max": 1.0,
+      "last": 1.0
+    },
+    "phase_valid_to_count": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "prosthetic_joint_range_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "prosthetic_joint_range_term": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "reward": {
+      "mean": -0.39,
+      "min": -2.25,
+      "max": 0.2,
+      "last": -2.25
+    },
+    "reward_base": {
+      "mean": 0.06000000000000001,
+      "min": 0.0,
+      "max": 0.2,
+      "last": 0.0
+    },
+    "reward_without_grf_slip": {
+      "mean": -0.39,
+      "min": -2.25,
+      "max": 0.2,
+      "last": -2.25
+    },
+    "step": {
+      "mean": 3.0,
+      "min": 1.0,
+      "max": 5.0,
+      "last": 5.0
+    },
+    "swing_unloading_loss": {
+      "mean": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "last": 0.0
+    },
+    "time": {
+      "mean": 0.192,
+      "min": 0.0,
+      "max": 0.36,
+      "last": 0.36
+    }
+  },
+  "reward_config": {
+    "tracking_weight": 8.0,
+    "reference_weight": 6.0,
+    "bio_weight": 2.0,
+    "effort_weight": 0.05,
+    "smoothness_weight": 0.02,
+    "saturation_weight": 0.1,
+    "command_rate_weight": 0.05,
+    "segment_delta_weight": 0.0,
+    "qdot_ref_weight": 0.0,
+    "qddot_ref_weight": 0.0,
+    "jerk_ref_weight": 0.0,
+    "reference_governor_weight": 0.0,
+    "u_rate_weight": 0.0,
+    "sea_saturation_weight": 0.1,
+    "sea_torque_error_weight": 0.01,
+    "sea_tau_spring_effort_weight": 0.0,
+    "sea_tau_spring_rate_weight": 0.0,
+    "sea_motor_speed_weight": 0.01,
+    "sea_motor_accel_weight": 0.005,
+    "sea_motor_power_weight": 0.005,
+    "policy_action_clip_weight": 0.25,
+    "safety_weight": 2.0,
+    "grf_penetration_weight": 0.05,
+    "grf_ankle_moment_flip_weight": 0.05,
+    "grf_ankle_moment_flip_tau_tol_nm": 8.0,
+    "grf_ankle_moment_flip_force_threshold_n": 50.0,
+    "blend_contact_load": 0.1,
+    "blend_contact_support_to": 0.3,
+    "blend_phase_regular": 0.25,
+    "blend_phase_event_progress": 1.0,
+    "blend_landing_window_contact": 0.25,
+    "contact_load_target_bw": 0.65,
+    "contact_load_max_bw": 1.35,
+    "contact_load_confidence_full_bw": 0.2,
+    "contact_load_dense_evidence_limit_bw_s": 0.04,
+    "contact_load_penetration_full_reward_m": 0.01,
+    "contact_load_penetration_zero_reward_m": 0.012,
+    "contact_support_to_window_start_s": 0.79,
+    "contact_support_to_window_end_s": 1.26,
+    "contact_support_failure_clawback_weight": 1.0,
+    "prosthetic_stance_phase_end": 0.68,
+    "swing_unloading_weight": 0.02,
+    "swing_unloading_force_tol_bw": 0.08,
+    "contact_overload_weight": 0.02,
+    "grf_slip_weight": 0.0,
+    "grf_slip_speed_scale_m_s": 0.5,
+    "phase_regularity_weight": 4.0,
+    "phase_event_order_weight": 1.0,
+    "phase_period_weight": 1.0,
+    "phase_period_nominal_s": 1.58,
+    "phase_period_soft_margin_s": 0.25,
+    "phase_period_hard_min_s": 0.9,
+    "phase_period_hard_max_s": 2.2,
+    "phase_periodicity_weight": 0.5,
+    "phase_periodicity_scale_s": 0.2,
+    "phase_period_min_s": 0.6,
+    "phase_period_max_s": 1.6,
+    "phase_stance_fraction_weight": 0.5,
+    "phase_stance_fraction_min": 0.5,
+    "phase_stance_fraction_max": 0.8,
+    "phase_timeout_weight": 0.5,
+    "phase_stance_timeout_s": 1.45,
+    "phase_swing_timeout_s": 0.75,
+    "phase_timeout_scale_s": 0.2,
+    "phase_timeout_penalty_weight": 0.5,
+    "phase_stance_hard_timeout_s": 2.2,
+    "phase_swing_hard_timeout_s": 1.1,
+    "phase_min_stance_duration_s": 0.3,
+    "phase_min_swing_duration_s": 0.25,
+    "phase_landing_window_start_s": 0.35,
+    "phase_landing_window_end_s": 0.85,
+    "phase_invalid_event_weight": 0.1,
+    "phase_contact_validity_weight": 0.1,
+    "phase_min_stance_contact_fraction": 0.2,
+    "phase_min_stance_load_bw_s": 0.04,
+    "phase_min_cycle_knee_excursion_rad": 0.12,
+    "phase_hs_event_credit": 0.1,
+    "phase_to_event_credit": 0.2,
+    "phase_cycle_complete_bonus": 0.7,
+    "phase_failure_extra_penalty": 0.05,
+    "phase_clawback_penalty_weight": 1.0,
+    "reserve_residual_weight": 0.0,
+    "reserve_norm_scale_nm": 500.0,
+    "residual_norm_scale_nm": 100.0,
+    "pelvis_height_weight": 0.0,
+    "pelvis_height_min_m": 0.75,
+    "pelvis_height_scale_m": 0.1,
+    "blend_tracking": 0.0,
+    "blend_reference": 0.0,
+    "blend_bio": 0.0,
+    "clip_low": 0.0,
+    "clip_high": 1.0,
+    "oob_weight": 2.0,
+    "oob_q_min": [
+      -1.25,
+      -0.6
+    ],
+    "oob_q_max": [
+      0.0,
+      0.6
+    ],
+    "prosthetic_joint_range_weight": 2.0,
+    "prosthetic_joint_q_min": [
+      -1.3,
+      -0.6
+    ],
+    "prosthetic_joint_q_max": [
+      0.0,
+      0.6
+    ],
+    "morphology_profile": "morphology_profiles/ab06_prosthetic_mean_std_corridor.json",
+    "morphology_weight": 0.0,
+    "morphology_std_multiplier_knee": 1.6,
+    "morphology_std_multiplier_ankle": 0.6,
+    "morphology_margin_knee_deg": 7.5,
+    "morphology_margin_ankle_deg": 7.5,
+    "reward_mode": "ex_novo",
+    "imitation_weight": 8.0,
+    "served_imitation_weight": 8.0,
+    "imitation_knee_position_weight": 1.0,
+    "imitation_ankle_position_weight": 1.0,
+    "imitation_knee_velocity_weight": 0.02,
+    "imitation_ankle_velocity_weight": 0.02,
+    "blend_served_imitation": 0.0,
+    "blend_imitation": 0.8,
+    "blend_imitation_tracking": 0.2
+  }
+}

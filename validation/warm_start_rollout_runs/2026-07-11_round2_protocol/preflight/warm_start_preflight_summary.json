@@ -1,0 +1,188 @@
+{
+  "status": "STOP_BEFORE_H1",
+  "ready_for_h1": false,
+  "selected_actor_digest": "853940898f079d560756ce22aaa1c908239b4dfa2da82ce690a2fd08d3558c27",
+  "gate_1_freeze": {
+    "status": "PASS"
+  },
+  "gate_2_zero_iteration_transplant": {
+    "status": "PASS",
+    "iterations_run": 0,
+    "env_runner_count_checked": 2,
+    "critic_exact": true,
+    "optimizer_source_loaded": false,
+    "port_audit_status": "PASS"
+  },
+  "deterministic_actor_evidence": {
+    "steps": 356,
+    "episode_return": 29.886494038953998,
+    "valid_hs_count": 2.0,
+    "valid_to_count": 2.0,
+    "valid_cycle_count": 1.0,
+    "max_penetration_m": 0.026512372466586085,
+    "action_clipped_fraction": 0.0,
+    "fresh_replay_attempts": [
+      {
+        "ok": false,
+        "label": "inference rollout",
+        "command": [
+          "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+          "--checkpoint",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_port_runs/2026-07-11_round2_protocol/trainer_zero_iter/rl_module_initial_warm_start",
+          "--output-dir",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_rollout_runs/2026-07-11_round2_protocol/deterministic_replay",
+          "--record-outputs",
+          "--no-progress",
+          "--checkpoint",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_port_runs/2026-07-11_round2_protocol/trainer_zero_iter/rl_module_initial_warm_start",
+          "--output-dir",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_rollout_runs/2026-07-11_round2_protocol/deterministic_replay",
+          "--worker-process"
+        ],
+        "returncode": -15,
+        "timeout_reason": "phase_timeout",
+        "timeout_message": "inference rollout phase 'inference simulator step 198' exceeded 120 s.",
+        "elapsed_wall_time_s": 342.3123321533203,
+        "heartbeat_file": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_rollout_runs/2026-07-11_round2_protocol/deterministic_replay/watchdog_state.json",
+        "last_heartbeat": {
+          "phase": "inference simulator step 198",
+          "progress": 197,
+          "timeout_s": 120.0,
+          "started_at_unix_s": 1783784662.503674,
+          "updated_at_unix_s": 1783784662.503674,
+          "pid": 75039
+        }
+      },
+      {
+        "ok": false,
+        "label": "inference rollout",
+        "command": [
+          "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+          "--checkpoint",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_port_runs/2026-07-11_round2_protocol/trainer_zero_iter/rl_module_initial_warm_start",
+          "--output-dir",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_rollout_runs/2026-07-11_round2_protocol/deterministic_replay_retry",
+          "--record-outputs",
+          "--no-progress",
+          "--step-timeout-s",
+          "600",
+          "--stall-timeout-s",
+          "700",
+          "--run-timeout-s",
+          "3600",
+          "--checkpoint",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_port_runs/2026-07-11_round2_protocol/trainer_zero_iter/rl_module_initial_warm_start",
+          "--output-dir",
+          "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_rollout_runs/2026-07-11_round2_protocol/deterministic_replay_retry",
+          "--worker-process"
+        ],
+        "returncode": -15,
+        "timeout_reason": "phase_timeout",
+        "timeout_message": "inference rollout phase 'inference simulator step 165' exceeded 600 s.",
+        "elapsed_wall_time_s": 1222.1199128627777,
+        "heartbeat_file": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/warm_start_rollout_runs/2026-07-11_round2_protocol/deterministic_replay_retry/watchdog_state.json",
+        "last_heartbeat": {
+          "phase": "inference simulator step 165",
+          "progress": 164,
+          "timeout_s": 600.0,
+          "started_at_unix_s": 1783785449.1633532,
+          "updated_at_unix_s": 1783785449.1633532,
+          "pid": 77036
+        }
+      }
+    ],
+    "offline_target_equivalence": {
+      "samples": 356,
+      "source_target_logits_max_abs_diff": 0.0,
+      "source_target_logits_rmse": 0.0,
+      "target_mean_recorded_action_max_abs_diff": 1.1920928955078125e-07
+    }
+  },
+  "exploration_distribution_on_deterministic_trace": {
+    "samples": 356,
+    "mean_vs_recorded_action_max_abs_diff": 5.364418029785156e-07,
+    "logstd_min": [
+      -1.339186668395996,
+      -1.3885958194732666
+    ],
+    "logstd_median": [
+      -0.2844976782798767,
+      -0.2978752553462982
+    ],
+    "logstd_max": [
+      0.9143711924552917,
+      0.8981493711471558
+    ],
+    "std_min": [
+      0.26205873489379883,
+      0.24942529201507568
+    ],
+    "std_median": [
+      0.7523921728134155,
+      0.7423968315124512
+    ],
+    "std_max": [
+      2.4952056407928467,
+      2.4550554752349854
+    ]
+  },
+  "gate_3_stochastic_preflight": {
+    "status": "FAIL",
+    "technical_pass": true,
+    "behavioral_pass": false,
+    "probe_count": 3,
+    "valid_to_fraction": 0.0,
+    "valid_cycle_fraction": 0.0,
+    "penetration_termination_fraction": 1.0,
+    "median_action_clipped_fraction": 0.32,
+    "failure_reasons": [
+      "fewer than two thirds of probes reached a valid TO",
+      "at least two thirds terminated on GRF penetration",
+      "median raw-action clipping exceeded 10%"
+    ],
+    "probes": [
+      {
+        "action_seed": 123,
+        "steps": 48,
+        "episode_return": -3.1041705015216294,
+        "action_abs_max": 3.892960548400879,
+        "action_clipped_fraction": 0.3020833333333333,
+        "grf_penetration_max_m": 0.02542718956633683,
+        "phase_valid_hs_count": 1,
+        "phase_valid_to_count": 0,
+        "phase_valid_cycle_count": 0,
+        "invalid_event_count": 0,
+        "end_reason": "grf_penetration"
+      },
+      {
+        "action_seed": 124,
+        "steps": 50,
+        "episode_return": -2.6875198144672536,
+        "action_abs_max": 3.0271356105804443,
+        "action_clipped_fraction": 0.32,
+        "grf_penetration_max_m": 0.026067501915910663,
+        "phase_valid_hs_count": 1,
+        "phase_valid_to_count": 0,
+        "phase_valid_cycle_count": 0,
+        "invalid_event_count": 0,
+        "end_reason": "grf_penetration"
+      },
+      {
+        "action_seed": 125,
+        "steps": 77,
+        "episode_return": -3.125115335329638,
+        "action_abs_max": 3.662285804748535,
+        "action_clipped_fraction": 0.3246753246753247,
+        "grf_penetration_max_m": 0.02503362951107509,
+        "phase_valid_hs_count": 1,
+        "phase_valid_to_count": 0,
+        "phase_valid_cycle_count": 0,
+        "invalid_event_count": 0,
+        "end_reason": "grf_penetration"
+      }
+    ]
+  },
+  "decision": "Do not start H1 with the inherited exploration variance. Preserve the validated action mean, reduce or reinitialize the Gaussian log-standard-deviation output, then repeat gate 3."
+}

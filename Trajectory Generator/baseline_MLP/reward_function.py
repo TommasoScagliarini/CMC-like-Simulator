@@ -29,9 +29,10 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 import gymnasium as gym
 import numpy as np
@@ -60,8 +61,12 @@ SEA_MOTOR_POWER_LOSS = "sea_motor_power_loss"
 POLICY_ACTION_CLIP_LOSS = "policy_action_clip_loss"
 SAFETY_LOSS = "safety_loss"
 GRF_PENETRATION_LOSS = "grf_penetration_loss"
+GRF_ANKLE_MOMENT_FLIP_LOSS = "grf_ankle_moment_flip_loss"
 SOUND_IMITATION_LOSS = "sound_imitation_loss"
 SERVED_IMITATION_LOSS = "served_imitation_loss"
+
+_REWARD_MODULE_DIR = Path(__file__).resolve().parent
+_MORPHOLOGY_COORDS = ("pros_knee_angle", "pros_ankle_angle")
 
 
 @dataclass
@@ -116,6 +121,76 @@ class RewardConfig:
     # explicitly when the online prosthetic contact is applied.
     safety_weight: float = 2.0
     grf_penetration_weight: float = 0.0
+    grf_ankle_moment_flip_weight: float = 0.0
+    grf_ankle_moment_flip_tau_tol_nm: float = 8.0
+    grf_ankle_moment_flip_force_threshold_n: float = 50.0
+
+    # Prescribed-free ex-novo shaping. Defaults are off so old imitation runs and
+    # checkpoint evaluation keep their reward contract unless a YAML enables
+    # these terms explicitly.
+    blend_contact_load: float = 0.0
+    blend_contact_support_to: float = 0.0
+    blend_phase_regular: float = 0.0
+    blend_phase_event_progress: float = 0.0
+    blend_landing_window_contact: float = 0.0
+    contact_load_target_bw: float = 0.65
+    contact_load_max_bw: float = 1.35
+    # Optional ex-novo contact-confidence/ledger mode. Zero defaults preserve
+    # the legacy per-step load-magnitude reward for old checkpoint configs.
+    contact_load_confidence_full_bw: float = 0.0
+    contact_load_dense_evidence_limit_bw_s: float = 0.0
+    contact_load_penetration_full_reward_m: float = 0.010
+    contact_load_penetration_zero_reward_m: float = 0.012
+    contact_support_to_window_start_s: float = 0.0
+    contact_support_to_window_end_s: float = 0.0
+    contact_support_failure_clawback_weight: float = 0.0
+    prosthetic_stance_phase_end: float = 0.62
+    swing_unloading_weight: float = 0.0
+    swing_unloading_force_tol_bw: float = 0.08
+    contact_overload_weight: float = 0.0
+    grf_slip_weight: float = 0.0
+    grf_slip_speed_scale_m_s: float = 0.5
+    phase_regularity_weight: float = 4.0
+    phase_event_order_weight: float = 1.0
+    phase_period_weight: float = 1.0
+    phase_period_nominal_s: float = 1.58
+    phase_period_soft_margin_s: float = 0.25
+    phase_period_hard_min_s: float = 0.90
+    phase_period_hard_max_s: float = 2.20
+    phase_periodicity_weight: float = 0.5
+    phase_periodicity_scale_s: float = 0.20
+    phase_period_min_s: float = 0.60
+    phase_period_max_s: float = 1.60
+    phase_stance_fraction_weight: float = 0.5
+    phase_stance_fraction_min: float = 0.35
+    phase_stance_fraction_max: float = 0.80
+    phase_timeout_weight: float = 0.5
+    phase_stance_timeout_s: float = 1.45
+    phase_swing_timeout_s: float = 0.90
+    phase_timeout_scale_s: float = 0.20
+    phase_timeout_penalty_weight: float = 0.0
+    phase_stance_hard_timeout_s: float = 2.20
+    phase_swing_hard_timeout_s: float = 1.30
+    phase_min_stance_duration_s: float = 0.05
+    phase_min_swing_duration_s: float = 0.20
+    phase_landing_window_start_s: float = 0.55
+    phase_landing_window_end_s: float = 1.10
+    phase_invalid_event_weight: float = 0.0
+    phase_contact_validity_weight: float = 0.0
+    phase_min_stance_contact_fraction: float = 0.0
+    phase_min_stance_load_bw_s: float = 0.0
+    phase_min_cycle_knee_excursion_rad: float = 0.0
+    phase_hs_event_credit: float = 0.10
+    phase_to_event_credit: float = 0.20
+    phase_cycle_complete_bonus: float = 0.70
+    phase_failure_extra_penalty: float = 0.05
+    phase_clawback_penalty_weight: float = 0.0
+    reserve_residual_weight: float = 0.0
+    reserve_norm_scale_nm: float = 500.0
+    residual_norm_scale_nm: float = 100.0
+    pelvis_height_weight: float = 0.0
+    pelvis_height_min_m: float = 0.75
+    pelvis_height_scale_m: float = 0.10
 
     # Convex-ish blend of the three positive scores.
     blend_tracking: float = 0.25
@@ -139,6 +214,15 @@ class RewardConfig:
     oob_weight: float = 2.0
     oob_q_min: tuple[float, ...] = (-1.35, -0.5)
     oob_q_max: tuple[float, ...] = (0.0, 0.5)
+    prosthetic_joint_range_weight: float = 0.0
+    prosthetic_joint_q_min: tuple[float, ...] = (-1.40, -0.60)
+    prosthetic_joint_q_max: tuple[float, ...] = (0.0, 0.60)
+    morphology_profile: str = ""
+    morphology_weight: float = 0.0
+    morphology_std_multiplier_knee: float = 1.0
+    morphology_std_multiplier_ankle: float = 1.0
+    morphology_margin_knee_deg: float = 0.0
+    morphology_margin_ankle_deg: float = 0.0
 
     # Reward objective selector. "ex_novo" (default) = the blend above, UNCHANGED.
     # "imitation" = pre-training reward where the prosthetic joints mirror the
@@ -194,7 +278,286 @@ def _score(loss: float, weight: float) -> float:
     return 1.0 / (1.0 + weight * float(loss))
 
 
-def _out_of_band_losses(reference, cfg: RewardConfig) -> tuple[float, float]:
+def _bounded_square_ratio(value: float, scale: float, cap: float = 25.0) -> float:
+    scale = max(1e-9, abs(float(scale)))
+    ratio = float(value) / scale
+    return float(min(cap, ratio * ratio))
+
+
+def _huber_loss(value: float, delta: float = 1.0, cap: float = 25.0) -> float:
+    """Robust dimensionless loss: quadratic near zero, linear for large errors."""
+    delta = max(1e-9, abs(float(delta)))
+    x = abs(float(value))
+    if x <= delta:
+        loss = 0.5 * x * x
+    else:
+        loss = delta * (x - 0.5 * delta)
+    return float(min(cap, loss))
+
+
+def _huber_interval_loss(
+    value: float,
+    low: float,
+    high: float,
+    scale: float,
+    *,
+    cap: float = 25.0,
+) -> float:
+    """Huber loss for excursions outside a soft interval."""
+    low_f = float(min(low, high))
+    high_f = float(max(low, high))
+    value_f = float(value)
+    scale_f = max(1e-9, abs(float(scale)))
+    if value_f < low_f:
+        return _huber_loss((low_f - value_f) / scale_f, cap=cap)
+    if value_f > high_f:
+        return _huber_loss((value_f - high_f) / scale_f, cap=cap)
+    return 0.0
+
+
+def _interval_loss(value: float, low: float, high: float) -> float:
+    low_f = float(min(low, high))
+    high_f = float(max(low, high))
+    width = max(1e-9, high_f - low_f)
+    value_f = float(value)
+    if value_f < low_f:
+        return _bounded_square_ratio(low_f - value_f, width)
+    if value_f > high_f:
+        return _bounded_square_ratio(value_f - high_f, width)
+    return 0.0
+
+
+def _soft_window_score(
+    value: float,
+    full_start: float,
+    full_end: float,
+    outer_start: float,
+    outer_end: float,
+) -> float:
+    """Unit score in a full-credit window with linear outer ramps."""
+    full_low = float(min(full_start, full_end))
+    full_high = float(max(full_start, full_end))
+    outer_low = float(min(outer_start, full_low))
+    outer_high = float(max(outer_end, full_high))
+    value_f = float(value)
+    if full_low <= value_f <= full_high:
+        return 1.0
+    if outer_low < value_f < full_low:
+        return float((value_f - outer_low) / max(1e-9, full_low - outer_low))
+    if full_high < value_f < outer_high:
+        return float((outer_high - value_f) / max(1e-9, outer_high - full_high))
+    return 0.0
+
+
+def _resolve_reward_asset_path(spec: str | os.PathLike[str]) -> Path:
+    text = os.fspath(spec)
+    if os.name != "nt":
+        text = text.replace("\\", "/")
+    if not text:
+        raise FileNotFoundError("empty reward asset path")
+    path = Path(text).expanduser()
+    candidates = [path] if path.is_absolute() else [Path.cwd() / path, _REWARD_MODULE_DIR / path]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate.resolve()
+    searched = ", ".join(str(candidate) for candidate in candidates)
+    raise FileNotFoundError(f"reward asset not found: {text!r}; searched: {searched}")
+
+
+def _load_morphology_profile(spec: str | os.PathLike[str] | None) -> dict[str, Any] | None:
+    """Load the AB06 mean/std prosthetic morphology corridor profile.
+
+    Empty ``spec`` disables the term. A non-empty but unreadable profile fails
+    explicitly so a misspelled training YAML does not silently remove the guardrail.
+    """
+    if spec is None or str(spec).strip() == "":
+        return None
+    path = _resolve_reward_asset_path(spec)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, Mapping):
+        raise ValueError(f"morphology profile must be a JSON object: {path}")
+    if str(data.get("units", "")).lower() not in {"radian", "radians", "rad"}:
+        raise ValueError(f"morphology profile must use radians: {path}")
+
+    phase_grid = np.asarray(data.get("phase_grid"), dtype=float)
+    if phase_grid.ndim != 1 or phase_grid.size < 2:
+        raise ValueError(f"morphology phase_grid must be a 1D array: {path}")
+    if not np.all(np.isfinite(phase_grid)):
+        raise ValueError(f"morphology phase_grid contains non-finite values: {path}")
+    if not np.all(np.diff(phase_grid) > 0.0):
+        raise ValueError(f"morphology phase_grid must be strictly increasing: {path}")
+
+    coordinates = data.get("coordinates")
+    if not isinstance(coordinates, Mapping):
+        raise ValueError(f"morphology profile missing coordinates: {path}")
+
+    parsed_coords: dict[str, dict[str, np.ndarray]] = {}
+    for coord_name in _MORPHOLOGY_COORDS:
+        coord = coordinates.get(coord_name)
+        if not isinstance(coord, Mapping):
+            raise ValueError(f"morphology profile missing {coord_name}: {path}")
+        mean = np.asarray(coord.get("mean_rad"), dtype=float)
+        std = np.asarray(coord.get("std_rad"), dtype=float)
+        if mean.shape != phase_grid.shape or std.shape != phase_grid.shape:
+            raise ValueError(
+                f"morphology {coord_name} arrays must match phase_grid shape: {path}"
+            )
+        if not np.all(np.isfinite(mean)) or not np.all(np.isfinite(std)):
+            raise ValueError(f"morphology {coord_name} contains non-finite values: {path}")
+        if np.any(std < 0.0):
+            raise ValueError(f"morphology {coord_name} std_rad must be non-negative: {path}")
+        parsed_coords[coord_name] = {"mean_rad": mean, "std_rad": std}
+
+    metadata = data.get("metadata") if isinstance(data.get("metadata"), Mapping) else {}
+    return {
+        "path": str(path),
+        "version": data.get("version"),
+        "name": data.get("name"),
+        "phase_grid": phase_grid,
+        "coordinates": parsed_coords,
+        "metadata": dict(metadata),
+    }
+
+
+def _normalize_morphology_phase(phase: float) -> float | None:
+    try:
+        phase_f = float(phase)
+    except (TypeError, ValueError):
+        return None
+    if not np.isfinite(phase_f):
+        return None
+    if phase_f < 0.0 or phase_f > 1.0:
+        phase_f = phase_f % 1.0
+    return float(np.clip(phase_f, 0.0, 1.0))
+
+
+def _morphology_joint_params(cfg: RewardConfig, coord_name: str) -> tuple[float, float]:
+    if coord_name == "pros_knee_angle":
+        return (
+            float(cfg.morphology_std_multiplier_knee),
+            float(np.deg2rad(cfg.morphology_margin_knee_deg)),
+        )
+    if coord_name == "pros_ankle_angle":
+        return (
+            float(cfg.morphology_std_multiplier_ankle),
+            float(np.deg2rad(cfg.morphology_margin_ankle_deg)),
+        )
+    raise KeyError(coord_name)
+
+
+def _morphology_corridor_at(
+    profile: Mapping[str, Any],
+    phase: float,
+    cfg: RewardConfig,
+) -> dict[str, dict[str, float]]:
+    phase_f = _normalize_morphology_phase(phase)
+    if phase_f is None:
+        raise ValueError(f"invalid morphology phase: {phase!r}")
+    phase_grid = np.asarray(profile["phase_grid"], dtype=float)
+    out: dict[str, dict[str, float]] = {}
+    for coord_name in _MORPHOLOGY_COORDS:
+        coord = profile["coordinates"][coord_name]
+        mean = float(np.interp(phase_f, phase_grid, coord["mean_rad"]))
+        std = float(np.interp(phase_f, phase_grid, coord["std_rad"]))
+        k, margin_rad = _morphology_joint_params(cfg, coord_name)
+        low = mean - float(k) * std - margin_rad
+        high = mean + float(k) * std + margin_rad
+        out[coord_name] = {
+            "mean_rad": float(mean),
+            "std_rad": float(std),
+            "min_rad": float(min(low, high)),
+            "max_rad": float(max(low, high)),
+        }
+    return out
+
+
+def _morphology_interval_losses(
+    value: float,
+    low: float,
+    high: float,
+) -> tuple[float, float, float]:
+    low_f = float(min(low, high))
+    high_f = float(max(low, high))
+    value_f = float(value)
+    if value_f < low_f:
+        excursion = low_f - value_f
+    elif value_f > high_f:
+        excursion = value_f - high_f
+    else:
+        excursion = 0.0
+    width = max(1e-9, high_f - low_f)
+    loss = min(25.0, (excursion / width) ** 2)
+    return float(loss), float(excursion * excursion), float(excursion)
+
+
+def _fsm_morphology_phase(
+    info: Mapping[str, Any],
+    cfg: RewardConfig,
+) -> tuple[float | None, float, float]:
+    """Return morphology phase from the prosthetic HS-TO-HS FSM.
+
+    The returned tuple is ``(phase, available, source_id)`` where source id is:
+    0 = unavailable, 1 = nominal bootstrap timing, 2 = measured prosthetic
+    period/stance fraction from a completed cycle.
+    """
+    fsm = info.get("phase_fsm")
+    if not isinstance(fsm, Mapping):
+        return None, 0.0, 0.0
+
+    state_id = int(float(fsm.get("state_id", 0.0) or 0.0))
+    stance_elapsed_s = max(0.0, float(fsm.get("stance_elapsed_s", 0.0) or 0.0))
+    swing_elapsed_s = max(0.0, float(fsm.get("swing_elapsed_s", 0.0) or 0.0))
+    valid_cycle_count = float(fsm.get("valid_cycle_count", 0.0) or 0.0)
+    last_period_s = float(fsm.get("last_period_s", 0.0) or 0.0)
+    last_stance_fraction = float(fsm.get("last_stance_fraction", 0.0) or 0.0)
+
+    period_s = max(1e-9, float(cfg.phase_period_nominal_s))
+    stance_fraction = float(
+        np.clip(float(cfg.prosthetic_stance_phase_end), 1e-6, 1.0 - 1e-6)
+    )
+    source_id = 1.0
+    if (
+        valid_cycle_count > 0.0
+        and last_period_s > 1e-9
+        and 1e-6 < last_stance_fraction < 1.0 - 1e-6
+    ):
+        period_s = last_period_s
+        stance_fraction = float(np.clip(last_stance_fraction, 1e-6, 1.0 - 1e-6))
+        source_id = 2.0
+
+    stance_duration_s = max(1e-9, period_s * stance_fraction)
+    swing_duration_s = max(1e-9, period_s * (1.0 - stance_fraction))
+
+    if state_id == 1:  # STANCE_AFTER_HS
+        phase = stance_fraction * (stance_elapsed_s / stance_duration_s)
+    elif state_id == 2:  # SWING_AFTER_TO
+        phase = stance_fraction + (1.0 - stance_fraction) * (
+            swing_elapsed_s / swing_duration_s
+        )
+    elif state_id == 4:  # TIMEOUT; preserve terminal phase diagnostics.
+        timeout_side = float(fsm.get("timeout_side", 0.0) or 0.0)
+        if swing_elapsed_s > 0.0 or timeout_side == 2.0:
+            phase = stance_fraction + (1.0 - stance_fraction) * (
+                swing_elapsed_s / swing_duration_s
+            )
+        elif stance_elapsed_s > 0.0 or timeout_side == 1.0:
+            phase = stance_fraction * (stance_elapsed_s / stance_duration_s)
+        else:
+            return None, 0.0, 0.0
+    else:
+        return None, 0.0, 0.0
+
+    if not np.isfinite(phase):
+        return None, 0.0, 0.0
+    return float(np.clip(phase, 0.0, 1.0)), 1.0, source_id
+
+
+def _out_of_band_losses(
+    reference,
+    cfg: RewardConfig,
+    *,
+    bounds: tuple[tuple[float, ...], tuple[float, ...]] | None = None,
+) -> tuple[float, float]:
     """Dimensionless and raw excursion of the commanded reference outside the gait band.
 
     ``reference``: array ``(n_points, n_pros)`` of commanded reference q [rad] in
@@ -207,12 +570,13 @@ def _out_of_band_losses(reference, cfg: RewardConfig) -> tuple[float, float]:
     ref = np.asarray(reference, dtype=float)
     if ref.ndim == 1:
         ref = ref.reshape(1, -1)
-    n = min(ref.shape[1], len(cfg.oob_q_min), len(cfg.oob_q_max))
+    q_min, q_max = bounds or (cfg.oob_q_min, cfg.oob_q_max)
+    n = min(ref.shape[1], len(q_min), len(q_max))
     if n == 0:
         return 0.0, 0.0
     ref = ref[:, :n]
-    low = np.asarray(cfg.oob_q_min[:n], dtype=float)
-    high = np.asarray(cfg.oob_q_max[:n], dtype=float)
+    low = np.asarray(q_min[:n], dtype=float)
+    high = np.asarray(q_max[:n], dtype=float)
     over = np.clip(ref - high, 0.0, None)
     under = np.clip(low - ref, 0.0, None)
     excursion = over + under
@@ -244,6 +608,17 @@ def compute_reward(
     tracking_score = _score(reward_terms.get(TRACKING_LOSS, 0.0), cfg.tracking_weight)
     reference_score = _score(reward_terms.get(REFERENCE_LOSS, 0.0), cfg.reference_weight)
     bio_score = _score(reward_terms.get(BIO_LOSS, 0.0), cfg.bio_weight)
+    contact_load_score = float(reward_terms.get("contact_load_score", 0.0))
+    contact_support_to_score = float(
+        reward_terms.get("contact_support_to_score", 0.0)
+    )
+    phase_regular_score = float(reward_terms.get("phase_regular_score", 0.0))
+    phase_event_progress_score = float(
+        reward_terms.get("phase_event_progress_score", 0.0)
+    )
+    landing_window_contact_score = float(
+        reward_terms.get("landing_window_contact_score", 0.0)
+    )
     imitation_score = _score(
         reward_terms.get(SOUND_IMITATION_LOSS, 0.0), cfg.imitation_weight
     )
@@ -282,10 +657,45 @@ def compute_reward(
         * float(reward_terms.get(SEA_MOTOR_POWER_LOSS, 0.0))
         + cfg.policy_action_clip_weight
         * float(reward_terms.get(POLICY_ACTION_CLIP_LOSS, 0.0))
+        + cfg.phase_invalid_event_weight
+        * float(reward_terms.get("invalid_event_loss", 0.0))
+        + cfg.phase_contact_validity_weight
+        * float(reward_terms.get("contact_validity_loss", 0.0))
     )
     safety_term = cfg.safety_weight * float(reward_terms.get(SAFETY_LOSS, 0.0))
     grf_penetration_term = cfg.grf_penetration_weight * float(
         reward_terms.get(GRF_PENETRATION_LOSS, 0.0)
+    )
+    grf_ankle_moment_flip_term = cfg.grf_ankle_moment_flip_weight * float(
+        reward_terms.get(GRF_ANKLE_MOMENT_FLIP_LOSS, 0.0)
+    )
+    phase_timeout_penalty_term = cfg.phase_timeout_penalty_weight * float(
+        reward_terms.get("phase_timeout_loss", 0.0)
+    )
+    phase_clawback_penalty_term = cfg.phase_clawback_penalty_weight * (
+        float(reward_terms.get("phase_clawback_penalty", 0.0))
+        + float(reward_terms.get("phase_failure_extra_penalty", 0.0))
+    )
+    contact_support_clawback_term = (
+        cfg.contact_support_failure_clawback_weight
+        * float(reward_terms.get("contact_support_clawback_penalty", 0.0))
+    )
+    exnovo_task_term = (
+        cfg.swing_unloading_weight
+        * float(reward_terms.get("swing_unloading_loss", 0.0))
+        + cfg.contact_overload_weight
+        * float(reward_terms.get("contact_overload_loss", 0.0))
+        + cfg.grf_slip_weight * float(reward_terms.get("grf_slip_loss", 0.0))
+        + cfg.reserve_residual_weight
+        * float(reward_terms.get("reserve_residual_loss", 0.0))
+        + cfg.pelvis_height_weight
+        * float(reward_terms.get("pelvis_height_loss", 0.0))
+    )
+    prosthetic_joint_range_term = cfg.prosthetic_joint_range_weight * float(
+        reward_terms.get("prosthetic_joint_range_loss", 0.0)
+    )
+    morphology_term = cfg.morphology_weight * float(
+        reward_terms.get("morphology_loss", 0.0)
     )
     if reference is not None and cfg.oob_weight:
         oob_loss, oob_raw_loss = _out_of_band_losses(reference, cfg)
@@ -310,13 +720,30 @@ def compute_reward(
             cfg.blend_tracking * tracking_score
             + cfg.blend_reference * reference_score
             + cfg.blend_bio * bio_score
+            + cfg.blend_contact_load * contact_load_score
+            + cfg.blend_contact_support_to * contact_support_to_score
+            + cfg.blend_phase_regular * phase_regular_score
+            + cfg.blend_phase_event_progress * phase_event_progress_score
+            + cfg.blend_landing_window_contact * landing_window_contact_score
             - penalty
         )
     base = min(cfg.clip_high, max(cfg.clip_low, base))
 
     # Safety, contact feasibility and out-of-band are subtracted AFTER the clip:
     # they stay active even once the positive reward has saturated to clip_low.
-    reward = base - safety_term - grf_penetration_term - oob_term
+    reward = (
+        base
+        - safety_term
+        - grf_penetration_term
+        - grf_ankle_moment_flip_term
+        - phase_timeout_penalty_term
+        - phase_clawback_penalty_term
+        - contact_support_clawback_term
+        - exnovo_task_term
+        - prosthetic_joint_range_term
+        - morphology_term
+        - oob_term
+    )
 
     components = {
         "reward": float(reward),
@@ -324,6 +751,11 @@ def compute_reward(
         "tracking_score": float(tracking_score),
         "reference_score": float(reference_score),
         "bio_score": float(bio_score),
+        "contact_load_score": float(contact_load_score),
+        "contact_support_to_score": float(contact_support_to_score),
+        "phase_regular_score": float(phase_regular_score),
+        "phase_event_progress_score": float(phase_event_progress_score),
+        "landing_window_contact_score": float(landing_window_contact_score),
         "imitation_score": float(imitation_score),
         "served_imitation_score": float(served_imitation_score),
         "tracking_loss": float(reward_terms.get(TRACKING_LOSS, 0.0)),
@@ -377,12 +809,177 @@ def compute_reward(
         "policy_action_clip_abs_max": float(
             reward_terms.get("policy_action_clip_abs_max", 0.0)
         ),
+        "invalid_event_loss": float(reward_terms.get("invalid_event_loss", 0.0)),
+        "contact_validity_loss": float(
+            reward_terms.get("contact_validity_loss", 0.0)
+        ),
+        "invalid_event_count": float(reward_terms.get("invalid_event_count", 0.0)),
         "penalty": float(penalty),
         "safety_term": float(safety_term),
         "grf_penetration_loss": float(
             reward_terms.get(GRF_PENETRATION_LOSS, 0.0)
         ),
         "grf_penetration_term": float(grf_penetration_term),
+        "grf_ankle_moment_flip_loss": float(
+            reward_terms.get(GRF_ANKLE_MOMENT_FLIP_LOSS, 0.0)
+        ),
+        "grf_ankle_moment_flip_term": float(grf_ankle_moment_flip_term),
+        "phase_timeout_penalty_term": float(phase_timeout_penalty_term),
+        "phase_clawback_penalty": float(
+            reward_terms.get("phase_clawback_penalty", 0.0)
+        ),
+        "phase_failure_extra_penalty": float(
+            reward_terms.get("phase_failure_extra_penalty", 0.0)
+        ),
+        "phase_clawback_penalty_term": float(phase_clawback_penalty_term),
+        "contact_support_clawback_penalty": float(
+            reward_terms.get("contact_support_clawback_penalty", 0.0)
+        ),
+        "contact_support_clawback_term": float(contact_support_clawback_term),
+        "phase_cycle_complete_bonus": float(
+            reward_terms.get("phase_cycle_complete_bonus", 0.0)
+        ),
+        "phase_cycle_failed_this_step": float(
+            reward_terms.get("phase_cycle_failed_this_step", 0.0)
+        ),
+        "phase_pending_cycle_credit": float(
+            reward_terms.get("phase_pending_cycle_credit", 0.0)
+        ),
+        "grf_ankle_moment_flip_tau_nm": float(
+            reward_terms.get("grf_ankle_moment_flip_tau_nm", 0.0)
+        ),
+        "grf_ankle_moment_flip_excess_nm": float(
+            reward_terms.get("grf_ankle_moment_flip_excess_nm", 0.0)
+        ),
+        "grf_ankle_moment_flip_raw_loss_nm2": float(
+            reward_terms.get("grf_ankle_moment_flip_raw_loss_nm2", 0.0)
+        ),
+        "contact_load_loss": float(reward_terms.get("contact_load_loss", 0.0)),
+        "contact_load_raw_score": float(
+            reward_terms.get("contact_load_raw_score", 0.0)
+        ),
+        "contact_load_dense_active": float(
+            reward_terms.get("contact_load_dense_active", 0.0)
+        ),
+        "contact_load_evidence_complete": float(
+            reward_terms.get("contact_load_evidence_complete", 0.0)
+        ),
+        "contact_load_penetration_quality": float(
+            reward_terms.get("contact_load_penetration_quality", 0.0)
+        ),
+        "contact_support_to_timing_score": float(
+            reward_terms.get("contact_support_to_timing_score", 0.0)
+        ),
+        "contact_support_stance_duration_s": float(
+            reward_terms.get("contact_support_stance_duration_s", 0.0)
+        ),
+        "contact_support_min_penetration_quality": float(
+            reward_terms.get("contact_support_min_penetration_quality", 0.0)
+        ),
+        "contact_support_mean_penetration_quality": float(
+            reward_terms.get("contact_support_mean_penetration_quality", 0.0)
+        ),
+        "contact_support_pending_dense_reward": float(
+            reward_terms.get("contact_support_pending_dense_reward", 0.0)
+        ),
+        "contact_support_dense_confirmed_reward": float(
+            reward_terms.get("contact_support_dense_confirmed_reward", 0.0)
+        ),
+        "contact_overload_loss": float(
+            reward_terms.get("contact_overload_loss", 0.0)
+        ),
+        "swing_unloading_loss": float(
+            reward_terms.get("swing_unloading_loss", 0.0)
+        ),
+        "grf_slip_loss": float(reward_terms.get("grf_slip_loss", 0.0)),
+        "phase_regularity_loss": float(
+            reward_terms.get("phase_regularity_loss", 0.0)
+        ),
+        "phase_event_order_loss": float(
+            reward_terms.get("phase_event_order_loss", 0.0)
+        ),
+        "phase_period_loss": float(reward_terms.get("phase_period_loss", 0.0)),
+        "phase_period_hard_loss": float(
+            reward_terms.get("phase_period_hard_loss", 0.0)
+        ),
+        "phase_periodicity_loss": float(
+            reward_terms.get("phase_periodicity_loss", 0.0)
+        ),
+        "phase_stance_fraction_loss": float(
+            reward_terms.get("phase_stance_fraction_loss", 0.0)
+        ),
+        "phase_timeout_loss": float(reward_terms.get("phase_timeout_loss", 0.0)),
+        "phase_stance_timeout_loss": float(
+            reward_terms.get("phase_stance_timeout_loss", 0.0)
+        ),
+        "phase_swing_timeout_loss": float(
+            reward_terms.get("phase_swing_timeout_loss", 0.0)
+        ),
+        "reserve_residual_loss": float(
+            reward_terms.get("reserve_residual_loss", 0.0)
+        ),
+        "reserve_norm_loss": float(reward_terms.get("reserve_norm_loss", 0.0)),
+        "residual_norm_loss": float(reward_terms.get("residual_norm_loss", 0.0)),
+        "pelvis_height_loss": float(reward_terms.get("pelvis_height_loss", 0.0)),
+        "exnovo_task_term": float(exnovo_task_term),
+        "prosthetic_joint_range_loss": float(
+            reward_terms.get("prosthetic_joint_range_loss", 0.0)
+        ),
+        "prosthetic_joint_range_raw_loss": float(
+            reward_terms.get("prosthetic_joint_range_raw_loss", 0.0)
+        ),
+        "prosthetic_joint_range_term": float(prosthetic_joint_range_term),
+        "morphology_loss": float(reward_terms.get("morphology_loss", 0.0)),
+        "morphology_knee_loss": float(
+            reward_terms.get("morphology_knee_loss", 0.0)
+        ),
+        "morphology_ankle_loss": float(
+            reward_terms.get("morphology_ankle_loss", 0.0)
+        ),
+        "morphology_knee_raw_loss_rad2": float(
+            reward_terms.get("morphology_knee_raw_loss_rad2", 0.0)
+        ),
+        "morphology_ankle_raw_loss_rad2": float(
+            reward_terms.get("morphology_ankle_raw_loss_rad2", 0.0)
+        ),
+        "morphology_knee_excursion_rad": float(
+            reward_terms.get("morphology_knee_excursion_rad", 0.0)
+        ),
+        "morphology_ankle_excursion_rad": float(
+            reward_terms.get("morphology_ankle_excursion_rad", 0.0)
+        ),
+        "morphology_available": float(
+            reward_terms.get("morphology_available", 0.0)
+        ),
+        "morphology_phase": float(reward_terms.get("morphology_phase", 0.0)),
+        "fsm_morphology_phase": float(
+            reward_terms.get("fsm_morphology_phase", 0.0)
+        ),
+        "morphology_phase_source_id": float(
+            reward_terms.get("morphology_phase_source_id", 0.0)
+        ),
+        "morphology_phase_fsm_available": float(
+            reward_terms.get("morphology_phase_fsm_available", 0.0)
+        ),
+        "morphology_knee_value_rad": float(
+            reward_terms.get("morphology_knee_value_rad", 0.0)
+        ),
+        "morphology_ankle_value_rad": float(
+            reward_terms.get("morphology_ankle_value_rad", 0.0)
+        ),
+        "morphology_knee_min_rad": float(
+            reward_terms.get("morphology_knee_min_rad", 0.0)
+        ),
+        "morphology_knee_max_rad": float(
+            reward_terms.get("morphology_knee_max_rad", 0.0)
+        ),
+        "morphology_ankle_min_rad": float(
+            reward_terms.get("morphology_ankle_min_rad", 0.0)
+        ),
+        "morphology_ankle_max_rad": float(
+            reward_terms.get("morphology_ankle_max_rad", 0.0)
+        ),
+        "morphology_term": float(morphology_term),
         "oob_loss": float(oob_loss),
         "oob_raw_loss": float(oob_raw_loss),
         "oob_term": float(oob_term),
@@ -434,6 +1031,23 @@ class RewardShapingWrapper(gym.Wrapper):
     def __init__(self, env: gym.Env, reward_config: RewardConfig | None = None) -> None:
         super().__init__(env)
         self.reward_config = reward_config or RewardConfig()
+        self._morphology_profile = _load_morphology_profile(
+            self.reward_config.morphology_profile
+        )
+        self._reset_contact_support_state()
+
+    def reset(self, **kwargs):
+        self._reset_contact_support_state()
+        return self.env.reset(**kwargs)
+
+    def _reset_contact_support_state(self) -> None:
+        self._contact_support_last_valid_hs_count = 0.0
+        self._contact_support_last_valid_to_count = 0.0
+        self._contact_support_pending_dense_reward = 0.0
+        self._contact_support_min_penetration_quality = 1.0
+        self._contact_support_penetration_quality_sum = 0.0
+        self._contact_support_penetration_quality_samples = 0
+        self._contact_support_stance_seen = False
 
     def _action_clip_terms(self, action) -> dict[str, float]:
         space = getattr(self.env, "action_space", None)
@@ -485,6 +1099,646 @@ class RewardShapingWrapper(gym.Wrapper):
             "policy_action_clip_abs_max": float(np.max(clipped_delta)),
         }
 
+    def _contact_support_terms(
+        self,
+        info: Mapping[str, Any],
+        *,
+        stance_expected: bool,
+        candidate_contact_score: float,
+        penetration_quality: float,
+    ) -> dict[str, float]:
+        """Gate dense support credit and settle its provisional cycle ledger."""
+        cfg = self.reward_config
+        fsm = info.get("phase_fsm")
+        if not isinstance(fsm, Mapping):
+            fsm = {}
+
+        ledger_enabled = any(
+            (
+                float(cfg.contact_load_confidence_full_bw) > 0.0,
+                float(cfg.contact_load_dense_evidence_limit_bw_s) > 0.0,
+                float(cfg.blend_contact_support_to) > 0.0,
+                float(cfg.contact_support_failure_clawback_weight) > 0.0,
+            )
+        )
+        if not ledger_enabled:
+            return {
+                "contact_load_score": float(candidate_contact_score),
+                "contact_load_dense_active": float(stance_expected),
+                "contact_load_evidence_complete": 0.0,
+                "contact_support_to_score": 0.0,
+                "contact_support_to_timing_score": 0.0,
+                "contact_support_stance_duration_s": 0.0,
+                "contact_support_min_penetration_quality": float(
+                    penetration_quality
+                ),
+                "contact_support_mean_penetration_quality": float(
+                    penetration_quality
+                ),
+                "contact_support_pending_dense_reward": 0.0,
+                "contact_support_dense_confirmed_reward": 0.0,
+                "contact_support_clawback_penalty": 0.0,
+            }
+
+        valid_hs_count = float(fsm.get("valid_hs_count", 0.0) or 0.0)
+        valid_to_count = float(fsm.get("valid_to_count", 0.0) or 0.0)
+        new_hs = valid_hs_count > self._contact_support_last_valid_hs_count
+        new_to = valid_to_count > self._contact_support_last_valid_to_count
+        state_id = int(float(fsm.get("state_id", 0.0) or 0.0))
+        stance_load_integral = max(
+            0.0,
+            float(fsm.get("stance_load_integral_bw_s", 0.0) or 0.0),
+        )
+
+        reward_terms = info.get("reward_terms")
+        if not isinstance(reward_terms, Mapping):
+            reward_terms = {}
+        episode_ended = bool(
+            float(reward_terms.get("terminated", 0.0) or 0.0) > 0.0
+            or float(reward_terms.get("truncated", 0.0) or 0.0) > 0.0
+            or info.get("end_reason")
+        )
+        cycle_failed = bool(
+            float(fsm.get("phase_cycle_failed_this_step", 0.0) or 0.0) > 0.0
+            or float(fsm.get("timeout_exceeded", 0.0) or 0.0) > 0.0
+            or (episode_ended and not new_to)
+        )
+
+        clawback = 0.0
+        if cycle_failed:
+            clawback = float(self._contact_support_pending_dense_reward)
+            self._contact_support_pending_dense_reward = 0.0
+
+        if new_hs:
+            self._contact_support_pending_dense_reward = 0.0
+            self._contact_support_min_penetration_quality = 1.0
+            self._contact_support_penetration_quality_sum = 0.0
+            self._contact_support_penetration_quality_samples = 0
+            self._contact_support_stance_seen = False
+
+        dense_active = False
+        contact_load_score = 0.0
+        evidence_limit = max(
+            0.0,
+            float(cfg.contact_load_dense_evidence_limit_bw_s),
+        )
+        evidence_complete = bool(
+            evidence_limit > 0.0 and stance_load_integral >= evidence_limit
+        )
+        if state_id == 1 and stance_expected and not episode_ended:
+            self._contact_support_stance_seen = True
+            self._contact_support_min_penetration_quality = min(
+                self._contact_support_min_penetration_quality,
+                float(penetration_quality),
+            )
+            self._contact_support_penetration_quality_sum += float(
+                penetration_quality
+            )
+            self._contact_support_penetration_quality_samples += 1
+            dense_active = evidence_limit <= 0.0 or not evidence_complete
+            if dense_active:
+                contact_load_score = float(candidate_contact_score)
+                self._contact_support_pending_dense_reward += (
+                    float(cfg.blend_contact_load) * contact_load_score
+                )
+
+        to_score = 0.0
+        timing_score = 0.0
+        stance_duration_s = 0.0
+        dense_confirmed = 0.0
+        if new_to:
+            gait = info.get("online_gait")
+            sides = gait.get("sides") if isinstance(gait, Mapping) else None
+            left = sides.get("left") if isinstance(sides, Mapping) else None
+            if isinstance(left, Mapping):
+                last_hs = left.get("last_heel_strike_time")
+                last_to = left.get("last_toe_off_time")
+                if last_hs is not None and last_to is not None:
+                    stance_duration_s = max(0.0, float(last_to) - float(last_hs))
+            window_start = float(cfg.contact_support_to_window_start_s)
+            window_end = float(cfg.contact_support_to_window_end_s)
+            if window_end > window_start > 0.0:
+                timing_score = _soft_window_score(
+                    stance_duration_s,
+                    window_start,
+                    window_end,
+                    float(cfg.phase_min_stance_duration_s),
+                    float(cfg.phase_stance_timeout_s),
+                )
+            else:
+                timing_score = 1.0
+            if self._contact_support_stance_seen:
+                mean_penetration_quality = (
+                    self._contact_support_penetration_quality_sum
+                    / max(1, self._contact_support_penetration_quality_samples)
+                )
+                to_score = float(
+                    timing_score * mean_penetration_quality
+                )
+            dense_confirmed = float(self._contact_support_pending_dense_reward)
+            self._contact_support_pending_dense_reward = 0.0
+
+        self._contact_support_last_valid_hs_count = valid_hs_count
+        self._contact_support_last_valid_to_count = valid_to_count
+        return {
+            "contact_load_score": float(contact_load_score),
+            "contact_load_dense_active": float(dense_active),
+            "contact_load_evidence_complete": float(evidence_complete),
+            "contact_support_to_score": float(to_score),
+            "contact_support_to_timing_score": float(timing_score),
+            "contact_support_stance_duration_s": float(stance_duration_s),
+            "contact_support_min_penetration_quality": float(
+                self._contact_support_min_penetration_quality
+            ),
+            "contact_support_mean_penetration_quality": float(
+                self._contact_support_penetration_quality_sum
+                / max(1, self._contact_support_penetration_quality_samples)
+            ),
+            "contact_support_pending_dense_reward": float(
+                self._contact_support_pending_dense_reward
+            ),
+            "contact_support_dense_confirmed_reward": float(dense_confirmed),
+            "contact_support_clawback_penalty": float(clawback),
+        }
+
+    def _task_reward_terms(self, info: Mapping[str, Any]) -> dict[str, float]:
+        cfg = self.reward_config
+        gait = info.get("online_gait")
+        sides = gait.get("sides") if isinstance(gait, Mapping) else None
+        left_gait = sides.get("left") if isinstance(sides, Mapping) else None
+        if not isinstance(left_gait, Mapping):
+            left_gait = {}
+        online_grf = info.get("online_grf")
+        grf_sides = online_grf.get("left") if isinstance(online_grf, Mapping) else None
+        if not isinstance(grf_sides, Mapping):
+            grf_sides = {}
+
+        normal_bw = max(0.0, float(left_gait.get("normal_force_bw", 0.0) or 0.0))
+        penetration_m = max(0.0, float(grf_sides.get("penetration", 0.0) or 0.0))
+        in_contact = bool(left_gait.get("in_contact", False))
+        phase = float(left_gait.get("gait_phase", 0.0) or 0.0)
+        cycle_duration = float(left_gait.get("cycle_duration_s", 0.0) or 0.0)
+        last_hs = left_gait.get("last_heel_strike_time")
+        last_to = left_gait.get("last_toe_off_time")
+        phase_known = last_hs is not None and cycle_duration > 1e-9
+        swing_since_to = (
+            last_to is not None
+            and (last_hs is None or float(last_to) > float(last_hs))
+        )
+        phase_fsm = info.get("phase_fsm")
+        if not isinstance(phase_fsm, Mapping):
+            phase_fsm = {}
+        try:
+            phase_fsm_state_id = int(float(phase_fsm.get("state_id", 0.0) or 0.0))
+        except (TypeError, ValueError, OverflowError):
+            phase_fsm_state_id = 0
+        phase_fsm_state_name = str(phase_fsm.get("state_name", "") or "")
+        fsm_expects_stance = (
+            phase_fsm_state_id == 1 or phase_fsm_state_name == "STANCE_AFTER_HS"
+        )
+        fsm_expects_swing = (
+            phase_fsm_state_id == 2 or phase_fsm_state_name == "SWING_AFTER_TO"
+        )
+        phase_expectation_source_id = 0.0
+        if fsm_expects_stance:
+            stance_expected = True
+            swing_expected = False
+            phase_expectation_source_id = 1.0
+        elif fsm_expects_swing:
+            stance_expected = False
+            swing_expected = True
+            phase_expectation_source_id = 1.0
+        elif swing_since_to:
+            stance_expected = False
+            swing_expected = True
+        elif phase_known:
+            stance_expected = phase <= float(cfg.prosthetic_stance_phase_end)
+            swing_expected = not stance_expected
+        else:
+            stance_expected = in_contact
+            swing_expected = False
+
+        load_target = max(1e-9, float(cfg.contact_load_target_bw))
+        confidence_full_bw = float(cfg.contact_load_confidence_full_bw)
+        if confidence_full_bw <= 0.0:
+            confidence_full_bw = load_target
+        pen_full = max(0.0, float(cfg.contact_load_penetration_full_reward_m))
+        pen_zero = max(pen_full, float(cfg.contact_load_penetration_zero_reward_m))
+        if pen_zero <= pen_full + 1e-12:
+            contact_penetration_quality = 1.0 if penetration_m <= pen_zero else 0.0
+        elif penetration_m <= pen_full:
+            contact_penetration_quality = 1.0
+        elif penetration_m >= pen_zero:
+            contact_penetration_quality = 0.0
+        else:
+            contact_penetration_quality = float(
+                (pen_zero - penetration_m) / (pen_zero - pen_full)
+            )
+        if stance_expected:
+            contact_load_raw_score = float(
+                np.clip(normal_bw / max(1e-9, confidence_full_bw), 0.0, 1.0)
+            )
+            candidate_contact_score = float(
+                contact_load_raw_score * contact_penetration_quality
+            )
+        else:
+            contact_load_raw_score = 0.0
+            candidate_contact_score = 0.0
+        contact_support_terms = self._contact_support_terms(
+            info,
+            stance_expected=stance_expected,
+            candidate_contact_score=candidate_contact_score,
+            penetration_quality=contact_penetration_quality,
+        )
+        contact_load_score = float(contact_support_terms["contact_load_score"])
+        contact_load_loss = (
+            float((1.0 - contact_load_score) ** 2) if stance_expected else 0.0
+        )
+        contact_overload_loss = _bounded_square_ratio(
+            max(0.0, normal_bw - float(cfg.contact_load_max_bw)),
+            max(load_target, float(cfg.contact_load_max_bw)),
+        )
+        swing_unloading_loss = (
+            _bounded_square_ratio(normal_bw, cfg.swing_unloading_force_tol_bw)
+            if swing_expected
+            else 0.0
+        )
+        slip_speed = max(0.0, float(grf_sides.get("slip_speed", 0.0) or 0.0))
+        grf_slip_loss = (
+            _bounded_square_ratio(slip_speed, cfg.grf_slip_speed_scale_m_s)
+            if normal_bw > 0.05
+            else 0.0
+        )
+
+        phase_terms = self._phase_regular_terms(info)
+        reserve_terms = self._reserve_terms(info)
+        pelvis_terms = self._pelvis_terms(info)
+        joint_terms = self._prosthetic_joint_terms(info)
+        morphology_terms = self._morphology_terms(info)
+        return {
+            "contact_load_raw_score": contact_load_raw_score,
+            "contact_load_loss": contact_load_loss,
+            "contact_load_confidence_full_bw": confidence_full_bw,
+            "contact_load_penetration_quality": contact_penetration_quality,
+            "contact_load_penetration_m": penetration_m,
+            "contact_load_penetration_full_reward_m": pen_full,
+            "contact_load_penetration_zero_reward_m": pen_zero,
+            "contact_overload_loss": contact_overload_loss,
+            "swing_unloading_loss": swing_unloading_loss,
+            "grf_slip_loss": grf_slip_loss,
+            "prosthetic_stance_expected": float(stance_expected),
+            "prosthetic_swing_expected": float(swing_expected),
+            "prosthetic_phase_expectation_source_id": float(
+                phase_expectation_source_id
+            ),
+            "prosthetic_normal_force_bw": float(normal_bw),
+            "prosthetic_slip_speed_m_s": float(slip_speed),
+            **contact_support_terms,
+            **phase_terms,
+            **reserve_terms,
+            **pelvis_terms,
+            **joint_terms,
+            **morphology_terms,
+        }
+
+    def _phase_regular_terms(self, info: Mapping[str, Any]) -> dict[str, float]:
+        cfg = self.reward_config
+        fsm = info.get("phase_fsm")
+        if not isinstance(fsm, Mapping):
+            fsm = {}
+        period_soft_low = (
+            float(cfg.phase_period_nominal_s) - float(cfg.phase_period_soft_margin_s)
+        )
+        period_soft_high = (
+            float(cfg.phase_period_nominal_s) + float(cfg.phase_period_soft_margin_s)
+        )
+        event_order_loss = float(fsm.get("invalid_event_loss", 0.0) or 0.0)
+        last_period_s = float(fsm.get("last_period_s", 0.0) or 0.0)
+        previous_period_s = float(fsm.get("previous_period_s", 0.0) or 0.0)
+        last_stance_fraction = float(fsm.get("last_stance_fraction", 0.0) or 0.0)
+        phase_period_loss = (
+            _huber_interval_loss(
+                last_period_s,
+                period_soft_low,
+                period_soft_high,
+                cfg.phase_period_soft_margin_s,
+            )
+            if last_period_s > 1e-9
+            else 0.0
+        )
+        phase_period_hard_loss = (
+            _huber_interval_loss(
+                last_period_s,
+                cfg.phase_period_hard_min_s,
+                cfg.phase_period_hard_max_s,
+                cfg.phase_period_soft_margin_s,
+            )
+            if last_period_s > 1e-9
+            else 0.0
+        )
+        phase_periodicity_loss = (
+            _huber_loss(
+                (last_period_s - previous_period_s)
+                / max(1e-9, float(cfg.phase_periodicity_scale_s))
+            )
+            if last_period_s > 1e-9 and previous_period_s > 1e-9
+            else 0.0
+        )
+        stance_fraction_loss = (
+            _huber_interval_loss(
+                last_stance_fraction,
+                cfg.phase_stance_fraction_min,
+                cfg.phase_stance_fraction_max,
+                max(
+                    1e-9,
+                    0.5
+                    * (
+                        float(cfg.phase_stance_fraction_max)
+                        - float(cfg.phase_stance_fraction_min)
+                    ),
+                ),
+            )
+            if last_stance_fraction > 1e-9
+            else 0.0
+        )
+        stance_elapsed_s = float(fsm.get("stance_elapsed_s", 0.0) or 0.0)
+        swing_elapsed_s = float(fsm.get("swing_elapsed_s", 0.0) or 0.0)
+        stance_timeout_loss = _huber_interval_loss(
+            stance_elapsed_s,
+            0.0,
+            cfg.phase_stance_timeout_s,
+            cfg.phase_timeout_scale_s,
+        )
+        swing_timeout_loss = _huber_interval_loss(
+            swing_elapsed_s,
+            0.0,
+            cfg.phase_swing_timeout_s,
+            cfg.phase_timeout_scale_s,
+        )
+        phase_timeout_exceeded = float(fsm.get("timeout_exceeded", 0.0) or 0.0)
+        phase_timeout_side = float(fsm.get("timeout_side", 0.0) or 0.0)
+        timeout_loss = float(stance_timeout_loss + swing_timeout_loss)
+        phase_regularity_loss = float(
+            float(cfg.phase_event_order_weight) * event_order_loss
+            + float(cfg.phase_period_weight) * (phase_period_loss + phase_period_hard_loss)
+            + float(cfg.phase_periodicity_weight) * phase_periodicity_loss
+            + float(cfg.phase_stance_fraction_weight) * stance_fraction_loss
+            + float(cfg.phase_timeout_weight) * timeout_loss
+        )
+        valid_cycle_count = float(fsm.get("valid_cycle_count", 0.0) or 0.0)
+        phase_event_progress_score = float(
+            fsm.get("phase_event_progress_score", 0.0) or 0.0
+        )
+        phase_regular_score = (
+            _score(phase_regularity_loss, cfg.phase_regularity_weight)
+            if valid_cycle_count > 0
+            else 0.0
+        )
+        return {
+            "phase_regular_score": float(phase_regular_score),
+            "phase_event_progress_score": float(phase_event_progress_score),
+            "landing_window_contact_score": float(
+                fsm.get("landing_window_contact_score", 0.0) or 0.0
+            ),
+            "landing_window_active": float(
+                fsm.get("landing_window_active", 0.0) or 0.0
+            ),
+            "invalid_event_loss": float(fsm.get("invalid_event_loss", 0.0) or 0.0),
+            "contact_validity_loss": float(
+                fsm.get("contact_validity_loss", 0.0) or 0.0
+            ),
+            "invalid_event_count": float(fsm.get("invalid_event_count", 0.0) or 0.0),
+            "phase_fsm_state_id": float(fsm.get("state_id", 0.0) or 0.0),
+            "phase_regularity_loss": float(phase_regularity_loss),
+            "phase_event_order_loss": float(event_order_loss),
+            "phase_period_loss": float(phase_period_loss),
+            "phase_period_hard_loss": float(phase_period_hard_loss),
+            "phase_periodicity_loss": float(phase_periodicity_loss),
+            "phase_stance_fraction_loss": float(stance_fraction_loss),
+            "phase_timeout_loss": float(timeout_loss),
+            "phase_stance_timeout_loss": float(stance_timeout_loss),
+            "phase_swing_timeout_loss": float(swing_timeout_loss),
+            "phase_stance_elapsed_s": float(stance_elapsed_s),
+            "phase_swing_elapsed_s": float(swing_elapsed_s),
+            "phase_stance_hard_timeout_s": float(cfg.phase_stance_hard_timeout_s),
+            "phase_swing_hard_timeout_s": float(cfg.phase_swing_hard_timeout_s),
+            "phase_timeout_exceeded": float(phase_timeout_exceeded),
+            "phase_timeout_side": float(phase_timeout_side),
+            "phase_valid_hs_count": float(fsm.get("valid_hs_count", 0.0) or 0.0),
+            "phase_valid_to_count": float(fsm.get("valid_to_count", 0.0) or 0.0),
+            "phase_valid_cycle_count": float(valid_cycle_count),
+            "phase_cycle_progress_credit": float(
+                fsm.get("cycle_progress_credit", 0.0) or 0.0
+            ),
+            "phase_pending_cycle_credit": float(
+                fsm.get("pending_cycle_credit", 0.0) or 0.0
+            ),
+            "phase_cycle_complete_bonus": float(
+                fsm.get("phase_cycle_complete_bonus", 0.0) or 0.0
+            ),
+            "phase_clawback_penalty": float(
+                fsm.get("phase_clawback_penalty", 0.0) or 0.0
+            ),
+            "phase_failure_extra_penalty": float(
+                fsm.get("phase_failure_extra_penalty", 0.0) or 0.0
+            ),
+            "phase_cycle_failed_this_step": float(
+                fsm.get("phase_cycle_failed_this_step", 0.0) or 0.0
+            ),
+            "phase_last_period_s": float(last_period_s),
+            "phase_previous_period_s": float(previous_period_s),
+            "phase_last_stance_fraction": float(last_stance_fraction),
+            "phase_stance_contact_time_s": float(
+                fsm.get("stance_contact_time_s", 0.0) or 0.0
+            ),
+            "phase_stance_load_integral_bw_s": float(
+                fsm.get("stance_load_integral_bw_s", 0.0) or 0.0
+            ),
+            "phase_stance_contact_fraction": float(
+                fsm.get("stance_contact_fraction", 0.0) or 0.0
+            ),
+            "phase_stance_mean_load_bw": float(
+                fsm.get("stance_mean_load_bw", 0.0) or 0.0
+            ),
+            "phase_cycle_knee_excursion_rad": float(
+                fsm.get("cycle_knee_excursion_rad", 0.0) or 0.0
+            ),
+            "phase_cycle_ankle_excursion_rad": float(
+                fsm.get("cycle_ankle_excursion_rad", 0.0) or 0.0
+            ),
+            "phase_cycle_rejected_this_step": float(
+                fsm.get("cycle_rejected_this_step", 0.0) or 0.0
+            ),
+        }
+
+    def _prosthetic_joint_terms(self, info: Mapping[str, Any]) -> dict[str, float]:
+        obs = info.get("observation")
+        if not isinstance(obs, Mapping):
+            return {
+                "prosthetic_joint_range_loss": 0.0,
+                "prosthetic_joint_range_raw_loss": 0.0,
+            }
+        values = []
+        for coord_name in ("pros_knee_angle", "pros_ankle_angle"):
+            if coord_name in obs:
+                values.append(float(obs.get(coord_name, 0.0) or 0.0))
+        if not values:
+            return {
+                "prosthetic_joint_range_loss": 0.0,
+                "prosthetic_joint_range_raw_loss": 0.0,
+            }
+        loss, raw_loss = _out_of_band_losses(
+            np.asarray(values, dtype=float),
+            self.reward_config,
+            bounds=(
+                self.reward_config.prosthetic_joint_q_min,
+                self.reward_config.prosthetic_joint_q_max,
+            ),
+        )
+        return {
+            "prosthetic_joint_range_loss": float(loss),
+            "prosthetic_joint_range_raw_loss": float(raw_loss),
+            "prosthetic_knee_q_rad": float(values[0]) if len(values) > 0 else 0.0,
+            "prosthetic_ankle_q_rad": float(values[1]) if len(values) > 1 else 0.0,
+        }
+
+    @staticmethod
+    def _empty_morphology_terms() -> dict[str, float]:
+        return {
+            "morphology_available": 0.0,
+            "morphology_phase": 0.0,
+            "morphology_loss": 0.0,
+            "morphology_knee_loss": 0.0,
+            "morphology_ankle_loss": 0.0,
+            "morphology_knee_raw_loss_rad2": 0.0,
+            "morphology_ankle_raw_loss_rad2": 0.0,
+            "morphology_knee_excursion_rad": 0.0,
+            "morphology_ankle_excursion_rad": 0.0,
+            "morphology_knee_value_rad": 0.0,
+            "morphology_ankle_value_rad": 0.0,
+            "morphology_knee_min_rad": 0.0,
+            "morphology_knee_max_rad": 0.0,
+            "morphology_ankle_min_rad": 0.0,
+            "morphology_ankle_max_rad": 0.0,
+            "fsm_morphology_phase": 0.0,
+            "morphology_phase_source_id": 0.0,
+            "morphology_phase_fsm_available": 0.0,
+        }
+
+    def _morphology_terms(self, info: Mapping[str, Any]) -> dict[str, float]:
+        profile = self._morphology_profile
+        if profile is None:
+            return self._empty_morphology_terms()
+
+        fsm_phase, fsm_available, phase_source_id = _fsm_morphology_phase(
+            info,
+            self.reward_config,
+        )
+        if "phase_fsm" in info:
+            if fsm_phase is None:
+                return self._empty_morphology_terms()
+            phase = fsm_phase
+        else:
+            phase = None
+            phase_source_id = 3.0
+            fsm_available = 0.0
+
+        if phase is None:
+            gait = info.get("online_gait")
+            sides = gait.get("sides") if isinstance(gait, Mapping) else None
+            left_gait = sides.get("left") if isinstance(sides, Mapping) else None
+            phase = (
+                _normalize_morphology_phase(left_gait.get("gait_phase"))
+                if isinstance(left_gait, Mapping)
+                else None
+            )
+        if phase is None:
+            return self._empty_morphology_terms()
+
+        obs = info.get("observation")
+        if not isinstance(obs, Mapping):
+            return self._empty_morphology_terms()
+
+        try:
+            knee_value = float(obs["pros_knee_angle_served_ref"])
+            ankle_value = float(obs["pros_ankle_angle_served_ref"])
+        except (KeyError, TypeError, ValueError):
+            return self._empty_morphology_terms()
+        if not (np.isfinite(knee_value) and np.isfinite(ankle_value)):
+            return self._empty_morphology_terms()
+
+        corridor = _morphology_corridor_at(profile, phase, self.reward_config)
+        knee_corridor = corridor["pros_knee_angle"]
+        ankle_corridor = corridor["pros_ankle_angle"]
+        knee_loss, knee_raw_loss, knee_excursion = _morphology_interval_losses(
+            knee_value,
+            knee_corridor["min_rad"],
+            knee_corridor["max_rad"],
+        )
+        ankle_loss, ankle_raw_loss, ankle_excursion = _morphology_interval_losses(
+            ankle_value,
+            ankle_corridor["min_rad"],
+            ankle_corridor["max_rad"],
+        )
+        return {
+            "morphology_available": 1.0,
+            "morphology_phase": float(phase),
+            "fsm_morphology_phase": float(fsm_phase or 0.0),
+            "morphology_phase_source_id": float(phase_source_id),
+            "morphology_phase_fsm_available": float(fsm_available),
+            "morphology_loss": float(0.5 * (knee_loss + ankle_loss)),
+            "morphology_knee_loss": float(knee_loss),
+            "morphology_ankle_loss": float(ankle_loss),
+            "morphology_knee_raw_loss_rad2": float(knee_raw_loss),
+            "morphology_ankle_raw_loss_rad2": float(ankle_raw_loss),
+            "morphology_knee_excursion_rad": float(knee_excursion),
+            "morphology_ankle_excursion_rad": float(ankle_excursion),
+            "morphology_knee_value_rad": float(knee_value),
+            "morphology_ankle_value_rad": float(ankle_value),
+            "morphology_knee_min_rad": float(knee_corridor["min_rad"]),
+            "morphology_knee_max_rad": float(knee_corridor["max_rad"]),
+            "morphology_ankle_min_rad": float(ankle_corridor["min_rad"]),
+            "morphology_ankle_max_rad": float(ankle_corridor["max_rad"]),
+        }
+
+    def _reserve_terms(self, info: Mapping[str, Any]) -> dict[str, float]:
+        diag = info.get("so_diagnostics")
+        if not isinstance(diag, Mapping):
+            diag = {}
+        reserve_norm = float(diag.get("tau_reserve_norm", 0.0) or 0.0)
+        residual_norm = float(diag.get("residual_norm", 0.0) or 0.0)
+        reserve_loss = _bounded_square_ratio(
+            reserve_norm,
+            self.reward_config.reserve_norm_scale_nm,
+        )
+        residual_loss = _bounded_square_ratio(
+            residual_norm,
+            self.reward_config.residual_norm_scale_nm,
+        )
+        return {
+            "reserve_norm_nm": float(reserve_norm),
+            "residual_norm_nm": float(residual_norm),
+            "reserve_norm_loss": float(reserve_loss),
+            "residual_norm_loss": float(residual_loss),
+            "reserve_residual_loss": float(0.5 * (reserve_loss + residual_loss)),
+        }
+
+    def _pelvis_terms(self, info: Mapping[str, Any]) -> dict[str, float]:
+        obs = info.get("observation")
+        pelvis_ty = None
+        if isinstance(obs, Mapping) and "pelvis_ty" in obs:
+            pelvis_ty = float(obs.get("pelvis_ty", 0.0) or 0.0)
+        if pelvis_ty is None:
+            return {"pelvis_height_loss": 0.0}
+        deficit = max(0.0, float(self.reward_config.pelvis_height_min_m) - pelvis_ty)
+        return {
+            "pelvis_ty_m": float(pelvis_ty),
+            "pelvis_height_loss": _bounded_square_ratio(
+                deficit,
+                self.reward_config.pelvis_height_scale_m,
+            ),
+        }
+
     def step(self, action):
         action_clip_terms = self._action_clip_terms(action)
         obs, env_reward, terminated, truncated, info = self.env.step(action)
@@ -494,12 +1748,27 @@ class RewardShapingWrapper(gym.Wrapper):
 
         terms = dict(terms)
         terms.update(action_clip_terms)
+        terms.update(self._task_reward_terms(info))
         reference = info.get("policy_segment_values")
         reward, components = compute_reward(
             terms, self.reward_config, reference=reference
         )
 
         info = dict(info)
+        if float(terms.get("phase_timeout_exceeded", 0.0) or 0.0) > 0.0:
+            side_code = float(terms.get("phase_timeout_side", 0.0) or 0.0)
+            side_name = "stance" if side_code == 1.0 else "swing"
+            current_reason = info.get("end_reason")
+            if not terminated or current_reason in {
+                None,
+                "episode_time_limit",
+                "dataset_end",
+            }:
+                terminated = True
+                truncated = False
+                info["end_reason"] = f"phase_timeout:{side_name}"
+                terms["terminated"] = 1.0
+                terms["truncated"] = 0.0
         info["reward_terms"] = terms
         info["reward_components"] = components
         info["reward_env_original"] = float(env_reward)

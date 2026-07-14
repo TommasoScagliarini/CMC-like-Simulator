@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-13",
+  "decision": "REJECT_H1_KEEP_H0_WARM_CRITIC",
+  "continue_training_from_h1": false,
+  "promote_post_h1_checkpoint": false,
+  "rollback_checkpoint": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last",
+  "h1": {
+    "output_dir": "Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-13_markov35_after_critic_warmup_iter2",
+    "resume_from": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last",
+    "restored_logical_iteration": 1,
+    "completed_logical_iteration": 2,
+    "ppo_updates_with_actor_enabled": 1,
+    "freeze_actor": false,
+    "freeze_logstd": true,
+    "sigma": 0.005,
+    "sampled_steps_this_iteration": 4096,
+    "episode_return_mean": -32.558214120764404,
+    "episode_length_mean": 229.0,
+    "policy_loss": 0.07737986743450165,
+    "value_loss": 0.5499966740608215,
+    "value_explained_variance_before": 0.23806822299957275,
+    "value_explained_variance_after": 0.4552001357078552,
+    "mean_kl": 0.15469039976596832,
+    "kl_target": 0.01,
+    "kl_over_target_ratio": 15.469039976596832,
+    "grf_penetration_terminations": 2,
+    "critic_digest_before": "4584399f63781c48002f8169240ae686b0317aaa22bab9799d553d7fbc2a9f6e",
+    "critic_digest_after": "a4c72e333e4843799fc8beeb9d27a671761e209304bfa8990fe32e7d82562091"
+  },
+  "actor_audit": {
+    "source_actor_digest": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+    "post_h1_actor_digest": "266f43bdbca6ff7db0dce2129041615a1cb019e0f65516ec2dea2ac3729c6a3a",
+    "actor_changed": true,
+    "actor_parameter_max_abs_diff": 0.001715734601020813,
+    "nominal_post_h1_trace_samples": 500,
+    "mean_output_max_abs_shift": 0.005132261663675308,
+    "mean_output_rmse": 0.0016372592654079199,
+    "mean_output_rmse_per_action": [
+      0.0020837627816945314,
+      0.0010095381876453757
+    ],
+    "mean_output_p95_abs_per_action": [
+      0.004047510679811239,
+      0.001977482344955206
+    ],
+    "logstd_last_layer_weight_rows_exact": true,
+    "logstd_last_layer_bias_rows_exact": true,
+    "logstd_output_max_abs_shift": 0.0,
+    "source_sigma_mean": [
+      0.005000019446015358,
+      0.005000019446015358
+    ],
+    "post_h1_sigma_mean": [
+      0.005000019446015358,
+      0.005000019446015358
+    ]
+  },
+  "h2": {
+    "deterministic": [
+      {
+        "case": "nominal",
+        "pre_steps": 500,
+        "post_steps": 500,
+        "pre_return": 51.79749636232904,
+        "post_return": 47.7296462515802,
+        "pre_valid_cycles": 2,
+        "post_valid_cycles": 2,
+        "pre_max_penetration_m": 0.02395957553235469,
+        "post_max_penetration_m": 0.024150625311253508,
+        "post_end_reason": "episode_time_limit",
+        "post_clipped_steps": 0,
+        "pass": true
+      },
+      {
+        "case": "minus_0_20_s",
+        "pre_steps": 500,
+        "post_steps": 231,
+        "pre_return": 35.78750918194062,
+        "post_return": 15.446616975925766,
+        "pre_valid_cycles": 2,
+        "post_valid_cycles": 1,
+        "pre_max_penetration_m": 0.02460202939096984,
+        "post_max_penetration_m": 0.02533410014644322,
+        "post_end_reason": "grf_penetration",
+        "post_clipped_steps": 0,
+        "pass": false
+      },
+      {
+        "case": "plus_0_20_s",
+        "pre_steps": 500,
+        "post_steps": 500,
+        "pre_return": 55.92595717487139,
+        "post_return": 57.35413079074668,
+        "pre_valid_cycles": 2,
+        "post_valid_cycles": 2,
+        "pre_max_penetration_m": 0.024323924384327976,
+        "post_max_penetration_m": 0.02392226118596879,
+        "post_end_reason": "episode_time_limit",
+        "post_clipped_steps": 0,
+        "pass": true
+      }
+    ],
+    "stochastic_sigma_0_005": [
+      {
+        "seed": 123,
+        "pre_steps": 500,
+        "post_steps": 500,
+        "pre_return": 62.1448986075408,
+        "post_return": 61.82025038936794,
+        "pre_valid_cycles": 3,
+        "post_valid_cycles": 2,
+        "pre_max_penetration_m": 0.023268426267771973,
+        "post_max_penetration_m": 0.02293387067157149,
+        "post_clipped_steps": 0,
+        "pass": true
+      },
+      {
+        "seed": 124,
+        "pre_steps": 500,
+        "post_steps": 500,
+        "pre_return": 54.96120396961204,
+        "post_return": 40.804329711612915,
+        "pre_valid_cycles": 3,
+        "post_valid_cycles": 2,
+        "pre_max_penetration_m": 0.023883867413594984,
+        "post_max_penetration_m": 0.024945147416310088,
+        "post_guard_margin_m": 0.000054852583689913,
+        "post_clipped_steps": 0,
+        "pass": true
+      },
+      {
+        "seed": 125,
+        "pre_steps": 500,
+        "post_steps": 500,
+        "pre_return": 53.98130125700607,
+        "post_return": 61.042195295085776,
+        "pre_valid_cycles": 3,
+        "post_valid_cycles": 3,
+        "pre_max_penetration_m": 0.024164960176760928,
+        "post_max_penetration_m": 0.023880431208643197,
+        "post_clipped_steps": 0,
+        "pass": true
+      }
+    ]
+  },
+  "gate": {
+    "h1_completed_exactly_one_actor_enabled_iteration": true,
+    "actor_changed": true,
+    "logstd_and_sigma_preserved": true,
+    "critic_changed": true,
+    "critic_explained_variance_improved": true,
+    "mean_kl_within_target": false,
+    "all_deterministic_starts_complete": false,
+    "all_stochastic_rollouts_complete": true,
+    "all_rollouts_have_at_least_one_valid_cycle": true,
+    "all_rollouts_below_0_025_m_guard": false,
+    "all_rollouts_without_action_clipping": true,
+    "pass": false
+  },
+  "interpretation": [
+    "The critic warm-up improved value estimation but was not sufficient to make the first actor update safe.",
+    "The actor mean moved by up to approximately one sigma and PPO reported a KL about 15.5 times its default target.",
+    "The fixed nominal training start did not protect the alternative-start state region learned during imitation adaptation.",
+    "The failure is caused by the PPO update, not by a logstd change, privileged actor inputs, or a modified reward/safety threshold."
+  ],
+  "next_protocol": [
+    "Keep the critic-warmed H0 checkpoint as the immutable rollback source.",
+    "Do not continue from the rejected H1 checkpoint.",
+    "Design H1-bis with explicit initial-state coverage and a materially smaller actor update/KL budget.",
+    "Repeat the same deterministic and stochastic H2 gate before any multi-iteration training."
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-13",
+  "decision": "REJECT_MARKOV35_KEEP_DEPLOYABLE25",
+  "candidate_selected": false,
+  "reason": "The 35-feature candidate improved the single held-noise probe but regressed nominal/stochastic return and failed both alternative-start rollouts. The zero-column baseline completed the +0.20 s start with three valid cycles.",
+  "baseline": {
+    "role": "35-feature zero-column expansion used for a schema-matched A/B",
+    "checkpoint": "Trajectory Generator/runs/training/validation/controller_memory_ablation/2026-07-13_markov35_zero_iter_port/rl_module_initial_warm_start",
+    "actor_digest": "42837d4802d71b708f48ed4f035bffcfa0accd650803f9c5fdef50d405ead30e",
+    "actor_feature_count": 35,
+    "new_markov_columns_zero": true,
+    "shared_actor_weights_preserved": true,
+    "source_deployable25_actor": "Trajectory Generator/runs/training/target_domain_warm_start_deployable_sigma0005_2026-07-13/rl_module_warm_start",
+    "source_deployable25_digest": "5616be85c815eece79c08730d05529a7b41ea60f3e36033fb5276edc83dd2bf7"
+  },
+  "candidate": {
+    "checkpoint": "Trajectory Generator/runs/training/target_domain_markov35_robust_conservative_r96_2026-07-13/rl_module_target_adapted",
+    "actor_digest": "73ee5aebf8aa52d5cfddb6de225581fd61a2c478958c2c2e50e46cbd0db9bcf9",
+    "actor_feature_count": 35,
+    "new_deployable_markov_features": 10,
+    "prescribed_actor_features": 0,
+    "shared_actor_max_abs_parameter_change": 0.0,
+    "logstd_max_abs_parameter_change": 0.0,
+    "nominal_mean_shift_rms": 0.00133614211569905,
+    "nominal_mean_shift_max_abs": 0.004909336566925049,
+    "offline_adaptation_gate_pass": true
+  },
+  "rollouts": {
+    "deterministic_fixed_start": {
+      "baseline": {
+        "steps": 500,
+        "return": 64.03887387248224,
+        "cycles": 2,
+        "max_penetration_m": 0.02274844066358208,
+        "clipped_steps": 0
+      },
+      "candidate": {
+        "steps": 500,
+        "return": 63.19315179129788,
+        "cycles": 2,
+        "max_penetration_m": 0.022907110094902643,
+        "clipped_steps": 0
+      }
+    },
+    "stochastic_sigma_0_005": {
+      "seeds": [123, 124, 125],
+      "baseline_passes": 3,
+      "candidate_passes": 3,
+      "baseline_mean_return": 64.76991219536162,
+      "candidate_mean_return": 63.43095885462884,
+      "candidate_minus_baseline_mean_return": -1.33895334073278,
+      "baseline_mean_max_penetration_m": 0.02288916134314783,
+      "candidate_mean_max_penetration_m": 0.023093224893569474,
+      "candidate_minus_baseline_mean_max_penetration_m": 0.0002040635504216442,
+      "all_rollouts": {
+        "baseline": [
+          {"seed": 123, "steps": 500, "return": 64.79338744911024, "cycles": 2, "max_penetration_m": 0.02292911314423756},
+          {"seed": 124, "steps": 500, "return": 63.27635677078767, "cycles": 2, "max_penetration_m": 0.02275920530553121},
+          {"seed": 125, "steps": 500, "return": 66.23999236618694, "cycles": 2, "max_penetration_m": 0.022979165579674714}
+        ],
+        "candidate": [
+          {"seed": 123, "steps": 500, "return": 63.60404073306838, "cycles": 2, "max_penetration_m": 0.023215223478590723},
+          {"seed": 124, "steps": 500, "return": 63.05028831176082, "cycles": 2, "max_penetration_m": 0.02274827865671556},
+          {"seed": 125, "steps": 500, "return": 63.63854751905733, "cycles": 2, "max_penetration_m": 0.023316172545402143}
+        ]
+      }
+    },
+    "held_noise_50_ms_seed_123": {
+      "noise_rms": [0.0043753526602771904, 0.004717392866299702],
+      "baseline": {"steps": 500, "return": 67.80314219556038, "cycles": 2, "max_penetration_m": 0.022715002518727954},
+      "candidate": {"steps": 500, "return": 73.36629458241539, "cycles": 3, "max_penetration_m": 0.022754683582118802},
+      "candidate_improved": true
+    },
+    "alternative_starts": {
+      "minus_0_20_s": {
+        "teacher_full_episode_pass": true,
+        "baseline": {"steps": 51, "cycles": 0, "max_penetration_m": 0.02506085870311012, "end_reason": "grf_penetration"},
+        "candidate": {"steps": 48, "cycles": 0, "max_penetration_m": 0.026141693471362835, "end_reason": "grf_penetration"}
+      },
+      "plus_0_20_s": {
+        "teacher_full_episode_pass": true,
+        "baseline": {"steps": 500, "return": 56.94415993240318, "cycles": 3, "max_penetration_m": 0.02232559918225634, "end_reason": "episode_time_limit"},
+        "candidate": {"steps": 52, "cycles": 0, "max_penetration_m": 0.02509465507092002, "end_reason": "grf_penetration"}
+      },
+      "baseline_pass_count": 1,
+      "candidate_pass_count": 0,
+      "trial_count": 2
+    }
+  },
+  "selection_gate": {
+    "nominal_not_regressed": false,
+    "stochastic_sigma_0_005_all_pass": true,
+    "stochastic_mean_return_not_regressed": false,
+    "held_noise_improved": true,
+    "alternative_starts_not_regressed": false,
+    "pass": false
+  },
+  "selected_training_contract": {
+    "actor_feature_count": 25,
+    "controller_state_actor_visible": false,
+    "controller_diagnostics_actor_visible": false,
+    "prescribed_actor_visible": false,
+    "controller_state_critic_visible": true,
+    "prescribed_critic_visible": true,
+    "actor_checkpoint": "Trajectory Generator/runs/training/target_domain_warm_start_deployable_sigma0005_2026-07-13/rl_module_warm_start",
+    "actor_digest": "5616be85c815eece79c08730d05529a7b41ea60f3e36033fb5276edc83dd2bf7",
+    "critic_warmup_checkpoint": "validation/critic_warmup/2026-07-13_deployable_sigma0005_iter1/checkpoint_last",
+    "critic_warmup_gate": "PASS_ACTOR_ROBUSTNESS_AND_CRITIC_WARMUP",
+    "candidate_critic_warmup_executed": false
+  }
+}

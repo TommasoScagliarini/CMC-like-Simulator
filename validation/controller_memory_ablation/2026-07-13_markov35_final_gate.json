@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-13",
+  "decision": "SELECT_MARKOV35_FOR_H0_H1_WITH_WARM_CRITIC",
+  "training_ready": true,
+  "deployment_validated": false,
+  "root_cause": {
+    "architecture_rejected": false,
+    "reward_failure": false,
+    "adaptation_protocol_failure": true,
+    "phase_label_audit": {
+      "original_recovery_samples": 1500,
+      "phase_aligned_samples": 356,
+      "phase_misaligned_samples": 1144,
+      "phase_misaligned_fraction": 0.7626666666666667,
+      "first_mismatch_steps": [120, 119, 120]
+    },
+    "additional_causes": [
+      "Unscaled served-reference accelerations dominated the new first-layer inputs.",
+      "Alternative-start examples were underrepresented relative to repeated nominal samples.",
+      "Updating only the ten new input columns could not learn their interaction with FSM and physical-state features."
+    ]
+  },
+  "selected_actor": {
+    "checkpoint": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13/rl_module_target_adapted",
+    "actor_digest": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+    "actor_feature_count": 35,
+    "deployable_controller_state_features": 10,
+    "prescribed_actor_features": 0,
+    "controller_diagnostic_actor_features": 0,
+    "critic_trained_during_actor_adaptation": false,
+    "ppo_updates_during_actor_adaptation": 0,
+    "logstd_max_abs_parameter_change": 0.0,
+    "adaptation_samples": 24712,
+    "dataset_composition": {
+      "nominal_source_policy_anchors": 16000,
+      "phase_aligned_stochastic_recovery": 712,
+      "alternative_start_teacher_samples": 8000
+    },
+    "offline_metrics": {
+      "aggregate_rmse_before": 0.019656642549642975,
+      "aggregate_rmse_after": 0.008143817884291011,
+      "nominal_source_shift_rms": 0.004175083023500488,
+      "nominal_source_shift_max_abs": 0.03159449528902769,
+      "nominal_source_shift_p95_abs": 0.00795625988394022,
+      "strict_single_sample_0_005_gate_pass": false,
+      "minus_0_20_s_teacher_rmse": 0.007829868400222664,
+      "plus_0_20_s_teacher_rmse": 0.007208995372283373
+    }
+  },
+  "closed_loop_validation": {
+    "deterministic": [
+      {"start": "nominal", "steps": 500, "return": 51.79749636232904, "valid_cycles": 2, "max_penetration_m": 0.02395957553235469, "clipped_steps": 0, "invalid_detector_events": 2, "pass": true},
+      {"start": "minus_0_20_s", "steps": 500, "return": 35.78750918194062, "valid_cycles": 2, "max_penetration_m": 0.02460202939096984, "clipped_steps": 0, "invalid_detector_events": 1, "pass": true},
+      {"start": "plus_0_20_s", "steps": 500, "return": 55.92595717487139, "valid_cycles": 2, "max_penetration_m": 0.024323924384327976, "clipped_steps": 0, "invalid_detector_events": 2, "pass": true}
+    ],
+    "stochastic_sigma_0_005": [
+      {"seed": 123, "steps": 500, "return": 62.1448986075408, "valid_cycles": 3, "max_penetration_m": 0.023268426267771973, "clipped_steps": 0, "pass": true},
+      {"seed": 124, "steps": 500, "return": 54.96120396961204, "valid_cycles": 3, "max_penetration_m": 0.023883867413594984, "clipped_steps": 0, "pass": true},
+      {"seed": 125, "steps": 500, "return": 53.98130125700607, "valid_cycles": 3, "max_penetration_m": 0.024164960176760928, "clipped_steps": 0, "pass": true}
+    ],
+    "deterministic_start_passes": 3,
+    "deterministic_start_trials": 3,
+    "stochastic_passes": 3,
+    "stochastic_trials": 3
+  },
+  "rejected_refinement": {
+    "checkpoint": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r64_alt8_anchor05_2026-07-13/rl_module_target_adapted",
+    "actor_digest": "fcea0c27ccfd8033bbad0f72f369f39445014c0196a3fb051496ab747e4765c9",
+    "nominal_source_shift_rms": 0.0029479639721591315,
+    "reason": "Improved nominal imitation but lost alternative-start robustness.",
+    "failure": {"start": "minus_0_20_s", "steps": 221, "end_reason": "grf_penetration", "max_penetration_m": 0.025089750673601228}
+  },
+  "critic_warmup": {
+    "checkpoint": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last",
+    "restore_audit": "validation/critic_warmup/2026-07-13_markov35_restore_audit/summary.json",
+    "iterations": 1,
+    "sampled_steps": 4096,
+    "num_env_runners": 13,
+    "num_epochs": 10,
+    "learning_rate": 0.0001,
+    "vf_loss": 0.5587679743766785,
+    "vf_explained_variance": 0.23806822299957275,
+    "mean_kl": 0.0,
+    "actor_digest_before": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+    "actor_digest_after": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+    "actor_max_abs_parameter_change": 0.0,
+    "critic_digest_before": "5ce4ef41d5677623de42081adc23b6f4168d3a0141d222f0ec64c683203e1096",
+    "critic_digest_after": "4584399f63781c48002f8169240ae686b0317aaa22bab9799d553d7fbc2a9f6e",
+    "critic_digest_after_restore": "4584399f63781c48002f8169240ae686b0317aaa22bab9799d553d7fbc2a9f6e",
+    "source_config_provenance": {
+      "generated_report_used_legacy_default_path": true,
+      "correct_adjacent_config": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13/training_cfg.resolved.yaml",
+      "actor_manifest_and_digest_were_adjacent_and_validated": true,
+      "behavioral_impact": false,
+      "parser_fixed_after_audit": true
+    },
+    "pass": true
+  },
+  "selection_gate": {
+    "all_deterministic_starts_complete": true,
+    "all_stochastic_sigma_0_005_complete": true,
+    "all_rollouts_have_valid_cycle": true,
+    "all_rollouts_below_0_025_m_guard": true,
+    "all_rollouts_without_action_clipping": true,
+    "actor_contains_no_prescribed_runtime_features": true,
+    "actor_bit_exact_after_critic_warmup": true,
+    "critic_changed_and_restored_exactly": true,
+    "nominal_return_not_regressed_vs_25_feature_baseline": false,
+    "strict_offline_single_sample_shift_gate": false,
+    "pass": true,
+    "rationale": "Closed-loop start and exploration robustness are the primary warm-start gate. A stricter nominal refinement reduced offline shift but failed dynamically, so it was rejected instead of weakening the safety threshold."
+  },
+  "selected_training_contract": {
+    "actor_feature_count": 35,
+    "controller_state_actor_visible": true,
+    "controller_diagnostics_actor_visible": false,
+    "prescribed_actor_visible": false,
+    "critic_privileged_observation": true,
+    "gait_clock_enable": false,
+    "sigma": 0.005,
+    "grf_penetration_penalty_threshold_m": 0.015,
+    "grf_penetration_termination_m": 0.025,
+    "resume_from": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last",
+    "freeze_actor_for_h1": false
+  },
+  "residual_risks": [
+    "The controlled validation covers AB06 and three start conditions, not other subjects, trials, speeds, or hardware.",
+    "The selected actor has lower nominal return than the 25-feature baseline before PPO optimization.",
+    "The critic-only sampling batch contained one GRF-penetration episode end; H1 must be monitored with the existing hard guard.",
+    "The detector can emit isolated early HS/TO pulses; valid-cycle accounting survives them, but detector debouncing remains a separate issue.",
+    "This is a validated warm start, not a final deployable clinical policy."
+  ]
+}

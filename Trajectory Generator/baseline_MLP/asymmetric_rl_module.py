@@ -71,6 +71,23 @@ def _mlp(in_dim: int, hiddens: List[int], activation: str) -> nn.Sequential:
     return nn.Sequential(*layers)
 
 
+def _detach_logstd_gradient(
+    logits: "torch.Tensor", action_dim: int, freeze: bool
+) -> "torch.Tensor":
+    """Keep Gaussian values unchanged while blocking log-std gradients."""
+    if not freeze:
+        return logits
+    return torch.cat(
+        (logits[..., :action_dim], logits[..., action_dim:].detach()),
+        dim=-1,
+    )
+
+
+def _detach_actor_gradient(logits: "torch.Tensor", freeze: bool) -> "torch.Tensor":
+    """Keep the policy distribution unchanged while blocking all actor gradients."""
+    return logits.detach() if freeze else logits
+
+
 class AsymmetricActorCriticTorchRLModule(DefaultPPOTorchRLModule):
     """PPO RLModule with a realistic policy and a privileged value function.
 
@@ -102,6 +119,11 @@ class AsymmetricActorCriticTorchRLModule(DefaultPPOTorchRLModule):
         self._n_full = n_full
 
         action_dim = int(np.prod(self.action_space.shape))
+        self._action_dim = action_dim
+        self._freeze_logstd = bool(
+            _cfg_get(self.model_config, "freeze_logstd", False)
+        )
+        self._freeze_actor = bool(_cfg_get(self.model_config, "freeze_actor", False))
         hiddens = list(_cfg_get(self.model_config, "fcnet_hiddens", [256, 256]))
         activation = _cfg_get(self.model_config, "fcnet_activation", "tanh")
         pi_out = 2 * action_dim  # Gaussian mean + log-std (TorchDiagGaussian).
@@ -127,15 +149,24 @@ class AsymmetricActorCriticTorchRLModule(DefaultPPOTorchRLModule):
     def _critic_in(self, batch: Dict[str, Any]) -> "torch.Tensor":
         return batch[Columns.OBS][..., : self._n_full]
 
+    def _policy_logits(self, batch: Dict[str, Any]) -> "torch.Tensor":
+        logits = self.pi(self._actor_in(batch))
+        logits = _detach_actor_gradient(logits, self._freeze_actor)
+        return _detach_logstd_gradient(
+            logits,
+            self._action_dim,
+            self._freeze_logstd,
+        )
+
     @override(DefaultPPOTorchRLModule)
     def _forward(self, batch: Dict[str, Any], **kwargs) -> Dict[str, Any]:
-        return {Columns.ACTION_DIST_INPUTS: self.pi(self._actor_in(batch))}
+        return {Columns.ACTION_DIST_INPUTS: self._policy_logits(batch)}
 
     @override(DefaultPPOTorchRLModule)
     def _forward_train(self, batch: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         # Emit the critic embedding so the PPO loss can reuse it in compute_values.
         return {
-            Columns.ACTION_DIST_INPUTS: self.pi(self._actor_in(batch)),
+            Columns.ACTION_DIST_INPUTS: self._policy_logits(batch),
             Columns.EMBEDDINGS: self.vf_encoder(self._critic_in(batch)),
         }
 

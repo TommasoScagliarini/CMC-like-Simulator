@@ -1,0 +1,41 @@
+
+=== 2026-07-10T19:45:17.627323 phase='training stack imports' pre-timeout stack dump after 30s ===
+
+=== 2026-07-10T19:45:19.365947 phase='ray.init' pre-timeout stack dump after 30s ===
+
+=== 2026-07-10T19:45:24.737441 phase='PPOConfig.build_algo' pre-timeout stack dump after 30s ===
+
+=== 2026-07-10T19:45:30.827555 phase='actor warm-start transplant' pre-timeout stack dump after 30s ===
+
+=== 2026-07-10T19:45:30.827897 FATAL ERROR RuntimeError ===
+Thread 0x00000003ab927000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/tune/utils/util.py", line 115 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039c813000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/worker.py", line 2452 in listen_error_messages
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000039b807000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 320 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/gc_collect_manager.py", line 29 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x000000016c79f000 (most recent call first):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 324 in wait
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 607 in wait
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 464 in _loop
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 953 in run
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Current thread 0x00000001fc39de80 (most recent call first):
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 825 in _dump_all_stacks
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 1367 in run
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2612 in main
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py", line 2619 in <module>

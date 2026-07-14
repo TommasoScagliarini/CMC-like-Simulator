@@ -1,4 +1,4 @@
-"""Deterministic rollout / evaluation from a trained baseline-MLP checkpoint.
+"""Rollout / evaluation from a trained baseline-MLP checkpoint.
 
 Loads the exported inference RLModule (``rl_module_best`` / ``rl_module_last``
 directory written by ``train_ppo_mlp.py``), runs a greedy rollout on the
@@ -27,20 +27,49 @@ from datetime import datetime  # noqa: E402
 
 import process_watchdog  # noqa: E402
 import progress_display  # noqa: E402
+import exploration_noise  # noqa: E402
 import training_config  # noqa: E402
 
 _DEFAULT_SETUP_XML = r"models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
 _DEFAULT_GRF_MODE = "online_sensor"
 _DEFAULT_ONLINE_GRF_PROFILE = (
     "online_grf_profiles/"
-    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+    "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
+_DEFAULT_ONLINE_GRF_DETECTOR_PROFILE = None
 _SCRIPT_PATH = Path(__file__).resolve()
 _TRAJ_GEN_DIR = _SCRIPT_PATH.parents[1]   # .../Trajectory Generator
 _RUNS_ROOT = _TRAJ_GEN_DIR / "runs"
 _TRAINING_RUNS_ROOT = _RUNS_ROOT / "training"
 _ROLLOUT_RUNS_ROOT = _RUNS_ROOT / "rollout"
 _WATCHDOG_FILENAME = "watchdog_state.json"
+
+
+def _validate_module_observation_contract(
+    module,
+    actor_feature_names: tuple[str, ...],
+    observation_feature_names: tuple[str, ...],
+) -> None:
+    """Reject silent prefix slicing when an old checkpoint schema has drifted."""
+    expected_actor = getattr(module, "_n_actor", None)
+    expected_full = getattr(module, "_n_full", None)
+    mismatches = []
+    if expected_actor is not None and int(expected_actor) != len(actor_feature_names):
+        mismatches.append(
+            f"actor checkpoint={int(expected_actor)} runtime={len(actor_feature_names)}"
+        )
+    if expected_full is not None and int(expected_full) != len(observation_feature_names):
+        mismatches.append(
+            "full observation "
+            f"checkpoint={int(expected_full)} runtime={len(observation_feature_names)}"
+        )
+    if mismatches:
+        raise RuntimeError(
+            "Checkpoint observation schema does not match the current environment "
+            f"({'; '.join(mismatches)}). Prefix slicing would map different feature "
+            "semantics; use a compatible historical environment or an explicit "
+            "feature adapter."
+        )
 
 
 def _cli_path(value: str | Path) -> Path:
@@ -279,21 +308,81 @@ def _load_inference_stack() -> None:
     _INFERENCE_STACK_LOADED = True
 
 
-def _deterministic_action(module: RLModule, obs: np.ndarray, action_shape) -> np.ndarray:
-    """Greedy (mean) action from the inference RLModule for a single obs."""
+def _policy_action(
+    module: RLModule,
+    obs: np.ndarray,
+    action_shape,
+    *,
+    action_selection: str = "deterministic",
+) -> np.ndarray:
+    """Select one action using the deployment or PPO exploration path."""
     obs_t = torch.as_tensor(np.asarray(obs), dtype=torch.float32).reshape(1, -1)
     with torch.no_grad():
-        fwd = module.forward_inference({"obs": obs_t})
+        if action_selection == "stochastic":
+            fwd = module.forward_exploration({"obs": obs_t})
+        else:
+            fwd = module.forward_inference({"obs": obs_t})
     logits = fwd["action_dist_inputs"]
     try:
-        dist_cls = module.get_inference_action_dist_cls()
-        action_t = dist_cls.from_logits(logits).to_deterministic().sample()
+        if action_selection == "stochastic":
+            dist_cls = module.get_exploration_action_dist_cls()
+            action_t = dist_cls.from_logits(logits).sample()
+        else:
+            dist_cls = module.get_inference_action_dist_cls()
+            action_t = dist_cls.from_logits(logits).to_deterministic().sample()
     except Exception:
-        # Gaussian fallback: deterministic action = mean (first half of logits).
+        # Flat Box fallback: logits contain Gaussian mean followed by log-std.
         mean = logits[..., : logits.shape[-1] // 2]
-        action_t = mean
+        if action_selection == "stochastic":
+            log_std = logits[..., logits.shape[-1] // 2 :]
+            action_t = mean + torch.exp(log_std) * torch.randn_like(mean)
+        else:
+            action_t = mean
     action = action_t.detach().cpu().numpy().reshape(action_shape).astype(np.float32)
     return action
+
+
+def _held_stochastic_action(
+    module: RLModule,
+    obs: np.ndarray,
+    action_shape,
+    standard_normal_noise: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Apply held standard-normal noise to the current Gaussian parameters."""
+    obs_t = torch.as_tensor(np.asarray(obs), dtype=torch.float32).reshape(1, -1)
+    with torch.no_grad():
+        fwd = module.forward_exploration({"obs": obs_t})
+    logits = fwd["action_dist_inputs"]
+    action_dim = logits.shape[-1] // 2
+    mean_t = logits[..., :action_dim]
+    std_t = torch.exp(logits[..., action_dim:])
+    noise_t = torch.as_tensor(
+        np.asarray(standard_normal_noise),
+        dtype=mean_t.dtype,
+        device=mean_t.device,
+    ).reshape(mean_t.shape)
+    applied_noise_t = std_t * noise_t
+    action_t = mean_t + applied_noise_t
+
+    def array(value) -> np.ndarray:
+        return value.detach().cpu().numpy().reshape(action_shape).astype(np.float32)
+
+    return (
+        array(action_t),
+        array(mean_t),
+        array(std_t),
+        array(applied_noise_t),
+    )
+
+
+def _deterministic_action(module: RLModule, obs: np.ndarray, action_shape) -> np.ndarray:
+    """Backward-compatible greedy action helper."""
+    return _policy_action(
+        module,
+        obs,
+        action_shape,
+        action_selection="deterministic",
+    )
 
 
 def run(args: argparse.Namespace) -> dict:
@@ -318,6 +407,8 @@ def run(args: argparse.Namespace) -> dict:
         timeout_s=args.startup_timeout_s,
     )
     _load_inference_stack()
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     process_watchdog.write_heartbeat(
         heartbeat_path,
         "load inference checkpoint",
@@ -335,6 +426,10 @@ def run(args: argparse.Namespace) -> dict:
         "policy_knots": args.policy_knots,
         "action_mode": args.action_mode,
         "max_delta_rad": args.max_delta_rad,
+        "target_slew_rate_limit_rad_s": {
+            "pros_knee_angle": args.pros_knee_target_slew_rate_limit_rad_s,
+            "pros_ankle_angle": args.pros_ankle_target_slew_rate_limit_rad_s,
+        },
         "enable_pros_ref_governor": args.pros_ref_governor,
         "pros_ref_model": args.pros_ref_model,
         "pros_ref_lpf_cutoff_hz": args.pros_ref_cutoff_hz,
@@ -350,8 +445,16 @@ def run(args: argparse.Namespace) -> dict:
             "pros_knee_angle": args.pros_knee_ref_jerk_limit_rad_s3,
             "pros_ankle_angle": args.pros_ankle_ref_jerk_limit_rad_s3,
         },
+        "gait_clock_enable": args.gait_clock_enable,
         "actor_cyclic_phase_only": args.actor_cyclic_phase_only,
         "include_reference_state_observation": args.include_reference_state_observation,
+        "include_controller_state_observation": (
+            args.include_controller_state_observation
+        ),
+        "include_controller_diagnostic_observation": (
+            args.include_controller_diagnostic_observation
+        ),
+        "deployable_minimal_observation": args.deployable_minimal_observation,
         "imitation_initialize_to_target": args.imitation_initialize_to_target,
         "reward_reference_range_floor": args.reward_reference_range_floor,
         "reward_reference_velocity_range_floor": (
@@ -363,11 +466,16 @@ def run(args: argparse.Namespace) -> dict:
         "save_outputs_on_close": args.record_outputs,
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
+        "online_grf_detector_profile_file": args.online_grf_detector_profile,
         "include_online_grf_observation": args.online_grf_observation,
         "critic_privileged_observation": args.asymmetric_actor_critic,
         "prescribed_grf_disabled_sides": args.disable_prescribed_grf_side,
         "online_grf_applied_sides": args.online_grf_applied_side,
         "step_wall_timeout_s": args.step_wall_timeout_s,
+        "grf_penetration_penalty_threshold_m": (
+            args.grf_penetration_penalty_threshold_m
+        ),
+        "grf_penetration_termination_m": args.grf_penetration_termination_m,
     }
     # Same reward shaping as training (reward_function.py), so the evaluated
     # return is comparable to the trained objective.
@@ -392,6 +500,18 @@ def run(args: argparse.Namespace) -> dict:
     )
     env = env_factory.make_cmc_env(env_config)
     action_shape = tuple(int(d) for d in env.action_space.shape)
+    base_env = env.unwrapped
+    actor_feature_names = tuple(
+        str(name) for name in getattr(base_env, "actor_feature_names", ())
+    )
+    observation_feature_names = tuple(
+        str(name) for name in getattr(base_env, "observation_feature_names", ())
+    )
+    _validate_module_observation_contract(
+        module,
+        actor_feature_names,
+        observation_feature_names,
+    )
 
     # Upper bound on the number of steps for the progress bar (an episode may end
     # earlier via termination/truncation); capped by --max-steps.
@@ -414,11 +534,23 @@ def run(args: argparse.Namespace) -> dict:
     action_clipped_steps = 0
     action_clipped_values = 0
     action_values_total = 0
+    exploration_noise_samples: list[np.ndarray] = []
+    exploration_std_samples: list[np.ndarray] = []
     pelvis_ty_min = float("inf")
+    grf_penetration_max_m = 0.0
+    phase_valid_hs_count = 0
+    phase_valid_to_count = 0
+    phase_valid_cycle_count = 0
+    invalid_event_count = 0
     policy_trace: list[dict] = []
     reset_diagnostics: dict = {}
     terminated = truncated = False
     steps = 0
+    held_noise_process = exploration_noise.HeldStandardNormal(
+        np.random.default_rng(args.seed),
+        action_shape,
+        args.exploration_noise_hold_steps,
+    )
     # Pre-bind for the finally block: if env.reset() itself raises, the progress
     # epilogue must not shadow the real error with a NameError on `info`.
     info: dict = {}
@@ -435,8 +567,31 @@ def run(args: argparse.Namespace) -> dict:
         if isinstance(info, dict):
             reset_diagnostics = dict(info.get("reset_diagnostics", {}) or {})
         for _ in range(args.max_steps):
-            raw_action = _deterministic_action(module, obs, action_shape)
-            # Mirror the env wrapper's clipping so the applied action is traceable.
+            obs_before = np.asarray(obs, dtype=float).reshape(-1).copy()
+            actor_obs_before = obs_before[: len(actor_feature_names)]
+            policy_mean = None
+            action_noise = None
+            if args.action_selection == "stochastic_held":
+                raw_action, policy_mean, policy_std, action_noise = (
+                    _held_stochastic_action(
+                        module,
+                        obs,
+                        action_shape,
+                        held_noise_process.next(),
+                    )
+                )
+                exploration_noise_samples.append(action_noise.copy())
+                exploration_std_samples.append(policy_std.copy())
+            else:
+                raw_action = _policy_action(
+                    module,
+                    obs,
+                    action_shape,
+                    action_selection=args.action_selection,
+                )
+            # Mirror the env wrapper's clipping for trace/summary only. Step the
+            # env with the raw action so RewardShapingWrapper can penalize the
+            # raw-vs-applied excursion before FlattenClipAction protects the sim.
             action = np.clip(
                 raw_action,
                 env.action_space.low,
@@ -461,10 +616,34 @@ def run(args: argparse.Namespace) -> dict:
             if progress is not None:
                 progress.update(phase=f"step {steps + 1}", phase_reset=True)
                 progress.render()
-            obs, reward, terminated, truncated, info = env.step(action)
+            obs, reward, terminated, truncated, info = env.step(raw_action)
             rewards.append(float(reward))
             steps += 1
-            if args.record_outputs and isinstance(info, dict):
+            reward_terms = (
+                info.get("reward_terms", {}) if isinstance(info, dict) else {}
+            )
+            if isinstance(reward_terms, dict):
+                grf_penetration_max_m = max(
+                    grf_penetration_max_m,
+                    float(reward_terms.get("grf_penetration_m", 0.0) or 0.0),
+                )
+                phase_valid_hs_count = max(
+                    phase_valid_hs_count,
+                    int(reward_terms.get("phase_valid_hs_count", 0) or 0),
+                )
+                phase_valid_to_count = max(
+                    phase_valid_to_count,
+                    int(reward_terms.get("phase_valid_to_count", 0) or 0),
+                )
+                phase_valid_cycle_count = max(
+                    phase_valid_cycle_count,
+                    int(reward_terms.get("phase_valid_cycle_count", 0) or 0),
+                )
+                invalid_event_count = max(
+                    invalid_event_count,
+                    int(reward_terms.get("invalid_event_count", 0) or 0),
+                )
+            if (args.record_outputs or args.record_policy_trace) and isinstance(info, dict):
                 imitation_target = info.get("imitation_target", {})
                 observation = info.get("observation", {})
                 policy_trace.append(
@@ -474,9 +653,26 @@ def run(args: argparse.Namespace) -> dict:
                         "raw_policy_action": np.asarray(
                             raw_action, dtype=float
                         ).tolist(),
+                        "policy_action_mean": (
+                            np.asarray(policy_mean, dtype=float).tolist()
+                            if policy_mean is not None
+                            else None
+                        ),
+                        "exploration_action_noise": (
+                            np.asarray(action_noise, dtype=float).tolist()
+                            if action_noise is not None
+                            else None
+                        ),
                         "applied_policy_action": np.asarray(
                             action, dtype=float
                         ).tolist(),
+                        "actor_observation_before": {
+                            name: float(actor_obs_before[index])
+                            for index, name in enumerate(actor_feature_names)
+                        },
+                        "actor_observation_vector_before": (
+                            actor_obs_before.astype(float).tolist()
+                        ),
                         "policy_segment_times": np.asarray(
                             info.get("policy_segment_times", []),
                             dtype=float,
@@ -559,6 +755,35 @@ def run(args: argparse.Namespace) -> dict:
     summary = {
         "ok": True,
         "checkpoint": str(args.checkpoint),
+        "action_selection": args.action_selection,
+        "action_seed": int(args.seed),
+        "exploration_noise_hold_steps": int(
+            args.exploration_noise_hold_steps
+        ),
+        "exploration_noise_hold_duration_s": float(
+            args.exploration_noise_hold_steps * args.segment_duration
+        ),
+        "exploration_noise_realized_rms": (
+            np.sqrt(
+                np.mean(
+                    np.square(np.asarray(exploration_noise_samples, dtype=float)),
+                    axis=0,
+                )
+            )
+            .reshape(-1)
+            .astype(float)
+            .tolist()
+            if exploration_noise_samples
+            else None
+        ),
+        "exploration_std_mean": (
+            np.mean(np.asarray(exploration_std_samples, dtype=float), axis=0)
+            .reshape(-1)
+            .astype(float)
+            .tolist()
+            if exploration_std_samples
+            else None
+        ),
         "setup_xml_path": args.setup_xml,
         "episode_start_offset_s": float(args.episode_start_offset_s),
         "imitation_initialize_to_target": bool(args.imitation_initialize_to_target),
@@ -576,16 +801,42 @@ def run(args: argparse.Namespace) -> dict:
             else 0.0
         ),
         "pelvis_ty_min": None if pelvis_ty_min == float("inf") else pelvis_ty_min,
+        "grf_penetration_max_m": float(grf_penetration_max_m),
+        "phase_valid_hs_count": int(phase_valid_hs_count),
+        "phase_valid_to_count": int(phase_valid_to_count),
+        "phase_valid_cycle_count": int(phase_valid_cycle_count),
+        "invalid_event_count": int(invalid_event_count),
+        "end_reason": info.get("end_reason") if isinstance(info, dict) else None,
         "terminated": bool(terminated),
         "truncated": bool(truncated),
         "action_shape": list(action_shape),
+        "actor_feature_names": list(actor_feature_names),
+        "observation_feature_names": list(observation_feature_names),
+        "n_actor": len(actor_feature_names),
+        "n_observation": len(observation_feature_names),
         "record_outputs": bool(args.record_outputs),
+        "record_policy_trace": bool(args.record_policy_trace),
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
+        "online_grf_detector_profile_file": args.online_grf_detector_profile,
         "online_grf_observation": bool(args.online_grf_observation),
+        "gait_clock_enable": bool(args.gait_clock_enable),
+        "deployable_minimal_observation": bool(args.deployable_minimal_observation),
+        "include_controller_state_observation": bool(
+            args.include_controller_state_observation
+        ),
+        "include_controller_diagnostic_observation": bool(
+            args.include_controller_diagnostic_observation
+        ),
         "critic_privileged_observation": bool(args.asymmetric_actor_critic),
         "prescribed_grf_disabled_sides": list(args.disable_prescribed_grf_side),
         "online_grf_applied_sides": list(args.online_grf_applied_side),
+        "grf_penetration_penalty_threshold_m": float(
+            args.grf_penetration_penalty_threshold_m
+        ),
+        "grf_penetration_termination_m": float(
+            args.grf_penetration_termination_m
+        ),
         "reward_config": reward_function.RewardConfig.from_mapping(
             reward_overrides
         ).to_dict(),
@@ -596,10 +847,11 @@ def run(args: argparse.Namespace) -> dict:
         (out / "rollout_summary.json").write_text(
             json.dumps(summary, indent=2), encoding="utf-8"
         )
-        if args.record_outputs:
+        if args.record_outputs or args.record_policy_trace:
             (out / "rollout_policy_trace.json").write_text(
                 json.dumps(policy_trace, indent=2), encoding="utf-8"
             )
+        if args.record_outputs:
             (out / "rollout_reset_diagnostics.json").write_text(
                 json.dumps(_jsonable(reset_diagnostics), indent=2), encoding="utf-8"
             )
@@ -726,6 +978,24 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--max-delta-rad", type=float, default=0.35)
     p.add_argument(
+        "--pros-knee-target-slew-rate-limit-rad-s",
+        type=float,
+        default=0.0,
+        help=(
+            "Max target-to-target rate for generated prosthetic knee references. "
+            "Non-positive disables the limiter."
+        ),
+    )
+    p.add_argument(
+        "--pros-ankle-target-slew-rate-limit-rad-s",
+        type=float,
+        default=0.0,
+        help=(
+            "Max target-to-target rate for generated prosthetic ankle references. "
+            "Non-positive disables the limiter."
+        ),
+    )
+    p.add_argument(
         "--pros-ref-governor",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -749,6 +1019,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--pros-knee-ref-jerk-limit-rad-s3", type=float, default=3000.0)
     p.add_argument("--pros-ankle-ref-jerk-limit-rad-s3", type=float, default=2750.0)
     p.add_argument(
+        "--gait-clock-enable",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Expose the prescribed sound-leg gait clock. Disable for clean "
+            "prosthesis-phase ex-novo evaluation."
+        ),
+    )
+    p.add_argument(
         "--actor-cyclic-phase-only",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -757,6 +1036,24 @@ def parse_args() -> argparse.Namespace:
         "--include-reference-state-observation",
         action=argparse.BooleanOptionalAction,
         default=False,
+    )
+    p.add_argument(
+        "--include-controller-state-observation",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Must match training; core controller state otherwise remains critic-only.",
+    )
+    p.add_argument(
+        "--include-controller-diagnostic-observation",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Must match training; derived command diagnostics otherwise remain critic-only.",
+    )
+    p.add_argument(
+        "--deployable-minimal-observation",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Restrict actor obs to prosthetic angles, online GRF detector, and FSM.",
     )
     p.add_argument(
         "--imitation-initialize-to-target",
@@ -779,12 +1076,38 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-steps", type=int, default=10000)
     p.add_argument("--seed", type=int, default=123)
     p.add_argument(
+        "--action-selection",
+        choices=("deterministic", "stochastic", "stochastic_held"),
+        default="deterministic",
+        help=(
+            "deterministic uses the Gaussian mean; stochastic uses RLlib's "
+            "forward_exploration distribution exactly as PPO sampling does; "
+            "stochastic_held applies the same Gaussian parameters while holding "
+            "each standard-normal draw for multiple policy steps."
+        ),
+    )
+    p.add_argument(
+        "--exploration-noise-hold-steps",
+        type=int,
+        default=1,
+        help="For stochastic_held, retain each noise draw for this many steps.",
+    )
+    p.add_argument(
         "--record-outputs",
         action=argparse.BooleanOptionalAction,
         default=True,
         help=(
             "Write detailed simulator outputs under <output-dir>/sim_outputs "
             "(default: on). Use --no-record-outputs for metric-only rollout."
+        ),
+    )
+    p.add_argument(
+        "--record-policy-trace",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Write rollout_policy_trace.json without enabling the simulator's "
+            "detailed .sto outputs. Diagnostic only; does not alter the policy."
         ),
     )
     p.add_argument(
@@ -797,6 +1120,26 @@ def parse_args() -> argparse.Namespace:
         "--online-grf-profile",
         default=_DEFAULT_ONLINE_GRF_PROFILE,
         help="onlineGRF profile JSON used by online_sensor/online.",
+    )
+    p.add_argument(
+        "--online-grf-detector-profile",
+        default=_DEFAULT_ONLINE_GRF_DETECTOR_PROFILE,
+        help=(
+            "Optional second onlineGRF profile used only for HS/TO detection. "
+            "It is added as sensor-only contact and never applied to dynamics."
+        ),
+    )
+    p.add_argument(
+        "--grf-penetration-penalty-threshold-m",
+        type=float,
+        default=0.012,
+        help="Soft online-contact penetration threshold [m]; must match training.",
+    )
+    p.add_argument(
+        "--grf-penetration-termination-m",
+        type=float,
+        default=0.017,
+        help="Hard online-contact penetration termination [m]; must match training.",
     )
     p.add_argument(
         "--online-grf-observation",

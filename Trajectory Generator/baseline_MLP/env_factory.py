@@ -13,8 +13,9 @@ and bootstrap the simulator roots before importing the env.
 from __future__ import annotations
 
 import os
+import math
 import sys
-from dataclasses import fields
+from dataclasses import fields, replace
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -42,10 +43,73 @@ ENV_NAME = "cmc_traj_env"
 DEFAULT_NETWORK_GRF_MODE = "online_sensor"
 DEFAULT_NETWORK_ONLINE_GRF_PROFILE = (
     "online_grf_profiles/"
-    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+    "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
 
 _CMC_ENV_FIELDS = {f.name for f in fields(CMCEnvConfig)}
+
+
+def _episode_start_offset_for_runner(
+    env_config: Mapping[str, Any] | None,
+) -> float | None:
+    """Select one configured start offset deterministically for this EnvRunner."""
+    if env_config is None:
+        return None
+    choices = env_config.get("episode_start_offset_choices_s")
+    if choices is None or choices == [] or choices == ():
+        return None
+    if isinstance(choices, (str, bytes)):
+        choices = [choices]
+    try:
+        offsets = [float(value) for value in choices]
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "episode_start_offset_choices_s must contain numeric offsets"
+        ) from exc
+    if not offsets or any(not math.isfinite(value) or value < 0.0 for value in offsets):
+        raise ValueError(
+            "episode_start_offset_choices_s must contain finite, non-negative offsets"
+        )
+
+    worker_index = int(
+        getattr(env_config, "worker_index", env_config.get("worker_index", 0)) or 0
+    )
+    vector_index = int(
+        getattr(env_config, "vector_index", env_config.get("vector_index", 0)) or 0
+    )
+    assignment_index = max(0, worker_index - 1) + max(0, vector_index)
+    return offsets[assignment_index % len(offsets)]
+
+
+def assign_episode_start_offset_for_runner(
+    env: gym.Env,
+    env_context: Mapping[str, Any] | None,
+) -> float | None:
+    """Apply the worker-specific offset after RLlib creates its vector env.
+
+    RLlib 2.55 converts ``EnvContext`` to a plain dict while invoking a custom
+    vector entry point, which drops ``worker_index`` before ``make_cmc_env``.
+    Its environment-created callback still receives the original context, so
+    this hook applies the assignment before the first reset.
+    """
+    assigned_start = _episode_start_offset_for_runner(env_context)
+    if assigned_start is None:
+        return None
+
+    vector_envs = getattr(env, "envs", None)
+    candidates = list(vector_envs) if vector_envs is not None else [env]
+    applied = 0
+    for candidate in candidates:
+        base_env = getattr(candidate, "unwrapped", candidate)
+        cfg = getattr(base_env, "env_cfg", None)
+        if isinstance(cfg, CMCEnvConfig):
+            base_env.env_cfg = replace(cfg, episode_start_offset_s=assigned_start)
+            applied += 1
+    if applied == 0:
+        raise RuntimeError(
+            "could not apply the EnvRunner-specific episode start offset"
+        )
+    return assigned_start
 
 
 class FlattenClipAction(gym.ActionWrapper):
@@ -93,6 +157,9 @@ def _resolve_setup_xml(value: Any) -> Any:
 def build_env_config(env_config: Mapping[str, Any] | None) -> CMCEnvConfig:
     """Build a CMCEnvConfig from an RLlib-style dict (unknown keys ignored)."""
     raw = dict(env_config or {})
+    assigned_start = _episode_start_offset_for_runner(env_config)
+    if assigned_start is not None:
+        raw["episode_start_offset_s"] = assigned_start
     raw.setdefault("grf_mode", DEFAULT_NETWORK_GRF_MODE)
     raw.setdefault(
         "online_grf_profile_file",
@@ -133,6 +200,30 @@ def make_cmc_env(env_config: Mapping[str, Any] | None = None) -> gym.Env:
         "pros_knee_angle": reward_cfg.imitation_knee_velocity_weight,
         "pros_ankle_angle": reward_cfg.imitation_ankle_velocity_weight,
     }
+    raw["grf_ankle_moment_flip_tau_tol_nm"] = (
+        reward_cfg.grf_ankle_moment_flip_tau_tol_nm
+    )
+    raw["grf_ankle_moment_flip_force_threshold_n"] = (
+        reward_cfg.grf_ankle_moment_flip_force_threshold_n
+    )
+    raw["phase_min_stance_duration_s"] = reward_cfg.phase_min_stance_duration_s
+    raw["phase_min_swing_duration_s"] = reward_cfg.phase_min_swing_duration_s
+    raw["phase_landing_window_start_s"] = reward_cfg.phase_landing_window_start_s
+    raw["phase_landing_window_end_s"] = reward_cfg.phase_landing_window_end_s
+    raw["phase_stance_hard_timeout_s"] = reward_cfg.phase_stance_hard_timeout_s
+    raw["phase_swing_hard_timeout_s"] = reward_cfg.phase_swing_hard_timeout_s
+    raw["phase_landing_force_full_credit_bw"] = reward_cfg.contact_load_target_bw
+    raw["phase_min_stance_contact_fraction"] = (
+        reward_cfg.phase_min_stance_contact_fraction
+    )
+    raw["phase_min_stance_load_bw_s"] = reward_cfg.phase_min_stance_load_bw_s
+    raw["phase_min_cycle_knee_excursion_rad"] = (
+        reward_cfg.phase_min_cycle_knee_excursion_rad
+    )
+    raw["phase_hs_event_credit"] = reward_cfg.phase_hs_event_credit
+    raw["phase_to_event_credit"] = reward_cfg.phase_to_event_credit
+    raw["phase_cycle_complete_bonus"] = reward_cfg.phase_cycle_complete_bonus
+    raw["phase_failure_extra_penalty"] = reward_cfg.phase_failure_extra_penalty
     if reward_cfg.reward_mode == "imitation":
         raw.setdefault("imitation_initialize_to_target", True)
     cfg = build_env_config(raw)  # "reward" is not a CMCEnvConfig field -> ignored

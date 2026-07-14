@@ -72,6 +72,43 @@ _LOSS_KEYS = (
     "sound_imitation_loss",
     "served_imitation_loss",
     "safety_loss",
+    "contact_load_loss",
+    "contact_overload_loss",
+    "swing_unloading_loss",
+    "grf_slip_loss",
+    "phase_regularity_loss",
+    "phase_event_progress_score",
+    "landing_window_contact_score",
+    "landing_window_active",
+    "invalid_event_loss",
+    "contact_validity_loss",
+    "invalid_event_count",
+    "phase_fsm_state_id",
+    "phase_event_order_loss",
+    "phase_period_loss",
+    "phase_timeout_loss",
+    "phase_stance_timeout_loss",
+    "phase_swing_timeout_loss",
+    "phase_timeout_exceeded",
+    "phase_pending_cycle_credit",
+    "phase_cycle_complete_bonus",
+    "phase_clawback_penalty",
+    "phase_failure_extra_penalty",
+    "phase_cycle_failed_this_step",
+    "phase_stance_fraction_loss",
+    "phase_stance_contact_fraction",
+    "phase_stance_mean_load_bw",
+    "phase_cycle_knee_excursion_rad",
+    "phase_cycle_ankle_excursion_rad",
+    "phase_cycle_rejected_this_step",
+    "reserve_residual_loss",
+    "reserve_norm_loss",
+    "residual_norm_loss",
+    "pelvis_height_loss",
+    "morphology_loss",
+    "morphology_knee_loss",
+    "morphology_ankle_loss",
+    "fsm_morphology_phase",
     "u_abs_max",
     "u_saturation_fraction",
     "terminated",
@@ -96,6 +133,11 @@ class RewardComponentsCallback(RLlibCallback):
     never crash sampling.
     """
 
+    def on_environment_created(self, *, env, env_context, **kwargs) -> None:
+        from env_factory import assign_episode_start_offset_for_runner
+
+        assign_episode_start_offset_for_runner(env, env_context)
+
     def on_episode_step(self, *, episode, metrics_logger=None, **kwargs) -> None:
         if metrics_logger is None:
             return
@@ -105,6 +147,15 @@ class RewardComponentsCallback(RLlibCallback):
             return
         if not isinstance(info, dict):
             return
+
+        start_offset = _as_finite_float(info.get("episode_start_offset_s"))
+        if start_offset is not None:
+            offset_label = f"{start_offset:.6f}".replace("-", "m").replace(".", "p")
+            metrics_logger.log_value(
+                f"episode_start_steps/offset_{offset_label}s",
+                1.0,
+                reduce="lifetime_sum",
+            )
 
         components = info.get("reward_components")
         if isinstance(components, dict):
@@ -126,6 +177,15 @@ class RewardComponentsCallback(RLlibCallback):
                     or key.endswith("_reward_q_range")
                     or key.endswith("_reward_qdot_range")
                     or key.startswith("grf_penetration_")
+                    or key.startswith("grf_ankle_moment_flip_")
+                    or key.startswith("contact_")
+                    or key.startswith("phase_")
+                    or key.startswith("prosthetic_")
+                    or key.startswith("morphology_")
+                    or key.startswith("fsm_morphology_")
+                    or key.startswith("reserve_")
+                    or key.startswith("residual_")
+                    or key.startswith("pelvis_")
                     or key.endswith("_imitation_loss")
                     or "_imitation_position_" in key
                     or "_imitation_velocity_" in key
@@ -212,6 +272,7 @@ def log_result_scalars(writer, result: Mapping[str, Any], step: int) -> int:
                 or key.startswith("reward_diagnostic/")
                 or key.startswith("gait/")
                 or key.startswith("episode_end/")
+                or key.startswith("episode_start_steps/")
             ):
                 tag = key  # dedicated top-level section for reward tuning
             else:

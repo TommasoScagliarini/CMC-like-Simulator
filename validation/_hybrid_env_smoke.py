@@ -13,7 +13,7 @@ cfg = CMCEnvConfig(
     setup_xml_path="models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
     grf_mode="online_sensor",
     online_grf_profile_file=(
-        "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+        "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
     ),
     online_grf_applied_sides=["left"],
     include_online_grf_observation=True,

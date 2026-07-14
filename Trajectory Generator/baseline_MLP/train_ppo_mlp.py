@@ -44,8 +44,9 @@ _DEFAULT_SETUP_XML = r"models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi
 _DEFAULT_GRF_MODE = "online_sensor"
 _DEFAULT_ONLINE_GRF_PROFILE = (
     "online_grf_profiles/"
-    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+    "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
+_DEFAULT_ONLINE_GRF_DETECTOR_PROFILE = None
 _BASELINE_DIR = str(Path(__file__).resolve().parent)
 _SCRIPT_PATH = Path(__file__).resolve()
 _TRAJ_GEN_DIR = _SCRIPT_PATH.parents[1]   # .../Trajectory Generator
@@ -161,6 +162,13 @@ def _default_training_output_dir(
     suffix = _sanitize_name_suffix(name_suffix)
     folder = f"MLP_{strategy}_training_{current:%m-%d-%Y}{suffix}"
     return _unique_path((_TRAINING_RUNS_ROOT / folder).resolve())
+
+
+def _warm_start_output_name(name_suffix: str | None) -> str:
+    warm_suffix = "warmstart_asym100_grfsoft"
+    if not name_suffix:
+        return warm_suffix
+    return f"{name_suffix}_{warm_suffix}"
 
 
 def _resolve_output_dir(output_dir, default_stem):
@@ -651,6 +659,94 @@ def _find_flat_metric(metrics: dict[str, float], *suffixes: str) -> float | None
     return None
 
 
+def _learner_module_state(algo) -> dict[str, Any]:
+    """Read the full learner RLModule, including the critic stripped from exports."""
+    import warm_start
+    from ray.rllib.algorithms.algorithm import (
+        COMPONENT_LEARNER,
+        COMPONENT_RL_MODULE,
+    )
+
+    learner_state = algo.learner_group.get_state(
+        components=[f"{COMPONENT_LEARNER}/{COMPONENT_RL_MODULE}"]
+    )
+    module_state = warm_start.find_actor_state(learner_state)
+    if module_state is None:
+        raise RuntimeError("Learner state does not contain the actor-critic RLModule")
+    return dict(module_state)
+
+
+def _optimizer_learning_rates_on_learner(learner) -> list[dict[str, Any]]:
+    reports = []
+    for optimizer_name, optimizer in learner.get_optimizers_for_module(
+        "default_policy"
+    ):
+        reports.append(
+            {
+                "optimizer_name": str(optimizer_name),
+                "optimizer_type": type(optimizer).__name__,
+                "learning_rate": float(learner._get_optimizer_lr(optimizer)),
+            }
+        )
+    if not reports:
+        raise RuntimeError("no optimizer registered for default_policy")
+    return reports
+
+
+def _set_optimizer_learning_rate_on_learner(
+    learner, *, learning_rate: float
+) -> list[dict[str, Any]]:
+    reports = []
+    for optimizer_name, optimizer in learner.get_optimizers_for_module(
+        "default_policy"
+    ):
+        before = float(learner._get_optimizer_lr(optimizer))
+        learner._set_optimizer_lr(optimizer, float(learning_rate))
+        after = float(learner._get_optimizer_lr(optimizer))
+        reports.append(
+            {
+                "optimizer_name": str(optimizer_name),
+                "optimizer_type": type(optimizer).__name__,
+                "before": before,
+                "requested": float(learning_rate),
+                "after": after,
+            }
+        )
+    if not reports:
+        raise RuntimeError("no optimizer registered for default_policy")
+    return reports
+
+
+def _learner_call_results(algo, func, **kwargs) -> list[Any]:
+    pending = algo.learner_group.foreach_learner(func, **kwargs)
+    return list(algo.learner_group._get_results(pending))
+
+
+def _reapply_optimizer_learning_rate(algo, learning_rate: float) -> list[Any]:
+    reports = _learner_call_results(
+        algo,
+        _set_optimizer_learning_rate_on_learner,
+        learning_rate=float(learning_rate),
+    )
+    for learner_reports in reports:
+        for report in learner_reports:
+            if not math.isclose(
+                float(report["after"]),
+                float(learning_rate),
+                rel_tol=0.0,
+                abs_tol=1e-15,
+            ):
+                raise RuntimeError(
+                    "failed to reapply the configured optimizer learning rate: "
+                    f"{report}"
+                )
+    return reports
+
+
+def _optimizer_learning_rates(algo) -> list[Any]:
+    return _learner_call_results(algo, _optimizer_learning_rates_on_learner)
+
+
 def build_config(
     args: argparse.Namespace, reward_overrides: dict | None = None
 ) -> PPOConfig:
@@ -663,6 +759,10 @@ def build_config(
         "policy_knots": args.policy_knots,
         "action_mode": args.action_mode,
         "max_delta_rad": args.max_delta_rad,
+        "target_slew_rate_limit_rad_s": {
+            "pros_knee_angle": args.pros_knee_target_slew_rate_limit_rad_s,
+            "pros_ankle_angle": args.pros_ankle_target_slew_rate_limit_rad_s,
+        },
         "enable_pros_ref_governor": args.pros_ref_governor,
         "pros_ref_model": args.pros_ref_model,
         "pros_ref_lpf_cutoff_hz": args.pros_ref_cutoff_hz,
@@ -678,8 +778,16 @@ def build_config(
             "pros_knee_angle": args.pros_knee_ref_jerk_limit_rad_s3,
             "pros_ankle_angle": args.pros_ankle_ref_jerk_limit_rad_s3,
         },
+        "gait_clock_enable": args.gait_clock_enable,
         "actor_cyclic_phase_only": args.actor_cyclic_phase_only,
         "include_reference_state_observation": args.include_reference_state_observation,
+        "include_controller_state_observation": (
+            args.include_controller_state_observation
+        ),
+        "include_controller_diagnostic_observation": (
+            args.include_controller_diagnostic_observation
+        ),
+        "deployable_minimal_observation": args.deployable_minimal_observation,
         "imitation_initialize_to_target": args.imitation_initialize_to_target,
         "reward_reference_range_floor": args.reward_reference_range_floor,
         "reward_reference_velocity_range_floor": (
@@ -687,16 +795,22 @@ def build_config(
         ),
         "random_init": args.random_init,
         "episode_start_offset_s": args.episode_start_offset_s,
+        "episode_start_offset_choices_s": args.episode_start_offset_choices_s,
         "rebuild_model_on_reset": False,
         "record_outputs": False,
         "fail_fast": True,
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
+        "online_grf_detector_profile_file": args.online_grf_detector_profile,
         "include_online_grf_observation": args.online_grf_observation,
         "critic_privileged_observation": args.asymmetric_actor_critic,
         "prescribed_grf_disabled_sides": args.disable_prescribed_grf_side,
         "online_grf_applied_sides": args.online_grf_applied_side,
         "step_wall_timeout_s": args.step_wall_timeout_s,
+        "grf_penetration_penalty_threshold_m": (
+            args.grf_penetration_penalty_threshold_m
+        ),
+        "grf_penetration_termination_m": args.grf_penetration_termination_m,
     }
     # The reward seen by the agent is shaped by reward_function.py (single source
     # of truth); these overrides reach RewardShapingWrapper via make_cmc_env.
@@ -711,6 +825,8 @@ def build_config(
         "gamma": args.gamma,
         "lambda_": args.lam,
         "clip_param": args.clip_param,
+        "kl_coeff": args.kl_coeff,
+        "kl_target": args.kl_target,
     }
     if args.vf_clip_param is not None:
         training_kwargs["vf_clip_param"] = args.vf_clip_param
@@ -769,8 +885,14 @@ def build_config(
         try:
             n_actor = int(probe.n_actor)
             n_full = int(probe.n_obs)
+            actor_feature_names = tuple(probe.actor_feature_names)
+            observation_feature_names = tuple(probe.observation_feature_names)
         finally:
             probe.close()
+        args._target_actor_feature_names = actor_feature_names
+        args._target_observation_feature_names = observation_feature_names
+        args._target_n_actor = n_actor
+        args._target_n_full = n_full
         config = config.rl_module(
             rl_module_spec=RLModuleSpec(
                 module_class=AsymmetricActorCriticTorchRLModule,
@@ -779,6 +901,8 @@ def build_config(
                     "n_full": n_full,
                     "fcnet_hiddens": hiddens,
                     "fcnet_activation": args.fcnet_activation,
+                    "freeze_logstd": bool(args.freeze_logstd),
+                    "freeze_actor": bool(args.freeze_actor),
                 },
             )
         )
@@ -949,6 +1073,13 @@ def run(args: argparse.Namespace) -> dict:
     stop_message: str | None = None
     restored_training_iteration = 0
     restored_logical_iteration = 0
+    warm_start_applied = False
+    warm_start_report_path: Path | None = None
+    warm_start_report: dict[str, Any] | None = None
+    actor_freeze_reference_state: dict[str, Any] | None = None
+    actor_freeze_audit: list[dict[str, Any]] = []
+    critic_state_audit: list[dict[str, Any]] = []
+    optimizer_lr_audit: list[dict[str, Any]] = []
     iteration_start = max(1, int(args.iteration_start or 0))
     iterations_completed_this_process = 0
     start_time = time.perf_counter()
@@ -1047,6 +1178,12 @@ def run(args: argparse.Namespace) -> dict:
                 args.startup_timeout_s,
             ):
                 algo.restore_from_path(resume_path)
+            optimizer_lr_audit.append(
+                {
+                    "stage": "after_restore",
+                    "learners": _reapply_optimizer_learning_rate(algo, args.lr),
+                }
+            )
             restored_training_iteration = int(getattr(algo, "iteration", 0) or 0)
             checkpoint_meta = _read_json_dict(
                 resume_path.parent / f"{resume_path.name}_meta.json"
@@ -1064,6 +1201,202 @@ def run(args: argparse.Namespace) -> dict:
                 f"{restored_logical_iteration}; next logical iteration "
                 f"{iteration_start}/{args.iterations}."
             )
+
+        if args.warm_start and resume_path is None:
+            import warm_start
+            from ray.rllib.algorithms.algorithm import (
+                COMPONENT_LEARNER,
+                COMPONENT_LEARNER_GROUP,
+                COMPONENT_RL_MODULE,
+            )
+
+            monitor.set_phase("actor warm-start transplant", args.startup_timeout_s)
+            with _fault_dump_guard(
+                output_dir,
+                "actor warm-start transplant",
+                args.startup_timeout_s,
+            ):
+                target_actor_feature_names = tuple(
+                    getattr(args, "_target_actor_feature_names", ())
+                )
+                module = algo.get_module("default_policy")
+                target_state = module.get_state()
+                learner_state_before = algo.learner_group.get_state(
+                    components=[f"{COMPONENT_LEARNER}/{COMPONENT_RL_MODULE}"]
+                )
+                learner_module_before = warm_start.find_actor_state(
+                    learner_state_before
+                )
+                if learner_module_before is None:
+                    raise RuntimeError(
+                        "Learner state does not contain the target actor-critic"
+                    )
+                zero_target_features = (
+                    ()
+                    if args.gait_clock_enable
+                    else warm_start.DISABLED_GAIT_CLOCK_FEATURES
+                )
+                transplanted_state, warm_start_report = (
+                    warm_start.transplant_actor_state(
+                        target_state=target_state,
+                        target_actor_feature_names=target_actor_feature_names,
+                        source_checkpoint=args.warm_start_source,
+                        source_config=args.warm_start_source_config,
+                        source_actor_feature_manifest=(
+                            args.warm_start_source_feature_manifest
+                        ),
+                        mode="drop",
+                        zero_target_features=zero_target_features,
+                    )
+                )
+                module.set_state(transplanted_state)
+                algo.set_state(
+                    {
+                        COMPONENT_LEARNER_GROUP: {
+                            COMPONENT_LEARNER: {
+                                COMPONENT_RL_MODULE: {
+                                    "default_policy": transplanted_state
+                                }
+                            }
+                        }
+                    }
+                )
+                learner_state_after = algo.learner_group.get_state(
+                    components=[f"{COMPONENT_LEARNER}/{COMPONENT_RL_MODULE}"]
+                )
+                learner_module_after = warm_start.find_actor_state(
+                    learner_state_after
+                )
+                if learner_module_after is None:
+                    raise RuntimeError(
+                        "Learner state does not contain the transplanted actor-critic"
+                    )
+                non_actor_comparison = warm_start.compare_non_actor_states(
+                    learner_module_before,
+                    learner_module_after,
+                )
+                if not non_actor_comparison["exact"]:
+                    raise RuntimeError(
+                        "warm-start transplant changed the target critic: "
+                        f"max_abs_diff={non_actor_comparison['max_abs_diff']}"
+                    )
+                warm_start_report["target_non_actor_keys_preserved"] = (
+                    non_actor_comparison["keys"]
+                )
+                warm_start_report["target_non_actor_state_unchanged"] = True
+                # The module and Learner are updated above. Explicitly sync all
+                # EnvRunners now so the very first sampled batch cannot use the
+                # random actor created during Algorithm construction.
+                algo.env_runner_group.sync_weights(
+                    from_worker_or_learner_group=algo.learner_group,
+                    timeout_seconds=args.startup_timeout_s,
+                    inference_only=True,
+                )
+
+                live_comparison = warm_start.compare_actor_states(
+                    transplanted_state,
+                    learner_module_after,
+                )
+                if not live_comparison["exact"]:
+                    raise RuntimeError(
+                        "live Learner actor differs from transplanted actor: "
+                        f"max_abs_diff={live_comparison['max_abs_diff']}"
+                    )
+
+                runner_states = algo.env_runner_group.foreach_env_runner(
+                    func=lambda runner: runner.get_state(
+                        components=[COMPONENT_RL_MODULE],
+                        inference_only=True,
+                    ),
+                    local_env_runner=True,
+                    timeout_seconds=args.startup_timeout_s,
+                )
+                runner_comparisons = []
+                for index, runner_state in enumerate(runner_states):
+                    actor_state = warm_start.find_actor_state(runner_state)
+                    if actor_state is None:
+                        raise RuntimeError(
+                            f"EnvRunner {index} state does not contain actor tensors"
+                        )
+                    comparison = warm_start.compare_actor_states(
+                        transplanted_state,
+                        actor_state,
+                    )
+                    runner_comparisons.append(comparison)
+                    if not comparison["exact"]:
+                        raise RuntimeError(
+                            f"EnvRunner {index} actor differs after sync: "
+                            f"max_abs_diff={comparison['max_abs_diff']}"
+                        )
+
+                _save_module(algo, output_dir / "rl_module_initial_warm_start")
+                saved_state = warm_start.load_module_state(
+                    output_dir / "rl_module_initial_warm_start"
+                )
+                saved_comparison = warm_start.compare_actor_states(
+                    transplanted_state,
+                    saved_state,
+                )
+                if not saved_comparison["exact"]:
+                    raise RuntimeError(
+                        "saved initial warm-start actor differs from live actor: "
+                        f"max_abs_diff={saved_comparison['max_abs_diff']}"
+                    )
+                warm_start_report["integration_validation"] = {
+                    "learner_actor": live_comparison,
+                    "learner_non_actor": non_actor_comparison,
+                    "env_runner_count_checked": len(runner_comparisons),
+                    "env_runner_actors_exact": all(
+                        item["exact"] for item in runner_comparisons
+                    ),
+                    "env_runner_actor_digests": [
+                        item["actual_digest"] for item in runner_comparisons
+                    ],
+                    "saved_initial_actor": saved_comparison,
+                    "optimizer_source_loaded": False,
+                    "weights_synced_before_first_sample": True,
+                }
+                warm_start_report_path = warm_start.write_report(
+                    output_dir / "actor_transplant_report.json",
+                    warm_start_report,
+                )
+                warm_start_applied = True
+            monitor.log_event(
+                "Applied actor warm-start from "
+                f"{warm_start_report['source_checkpoint']} "
+                f"({len(warm_start_report['copied_features'])} copied feature(s), "
+                f"{len(warm_start_report['zeroed_target_features'])} "
+                "target feature(s) zeroed)."
+            )
+
+        if args.asymmetric_actor_critic:
+            import warm_start
+
+            live_state = _learner_module_state(algo)
+            critic_self_comparison = warm_start.compare_non_actor_states(
+                live_state, live_state
+            )
+            critic_state_audit.append(
+                {
+                    "stage": "before_training",
+                    "critic_digest": critic_self_comparison["expected_digest"],
+                    "critic_keys": critic_self_comparison["keys"],
+                }
+            )
+            if args.freeze_actor:
+                actor_freeze_reference_state = live_state
+                actor_freeze_audit.append(
+                    {
+                        "stage": "before_training",
+                        "actor_digest": warm_start.actor_state_digest(
+                            actor_freeze_reference_state
+                        ),
+                        "exact": True,
+                        "max_abs_diff": 0.0,
+                    }
+                )
+        elif args.freeze_actor:
+            raise ValueError("--freeze-actor requires --asymmetric-actor-critic")
 
         if args.tensorboard:
             tb_writer = tb_logging.make_tb_writer(output_dir / "tensorboard")
@@ -1085,6 +1418,43 @@ def run(args: argparse.Namespace) -> dict:
                 args.iteration_timeout_s,
             ):
                 result = algo.train()
+            if actor_freeze_reference_state is not None:
+                import warm_start
+
+                frozen_comparison = warm_start.compare_actor_states(
+                    actor_freeze_reference_state,
+                    _learner_module_state(algo),
+                )
+                actor_freeze_audit.append(
+                    {
+                        "stage": "after_iteration",
+                        "iteration": int(iteration),
+                        "actor_digest": frozen_comparison["actual_digest"],
+                        "exact": bool(frozen_comparison["exact"]),
+                        "max_abs_diff": float(frozen_comparison["max_abs_diff"]),
+                    }
+                )
+                if not frozen_comparison["exact"]:
+                    raise RuntimeError(
+                        "freeze_actor audit failed after iteration "
+                        f"{iteration}: max_abs_diff="
+                        f"{frozen_comparison['max_abs_diff']}"
+                    )
+            if args.asymmetric_actor_critic:
+                import warm_start
+
+                live_state = _learner_module_state(algo)
+                critic_self_comparison = warm_start.compare_non_actor_states(
+                    live_state, live_state
+                )
+                critic_state_audit.append(
+                    {
+                        "stage": "after_iteration",
+                        "iteration": int(iteration),
+                        "critic_digest": critic_self_comparison["expected_digest"],
+                        "critic_keys": critic_self_comparison["keys"],
+                    }
+                )
             iter_seconds = time.perf_counter() - iter_t0
             ret = _get_metric(result, "episode_return_mean")
             length = _get_metric(result, "episode_len_mean")
@@ -1110,7 +1480,19 @@ def run(args: argparse.Namespace) -> dict:
                 "entropy": _find_flat_metric(
                     learner_metrics, "/entropy", "/entropy_mean"
                 ),
+                "mean_kl_loss": _find_flat_metric(
+                    learner_metrics, "/mean_kl_loss"
+                ),
+                "current_kl_coeff": _find_flat_metric(
+                    learner_metrics, "/curr_kl_coeff"
+                ),
+                "optimizer_learning_rates": _optimizer_learning_rates(algo),
                 "learner_metrics": learner_metrics,
+                "start_coverage_metrics": {
+                    key: value
+                    for key, value in env_metrics.items()
+                    if "/episode_start_steps/" in key
+                },
                 "termination_metrics": {
                     key: value
                     for key, value in env_metrics.items()
@@ -1214,11 +1596,37 @@ def run(args: argparse.Namespace) -> dict:
         "resume_from": str(resume_path) if resume_path is not None else None,
         "restored_training_iteration": restored_training_iteration,
         "restored_logical_iteration": restored_logical_iteration,
+        "warm_start_requested": bool(args.warm_start),
+        "warm_start_applied": bool(warm_start_applied),
+        "warm_start_source": str(args.warm_start_source or ""),
+        "warm_start_source_config": str(args.warm_start_source_config or ""),
+        "warm_start_source_feature_manifest": str(
+            args.warm_start_source_feature_manifest or ""
+        ),
+        "warm_start_mode": "drop" if args.warm_start else None,
+        "freeze_logstd": bool(args.freeze_logstd),
+        "warm_start_report": (
+            str(warm_start_report_path) if warm_start_report_path is not None else None
+        ),
+        "warm_start": warm_start_report,
+        "freeze_actor": bool(args.freeze_actor),
+        "actor_freeze_audit": actor_freeze_audit,
+        "critic_state_audit": critic_state_audit,
+        "optimizer_lr_audit": optimizer_lr_audit,
         "best_episode_return_mean": best_return if math.isfinite(best_return) else None,
         "env_name": (
             env_factory.ENV_NAME if _TRAINING_STACK_LOADED else None
         ),
         "num_env_runners": args.num_env_runners,
+        "episode_start_offset_s": float(args.episode_start_offset_s),
+        "episode_start_offset_choices_s": list(
+            args.episode_start_offset_choices_s
+        ),
+        "num_epochs": int(args.num_epochs),
+        "lr": float(args.lr),
+        "clip_param": float(args.clip_param),
+        "kl_coeff": float(args.kl_coeff),
+        "kl_target": float(args.kl_target),
         "ray_num_cpus": ray_num_cpus,
         "iteration_timeout_s": args.iteration_timeout_s,
         "max_consecutive_skips": args.max_consecutive_skips,
@@ -1228,9 +1636,24 @@ def run(args: argparse.Namespace) -> dict:
         "cleanup_timeout_s": args.cleanup_timeout_s,
         "sample_timeout_s": args.sample_timeout_s,
         "step_wall_timeout_s": args.step_wall_timeout_s,
+        "grf_penetration_penalty_threshold_m": float(
+            args.grf_penetration_penalty_threshold_m
+        ),
+        "grf_penetration_termination_m": float(
+            args.grf_penetration_termination_m
+        ),
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
+        "online_grf_detector_profile_file": args.online_grf_detector_profile,
         "online_grf_observation": bool(args.online_grf_observation),
+        "gait_clock_enable": bool(args.gait_clock_enable),
+        "deployable_minimal_observation": bool(args.deployable_minimal_observation),
+        "include_controller_state_observation": bool(
+            args.include_controller_state_observation
+        ),
+        "include_controller_diagnostic_observation": bool(
+            args.include_controller_diagnostic_observation
+        ),
         "prescribed_grf_disabled_sides": list(args.disable_prescribed_grf_side),
         "online_grf_applied_sides": list(args.online_grf_applied_side),
         "reward_config": (
@@ -1960,6 +2383,16 @@ def parse_args() -> argparse.Namespace:
         default=0.0,
         help="Deterministic offset from setup t_start when --random-init is off.",
     )
+    p.add_argument(
+        "--episode-start-offset-choices-s",
+        type=float,
+        nargs="+",
+        default=[],
+        help=(
+            "Training-only deterministic start offsets assigned round-robin to "
+            "EnvRunners. An empty list keeps --episode-start-offset-s."
+        ),
+    )
     p.add_argument("--policy-knots", type=int, default=3)
     p.add_argument(
         "--action-mode",
@@ -1973,6 +2406,24 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument("--max-delta-rad", type=float, default=0.35)
+    p.add_argument(
+        "--pros-knee-target-slew-rate-limit-rad-s",
+        type=float,
+        default=0.0,
+        help=(
+            "Max target-to-target rate for generated prosthetic knee references. "
+            "Non-positive disables the limiter."
+        ),
+    )
+    p.add_argument(
+        "--pros-ankle-target-slew-rate-limit-rad-s",
+        type=float,
+        default=0.0,
+        help=(
+            "Max target-to-target rate for generated prosthetic ankle references. "
+            "Non-positive disables the limiter."
+        ),
+    )
     p.add_argument(
         "--pros-ref-governor",
         action=argparse.BooleanOptionalAction,
@@ -1996,6 +2447,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--pros-knee-ref-jerk-limit-rad-s3", type=float, default=3000.0)
     p.add_argument("--pros-ankle-ref-jerk-limit-rad-s3", type=float, default=2750.0)
     p.add_argument(
+        "--gait-clock-enable",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Expose the prescribed sound-leg gait clock. Disable for clean "
+            "prosthesis-phase ex-novo training."
+        ),
+    )
+    p.add_argument(
         "--actor-cyclic-phase-only",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2004,6 +2464,30 @@ def parse_args() -> argparse.Namespace:
         "--include-reference-state-observation",
         action=argparse.BooleanOptionalAction,
         default=False,
+    )
+    p.add_argument(
+        "--include-controller-state-observation",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Expose the deployable Markov controller state (previous endpoint, "
+            "served reference, and raw SEA command) to the actor."
+        ),
+    )
+    p.add_argument(
+        "--include-controller-diagnostic-observation",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Also expose derived abs(SEA command) and saturation flags. When "
+            "disabled these redundant diagnostics remain critic-only."
+        ),
+    )
+    p.add_argument(
+        "--deployable-minimal-observation",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Restrict actor obs to prosthetic angles, online GRF detector, and FSM.",
     )
     p.add_argument(
         "--imitation-initialize-to-target",
@@ -2127,6 +2611,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--gamma", type=float, default=0.95)
     p.add_argument("--lam", type=float, default=0.9)
     p.add_argument("--clip-param", type=float, default=0.2)
+    p.add_argument("--kl-coeff", type=float, default=0.2)
+    p.add_argument("--kl-target", type=float, default=0.01)
     p.add_argument(
         "--vf-clip-param",
         type=float,
@@ -2157,6 +2643,24 @@ def parse_args() -> argparse.Namespace:
         help="MLP activation: tanh | relu | elu | swish | silu.",
     )
     p.add_argument(
+        "--freeze-logstd",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Block gradients through the Gaussian log-standard-deviation "
+            "outputs while continuing to train the action mean."
+        ),
+    )
+    p.add_argument(
+        "--freeze-actor",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Critic warm-up mode: preserve the complete policy distribution while "
+            "training only the value tower. Requires asymmetric actor-critic."
+        ),
+    )
+    p.add_argument(
         # Deprecated: superseded by --num-hidden-layers/--dim-hidden-layers. Kept
         # (hidden) so older commands and in-flight supervisor restarts keep working;
         # an explicit list still wins over the num/dim form in build_config.
@@ -2175,6 +2679,42 @@ def parse_args() -> argparse.Namespace:
         "before continuing. With no internal iteration override, training resumes "
         "at checkpoint training_iteration + 1.",
     )
+    p.add_argument(
+        "--warm-start",
+        action="store_true",
+        help=(
+            "Initialize a new ex-novo asymmetric actor from the official "
+            "asym100_GRFpenalty-lowered imitation rl_module_best. Actor-only: "
+            "critic, optimizer, and PPO state remain fresh. Mutually exclusive "
+            "with a supervisor-level --resume-from."
+        ),
+    )
+    p.add_argument(
+        "--warm-start-source",
+        default=None,
+        help=(
+            "Optional rl_module_best/run/module_state.pkl source for --warm-start. "
+            "Default: MLP_imitation_training_06-23-2026_grfsoft_knee1_ankle2_100iter."
+        ),
+    )
+    p.add_argument(
+        "--warm-start-source-config",
+        default=None,
+        help=(
+            "Optional resolved source config path recorded in the warm-start audit. "
+            "Default: training_cfg.resolved.yaml next to the warm-start source run."
+        ),
+    )
+    p.add_argument(
+        "--warm-start-source-feature-manifest",
+        default=None,
+        help=(
+            "Optional actor_feature_manifest.json declaring the exact ordered "
+            "source actor observation schema. Adjacent manifests are detected "
+            "automatically; the historical 31-feature source uses a built-in "
+            "compatibility manifest."
+        ),
+    )
     p.add_argument("--random-init", action="store_true")
     p.add_argument(
         "--grf-mode",
@@ -2186,6 +2726,26 @@ def parse_args() -> argparse.Namespace:
         "--online-grf-profile",
         default=_DEFAULT_ONLINE_GRF_PROFILE,
         help="onlineGRF profile JSON used by online_sensor/online.",
+    )
+    p.add_argument(
+        "--online-grf-detector-profile",
+        default=_DEFAULT_ONLINE_GRF_DETECTOR_PROFILE,
+        help=(
+            "Optional second onlineGRF profile used only for HS/TO detection. "
+            "It is added as sensor-only contact and never applied to dynamics."
+        ),
+    )
+    p.add_argument(
+        "--grf-penetration-penalty-threshold-m",
+        type=float,
+        default=0.012,
+        help="Soft online-contact penetration threshold [m].",
+    )
+    p.add_argument(
+        "--grf-penetration-termination-m",
+        type=float,
+        default=0.017,
+        help="Hard online-contact penetration termination [m].",
     )
     p.add_argument(
         "--online-grf-observation",
@@ -2271,14 +2831,44 @@ def parse_args() -> argparse.Namespace:
     p.set_defaults(**{k: v for k, v in cfg_defaults.items() if k in valid_dests})
     args = p.parse_args()
     args._cfg_reward = cfg_reward
+    if args.warm_start:
+        import warm_start
+
+        if args.warm_start_source is None:
+            args.warm_start_source = str(warm_start.DEFAULT_WARM_START_SOURCE)
+        # Keep an omitted config as None. transplant_actor_state() then resolves
+        # training_cfg.resolved.yaml next to the actual source checkpoint rather
+        # than accidentally attaching the official checkpoint's provenance to a
+        # custom --warm-start-source.
     if args.output_dir is None:
         reward_mode = _resolved_reward_mode_for_run_name(args, cfg_reward)
-        args.output_dir = str(_default_training_output_dir(reward_mode, args.name))
+        name = _warm_start_output_name(args.name) if args.warm_start else args.name
+        args.output_dir = str(_default_training_output_dir(reward_mode, name))
     return args
+
+
+def _validate_warm_start_args(args: argparse.Namespace) -> None:
+    if not getattr(args, "warm_start", False):
+        return
+    reward_mode = _resolved_reward_mode_for_run_name(
+        args,
+        getattr(args, "_cfg_reward", None) or {},
+    )
+    if reward_mode != "ex_novo":
+        raise SystemExit("--warm-start is only valid with reward_mode: ex_novo")
+    if not args.asymmetric_actor_critic:
+        raise SystemExit("--warm-start requires --asymmetric-actor-critic")
+    if not args.worker_process and args.resume_from:
+        raise SystemExit(
+            "--warm-start cannot be combined with supervisor-level --resume-from. "
+            "Start a fresh warm-start run, or resume an existing warm-start run "
+            "without --warm-start."
+        )
 
 
 def main() -> None:
     args = parse_args()
+    _validate_warm_start_args(args)
     if args.checkpoint_every <= 0:
         raise SystemExit("--checkpoint-every must be >= 1")
     if args.max_consecutive_skips <= 0:

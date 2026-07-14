@@ -1,0 +1,72 @@
+{
+  "status": "REJECT_H1",
+  "continue_training": false,
+  "h1_iterations": 1,
+  "h2_completed": true,
+  "source_actor_digest": "7fa7fbd15db67dd29b9cd428528b68e14648e934f70c165d6d6be901f025383c",
+  "post_h1_actor_digest": "13d7f6786b0dfea593861b30c92e3895d63e1eb93293f77e82745e03e4e069a3",
+  "h1_sampling": {
+    "env_steps": 4096,
+    "episode_return_mean": -16.97205096032605,
+    "episode_len_mean": 210.77777777777777,
+    "grf_penetration_terminations": 8,
+    "stance_timeout_terminations": 1,
+    "mean_kl_loss": 0.3915523588657379,
+    "policy_loss": 0.010119954124093056,
+    "vf_loss": 1.084395408630371,
+    "vf_explained_var": 0.11204057931900024
+  },
+  "actor_audit": {
+    "logstd_parameters_exact": true,
+    "sigma": [0.003, 0.003],
+    "actor_parameter_max_abs_diff": 0.0025513956788927317,
+    "nominal_trace_samples": 356,
+    "mean_output_max_abs_diff": 0.007262818515300751,
+    "mean_output_rmse": 0.0021192326676100492,
+    "mean_output_rmse_per_action": [
+      0.0014608383644372225,
+      0.002616915153339505
+    ]
+  },
+  "deterministic": {
+    "pre_h1": {
+      "steps": 356,
+      "episode_return": 29.886494038953998,
+      "valid_hs_count": 2,
+      "valid_to_count": 2,
+      "valid_cycle_count": 1
+    },
+    "post_h1": {
+      "steps": 221,
+      "episode_return": -59.6891049486994,
+      "valid_hs_count": 1,
+      "valid_to_count": 0,
+      "valid_cycle_count": 0,
+      "end_reason": "phase_timeout:stance"
+    }
+  },
+  "stochastic_sigma_0_003": {
+    "pre_h1_steps": [361, 360, 210],
+    "post_h1_steps": [214, 221, 213],
+    "pre_h1_valid_cycle_seeds": 2,
+    "post_h1_valid_cycle_seeds": 0,
+    "pre_h1_valid_to_seeds": 3,
+    "post_h1_valid_to_seeds": 2,
+    "pre_h1_median_steps": 360,
+    "post_h1_median_steps": 214
+  },
+  "stochastic_sigma_0_005_post_h1": {
+    "steps": [207, 221, 214],
+    "valid_cycle_seeds": 0,
+    "valid_to_seeds": 2,
+    "median_steps": 214
+  },
+  "checks": {
+    "single_iteration_only": true,
+    "logstd_frozen_bit_exact": true,
+    "deterministic_not_regressed": false,
+    "sigma_0_003_not_regressed": false,
+    "improved_toward_sigma_0_005": false,
+    "eligible_for_iteration_2": false
+  }
+}

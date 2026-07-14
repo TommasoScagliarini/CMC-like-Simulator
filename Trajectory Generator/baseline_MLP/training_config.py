@@ -74,6 +74,14 @@ def _list_str(value: Any) -> list[str]:
     return [str(value)]
 
 
+def _list_float(value: Any) -> list[float]:
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        return [float(item) for item in value]
+    return [float(value)]
+
+
 # Section -> {argparse dest: coercer}. The YAML key IS the argparse dest. This is
 # the single source for both flattening (YAML -> defaults) and dumping the
 # resolved snapshot, so train and rollout stay aligned.
@@ -83,6 +91,8 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "dim_hidden_layers": int,
         "fcnet_activation": str,
         "asymmetric_actor_critic": _to_bool,
+        "freeze_logstd": _to_bool,
+        "freeze_actor": _to_bool,
         "seed": int,
     },
     "ppo": {
@@ -93,6 +103,8 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "gamma": float,
         "lam": float,
         "clip_param": float,
+        "kl_coeff": float,
+        "kl_target": float,
         "vf_clip_param": _opt(float),
         "vf_loss_coeff": _opt(float),
     },
@@ -108,13 +120,18 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "policy_knots": int,
         "random_init": _to_bool,
         "episode_start_offset_s": float,
+        "episode_start_offset_choices_s": _list_float,
         "step_wall_timeout_s": float,
+        "grf_penetration_penalty_threshold_m": float,
+        "grf_penetration_termination_m": float,
         # Diagnostic-only: "absolute" is the sole production action mode, so these
         # are intentionally omitted from the shipped training_cfg.yaml. They stay
         # valid keys so the resolved snapshot can round-trip a diagnostic run's
         # action_mode/max_delta_rad back into the rollout.
         "action_mode": str,
         "max_delta_rad": float,
+        "pros_knee_target_slew_rate_limit_rad_s": float,
+        "pros_ankle_target_slew_rate_limit_rad_s": float,
         "pros_ref_governor": _to_bool,
         "pros_ref_model": str,
         "pros_ref_cutoff_hz": float,
@@ -124,8 +141,12 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "pros_ankle_ref_acceleration_limit_rad_s2": float,
         "pros_knee_ref_jerk_limit_rad_s3": float,
         "pros_ankle_ref_jerk_limit_rad_s3": float,
+        "gait_clock_enable": _to_bool,
         "actor_cyclic_phase_only": _to_bool,
         "include_reference_state_observation": _to_bool,
+        "include_controller_state_observation": _to_bool,
+        "include_controller_diagnostic_observation": _to_bool,
+        "deployable_minimal_observation": _to_bool,
         "imitation_initialize_to_target": _to_bool,
         "reward_reference_range_floor": float,
         "reward_reference_velocity_range_floor": float,
@@ -133,6 +154,7 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
     "grf": {
         "grf_mode": str,
         "online_grf_profile": str,
+        "online_grf_detector_profile": _opt(str),
         "online_grf_observation": _to_bool,
         "online_grf_applied_side": _list_str,
         "disable_prescribed_grf_side": _list_str,
