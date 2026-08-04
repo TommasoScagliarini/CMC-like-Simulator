@@ -63,3 +63,7 @@ Training 20-50/100 iterazioni restano bloccati.
 - [ ] Ripetere H1/H2 e richiedere almeno un TO sinistro valido.
 - [ ] Non aumentare il budget finche' il gate comportamentale non passa.
 
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

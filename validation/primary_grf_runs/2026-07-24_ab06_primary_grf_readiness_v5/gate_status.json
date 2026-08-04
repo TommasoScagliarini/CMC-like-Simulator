@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "step_id": "0",
+  "status": "ERROR",
+  "decision": "CADENCE_DEPENDENT_ORACLE_TO_SEMANTICS_UNRESOLVED",
+  "phase": "gate_0_1_baseline_forensics",
+  "protocol": {
+    "path": "validation/primary_grf_readiness_protocol_v5.json",
+    "sha256": "ddd8cff5dced20dc10ff9c61693273d3683e68c770ae77d4ed72690101bbedf0"
+  },
+  "execution_ledger": {
+    "path": "validation/primary_grf_readiness_execution_ledger_v5.json",
+    "sha256": "034645d983e79be76c0b28d681359e1a67ebbde96753ea2eb3fbf361ecb230b6"
+  },
+  "run_start_receipt": {
+    "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v5/run_start_receipt.json",
+    "sha256": "5ea25813e649c1b43feb18dc72b0cec29b27f15c2ee90b91cd0457c3e709ee77"
+  },
+  "failure": {
+    "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v5/baseline_forensics/failure.json",
+    "sha256": "768d899c716b6d64e1311ac28082fb3f552339af9962b0d4da7c2fc97b9f552a"
+  },
+  "source_hashes_match": true,
+  "semantic_access_started": true,
+  "semantic_access_scope": "development_and_historical_only",
+  "protected_trials_opened": [],
+  "one_shot_budget_consumed": false,
+  "retry_authorized": false,
+  "primary_grf_ready": false,
+  "baseline_forensics_published": false,
+  "cadence_pair_diagnostic": {
+    "development_pair_count": 12,
+    "complete_cycle_count_per_cadence": 360,
+    "all_pairs_same_cycle_count_order_and_indices": true,
+    "maximum_cycle_start_difference_s": 0.032,
+    "maximum_cycle_end_difference_s": 0.032,
+    "maximum_toe_off_difference_s": 0.051,
+    "first_refusal": {
+      "trial_id": "02",
+      "plateau_id": "01",
+      "cycle_index": 7,
+      "fine_toe_off_s": 23.923000000000002,
+      "runtime_toe_off_s": 23.948,
+      "absolute_difference_s": 0.02499999999999858
+    }
+  },
+  "root_cause": "Sub-10-ms prescribed-force dropouts are visible at 1 ms and skipped at 10 ms. The frozen causal detector confirms contact onset but emits toe-off on the first below-threshold sample, so the two cadences can select different below-threshold episodes even when cycle counts and ordering agree.",
+  "terminal_reason": "Cadence alone supplies no finite event-time bound under sub-grid threshold chatter. Widening the V5 parity tolerance, adding toe-off dwell or hysteresis, or replacing the two sampled oracles with one native-rate shared oracle would change the scientific event semantics after observing development outcomes. Those changes require a future independently preregistered scientific protocol and are not authorized as a control-plane retry of this execution.",
+  "downstream_steps": {
+    "step_1_h0_sep": "NOT_STARTED_PREREQUISITE_FAILED",
+    "step_2_detector_training_ready": "NOT_STARTED_PREREQUISITE_FAILED",
+    "combined_training": "NOT_STARTED"
+  }
+}

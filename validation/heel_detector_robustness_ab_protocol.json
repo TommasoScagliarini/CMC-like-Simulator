@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "status": "preregistered_development_only",
+  "purpose": "Paired frozen-actor robustness validation for legacy, non-perturbing shadow, and two-sensor HS/TO detection.",
+  "created_on": "2026-07-21",
+  "development_seeds": [123, 124, 125],
+  "heldout_contract": {
+    "status": "sealed_not_read_or_run",
+    "forbidden_seeds": [126, 127, 128]
+  },
+  "start_conditions": [
+    {
+      "name": "minus020",
+      "offset_s": 1.756870983805102
+    },
+    {
+      "name": "nominal",
+      "offset_s": 1.956870983805102
+    },
+    {
+      "name": "plus020",
+      "offset_s": 2.156870983805102
+    }
+  ],
+  "action_matrix": {
+    "deterministic_seed": 123,
+    "stochastic_seeds": [123, 124, 125],
+    "expected_sigma": 0.005
+  },
+  "modes": [
+    {
+      "name": "legacy",
+      "phase_fsm_input_mode": "legacy_events",
+      "comparison_reference": "legacy",
+      "shadow_replay": false,
+      "record_outputs": false,
+      "record_policy_trace": false
+    },
+    {
+      "name": "shadow",
+      "phase_fsm_input_mode": "shadow",
+      "comparison_reference": "legacy",
+      "shadow_replay": true,
+      "record_outputs": true,
+      "record_policy_trace": true
+    },
+    {
+      "name": "two_sensor",
+      "phase_fsm_input_mode": "two_sensor",
+      "comparison_reference": "legacy",
+      "shadow_replay": false,
+      "record_outputs": false,
+      "record_policy_trace": false
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "h0",
+      "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+      "logical_iteration": 1,
+      "actor_digest": "585e33257a0b5fe5b419f8e8f3a5f793c9d2ea71ecd07b8668b77d599bcb0287",
+      "module_state_sha256": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b"
+    },
+    {
+      "name": "pilot50_best",
+      "path": "Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-15_h0_exact_interleaved_lr5e-7_iter2-51_pilot50/rl_module_best",
+      "logical_iteration": 24,
+      "actor_digest": "03f20fa8862837df06c8a5f46125e68b5d5ec7976c5cc7b7e4ca8c5b367eeddc",
+      "module_state_sha256": "06d8c5f52f80f4e67cab28de4b16732d2248df117a14b4e3a41b6ea314bc4f6d"
+    }
+  ],
+  "rollout": {
+    "script": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+    "phase_fsm_input_mode_cli_flag": "--phase-fsm-input-mode",
+    "phase_fsm_input_mode_summary_field": "phase_fsm_input_mode",
+    "phase_sensor_on_threshold_n": 5.0,
+    "phase_sensor_off_threshold_n": 2.0,
+    "phase_sensor_dwell_s": 0.03,
+    "segment_duration_s": 0.01,
+    "episode_duration_s": 5.0,
+    "max_steps": 500,
+    "action_mode": "absolute",
+    "run_timeout_s": 900.0
+  },
+  "gate": {
+    "minimum_valid_cycles": 2,
+    "penetration_limit_m_strict": 0.025,
+    "maximum_action_clipped_steps": 0,
+    "expected_actor_features": 35,
+    "expected_observation_features": 84,
+    "reserve_reference": "paired_legacy_same_checkpoint_start_selection_seed",
+    "reserve_tolerance_formula": "max(1e-6 Nm, 1e-9 * legacy Nm)",
+    "invalid_event_non_regression": true,
+    "shadow_float_abs_tolerance": 1e-12,
+    "shadow_exact_fields": [
+      "steps",
+      "end_reason",
+      "terminated",
+      "truncated",
+      "action_clipped_steps",
+      "phase_valid_hs_count",
+      "phase_valid_to_count",
+      "phase_valid_cycle_count",
+      "invalid_event_count"
+    ],
+    "shadow_float_fields": [
+      "episode_return",
+      "grf_penetration_max_m",
+      "reserve_norm_max_nm",
+      "action_abs_max",
+      "applied_action_abs_max"
+    ]
+  },
+  "historical_artifacts": [
+    {
+      "role": "h0_deterministic_minus020",
+      "path": "Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_minus020/rollout_summary.json",
+      "sha256": "b89a18fa3c55d1e0c32b313e51d92ddaebfa424763aa07e9f6e07ec4feaac25e"
+    },
+    {
+      "role": "h0_deterministic_nominal",
+      "path": "Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_nominal/rollout_summary.json",
+      "sha256": "03ddb2ed18429bf6749a027b170dabb66e71204a0273eb2597163c9fbd104d5b"
+    },
+    {
+      "role": "h0_deterministic_plus020",
+      "path": "Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_plus020/rollout_summary.json",
+      "sha256": "24abcf977232aa6c7f042f5e92fc0032964bdaf4e4dd26824a846216cd50f313"
+    },
+    {
+      "role": "h0_stochastic_plus020_seed123",
+      "path": "Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/stochastic_plus020_seed123/rollout_summary.json",
+      "sha256": "a20c0555dc2688d44d9d339e30f6f7a9c41a7e16da1fd36257485d2f83513324"
+    },
+    {
+      "role": "pilot50_best_deterministic_nominal",
+      "path": "Trajectory Generator/runs/rollout/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_best_deterministic_nominal_recorded/rollout_summary.json",
+      "sha256": "085d46cede965e4981db617f7630eb47a4355a31caf2463a621a9df654d2ae72"
+    }
+  ],
+  "output_root": "validation/heel_detector_robustness_runs/2026-07-21_development_ab_v1"
+}

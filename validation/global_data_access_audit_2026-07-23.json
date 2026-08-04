@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "audit_id": "AB06_GLOBAL_DATA_ACCESS_AUDIT_2026-07-23",
+  "status": "PASS",
+  "decision": "GLOBAL_DATA_BUDGET_ADOPTABLE",
+  "created_date": "2026-07-24",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "plan": {
+    "path": "reports/plans/2026-07-23_piano_grf_primaria_h0_sep_detector_training_ready.md",
+    "sha256": "19107fe9f5bca3ebbdebc80cc2c43a2ce252450182007528f614ca1a8f92053c"
+  },
+  "scope": {
+    "subject": "AB06",
+    "task": "treadmill",
+    "trials": [
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08"
+    ],
+    "components": [
+      "primary_grf",
+      "two_sensor_detector"
+    ],
+    "canonical_raw_root": "models/AB06-raw/10_09_18/treadmill",
+    "forbidden_fallback_root": "models/AB06_SEASEA-raw/10_09_18/treadmill",
+    "semantic_access_definition": "Decoding event, trajectory, force, marker, IK, gait-cycle, or candidate-performance values is protected component-outcome access. Conditions-only fields explicitly listed in metadata_access_contract were decoded semantically, but are not component outcomes and do not consume a validation, sealed, or reserve opening."
+  },
+  "metadata_access_contract": {
+    "status": "PREVIOUSLY_READ_METADATA_ONLY",
+    "source": {
+      "path": "validation/two_sensor_v14_metadata_runs/2026-07-22_ab06_trials_01_08/metadata_audit.json",
+      "sha256": "9bebe3b3c6072d37a43055b967186b580452a63f9d3aa1afdda066435c3cf924"
+    },
+    "semantic_allowlist": [
+      "conditions.trialStarts",
+      "conditions.trialEnds",
+      "conditions.Header",
+      "conditions.Speed",
+      "conditions.VariableNames",
+      "conditions.VariableUnits"
+    ],
+    "allowlisted_conditions_semantic_access_started": true,
+    "event_or_trajectory_values_decoded": [],
+    "fp_semantically_decoded": false,
+    "ik_semantically_decoded": false,
+    "markers_semantically_decoded": false,
+    "gait_events_semantically_decoded": false,
+    "candidate_performance_evaluated": false,
+    "validation_opened": false,
+    "sealed_opened": false,
+    "reserve_opened": false
+  },
+  "frozen_allocation": {
+    "01": {
+      "role": "HISTORICAL_CONSUMED",
+      "allowed_use": [
+        "diagnostics",
+        "comparison"
+      ],
+      "independent_evidence": false
+    },
+    "02": {
+      "role": "DEVELOPMENT_OPEN",
+      "allowed_steps": [
+        "0",
+        "1",
+        "2"
+      ],
+      "independent_evidence": false
+    },
+    "03": {
+      "role": "PRIMARY_VALIDATION_ONE_SHOT",
+      "allowed_steps": [
+        "0"
+      ],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED"
+    },
+    "04": {
+      "role": "DEVELOPMENT_OPEN",
+      "allowed_steps": [
+        "0",
+        "1",
+        "2"
+      ],
+      "independent_evidence": false
+    },
+    "05": {
+      "role": "DETECTOR_VALIDATION_ONE_SHOT",
+      "allowed_steps": [
+        "2"
+      ],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED"
+    },
+    "06": {
+      "role": "DETECTOR_SEALED_ONE_SHOT",
+      "allowed_steps": [
+        "2"
+      ],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED"
+    },
+    "07": {
+      "role": "PRIMARY_SEALED_ONE_SHOT",
+      "allowed_steps": [
+        "0"
+      ],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED"
+    },
+    "08": {
+      "role": "DEVELOPMENT_OPEN",
+      "allowed_steps": [
+        "0",
+        "1",
+        "2"
+      ],
+      "independent_evidence": false
+    }
+  },
+  "protected_conditions_metadata_semantic_access_started": true,
+  "protected_component_outcome_semantic_access_started": false,
+  "protected_outcome_access_found": false,
+  "protected_run_authorized": false,
+  "protected_trials": {
+    "03": {
+      "previous_role": "RESERVE_METADATA_ONLY_EVENTS_CLOSED",
+      "new_role": "PRIMARY_VALIDATION_ONE_SHOT",
+      "outcome_access_receipts_found": [],
+      "preprocessed_output_roots_found": [],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED",
+      "status": "CLOSED"
+    },
+    "05": {
+      "previous_role": "VALIDATION_METADATA_ONLY_ONE_SHOT_CLOSED",
+      "new_role": "DETECTOR_VALIDATION_ONE_SHOT",
+      "outcome_access_receipts_found": [],
+      "preprocessed_output_roots_found": [],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED",
+      "status": "CLOSED"
+    },
+    "06": {
+      "previous_role": "SEALED_METADATA_ONLY_ONE_SHOT_CLOSED",
+      "new_role": "DETECTOR_SEALED_ONE_SHOT",
+      "outcome_access_receipts_found": [],
+      "preprocessed_output_roots_found": [],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED",
+      "status": "CLOSED"
+    },
+    "07": {
+      "previous_role": "RESERVE_METADATA_ONLY_EVENTS_CLOSED",
+      "new_role": "PRIMARY_SEALED_ONE_SHOT",
+      "outcome_access_receipts_found": [],
+      "preprocessed_output_roots_found": [],
+      "conditions_metadata_semantic_access_started": true,
+      "component_outcome_semantic_access_started": false,
+      "one_shot_status": "NOT_CONSUMED",
+      "status": "CLOSED"
+    }
+  },
+  "checks": [
+    {
+      "id": "metadata_audit_explicit_non_actions",
+      "status": "PASS",
+      "evidence": "metadata_audit.json records event_or_trajectory_values_decoded=[], validation_opened=false, sealed_opened=false, reserve_opened=false."
+    },
+    {
+      "id": "v14_ledgers_protected_closed",
+      "status": "PASS",
+      "evidence": "V14, V14.1, and V14.2 ledgers all record reserve_semantic_access_started=false, validation_semantic_access_started=false, and sealed_semantic_access_started=false."
+    },
+    {
+      "id": "v14_recovery_receipts_protected_absent",
+      "status": "PASS",
+      "evidence": "Recovery lineage records no protected receipts; only development preprocessing receipts exist."
+    },
+    {
+      "id": "v15_authorization_development_only",
+      "status": "PASS",
+      "evidence": "V15 authorization excludes trials 01/03/05/06/07 and its failure preserves them unopened."
+    },
+    {
+      "id": "v16_authorization_development_only",
+      "status": "PASS",
+      "evidence": "V16 protocol and run receipt authorize only 02/04/08; its manifest records 01/03/05/06/07 semantically unopened."
+    },
+    {
+      "id": "protected_preprocessed_outputs_absent",
+      "status": "PASS",
+      "evidence": "No validation path matching trial_03, trial_05, trial_06, or trial_07 was found."
+    },
+    {
+      "id": "allocation_roles_disjoint",
+      "status": "PASS",
+      "evidence": "Primary uses one-shot 03/07; detector uses one-shot 05/06; development uses only 02/04/08."
+    }
+  ],
+  "source_hashes_match": true,
+  "source_records": [
+    {
+      "path": "validation/two_sensor_cross_speed_v14_protocol.json",
+      "sha256": "bdc44f93ed88e94b5afb867f30bb9b1507ebc44b7883be2c96224c37f0ae026c"
+    },
+    {
+      "path": "validation/two_sensor_cross_speed_v14_execution_ledger.json",
+      "sha256": "afe6dfe204d48984aeb7910344707d03a6f8bfdbc49fa77bbf2114bd2438475a"
+    },
+    {
+      "path": "validation/two_sensor_cross_speed_v14_1_protocol.json",
+      "sha256": "e263a624e24a13bafd76bf2858f831184914399d188982deb2520f1f383673f1"
+    },
+    {
+      "path": "validation/two_sensor_cross_speed_v14_1_execution_ledger.json",
+      "sha256": "2db41fde50d009b57a04b9f51b037c0d4c1363ee202aca0f1592c5b85b87847f"
+    },
+    {
+      "path": "validation/two_sensor_cross_speed_v141_recovery_lineage.json",
+      "sha256": "60590bbcc69f8095add54e66042c1751216dfeb6d443f2bddc355e392818d139"
+    },
+    {
+      "path": "validation/two_sensor_cross_speed_v14_2_protocol.json",
+      "sha256": "66afa3765bbce4c79edd58594249200fae7c2c80957df873c683dee931874cdf"
+    },
+    {
+      "path": "validation/two_sensor_cross_speed_v14_2_execution_ledger.json",
+      "sha256": "98caedefb9d136a4d6a5471cb59bbaca85140b6b9c639c3ad84768905ff1fa51"
+    },
+    {
+      "path": "validation/two_sensor_cross_speed_v142_boundary_recovery_lineage.json",
+      "sha256": "6902f821f1226c45aee9dc6914bb105f8cc424449151f06febfdd3b8988816d8"
+    },
+    {
+      "path": "validation/two_sensor_v15_routing_protocol.json",
+      "sha256": "b18b884239af363dcd08c70101b3416587577d4e5629a124bb843a30caab92a9"
+    },
+    {
+      "path": "validation/two_sensor_v15_routing_runs/2026-07-22_ab06_dev02_04_08_v15/run_start_receipt.json",
+      "sha256": "d35908dfaf730d5f0d004f930b7252bde2cc606aac3a38d52662049abfa9d9f6"
+    },
+    {
+      "path": "validation/two_sensor_v15_routing_runs/2026-07-22_ab06_dev02_04_08_v15/failure.json",
+      "sha256": "4e6e1234971f30af00b978be29606fd4dad171c9c3cabd8f2f1b5a980cb8e8f3"
+    },
+    {
+      "path": "validation/two_sensor_heel_geometry_v16_protocol.json",
+      "sha256": "8c19c4ef2bbfcc90efe0cf796302e0b413e6fdfccde115ecda047a42ee50b99a"
+    },
+    {
+      "path": "validation/two_sensor_heel_geometry_v16_runs/2026-07-22_ab06_dev02_04_08_v16_hy_hr_ofat/run_start_receipt.json",
+      "sha256": "afc283f6833bb6f231616a29c71307a2f679cdbcc8efa0478293c9f4aa5a957a"
+    },
+    {
+      "path": "validation/two_sensor_heel_geometry_v16_runs/2026-07-22_ab06_dev02_04_08_v16_hy_hr_ofat/manifest.json",
+      "sha256": "02ca2d65a10c4b70e4d6755171dd2008433d01643d8cf317e00f876b2f10c2a2"
+    }
+  ],
+  "historical_git_provenance": {
+    "complete": false,
+    "reason": "Several July validation lineage artifacts are currently untracked by Git. This audit binds the exact current files by SHA-256 and does not infer history beyond their internally consistent no-clobber ledgers and receipts.",
+    "effect_on_decision": "The protected openings remain closed in the current frozen lineage. Any later hash drift invalidates this audit and blocks protected access."
+  },
+  "historical_clarifications": [
+    {
+      "component": "two_sensor_detector",
+      "event": "V13 sealed failure",
+      "trial": "01",
+      "effect": "Trial 01 is consumed; the historical V13 sealed opening does not consume newly allocated detector trial 06."
+    },
+    {
+      "component": "protected source identity",
+      "effect": "Before any protected semantic decode, recompute whole-file SHA-256 for the canonical raw files and reject the alternate AB06 raw mirror."
+    }
+  ],
+  "invalidation_rules": [
+    "Any hash drift in source_records invalidates this audit.",
+    "Any new semantic receipt for 03, 05, 06, or 07 invalidates the corresponding one-shot role.",
+    "A primary validation or sealed failure consumes 03 or 07 respectively.",
+    "A detector validation or sealed failure consumes 05 or 06 respectively.",
+    "Protected conversion or event evaluation requires a prior candidate lock and access receipt."
+  ],
+  "failed_checks": []
+}

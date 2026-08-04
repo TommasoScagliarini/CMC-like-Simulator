@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "protocol_id": "AB06_TWO_SENSOR_DUAL_STREAM_CAUSAL_DIAGNOSTIC_2026-07-22_V1",
+  "frozen_before_execution": true,
+  "freeze_date": "2026-07-22",
+  "stage": "development_causal_diagnostic",
+  "objective": "Isolate the cause of the V2 stance_load_too_low rejections without changing detector geometry, event guards, thresholds, dwell, or production FSM. Replay H02_F70_P31p5 and H02_F70_P32p0 with identical two-sensor heel/toe force streams in two branches: A feeds the detector pair aggregate and penetration union to normal_force_bw/in_contact, while B feeds the hash-pinned primary online-GRF aggregate and physical-contact union to those two load-evidence inputs. This protocol only diagnoses causality; it cannot accept, select, validate, or promote a detector.",
+  "setup": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+  "profile_paths": {
+    "current_geometry": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+    "v4_mesh_geometry": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO_v4_mesh_experimental.json"
+  },
+  "load_evidence_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+  "candidate_ids": [
+    "H02_F70_P31p5",
+    "H02_F70_P32p0"
+  ],
+  "candidate_lineage": {
+    "source_protocol_id": "AB06_TWO_SENSOR_MESH_PLACEMENT_DEVELOPMENT_2026-07-22_V2",
+    "source_manifest": "validation/two_sensor_mesh_placement_sweep_runs/2026-07-22_ab06_50_100_depth_micro_v2/manifest.json",
+    "geometry": {
+      "heel_vertical_offset_below_current_mm": 2.0,
+      "forefoot_longitudinal_fraction_mesh_x": 0.7,
+      "forefoot_absolute_local_plantar_protrusion_mm": [31.5, 32.0],
+      "sensors_per_candidate": 2
+    },
+    "reason_for_candidates": "These are the two deepest preregistered V2 placements and exhibited stance_load_too_low while preserving the simple heel-plus-forefoot detector architecture. They are fixed causal probes, not candidates for selection in this diagnostic."
+  },
+  "data_access": {
+    "already_open_block_s": [50.0, 100.0],
+    "upper_bound_is_exclusive": true,
+    "allow_samples_at_or_after_100_s": false,
+    "sealed_block_s": [100.0, 155.045],
+    "sealed_block_status": "CLOSED_UNEVALUATED",
+    "expected_common_cycle_set": {
+      "original_complete_cycles": 51,
+      "retained_complete_cycles": 50,
+      "reference_hs_count": 51,
+      "reference_to_count": 50,
+      "excluded_closing_hs_s": [99.96878691565038],
+      "common_cycle_selection_margin_s": 0.04,
+      "last_retained_closing_hs_s": 99.08974385950206,
+      "last_sample_s": 99.12
+    },
+    "failure_policy": "Abort before sampling on any source, lineage, cadence, or boundary drift. No sample may reach 100 s."
+  },
+  "replay": {
+    "sea_plugin": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "event_source": "two_sensor",
+    "sensor_on_threshold_n": 0.5,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_dwell_s": 0.03,
+    "sample_dt_s": 0.01,
+    "primary_event_time_field": "confirmed_time_s",
+    "diagnostic_event_time_field": "event_time_s",
+    "phase_reference_mode": "validated_event_intervals",
+    "prescribed_contact_threshold_n": 20.0,
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "hs_tolerance_s": 0.05,
+    "toe_off_tolerance_s": 0.08,
+    "fsm_min_stance_contact_fraction": 0.2,
+    "fsm_min_stance_load_bw_s": 0.04,
+    "threshold_geometry_or_fsm_tuning_allowed_during_run": false
+  },
+  "branches": {
+    "A_detector_load": {
+      "heel_toe_event_guards": "candidate_two_sensor_forces",
+      "normal_force_bw": "candidate_two_sensor_aggregate",
+      "in_contact": "candidate_two_sensor_union_physical_penetration"
+    },
+    "B_primary_load": {
+      "heel_toe_event_guards": "candidate_two_sensor_forces",
+      "normal_force_bw": "primary_online_grf_left_aggregate",
+      "in_contact": "primary_online_grf_left_union_physical_penetration"
+    }
+  },
+  "sampling": {
+    "method": "all_required_spheres_directly_in_one_opensim_pass",
+    "affine_reconstruction": false,
+    "left_primary_spheres_only": true,
+    "expected_unique_detector_spheres": 3,
+    "expected_primary_load_spheres": 8,
+    "expected_total_unique_spheres": 11
+  },
+  "decision_contract": {
+    "role": "causal_diagnostic_only",
+    "primary_question": "does_stance_load_too_low_disappear",
+    "geometry_acceptance_applied": false,
+    "candidate_selection_allowed": false,
+    "profile_promotion_allowed": false,
+    "sealed_validation_allowed": false,
+    "training_allowed": false
+  },
+  "sources": {
+    "setup": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+      "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"
+    },
+    "model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "prescribed_kinematics": {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "external_loads_xml": {
+      "path": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml",
+      "sha256": "a2fb6460fc0f8ae9294b4504eb9bb18f0dcc4b112ec71403448c28f4b5dc3f27"
+    },
+    "prescribed_grf": {
+      "path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot",
+      "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"
+    },
+    "current_detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+    },
+    "rejected_v4_detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO_v4_mesh_experimental.json",
+      "sha256": "a0bda7fc657fad52e62904fc4083f59dd6da9a9566d160a9e88294af00d4b02e"
+    },
+    "primary_load_evidence_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+    },
+    "runtime_fsm_configuration": {
+      "path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"
+    },
+    "production_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "ec726fdf392f099ac1135de9e736e984ada695c9704102621d0cd8af2fdc5b45"
+    },
+    "dual_stream_validator": {
+      "path": "validation/diagnose_two_sensor_dual_stream_prescribed.py",
+      "sha256": "e9376dd841456b77af6a6bda97895143e3f8d70023d4282f9a90a2579b37a1a1"
+    },
+    "v2_candidate_builder": {
+      "path": "validation/sweep_two_sensor_mesh_placements_prescribed_v2.py",
+      "sha256": "6b172f60a37ddf23f8b49677d2b229807cc411561098af993b2d1a33f993143a"
+    },
+    "v2_protocol": {
+      "path": "validation/two_sensor_mesh_placement_sweep_protocol_v2.json",
+      "sha256": "8e36fb19f65d9fd93fc3ad2d548f72a40e1b420353ba72c2a3b0806c6bc2f4aa"
+    },
+    "v2_manifest": {
+      "path": "validation/two_sensor_mesh_placement_sweep_runs/2026-07-22_ab06_50_100_depth_micro_v2/manifest.json",
+      "sha256": "d0a3b244f909f5986c07d875fe9bb932a8d050855a13bf8e3da056b76b104cfe"
+    },
+    "v1_sampling_and_geometry_helper": {
+      "path": "validation/sweep_two_sensor_mesh_placements_prescribed.py",
+      "sha256": "929e0bbdebaf1f9a9cbe2d021ff6610a22fb2be02f3a6438bb184c3a1ad0a39a"
+    },
+    "candidate_evaluator": {
+      "path": "validation/sweep_two_sensor_prescribed_thresholds.py",
+      "sha256": "1a33efe86f5bbfb986e24dd1d2784e43339dcd8dda3ea23030203781b389f586"
+    },
+    "production_fsm_replay_helper": {
+      "path": "validation/validate_two_sensor_prescribed_replay.py",
+      "sha256": "91dcf134f2978f808457eafd5919985cccbb504dd3c3b75da8f47fa996a39fae"
+    },
+    "contact_sampler_and_wrench": {
+      "path": "validation/validate_online_grf.py",
+      "sha256": "d71855951d23660e7eeba3f70da31996a2ff1be8ec9a3a64bd75a4c18613021c"
+    }
+  },
+  "interpretation_limits": [
+    "This test can identify whether the FSM stance-load evidence, rather than the two detector guards themselves, causes stance_load_too_low rejections on the already-open AB06 50-100 s block.",
+    "The primary load profile is used only for normal_force_bw and in_contact in branch B. It does not generate heel-strike or toe-off; those event guards remain the same candidate heel/toe forces in A and B.",
+    "The branch-B penetration adapter places the primary union penetration in one regional API slot and exact zeros in the other because the unchanged production replay API ORs those two arrays to obtain in_contact. Detector penetrations remain separately available and are not reinterpreted.",
+    "A reduction in stance_load_too_low does not demonstrate correct event timing, complete cycles, acceptable sensor geometry, deployability, or profile validity.",
+    "No acceptance, ranking, winner selection, sensitivity replay, holdout access, profile promotion, policy rollout, or training is authorized by this protocol."
+  ]
+}

@@ -1,0 +1,45 @@
+# Preflight-only candidate for the delayed causal morphology corridor.
+#
+# This is an override/contract document, not the active training configuration.
+# Do not use it to start PPO.  Promotion requires TWO_SENSOR_EVENT_READY and
+# the weight-zero, causal-replay, frozen-action, and zero-update gates.
+
+candidate:
+  status: corridor_preflight_only
+  terminal_gate: CORRIDOR_TRAINING_READY
+  ppo_updates_authorized: false
+  active_training_config_replaced: false
+
+simulation:
+  segment_duration: 0.01
+
+grf:
+  phase_fsm_input_mode: two_sensor
+  online_grf_detector_profile: validation/experimental_detector_profiles/two_sensor_v17_high_rate_v13_geometry.json
+  online_grf_detector_profile_sha256: 2225823282743b55f2cbd3bdcb8c345f3d2e3b878bd0646283a4cc0b739df0bc
+  phase_sensor_on_threshold_n: 0.5
+  phase_sensor_off_threshold_n: 0.25
+  phase_sensor_dwell_s: 0.03
+  event_contract_id: primary_grf_split_v1+two_sensor_highrate_v1
+  detector_sample_dt_s: 0.001
+  policy_step_s: 0.01
+
+reward:
+  morphology_profile: morphology_profiles/ab06_prosthetic_event_warped_mean_std_corridor.json
+  morphology_profile_sha256: 33b1dd7cb0db40110a4f9c1b8c0dd49a498662211e6e132f0f3cefe8edc02a55
+  morphology_phase_mode: event_anchored_causal_delayed_experimental
+  morphology_canonical_to_phase: 0.6223299989
+  morphology_reward_delay_s: 0.04
+  morphology_max_delivery_latency_s: 0.01
+  morphology_weight: 0.05
+  morphology_hard_termination_enabled: 0.0
+
+invariants:
+  event_anchor_field: event_time_s
+  confirmation_field: confirmed_time_s
+  delivery_field: delivered_time_s
+  delay_observation: false
+  delay_detector_pulses: false
+  delay_policy_actions: false
+  delay_simulator_state: false
+  terminal_pending_rule: drop_samples_at_or_after_pending_onset

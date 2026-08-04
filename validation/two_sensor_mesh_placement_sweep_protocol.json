@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "protocol_id": "AB06_TWO_SENSOR_MESH_PLACEMENT_DEVELOPMENT_2026-07-22_V1",
+  "frozen_before_execution": true,
+  "freeze_date": "2026-07-22",
+  "stage": "development",
+  "objective": "Evaluate a small, geometry-preregistered Cartesian grid of exactly two virtual sensors (one heel and one forefoot) with the production two-sensor FSM on the already-open AB06 50-100 s development block. Select a strict winner only if both the physical continuity pre-gate and the frozen V3 confirmed-time gate pass at 10 ms; otherwise lock one explicitly non-promotable diagnostic_best for a 1 ms diagnostic and the next redesign.",
+  "setup": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+  "profile_paths": {
+    "current_geometry": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+    "v4_mesh_geometry": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO_v4_mesh_experimental.json"
+  },
+  "data_access": {
+    "already_open_block_s": [50.0, 100.0],
+    "upper_bound_is_exclusive": true,
+    "allow_samples_at_or_after_100_s": false,
+    "sealed_block_s": [100.0, 155.045],
+    "sealed_block_status": "CLOSED_UNEVALUATED",
+    "expected_common_cycle_set": {
+      "source_protocol": "AB06_TWO_SENSOR_V4_FIXED_GEOMETRY_50_100_2026-07-21_V4",
+      "original_complete_cycles": 51,
+      "retained_complete_cycles": 50,
+      "reference_hs_count": 51,
+      "reference_to_count": 50,
+      "excluded_closing_hs_s": [99.96878691565038],
+      "common_cycle_selection_margin_s": 0.04,
+      "last_retained_closing_hs_s": 99.08974385950206,
+      "last_sample_s": 99.12
+    },
+    "failure_policy": "Abort before candidate sampling if the common-cycle lineage drifts, if the final boundary exclusion differs, or if any generated sample reaches t >= 100 s."
+  },
+  "replay": {
+    "sea_plugin": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "event_source": "two_sensor",
+    "sensor_on_threshold_n": 0.5,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_dwell_s": 0.03,
+    "primary_sample_dt_s": 0.01,
+    "winner_sensitivity_sample_dt_s": 0.001,
+    "primary_evaluate_all_candidates": true,
+    "sensitivity_evaluate_winner_only": true,
+    "sensitivity_also_evaluates_current_comparator": true,
+    "primary_event_time_field": "confirmed_time_s",
+    "diagnostic_event_time_field": "event_time_s",
+    "phase_reference_mode": "validated_event_intervals",
+    "prescribed_contact_threshold_n": 20.0,
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "hs_tolerance_s": 0.05,
+    "toe_off_tolerance_s": 0.08,
+    "threshold_geometry_or_fsm_tuning_allowed_during_run": false
+  },
+  "placement_grid": {
+    "generation": "full Cartesian product in listed order",
+    "heel_vertical_offsets_below_current_mm": [0, 2],
+    "heel_offset_rule": "local_vertical_below_current_center",
+    "forefoot_longitudinal_fractions_mesh_x": [0.6, 0.7, 0.8],
+    "x_rule": "mesh_bbox_longitudinal_fraction",
+    "z_rule": "midpoint_of_mesh_section_at_candidate_x",
+    "forefoot_absolute_local_plantar_protrusion_mm": [25, 30],
+    "forefoot_height_rule": "absolute_sphere_bottom_below_local_plantar_surface",
+    "cartesian_candidate_count": 12,
+    "sensors_per_candidate": 2,
+    "frozen_sensor_fields": [
+      "radius",
+      "frame",
+      "side",
+      "material",
+      "ground",
+      "contact law",
+      "residual force parameters"
+    ],
+    "sampling": {
+      "method": "sample every unique heel/forefoot sphere directly in one OpenSim pass at 10 ms",
+      "affine_reconstruction": false,
+      "expected_unique_spheres_including_comparators": 10
+    },
+    "development_prescreen": {
+      "role": "non_gating_grid_design_only",
+      "block_s": [50.0, 100.0],
+      "used_for_candidate_ranking_or_acceptance": false,
+      "rejected_height_rules": [
+        "same_plantar_protrusion_as_selected_heel",
+        "flat_sensor_bottom_with_selected_heel"
+      ],
+      "observation": "Those shallower rules remained almost always OFF under the prescribed IK/mesh/ground offset. The final P25/P30 proxies are still substantially shallower than the current toe's approximately 51.7 mm mesh protrusion.",
+      "interpretation": "Because this pre-screen used the same 50-100 s block, the entire V1 run is development and cannot be called holdout validation."
+    }
+  },
+  "comparators": {
+    "current_geometry": true,
+    "v4_mesh_geometry": true
+  },
+  "selection": {
+    "physical_continuity_pre_gate": {
+      "maximum_heel_off_to_forefoot_gap_s": 0.01,
+      "maximum_interior_both_off_gap_s": 0.01,
+      "require_forefoot_present_every_stance": true,
+      "require_forefoot_off_observed_every_swing": true,
+      "require_forefoot_off_before_next_hs": true,
+      "require_exact_event_counts_order_and_cycles": true,
+      "maximum_invalid_or_timeout_transitions": 0,
+      "maximum_unaccepted_sensor_events": 0
+    },
+    "strict_gate": "V3_confirmed_time_holdout_gate",
+    "strict_winner_ranking": [
+      {"metric": "worst_event_normalized_max_abs_error", "direction": "min"},
+      {"metric": "mean_event_normalized_mean_abs_error", "direction": "min"},
+      {"metric": "confirmed_fsm_stance_iou", "direction": "max"},
+      {"metric": "geometry_displacement_from_current_m", "direction": "min"}
+    ],
+    "diagnostic_best_ranking": [
+      {"metric": "observed_valid_cycle_count", "direction": "max"},
+      {"metric": "event_count_deficit", "direction": "min"},
+      {"metric": "invalid_timeout_plus_unaccepted_count", "direction": "min"},
+      {"metric": "confirmed_fsm_stance_f1", "direction": "max"},
+      {"metric": "confirmed_fsm_stance_iou", "direction": "max"},
+      {"metric": "maximum_heel_off_to_forefoot_gap_s", "direction": "min"},
+      {"metric": "geometry_displacement_from_current_m", "direction": "min"}
+    ],
+    "tie_breaker": "lexicographically_lowest_candidate_id",
+    "no_strict_winner_policy": "lock_diagnostic_best_without_promotion_and_run_1ms_diagnostic",
+    "winner_1ms_gate": "V3_confirmed_time_holdout_gate",
+    "diagnostic_1ms_cannot_convert_fail_to_pass": true
+  },
+  "sealed_validation_gate": {
+    "primary_event_timestamp": "confirmed_time_s",
+    "onset_is_diagnostic_only": true,
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "no_invalid_or_timeout_transitions": true,
+    "no_unaccepted_sensor_gait_events": true,
+    "exact_hs_to_toe_off_to_hs_order_and_cycle_count": true,
+    "confirmation_latency_range": "[sensor_dwell_s, sensor_dwell_s + sample_dt_s]",
+    "zero_phase_mismatches_outside_fixed_confirmed_event_windows": true,
+    "no_unknown_fsm_phase_samples": true,
+    "minimum_confirmed_fsm_stance_f1": 0.95,
+    "minimum_confirmed_fsm_stance_iou": 0.9,
+    "maximum_confirmed_fsm_iou_regression_vs_baseline": 0.01,
+    "maximum_confirmed_time_worst_timing_regression_vs_baseline": 0.0,
+    "primary_10ms_and_sensitivity_1ms_must_both_pass": true
+  },
+  "sources": {
+    "setup": {"path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml", "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"},
+    "model": {"path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim", "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"},
+    "foot_mesh": {"path": "Geometry/AM_foot_l.stl", "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"},
+    "prescribed_kinematics": {"path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot", "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"},
+    "external_loads_xml": {"path": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml", "sha256": "a2fb6460fc0f8ae9294b4504eb9bb18f0dcc4b112ec71403448c28f4b5dc3f27"},
+    "prescribed_grf": {"path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot", "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"},
+    "current_detector_profile": {"path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json", "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"},
+    "rejected_v4_detector_profile": {"path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO_v4_mesh_experimental.json", "sha256": "a0bda7fc657fad52e62904fc4083f59dd6da9a9566d160a9e88294af00d4b02e"},
+    "runtime_fsm_configuration": {"path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml", "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"},
+    "production_fsm": {"path": "Trajectory Generator/prosthetic_phase_fsm.py", "sha256": "ec726fdf392f099ac1135de9e736e984ada695c9704102621d0cd8af2fdc5b45"},
+    "placement_sweep_validator": {"path": "validation/sweep_two_sensor_mesh_placements_prescribed.py", "sha256": "929e0bbdebaf1f9a9cbe2d021ff6610a22fb2be02f3a6438bb184c3a1ad0a39a"},
+    "fixed_v4_comparison_helper": {"path": "validation/compare_two_sensor_mesh_profiles_prescribed.py", "sha256": "12b2738b9af44ffeb914cb95d45a20697b4d151cab9627d5c04d7be1a29eb1cd"},
+    "threshold_evaluator": {"path": "validation/sweep_two_sensor_prescribed_thresholds.py", "sha256": "1a33efe86f5bbfb986e24dd1d2784e43339dcd8dda3ea23030203781b389f586"},
+    "prescribed_replay_evaluator": {"path": "validation/validate_two_sensor_prescribed_replay.py", "sha256": "91dcf134f2978f808457eafd5919985cccbb504dd3c3b75da8f47fa996a39fae"},
+    "contact_evaluator": {"path": "validation/validate_online_grf.py", "sha256": "d71855951d23660e7eeba3f70da31996a2ff1be8ec9a3a64bd75a4c18613021c"},
+    "event_matcher": {"path": "validation/validate_online_grf_events.py", "sha256": "6f314854ce80f6ab13eec7ac9a0b02d8014dd02c274c36c6bcdc00982b0ba2f7"},
+    "mesh_profile_builder": {"path": "validation/build_two_sensor_mesh_profile_v4.py", "sha256": "671b59ca546112b720b915816a89eec14eaf3dd3cf52a9a37388074b23ef4bda"},
+    "mesh_geometry_audit": {"path": "validation/audit_two_sensor_prescribed_geometry.py", "sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307"},
+    "common_cycle_protocol": {"path": "validation/two_sensor_mesh_profile_v4_fixed_replay_protocol_v4.json", "sha256": "590d8b6ad8af7f0d4f037992ddcf56646619accea8ca54dea0c76cf6bd8749d2"},
+    "common_cycle_manifest": {"path": "validation/two_sensor_mesh_profile_v4_fixed_replay_runs/2026-07-21_ab06_50_100_fixed_v4/manifest.json", "sha256": "accf6366a6fe0d495b6f7863ef835da9a70954138b40cb40487e153e28718fd6"}
+  },
+  "interpretation_limits": [
+    "This is a development sweep because both the height-rule pre-screen and candidate evaluation use the already-open 50-100 s block.",
+    "A diagnostic_best is explicitly not a winner, cannot be promoted, and its 1 ms result cannot convert the 10 ms FAIL to PASS.",
+    "Only a pair passing both the physical continuity pre-gate and V3 confirmed-time gate at 10 ms, then both gates at 1 ms, may be called a development strict winner.",
+    "The physical pre-gate requires no heel-to-forefoot or interior both-off gap above 10 ms, forefoot presence in every stance, observed release in every swing before the next HS, exact event counts/order/cycles, and zero invalid/timeout/unaccepted events.",
+    "Current and rejected V4 geometries are nonselectable diagnostic comparators.",
+    "No policy or training is evaluated; no runtime config, detector profile, contact law, threshold, dwell, or FSM is modified.",
+    "The 100-155.045 s block remains sealed."
+  ]
+}

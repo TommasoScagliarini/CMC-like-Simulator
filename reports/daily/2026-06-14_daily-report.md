@@ -478,6 +478,10 @@ lungo V4.
 - [ ] Investigare reserve biologiche elevate e richieste sui DOF non attuati.
 - [ ] Verificare il plugin PI e il setup default anche su macOS arm64.
 - [ ] Validare `random_init=true` dopo la correzione del reset SEA.
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta
+      (`motor_angle = joint_angle + tau_initial / K`) prima di qualificare i
+      reset casuali; il solo allineamento di `motor_speed` non chiude questo
+      punto del report progettuale del 13/06.
 - [ ] Popolare o marcare esplicitamente come indisponibili i canali
       `SEA_*_torque_error_integral_dot`.
 - [ ] Validare heel-strike online, `in_contact`, rocker/COP push-off e contatto

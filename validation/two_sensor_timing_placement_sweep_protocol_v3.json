@@ -1,0 +1,142 @@
+{
+  "schema_version": 3,
+  "protocol_id": "AB06_TWO_SENSOR_TIMING_PLACEMENT_DEVELOPMENT_2026-07-22_V3",
+  "frozen_before_execution": true,
+  "freeze_date": "2026-07-22",
+  "stage": "development_timing_placement",
+  "objective": "Test a minimal data-driven placement grid for exactly two virtual gait-event sensors. Keep F80 fixed, vary heel height H1/H2 and forefoot depth P30--P32, use the two spheres only for heel/toe guards, and use the frozen primary online-GRF profile only for FSM load/contact evidence.",
+  "setup": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+  "detector_template_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+  "profile_paths": {
+    "current_geometry": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json"
+  },
+  "load_evidence_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+  "data_access": {
+    "already_open_block_s": [50.0, 100.0],
+    "upper_bound_is_exclusive": true,
+    "allow_samples_at_or_after_100_s": false,
+    "sealed_block_s": [100.0, 155.045],
+    "sealed_block_status": "CLOSED_UNEVALUATED",
+    "expected_common_cycle_set": {
+      "original_complete_cycles": 51,
+      "retained_complete_cycles": 50,
+      "reference_hs_count": 51,
+      "reference_to_count": 50,
+      "excluded_closing_hs_s": [99.96878691565038],
+      "last_sample_s": 99.12
+    }
+  },
+  "replay": {
+    "sea_plugin": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "event_source": "two_sensor",
+    "sensor_on_threshold_n": 0.5,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_dwell_s": 0.03,
+    "sample_dt_s": 0.01,
+    "primary_event_time_field": "confirmed_time_s",
+    "diagnostic_event_time_field": "event_time_s",
+    "phase_reference_mode": "validated_event_intervals",
+    "prescribed_contact_threshold_n": 20.0,
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "hs_tolerance_s": 0.05,
+    "toe_off_tolerance_s": 0.08,
+    "fsm_min_stance_duration_s": 0.3,
+    "fsm_min_stance_contact_fraction": 0.2,
+    "fsm_min_stance_load_bw_s": 0.04,
+    "threshold_geometry_or_fsm_tuning_allowed_during_run": false
+  },
+  "placement_grid": {
+    "heel_vertical_offsets_below_current_mm": [1.0, 2.0],
+    "forefoot_longitudinal_fractions_mesh_x": [0.8],
+    "forefoot_absolute_local_plantar_protrusion_mm": [30.0, 30.5, 31.0, 31.5, 32.0],
+    "heel_offset_rule": "local_vertical_below_current_center",
+    "forefoot_x_rule": "mesh_bbox_longitudinal_fraction",
+    "forefoot_z_rule": "midpoint_of_mesh_section_at_candidate_x",
+    "forefoot_height_rule": "absolute_sphere_bottom_below_local_plantar_surface",
+    "selectable_candidate_count": 10,
+    "nonselectable_current_comparator_count": 1,
+    "total_pair_count": 11,
+    "sensors_per_pair": 2,
+    "maximum_forefoot_protrusion_mm": 32.0
+  },
+  "evidence_routing": {
+    "heel_toe_event_guards": "candidate_two_sensor_forces_only",
+    "normal_force_bw": "primary_online_grf_left_aggregate",
+    "in_contact": "primary_online_grf_left_union_physical_penetration",
+    "detector_spheres_generate_grf": false
+  },
+  "sampling": {
+    "method": "all_required_spheres_directly_in_one_opensim_pass",
+    "affine_reconstruction": false,
+    "expected_unique_detector_spheres": 9,
+    "expected_primary_load_spheres": 8,
+    "expected_total_unique_spheres": 17,
+    "evaluated_pair_count": 11
+  },
+  "development_gate": {
+    "maximum_transfer_both_latches_off_samples": 0,
+    "maximum_incomplete_heel_to_forefoot_transfers": 0,
+    "maximum_to_candidates_before_min_stance": 0,
+    "require_exact_reference_counts": {"heel_strike": 51, "toe_off": 50},
+    "require_exact_detector_counts": {"heel_strike": 51, "toe_off": 50},
+    "require_exact_valid_cycles": 50,
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "minimum_confirmed_fsm_stance_f1": 0.95,
+    "minimum_confirmed_fsm_stance_iou": 0.9,
+    "maximum_confirmed_fsm_iou_regression_vs_current": 0.01,
+    "maximum_confirmed_time_worst_timing_regression_vs_current": 0.0,
+    "maximum_invalid_or_timeout_transitions": 0,
+    "maximum_unaccepted_sensor_events": 0,
+    "require_forefoot_present_every_stance": true,
+    "require_forefoot_off_observed_every_swing": true,
+    "require_forefoot_off_before_next_hs": true,
+    "require_mesh_proximity_pre_gate": true
+  },
+  "sealed_validation_gate": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "minimum_confirmed_fsm_stance_f1": 0.95,
+    "minimum_confirmed_fsm_stance_iou": 0.9,
+    "maximum_confirmed_fsm_iou_regression_vs_baseline": 0.01,
+    "maximum_confirmed_time_worst_timing_regression_vs_baseline": 0.0
+  },
+  "decision_contract": {
+    "role": "development_geometry_screen_only",
+    "candidate_selection_allowed": true,
+    "profile_creation_allowed": false,
+    "profile_promotion_allowed": false,
+    "sealed_validation_allowed": false,
+    "training_allowed": false,
+    "runtime_modification_allowed": false
+  },
+  "sources": {
+    "v3_validator": {"path": "validation/sweep_two_sensor_timing_placements_prescribed_v3.py", "sha256": "c3a716fd2e827dfee1fe7a7c9d521cd7f1b8b110ae9c2a3c398c7d9c5f4f953b"},
+    "dual_stream_v2_manifest": {"path": "validation/two_sensor_dual_stream_diagnostic_runs/2026-07-22_ab06_50_100_h02_f70_p315_p320_v2_raw_guard/manifest.json", "sha256": "ed079d3bab22d18d2074efe730c31485929a87235d43a7dcde16b62a47c46053"},
+    "setup": {"path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml", "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"},
+    "model": {"path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim", "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"},
+    "foot_mesh": {"path": "Geometry/AM_foot_l.STL", "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"},
+    "prescribed_kinematics": {"path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot", "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"},
+    "external_loads_xml": {"path": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml", "sha256": "a2fb6460fc0f8ae9294b4504eb9bb18f0dcc4b112ec71403448c28f4b5dc3f27"},
+    "prescribed_grf": {"path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot", "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"},
+    "current_detector_profile": {"path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json", "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"},
+    "primary_load_profile": {"path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json", "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"},
+    "runtime_fsm_configuration": {"path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml", "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"},
+    "production_fsm": {"path": "Trajectory Generator/prosthetic_phase_fsm.py", "sha256": "ec726fdf392f099ac1135de9e736e984ada695c9704102621d0cd8af2fdc5b45"},
+    "dual_stream_helper": {"path": "validation/diagnose_two_sensor_dual_stream_prescribed.py", "sha256": "e9376dd841456b77af6a6bda97895143e3f8d70023d4282f9a90a2579b37a1a1"},
+    "placement_helper": {"path": "validation/sweep_two_sensor_mesh_placements_prescribed.py", "sha256": "929e0bbdebaf1f9a9cbe2d021ff6610a22fb2be02f3a6438bb184c3a1ad0a39a"},
+    "candidate_evaluator": {"path": "validation/sweep_two_sensor_prescribed_thresholds.py", "sha256": "1a33efe86f5bbfb986e24dd1d2784e43339dcd8dda3ea23030203781b389f586"},
+    "production_fsm_replay_helper": {"path": "validation/validate_two_sensor_prescribed_replay.py", "sha256": "91dcf134f2978f808457eafd5919985cccbb504dd3c3b75da8f47fa996a39fae"}
+  },
+  "interpretation_limits": [
+    "A development PASS identifies only a candidate for later 1 ms and sealed holdout validation; it does not create or promote a profile.",
+    "The prosthetic-foot mesh is used only to preregister simple sphere positions and enforce proximity; the detector itself remains exactly two spheres.",
+    "The primary profile supplies only FSM load/contact evidence. Heel strike and toe off are generated only by the candidate heel and forefoot sensors.",
+    "No policy, rollout, reward, training, runtime default, FSM, detector profile, or sealed data is modified or evaluated."
+  ]
+}

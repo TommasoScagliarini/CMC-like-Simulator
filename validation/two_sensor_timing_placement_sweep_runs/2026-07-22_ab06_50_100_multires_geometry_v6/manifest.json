@@ -1,0 +1,40 @@
+{
+  "schema_version": 6,
+  "status": "ERROR_INVALID_HARNESS",
+  "ok": false,
+  "scientific_result_available": false,
+  "protocol": {
+    "path": "validation/two_sensor_timing_placement_sweep_protocol_v6.json",
+    "sha256": "d339db6a18f1072a83d086fc5436b804ee3a05dc6d5f1bb7b8f1ca4eff844f78",
+    "protocol_id": "AB06_TWO_SENSOR_TIMING_PLACEMENT_DEVELOPMENT_2026-07-22_V6"
+  },
+  "validator": {
+    "path": "validation/sweep_two_sensor_timing_placements_prescribed_v6.py",
+    "sha256": "21c72489fce623706bac5b3b652d787fc52080990876113fc659f33c5797a0ad"
+  },
+  "failure": {
+    "type": "KeyError",
+    "missing_key": "sealed_validation_gate",
+    "location": "inherited V3/V4 strict gate evaluation",
+    "occurred_before_candidate_selection": true,
+    "candidate_metrics_or_selection_persisted": false,
+    "scientific_pass_or_fail_interpretable": false
+  },
+  "data_access": {
+    "already_open_block_s": [50.0, 100.0],
+    "runtime_10ms_sampling_started": true,
+    "fine_1ms_sampling_started": true,
+    "sealed_block_s": [100.0, 155.045],
+    "sealed_block_opened": false
+  },
+  "non_actions": {
+    "placement_grid_changed_after_failure": false,
+    "threshold_or_fsm_changed": false,
+    "policy_or_training_run": false,
+    "runtime_configuration_modified": false,
+    "production_fsm_modified": false,
+    "current_profile_modified": false,
+    "candidate_profile_created_or_promoted": false
+  },
+  "next_action": "Create a new hash-pinned harness revision that adds only the missing inherited sealed-validation gate contract, then rerun the unchanged V6 scientific grid on the same open development block."
+}

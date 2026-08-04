@@ -63,3 +63,7 @@ un TO protesico.
 - [ ] Verificare graficamente target raw/served, GRF e penetrazione.
 - [ ] Mantenere bloccati i training lunghi finche' H2 non passa.
 
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

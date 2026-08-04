@@ -37,6 +37,11 @@ from typing import Any
 import gymnasium as gym
 import numpy as np
 
+from experimental_morphology_corridor import (
+    EXPERIMENTAL_PHASE_MODE,
+    CompletedSegmentMorphologyLedger,
+)
+
 # Loss keys read from ``info["reward_terms"]`` (produced by the env).
 TRACKING_LOSS = "tracking_loss"
 REFERENCE_LOSS = "reference_loss"
@@ -218,11 +223,23 @@ class RewardConfig:
     prosthetic_joint_q_min: tuple[float, ...] = (-1.40, -0.60)
     prosthetic_joint_q_max: tuple[float, ...] = (0.0, 0.60)
     morphology_profile: str = ""
+    # ``legacy_cycle_fraction`` reproduces historical checkpoints exactly.
+    # ``event_anchored`` fixes HS at phase 0 and TO at the canonical profile
+    # phase while using only past valid cycle durations at runtime.
+    morphology_phase_mode: str = "legacy_cycle_fraction"
     morphology_weight: float = 0.0
     morphology_std_multiplier_knee: float = 1.0
     morphology_std_multiplier_ankle: float = 1.0
     morphology_margin_knee_deg: float = 0.0
     morphology_margin_ankle_deg: float = 0.0
+    # Experimental completed-segment ledger.  All effectful controls default
+    # off: selecting the experimental phase mode with these defaults is a
+    # diagnostic shadow evaluation only.
+    morphology_completed_segment_max_samples: float = 4096.0
+    morphology_hard_q_min: tuple[float, ...] = (-1.40, -0.60)
+    morphology_hard_q_max: tuple[float, ...] = (0.0, 0.60)
+    morphology_hard_termination_enabled: float = 0.0
+    morphology_experimental_allow_effects: float = 0.0
 
     # Reward objective selector. "ex_novo" (default) = the blend above, UNCHANGED.
     # "imitation" = pre-training reward where the prosthetic joints mirror the
@@ -490,15 +507,107 @@ def _morphology_interval_losses(
     return float(loss), float(excursion * excursion), float(excursion)
 
 
+def _morphology_hard_excursions(
+    knee_value: float,
+    ankle_value: float,
+    cfg: RewardConfig,
+) -> tuple[float, float]:
+    """Return raw excursions beyond provisional, phase-independent hard bounds.
+
+    Equality with a hard boundary is valid.  The bounds are diagnostic unless
+    ``morphology_hard_termination_enabled`` is explicitly enabled.
+    """
+    values = (float(knee_value), float(ankle_value))
+    lows = tuple(float(value) for value in cfg.morphology_hard_q_min)
+    highs = tuple(float(value) for value in cfg.morphology_hard_q_max)
+    if len(lows) < 2 or len(highs) < 2:
+        raise ValueError(
+            "morphology_hard_q_min/max must each contain knee and ankle bounds"
+        )
+    excursions: list[float] = []
+    for value, low, high in zip(values, lows[:2], highs[:2]):
+        low_f = min(low, high)
+        high_f = max(low, high)
+        excursions.append(max(low_f - value, value - high_f, 0.0))
+    return float(excursions[0]), float(excursions[1])
+
+
+def _normalize_morphology_phase_mode(value: str) -> str:
+    mode = str(value or "legacy_cycle_fraction").strip().lower().replace("-", "_")
+    aliases = {
+        "legacy": "legacy_cycle_fraction",
+        "legacy_cycle_fraction": "legacy_cycle_fraction",
+        "legacy_fsm": "legacy_cycle_fraction",
+        "fsm_legacy": "legacy_cycle_fraction",
+        "event": "event_anchored",
+        "event_anchored": "event_anchored",
+        "profile_event_anchored": "event_anchored",
+        "hs_to_anchored": "event_anchored",
+        "event_anchored_completed_segment_experimental": EXPERIMENTAL_PHASE_MODE,
+        "completed_segment_experimental": EXPERIMENTAL_PHASE_MODE,
+        "event_retrospective_experimental": EXPERIMENTAL_PHASE_MODE,
+    }
+    try:
+        return aliases[mode]
+    except KeyError as exc:
+        supported = ", ".join(sorted(set(aliases.values())))
+        raise ValueError(
+            f"unsupported morphology_phase_mode={value!r}; expected {supported}"
+        ) from exc
+
+
+_EVENT_WARPED_PHASE_PARAMETERIZATION = "event_warped_hs_to_to_to_hs_v1"
+
+
+def _morphology_canonical_to_phase(
+    profile: Mapping[str, Any],
+    *,
+    require_event_contract: bool = False,
+) -> float:
+    metadata = profile.get("metadata")
+    if not isinstance(metadata, Mapping):
+        metadata = {}
+    if require_event_contract:
+        parameterization = metadata.get("phase_parameterization")
+        if parameterization != _EVENT_WARPED_PHASE_PARAMETERIZATION:
+            raise ValueError(
+                "event-anchored morphology profile metadata must declare "
+                "phase_parameterization="
+                f"{_EVENT_WARPED_PHASE_PARAMETERIZATION!r}; got "
+                f"{parameterization!r}"
+            )
+        candidates = (metadata.get("canonical_to_phase"),)
+    else:
+        candidates = (
+            metadata.get("canonical_to_phase"),
+            metadata.get("mean_to_phase"),
+        )
+    for candidate in candidates:
+        try:
+            value = float(candidate)
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(value) and 0.0 < value < 1.0:
+            return value
+    raise ValueError(
+        "event-anchored morphology profile metadata must define a finite "
+        "canonical_to_phase (or mean_to_phase) strictly inside (0, 1)"
+    )
+
+
 def _fsm_morphology_phase(
     info: Mapping[str, Any],
     cfg: RewardConfig,
+    *,
+    canonical_to_phase: float | None = None,
 ) -> tuple[float | None, float, float]:
     """Return morphology phase from the prosthetic HS-TO-HS FSM.
 
     The returned tuple is ``(phase, available, source_id)`` where source id is:
     0 = unavailable, 1 = nominal bootstrap timing, 2 = measured prosthetic
-    period/stance fraction from a completed cycle.
+    period/stance fraction from the last completed cycle, 4 = robust median of
+    recent valid stance and swing durations. Source id 3 remains reserved for
+    the non-FSM online-gait fallback used by ``_morphology_terms``.
     """
     fsm = info.get("phase_fsm")
     if not isinstance(fsm, Mapping):
@@ -510,6 +619,13 @@ def _fsm_morphology_phase(
     valid_cycle_count = float(fsm.get("valid_cycle_count", 0.0) or 0.0)
     last_period_s = float(fsm.get("last_period_s", 0.0) or 0.0)
     last_stance_fraction = float(fsm.get("last_stance_fraction", 0.0) or 0.0)
+    robust_stance_duration_s = float(
+        fsm.get("robust_stance_duration_s", 0.0) or 0.0
+    )
+    robust_swing_duration_s = float(
+        fsm.get("robust_swing_duration_s", 0.0) or 0.0
+    )
+    duration_history_count = float(fsm.get("duration_history_count", 0.0) or 0.0)
 
     period_s = max(1e-9, float(cfg.phase_period_nominal_s))
     stance_fraction = float(
@@ -527,21 +643,39 @@ def _fsm_morphology_phase(
 
     stance_duration_s = max(1e-9, period_s * stance_fraction)
     swing_duration_s = max(1e-9, period_s * (1.0 - stance_fraction))
+    mode = _normalize_morphology_phase_mode(cfg.morphology_phase_mode)
+    phase_boundary = stance_fraction
+    if mode == "event_anchored":
+        if (
+            duration_history_count > 0.0
+            and robust_stance_duration_s > 1e-9
+            and robust_swing_duration_s > 1e-9
+        ):
+            stance_duration_s = robust_stance_duration_s
+            swing_duration_s = robust_swing_duration_s
+            source_id = 4.0
+        if canonical_to_phase is None:
+            canonical_to_phase = float(cfg.prosthetic_stance_phase_end)
+        phase_boundary = float(np.clip(canonical_to_phase, 1e-6, 1.0 - 1e-6))
+
+    stance_progress = stance_elapsed_s / stance_duration_s
+    swing_progress = swing_elapsed_s / swing_duration_s
+    if mode == "event_anchored":
+        # A late event may hold at its anchor, but can never cross into the next
+        # segment before the FSM actually detects that event.
+        stance_progress = float(np.clip(stance_progress, 0.0, 1.0))
+        swing_progress = float(np.clip(swing_progress, 0.0, 1.0))
 
     if state_id == 1:  # STANCE_AFTER_HS
-        phase = stance_fraction * (stance_elapsed_s / stance_duration_s)
+        phase = phase_boundary * stance_progress
     elif state_id == 2:  # SWING_AFTER_TO
-        phase = stance_fraction + (1.0 - stance_fraction) * (
-            swing_elapsed_s / swing_duration_s
-        )
+        phase = phase_boundary + (1.0 - phase_boundary) * swing_progress
     elif state_id == 4:  # TIMEOUT; preserve terminal phase diagnostics.
         timeout_side = float(fsm.get("timeout_side", 0.0) or 0.0)
         if swing_elapsed_s > 0.0 or timeout_side == 2.0:
-            phase = stance_fraction + (1.0 - stance_fraction) * (
-                swing_elapsed_s / swing_duration_s
-            )
+            phase = phase_boundary + (1.0 - phase_boundary) * swing_progress
         elif stance_elapsed_s > 0.0 or timeout_side == 1.0:
-            phase = stance_fraction * (stance_elapsed_s / stance_duration_s)
+            phase = phase_boundary * stance_progress
         else:
             return None, 0.0, 0.0
     else:
@@ -930,6 +1064,15 @@ def compute_reward(
         ),
         "prosthetic_joint_range_term": float(prosthetic_joint_range_term),
         "morphology_loss": float(reward_terms.get("morphology_loss", 0.0)),
+        "morphology_loss_mean": float(
+            reward_terms.get("morphology_loss_mean", 0.0)
+        ),
+        "morphology_inside_score": float(
+            reward_terms.get("morphology_inside_score", 0.0)
+        ),
+        "morphology_inside_fraction": float(
+            reward_terms.get("morphology_inside_fraction", 0.0)
+        ),
         "morphology_knee_loss": float(
             reward_terms.get("morphology_knee_loss", 0.0)
         ),
@@ -960,6 +1103,54 @@ def compute_reward(
         ),
         "morphology_phase_fsm_available": float(
             reward_terms.get("morphology_phase_fsm_available", 0.0)
+        ),
+        "morphology_phase_mode_id": float(
+            reward_terms.get("morphology_phase_mode_id", 0.0)
+        ),
+        "morphology_canonical_to_phase": float(
+            reward_terms.get("morphology_canonical_to_phase", 0.0)
+        ),
+        "morphology_settled_this_step": float(
+            reward_terms.get("morphology_settled_this_step", 0.0)
+        ),
+        "morphology_settled_sample_count": float(
+            reward_terms.get("morphology_settled_sample_count", 0.0)
+        ),
+        "morphology_pending_sample_count": float(
+            reward_terms.get("morphology_pending_sample_count", 0.0)
+        ),
+        "morphology_active_segment_id": float(
+            reward_terms.get("morphology_active_segment_id", 0.0)
+        ),
+        "morphology_discarded_segment_count": float(
+            reward_terms.get("morphology_discarded_segment_count", 0.0)
+        ),
+        "morphology_discarded_sample_count": float(
+            reward_terms.get("morphology_discarded_sample_count", 0.0)
+        ),
+        "morphology_ledger_overflow": float(
+            reward_terms.get("morphology_ledger_overflow", 0.0)
+        ),
+        "morphology_ledger_nonmonotonic_sample": float(
+            reward_terms.get("morphology_ledger_nonmonotonic_sample", 0.0)
+        ),
+        "morphology_segment_duration_s": float(
+            reward_terms.get("morphology_segment_duration_s", 0.0)
+        ),
+        "morphology_segment_type_id": float(
+            reward_terms.get("morphology_segment_type_id", 0.0)
+        ),
+        "morphology_hard_violation": float(
+            reward_terms.get("morphology_hard_violation", 0.0)
+        ),
+        "morphology_hard_knee_excursion_rad": float(
+            reward_terms.get("morphology_hard_knee_excursion_rad", 0.0)
+        ),
+        "morphology_hard_ankle_excursion_rad": float(
+            reward_terms.get("morphology_hard_ankle_excursion_rad", 0.0)
+        ),
+        "morphology_hard_max_excursion_rad": float(
+            reward_terms.get("morphology_hard_max_excursion_rad", 0.0)
         ),
         "morphology_knee_value_rad": float(
             reward_terms.get("morphology_knee_value_rad", 0.0)
@@ -1034,10 +1225,63 @@ class RewardShapingWrapper(gym.Wrapper):
         self._morphology_profile = _load_morphology_profile(
             self.reward_config.morphology_profile
         )
+        self._morphology_phase_mode = _normalize_morphology_phase_mode(
+            self.reward_config.morphology_phase_mode
+        )
+        self._morphology_canonical_to_phase: float | None = None
+        if (
+            self._morphology_profile is not None
+            and self._morphology_phase_mode
+            in {"event_anchored", EXPERIMENTAL_PHASE_MODE}
+        ):
+            self._morphology_canonical_to_phase = _morphology_canonical_to_phase(
+                self._morphology_profile,
+                require_event_contract=True,
+            )
+        self._experimental_morphology_ledger: (
+            CompletedSegmentMorphologyLedger | None
+        ) = None
+        if self._morphology_phase_mode == EXPERIMENTAL_PHASE_MODE:
+            if self._morphology_profile is None:
+                raise ValueError(
+                    "experimental completed-segment morphology requires a "
+                    "non-empty event-warped morphology_profile"
+                )
+            effects_requested = (
+                abs(float(self.reward_config.morphology_weight)) > 0.0
+                or float(
+                    self.reward_config.morphology_hard_termination_enabled
+                )
+                > 0.0
+            )
+            if (
+                effects_requested
+                and float(
+                    self.reward_config.morphology_experimental_allow_effects
+                )
+                <= 0.0
+            ):
+                raise ValueError(
+                    "experimental completed-segment morphology is shadow-only: "
+                    "keep morphology_weight=0 and hard termination disabled; "
+                    "set morphology_experimental_allow_effects=1 only in an "
+                    "explicit synthetic/research validation"
+                )
+            self._experimental_morphology_ledger = CompletedSegmentMorphologyLedger(
+                max_samples=int(
+                    self.reward_config.morphology_completed_segment_max_samples
+                )
+            )
+        self._morphology_completed_segments_payload: list[dict[str, Any]] = []
+        self._morphology_ledger_diagnostics_payload: dict[str, Any] = {}
         self._reset_contact_support_state()
 
     def reset(self, **kwargs):
         self._reset_contact_support_state()
+        if self._experimental_morphology_ledger is not None:
+            self._experimental_morphology_ledger.reset()
+        self._morphology_completed_segments_payload = []
+        self._morphology_ledger_diagnostics_payload = {}
         return self.env.reset(**kwargs)
 
     def _reset_contact_support_state(self) -> None:
@@ -1548,6 +1792,15 @@ class RewardShapingWrapper(gym.Wrapper):
             "phase_last_period_s": float(last_period_s),
             "phase_previous_period_s": float(previous_period_s),
             "phase_last_stance_fraction": float(last_stance_fraction),
+            "phase_robust_stance_duration_s": float(
+                fsm.get("robust_stance_duration_s", 0.0) or 0.0
+            ),
+            "phase_robust_swing_duration_s": float(
+                fsm.get("robust_swing_duration_s", 0.0) or 0.0
+            ),
+            "phase_duration_history_count": float(
+                fsm.get("duration_history_count", 0.0) or 0.0
+            ),
             "phase_stance_contact_time_s": float(
                 fsm.get("stance_contact_time_s", 0.0) or 0.0
             ),
@@ -1623,16 +1876,289 @@ class RewardShapingWrapper(gym.Wrapper):
             "fsm_morphology_phase": 0.0,
             "morphology_phase_source_id": 0.0,
             "morphology_phase_fsm_available": 0.0,
+            "morphology_phase_mode_id": 0.0,
+            "morphology_canonical_to_phase": 0.0,
+            "morphology_loss_mean": 0.0,
+            "morphology_inside_score": 0.0,
+            "morphology_inside_fraction": 0.0,
+            "morphology_settled_this_step": 0.0,
+            "morphology_settled_sample_count": 0.0,
+            "morphology_pending_sample_count": 0.0,
+            "morphology_active_segment_id": 0.0,
+            "morphology_discarded_segment_count": 0.0,
+            "morphology_discarded_sample_count": 0.0,
+            "morphology_ledger_overflow": 0.0,
+            "morphology_ledger_nonmonotonic_sample": 0.0,
+            "morphology_segment_duration_s": 0.0,
+            "morphology_segment_type_id": 0.0,
+            "morphology_hard_violation": 0.0,
+            "morphology_hard_knee_excursion_rad": 0.0,
+            "morphology_hard_ankle_excursion_rad": 0.0,
+            "morphology_hard_max_excursion_rad": 0.0,
         }
+
+    def _experimental_morphology_terms(
+        self,
+        info: Mapping[str, Any],
+    ) -> dict[str, float]:
+        """Settle exact event-warped losses for completed FSM segments.
+
+        The Gym API cannot rewrite rewards already returned for earlier steps.
+        Consequently ``morphology_loss`` is the *sum* of the completed
+        segment's per-sample losses and is emitted sparsely on TO/HS.  The
+        shipped experimental override keeps its weight at zero; positive-weight
+        PPO use requires a separate complete-episode protocol and validation.
+        """
+        terms = self._empty_morphology_terms()
+        terms["morphology_phase_mode_id"] = 3.0
+        ledger = self._experimental_morphology_ledger
+        profile = self._morphology_profile
+        alpha = self._morphology_canonical_to_phase
+        if ledger is None or profile is None or alpha is None:
+            return terms
+
+        obs = info.get("observation")
+        if not isinstance(obs, Mapping):
+            obs = {}
+        try:
+            time_s = float(info.get("time", float("nan")))
+            knee_value = float(obs.get("pros_knee_angle_served_ref", float("nan")))
+            ankle_value = float(obs.get("pros_ankle_angle_served_ref", float("nan")))
+        except (TypeError, ValueError):
+            time_s = knee_value = ankle_value = float("nan")
+
+        fsm = info.get("phase_fsm")
+        if not isinstance(fsm, Mapping):
+            fsm = {}
+        transitions = fsm.get("accepted_transitions_this_step")
+        if not isinstance(transitions, (list, tuple)):
+            transitions = ()
+        raw_terms = info.get("reward_terms")
+        if not isinstance(raw_terms, Mapping):
+            raw_terms = {}
+        episode_ended = bool(
+            float(raw_terms.get("terminated", 0.0) or 0.0) > 0.0
+            or float(raw_terms.get("truncated", 0.0) or 0.0) > 0.0
+            or float(fsm.get("timeout_exceeded", 0.0) or 0.0) > 0.0
+            or info.get("end_reason")
+        )
+        update = ledger.update(
+            time_s=time_s,
+            knee_rad=knee_value,
+            ankle_rad=ankle_value,
+            accepted_transitions=transitions,
+            episode_ended=episode_ended,
+        )
+        self._morphology_ledger_diagnostics_payload = {
+            "discard_reason": str(update.discard_reason),
+            "discarded_segment_count": int(update.discarded_segment_count),
+            "discarded_sample_count": int(update.discarded_sample_count),
+            "overflowed": bool(update.overflowed),
+            "nonmonotonic_sample": bool(update.nonmonotonic_sample),
+            "pending_sample_count": int(update.pending_sample_count),
+            "active_segment_type": str(update.active_segment_type),
+            "active_segment_start_time_s": float(
+                update.active_segment_start_time_s
+            ),
+            "completed_segment_count": len(update.completed_segments),
+        }
+
+        active_id = {"": 0.0, "stance": 1.0, "swing": 2.0}.get(
+            update.active_segment_type,
+            0.0,
+        )
+        terms.update(
+            {
+                "morphology_canonical_to_phase": float(alpha),
+                "morphology_phase_source_id": 5.0,
+                "morphology_phase_fsm_available": float(
+                    bool(update.active_segment_type)
+                ),
+                "morphology_pending_sample_count": float(
+                    update.pending_sample_count
+                ),
+                "morphology_active_segment_id": float(active_id),
+                "morphology_discarded_segment_count": float(
+                    update.discarded_segment_count
+                ),
+                "morphology_discarded_sample_count": float(
+                    update.discarded_sample_count
+                ),
+                "morphology_ledger_overflow": float(update.overflowed),
+                "morphology_ledger_nonmonotonic_sample": float(
+                    update.nonmonotonic_sample
+                ),
+            }
+        )
+
+        payloads: list[dict[str, Any]] = []
+        knee_loss_sum = 0.0
+        ankle_loss_sum = 0.0
+        knee_raw_sum = 0.0
+        ankle_raw_sum = 0.0
+        knee_excursion_max = 0.0
+        ankle_excursion_max = 0.0
+        knee_hard_max = 0.0
+        ankle_hard_max = 0.0
+        inside_score_sum = 0.0
+        sample_count = 0
+        last_sample_payload: dict[str, float] | None = None
+        last_segment_type = ""
+        last_segment_duration_s = 0.0
+
+        for segment in update.completed_segments:
+            phases = segment.phases(alpha)
+            segment_samples: list[dict[str, float]] = []
+            for sample, phase in zip(segment.samples, phases):
+                corridor = _morphology_corridor_at(
+                    profile,
+                    phase,
+                    self.reward_config,
+                )
+                knee_corridor = corridor["pros_knee_angle"]
+                ankle_corridor = corridor["pros_ankle_angle"]
+                knee_loss, knee_raw, knee_excursion = _morphology_interval_losses(
+                    sample.knee_rad,
+                    knee_corridor["min_rad"],
+                    knee_corridor["max_rad"],
+                )
+                ankle_loss, ankle_raw, ankle_excursion = _morphology_interval_losses(
+                    sample.ankle_rad,
+                    ankle_corridor["min_rad"],
+                    ankle_corridor["max_rad"],
+                )
+                knee_hard, ankle_hard = _morphology_hard_excursions(
+                    sample.knee_rad,
+                    sample.ankle_rad,
+                    self.reward_config,
+                )
+                inside_score = 0.5 * (
+                    float(knee_excursion == 0.0)
+                    + float(ankle_excursion == 0.0)
+                )
+                item = {
+                    "time_s": float(sample.time_s),
+                    "phase": float(phase),
+                    "knee_served_ref_rad": float(sample.knee_rad),
+                    "ankle_served_ref_rad": float(sample.ankle_rad),
+                    "knee_min_rad": float(knee_corridor["min_rad"]),
+                    "knee_max_rad": float(knee_corridor["max_rad"]),
+                    "ankle_min_rad": float(ankle_corridor["min_rad"]),
+                    "ankle_max_rad": float(ankle_corridor["max_rad"]),
+                    "knee_loss": float(knee_loss),
+                    "ankle_loss": float(ankle_loss),
+                    "knee_excursion_rad": float(knee_excursion),
+                    "ankle_excursion_rad": float(ankle_excursion),
+                    "inside_score": float(inside_score),
+                    "knee_hard_excursion_rad": float(knee_hard),
+                    "ankle_hard_excursion_rad": float(ankle_hard),
+                }
+                segment_samples.append(item)
+                last_sample_payload = item
+                sample_count += 1
+                knee_loss_sum += knee_loss
+                ankle_loss_sum += ankle_loss
+                knee_raw_sum += knee_raw
+                ankle_raw_sum += ankle_raw
+                knee_excursion_max = max(knee_excursion_max, knee_excursion)
+                ankle_excursion_max = max(ankle_excursion_max, ankle_excursion)
+                knee_hard_max = max(knee_hard_max, knee_hard)
+                ankle_hard_max = max(ankle_hard_max, ankle_hard)
+                inside_score_sum += inside_score
+
+            last_segment_type = segment.segment_type
+            last_segment_duration_s = segment.duration_s
+            payloads.append(
+                {
+                    "segment_type": segment.segment_type,
+                    "start_time_s": float(segment.start_time_s),
+                    "end_time_s": float(segment.end_time_s),
+                    "duration_s": float(segment.duration_s),
+                    "sample_count": len(segment_samples),
+                    "samples": segment_samples,
+                }
+            )
+
+        self._morphology_completed_segments_payload = payloads
+        if sample_count <= 0:
+            return terms
+
+        total_loss_sum = 0.5 * (knee_loss_sum + ankle_loss_sum)
+        last = last_sample_payload or {}
+        hard_max = max(knee_hard_max, ankle_hard_max)
+        segment_type_id = 1.0 if last_segment_type == "stance" else 2.0
+        terms.update(
+            {
+                "morphology_available": 1.0,
+                "morphology_phase": float(last.get("phase", 0.0)),
+                "fsm_morphology_phase": float(last.get("phase", 0.0)),
+                "morphology_loss": float(total_loss_sum),
+                "morphology_loss_mean": float(total_loss_sum / sample_count),
+                "morphology_knee_loss": float(knee_loss_sum),
+                "morphology_ankle_loss": float(ankle_loss_sum),
+                "morphology_knee_raw_loss_rad2": float(knee_raw_sum),
+                "morphology_ankle_raw_loss_rad2": float(ankle_raw_sum),
+                "morphology_knee_excursion_rad": float(knee_excursion_max),
+                "morphology_ankle_excursion_rad": float(ankle_excursion_max),
+                "morphology_knee_value_rad": float(
+                    last.get("knee_served_ref_rad", 0.0)
+                ),
+                "morphology_ankle_value_rad": float(
+                    last.get("ankle_served_ref_rad", 0.0)
+                ),
+                "morphology_knee_min_rad": float(last.get("knee_min_rad", 0.0)),
+                "morphology_knee_max_rad": float(last.get("knee_max_rad", 0.0)),
+                "morphology_ankle_min_rad": float(
+                    last.get("ankle_min_rad", 0.0)
+                ),
+                "morphology_ankle_max_rad": float(
+                    last.get("ankle_max_rad", 0.0)
+                ),
+                "morphology_inside_score": float(
+                    inside_score_sum / sample_count
+                ),
+                "morphology_inside_fraction": float(
+                    inside_score_sum / sample_count
+                ),
+                "morphology_settled_this_step": float(
+                    len(update.completed_segments)
+                ),
+                "morphology_settled_sample_count": float(sample_count),
+                "morphology_segment_duration_s": float(
+                    last_segment_duration_s
+                ),
+                "morphology_segment_type_id": float(segment_type_id),
+                "morphology_hard_violation": float(hard_max > 0.0),
+                "morphology_hard_knee_excursion_rad": float(knee_hard_max),
+                "morphology_hard_ankle_excursion_rad": float(ankle_hard_max),
+                "morphology_hard_max_excursion_rad": float(hard_max),
+            }
+        )
+        return terms
 
     def _morphology_terms(self, info: Mapping[str, Any]) -> dict[str, float]:
         profile = self._morphology_profile
         if profile is None:
             return self._empty_morphology_terms()
 
+        phase_mode = self._morphology_phase_mode
+        if phase_mode == EXPERIMENTAL_PHASE_MODE:
+            return self._experimental_morphology_terms(info)
+        if phase_mode == "event_anchored":
+            canonical_to_phase = self._morphology_canonical_to_phase
+            if canonical_to_phase is None:
+                raise RuntimeError("event-anchored morphology TO phase was not loaded")
+        else:
+            try:
+                canonical_to_phase = _morphology_canonical_to_phase(profile)
+            except ValueError:
+                canonical_to_phase = 0.0
         fsm_phase, fsm_available, phase_source_id = _fsm_morphology_phase(
             info,
             self.reward_config,
+            canonical_to_phase=(
+                canonical_to_phase if phase_mode == "event_anchored" else None
+            ),
         )
         if "phase_fsm" in info:
             if fsm_phase is None:
@@ -1686,6 +2212,10 @@ class RewardShapingWrapper(gym.Wrapper):
             "fsm_morphology_phase": float(fsm_phase or 0.0),
             "morphology_phase_source_id": float(phase_source_id),
             "morphology_phase_fsm_available": float(fsm_available),
+            "morphology_phase_mode_id": float(
+                2.0 if phase_mode == "event_anchored" else 1.0
+            ),
+            "morphology_canonical_to_phase": float(canonical_to_phase),
             "morphology_loss": float(0.5 * (knee_loss + ankle_loss)),
             "morphology_knee_loss": float(knee_loss),
             "morphology_ankle_loss": float(ankle_loss),
@@ -1769,9 +2299,33 @@ class RewardShapingWrapper(gym.Wrapper):
                 info["end_reason"] = f"phase_timeout:{side_name}"
                 terms["terminated"] = 1.0
                 terms["truncated"] = 0.0
+        if (
+            float(self.reward_config.morphology_hard_termination_enabled) > 0.0
+            and float(terms.get("morphology_hard_violation", 0.0) or 0.0) > 0.0
+        ):
+            current_reason = info.get("end_reason")
+            if current_reason in {
+                None,
+                "episode_time_limit",
+                "dataset_end",
+            }:
+                terminated = True
+                truncated = False
+                info["end_reason"] = (
+                    "morphology_hard_violation:completed_segment"
+                )
+                terms["terminated"] = 1.0
+                terms["truncated"] = 0.0
         info["reward_terms"] = terms
         info["reward_components"] = components
         info["reward_env_original"] = float(env_reward)
+        if self._morphology_phase_mode == EXPERIMENTAL_PHASE_MODE:
+            info["morphology_completed_segments"] = [
+                dict(item) for item in self._morphology_completed_segments_payload
+            ]
+            info["morphology_ledger_diagnostics"] = dict(
+                self._morphology_ledger_diagnostics_payload
+            )
         log = dict(info.get("log") or {})
         for key, value in components.items():
             log[f"RewardShaped/{key}"] = float(value)

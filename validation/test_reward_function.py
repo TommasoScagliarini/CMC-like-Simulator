@@ -171,8 +171,10 @@ def test_exnovo_config_enables_task_based_reward_terms() -> None:
     assert resolved.reserve_residual_weight == 0.0
     assert resolved.pelvis_height_weight == 0.0
     assert resolved.morphology_profile.endswith(
-        "morphology_profiles/ab06_prosthetic_mean_std_corridor.json"
+        "morphology_profiles/"
+        "ab06_prosthetic_event_warped_mean_std_corridor.json"
     )
+    assert resolved.morphology_phase_mode == "event_anchored"
     assert resolved.morphology_weight == 0.0
     assert resolved.morphology_std_multiplier_knee == 1.6
     assert resolved.morphology_std_multiplier_ankle == 0.6

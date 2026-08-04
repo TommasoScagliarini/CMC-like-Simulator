@@ -194,3 +194,8 @@ decisione                         STOP_BEFORE_H1
       multi-ciclo, TODO ereditato dal 10 luglio.
 - [ ] Tenere una memoria esplicita in coda finche' i test di osservabilita' non
       mostrino un limite sequenziale reale; non introdurla come scorciatoia.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

@@ -1,0 +1,86 @@
+{
+  "schema_version": 9,
+  "protocol_id": "AB06_TWO_SENSOR_TIMING_PLACEMENT_DEVELOPMENT_2026-07-22_V9",
+  "frozen_before_execution": true,
+  "freeze_date": "2026-07-22",
+  "stage": "development_final_heel_micro_multiresolution",
+  "objective": "Perform one final local extrapolation from the V8 best candidate, using slightly deeper and more anterior heel placements to close its three-sample transfer gap and recover its 1.469 ms HS overrun, with only a F79/F79.5 comparison at fixed P35. Every detector remains exactly one heel plus one forefoot sphere.",
+  "base_protocol": {
+    "path": "validation/two_sensor_timing_placement_sweep_protocol_v8.json",
+    "sha256": "4d2065b9751b1ad179379ef4bb952a80620ac3b0996301af7f1e640744f25178"
+  },
+  "source_v8_manifest": {
+    "path": "validation/two_sensor_timing_placement_sweep_runs/2026-07-22_ab06_50_100_heel_micro_v8/manifest.json",
+    "sha256": "5fff95a44da968c54df81dc02a87128dc4bd025448feed8bed416e36c38d4840"
+  },
+  "threshold_fsm_gate_or_evidence_routing_changed": false,
+  "declared_final_local_iteration": true,
+  "placement_grid": {
+    "heel_vertical_offsets_below_current_mm": [2.5, 2.75],
+    "heel_anterior_x_deltas_mm": [3.0, 3.25],
+    "forefoot_longitudinal_fractions_mesh_x": [0.79, 0.795],
+    "forefoot_absolute_local_plantar_protrusion_mm": [35.0],
+    "selectable_candidate_count": 8,
+    "nonselectable_comparator_count": 2,
+    "total_pair_count": 10,
+    "sensors_per_pair": 2,
+    "maximum_absolute_heel_forefoot_bottom_offset_mm": 20.0
+  },
+  "sampling": {
+    "runtime_10ms": {
+      "method": "all_required_spheres_directly_in_one_opensim_pass",
+      "expected_unique_detector_spheres": 9,
+      "expected_primary_load_spheres": 8,
+      "expected_total_unique_spheres": 17,
+      "evaluated_pair_count": 10
+    },
+    "fine_1ms": {
+      "method": "all_required_spheres_directly_in_one_opensim_pass",
+      "expected_unique_detector_spheres": 9,
+      "expected_primary_load_spheres": 8,
+      "expected_total_unique_spheres": 17,
+      "evaluated_pair_count": 10
+    },
+    "affine_reconstruction": false,
+    "shared_spheres_are_offline_sampling_optimization_only": true
+  },
+  "selection": {
+    "eligibility": "full_strict_pass_at_both_10ms_and_1ms",
+    "ranking": [
+      "multiresolution_worst_event_normalized_max_abs_error:min",
+      "multiresolution_mean_event_normalized_mean_abs_error:min",
+      "minimum_multiresolution_confirmed_fsm_stance_iou:max",
+      "geometry_displacement_from_current_m:min",
+      "candidate_id:lexicographic"
+    ]
+  },
+  "sources": {
+    "v9_validator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v9.py",
+      "sha256": "4c330e3d5298f90c298608bffb94da5ef02f89f3f11efb8408e57468d3e92368"
+    },
+    "v8_validator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v8.py",
+      "sha256": "9d40048cdbabb9fc57b03857509db9c04b444b4618c5e70d6184786124303740"
+    },
+    "v8_protocol": {
+      "path": "validation/two_sensor_timing_placement_sweep_protocol_v8.json",
+      "sha256": "4d2065b9751b1ad179379ef4bb952a80620ac3b0996301af7f1e640744f25178"
+    },
+    "v8_manifest": {
+      "path": "validation/two_sensor_timing_placement_sweep_runs/2026-07-22_ab06_50_100_heel_micro_v8/manifest.json",
+      "sha256": "5fff95a44da968c54df81dc02a87128dc4bd025448feed8bed416e36c38d4840"
+    }
+  },
+  "interpretation_limits": [
+    "This is the declared final local development iteration for the current two-sphere geometry concept.",
+    "A PASS is development evidence only; sealed holdout validation remains mandatory before profile creation or promotion.",
+    "Every detector candidate has exactly two spheres: one heel and one forefoot.",
+    "The nine unique detector spheres in each offline batch are shared placement samples for ten independent two-sensor pairs, not a nine-sensor runtime detector.",
+    "The mesh is used only offline for sphere placement and geometric pre-gates.",
+    "Thresholds 0.5/0.25 N, dwell 30 ms, FSM, timing gates, primary load evidence, and event-guard routing are unchanged.",
+    "Toe recontact remains a separate foot-clearance diagnostic; detector validity requires at least 30 ms causal clear before the next accepted HS onset.",
+    "The runtime RL load-routing gap remains unresolved, so a development winner is not promotable or deployable.",
+    "No policy, training, rollout, runtime default, FSM, active profile, or sealed data is modified or evaluated."
+  ]
+}

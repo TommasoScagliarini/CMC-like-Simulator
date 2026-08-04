@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "protocol_id": "AB06_TWO_SENSOR_V4_FIXED_GEOMETRY_50_100_2026-07-21_V1",
+  "frozen_before_execution": true,
+  "freeze_date": "2026-07-21",
+  "objective": "Compare the hash-pinned current and experimental V4 mesh detector geometries without tuning, using the production two-sensor FSM and confirmed-time evaluator on only the already-open 50-100 s AB06 block. No policy, training, reward, runtime configuration, FSM implementation, or detector profile is modified.",
+  "setup": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+  "profiles": {
+    "current_geometry": {
+      "role": "comparator",
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+    },
+    "v4_mesh_geometry": {
+      "role": "candidate",
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO_v4_mesh_experimental.json",
+      "sha256": "a0bda7fc657fad52e62904fc4083f59dd6da9a9566d160a9e88294af00d4b02e"
+    }
+  },
+  "data_access": {
+    "already_open_block_s": [50.0, 100.0],
+    "upper_bound_is_exclusive": true,
+    "allow_samples_at_or_after_100_s": false,
+    "sealed_block_s": [100.0, 155.045],
+    "sealed_block_status": "CLOSED_UNEVALUATED",
+    "failure_policy": "Abort before contact sampling if the reference confirmation margin or any generated sample would reach t >= 100 s.",
+    "minimum_complete_cycles": 10
+  },
+  "replay": {
+    "sea_plugin": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "event_source": "two_sensor",
+    "sensor_on_threshold_n": 0.5,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_dwell_s": 0.03,
+    "primary_sample_dt_s": 0.01,
+    "sensitivity_sample_dt_s": 0.001,
+    "primary_event_time_field": "confirmed_time_s",
+    "diagnostic_event_time_field": "event_time_s",
+    "phase_reference_mode": "validated_event_intervals",
+    "prescribed_contact_threshold_n": 20.0,
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "hs_tolerance_s": 0.05,
+    "toe_off_tolerance_s": 0.08,
+    "geometry_or_threshold_tuning_allowed": false
+  },
+  "sealed_validation_gate": {
+    "primary_event_timestamp": "confirmed_time_s",
+    "onset_is_diagnostic_only": true,
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "no_invalid_or_timeout_transitions": true,
+    "no_unaccepted_sensor_gait_events": true,
+    "exact_hs_to_toe_off_to_hs_order_and_cycle_count": true,
+    "confirmation_latency_range": "[sensor_dwell_s, sensor_dwell_s + sample_dt_s]",
+    "zero_phase_mismatches_outside_fixed_confirmed_event_windows": true,
+    "no_unknown_fsm_phase_samples": true,
+    "minimum_confirmed_fsm_stance_f1": 0.95,
+    "minimum_confirmed_fsm_stance_iou": 0.9,
+    "maximum_confirmed_fsm_iou_regression_vs_baseline": 0.01,
+    "maximum_confirmed_time_worst_timing_regression_vs_baseline": 0.0,
+    "primary_10ms_and_sensitivity_1ms_must_both_pass": true
+  },
+  "regional_continuity_diagnostics_not_gate": {
+    "required": true,
+    "stance_bounds": "prescribed validated HS-to-TO",
+    "contact_signal": "production FSM debounced regional heel/toe latches",
+    "metrics": [
+      "toe onset after prescribed HS",
+      "toe contact duration and peak regional load",
+      "heel-off to toe-on overlap or unsupported gap",
+      "maximum interior both-off gap",
+      "confirmed TO timing error"
+    ],
+    "reason_not_gating": "These metrics were added to explain the fixed comparison and identify premature-TO risk; no numeric continuity acceptance limit was selected before this geometry existed. They cannot be used to retune this run."
+  },
+  "sources": {
+    "setup": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+      "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"
+    },
+    "model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "prescribed_kinematics": {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "external_loads_xml": {
+      "path": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml",
+      "sha256": "a2fb6460fc0f8ae9294b4504eb9bb18f0dcc4b112ec71403448c28f4b5dc3f27"
+    },
+    "prescribed_grf": {
+      "path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot",
+      "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"
+    },
+    "current_detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+    },
+    "v4_detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO_v4_mesh_experimental.json",
+      "sha256": "a0bda7fc657fad52e62904fc4083f59dd6da9a9566d160a9e88294af00d4b02e"
+    },
+    "runtime_fsm_configuration": {
+      "path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"
+    },
+    "production_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "ec726fdf392f099ac1135de9e736e984ada695c9704102621d0cd8af2fdc5b45"
+    },
+    "fixed_comparison_validator": {
+      "path": "validation/compare_two_sensor_mesh_profiles_prescribed.py",
+      "sha256": "4136f08a0fb370cb9bc8a3819f6922bb72eb9cd90140bb8769c6aa834bbecec0"
+    },
+    "threshold_evaluator": {
+      "path": "validation/sweep_two_sensor_prescribed_thresholds.py",
+      "sha256": "1a33efe86f5bbfb986e24dd1d2784e43339dcd8dda3ea23030203781b389f586"
+    },
+    "prescribed_replay_evaluator": {
+      "path": "validation/validate_two_sensor_prescribed_replay.py",
+      "sha256": "91dcf134f2978f808457eafd5919985cccbb504dd3c3b75da8f47fa996a39fae"
+    },
+    "contact_evaluator": {
+      "path": "validation/validate_online_grf.py",
+      "sha256": "d71855951d23660e7eeba3f70da31996a2ff1be8ec9a3a64bd75a4c18613021c"
+    },
+    "event_matcher": {
+      "path": "validation/validate_online_grf_events.py",
+      "sha256": "6f314854ce80f6ab13eec7ac9a0b02d8014dd02c274c36c6bcdc00982b0ba2f7"
+    },
+    "online_grf_runtime": {
+      "path": "online_grf.py",
+      "sha256": "201cf8c4451d60afa66e034572469e6c0b121fb541fb528f3044903aad8784b8"
+    },
+    "setup_parser": {
+      "path": "setup_io.py",
+      "sha256": "9d24df7b272ad6550c2897151b019b53d665a61a715217eeeb6dfbe54a6ae6e3"
+    }
+  },
+  "interpretation_limits": [
+    "The V4 toe placement was frozen from mesh geometry before this timing comparison and is not adjusted using these results.",
+    "The current profile is a fixed geometry comparator under the same selected 0.5/0.25 N contract; it is not the checked-in runtime default threshold contract.",
+    "The 1 ms run is a fixed sampling-sensitivity gate, not a source of tuning.",
+    "Passing does not validate hardware sensor noise, cross-subject generalization, policy robustness, or policy deployability.",
+    "The 100-155.045 s block remains sealed and cannot be sampled by this protocol."
+  ]
+}

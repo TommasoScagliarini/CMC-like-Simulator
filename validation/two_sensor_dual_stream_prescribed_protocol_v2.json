@@ -1,0 +1,84 @@
+{
+  "schema_version": 2,
+  "protocol_id": "AB06_TWO_SENSOR_DUAL_STREAM_CAUSAL_DIAGNOSTIC_2026-07-22_V2_RAW_GUARD",
+  "frozen_before_execution": true,
+  "freeze_date": "2026-07-22",
+  "stage": "development_causal_diagnostic",
+  "objective": "Correct the V1 A/B integrity control without changing the physical experiment. The integrity hash now contains only the raw heel/toe forces, their debounced contact latches, and detector edges produced before FSM event acceptance. FSM-conditioned sensor event candidates remain reported separately and cannot invalidate the A/B comparison. Determine whether primary load evidence removes stance_load_too_low for the fixed H02_F70_P31p5 and H02_F70_P32p0 detector pairs.",
+  "derived_from": {
+    "protocol_path": "validation/two_sensor_dual_stream_prescribed_protocol.json",
+    "protocol_sha256": "98667695d844fef23a6da242ddec2432bffe46e944b59412416a02beff4e56e6",
+    "invalid_manifest_path": "validation/two_sensor_dual_stream_diagnostic_runs/2026-07-22_ab06_50_100_h02_f70_p315_p320/manifest.json",
+    "invalid_manifest_sha256": "08419eb3f454a264e98f90049788318a081abd3fa164ddbda288029d7637172e",
+    "invalid_conclusion": "INVALID_AB_DETECTOR_GUARD_STREAM_DRIFT",
+    "interpretation": "The V1 run is retained as evidence that the original integrity control mixed pre-FSM detector state with FSM-state-conditioned event candidates. Its physical A/B observations are not deleted or overwritten."
+  },
+  "inherited_contract": {
+    "mode": "reuse_hash_pinned_v1_without_changes",
+    "keys": [
+      "setup",
+      "profile_paths",
+      "load_evidence_profile",
+      "candidate_ids",
+      "candidate_lineage",
+      "data_access",
+      "replay",
+      "branches",
+      "sampling",
+      "decision_contract"
+    ]
+  },
+  "guard_trace_correction": {
+    "v1_error": "state_conditioned_sensor_event_candidates_were_included_in_the_detector_guard_hash",
+    "ab_integrity_gate_fields": [
+      "raw_heel_force_trace",
+      "raw_toe_force_trace",
+      "debounced_heel_latch_trace",
+      "debounced_toe_latch_trace",
+      "raw_detector_edge_trace"
+    ],
+    "fsm_conditioned_sensor_event_candidates_role": "diagnostic_only",
+    "fsm_conditioned_candidate_drift_invalidates_ab": false,
+    "accepted_transitions_in_ab_integrity_hash": false
+  },
+  "execution": {
+    "default_output_dir": "validation/two_sensor_dual_stream_diagnostic_runs/2026-07-22_ab06_50_100_h02_f70_p315_p320_v2_raw_guard",
+    "default_plot_dir": "plot/07_22_2026_two_sensor_dual_stream_causal_diagnostic_v2_raw_guard",
+    "new_versioned_run_required": true,
+    "v1_artifacts_must_remain_immutable": true
+  },
+  "sources": {
+    "v2_validator": {
+      "path": "validation/diagnose_two_sensor_dual_stream_prescribed_v2.py",
+      "sha256": "978c3d3d85c3443c29649e110d406bc2009c79ed94bf232ff4849e8c0d5c2d28"
+    },
+    "v1_validator": {
+      "path": "validation/diagnose_two_sensor_dual_stream_prescribed.py",
+      "sha256": "e9376dd841456b77af6a6bda97895143e3f8d70023d4282f9a90a2579b37a1a1"
+    },
+    "v1_protocol": {
+      "path": "validation/two_sensor_dual_stream_prescribed_protocol.json",
+      "sha256": "98667695d844fef23a6da242ddec2432bffe46e944b59412416a02beff4e56e6"
+    },
+    "v1_test": {
+      "path": "validation/test_two_sensor_dual_stream_prescribed.py",
+      "sha256": "4de184a2bfc7e3fd3bd3732a1ca9c99194085877026c6236025c3003d37eb59f"
+    },
+    "v1_invalid_manifest": {
+      "path": "validation/two_sensor_dual_stream_diagnostic_runs/2026-07-22_ab06_50_100_h02_f70_p315_p320/manifest.json",
+      "sha256": "08419eb3f454a264e98f90049788318a081abd3fa164ddbda288029d7637172e"
+    },
+    "v1_invalid_metrics": {
+      "path": "validation/two_sensor_dual_stream_diagnostic_runs/2026-07-22_ab06_50_100_h02_f70_p315_p320/dual_stream_branch_metrics.csv",
+      "sha256": "dc64a1e44a11365195278091704956faf8584084d122b5509dc3c62290f1c3ad"
+    }
+  },
+  "interpretation_limits": [
+    "V2 corrects only the integrity control. It does not alter or rerun geometry selection, thresholds, dwell, FSM logic, contact law, prescribed reference extraction, load-evidence sources, or detector input forces.",
+    "Raw detector equality means equality of heel/toe force arrays, debounced heel/toe latch arrays, and detector edge records. These quantities precede FSM event acceptance.",
+    "Sensor event candidates are retained with their own hash and full event list, but they are state-conditioned because mapping detector edges to HS/TO candidates consults the current FSM state. Their A/B difference is therefore expected when load evidence changes FSM progression.",
+    "A disappearance of stance_load_too_low isolates a load-evidence limitation. It does not by itself validate event timing, candidate geometry, deployability, or a detector profile.",
+    "This remains a causal diagnostic on the already-open 50-100 s block. It cannot select or promote a detector, access sealed data, run a rollout, or train a policy.",
+    "The V1 INVALID run and all its artifacts remain immutable and separately auditable."
+  ]
+}

@@ -453,3 +453,8 @@ comportamentale non e' ancora risolta: il training full-batch conferma che la
 policy non produce un ciclo completo e che il prossimo intervento deve essere
 sulla reward densa di recupero contatto/landing e sulla saturazione delle
 azioni, non sulla morphology.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

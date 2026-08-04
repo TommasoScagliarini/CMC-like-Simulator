@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "source": "v17_high_rate_candidate_with_v13_geometry",
+  "ground": {
+    "origin": [0.0, 0.0148208231, 0.0],
+    "normal": [0.0, 1.0, 0.0],
+    "surface_velocity": [0.0, 0.0, 0.0]
+  },
+  "material": {
+    "stiffness": 46291.9265,
+    "dissipation": 0.1920624923,
+    "static_friction": 0.2981956025,
+    "dynamic_friction": 0.2981956025,
+    "viscous_friction": 0.0,
+    "transition_velocity": 0.2,
+    "smoothing": 0.00001
+  },
+  "spheres": [
+    {
+      "name": "left_heel",
+      "side": "left",
+      "frame": "/bodyset/foot_l",
+      "location": [-0.0946600475, -0.0353195377, 0.01399567],
+      "radius": 0.0229053623
+    },
+    {
+      "name": "left_toe",
+      "side": "left",
+      "frame": "/bodyset/foot_l",
+      "location": [0.11574858501553537, -0.051879237903540584, 0.0030479021621026177],
+      "radius": 0.0229053623
+    }
+  ],
+  "metadata": {
+    "status": "development_candidate_not_runtime_or_training_promoted",
+    "human_alias": "V17 high-rate two-sensor candidate",
+    "candidate_id": "two_sensor_v17_high_rate_v13_geometry",
+    "event_contract_id": "primary_grf_split_v1+two_sensor_highrate_v1",
+    "geometry_origin": "V13 development baseline copied exactly; no V16 geometry selected",
+    "designation_date": "2026-08-03",
+    "designation_scope": "single preregistered high-rate development candidate",
+    "detector_sampling": {
+      "sample_dt_s": 0.001,
+      "policy_step_s": 0.01,
+      "sensor_on_threshold_n": 0.5,
+      "sensor_off_threshold_n": 0.25,
+      "sensor_dwell_s": 0.03
+    },
+    "force_role": "detector-only; loader must set appliesForce=false for both spheres",
+    "v13_comparator": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "status": "diagnostic_nonselectable_not_promoted"
+    },
+    "allowed_uses": [
+      "development prescribed replay on trials 02/04/08",
+      "shadow-mode runtime preflight after development PASS",
+      "frozen candidate input to separately authorized one-shot validation"
+    ],
+    "forbidden_uses": [
+      "runtime activation before protected validation and sealed PASS",
+      "policy training or inference before atomic promotion",
+      "geometry, threshold, dwell or radius sweep",
+      "fallback to V13 after a V17 development failure"
+    ],
+    "contract": "exactly one prosthetic heel sphere and one prosthetic toe sphere; neither applies physical force"
+  }
+}

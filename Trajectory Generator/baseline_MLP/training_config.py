@@ -111,6 +111,7 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
     "parallelism": {
         "num_env_runners": int,
         "ray_num_cpus": _opt(int),
+        "exact_start_sampling": _to_bool,
     },
     "simulation": {
         "setup_xml": str,
@@ -155,6 +156,12 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "grf_mode": str,
         "online_grf_profile": str,
         "online_grf_detector_profile": _opt(str),
+        "phase_fsm_input_mode": str,
+        "phase_sensor_on_threshold_n": float,
+        "phase_sensor_off_threshold_n": float,
+        "phase_sensor_dwell_s": float,
+        "detector_sample_dt_s": float,
+        "event_contract_id": str,
         "online_grf_observation": _to_bool,
         "online_grf_applied_side": _list_str,
         "disable_prescribed_grf_side": _list_str,
@@ -169,6 +176,8 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "max_consecutive_crash_restarts": int,
         "child_self_timeout": _to_bool,
         "checkpoint_every": int,
+        "retain_iteration_checkpoints": _to_bool,
+        "max_minibatch_mean_kl_loss": _opt(float),
     },
     "logging": {
         "tensorboard": _to_bool,

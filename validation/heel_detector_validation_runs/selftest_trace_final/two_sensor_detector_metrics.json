@@ -1,0 +1,308 @@
+{
+  "detector_config": {
+    "alignment_tolerance_s": 0.06,
+    "dwell_s": 0.03,
+    "off_threshold_n": 2.0,
+    "on_threshold_n": 5.0
+  },
+  "event_authority": "offline_two_sensor_fsm_replay",
+  "event_sources": [
+    "shadow"
+  ],
+  "event_state_at_times": {
+    "accepted": [
+      {
+        "confirmation_heel_contact": true,
+        "confirmation_heel_load_n": 10.0,
+        "confirmation_toe_contact": true,
+        "confirmation_toe_load_n": 10.0,
+        "confirmed_time_s": null,
+        "emission_row_time_s": 0.23,
+        "event": "heel_strike",
+        "event_time_s": 0.2,
+        "onset_ankle_actual_deg": 3.269491467727638,
+        "onset_ankle_served_deg": 3.8144067123489114,
+        "onset_heel_load_n": 10.0,
+        "onset_knee_actual_deg": -13.074702143693395,
+        "onset_knee_served_deg": -13.293552547314171,
+        "onset_nearest_sample_time_s": 0.2,
+        "onset_sample_alignment_error_s": 0.0,
+        "onset_toe_load_n": 10.0
+      },
+      {
+        "confirmation_heel_contact": false,
+        "confirmation_heel_load_n": 0.0,
+        "confirmation_toe_contact": false,
+        "confirmation_toe_load_n": 0.0,
+        "confirmed_time_s": null,
+        "emission_row_time_s": 0.73,
+        "event": "toe_off",
+        "event_time_s": 0.7,
+        "onset_ankle_actual_deg": -3.269491467727638,
+        "onset_ankle_served_deg": -3.8144067123489114,
+        "onset_heel_load_n": 0.0,
+        "onset_knee_actual_deg": -20.156849973894353,
+        "onset_knee_served_deg": -21.083915160535224,
+        "onset_nearest_sample_time_s": 0.7,
+        "onset_sample_alignment_error_s": 0.0,
+        "onset_toe_load_n": 0.0
+      }
+    ],
+    "legacy": [
+      {
+        "confirmation_heel_contact": false,
+        "confirmation_heel_load_n": 0.0,
+        "confirmation_toe_contact": true,
+        "confirmation_toe_load_n": 10.0,
+        "confirmed_time_s": null,
+        "emission_row_time_s": 0.13,
+        "event": "heel_strike",
+        "event_time_s": 0.1,
+        "onset_ankle_actual_deg": 2.02065685298346,
+        "onset_ankle_served_deg": 2.357432995147371,
+        "onset_heel_load_n": 0.0,
+        "onset_knee_actual_deg": -7.345124192385161,
+        "onset_knee_served_deg": -6.991016800875115,
+        "onset_nearest_sample_time_s": 0.1,
+        "onset_sample_alignment_error_s": 0.0,
+        "onset_toe_load_n": 10.0
+      }
+    ],
+    "sensor": [
+      {
+        "confirmation_heel_contact": true,
+        "confirmation_heel_load_n": 10.0,
+        "confirmation_toe_contact": true,
+        "confirmation_toe_load_n": 10.0,
+        "confirmed_time_s": 0.23,
+        "emission_row_time_s": 0.23,
+        "event": "heel_strike",
+        "event_time_s": 0.2,
+        "onset_ankle_actual_deg": 3.269491467727638,
+        "onset_ankle_served_deg": 3.8144067123489114,
+        "onset_heel_load_n": 10.0,
+        "onset_knee_actual_deg": -13.074702143693395,
+        "onset_knee_served_deg": -13.293552547314171,
+        "onset_nearest_sample_time_s": 0.2,
+        "onset_sample_alignment_error_s": 0.0,
+        "onset_toe_load_n": 10.0
+      },
+      {
+        "confirmation_heel_contact": false,
+        "confirmation_heel_load_n": 0.0,
+        "confirmation_toe_contact": false,
+        "confirmation_toe_load_n": 0.0,
+        "confirmed_time_s": 0.73,
+        "emission_row_time_s": 0.73,
+        "event": "toe_off",
+        "event_time_s": 0.7,
+        "onset_ankle_actual_deg": -3.269491467727638,
+        "onset_ankle_served_deg": -3.8144067123489114,
+        "onset_heel_load_n": 0.0,
+        "onset_knee_actual_deg": -20.156849973894353,
+        "onset_knee_served_deg": -21.083915160535224,
+        "onset_nearest_sample_time_s": 0.7,
+        "onset_sample_alignment_error_s": 0.0,
+        "onset_toe_load_n": 0.0
+      }
+    ]
+  },
+  "event_streams": {
+    "accepted": {
+      "counts": {
+        "heel_strike": 1,
+        "toe_off": 1
+      },
+      "times_s": {
+        "heel_strike": [
+          0.2
+        ],
+        "toe_off": [
+          0.7
+        ]
+      },
+      "total": 2
+    },
+    "legacy": {
+      "counts": {
+        "heel_strike": 1
+      },
+      "times_s": {
+        "heel_strike": [
+          0.1
+        ]
+      },
+      "total": 1
+    },
+    "sensor": {
+      "counts": {
+        "forefoot_first": 1,
+        "heel_strike": 1,
+        "toe_off": 1
+      },
+      "times_s": {
+        "forefoot_first": [
+          0.1
+        ],
+        "heel_strike": [
+          0.2
+        ],
+        "toe_off": [
+          0.7
+        ]
+      },
+      "total": 3
+    }
+  },
+  "hard_check_failures": [],
+  "hard_checks": [
+    {
+      "description": "Every row contains time, served angles, both sensor loads, FSM contacts/source, and all three event streams.",
+      "name": "trace_schema_complete",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    },
+    {
+      "description": "A forefoot-only contact may be diagnostic but cannot create HS.",
+      "name": "toe_only_never_generates_hs",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    },
+    {
+      "description": "Every detector HS has a stable heel latch, heel load at the ON threshold, and causal onset/confirmation timestamps.",
+      "name": "sensor_hs_requires_heel_contact_and_onset",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    },
+    {
+      "description": "An FSM-accepted HS must coincide with heel contact and a heel onset.",
+      "name": "accepted_hs_requires_heel_contact_and_onset",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    },
+    {
+      "description": "A detector TO is emitted only after both debounced sensors are OFF.",
+      "name": "sensor_to_requires_both_contacts_off",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    },
+    {
+      "description": "An FSM-accepted TO requires both debounced sensor contacts OFF.",
+      "name": "accepted_to_requires_both_contacts_off",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    },
+    {
+      "description": "Sensor HS/TO timestamps are monotonic and alternate; the first event may be TO after a partial-stance reset.",
+      "name": "sensor_hs_to_order_is_valid",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    },
+    {
+      "description": "Accepted HS/TO timestamps are monotonic and alternate; the first event may be TO after a partial-stance reset.",
+      "name": "accepted_hs_to_order_is_valid",
+      "pass": true,
+      "violation_count": 0,
+      "violations": [],
+      "violations_truncated": 0
+    }
+  ],
+  "offline_replay": {
+    "aggregate_contact_evidence": {
+      "aligned_steps": 0,
+      "fallback": "regional heel/toe load greater than zero",
+      "fallback_steps": 9
+    },
+    "aggregate_force_evidence": {
+      "aligned_steps": 0,
+      "alignment_method": "actor_observation_before in row i+1 is the post-step state saved by detector loads in row i",
+      "fallback_steps": 9,
+      "regional_body_weight_estimate_n": null
+    },
+    "applied": true,
+    "authority_for_hard_checks_and_plot": "offline_two_sensor_fsm_replay",
+    "input_sampling": "one replay update per recorded policy-trace row",
+    "legacy_events_supplied_to_replay": 0,
+    "limitations": [
+      "The reset-time regional loads are not present in the trace; replay starts at the first saved post-step sample.",
+      "Only detector samples retained at policy-step boundaries can be replayed; sub-step excursions would require a denser trace."
+    ],
+    "production_class": "prosthetic_phase_fsm.ProstheticPhaseFSM",
+    "production_config": {
+      "cycle_complete_bonus": 0.7,
+      "duration_history_window_cycles": 5,
+      "event_source": "two_sensor",
+      "failure_extra_penalty": 0.05,
+      "hs_event_credit": 0.1,
+      "landing_force_full_credit_bw": 0.65,
+      "landing_window_end_s": 1.1,
+      "landing_window_start_s": 0.55,
+      "min_cycle_knee_excursion_rad": 0.0,
+      "min_stance_contact_fraction": 0.0,
+      "min_stance_duration_s": 0.05,
+      "min_stance_load_bw_s": 0.0,
+      "min_swing_duration_s": 0.2,
+      "sensor_dwell_s": 0.03,
+      "sensor_off_threshold_n": 2.0,
+      "sensor_on_threshold_n": 5.0,
+      "stance_hard_timeout_s": 2.2,
+      "swing_hard_timeout_s": 1.3,
+      "toe_off_event_credit": 0.2
+    },
+    "production_config_source": "ProstheticPhaseFSMConfig defaults",
+    "raw_inputs": [
+      "time",
+      "detector_sensors.left_heel.normal_load_n",
+      "detector_sensors.left_toe.normal_load_n",
+      "prosthetic_state.pros_knee_angle",
+      "prosthetic_state.pros_ankle_angle"
+    ],
+    "reason": "recorded shadow sensor events share a state machine driven by legacy events; hard checks use an offline counterfactual replay",
+    "replay_step_count": 9
+  },
+  "overall_pass": true,
+  "recorded_fsm_event_streams_before_replay": {
+    "accepted": {
+      "counts": {
+        "heel_strike": 1
+      },
+      "times_s": {
+        "heel_strike": [
+          0.1
+        ]
+      },
+      "total": 1
+    },
+    "sensor": {
+      "counts": {
+        "forefoot_first": 1
+      },
+      "times_s": {
+        "forefoot_first": [
+          0.1
+        ]
+      },
+      "total": 1
+    }
+  },
+  "sample_count": 9,
+  "schema_version": 2,
+  "source_trace": "synthetic:self-test",
+  "time_end_s": 0.73,
+  "time_start_s": 0.0,
+  "trace_row_count": 9
+}

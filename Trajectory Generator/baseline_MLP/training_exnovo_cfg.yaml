@@ -71,6 +71,14 @@ grf:
   grf_mode: online_sensor
   online_grf_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json
   online_grf_detector_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json
+  # Experimental detector source. Keep legacy authoritative until the paired
+  # frozen-policy robustness gate promotes the two-sensor path.
+  phase_fsm_input_mode: legacy_events
+  phase_sensor_on_threshold_n: 5.0
+  phase_sensor_off_threshold_n: 2.0
+  phase_sensor_dwell_s: 0.03
+  detector_sample_dt_s: 0.001
+  event_contract_id: legacy_events_v1
   online_grf_observation: true
   online_grf_applied_side: [left]
   disable_prescribed_grf_side: []
@@ -213,9 +221,11 @@ reward:
   sea_motor_accel_weight: 0.005
   sea_motor_power_weight: 0.005
 
-  # 7) Prosthetic kinematic morphology. AB06 mean +/- K*std corridor on the
-  # policy's served reference; weight 0.0 keeps it diagnostic in this first pass.
-  morphology_profile: morphology_profiles/ab06_prosthetic_mean_std_corridor.json
+  # 7) Prosthetic kinematic morphology. Each prescribed cycle is warped around
+  # HS/TO and runtime phase is causally anchored to the same canonical events.
+  # Weight 0.0 keeps this validated mapping diagnostic until a training A/B.
+  morphology_profile: morphology_profiles/ab06_prosthetic_event_warped_mean_std_corridor.json
+  morphology_phase_mode: event_anchored
   morphology_weight: 0.0
   morphology_std_multiplier_knee: 1.6
   morphology_std_multiplier_ankle: 0.6
@@ -242,6 +252,8 @@ supervision:
   max_consecutive_crash_restarts: 5
   child_self_timeout: true
   checkpoint_every: 1
+  retain_iteration_checkpoints: false
+  max_minibatch_mean_kl_loss: null
 
 logging:
   tensorboard: true

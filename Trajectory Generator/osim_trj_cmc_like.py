@@ -29,6 +29,7 @@ validated SimulationRunner path and does not modify the C++ SEA plugin.
 from __future__ import annotations
 
 import copy
+import hashlib
 import os
 import traceback
 from dataclasses import dataclass, field
@@ -68,6 +69,7 @@ except ModuleNotFoundError:  # pragma: no cover - small import-time fallback.
 from config import SimulatorConfig
 from kinematics_interpolator import KinematicsInterpolator
 from model_loader import setup_model
+from online_grf import online_grf_sensor_role
 from path_resolver import normalize_cli_existing_path, resolve_repo_path
 from prosthetic_phase_fsm import ProstheticPhaseFSM, ProstheticPhaseFSMConfig
 from setup_io import read_last_setup_path, read_setup_xml
@@ -308,6 +310,16 @@ class CMCEnvConfig:
     phase_to_event_credit: float = 0.20
     phase_cycle_complete_bonus: float = 0.70
     phase_failure_extra_penalty: float = 0.05
+    # Event source used by the existing prosthetic gait-cycle FSM.  The
+    # two-sensor path consumes the detector-only heel/toe channels; ``shadow``
+    # conditions the same channels for diagnostics while legacy events remain
+    # authoritative.  None of these modes changes the actor observation schema.
+    phase_fsm_input_mode: str = "legacy_events"
+    phase_sensor_on_threshold_n: float = 5.0
+    phase_sensor_off_threshold_n: float = 2.0
+    phase_sensor_dwell_s: float = 0.03
+    detector_sample_dt_s: float = 0.001
+    event_contract_id: str = "legacy_events_v1"
     # Sound-leg imitation target (used only when reward_function shapes the reward
     # in "imitation" mode; the env always emits ``sound_imitation_loss`` so the
     # ex-novo reward is unchanged). A periodic phase-normalized template is built
@@ -1035,6 +1047,67 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             raise ValueError("policy_knots must be >= 1.")
         if self.env_cfg.segment_duration <= 0.0:
             raise ValueError("segment_duration must be > 0.")
+        detector_dt = float(self.env_cfg.detector_sample_dt_s)
+        if not np.isfinite(detector_dt) or detector_dt <= 0.0:
+            raise ValueError("detector_sample_dt_s must be finite and positive.")
+        if self.env_cfg.phase_fsm_input_mode in {"shadow", "two_sensor"}:
+            detector_parameters = (
+                float(self.env_cfg.phase_sensor_on_threshold_n),
+                float(self.env_cfg.phase_sensor_off_threshold_n),
+                float(self.env_cfg.phase_sensor_dwell_s),
+            )
+            if detector_parameters != (0.5, 0.25, 0.03):
+                raise ValueError(
+                    "shadow/two_sensor V17 contract requires detector "
+                    "on/off/dwell=(0.5 N, 0.25 N, 0.03 s)."
+                )
+            detector_profile_raw = self.env_cfg.online_grf_detector_profile_file
+            if detector_profile_raw is None:
+                raise ValueError(
+                    "shadow/two_sensor V17 contract requires the frozen V17 "
+                    "detector profile explicitly."
+                )
+            detector_profile_path = Path(
+                normalize_cli_existing_path(detector_profile_raw)
+            )
+            expected_detector_sha256 = (
+                "2225823282743b55f2cbd3bdcb8c345f3d2e3b878bd0646283a4cc0b739df0bc"
+            )
+            if not detector_profile_path.is_file():
+                raise ValueError(
+                    "shadow/two_sensor V17 detector profile is missing: "
+                    f"{detector_profile_path}"
+                )
+            observed_detector_sha256 = hashlib.sha256(
+                detector_profile_path.read_bytes()
+            ).hexdigest()
+            if observed_detector_sha256 != expected_detector_sha256:
+                raise ValueError(
+                    "shadow/two_sensor V17 detector profile hash mismatch: "
+                    f"expected {expected_detector_sha256}, observed "
+                    f"{observed_detector_sha256}."
+                )
+            if abs(float(self.env_cfg.segment_duration) - 0.01) > 1e-12:
+                raise ValueError(
+                    "shadow/two_sensor high-rate contract requires "
+                    "segment_duration=0.01 s."
+                )
+            samples_per_step = self.env_cfg.segment_duration / detector_dt
+            if (
+                abs(samples_per_step - round(samples_per_step)) > 1e-9
+                or int(round(samples_per_step)) != 10
+            ):
+                raise ValueError(
+                    "shadow/two_sensor high-rate contract requires exactly ten "
+                    "detector samples per 10 ms policy step."
+                )
+        if self.env_cfg.phase_fsm_input_mode in {"shadow", "two_sensor"}:
+            expected_contract = "primary_grf_split_v1+two_sensor_highrate_v1"
+            if str(self.env_cfg.event_contract_id) != expected_contract:
+                raise ValueError(
+                    "shadow/two_sensor mode requires event_contract_id="
+                    f"{expected_contract!r}."
+                )
 
         self._base_simulator_config = copy.deepcopy(
             simulator_config or SimulatorConfig()
@@ -1065,7 +1138,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._body_weight_n = 1.0
         self._online_grf: dict = {}
         self._online_grf_detector: dict = {}
+        self._legacy_online_events: list[dict] = []
         self._online_events: list[dict] = []
+        self._phase_sensor_samples: list[object] = []
+        self._phase_sensor_previous_time_s: float = 0.0
         self._online_gait_sides: dict[str, dict[str, float | None]] = {}
         self._phase_fsm = ProstheticPhaseFSM(self._phase_fsm_config())
         self._phase_fsm_payload: dict = self._phase_fsm.payload()
@@ -1081,6 +1157,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self.action_space = self._build_action_space()
 
         self._build_simulator()
+        self._validate_phase_sensor_setup()
         self._initialise_episode()
         obs, _ = self._get_observation()
         self.observation_space = spaces.Box(
@@ -1112,7 +1189,48 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             toe_off_event_credit=float(self.env_cfg.phase_to_event_credit),
             cycle_complete_bonus=float(self.env_cfg.phase_cycle_complete_bonus),
             failure_extra_penalty=float(self.env_cfg.phase_failure_extra_penalty),
+            event_source=str(self.env_cfg.phase_fsm_input_mode),
+            detector_sample_dt_s=float(self.env_cfg.detector_sample_dt_s),
+            sensor_on_threshold_n=float(
+                self.env_cfg.phase_sensor_on_threshold_n
+            ),
+            sensor_off_threshold_n=float(
+                self.env_cfg.phase_sensor_off_threshold_n
+            ),
+            sensor_dwell_s=float(self.env_cfg.phase_sensor_dwell_s),
         )
+
+    def _validate_phase_sensor_setup(self) -> None:
+        """Fail before the first segment if the detector profile is incomplete."""
+        if self.env_cfg.phase_fsm_input_mode not in {"shadow", "two_sensor"}:
+            return
+        paths = list(getattr(self.ctx, "online_grf_detector_force_paths", []))
+        sides = dict(getattr(self.ctx, "online_grf_detector_force_sides", {}))
+        if len(paths) != 2:
+            raise ValueError(
+                "shadow/two_sensor phase detection requires exactly two "
+                f"detector components; observed {len(paths)}."
+            )
+        roles: list[str] = []
+        for component_path in paths:
+            component_name = str(component_path).rsplit("/", 1)[-1]
+            role = online_grf_sensor_role(
+                component_name,
+                str(sides.get(component_name, "")),
+            )
+            if role is not None:
+                roles.append(role)
+        missing_or_duplicated = {
+            role: roles.count(role)
+            for role in ("left_heel", "left_toe")
+            if roles.count(role) != 1
+        }
+        if missing_or_duplicated or set(roles) != {"left_heel", "left_toe"}:
+            raise ValueError(
+                "shadow/two_sensor phase detection requires exactly one "
+                "left_heel and one left_toe detector component; observed "
+                f"roles={roles}, invalid_counts={missing_or_duplicated}."
+            )
 
     @property
     def observation_feature_names(self) -> tuple[str, ...]:
@@ -1239,7 +1357,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             failure_traceback = traceback.format_exc()
 
         self._update_online_gait_state(step_info)
-        self._update_phase_fsm()
+        self._update_phase_fsm(require_primary_sample=failure is None)
         obs, obs_dict = self._get_observation()
         reward, reward_terms = self._get_reward(obs_dict)
         unsafe_reason = self._unsafe_end_reason(obs_dict)
@@ -1494,6 +1612,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             cfg.online_grf_detector_profile_file = normalize_cli_existing_path(
                 self.env_cfg.online_grf_detector_profile_file
             )
+        cfg.detector_sample_dt_s = float(self.env_cfg.detector_sample_dt_s)
         cfg.prescribed_grf_disabled_sides = [
             str(side).strip().lower()
             for side in self.env_cfg.prescribed_grf_disabled_sides
@@ -2336,10 +2455,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         if self.env_cfg.include_online_grf_observation:
             gait = self._online_gait_info()
             left_info = gait["sides"]["left"]
-            actor["online_left_normal_grf_bw"] = float(
-                left_info["normal_force_bw"]
+            load_actor, _load_privileged = (
+                self._online_load_contact_observation_features(gait)
             )
-            actor["online_left_in_contact"] = float(left_info["in_contact"])
+            actor.update(load_actor)
             actor["online_left_heel_strike"] = float(left_info["heel_strike"])
             actor["online_left_toe_off"] = float(left_info["toe_off"])
             left_phase = float(left_info["gait_phase"])
@@ -2417,10 +2536,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         # Sound-side foot load.
         if self.env_cfg.include_online_grf_observation and gait is not None:
             right_info = gait["sides"]["right"]
-            priv["online_right_normal_grf_bw"] = float(
-                right_info["normal_force_bw"]
+            _load_actor, load_privileged = (
+                self._online_load_contact_observation_features(gait)
             )
-            priv["online_right_in_contact"] = float(right_info["in_contact"])
+            priv.update(load_privileged)
             priv["online_right_heel_strike"] = float(right_info["heel_strike"])
             priv["online_right_toe_off"] = float(right_info["toe_off"])
             priv["online_right_gait_phase"] = float(right_info["gait_phase"])
@@ -2464,7 +2583,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
     def _reset_online_gait_state(self) -> None:
         self._online_grf = {}
         self._online_grf_detector = {}
+        self._legacy_online_events = []
         self._online_events = []
+        self._phase_sensor_samples = []
+        self._phase_sensor_previous_time_s = float(self.t)
         self._online_gait_sides = {
             side: {
                 "last_heel_strike_time": None,
@@ -2485,11 +2607,34 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         )
 
         events = step_info.get("online_events")
-        self._online_events = [
+        self._legacy_online_events = [
             dict(event)
             for event in events
             if isinstance(event, Mapping)
         ] if isinstance(events, Sequence) else []
+
+        phase_samples = step_info.get("phase_sensor_samples")
+        if phase_samples is None:
+            self._phase_sensor_samples = []
+        elif isinstance(phase_samples, Sequence) and not isinstance(
+            phase_samples,
+            (str, bytes, bytearray),
+        ):
+            # Preserve malformed entries for the FSM batch validator.  Dropping
+            # them here would turn a missing/corrupt detector sample into a
+            # silent fallback instead of the required fail-closed result.
+            self._phase_sensor_samples = list(phase_samples)
+        else:
+            self._phase_sensor_samples = [phase_samples]
+
+        # The active event stream is selected only after the existing phase FSM
+        # has consumed either legacy events or the two detector-only channels.
+        # Clearing it here prevents a previous step's pulse from leaking into the
+        # next actor observation.
+        self._online_events = []
+
+    def _apply_online_events_to_gait_state(self) -> None:
+        """Update gait-clock diagnostics from the authoritative event stream."""
 
         for event in self._online_events:
             side = str(event.get("side", "")).lower()
@@ -2507,14 +2652,105 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             elif event_name == "toe_off":
                 self._online_gait_sides[side]["last_toe_off_time"] = event_time
 
-    def _phase_grf_sides(self) -> Mapping[str, object]:
-        detector_sides = self._online_grf_detector.get("left")
-        if isinstance(detector_sides, Mapping):
-            return self._online_grf_detector
-        return self._online_grf
+    def _physical_online_grf_sides(
+        self,
+        *,
+        required: bool = False,
+    ) -> Mapping[str, object]:
+        """Return only the primary, force-applying online-GRF stream.
 
-    def _update_phase_fsm(self) -> None:
-        grf = self._phase_grf_sides()
+        Detector contacts are virtual measurements used for heel/toe event
+        detection.  Their aggregate force/contact values must never replace
+        the physical GRF evidence consumed by observations, rewards or the
+        continuous guards of the phase FSM.
+
+        During construction/reset an online sample does not exist yet, so
+        diagnostic observation assembly may request the non-required empty
+        view.  Once a simulation segment has completed, callers pass
+        ``required=True``: if primary contacts are configured but their
+        configured-side aggregate is absent or malformed, fail explicitly
+        instead of silently turning the load/contact features into zeros.
+        """
+
+        primary = (
+            self._online_grf
+            if isinstance(self._online_grf, Mapping)
+            else {}
+        )
+        if required and getattr(self.ctx, "online_grf_force_paths", []):
+            configured_sides = {
+                str(side).strip().lower()
+                for side in getattr(
+                    self.ctx,
+                    "online_grf_force_sides",
+                    {},
+                ).values()
+                if str(side).strip().lower() in {"left", "right"}
+            }
+            if not configured_sides:
+                configured_sides = {"left", "right"}
+            invalid: dict[str, list[str]] = {}
+            for side in sorted(configured_sides):
+                side_payload = primary.get(side)
+                problems: list[str] = []
+                if not isinstance(side_payload, Mapping):
+                    problems.append("aggregate mapping")
+                else:
+                    for field in ("force", "moment", "cop"):
+                        try:
+                            values = np.asarray(
+                                side_payload.get(field),
+                                dtype=float,
+                            )
+                        except (TypeError, ValueError):
+                            values = np.asarray([], dtype=float)
+                        if (
+                            values.shape != (3,)
+                            or not np.all(np.isfinite(values))
+                        ):
+                            problems.append(f"finite {field}[3]")
+                    for field in (
+                        "normal_force",
+                        "penetration",
+                        "slip_speed",
+                    ):
+                        raw_value = side_payload.get(field)
+                        try:
+                            value = (
+                                float("nan")
+                                if isinstance(raw_value, (bool, np.bool_))
+                                else float(raw_value)
+                            )
+                        except (TypeError, ValueError):
+                            value = float("nan")
+                        if not np.isfinite(value) or value < 0.0:
+                            problems.append(f"finite nonnegative {field}")
+                    if not isinstance(
+                        side_payload.get("in_contact"),
+                        (bool, np.bool_),
+                    ):
+                        problems.append("boolean in_contact")
+                if problems:
+                    invalid[side] = problems
+            if invalid:
+                raise RuntimeError(
+                    "Primary online-GRF sample is required after a completed "
+                    "simulation segment, but configured-side aggregate data "
+                    f"are missing or malformed: {invalid}. Detector data are "
+                    "never used as fallback."
+                )
+        return primary
+
+    def _update_phase_fsm(
+        self,
+        *,
+        require_primary_sample: bool = True,
+    ) -> None:
+        # Keep continuous load/contact evidence on the primary physical stream.
+        # Only the local heel/toe channels below come from the detector stream.
+        grf = self._physical_online_grf_sides(
+            required=require_primary_sample,
+        )
         left = grf.get("left") if isinstance(grf, Mapping) else None
         if not isinstance(left, Mapping):
             left = {}
@@ -2523,14 +2759,105 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         sv = self.ctx.model.getStateVariableValues(self.runner.state)
         knee_q = float(sv.get(self.ctx.q_sv_idx["pros_knee_angle"]))
         ankle_q = float(sv.get(self.ctx.q_sv_idx["pros_ankle_angle"]))
-        self._phase_fsm_payload = self._phase_fsm.update(
-            time_s=float(self.t),
-            events=self._online_events,
-            normal_force_bw=normal_force_bw,
-            in_contact=bool(left.get("in_contact", False)),
-            prosthetic_knee_angle_rad=knee_q,
-            prosthetic_ankle_angle_rad=ankle_q,
+
+        sensors_raw = self._online_grf_detector.get("sensors", {})
+        sensors = sensors_raw if isinstance(sensors_raw, Mapping) else {}
+        heel_raw = sensors.get("left_heel")
+        toe_raw = sensors.get("left_toe")
+        heel = heel_raw if isinstance(heel_raw, Mapping) else None
+        toe = toe_raw if isinstance(toe_raw, Mapping) else None
+        mode = str(self.env_cfg.phase_fsm_input_mode).strip().lower()
+        fsm_events = (
+            () if mode == "two_sensor" else self._legacy_online_events
         )
+        common_inputs = {
+            "time_s": float(self.t),
+            "events": fsm_events,
+            "normal_force_bw": normal_force_bw,
+            "in_contact": bool(left.get("in_contact", False)),
+            "prosthetic_knee_angle_rad": knee_q,
+            "prosthetic_ankle_angle_rad": ankle_q,
+        }
+        if mode in {"shadow", "two_sensor"}:
+            self._phase_fsm_payload = self._phase_fsm.update_policy_step(
+                **common_inputs,
+                previous_time_s=float(self._phase_sensor_previous_time_s),
+                sensor_samples=self._phase_sensor_samples,
+            )
+            # Advance the open-left boundary only after the complete batch has
+            # passed validation and the FSM update has succeeded.
+            self._phase_sensor_previous_time_s = float(self.t)
+        else:
+            # Preserve the scalar legacy path exactly; detector sampling is
+            # neither required nor authoritative in this mode.
+            self._phase_fsm_payload = self._phase_fsm.update(
+                **common_inputs,
+                heel_normal_force_n=(
+                    None if heel is None else heel.get("normal_load_n")
+                ),
+                toe_normal_force_n=(
+                    None if toe is None else toe.get("normal_load_n")
+                ),
+            )
+
+        if mode == "two_sensor":
+            # The current FSM remains the sole authority: raw sensor candidates
+            # become actor event pulses only when the existing transition
+            # handlers accept them.  Sound-side events stay on the legacy stream.
+            active_events = [
+                dict(event)
+                for event in self._legacy_online_events
+                if str(event.get("side", "")).strip().lower() == "right"
+            ]
+            transitions = self._phase_fsm_payload.get(
+                "accepted_transitions_this_step", []
+            )
+            if isinstance(transitions, Sequence):
+                for transition in transitions:
+                    if not isinstance(transition, Mapping):
+                        continue
+                    event_name = str(transition.get("event", "")).lower()
+                    if event_name not in {"heel_strike", "toe_off"}:
+                        continue
+                    event_time = float(
+                        transition.get("event_time_s", self.t)
+                    )
+                    confirmed_time = float(
+                        transition.get("confirmed_time_s", event_time)
+                    )
+                    delivered_time = float(
+                        transition.get("delivered_time_s", self.t)
+                    )
+                    event = {
+                        "time": event_time,
+                        "confirmed_time": confirmed_time,
+                        "event_time_s": event_time,
+                        "confirmed_time_s": confirmed_time,
+                        "delivered_time_s": delivered_time,
+                        "side": "left",
+                        "event": event_name,
+                        "source": "two_sensor_phase_fsm",
+                    }
+                    if event_name == "heel_strike":
+                        period = float(
+                            self._phase_fsm_payload.get("last_period_s", 0.0)
+                            or 0.0
+                        )
+                        event["cycle_duration_s"] = (
+                            period if period > 0.0 else None
+                        )
+                    active_events.append(event)
+            self._online_events = sorted(
+                active_events,
+                key=lambda item: float(item.get("time", self.t)),
+            )
+        else:
+            # ``shadow`` deliberately shares the exact active behaviour of the
+            # legacy path; only the FSM payload gains two-sensor diagnostics.
+            self._online_events = [
+                dict(event) for event in self._legacy_online_events
+            ]
+        self._apply_online_events_to_gait_state()
 
     def _phase_fsm_reward_terms(self) -> dict[str, float]:
         payload = self._phase_fsm_payload
@@ -2623,8 +2950,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             for side in ("left", "right")
         }
         sides: dict[str, dict[str, float | bool | None]] = {}
+        grf_source = self._physical_online_grf_sides()
         for side in ("left", "right"):
-            grf_source = self._phase_grf_sides()
             grf_side = grf_source.get(side, {}) if isinstance(grf_source, Mapping) else {}
             if not isinstance(grf_side, Mapping):
                 grf_side = {}
@@ -2654,14 +2981,38 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "sides": sides,
         }
 
+    @staticmethod
+    def _online_load_contact_observation_features(
+        gait: Mapping[str, object],
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        """Assemble only continuous primary load/contact observation fields."""
+
+        sides = gait["sides"]
+        left = sides["left"]
+        right = sides["right"]
+        return (
+            {
+                "online_left_normal_grf_bw": float(left["normal_force_bw"]),
+                "online_left_in_contact": float(left["in_contact"]),
+            },
+            {
+                "online_right_normal_grf_bw": float(right["normal_force_bw"]),
+                "online_right_in_contact": float(right["in_contact"]),
+            },
+        )
+
     def _online_info_payload(self) -> dict:
         if not getattr(self.ctx, "online_grf_force_paths", []):
             return {}
         return {
             "online_grf": copy.deepcopy(self._online_grf),
             "online_grf_detector": copy.deepcopy(self._online_grf_detector),
+            "legacy_online_events": copy.deepcopy(self._legacy_online_events),
             "online_events": copy.deepcopy(self._online_events),
             "online_gait": self._online_gait_info(),
+            "phase_fsm_input_mode": str(self.env_cfg.phase_fsm_input_mode),
+            "detector_sample_dt_s": float(self.env_cfg.detector_sample_dt_s),
+            "event_contract_id": str(self.env_cfg.event_contract_id),
         }
 
     def _bio_context_coords(self) -> Iterable[str]:

@@ -55,6 +55,16 @@ check("exnovo deployable minimal observation off", exnovo_flat.get("deployable_m
 check("exnovo reference state observation on", exnovo_flat.get("include_reference_state_observation") is True)
 check("exnovo deployable controller state is actor-visible", exnovo_flat.get("include_controller_state_observation") is True)
 check("exnovo derived controller diagnostics are critic-only", exnovo_flat.get("include_controller_diagnostic_observation") is False)
+check(
+    "exnovo two-sensor detector remains non-promoted",
+    exnovo_flat.get("phase_fsm_input_mode") == "legacy_events",
+)
+check(
+    "exnovo two-sensor thresholds are pinned",
+    exnovo_flat.get("phase_sensor_on_threshold_n") == 5.0
+    and exnovo_flat.get("phase_sensor_off_threshold_n") == 2.0
+    and exnovo_flat.get("phase_sensor_dwell_s") == 0.03,
+)
 check("exnovo task contact load enabled", exnovo_reward.get("blend_contact_load", 0.0) > 0.0)
 check(
     "exnovo contact support ledger enabled",
@@ -88,7 +98,14 @@ check("exnovo reserve/pelvis diagnostic weights zero", exnovo_reward.get("reserv
 check(
     "exnovo morphology profile configured",
     exnovo_reward.get("morphology_profile")
-    == "morphology_profiles/ab06_prosthetic_mean_std_corridor.json",
+    == (
+        "morphology_profiles/"
+        "ab06_prosthetic_event_warped_mean_std_corridor.json"
+    ),
+)
+check(
+    "exnovo morphology phase is event anchored",
+    exnovo_reward.get("morphology_phase_mode") == "event_anchored",
 )
 check(
     "exnovo morphology diagnostic weight zero",
@@ -135,6 +152,13 @@ check(
     a_ex.grf_penetration_penalty_threshold_m == 0.015
     and a_ex.grf_penetration_termination_m == 0.025,
 )
+check(
+    "train exnovo config leaves two-sensor mode opt-in",
+    a_ex.phase_fsm_input_mode == "legacy_events"
+    and a_ex.phase_sensor_on_threshold_n == 5.0
+    and a_ex.phase_sensor_off_threshold_n == 2.0
+    and a_ex.phase_sensor_dwell_s == 0.03,
+)
 
 # 3. CLI override wins over YAML.
 b = _parse(train_ppo_mlp, ["--train-batch-size", "99", "--dim-hidden-layers", "128", "--lr", "5e-4"])
@@ -179,9 +203,12 @@ check("deprecated --fcnet-hiddens parses to [256,256]", getattr(f2, "fcnet_hidde
 # 5c. A custom warm-start source must not inherit the official source config.
 f3 = _parse(
     train_ppo_mlp,
-    ["--warm-start", "--warm-start-source", "CUSTOM_RL_MODULE"],
+    ["--warm-start-raw", "--warm-start-source", "CUSTOM_RL_MODULE"],
 )
-check("custom warm-start keeps adjacent config resolution", f3.warm_start_source_config is None)
+check(
+    "custom raw warm-start keeps adjacent config resolution",
+    f3.warm_start_source_config is None,
+)
 
 # 6. Rollout parse_args: built-in defaults when no snapshot (--no-auto-config).
 # A dummy checkpoint is OK for argparse only, but provide output_dir so rollout
@@ -198,6 +225,13 @@ r = _parse(
 )
 check("rollout action_mode default absolute", r.action_mode == "absolute")
 check("rollout asymmetric default False", r.asymmetric_actor_critic is False)
+check(
+    "rollout two-sensor mode is explicit opt-in",
+    r.phase_fsm_input_mode == "legacy_events"
+    and r.phase_sensor_on_threshold_n == 5.0
+    and r.phase_sensor_off_threshold_n == 2.0
+    and r.phase_sensor_dwell_s == 0.03,
+)
 check("rollout has _cfg_reward attr", hasattr(r, "_cfg_reward"))
 
 # 7. Snapshot round-trip (dump_resolved -> load_resolved_for_checkpoint).

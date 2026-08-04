@@ -1,0 +1,1407 @@
+{
+  "baseline_registry": "validation/experimental_detector_profiles/two_sensor_development_baseline_registry.json",
+  "causal_event_diagnostics": {
+    "expected_confirmation_latency_range_is_cadence_aware": true,
+    "gate_time_field": "confirmed_time_s",
+    "operational_compensation_not_unique_physical_cause": true,
+    "saved_per_event_per_cell": [
+      "onset_error=event_time_s-prescribed_time_s",
+      "confirmation_latency=confirmed_time_s-event_time_s",
+      "total_error=confirmed_time_s-prescribed_time_s",
+      "residual_quantization_or_routing=confirmation_latency-0.030"
+    ],
+    "summary_statistics": [
+      "count",
+      "mean",
+      "minimum",
+      "maximum",
+      "max_abs"
+    ]
+  },
+  "combination_formulas": {
+    "arm_set_rule": [
+      "exact_V13_baseline_value",
+      "diagnostic_root_safe_arm_winner_or_V13_fallback",
+      "one_deterministic_grid-adjacent_neighbor_of_the_winner"
+    ],
+    "canonical_axis_order": [
+      "Hx",
+      "Hr",
+      "Ty",
+      "Tr"
+    ],
+    "claim_limit": "best_in_preregistered_staged_neighborhood_not_4d_minimum",
+    "deduplicate_against_v13_and_isolated_stage1_tuples": true,
+    "deduplicate_identical_geometry": true,
+    "deduplication_rule": "canonical_lexicographic_geometry_tuple",
+    "existing_v13_or_isolated_rows_are_reused_when_in_the_cartesian_set": true,
+    "maximum_cartesian_tuple_count_before_deduplication": 81,
+    "neighbor_rule": {
+      "interior_winner": "rank_left_and_right_neighbors_with_the_same_arm_tuple; tie_then_closest_to_v13_then_grid_index_then_candidate_id",
+      "outer_boundary_winner": "use_the_single_inward_neighbor",
+      "winner_is_v13": "use_the_first_nonbaseline_grid_neighbor"
+    },
+    "new_cartesian_tuples_reuse_stage1_station_samples": true,
+    "stage2_design": "local_cartesian_product_of_three_values_per_arm"
+  },
+  "decision_contract": {
+    "automatic_profile_creation_allowed": false,
+    "automatic_profile_or_registry_promotion_allowed": false,
+    "canonical_global_ledger_blocks_alternate_destination_reopen": true,
+    "development_candidate_lock_written_before_validation_receipt": true,
+    "development_trials": [
+      "02",
+      "04",
+      "08"
+    ],
+    "holdout_promotion_requires_full_gate_and_pareto_vs_v13": true,
+    "holdout_scope_is_frozen_primary_plus_v13_in_one_pass": true,
+    "holdout_selector_tuple_is_retained_as_diagnostic_ranking": true,
+    "no_clobber_and_crash_consumes_destination": true,
+    "outer_boundary_improving_stop_occurs_before_validation_receipt": true,
+    "primary_alone_determines_gate_no_rescue_or_reselection": true,
+    "reserve_trials_never_opened": [
+      "03",
+      "07"
+    ],
+    "runtime_modification_allowed": false,
+    "sealed_opens_only_after_validation_full_gate_and_paired_tuple_pass": true,
+    "sealed_receipt_pins_development_and_validation_lock_sha256": true,
+    "sealed_receipt_required_before_semantic_decode": true,
+    "sealed_trial": "06",
+    "training_allowed": false,
+    "validation_decision_lock_written_before_sealed_receipt": true,
+    "validation_opens_only_after_one_frozen_dev_finalist": true,
+    "validation_receipt_pins_development_candidate_lock_sha256": true,
+    "validation_receipt_required_before_semantic_decode": true,
+    "validation_trial": "05"
+  },
+  "detail_reporting": {
+    "all_detail_artifacts_are_hash_pinned_in_locks_or_manifest": true,
+    "contains_event_gate_phase_semantic_transfer_and_decomposition": true,
+    "development_stage1_all_pairs": true,
+    "development_stage2_all_new_pairs": true,
+    "format": "canonical_compact_jsonl_no_clobber",
+    "stage2_reused_pairs_are_already_persisted_in_stage1": true,
+    "validation_and_sealed_frozen_pairs": true
+  },
+  "detector_template_profile": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+  "execution_destination": {
+    "alternate_output_directory_allowed": false,
+    "canonical_one_shot_ledger": "validation/two_sensor_cross_speed_v14_2_execution_ledger.json",
+    "canonical_output_dir": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery",
+    "ledger_written_before_any_development_import_or_semantic_decode": true
+  },
+  "freeze_date": "2026-07-22",
+  "frozen_before_execution": true,
+  "gate_contract": {
+    "dynamic_count_source": "prescribed_reference_complete_cycles_in_each_authorized_unit",
+    "dynamic_counts_cannot_modify_thresholds_or_grids": true,
+    "dynamic_exact_count_fields": [
+      "require_exact_reference_counts",
+      "require_exact_detector_counts",
+      "require_exact_valid_cycles",
+      "require_exact_causal_swing_intervals"
+    ],
+    "fixed_v13_thresholds_and_semantics": {
+      "max_abs_hs_error_s": 0.05,
+      "max_abs_toe_off_error_s": 0.08,
+      "maximum_forbidden_phase_mismatches": 0,
+      "maximum_incomplete_heel_to_forefoot_transfers": 0,
+      "maximum_invalid_or_timeout_transitions": 0,
+      "maximum_to_candidates_before_min_stance": 0,
+      "maximum_transfer_both_latches_off_samples": 0,
+      "maximum_unaccepted_sensor_events": 0,
+      "maximum_unknown_fsm_phase_samples": 0,
+      "minimum_causal_toe_clear_before_next_hs_onset_s": 0.03,
+      "minimum_confirmed_fsm_stance_f1": 0.95,
+      "minimum_confirmed_fsm_stance_iou": 0.9,
+      "precision": 1.0,
+      "recall": 1.0,
+      "require_confirmation_latency_in_range": true,
+      "require_exact_hs_to_toe_off_order_and_cycles": true,
+      "require_mesh_proximity_pre_gate": true
+    },
+    "reference_source": {
+      "gcLeft_or_gcRight_allowed": false,
+      "minimum_contact_duration_s": 0.05,
+      "minimum_cycle_duration_s": 0.3,
+      "stream": "prescribed_left_vertical_grf",
+      "threshold_n": 20.0
+    },
+    "runtime_10ms_and_fine_1ms_identical_except_dynamic_counts": true
+  },
+  "historical_v9_profile": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+  "interpretation_limits": [
+    "The split is cross-speed interpolation, not leave-one-trial-out and not exchangeable repeated trials.",
+    "Trial 01 and its consumed V13 interval are never used for V14 selection, thresholds, counts, or tuning.",
+    "Trials 03 and 07 are reserve data and this runner has no semantic-access route for them.",
+    "All gates are evaluated per trial x plateau x cadence; global trial metrics cannot be assigned to a plateau.",
+    "Per-unit exact counts are derived from prescribed GRF only after the unit's role is authorized; they cannot alter grids or thresholds.",
+    "Isolated arm winners are diagnostic root-safe components and need not pass the full V13 gate in isolation.",
+    "Only members of the deterministic Stage-2 Cartesian pool, including reused single-arm rows, may become a development finalist; a finalist must pass every development unit and aggregate gate.",
+    "Validation and sealed stages evaluate exactly the frozen primary plus V13 in one paired opening; there is no rescue or reselection.",
+    "V13 wins every tie. Promotion requires Pareto non-inferiority of the preregistered minimax vector and at least one improvement beyond tolerance.",
+    "A V14 PASS does not automatically edit a detector profile, registry, runtime configuration, policy, reward, or training configuration.",
+    "The search is local and staged: it is neither full-factorial over the original grids nor evidence of a global four-dimensional optimum.",
+    "One winner anchor and one deterministic adjacent neighbor per arm limit development multiple testing; validation and sealed stages protect against development adaptation.",
+    "Trials 05 and 06 are sealed for event/trajectory outcomes, not metadata-blind: their condition speeds, file sizes and SHA-256 identities were already inspected.",
+    "All trials are from the same subject and session with the same plateau order; no cross-subject, exchangeable-trial, chronological-holdout, independent-cycle, or statistical-independence claim is allowed.",
+    "The 20 N prescribed-GRF reference and the 0.5/0.25 N Hunt-Crossley detector have different physical definitions; V14 tests operational geometric compensability, not a unique physical cause.",
+    "This frozen V14 execution is macOS-arm64-only because only the ff dylib has a preregistered binary hash; the golden converter remains cross-platform, but V14 cannot run on Windows until a separate protocol pins the verified ff DLL.",
+    "V14.1 changes only the preregistered preprocessing coverage and continuous-state warmup certification; it does not constitute a new scientific search design.",
+    "Analysis timestamps remain absolute and are frozen on a global 5 ms lattice; no source-dependent cropping, resampling, interpolation, or time rezeroing is allowed.",
+    "Warmup events and samples certify FSM maturity only and never enter any plateau or trial scoring denominator.",
+    "V14.2 changes the scoreable reference-cycle boundary set and is not claimed as exact-core V14/V14.1.",
+    "The left prefix is chosen from prescribed GRF only before station sampling and cannot depend on a detector or candidate outcome.",
+    "The inherited 90 ms causal guard and warm-up certificate are preserved, not relaxed.",
+    "V14.1 DEV02 preprocessing is copied byte-identically; its raw MAT streams and IK are not reopened."
+  ],
+  "isolated_parameter_grid": {
+    "baseline_id": "V13_BASELINE",
+    "baseline_is_unique_and_nonselectable": true,
+    "every_isolated_candidate_changes_exactly_one_v13_parameter": true,
+    "heel_radius_reduction_from_v13_mm": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25
+    ],
+    "heel_x_absolute_shift_from_v9_mm": [
+      3.5,
+      3.75,
+      4.0,
+      4.25,
+      4.5,
+      5.0,
+      5.5,
+      6.0
+    ],
+    "isolated_selectable_count": 23,
+    "isolated_selectable_count_by_arm": {
+      "Hr": 5,
+      "Hx": 7,
+      "Tr": 5,
+      "Ty": 6
+    },
+    "stage1_pair_count_including_baseline": 24,
+    "toe_down_absolute_from_v9_mm": [
+      0.75,
+      0.85,
+      0.95,
+      1.05,
+      1.15,
+      1.25,
+      1.35
+    ],
+    "toe_radius_increase_allowed": false,
+    "toe_radius_reduction_from_v13_mm": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25
+    ],
+    "zero_or_baseline_grid_values_are_not_duplicated_as_isolates": true
+  },
+  "load_evidence_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+  "metadata_audit": {
+    "path": "validation/two_sensor_v14_metadata_runs/2026-07-22_ab06_trials_01_08/metadata_audit.json",
+    "sha256": "9bebe3b3c6072d37a43055b967186b580452a63f9d3aa1afdda066435c3cf924"
+  },
+  "model_file": "models/AB06_SEASEA-raw/osimxml/AB06_SEASEA_marker_calibrated.osim",
+  "objective": "Apply the preregistered prescribed-only left-boundary prefix censor, then execute the inherited V14.1 center/radius search and staged gates.",
+  "preprocessing": {
+    "absolute_timestamps_no_rezero": true,
+    "converter_implementation_remains_cross_platform": true,
+    "dataset_ik_semantically_decoded_for_schema_conversion_only": true,
+    "dataset_ik_used_downstream": false,
+    "detector_replay_semantic_inputs": [
+      "marker_based_ik",
+      "fp"
+    ],
+    "development_trial_access_receipt_before_raw_decode": true,
+    "exact_ik_setup_and_simulation_interval_required": true,
+    "execution_platform_scope": "macos_arm64_only_for_frozen_v14",
+    "force_plate_converter": "tools/convert_epic_ab06_tables_recovery.py",
+    "ik_receipt_required_before_replay": true,
+    "ik_smoke_allowed": false,
+    "inverse_kinematics": {
+      "accuracy": 1e-05,
+      "all_marker_task_weights": 1.0,
+      "all_marker_tasks_apply": true,
+      "dataset_ik_allowed": false,
+      "ik_smoke_allowed": false,
+      "kinematics_source": "marker_based_inverse_kinematics_from_converted_TRC",
+      "marker_calibrated_model": {
+        "path": "models/AB06_SEASEA-raw/osimxml/AB06_SEASEA_marker_calibrated.osim",
+        "sha256": "98cfcbc4f7155ea4576f583654fbd50a6e8bd2f2f33ff0894c9f3f24dce5fa8d"
+      },
+      "marker_count": 28,
+      "opensim_version": "4.5.2",
+      "trial01_consumed_parity_requirement": "exact_numeric_parity"
+    },
+    "marker_converter": "tools/convert_epic_ab06_tables_recovery.py",
+    "plugin_basename_has_no_platform_extension": true,
+    "plugin_binary_identity_must_be_verified_before_conversion": true,
+    "plugin_binary_sha256_by_platform_suffix": {
+      ".dylib": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b"
+    },
+    "preprocessing_lock_required_before_detector_replay": true,
+    "sea_plugin_loaded_before_model_or_ik_tool": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "semantic_raw_inputs_at_converter_boundary": [
+      "ik",
+      "markers",
+      "fp"
+    ],
+    "source_streams_preserved_without_crop_resample_or_interpolation": true,
+    "source_time_contract": "every_source_covers_exact_absolute_analysis_interval",
+    "trial_02_inverse_kinematics_rerun": false,
+    "trial_02_raw_mat_redecode": false,
+    "trial_02_source": "byte_locked_v14_1_preprocessing_products",
+    "trial_02_v14_2_import_receipt_before_copy": true,
+    "trial_time_range_source": "frozen_v14_1_analysis_intervals",
+    "windows_execution_allowed_without_preregistered_ff_dll_hash": false
+  },
+  "preprocessing_golden": {
+    "checks": {
+      "byte_parity": true,
+      "conversion_manifest": true,
+      "coverage": true,
+      "dataset_ik_not_downstream": true,
+      "execution_receipt": true,
+      "explicit_range": true,
+      "final_receipt": true,
+      "generated_ik": true,
+      "live_recovery_converter": true,
+      "live_recovery_converter_tests": true,
+      "no_adaptive_transform": true,
+      "parity": true,
+      "v13_ik": true
+    },
+    "expected_marker_ik_sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596",
+    "sources": {
+      "conversion_manifest": {
+        "path": "validation/two_sensor_v14_1_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_conversion_manifest.json",
+        "sha256": "2a15c02adab9efc28d8d75319c6c32b0d0654055d0e894367b6cabb6cc1d938a"
+      },
+      "execution_receipt": {
+        "path": "validation/two_sensor_v14_1_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_ik_execution_receipt.json",
+        "sha256": "4575cb0a6cf2d140e3852fa41e6bc310576095e0f3d3bc1b4eed29f297290dd8"
+      },
+      "final_receipt": {
+        "path": "validation/two_sensor_v14_1_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_ik_receipt.json",
+        "sha256": "0f8337aa5f988938c48865e93cd0dede12a19ef23a548da153a7b9ff1b1db45a"
+      },
+      "generated_ik": {
+        "path": "validation/two_sensor_v14_1_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_ik.mot",
+        "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+      },
+      "parity": {
+        "path": "validation/two_sensor_v14_1_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_v13_ik_parity.json",
+        "sha256": "98285280fd41fe5c415e9b3aa7eb651f55d67847e255da42a68c7e05d6aab678"
+      },
+      "v13_ik": {
+        "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+        "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+      }
+    },
+    "status": "PASS_VERIFIED_FULL_SPAN_BYTE_PARITY"
+  },
+  "protocol_id": "AB06_TWO_SENSOR_CROSS_SPEED_INTERPOLATION_2026-07-22_V14_2_BOUNDARY_RECOVERY",
+  "recovery": {
+    "analysis_time_lattice_s": 0.005,
+    "frozen_analysis_intervals_s": {
+      "02": [
+        9.875,
+        153.08
+      ],
+      "03": [
+        8.865,
+        154.4
+      ],
+      "04": [
+        12.485,
+        156.025
+      ],
+      "05": [
+        15.245,
+        158.94
+      ],
+      "06": [
+        11.165,
+        155.03
+      ],
+      "07": [
+        9.855,
+        153.895
+      ],
+      "08": [
+        10.69,
+        154.89
+      ]
+    },
+    "lineage": {
+      "path": "validation/two_sensor_cross_speed_v141_recovery_lineage.json",
+      "sha256": "60590bbcc69f8095add54e66042c1751216dfeb6d443f2bddc355e392818d139"
+    },
+    "minimum_edge_inset_s": 0.01,
+    "parent_destination_reused": false,
+    "parent_failure": {
+      "checks": {
+        "converter": true,
+        "exact_parent_output_inventory": true,
+        "failed_before_detector_replay": true,
+        "failure": true,
+        "ledger": true,
+        "protocol": true,
+        "run_start_receipt": true,
+        "runner": true,
+        "tests": true
+      },
+      "output_inventory": [
+        "failure.json",
+        "run_start_receipt.json"
+      ],
+      "sources": {
+        "converter": {
+          "path": "tools/convert_epic_ab06_tables.py",
+          "sha256": "015f7e96f4f3dd6a923e3c1115d4f41d07faf1d997419138e11e9d6f9d8433cb"
+        },
+        "failure": {
+          "path": "validation/two_sensor_cross_speed_v14_runs/2026-07-22_ab06_cross_speed_v14/failure.json",
+          "sha256": "4f72c22183a63a084653081ce4f40bfd6097e8e2dd12abd6ccd694a968eb4b58"
+        },
+        "ledger": {
+          "path": "validation/two_sensor_cross_speed_v14_execution_ledger.json",
+          "sha256": "afe6dfe204d48984aeb7910344707d03a6f8bfdbc49fa77bbf2114bd2438475a"
+        },
+        "protocol": {
+          "path": "validation/two_sensor_cross_speed_v14_protocol.json",
+          "sha256": "bdc44f93ed88e94b5afb867f30bb9b1507ebc44b7883be2c96224c37f0ae026c"
+        },
+        "run_start_receipt": {
+          "path": "validation/two_sensor_cross_speed_v14_runs/2026-07-22_ab06_cross_speed_v14/run_start_receipt.json",
+          "sha256": "22c1f986472a96cd8a66b3577e5a9046e2f6a4a0812fd19ea3080154c629b245"
+        },
+        "runner": {
+          "path": "validation/sweep_two_sensor_cross_speed_v14.py",
+          "sha256": "1f346643efe02cdcc32e2511302db45373c3e2eb076f68af8152459d9e298a6e"
+        },
+        "tests": {
+          "path": "validation/test_two_sensor_cross_speed_v14.py",
+          "sha256": "7057133ffb7d40198055b7d21bbdee8e258b143089240a112ed5bc42fdaf023e"
+        }
+      },
+      "status": "PASS_PARENT_V14_FAILURE_BOUNDARY_VERIFIED"
+    },
+    "parent_ledger_reused": false,
+    "parent_scientific_core_schema": 1,
+    "parent_scientific_core_sha256": "06f70ad7c80fc8a894c49d558ec15e9b2506bb489477a8ec063719491a3a9268",
+    "recovery_id": "AB06_TWO_SENSOR_CROSS_SPEED_V14_TO_V141_PREPROCESSING_RECOVERY_2026-07-22",
+    "v14_2_boundary_recovery": {
+      "boundary_contract": {
+        "cadence_independent": true,
+        "candidate_independent": true,
+        "first_plateau_additional_rule": "at_least_one_complete_prescribed_trial_cycle_closed_by_first_retained_hs_minus_90ms",
+        "guard_relaxed": false,
+        "left_excluded_cycles_enter_scoring": false,
+        "minimum_prefix_rule": "first_retained_hs_minus_plateau_start_at_least_90ms",
+        "minimum_scoreable_cycles_after_both_censors": 10,
+        "right_boundary_censor_applied_after_left_prefix": true,
+        "schema_version": 1,
+        "selection_source": "prescribed_grf_only_before_station_sampling",
+        "warmup_cycles_enter_scoring": false
+      },
+      "boundary_contract_sha256": "a5902ef523adf650291b0a3292f522fbf3725511dee32f597ceefddda8043989",
+      "lineage": {
+        "path": "validation/two_sensor_cross_speed_v142_boundary_recovery_lineage.json",
+        "sha256": "6902f821f1226c45aee9dc6914bb105f8cc424449151f06febfdd3b8988816d8"
+      },
+      "only_scientific_delta": "prescribed_left_boundary_prefix_censor",
+      "parent_destination_reused": false,
+      "parent_failure": {
+        "checks": {
+          "exact_failure": true,
+          "exact_parent_output_inventory_and_hashes": true,
+          "failure": true,
+          "ledger": true,
+          "lineage": true,
+          "no_detector_or_candidate_outputs": true,
+          "only_trial02_preprocessed": true,
+          "protocol": true,
+          "rerun_forbidden": true,
+          "run_start_receipt": true,
+          "runner": true,
+          "sealed_unopened": true,
+          "tests": true,
+          "trial02_access_receipt": true,
+          "trial02_preprocessing_lock": true,
+          "validation_unopened": true,
+          "warmup": true,
+          "warmup_tests": true
+        },
+        "output_inventory_sha256": {
+          "development_trial_02_preprocessing_access_receipt.json": "adcab9090ef724621e798a8bf4a5c6988011f9894dc057a101b8b791b126b4e2",
+          "failure.json": "4009aa12a01a1a0943a2525ea29658d6444d35ce09513db9c80625acb085f56d",
+          "preprocessed/trial_02/opensim.log": "e6d5f8205fc91326674cb34cef6b1182b67c9f91046bddcabd35d3da39de7329",
+          "preprocessed/trial_02/treadmill_02_01.trc": "cef30550f636c3d9ef4fa759c54c7cb98f0a9253d43cca777b196af5e7ca27b4",
+          "preprocessed/trial_02/treadmill_02_01_ExternalLoads.xml": "060c8add7ba26cf1ddf956fbc7445950aab0ee5c889e57024bb2d394a70bc429",
+          "preprocessed/trial_02/treadmill_02_01_conversion_manifest.json": "41580d678c6243e3a49a25a2842a9b6d5b5d32e6e65446b09fae29be6b5ba440",
+          "preprocessed/trial_02/treadmill_02_01_grf.mot": "36de805e73e1c95d303ba6265ee262099e0a88fc46e7351bae0cdce3877d23d3",
+          "preprocessed/trial_02/treadmill_02_01_ik.mot": "4018b3001a5d293edda799839158f4c154747af5c908a2eb530dae3e37e5a982",
+          "preprocessed/trial_02/treadmill_02_01_ik_dataset_ab06_seasea.mot": "314101f0dcf010a663699ed7e5d8765bcdca673c8f8d18337cd1a6238615a9f0",
+          "preprocessed/trial_02/treadmill_02_01_ik_execution_receipt.json": "36e578bb9556b692efa789e945b0641fe6b0b4d969d2f7400c98edf34c0ba491",
+          "preprocessed/trial_02/treadmill_02_01_ik_receipt.json": "f5daa2290a030dd2dbf6c4b1908db2e9505b14745b397aa61b070993703e086e",
+          "preprocessed/trial_02/treadmill_02_01_iksetup.xml": "2872322d1f61317c4bcf2c07174f99d612df09771c54f42a87c73a525c80d811",
+          "preprocessed/trial_02/treadmill_02_01_preprocessing_lock.json": "fa45f3e98b2dc83313c9e8171ed84114edc87078750379c05843a525e3a963d8",
+          "run_start_receipt.json": "b3b6db3d87349e4d182b0494ca57409567b80fd0641d07d0ef07f80d2b135ba8"
+        },
+        "sources": {
+          "failure": {
+            "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/failure.json",
+            "sha256": "4009aa12a01a1a0943a2525ea29658d6444d35ce09513db9c80625acb085f56d"
+          },
+          "ledger": {
+            "path": "validation/two_sensor_cross_speed_v14_1_execution_ledger.json",
+            "sha256": "2db41fde50d009b57a04b9f51b037c0d4c1363ee202aca0f1592c5b85b87847f"
+          },
+          "lineage": {
+            "path": "validation/two_sensor_cross_speed_v141_recovery_lineage.json",
+            "sha256": "60590bbcc69f8095add54e66042c1751216dfeb6d443f2bddc355e392818d139"
+          },
+          "protocol": {
+            "path": "validation/two_sensor_cross_speed_v14_1_protocol.json",
+            "sha256": "e263a624e24a13bafd76bf2858f831184914399d188982deb2520f1f383673f1"
+          },
+          "run_start_receipt": {
+            "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/run_start_receipt.json",
+            "sha256": "b3b6db3d87349e4d182b0494ca57409567b80fd0641d07d0ef07f80d2b135ba8"
+          },
+          "runner": {
+            "path": "validation/sweep_two_sensor_cross_speed_v14_1.py",
+            "sha256": "959f36239cda5bbd89dc07be68f2ecf11c3b1686def1b8c006d787c04bde79f8"
+          },
+          "tests": {
+            "path": "validation/test_two_sensor_cross_speed_v14_1.py",
+            "sha256": "5eeb101590a50f3da57c57c107086d3ca56a369a4ff470a1e24a6ed4a1cf0215"
+          },
+          "trial02_access_receipt": {
+            "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/development_trial_02_preprocessing_access_receipt.json",
+            "sha256": "adcab9090ef724621e798a8bf4a5c6988011f9894dc057a101b8b791b126b4e2"
+          },
+          "trial02_preprocessing_lock": {
+            "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/preprocessed/trial_02/treadmill_02_01_preprocessing_lock.json",
+            "sha256": "fa45f3e98b2dc83313c9e8171ed84114edc87078750379c05843a525e3a963d8"
+          },
+          "warmup": {
+            "path": "validation/two_sensor_v14_1_warmup.py",
+            "sha256": "886d2f89171ba8fedb03befdc752b90eb3a66e085685d3bc040d76a7fbb8c9b6"
+          },
+          "warmup_tests": {
+            "path": "validation/test_two_sensor_v14_1_warmup.py",
+            "sha256": "2f1312416dde548adffd423c605fd5ee1fb626b0c876168532c0c3ec5ec052e3"
+          }
+        },
+        "status": "PASS_PARENT_V14_1_PRE_REPLAY_FAILURE_VERIFIED"
+      },
+      "parent_ledger_reused": false,
+      "recovery_id": "AB06_TWO_SENSOR_CROSS_SPEED_V141_TO_V142_BOUNDARY_RECOVERY_2026-07-22",
+      "trial_02_preprocessing_reused_byte_identically": true
+    }
+  },
+  "replay": {
+    "diagnostic_event_time_field": "event_time_s",
+    "evaluate_all_candidates_at_both_resolutions": true,
+    "event_source": "two_sensor",
+    "fine_sample_dt_s": 0.001,
+    "fsm_min_stance_contact_fraction": 0.2,
+    "fsm_min_stance_duration_s": 0.3,
+    "fsm_min_stance_load_bw_s": 0.04,
+    "hs_tolerance_s": 0.05,
+    "phase_reference_mode": "validated_event_intervals",
+    "prescribed_contact_threshold_n": 20.0,
+    "primary_event_time_field": "confirmed_time_s",
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "runtime_sample_dt_s": 0.01,
+    "sea_plugin": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "sensor_dwell_s": 0.03,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_on_threshold_n": 0.5,
+    "threshold_fsm_routing_or_radius_changed": false,
+    "toe_off_tolerance_s": 0.08
+  },
+  "reserve_actuators_xml": "models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml",
+  "sampling": {
+    "affine_reconstruction": false,
+    "development_combinations": {
+      "all_locations_must_exist_in_stage1_plan": true,
+      "maximum_cartesian_tuple_count": 81,
+      "new_opensim_station_sampling_passes": 0,
+      "radius_variants_reuse_identical_station_kinematics": true
+    },
+    "development_stage1": {
+      "evaluated_pair_count": 24,
+      "expected_primary_load_spheres": 8,
+      "expected_total_sampled_stations": 23,
+      "expected_unique_detector_stations": 15,
+      "expected_unique_heel_locations": 8,
+      "expected_unique_toe_locations": 7,
+      "method": "shared_station_sampling_radius_evaluated_offline"
+    },
+    "validation_and_sealed": {
+      "one_continuous_trial_sampling_pass_per_cadence": true,
+      "other_isolates_or_combinations_forbidden": true,
+      "pair_count": 2,
+      "pairs": [
+        "frozen_primary",
+        "V13_paired_comparator"
+      ],
+      "primary_load_spheres": 8,
+      "unique_detector_station_count_range": [
+        2,
+        4
+      ]
+    }
+  },
+  "schema_version": 14,
+  "selection": {
+    "challenger_rule": {
+      "at_least_one_component_improves_beyond_tolerance": true,
+      "pareto_noninferior_to_v13_with_tolerance": 1e-12,
+      "v13_is_incumbent_and_wins_ties": true
+    },
+    "eligible_finalist_ranking": [
+      "worst_joint_normalized:min",
+      "worst_hs_s:min",
+      "worst_to_s:min",
+      "equal_cell_mean_normalized_error:min",
+      "worst_f1_deficit:min",
+      "worst_iou_deficit:min",
+      "geometry_displacement:min",
+      "candidate_id:lexicographic"
+    ],
+    "full_finalist_gate": {
+      "exact_counts_are_dynamic_from_each_unit_reference": true,
+      "must_also_pass_each_trial_x_cadence_aggregate_gate": true,
+      "must_pass_all_24_trial_x_plateau_x_cadence_units": true,
+      "trial_aggregate_is_not_a_ranking_weight": true,
+      "uses_unchanged_v13_thresholds_and_semantics": true,
+      "warmup_certificate_required": true
+    },
+    "isolated_arm_ranking": {
+      "Hr": [
+        "worst_normalized_hs:min",
+        "worst_normalized_to:min",
+        "worst_f1_deficit:min",
+        "geometry_displacement:min",
+        "candidate_id:lexicographic"
+      ],
+      "Hx": [
+        "worst_normalized_hs:min",
+        "worst_normalized_to:min",
+        "worst_f1_deficit:min",
+        "geometry_displacement:min",
+        "candidate_id:lexicographic"
+      ],
+      "Tr": [
+        "worst_normalized_to:min",
+        "worst_incomplete_transfer_count:min",
+        "worst_normalized_hs:min",
+        "worst_f1_deficit:min",
+        "geometry_displacement:min",
+        "candidate_id:lexicographic"
+      ],
+      "Ty": [
+        "worst_normalized_to:min",
+        "worst_incomplete_transfer_count:min",
+        "worst_normalized_hs:min",
+        "worst_f1_deficit:min",
+        "geometry_displacement:min",
+        "candidate_id:lexicographic"
+      ],
+      "common_prefix": [
+        "worst_event_count_deficit:min",
+        "sum_event_count_deficit:min",
+        "worst_valid_cycle_deficit:min",
+        "worst_incomplete_transfer_count:min",
+        "worst_unknown_phase_samples:min",
+        "worst_invalid_plus_unaccepted_count:min",
+        "worst_forbidden_phase_mismatch_count:min"
+      ],
+      "fallback_when_no_root_safe_candidate": "exact_V13_parameter_value"
+    },
+    "isolated_arm_root_safety": {
+      "finite_priority_and_structural_metrics_required": true,
+      "full_v13_gate_required": false,
+      "incomplete_transfer_and_unknown_samples_must_not_exceed_v13": true,
+      "invalid_plus_unaccepted_and_forbidden_may_exceed_v13_by_at_most_one": true,
+      "mesh_pre_gate_and_positive_radii_required": true,
+      "per_event_predicted_count_rule": "abs(candidate-reference)<=max(abs(V13-reference),1)",
+      "reference_counts_must_equal_unit_contract": true,
+      "valid_cycle_deficit_rule": "abs(candidate-reference_cycles)<=max(abs(V13-reference_cycles),1)",
+      "warmup_certificate_required": true
+    },
+    "minimax_vector": [
+      "worst_joint_normalized",
+      "worst_hs_s",
+      "worst_to_s",
+      "equal_cell_mean_normalized_error",
+      "worst_f1_deficit",
+      "worst_iou_deficit"
+    ]
+  },
+  "sources": {
+    "baseline_profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "sha256": "06e442bed2e4d2a2bc61f64e3379332d5e8d90695bcc9123585b0fbd008894fc"
+    },
+    "baseline_registry": {
+      "path": "validation/experimental_detector_profiles/two_sensor_development_baseline_registry.json",
+      "sha256": "63faa0f613129bca46772bd58b290a9160f9b090ebe4a8a9bba584db11998bbf"
+    },
+    "epic_converter": {
+      "path": "tools/convert_epic_ab06_tables.py",
+      "sha256": "015f7e96f4f3dd6a923e3c1115d4f41d07faf1d997419138e11e9d6f9d8433cb"
+    },
+    "golden_conversion_manifest": {
+      "path": "validation/two_sensor_v14_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_conversion_manifest.json",
+      "sha256": "3acf581c762e4f2c632e14be8477b6dc1bedb0f0fccbf6700a44160354d2f2fd"
+    },
+    "golden_ik_execution_receipt": {
+      "path": "validation/two_sensor_v14_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_ik_execution_receipt.json",
+      "sha256": "dfcb12939c2b065b581e5bdbdba58dd90698813ec39f6dfa5eb5f710c0f6bf61"
+    },
+    "golden_ik_final_receipt": {
+      "path": "validation/two_sensor_v14_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_ik_receipt.json",
+      "sha256": "88e95db01f4122ed79670bc74f731ec73ec3d1f59b76c0d3f10f0230ad56711b"
+    },
+    "golden_marker_ik": {
+      "path": "validation/two_sensor_v14_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_ik.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "golden_v13_ik_parity": {
+      "path": "validation/two_sensor_v14_preprocessing_golden/2026-07-22_treadmill_01_01/treadmill_01_01_v13_ik_parity.json",
+      "sha256": "6c472613fd734e8aa8083c9e76ab63bc535af7e81d44ace6aef24766f92dbb30"
+    },
+    "left_foot_mesh": {
+      "path": "Geometry/AM_foot_l.stl",
+      "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"
+    },
+    "load_evidence_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+    },
+    "marker_calibrated_model": {
+      "path": "models/AB06_SEASEA-raw/osimxml/AB06_SEASEA_marker_calibrated.osim",
+      "sha256": "98cfcbc4f7155ea4576f583654fbd50a6e8bd2f2f33ff0894c9f3f24dce5fa8d"
+    },
+    "parent_v14_1_execution_ledger": {
+      "path": "validation/two_sensor_cross_speed_v14_1_execution_ledger.json",
+      "sha256": "2db41fde50d009b57a04b9f51b037c0d4c1363ee202aca0f1592c5b85b87847f"
+    },
+    "parent_v14_1_failure": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/failure.json",
+      "sha256": "4009aa12a01a1a0943a2525ea29658d6444d35ce09513db9c80625acb085f56d"
+    },
+    "parent_v14_1_protocol": {
+      "path": "validation/two_sensor_cross_speed_v14_1_protocol.json",
+      "sha256": "e263a624e24a13bafd76bf2858f831184914399d188982deb2520f1f383673f1"
+    },
+    "parent_v14_1_run_start_receipt": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/run_start_receipt.json",
+      "sha256": "b3b6db3d87349e4d182b0494ca57409567b80fd0641d07d0ef07f80d2b135ba8"
+    },
+    "parent_v14_1_trial02_preprocessing_lock": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/preprocessed/trial_02/treadmill_02_01_preprocessing_lock.json",
+      "sha256": "fa45f3e98b2dc83313c9e8171ed84114edc87078750379c05843a525e3a963d8"
+    },
+    "parent_v14_ledger": {
+      "path": "validation/two_sensor_cross_speed_v14_execution_ledger.json",
+      "sha256": "afe6dfe204d48984aeb7910344707d03a6f8bfdbc49fa77bbf2114bd2438475a"
+    },
+    "parent_v14_protocol": {
+      "path": "validation/two_sensor_cross_speed_v14_protocol.json",
+      "sha256": "bdc44f93ed88e94b5afb867f30bb9b1507ebc44b7883be2c96224c37f0ae026c"
+    },
+    "recovery_converter": {
+      "path": "tools/convert_epic_ab06_tables_recovery.py",
+      "sha256": "aa295bab1af42347efed7d445dacdbee2aede36f5ee4368952f20644d1a55b80"
+    },
+    "recovery_converter_tests": {
+      "path": "validation/test_convert_epic_ab06_tables_recovery.py",
+      "sha256": "ef282bf5c47ab2921f44acc4520552f66766cf8191c8f8dd76580b0c00167669"
+    },
+    "recovery_lineage": {
+      "path": "validation/two_sensor_cross_speed_v141_recovery_lineage.json",
+      "sha256": "60590bbcc69f8095add54e66042c1751216dfeb6d443f2bddc355e392818d139"
+    },
+    "reserve_actuators": {
+      "path": "models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml",
+      "sha256": "238792c0024c405241e4a45b9be88e153660561a02e667aedbd1dd6116df73dd"
+    },
+    "runtime_config": {
+      "path": "config.py",
+      "sha256": "17c8639f0c2a04679a86b2a65c39249537684eebf67fbcc86c433633d498aa6c"
+    },
+    "runtime_dual_stream_core": {
+      "path": "validation/diagnose_two_sensor_dual_stream_prescribed.py",
+      "sha256": "e9376dd841456b77af6a6bda97895143e3f8d70023d4282f9a90a2579b37a1a1"
+    },
+    "runtime_kinematics_interpolator": {
+      "path": "kinematics_interpolator.py",
+      "sha256": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede"
+    },
+    "runtime_mesh_audit_core": {
+      "path": "validation/audit_two_sensor_prescribed_geometry.py",
+      "sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307"
+    },
+    "runtime_mesh_builder_core": {
+      "path": "validation/build_two_sensor_mesh_profile_v4.py",
+      "sha256": "671b59ca546112b720b915816a89eec14eaf3dd3cf52a9a37388074b23ef4bda"
+    },
+    "runtime_mesh_comparison_core": {
+      "path": "validation/compare_two_sensor_mesh_profiles_prescribed.py",
+      "sha256": "12b2738b9af44ffeb914cb95d45a20697b4d151cab9627d5c04d7be1a29eb1cd"
+    },
+    "runtime_mesh_sweep_core": {
+      "path": "validation/sweep_two_sensor_mesh_placements_prescribed.py",
+      "sha256": "929e0bbdebaf1f9a9cbe2d021ff6610a22fb2be02f3a6438bb184c3a1ad0a39a"
+    },
+    "runtime_model_loader": {
+      "path": "model_loader.py",
+      "sha256": "4921dd37765158af4d70fec555acef8b23012f38f9096a6028390d86525a01a0"
+    },
+    "runtime_online_grf": {
+      "path": "online_grf.py",
+      "sha256": "8f9dbbf533ffece1c2bf73dcaa19cd2a8b8e8d8993037f0bd590a98543db5dbf"
+    },
+    "runtime_online_grf_event_core": {
+      "path": "validation/validate_online_grf_events.py",
+      "sha256": "6f314854ce80f6ab13eec7ac9a0b02d8014dd02c274c36c6bcdc00982b0ba2f7"
+    },
+    "runtime_online_grf_validation_core": {
+      "path": "validation/validate_online_grf.py",
+      "sha256": "d71855951d23660e7eeba3f70da31996a2ff1be8ec9a3a64bd75a4c18613021c"
+    },
+    "runtime_output": {
+      "path": "output.py",
+      "sha256": "7b03d1031202976fd011288e031f8796364eb35c34d1ed8838f8eff971318acb"
+    },
+    "runtime_path_resolver": {
+      "path": "path_resolver.py",
+      "sha256": "2732d013cbcc1805863a3b832a663b27e26684ec52e954e12a7e191a4ea88882"
+    },
+    "runtime_prescribed_replay_core": {
+      "path": "validation/validate_two_sensor_prescribed_replay.py",
+      "sha256": "91dcf134f2978f808457eafd5919985cccbb504dd3c3b75da8f47fa996a39fae"
+    },
+    "runtime_prosthetic_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "f420b5a8885c79f422a6142acc9d2f2d4bad54f605656e990548c0b660c80cec"
+    },
+    "runtime_threshold_gate_core": {
+      "path": "validation/sweep_two_sensor_prescribed_thresholds.py",
+      "sha256": "1a33efe86f5bbfb986e24dd1d2784e43339dcd8dda3ea23030203781b389f586"
+    },
+    "sea_plugin_binary_macos": {
+      "path": "plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+      "sha256": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b"
+    },
+    "setup_io": {
+      "path": "setup_io.py",
+      "sha256": "9d24df7b272ad6550c2897151b019b53d665a61a715217eeeb6dfbe54a6ae6e3"
+    },
+    "v10_sweep": {
+      "path": "validation/sweep_two_sensor_center_radius_prescribed_v10.py",
+      "sha256": "d88e1e3d243992f4d2ff979686211428fdc0cde6c6725ec6e5eb04d4dd4883d3"
+    },
+    "v11_sweep": {
+      "path": "validation/sweep_two_sensor_heel_x_prescribed_v11.py",
+      "sha256": "0fb4e49aca735abac8509cbf12ac8e2bbd51826424121e1ccfd6adb6f109b87a"
+    },
+    "v12_sweep": {
+      "path": "validation/sweep_two_sensor_toe_compensation_prescribed_v12.py",
+      "sha256": "d40d6d47de2a17c1ad5c1eff4f99e215928e35c8eaf6fda54f7de9bed4930f39"
+    },
+    "v13_golden_ik": {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "v13_validator": {
+      "path": "validation/validate_two_sensor_sealed_v13.py",
+      "sha256": "1c2c226200c97d510eb6b0c812d603f3f10f74abcc65ba7e12670bb493c9807a"
+    },
+    "v14_1_harness": {
+      "path": "validation/sweep_two_sensor_cross_speed_v14_1.py",
+      "sha256": "959f36239cda5bbd89dc07be68f2ecf11c3b1686def1b8c006d787c04bde79f8"
+    },
+    "v14_1_tests": {
+      "path": "validation/test_two_sensor_cross_speed_v14_1.py",
+      "sha256": "5eeb101590a50f3da57c57c107086d3ca56a369a4ff470a1e24a6ed4a1cf0215"
+    },
+    "v14_1_warmup": {
+      "path": "validation/two_sensor_v14_1_warmup.py",
+      "sha256": "886d2f89171ba8fedb03befdc752b90eb3a66e085685d3bc040d76a7fbb8c9b6"
+    },
+    "v14_1_warmup_tests": {
+      "path": "validation/test_two_sensor_v14_1_warmup.py",
+      "sha256": "2f1312416dde548adffd423c605fd5ee1fb626b0c876168532c0c3ec5ec052e3"
+    },
+    "v14_2_boundary_lineage": {
+      "path": "validation/two_sensor_cross_speed_v142_boundary_recovery_lineage.json",
+      "sha256": "6902f821f1226c45aee9dc6914bb105f8cc424449151f06febfdd3b8988816d8"
+    },
+    "v14_2_harness": {
+      "path": "validation/sweep_two_sensor_cross_speed_v14_2.py",
+      "sha256": "d5afba3217df24904137a5609242ad897c1ae0b8ce661b4edf58f4690810b781"
+    },
+    "v14_2_tests": {
+      "path": "validation/test_two_sensor_cross_speed_v14_2.py",
+      "sha256": "2868ea66750575ae5f74a85ae50846b6a66b81344590ae35f6df8a2009dffb92"
+    },
+    "v14_harness": {
+      "path": "validation/sweep_two_sensor_cross_speed_v14.py",
+      "sha256": "1f346643efe02cdcc32e2511302db45373c3e2eb076f68af8152459d9e298a6e"
+    },
+    "v14_metadata_audit": {
+      "path": "validation/audit_two_sensor_v14_trial_metadata.py",
+      "sha256": "66cb4c3a370ca79ff5cdb70c87854f35a886c81a4aeced218e0ae24aa3db8d76"
+    },
+    "v14_metadata_tests": {
+      "path": "validation/test_two_sensor_v14_trial_metadata.py",
+      "sha256": "b0d69231b562dafc372881bd88551fa6b25b98595b8fcb6d9d5bb08daab7e742"
+    },
+    "v14_tests": {
+      "path": "validation/test_two_sensor_cross_speed_v14.py",
+      "sha256": "7057133ffb7d40198055b7d21bbdee8e258b143089240a112ed5bc42fdaf023e"
+    },
+    "v9_profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+      "sha256": "e08a7582776b41e883ae50cfce9ce53b5f6508c00b73ca54957afc98d01a4489"
+    }
+  },
+  "split": {
+    "CONSUMED": [
+      "01"
+    ],
+    "DEVELOPMENT": [
+      "02",
+      "04",
+      "08"
+    ],
+    "RESERVE": [
+      "03",
+      "07"
+    ],
+    "SEALED": [
+      "06"
+    ],
+    "VALIDATION": [
+      "05"
+    ]
+  },
+  "stage": "v14_2_prescribed_boundary_recovery_then_cross_speed_development_then_one_shot_validation_and_sealed",
+  "trials": {
+    "02": {
+      "analysis_interval_origin": "frozen_inward_global_5ms_lattice_after_minimum_10ms_edge_inset",
+      "dataset_ik_is_conversion_only_not_detector_kinematics": true,
+      "plateaus": [
+        {
+          "duration_s": 33.185,
+          "end_s": 44.883,
+          "sample_count": 33186,
+          "speed_mps": 0.55,
+          "start_s": 11.698
+        },
+        {
+          "duration_s": 32.34700000000001,
+          "end_s": 79.897,
+          "sample_count": 32348,
+          "speed_mps": 1.35,
+          "start_s": 47.55
+        },
+        {
+          "duration_s": 33.68000000000001,
+          "end_s": 114.911,
+          "sample_count": 33681,
+          "speed_mps": 1.75,
+          "start_s": 81.231
+        },
+        {
+          "duration_s": 32.34899999999999,
+          "end_s": 149.927,
+          "sample_count": 32350,
+          "speed_mps": 0.95,
+          "start_s": 117.578
+        }
+      ],
+      "raw_sources": {
+        "conditions": {
+          "path": "models/AB06-raw/10_09_18/treadmill/conditions/treadmill_02_01.mat",
+          "sha256": "daa0e291acdebddf7ddae88bcd1bcbf8d4e7500c92167389b403f05dd52416a1",
+          "size_bytes": 498844
+        },
+        "fp": {
+          "path": "models/AB06-raw/10_09_18/treadmill/fp/treadmill_02_01.mat",
+          "sha256": "b1c53429174fd98debcad5e525234a676991286775c6492aa45997a468862b40",
+          "size_bytes": 7025183
+        },
+        "ik": {
+          "path": "models/AB06-raw/10_09_18/treadmill/ik/treadmill_02_01.mat",
+          "sha256": "f2f6812f49dda6771a52dfb9dc7caa4b55bca593bc7c897f6787d7e8d2d5285b",
+          "size_bytes": 3957330
+        },
+        "markers": {
+          "path": "models/AB06-raw/10_09_18/treadmill/markers/treadmill_02_01.mat",
+          "sha256": "6b3663519aa9519c598cc0cf5de573e5d65d6590e5cbb784c81f7755f0ccf9bd",
+          "size_bytes": 8798479
+        }
+      },
+      "role": "DEVELOPMENT",
+      "source_trial_interval_s": [
+        9.864,
+        153.09
+      ],
+      "trial_interval_s": [
+        9.875,
+        153.08
+      ]
+    },
+    "03": {
+      "analysis_interval_origin": "frozen_inward_global_5ms_lattice_after_minimum_10ms_edge_inset",
+      "dataset_ik_is_conversion_only_not_detector_kinematics": true,
+      "plateaus": [
+        {
+          "duration_s": 33.016000000000005,
+          "end_s": 46.027,
+          "sample_count": 33017,
+          "speed_mps": 0.6,
+          "start_s": 13.011
+        },
+        {
+          "duration_s": 32.346000000000004,
+          "end_s": 81.04,
+          "sample_count": 32347,
+          "speed_mps": 1.4,
+          "start_s": 48.694
+        },
+        {
+          "duration_s": 33.68700000000001,
+          "end_s": 116.061,
+          "sample_count": 33688,
+          "speed_mps": 1.8,
+          "start_s": 82.374
+        },
+        {
+          "duration_s": 32.35000000000001,
+          "end_s": 151.078,
+          "sample_count": 32351,
+          "speed_mps": 1.0,
+          "start_s": 118.728
+        }
+      ],
+      "raw_sources": {
+        "conditions": {
+          "path": "models/AB06-raw/10_09_18/treadmill/conditions/treadmill_03_01.mat",
+          "sha256": "cb62b6bb6f4c66b584d63d49d0f80096ee18c2c26f4376bc09baa801d3ad4b9f",
+          "size_bytes": 494113
+        },
+        "fp": {
+          "path": "models/AB06-raw/10_09_18/treadmill/fp/treadmill_03_01.mat",
+          "sha256": "7068b115bc327785c20b699624dce15a243a3059a44b868d803c605157e153b8",
+          "size_bytes": 11611858
+        },
+        "ik": {
+          "path": "models/AB06-raw/10_09_18/treadmill/ik/treadmill_03_01.mat",
+          "sha256": "afbefd9944e6966e465b7ebf7a7fe7fc4c1d72bb88f7a5061374e2ddaf616ae4",
+          "size_bytes": 4015384
+        },
+        "markers": {
+          "path": "models/AB06-raw/10_09_18/treadmill/markers/treadmill_03_01.mat",
+          "sha256": "55a9647322acc4f159c1af40716084f51fe32244182f6fa757094fa1bd996207",
+          "size_bytes": 8907303
+        }
+      },
+      "role": "RESERVE",
+      "source_trial_interval_s": [
+        8.851,
+        154.41
+      ],
+      "trial_interval_s": [
+        8.865,
+        154.4
+      ]
+    },
+    "04": {
+      "analysis_interval_origin": "frozen_inward_global_5ms_lattice_after_minimum_10ms_edge_inset",
+      "dataset_ik_is_conversion_only_not_detector_kinematics": true,
+      "plateaus": [
+        {
+          "duration_s": 32.849999999999994,
+          "end_s": 47.489,
+          "sample_count": 32851,
+          "speed_mps": 0.65,
+          "start_s": 14.639
+        },
+        {
+          "duration_s": 32.349,
+          "end_s": 82.505,
+          "sample_count": 32350,
+          "speed_mps": 1.45,
+          "start_s": 50.156
+        },
+        {
+          "duration_s": 33.68300000000001,
+          "end_s": 117.522,
+          "sample_count": 33684,
+          "speed_mps": 1.85,
+          "start_s": 83.839
+        },
+        {
+          "duration_s": 32.349999999999994,
+          "end_s": 152.539,
+          "sample_count": 32351,
+          "speed_mps": 1.05,
+          "start_s": 120.189
+        }
+      ],
+      "raw_sources": {
+        "conditions": {
+          "path": "models/AB06-raw/10_09_18/treadmill/conditions/treadmill_04_01.mat",
+          "sha256": "17ccf3d86b3cb5eea2bd406df8d4eae7252cc1321a99e7a12264313abee41858",
+          "size_bytes": 505613
+        },
+        "fp": {
+          "path": "models/AB06-raw/10_09_18/treadmill/fp/treadmill_04_01.mat",
+          "sha256": "5a36c7ea999227cee9ed72de519010cc01df8779655e0ec12a50751945a21fb3",
+          "size_bytes": 7171925
+        },
+        "ik": {
+          "path": "models/AB06-raw/10_09_18/treadmill/ik/treadmill_04_01.mat",
+          "sha256": "4a5b4afd1ad64333d1a5228dd22f0798119f9a2696f777dedabb4394c539fbf6",
+          "size_bytes": 3965575
+        },
+        "markers": {
+          "path": "models/AB06-raw/10_09_18/treadmill/markers/treadmill_04_01.mat",
+          "sha256": "4dfcc0f0b52756228323c4d87d9b51376589ab259f33d4ab03b2dccaf4a392cc",
+          "size_bytes": 8828855
+        }
+      },
+      "role": "DEVELOPMENT",
+      "source_trial_interval_s": [
+        12.472,
+        156.035
+      ],
+      "trial_interval_s": [
+        12.485,
+        156.025
+      ]
+    },
+    "05": {
+      "analysis_interval_origin": "frozen_inward_global_5ms_lattice_after_minimum_10ms_edge_inset",
+      "dataset_ik_is_conversion_only_not_detector_kinematics": true,
+      "plateaus": [
+        {
+          "duration_s": 32.67699999999999,
+          "end_s": 50.242,
+          "sample_count": 32678,
+          "speed_mps": 0.7,
+          "start_s": 17.565
+        },
+        {
+          "duration_s": 32.35,
+          "end_s": 85.259,
+          "sample_count": 32351,
+          "speed_mps": 1.5,
+          "start_s": 52.909
+        },
+        {
+          "duration_s": 33.679,
+          "end_s": 120.272,
+          "sample_count": 33680,
+          "speed_mps": 1.9,
+          "start_s": 86.593
+        },
+        {
+          "duration_s": 32.34700000000001,
+          "end_s": 155.286,
+          "sample_count": 32348,
+          "speed_mps": 1.1,
+          "start_s": 122.939
+        }
+      ],
+      "raw_sources": {
+        "conditions": {
+          "path": "models/AB06-raw/10_09_18/treadmill/conditions/treadmill_05_01.mat",
+          "sha256": "3e728868f7328ab54ed81684002c54affa032914e66582aad1d7b0373e1df5a9",
+          "size_bytes": 509989
+        },
+        "fp": {
+          "path": "models/AB06-raw/10_09_18/treadmill/fp/treadmill_05_01.mat",
+          "sha256": "bff0eaeacd793623f52653770d08b009237eadad3bd137832c854e64c3c90011",
+          "size_bytes": 7302665
+        },
+        "ik": {
+          "path": "models/AB06-raw/10_09_18/treadmill/ik/treadmill_05_01.mat",
+          "sha256": "bc8e27c3e1c0395e467ba508da93bb7a7adb553ade9daf103db90985b392e5ad",
+          "size_bytes": 3971182
+        },
+        "markers": {
+          "path": "models/AB06-raw/10_09_18/treadmill/markers/treadmill_05_01.mat",
+          "sha256": "f27fe6d0cdb522447cf24e068ea8e39e2a1ade7056a037660feff2122cb6deaa",
+          "size_bytes": 8855769
+        }
+      },
+      "role": "VALIDATION",
+      "source_trial_interval_s": [
+        15.231,
+        158.95
+      ],
+      "trial_interval_s": [
+        15.245,
+        158.94
+      ]
+    },
+    "06": {
+      "analysis_interval_origin": "frozen_inward_global_5ms_lattice_after_minimum_10ms_edge_inset",
+      "dataset_ik_is_conversion_only_not_detector_kinematics": true,
+      "plateaus": [
+        {
+          "duration_s": 32.513999999999996,
+          "end_s": 46.166,
+          "sample_count": 32515,
+          "speed_mps": 0.75,
+          "start_s": 13.652
+        },
+        {
+          "duration_s": 32.348,
+          "end_s": 81.181,
+          "sample_count": 32349,
+          "speed_mps": 1.55,
+          "start_s": 48.833
+        },
+        {
+          "duration_s": 33.681,
+          "end_s": 116.196,
+          "sample_count": 33682,
+          "speed_mps": 1.95,
+          "start_s": 82.515
+        },
+        {
+          "duration_s": 32.34800000000001,
+          "end_s": 151.211,
+          "sample_count": 32349,
+          "speed_mps": 1.15,
+          "start_s": 118.863
+        }
+      ],
+      "raw_sources": {
+        "conditions": {
+          "path": "models/AB06-raw/10_09_18/treadmill/conditions/treadmill_06_01.mat",
+          "sha256": "e3424e6708579bf19b5a6c47f8cf47b0ce6328ad03826eeb39a772993a3b5901",
+          "size_bytes": 515931
+        },
+        "fp": {
+          "path": "models/AB06-raw/10_09_18/treadmill/fp/treadmill_06_01.mat",
+          "sha256": "3fdcf839104ba07258b455c901c5a293c4913619a7689114d33fef769c31ac01",
+          "size_bytes": 7271114
+        },
+        "ik": {
+          "path": "models/AB06-raw/10_09_18/treadmill/ik/treadmill_06_01.mat",
+          "sha256": "d0dfa2d62baa0342ef9dbcb9abf46c55c9ad68b8d5cbd35bdbf06e44cfaabb48",
+          "size_bytes": 3976223
+        },
+        "markers": {
+          "path": "models/AB06-raw/10_09_18/treadmill/markers/treadmill_06_01.mat",
+          "sha256": "75e41cc4c289f5cfedf5ee542e884505fe2b5d4780b329410e1cb3b7ad35375a",
+          "size_bytes": 8868425
+        }
+      },
+      "role": "SEALED",
+      "source_trial_interval_s": [
+        11.152,
+        155.04
+      ],
+      "trial_interval_s": [
+        11.165,
+        155.03
+      ]
+    },
+    "07": {
+      "analysis_interval_origin": "frozen_inward_global_5ms_lattice_after_minimum_10ms_edge_inset",
+      "dataset_ik_is_conversion_only_not_detector_kinematics": true,
+      "plateaus": [
+        {
+          "duration_s": 32.35,
+          "end_s": 44.859,
+          "sample_count": 32351,
+          "speed_mps": 0.8,
+          "start_s": 12.509
+        },
+        {
+          "duration_s": 32.35,
+          "end_s": 79.876,
+          "sample_count": 32351,
+          "speed_mps": 1.6,
+          "start_s": 47.526
+        },
+        {
+          "duration_s": 33.68000000000001,
+          "end_s": 114.89,
+          "sample_count": 33681,
+          "speed_mps": 2.0,
+          "start_s": 81.21
+        },
+        {
+          "duration_s": 32.349000000000004,
+          "end_s": 149.906,
+          "sample_count": 32350,
+          "speed_mps": 1.2,
+          "start_s": 117.557
+        }
+      ],
+      "raw_sources": {
+        "conditions": {
+          "path": "models/AB06-raw/10_09_18/treadmill/conditions/treadmill_07_01.mat",
+          "sha256": "cdce3568393bc44d303ba89585c8e035b1765fd230dff48daf4f70662279f3f9",
+          "size_bytes": 496717
+        },
+        "fp": {
+          "path": "models/AB06-raw/10_09_18/treadmill/fp/treadmill_07_01.mat",
+          "sha256": "7a499a65407713d5d581cd7e3765d212b3e086258c164fb0a6eebe37414b6d74",
+          "size_bytes": 7406958
+        },
+        "ik": {
+          "path": "models/AB06-raw/10_09_18/treadmill/ik/treadmill_07_01.mat",
+          "sha256": "12d9286bbeb40e597fd43c31aee960337ce849aec98f0a4e2e315347bbb820ba",
+          "size_bytes": 3981731
+        },
+        "markers": {
+          "path": "models/AB06-raw/10_09_18/treadmill/markers/treadmill_07_01.mat",
+          "sha256": "1dc34df29f077e065bff37e1cfe4c67823d1d8936b630b9fc2010e6dd6691eb5",
+          "size_bytes": 8891459
+        }
+      },
+      "role": "RESERVE",
+      "source_trial_interval_s": [
+        9.842,
+        153.905
+      ],
+      "trial_interval_s": [
+        9.855,
+        153.895
+      ]
+    },
+    "08": {
+      "analysis_interval_origin": "frozen_inward_global_5ms_lattice_after_minimum_10ms_edge_inset",
+      "dataset_ik_is_conversion_only_not_detector_kinematics": true,
+      "plateaus": [
+        {
+          "duration_s": 32.184,
+          "end_s": 45.696,
+          "sample_count": 32185,
+          "speed_mps": 0.85,
+          "start_s": 13.512
+        },
+        {
+          "duration_s": 32.345,
+          "end_s": 80.708,
+          "sample_count": 32346,
+          "speed_mps": 1.65,
+          "start_s": 48.363
+        },
+        {
+          "duration_s": 33.681,
+          "end_s": 115.723,
+          "sample_count": 33682,
+          "speed_mps": 2.05,
+          "start_s": 82.042
+        },
+        {
+          "duration_s": 32.348,
+          "end_s": 150.738,
+          "sample_count": 32349,
+          "speed_mps": 1.25,
+          "start_s": 118.39
+        }
+      ],
+      "raw_sources": {
+        "conditions": {
+          "path": "models/AB06-raw/10_09_18/treadmill/conditions/treadmill_08_01.mat",
+          "sha256": "d2465b271aabf7d408d525b013dbafbf690dbf95e0964e72aad8b93f88846dff",
+          "size_bytes": 507848
+        },
+        "fp": {
+          "path": "models/AB06-raw/10_09_18/treadmill/fp/treadmill_08_01.mat",
+          "sha256": "ec152b7547ba2a6eee83dda26560380cae6061776fb832f9c4b1a63d3c959a8f",
+          "size_bytes": 7916759
+        },
+        "ik": {
+          "path": "models/AB06-raw/10_09_18/treadmill/ik/treadmill_08_01.mat",
+          "sha256": "197c2822c839478c6f97211408f40ac1c42b086fb788b4b27e89025d62a5fca0",
+          "size_bytes": 3986892
+        },
+        "markers": {
+          "path": "models/AB06-raw/10_09_18/treadmill/markers/treadmill_08_01.mat",
+          "sha256": "3ad2f0e9d678e60482d5b093e5ec065c7201815067a68728b9f7d12398974545",
+          "size_bytes": 8907999
+        }
+      },
+      "role": "DEVELOPMENT",
+      "source_trial_interval_s": [
+        10.678,
+        154.9
+      ],
+      "trial_interval_s": [
+        10.69,
+        154.89
+      ]
+    }
+  },
+  "unit_boundary_handling": {
+    "common_cycle_set_at_10ms_and_1ms": true,
+    "fsm_replay_scope": "continuous_over_the_entire_trial_without_plateau_reset",
+    "left_boundary": "derive complete cycles inside the plateau, thereby excluding the contact/cycle already active at plateau start",
+    "left_context_role": "continuous_state_guard_not_a_scoreable_reference_cycle",
+    "left_context_s": 0.09,
+    "minimum_scoreable_complete_cycles_per_plateau": 10,
+    "plateaus_per_trial": 4,
+    "pre_score_warmup_certificate": {
+      "enters_score_denominators": false,
+      "known_nonfailure_state_at_boundary": true,
+      "minimum_detector_complete_cycles": 1,
+      "minimum_prescribed_complete_cycles": 1,
+      "nonbaseline_failure": "full_gate_false_and_root_safe_rejection",
+      "scope": "candidate_x_trial_x_cadence",
+      "v13_failure": "abort_protocol",
+      "window_end": "first_scoreable_hs_minus_left_context_90ms",
+      "zero_timeout_or_invalid": true
+    },
+    "right_boundary": "retain the chronological prefix whose closing HS plus the common right observation margin is strictly inside the plateau",
+    "right_observation_margin_rule": "max(HS_tolerance_50ms,sensor_dwell_30ms)+runtime_sample_10ms",
+    "right_observation_margin_s": 0.06,
+    "structural_metrics_are_scored_on_each_local_unit_from_continuous_trial_state": true,
+    "trial_aggregate_is_an_additional_gate_not_a_ranking_weight": true,
+    "trial_aggregate_rule": "union_the_four_plateau_cycle_sets_and_sum_counts_per_cadence; exclude_all_ramp_cycles",
+    "unit": "trial_x_plateau_x_cadence",
+    "v14_2_prescribed_left_prefix_censor": {
+      "cadence_independent": true,
+      "candidate_independent": true,
+      "first_plateau_additional_rule": "at_least_one_complete_prescribed_trial_cycle_closed_by_first_retained_hs_minus_90ms",
+      "guard_relaxed": false,
+      "left_excluded_cycles_enter_scoring": false,
+      "minimum_prefix_rule": "first_retained_hs_minus_plateau_start_at_least_90ms",
+      "minimum_scoreable_cycles_after_both_censors": 10,
+      "right_boundary_censor_applied_after_left_prefix": true,
+      "schema_version": 1,
+      "selection_source": "prescribed_grf_only_before_station_sampling",
+      "warmup_cycles_enter_scoring": false
+    },
+    "whole_trial_structural_metrics_cannot_be_attributed_to_a_plateau": true
+  }
+}

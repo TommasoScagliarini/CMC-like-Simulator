@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "source": "mesh_based_detector_experimental_v4",
+  "ground": {
+    "origin": [
+      0.0,
+      0.0148208231,
+      0.0
+    ],
+    "normal": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "surface_velocity": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "material": {
+    "stiffness": 46291.9265,
+    "exponent": 1.5,
+    "dissipation": 0.1920624923,
+    "static_friction": 0.2981956025,
+    "dynamic_friction": 0.2981956025,
+    "viscous_friction": 0.0,
+    "transition_velocity": 0.2,
+    "smoothing": 1e-05
+  },
+  "spheres": [
+    {
+      "name": "left_heel",
+      "side": "left",
+      "frame": "/bodyset/foot_l",
+      "location": [
+        -0.1014100475,
+        -0.0328195377,
+        0.01399567
+      ],
+      "radius": 0.0229053623
+    },
+    {
+      "name": "left_toe",
+      "side": "left",
+      "frame": "/bodyset/foot_l",
+      "location": [
+        0.15311119193641204,
+        -0.02404987547772972,
+        0.00882251820313719
+      ],
+      "radius": 0.0229053623
+    },
+    {
+      "name": "right_heel",
+      "side": "right",
+      "frame": "/bodyset/calcn_r",
+      "location": [
+        -0.0189065216,
+        0.0271346173,
+        0.0065209078
+      ],
+      "radius": 0.0229053623
+    },
+    {
+      "name": "right_toe",
+      "side": "right",
+      "frame": "/bodyset/calcn_r",
+      "location": [
+        0.153201581,
+        -0.0101099916,
+        0.0577219009
+      ],
+      "radius": 0.0229053623
+    }
+  ],
+  "metadata": {
+    "status": "experimental_not_promoted",
+    "note": "V4 geometry-only detector candidate; explicit opt-in only. The legacy detector profile remains the runtime default.",
+    "v4_mesh_design": {
+      "design_id": "heel_anchor_anterior_flush_equal_plantar_protrusion_v1",
+      "design_uses_prescribed_timing_or_force_data": false,
+      "changed_runtime_field": "spheres[left_toe].location",
+      "heel_anchor_unchanged": true,
+      "toe_rule": {
+        "x": "mesh_anterior_limit_minus_frozen_radius",
+        "z": "midpoint_of_mesh_section_at_toe_x",
+        "y": "equal_plantar_protrusion_to_frozen_heel_anchor"
+      },
+      "base_profile": {
+        "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+        "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+      },
+      "setup": {
+        "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+        "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"
+      },
+      "model": {
+        "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+        "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+      },
+      "foot_mesh": {
+        "path": "Geometry/AM_foot_l.stl",
+        "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"
+      },
+      "frozen_fields": [
+        "version",
+        "ground",
+        "material",
+        "heel_strike_confirmation_threshold_n",
+        "spheres[left_heel]",
+        "spheres[right_heel]",
+        "spheres[right_toe]",
+        "spheres[*].radius",
+        "spheres[*].frame",
+        "spheres[*].side",
+        "spheres[*].name"
+      ],
+      "geometry_diagnostics": {
+        "mesh_bounds_min_m": [
+          -0.1109737753868103,
+          -0.04522102326154709,
+          -0.040552083402872086
+        ],
+        "mesh_bounds_max_m": [
+          0.17601655423641205,
+          0.01600000075995922,
+          0.04795738682150841
+        ],
+        "heel_plantar_surface_y_m": -0.04517310471270111,
+        "heel_bottom_y_m": -0.055724899999999994,
+        "plantar_protrusion_m": 0.010551795287298882,
+        "toe_section_z_min_m": -0.027950705709565603,
+        "toe_section_z_max_m": 0.045595742115839985,
+        "toe_plantar_surface_y_m": -0.036403442490430836,
+        "toe_dorsal_surface_y_m": -0.028572023189142506,
+        "heel_center_to_mesh_m": 0.004791193649265538,
+        "toe_center_to_mesh_m": 0.004512258216120003,
+        "heel_sphere_surface_gap_to_mesh_m": 0.0,
+        "toe_sphere_surface_gap_to_mesh_m": 0.0,
+        "heel_toe_bottom_offset_m": 0.008769662222270276,
+        "toe_anterior_edge_m": 0.17601655423641205,
+        "mesh_anterior_limit_m": 0.17601655423641205
+      }
+    }
+  }
+}

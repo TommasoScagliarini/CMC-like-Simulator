@@ -50,6 +50,9 @@ class SimulatorConfig:
     # The primary profile above remains the physical/sensor stream and may be
     # applied to dynamics; this detector stream is always sensor-only.
     online_grf_detector_profile_file: str = ""
+    # Causal heel/toe detector lattice.  Policy/control segments may remain at
+    # 10 ms; detector samples are transported independently at this cadence.
+    detector_sample_dt_s: float = 0.001
     online_grf_contact_plugin: str = "plugins/OnlineGRFContact"
     online_grf_max_force_bw: float = 5.0
     online_grf_max_penetration_m: float = 0.03

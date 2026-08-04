@@ -385,3 +385,8 @@ PPO smoke 1 iterazione: PASS
   - tracking SEA;
   - reward functional/task-based.
 - [ ] Propagare i TODO non chiusi nei daily successivi.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

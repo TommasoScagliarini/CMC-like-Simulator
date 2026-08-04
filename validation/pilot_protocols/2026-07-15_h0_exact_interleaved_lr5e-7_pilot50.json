@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "status": "preregistered",
+  "purpose": "diagnostic_50_update_ppo_pilot_without_automatic_promotion",
+  "created_on": "2026-07-15",
+  "source": {
+    "checkpoint": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last",
+    "checkpoint_meta": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last_meta.json",
+    "checkpoint_meta_sha256": "adc5e26c84f3a0fb2de88eacea945426d38ea4e80c7f2f0cd1979ea663c9dfff",
+    "logical_iteration": 1,
+    "actor_digest": "585e33257a0b5fe5b419f8e8f3a5f793c9d2ea71ecd07b8668b77d599bcb0287",
+    "canonical_name": "H0",
+    "immutable": true
+  },
+  "run": {
+    "output_dir": "Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-15_h0_exact_interleaved_lr5e-7_iter2-51_pilot50",
+    "resolved_config_source": "Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/training_cfg.resolved.yaml",
+    "resolved_config_source_sha256": "0e38e60f4f48eb1fc90f787b8268cd6f632f4dc7151dd65b614020486664b775",
+    "new_actor_updates": 50,
+    "first_logical_iteration": 2,
+    "last_logical_iteration": 51,
+    "real_transitions_per_update": 4608,
+    "total_planned_real_transitions": 230400,
+    "checkpoint_every": 1,
+    "retain_iteration_checkpoints": true,
+    "update_history": false,
+    "automatic_promotion": false
+  },
+  "optimization": {
+    "learning_rate": 5e-7,
+    "train_batch_size": 4608,
+    "minibatch_size": 512,
+    "num_epochs": 1,
+    "num_env_runners": 12,
+    "ray_num_cpus": 13,
+    "freeze_logstd": true,
+    "freeze_actor": false,
+    "clip_param": 0.05,
+    "kl_coeff": 1.0,
+    "kl_target": 0.01,
+    "hard_max_minibatch_mean_kl_loss": 0.01,
+    "hard_min_minibatch_mean_kl_loss": -1e-7,
+    "required_kl_minibatch_count": 9,
+    "required_kl_nonfinite_count": 0
+  },
+  "sampling": {
+    "mode": "exact_post_gae_interleaved",
+    "start_offsets_s": [
+      1.756870983805102,
+      1.956870983805102,
+      2.156870983805102
+    ],
+    "runners_per_start": 4,
+    "rollout_fragment_length": 384,
+    "real_transitions_per_start_per_update": 1536,
+    "maximum_start_run_length": 1
+  },
+  "online_stop_contract": {
+    "stop_on_exact_start_balance_failure": true,
+    "stop_on_post_gae_compaction_failure": true,
+    "stop_on_interleaving_failure": true,
+    "stop_on_missing_or_nonfinite_kl_audit": true,
+    "stop_on_kl_limit_failure": true,
+    "max_consecutive_skips": 1,
+    "any_timeout_skip_or_restart_invalidates_promotion_eligibility": true,
+    "physical_failure_of_an_intermediate_checkpoint_does_not_stop_training": true
+  },
+  "milestones": {
+    "retained_logical_iterations": "all integers from 2 through 51 inclusive",
+    "screened_pilot_update_indices": [
+      1,
+      2,
+      5,
+      10,
+      20,
+      30,
+      40,
+      50
+    ],
+    "screened_logical_iterations": [
+      2,
+      3,
+      6,
+      11,
+      21,
+      31,
+      41,
+      51
+    ],
+    "screening_timing": "after_training_to_avoid_cpu_contention",
+    "screening_order_per_milestone": [
+      "training_integrity_and_kl_audit",
+      "stochastic_plus020_seed123_fail_fast",
+      "three_deterministic_condition_matched_rollouts_only_if_critical_passes"
+    ]
+  },
+  "development_gate": {
+    "stochastic_seed": 123,
+    "seed_status": "development_and_contaminated_not_held_out",
+    "expected_sigma": 0.005,
+    "reference_checkpoint": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+    "reference_summaries_root": "Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2",
+    "reserve_mode": "condition_matched_non_regression",
+    "penetration_limit_m_strict": 0.025,
+    "minimum_valid_cycles": 2,
+    "required_steps": 500,
+    "maximum_action_clipped_steps": 0
+  },
+  "candidate_selection": {
+    "eligible_set": "only preregistered screened milestones that pass every development gate",
+    "primary_order": "minimum worst condition-matched reserve ratio versus H0",
+    "tie_breakers": [
+      "minimum worst penetration ratio versus H0",
+      "minimum cumulative empirical KL versus H0",
+      "earlier pilot update"
+    ],
+    "maximum_candidates_opened_on_held_out": 1,
+    "fallback_after_held_out_failure": false,
+    "checkpoint_best_is_not_a_selector": true
+  },
+  "held_out_gate": {
+    "status": "sealed_until_one_candidate_digest_is_fixed",
+    "seeds": [
+      126,
+      127,
+      128
+    ],
+    "seeds_124_125_status": "contaminated_development_only",
+    "start_offsets_s": [
+      1.756870983805102,
+      1.956870983805102,
+      2.156870983805102
+    ],
+    "sigma": 0.005,
+    "paired_reference": "H0 in every seed/start cell",
+    "reserve_mode": "condition_matched_non_regression",
+    "open_once": true
+  },
+  "interpretation": {
+    "reward_reserve_residual_weight": 0.0,
+    "training_return_alone_is_not_evidence_of_reserve_robustness": true,
+    "successful_completion_does_not_promote_a_checkpoint": true,
+    "long_training_tests_optimization_not_long_horizon_closed_loop_stability": true
+  }
+}

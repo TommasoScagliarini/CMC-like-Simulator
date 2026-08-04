@@ -206,3 +206,8 @@ baseline conservata              warm start pre-H1 sigma=0.003
       multi-ciclo, TODO ancora propagato.
 - [ ] Valutare stato Markov/memoria solo con test di osservabilita' e
       deployability, senza dati prescribed nell'actor.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

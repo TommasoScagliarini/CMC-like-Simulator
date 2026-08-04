@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "step_id": "0",
+  "status": "RUNNING",
+  "run_id": "2026-07-24_ab06_primary_grf_readiness_v5",
+  "no_clobber": true,
+  "process_isolation": {
+    "ray_processes_active": false,
+    "opensim_processes_active": false,
+    "baseline_new_process_required": true,
+    "checked_at_utc": "2026-07-24T02:36:08Z",
+    "inspection_command": "ps -ef | rg 'ray::|gcs_server|raylet|train_ppo_mlp|rollout_eval|audit_primary_grf_training_readiness|opensim|OpenSim'",
+    "inspection_result": "Only the inspection shell and rg process matched; no pre-existing Ray, training, audit, or OpenSim process was active."
+  },
+  "gate_0_0_tests": [
+    {
+      "command": "/opt/anaconda3/envs/envCMC-rllib/bin/python -m pytest validation/test_detector_sensor_data_path.py validation/test_online_grf_core.py validation/test_online_grf_event_matching.py validation/test_build_primary_grf_mesh_sole.py validation/test_readiness_gatekeeper.py validation/test_primary_grf_training_readiness.py -q",
+      "passed": true,
+      "passed_count": 159,
+      "failed_count": 0
+    }
+  ],
+  "additional_verification": [
+    {
+      "command": "/opt/anaconda3/envs/envCMC-rllib/bin/python -m py_compile validation/readiness_gatekeeper.py validation/audit_primary_grf_training_readiness.py validation/build_primary_grf_mesh_sole.py model_loader.py simulation_runner.py online_grf.py 'Trajectory Generator/osim_trj_cmc_like.py'",
+      "status": "PASS"
+    },
+    {
+      "scope": "canonical causal events, cadence-pair parity, bounded streaming evidence, and atomic no-replace directory publication",
+      "independent_review": "PASS",
+      "audit_sha256": "d41ef855b34706d87e56edd6fd1619a382035834b9a0be679ad2397798bc9e2a",
+      "audit_tests_sha256": "b73c8ec670d4f262da7273afaa35545d95eb0b3ee6237238bd5cfef431bbb7e8",
+      "residual_blockers": []
+    },
+    {
+      "scope": "full raw development matrix no-output smoke",
+      "status": "PASS",
+      "development_unit_count": 24,
+      "cadence_pair_count": 12,
+      "all_oracle_and_primary_pairs_equal": true,
+      "invalid_toe_off_count_cycles": 0,
+      "protected_trials_opened": []
+    },
+    {
+      "scope": "bounded evidence resource certificate",
+      "status": "PASS",
+      "accepted_development_oracle_cycle_scopes": 720,
+      "left_primary_sphere_count": 20,
+      "bounded_development_per_sphere_rows": 14400,
+      "legacy_per_sample_rows_avoided": 9028500,
+      "streaming_test_rows": 250000,
+      "streaming_peak_bytes": 202497
+    },
+    {
+      "scope": "V4 infrastructure recovery",
+      "semantic_access_scope": "development_and_historical_only",
+      "protected_trials_opened": [],
+      "one_shot_budget_consumed": false,
+      "status": "RETRY_AUTHORIZED"
+    }
+  ],
+  "baseline_launch": {
+    "command": "/opt/anaconda3/envs/envCMC-rllib/bin/python validation/audit_primary_grf_training_readiness.py --protocol validation/primary_grf_readiness_protocol_v5.json --audit validation/global_data_access_audit_2026-07-23.json --ledger validation/primary_grf_readiness_execution_ledger_v5.json --receipt validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v5/run_start_receipt.json --execute-offline",
+    "fresh_process": true
+  },
+  "protocol": {
+    "path": "validation/primary_grf_readiness_protocol_v5.json",
+    "sha256": "ddd8cff5dced20dc10ff9c61693273d3683e68c770ae77d4ed72690101bbedf0"
+  },
+  "global_data_access_audit": {
+    "path": "validation/global_data_access_audit_2026-07-23.json",
+    "sha256": "296f7fed463fff07a0125f12b0bbbc8dcff2176cb02f406d6437bd88380ab694"
+  },
+  "execution_ledger": {
+    "path": "validation/primary_grf_readiness_execution_ledger_v5.json",
+    "sha256": "034645d983e79be76c0b28d681359e1a67ebbde96753ea2eb3fbf361ecb230b6"
+  },
+  "primary_profile": {
+    "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+    "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+  },
+  "recovery_lineage": {
+    "path": "validation/primary_grf_readiness_recovery_lineage_v5.json",
+    "sha256": "31facacbe64f4b8c525786c6ac997fc4f45c435281e5ef74491357c47241d02d"
+  },
+  "protected_trials_opened": []
+}

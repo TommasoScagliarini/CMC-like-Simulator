@@ -1,0 +1,234 @@
+{
+  "schema_version": 16,
+  "protocol_id": "AB06_TWO_SENSOR_HEEL_GEOMETRY_OFAT_2026-07-22_V16",
+  "freeze_date": "2026-07-22",
+  "frozen_before_execution": true,
+  "stage": "development_only_full_fsm_geometry_ofat",
+  "objective": "Vary V13 heel center local-y and heel radius separately, replay every geometry through the full production FSM, and minimize prescribed HS/TO timing without relaxing any V14.2 gate.",
+  "split": {
+    "DEVELOPMENT": ["02", "04", "08"],
+    "VALIDATION": ["05"],
+    "SEALED": ["06"],
+    "RESERVE": ["03", "07"],
+    "FORBIDDEN": ["01", "03", "05", "06", "07"]
+  },
+  "replay": {
+    "full_production_fsm": true,
+    "signal_only_router_used": false,
+    "continuous_trial_no_plateau_reset": true,
+    "sensor_on_threshold_n": 0.5,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_dwell_s": 0.03,
+    "primary_event_time_field": "confirmed_time_s",
+    "cadences": {
+      "runtime_10ms": 0.01,
+      "fine_1ms": 0.001
+    },
+    "reference_warmup_and_boundary_contract": "frozen_v14_2_exact",
+    "radius_variants_recompute_force_and_rerun_full_fsm": true
+  },
+  "geometry": {
+    "baseline_id": "V13_BASELINE",
+    "profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "sha256": "06e442bed2e4d2a2bc61f64e3379332d5e8d90695bcc9123585b0fbd008894fc"
+    },
+    "arms": ["Hy", "Hr"],
+    "delta_grid_mm": [
+      0.15,
+      0.25,
+      0.35,
+      0.45,
+      0.55,
+      0.65,
+      0.75,
+      0.85,
+      0.95,
+      1.05,
+      1.15,
+      1.25
+    ],
+    "candidate_count": 25,
+    "combine_arms": false,
+    "toe_geometry_modified": false,
+    "heel_local_y_rule": "v13_y_m_minus_delta_mm_over_1000",
+    "heel_radius_rule": "v13_radius_m_plus_delta_mm_over_1000",
+    "hy_design_prior_mm": [0.64, 0.97],
+    "hy_design_prior_is_non_gating": true
+  },
+  "gate_contract": {
+    "inheritance": "frozen_v14_2_exact",
+    "pass_all_24_units": true,
+    "pass_all_6_trial_cadence_aggregates": true,
+    "zero_rejection_timeout_required": true,
+    "exact_hs_to_toe_off_to_hs_order_and_counts": true,
+    "confirmed_hs_max_abs_error_s": 0.05,
+    "confirmed_toe_off_max_abs_error_s": 0.08,
+    "confirmed_fsm_stance_f1_minimum": 0.95,
+    "confirmed_fsm_stance_iou_minimum": 0.9,
+    "baseline_full_detail_parity_required_before_scientific_outputs": true,
+    "baseline_parity_unit_count": 24
+  },
+  "selection_contract": {
+    "pareto_tolerance": 1e-12,
+    "v13_wins_tie": true,
+    "requires_full_gate_and_pareto_noninferiority": true,
+    "requires_at_least_one_strict_improvement": true,
+    "ranking": [
+      "worst_joint_normalized",
+      "worst_hs_s",
+      "worst_to_s",
+      "equal_cell_mean_normalized_error",
+      "worst_f1_deficit",
+      "worst_iou_deficit",
+      "geometry_displacement",
+      "candidate_id"
+    ],
+    "diagnostic_per_arm_winners_are_not_promoted": true,
+    "outer_boundary_delta_mm": 1.25,
+    "improving_outer_boundary_requires_stop": true
+  },
+  "decision_contract": {
+    "holdout_or_runtime_promotion_allowed": false,
+    "profile_or_registry_write_allowed": false,
+    "development_finalist_requires_separate_future_validation_protocol": true,
+    "v13_remains_runtime_and_sealed_baseline": true
+  },
+  "sources": {
+    "v16_runner": {
+      "path": "validation/sweep_two_sensor_heel_geometry_v16.py",
+      "sha256": "2556658e0aba8691fef225cbc992aa3c8899d2aacfb64ef9cc05a5df72bbbc07"
+    },
+    "v16_tests": {
+      "path": "validation/test_two_sensor_heel_geometry_v16.py",
+      "sha256": "921bd75cd9cffc2549539432fc8ae361a320be66626527d9b5b5341f76148e3d"
+    },
+    "production_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "f420b5a8885c79f422a6142acc9d2f2d4bad54f605656e990548c0b660c80cec"
+    },
+    "v14_2_runner": {
+      "path": "validation/sweep_two_sensor_cross_speed_v14_2.py",
+      "sha256": "d5afba3217df24904137a5609242ad897c1ae0b8ce661b4edf58f4690810b781"
+    },
+    "v14_runner": {
+      "path": "validation/sweep_two_sensor_cross_speed_v14.py",
+      "sha256": "1f346643efe02cdcc32e2511302db45373c3e2eb076f68af8152459d9e298a6e"
+    },
+    "v15_runner": {
+      "path": "validation/diagnose_two_sensor_v15_routing.py",
+      "sha256": "0548507a123a5bccf9c3739bc995b0fcf0f5a80021b19fd342cae4502f6a107f"
+    },
+    "v14_2_protocol": {
+      "path": "validation/two_sensor_cross_speed_v14_2_protocol.json",
+      "sha256": "66afa3765bbce4c79edd58594249200fae7c2c80957df873c683dee931874cdf"
+    },
+    "v14_2_manifest": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/manifest.json",
+      "sha256": "5fc4ca8f5600a7940e384b57aaa5497a13907fefc7df4c681c379d65e0a13d3c"
+    },
+    "v14_2_stage1_details": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/development_stage1_details.jsonl",
+      "sha256": "3925d59830ce8832d4524b62ab9bd7a11ed6f2c5866e8b6d1a1fb2cf5d036aa7"
+    },
+    "v15_protocol": {
+      "path": "validation/two_sensor_v15_routing_protocol.json",
+      "sha256": "b18b884239af363dcd08c70101b3416587577d4e5629a124bb843a30caab92a9"
+    },
+    "v15_run_start_receipt": {
+      "path": "validation/two_sensor_v15_routing_runs/2026-07-22_ab06_dev02_04_08_v15/run_start_receipt.json",
+      "sha256": "d35908dfaf730d5f0d004f930b7252bde2cc606aac3a38d52662049abfa9d9f6"
+    },
+    "v15_failure": {
+      "path": "validation/two_sensor_v15_routing_runs/2026-07-22_ab06_dev02_04_08_v15/failure.json",
+      "sha256": "4e6e1234971f30af00b978be29606fd4dad171c9c3cabd8f2f1b5a980cb8e8f3"
+    },
+    "v13_profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "sha256": "06e442bed2e4d2a2bc61f64e3379332d5e8d90695bcc9123585b0fbd008894fc"
+    }
+  },
+  "preprocessing": {
+    "reuse_only": true,
+    "raw_semantic_decode_allowed": false,
+    "ik_rerun_allowed": false,
+    "trials": {
+      "02": {
+        "preprocessing_lock": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_02/treadmill_02_01_preprocessing_lock.json",
+          "sha256": "5b086a1a49e6dc8cf893ec43b6f5b1fa1dddb84bfffcb4d216a9287208cb472d"
+        },
+        "ik_motion": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_02/treadmill_02_01_ik.mot",
+          "sha256": "4018b3001a5d293edda799839158f4c154747af5c908a2eb530dae3e37e5a982"
+        },
+        "external_loads": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_02/treadmill_02_01_ExternalLoads.xml",
+          "sha256": "060c8add7ba26cf1ddf956fbc7445950aab0ee5c889e57024bb2d394a70bc429"
+        },
+        "grf": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_02/treadmill_02_01_grf.mot",
+          "sha256": "36de805e73e1c95d303ba6265ee262099e0a88fc46e7351bae0cdce3877d23d3"
+        }
+      },
+      "04": {
+        "preprocessing_lock": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_04/treadmill_04_01_preprocessing_lock.json",
+          "sha256": "e616ef95bae42ac6e99060abca1dc4a323ddaae1b68b01dcaafce36c407d6804"
+        },
+        "ik_motion": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_04/treadmill_04_01_ik.mot",
+          "sha256": "ade6b105d2f6f3cdb350852f92caa48b09cdfa8cd769bf5c02ef5fbdd7b7218f"
+        },
+        "external_loads": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_04/treadmill_04_01_ExternalLoads.xml",
+          "sha256": "b33d5a20fe8347747c53a7eef0eec0afde0ecc2333d0ae30be51fe221e1d74c4"
+        },
+        "grf": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_04/treadmill_04_01_grf.mot",
+          "sha256": "299c5267b06ba5b23921ba586c1b3c02fa23769954e62e5c94175db12a61dbc5"
+        }
+      },
+      "08": {
+        "preprocessing_lock": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_08/treadmill_08_01_preprocessing_lock.json",
+          "sha256": "c961e191871f0caab54edef82424cab20ca3e2938525af8fd1f2752c092399ca"
+        },
+        "ik_motion": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_08/treadmill_08_01_ik.mot",
+          "sha256": "87af7ec5e6530f179bb2fd84c7f2caf78da041f6dcd92966ac8ca1999e1ce14a"
+        },
+        "external_loads": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_08/treadmill_08_01_ExternalLoads.xml",
+          "sha256": "1ce11966ae7154f36999fa77b5162d8383bcbf11284cbdc333c665dc3f6873ac"
+        },
+        "grf": {
+          "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_08/treadmill_08_01_grf.mot",
+          "sha256": "7c5d5046e9ff68d8de1c3a0278a36123ccaac7e6315588c721289ba9b76bae7e"
+        }
+      }
+    }
+  },
+  "execution_destination": {
+    "canonical_output_dir": "validation/two_sensor_heel_geometry_v16_runs/2026-07-22_ab06_dev02_04_08_v16_hy_hr_ofat",
+    "alternate_output_directory_allowed": false,
+    "one_shot_no_clobber": true,
+    "receipt_before_sampling": true,
+    "forensic_baseline_diff_written_before_abort": true
+  },
+  "non_actions": {
+    "runtime_or_fsm_modification_allowed": false,
+    "profile_or_registry_edit_allowed": false,
+    "training_allowed": false,
+    "holdout_or_reserve_access_allowed": false,
+    "v15_rerun_allowed": false,
+    "arm_combination_allowed": false
+  },
+  "interpretation_limits": [
+    "V16 is adaptive development analysis after V14.2 and the failed V15 signal-only diagnostic; it is not independent validation.",
+    "V16 uses the production FSM for every geometry and makes no accepted-event claim from a signal-only router.",
+    "The 0.64-0.97 mm Hy interval is non-gating design rationale, not validated performance evidence.",
+    "A V16 finalist remains development-only and cannot replace V13 without a separately frozen one-shot validation protocol.",
+    "Trials 01/03/05/06/07 remain semantically unopened by V16."
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "step_id": "0",
+  "status": "PASS",
+  "decision": "DEVELOPMENT_ONLY_CONTROL_PLANE_RETRY_AUTHORIZED",
+  "predecessor_run_id": "2026-07-24_ab06_primary_grf_readiness_v4",
+  "successor_run_id": "2026-07-24_ab06_primary_grf_readiness_v5",
+  "predecessor_protocol": {
+    "path": "validation/primary_grf_readiness_protocol_v4.json",
+    "sha256": "e99b4a8b9dd8d174e179d15ab67cb0bbf2ce7c9bfcd4fade1efb847c60be3eb4"
+  },
+  "predecessor_run_start_receipt": {
+    "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v4/run_start_receipt.json",
+    "sha256": "8205cb1bd035d0b69612c1654a925b722f517acc568fdc915a252368c5458993"
+  },
+  "predecessor_failure": {
+    "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v4/baseline_forensics/failure.json",
+    "sha256": "86ae85f23253447b77859e5968a02c1fc53fcd125028cce450dd0af0ba4cf05b"
+  },
+  "predecessor_gate_status": {
+    "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v4/gate_status.json",
+    "sha256": "bdb8c29f87b6d35ddae152f7f011973270440563867cba81e2375f6a06eab009"
+  },
+  "semantic_access_started": true,
+  "semantic_access_scope": "development_and_historical_only",
+  "protected_trials_opened": [],
+  "one_shot_budget_consumed": false,
+  "scientific_data_model_profile_or_targets_changed": false,
+  "control_plane_change_required": "Harden the raw offline audit without changing scientific data, model, profile, thresholds, or reproduction targets: accept a regular cadence grid anchored exactly at start_s whose final sample is within one cadence before a non-aligned frozen end_s while rejecting overshoot or larger gaps; condition development oracle and primary 20 N events causally with 0.05 s contact confirmation and 0.30 s minimum cycles while retaining boundary-censored contacts as diagnostic-only evidence; and replace per-sample sphere materialization with bounded per-cycle sphere summaries plus staged, streamed, all-or-nothing no-clobber publication.",
+  "control_plane_changes": [
+    {
+      "change_id": "non_aligned_endpoint_grid",
+      "scope": "raw_offline_adapter",
+      "contract": "Start exactly at start_s, sample at the frozen cadence without overshoot, and require the terminal gap to end_s to be strictly less than one cadence."
+    },
+    {
+      "change_id": "canonical_causal_20n_events",
+      "scope": "development_oracle_and_primary_20n",
+      "contract": "Use StreamingGaitEventDetector at 20 N with 0.05 s contact confirmation and 0.30 s minimum cycles; exclude boundary-censored contacts from gating while retaining them diagnostically; preserve historical linear raw timing only for frozen reproduction targets."
+    },
+    {
+      "change_id": "bounded_atomic_forensics_publication",
+      "scope": "baseline_forensics",
+      "contract": "Stream fixed-schema trace and event CSVs, summarize sphere evidence once per complete oracle cycle or once per diagnostic whole-window fallback, stage and validate the full seven-artifact set, revalidate frozen bindings, and publish with an exclusive no-clobber commit."
+    }
+  ],
+  "retry_scope": "Fresh no-clobber V5 protocol, ledger, receipt, process, and output directory after full raw-matrix read-only smoke, focused tests, and independent review."
+}

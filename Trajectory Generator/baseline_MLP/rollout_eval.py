@@ -45,6 +45,26 @@ _ROLLOUT_RUNS_ROOT = _RUNS_ROOT / "rollout"
 _WATCHDOG_FILENAME = "watchdog_state.json"
 
 
+def _validated_nonnegative_rollout_metric(value, *, field: str) -> float:
+    """Return one finite, non-negative rollout metric or fail explicitly.
+
+    Checking before updating a running maximum is important: ``max(0.0, NaN)``
+    can evaluate to ``0.0`` and would otherwise hide a corrupted simulator
+    diagnostic in an apparently safe rollout summary.
+    """
+    if isinstance(value, bool):
+        raise RuntimeError(f"{field} must be numeric, finite, and non-negative")
+    try:
+        converted = float(value)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(
+            f"{field} must be numeric, finite, and non-negative"
+        ) from exc
+    if not math.isfinite(converted) or converted < 0.0:
+        raise RuntimeError(f"{field} must be finite and non-negative")
+    return converted
+
+
 def _validate_module_observation_contract(
     module,
     actor_feature_names: tuple[str, ...],
@@ -308,14 +328,14 @@ def _load_inference_stack() -> None:
     _INFERENCE_STACK_LOADED = True
 
 
-def _policy_action(
+def _policy_action_with_diagnostics(
     module: RLModule,
     obs: np.ndarray,
     action_shape,
     *,
     action_selection: str = "deterministic",
-) -> np.ndarray:
-    """Select one action using the deployment or PPO exploration path."""
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Select one action and expose the Gaussian mean/std/noise used."""
     obs_t = torch.as_tensor(np.asarray(obs), dtype=torch.float32).reshape(1, -1)
     with torch.no_grad():
         if action_selection == "stochastic":
@@ -338,7 +358,32 @@ def _policy_action(
             action_t = mean + torch.exp(log_std) * torch.randn_like(mean)
         else:
             action_t = mean
-    action = action_t.detach().cpu().numpy().reshape(action_shape).astype(np.float32)
+
+    action_dim = logits.shape[-1] // 2
+    mean_t = logits[..., :action_dim]
+    std_t = torch.exp(logits[..., action_dim:])
+    noise_t = action_t - mean_t
+
+    def array(value) -> np.ndarray:
+        return value.detach().cpu().numpy().reshape(action_shape).astype(np.float32)
+
+    return array(action_t), array(mean_t), array(std_t), array(noise_t)
+
+
+def _policy_action(
+    module: RLModule,
+    obs: np.ndarray,
+    action_shape,
+    *,
+    action_selection: str = "deterministic",
+) -> np.ndarray:
+    """Select one action using the deployment or PPO exploration path."""
+    action, _, _, _ = _policy_action_with_diagnostics(
+        module,
+        obs,
+        action_shape,
+        action_selection=action_selection,
+    )
     return action
 
 
@@ -467,6 +512,12 @@ def run(args: argparse.Namespace) -> dict:
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "phase_fsm_input_mode": args.phase_fsm_input_mode,
+        "phase_sensor_on_threshold_n": args.phase_sensor_on_threshold_n,
+        "phase_sensor_off_threshold_n": args.phase_sensor_off_threshold_n,
+        "phase_sensor_dwell_s": args.phase_sensor_dwell_s,
+        "detector_sample_dt_s": args.detector_sample_dt_s,
+        "event_contract_id": args.event_contract_id,
         "include_online_grf_observation": args.online_grf_observation,
         "critic_privileged_observation": args.asymmetric_actor_critic,
         "prescribed_grf_disabled_sides": args.disable_prescribed_grf_side,
@@ -538,10 +589,19 @@ def run(args: argparse.Namespace) -> dict:
     exploration_std_samples: list[np.ndarray] = []
     pelvis_ty_min = float("inf")
     grf_penetration_max_m = 0.0
+    grf_penetration_samples = 0
+    reserve_norm_max_nm = 0.0
+    residual_norm_max_nm = 0.0
+    reserve_norm_samples = 0
+    residual_norm_samples = 0
     phase_valid_hs_count = 0
     phase_valid_to_count = 0
     phase_valid_cycle_count = 0
     invalid_event_count = 0
+    morphology_settled_segments = 0
+    morphology_settled_samples = 0
+    morphology_discarded_segments = 0
+    morphology_discarded_samples = 0
     policy_trace: list[dict] = []
     reset_diagnostics: dict = {}
     terminated = truncated = False
@@ -583,12 +643,24 @@ def run(args: argparse.Namespace) -> dict:
                 exploration_noise_samples.append(action_noise.copy())
                 exploration_std_samples.append(policy_std.copy())
             else:
-                raw_action = _policy_action(
-                    module,
-                    obs,
-                    action_shape,
-                    action_selection=args.action_selection,
-                )
+                if args.action_selection == "stochastic":
+                    raw_action, policy_mean, policy_std, action_noise = (
+                        _policy_action_with_diagnostics(
+                            module,
+                            obs,
+                            action_shape,
+                            action_selection=args.action_selection,
+                        )
+                    )
+                    exploration_noise_samples.append(action_noise.copy())
+                    exploration_std_samples.append(policy_std.copy())
+                else:
+                    raw_action = _policy_action(
+                        module,
+                        obs,
+                        action_shape,
+                        action_selection=args.action_selection,
+                    )
             # Mirror the env wrapper's clipping for trace/summary only. Step the
             # env with the raw action so RewardShapingWrapper can penalize the
             # raw-vs-applied excursion before FlattenClipAction protects the sim.
@@ -623,10 +695,32 @@ def run(args: argparse.Namespace) -> dict:
                 info.get("reward_terms", {}) if isinstance(info, dict) else {}
             )
             if isinstance(reward_terms, dict):
+                if "grf_penetration_m" not in reward_terms:
+                    raise RuntimeError(
+                        "rollout reward_terms is missing grf_penetration_m"
+                    )
+                penetration_value = _validated_nonnegative_rollout_metric(
+                    reward_terms["grf_penetration_m"],
+                    field="grf_penetration_m",
+                )
                 grf_penetration_max_m = max(
                     grf_penetration_max_m,
-                    float(reward_terms.get("grf_penetration_m", 0.0) or 0.0),
+                    penetration_value,
                 )
+                grf_penetration_samples += 1
+                if "reserve_norm_nm" in reward_terms:
+                    reserve_value = _validated_nonnegative_rollout_metric(
+                        reward_terms["reserve_norm_nm"],
+                        field="reserve_norm_nm",
+                    )
+                    reserve_norm_max_nm = max(reserve_norm_max_nm, reserve_value)
+                    reserve_norm_samples += 1
+                if "residual_norm_nm" in reward_terms:
+                    residual_value = float(reward_terms["residual_norm_nm"])
+                    if not math.isfinite(residual_value):
+                        raise RuntimeError("non-finite residual_norm_nm in rollout")
+                    residual_norm_max_nm = max(residual_norm_max_nm, residual_value)
+                    residual_norm_samples += 1
                 phase_valid_hs_count = max(
                     phase_valid_hs_count,
                     int(reward_terms.get("phase_valid_hs_count", 0) or 0),
@@ -642,6 +736,20 @@ def run(args: argparse.Namespace) -> dict:
                 invalid_event_count = max(
                     invalid_event_count,
                     int(reward_terms.get("invalid_event_count", 0) or 0),
+                )
+                morphology_settled_segments += int(
+                    reward_terms.get("morphology_settled_this_step", 0) or 0
+                )
+                morphology_settled_samples += int(
+                    reward_terms.get("morphology_settled_sample_count", 0) or 0
+                )
+                morphology_discarded_segments += int(
+                    reward_terms.get("morphology_discarded_segment_count", 0)
+                    or 0
+                )
+                morphology_discarded_samples += int(
+                    reward_terms.get("morphology_discarded_sample_count", 0)
+                    or 0
                 )
             if (args.record_outputs or args.record_policy_trace) and isinstance(info, dict):
                 imitation_target = info.get("imitation_target", {})
@@ -714,6 +822,31 @@ def run(args: argparse.Namespace) -> dict:
                         "reference_governor_diagnostics": _jsonable(
                             info.get("reference_governor_diagnostics", {})
                         ),
+                        "phase_fsm": _jsonable(info.get("phase_fsm", {})),
+                        "detector_sensors": _jsonable(
+                            (
+                                info.get("online_grf_detector", {}).get(
+                                    "sensors", {}
+                                )
+                                if isinstance(
+                                    info.get("online_grf_detector", {}),
+                                    dict,
+                                )
+                                else {}
+                            )
+                        ),
+                        "legacy_online_events": _jsonable(
+                            info.get("legacy_online_events", [])
+                        ),
+                        "online_events": _jsonable(
+                            info.get("online_events", [])
+                        ),
+                        "morphology_completed_segments": _jsonable(
+                            info.get("morphology_completed_segments", [])
+                        ),
+                        "morphology_ledger_diagnostics": _jsonable(
+                            info.get("morphology_ledger_diagnostics", {})
+                        ),
                         "reward_terms": dict(info.get("reward_terms", {}) or {}),
                     }
                 )
@@ -755,6 +888,7 @@ def run(args: argparse.Namespace) -> dict:
     summary = {
         "ok": True,
         "checkpoint": str(args.checkpoint),
+        "action_mode": args.action_mode,
         "action_selection": args.action_selection,
         "action_seed": int(args.seed),
         "exploration_noise_hold_steps": int(
@@ -802,10 +936,23 @@ def run(args: argparse.Namespace) -> dict:
         ),
         "pelvis_ty_min": None if pelvis_ty_min == float("inf") else pelvis_ty_min,
         "grf_penetration_max_m": float(grf_penetration_max_m),
+        "grf_penetration_samples": int(grf_penetration_samples),
+        "reserve_norm_max_nm": (
+            float(reserve_norm_max_nm) if reserve_norm_samples else None
+        ),
+        "reserve_norm_samples": int(reserve_norm_samples),
+        "residual_norm_max_nm": (
+            float(residual_norm_max_nm) if residual_norm_samples else None
+        ),
+        "residual_norm_samples": int(residual_norm_samples),
         "phase_valid_hs_count": int(phase_valid_hs_count),
         "phase_valid_to_count": int(phase_valid_to_count),
         "phase_valid_cycle_count": int(phase_valid_cycle_count),
         "invalid_event_count": int(invalid_event_count),
+        "morphology_settled_segments": int(morphology_settled_segments),
+        "morphology_settled_samples": int(morphology_settled_samples),
+        "morphology_discarded_segments": int(morphology_discarded_segments),
+        "morphology_discarded_samples": int(morphology_discarded_samples),
         "end_reason": info.get("end_reason") if isinstance(info, dict) else None,
         "terminated": bool(terminated),
         "truncated": bool(truncated),
@@ -819,6 +966,12 @@ def run(args: argparse.Namespace) -> dict:
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "phase_fsm_input_mode": args.phase_fsm_input_mode,
+        "phase_sensor_on_threshold_n": float(args.phase_sensor_on_threshold_n),
+        "phase_sensor_off_threshold_n": float(args.phase_sensor_off_threshold_n),
+        "phase_sensor_dwell_s": float(args.phase_sensor_dwell_s),
+        "detector_sample_dt_s": float(args.detector_sample_dt_s),
+        "event_contract_id": str(args.event_contract_id),
         "online_grf_observation": bool(args.online_grf_observation),
         "gait_clock_enable": bool(args.gait_clock_enable),
         "deployable_minimal_observation": bool(args.deployable_minimal_observation),
@@ -1129,6 +1282,20 @@ def parse_args() -> argparse.Namespace:
             "It is added as sensor-only contact and never applied to dynamics."
         ),
     )
+    p.add_argument(
+        "--phase-fsm-input-mode",
+        choices=("legacy_events", "shadow", "two_sensor"),
+        default="legacy_events",
+        help=(
+            "Input source for the existing prosthetic phase FSM. 'shadow' "
+            "records heel/toe candidates while legacy events remain active."
+        ),
+    )
+    p.add_argument("--phase-sensor-on-threshold-n", type=float, default=5.0)
+    p.add_argument("--phase-sensor-off-threshold-n", type=float, default=2.0)
+    p.add_argument("--phase-sensor-dwell-s", type=float, default=0.03)
+    p.add_argument("--detector-sample-dt-s", type=float, default=0.001)
+    p.add_argument("--event-contract-id", default="legacy_events_v1")
     p.add_argument(
         "--grf-penetration-penalty-threshold-m",
         type=float,

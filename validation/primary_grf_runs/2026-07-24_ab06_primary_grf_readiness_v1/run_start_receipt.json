@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "step_id": "0",
+  "status": "RUNNING",
+  "run_id": "2026-07-24_ab06_primary_grf_readiness_v1",
+  "no_clobber": true,
+  "process_isolation": {
+    "ray_processes_active": false,
+    "opensim_processes_active": false,
+    "baseline_new_process_required": true,
+    "checked_at_utc": "2026-07-24T01:14:41Z",
+    "inspection_command": "ps -ef | rg 'ray::|gcs_server|raylet|train_ppo_mlp|rollout_eval|audit_primary_grf_training_readiness|opensim|OpenSim'",
+    "inspection_result": "Only the inspection shell and rg process matched; no pre-existing Ray, training, audit, or OpenSim process was active."
+  },
+  "gate_0_0_tests": [
+    {
+      "command": "/opt/anaconda3/envs/envCMC-rllib/bin/python -m pytest validation/test_detector_sensor_data_path.py validation/test_online_grf_core.py validation/test_online_grf_event_matching.py validation/test_build_primary_grf_mesh_sole.py validation/test_readiness_gatekeeper.py validation/test_primary_grf_training_readiness.py -q",
+      "passed": true,
+      "passed_count": 132,
+      "failed_count": 0
+    }
+  ],
+  "additional_verification": [
+    {
+      "command": "/opt/anaconda3/envs/envCMC-rllib/bin/python -m py_compile validation/readiness_gatekeeper.py validation/audit_primary_grf_training_readiness.py validation/build_primary_grf_mesh_sole.py model_loader.py simulation_runner.py online_grf.py 'Trajectory Generator/osim_trj_cmc_like.py'",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check -- <Gate-0 implementation and frozen control files>",
+      "status": "PASS"
+    },
+    {
+      "scope": "frozen harness hashes",
+      "independent_review": "PASS",
+      "residual_blockers": []
+    }
+  ],
+  "baseline_launch": {
+    "command": "/opt/anaconda3/envs/envCMC-rllib/bin/python validation/audit_primary_grf_training_readiness.py --protocol validation/primary_grf_readiness_protocol_v1.json --audit validation/global_data_access_audit_2026-07-23.json --ledger validation/primary_grf_readiness_execution_ledger.json --receipt validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/run_start_receipt.json --execute-offline",
+    "fresh_process": true
+  },
+  "protocol": {
+    "path": "validation/primary_grf_readiness_protocol_v1.json",
+    "sha256": "27cd47a99e4c9634f0be26f4b4d1c89ebb5debfdba77bd7bcf6b3d5900c21f75"
+  },
+  "global_data_access_audit": {
+    "path": "validation/global_data_access_audit_2026-07-23.json",
+    "sha256": "296f7fed463fff07a0125f12b0bbbc8dcff2176cb02f406d6437bd88380ab694"
+  },
+  "execution_ledger": {
+    "path": "validation/primary_grf_readiness_execution_ledger.json",
+    "sha256": "84145bcc1170fb4321b580a2d85f671c38f58fb2625fabb9e2ecb7b48838a268"
+  },
+  "primary_profile": {
+    "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+    "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+  },
+  "protected_trials_opened": []
+}

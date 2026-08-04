@@ -1,0 +1,89 @@
+{
+  "protocol_id": "2026-07-23_h0_postrouting_frozen_ablation",
+  "status": "diagnostic_non_promotable",
+  "purpose": "Isolate the effects of detector geometry and phase-FSM input mode after the primary-GRF/detector routing correction.",
+  "common": {
+    "checkpoint": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+    "checkpoint_module_state_sha256": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b",
+    "source_config": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/training_cfg.resolved.yaml",
+    "source_config_sha256": "6904f7a9000b63b5c1aab661ebcab4974dffdd1cfb8c731df6a953fc9234229e",
+    "seed": 123,
+    "action_selection": "deterministic",
+    "episode_start_offset_s": 1.956870983805102,
+    "segment_duration_s": 0.01,
+    "episode_duration_s": 5.0,
+    "max_steps": 500,
+    "morphology_weight": 0.0,
+    "record_outputs": true,
+    "record_policy_trace": true,
+    "primary_grf_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+    "primary_grf_profile_sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+  },
+  "production_sources": {
+    "environment": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "e7db6ab0819de67403801e7c1b6efcfb7bb3031355b5f82ec6e38d37d4e5e739"
+    },
+    "runner": {
+      "path": "simulation_runner.py",
+      "sha256": "b3888b475dcac385dc831c70cb80ac8d791e63120b60e107c6bc70584c5d06f5"
+    },
+    "phase_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "f420b5a8885c79f422a6142acc9d2f2d4bad54f605656e990548c0b660c80cec"
+    },
+    "rollout": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "e464eb33d2f2db97dd4ab36a652763a9eef75294fe907669937d7cac06aa46cf"
+    },
+    "reward": {
+      "path": "Trajectory Generator/baseline_MLP/reward_function.py",
+      "sha256": "210318ec88642c83876ced8e0fb8b4ba80de0dbbe0cfbcdc48e1d99f327cfeac"
+    }
+  },
+  "cases": [
+    {
+      "id": "case01_old_legacy_corridor0",
+      "detector_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "detector_profile_sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e",
+      "phase_fsm_input_mode": "legacy_events",
+      "output_dir": "Trajectory Generator/runs/rollout/validation/2026-07-23_h0_postrouting_frozen_ablation/case01_old_legacy_corridor0"
+    },
+    {
+      "id": "case02_v13_legacy_corridor0",
+      "detector_profile": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "detector_profile_sha256": "06e442bed2e4d2a2bc61f64e3379332d5e8d90695bcc9123585b0fbd008894fc",
+      "phase_fsm_input_mode": "legacy_events",
+      "output_dir": "Trajectory Generator/runs/rollout/validation/2026-07-23_h0_postrouting_frozen_ablation/case02_v13_legacy_corridor0",
+      "quarantine": true
+    },
+    {
+      "id": "case03_v13_twosensor_corridor0",
+      "detector_profile": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "detector_profile_sha256": "06e442bed2e4d2a2bc61f64e3379332d5e8d90695bcc9123585b0fbd008894fc",
+      "phase_fsm_input_mode": "two_sensor",
+      "output_dir": "Trajectory Generator/runs/rollout/validation/2026-07-23_h0_postrouting_frozen_ablation/case03_v13_twosensor_corridor0",
+      "quarantine": true
+    }
+  ],
+  "comparisons": [
+    {
+      "reference": "case01_old_legacy_corridor0",
+      "candidate": "case02_v13_legacy_corridor0",
+      "isolated_factor": "detector_profile"
+    },
+    {
+      "reference": "case02_v13_legacy_corridor0",
+      "candidate": "case03_v13_twosensor_corridor0",
+      "isolated_factor": "phase_fsm_input_mode"
+    }
+  ],
+  "v13_exception": {
+    "profile_status": "development_baseline_sealed_fail_not_runtime_promoted",
+    "metadata_forbids_policy_inference": true,
+    "authority": "explicit user request in the active 2026-07-23 diagnostic task",
+    "scope": "one frozen-policy diagnostic ablation only",
+    "promotion_allowed": false,
+    "training_allowed": false
+  }
+}

@@ -1,0 +1,535 @@
+{
+  "artifact": {
+    "summary_json": "validation/two_sensor_startup_hs_runs/2026-07-22_ab06_v9_prescribed/summary.json"
+  },
+  "cross_resolution": {
+    "checks": {
+      "heel_strike_equal_counts": true,
+      "heel_strike_within_runtime_cadence": true,
+      "toe_off_equal_counts": true,
+      "toe_off_within_runtime_cadence": true
+    },
+    "event_deltas": {
+      "heel_strike": {
+        "equal_counts": true,
+        "max_abs_timestamp_difference_s": 0.0020000000000024443
+      },
+      "toe_off": {
+        "equal_counts": true,
+        "max_abs_timestamp_difference_s": 0.0030000000000001137
+      }
+    },
+    "ok": true
+  },
+  "decision": {
+    "downstream_prescribed_timing_gate": {
+      "heel_strike_tolerance_s": 0.05,
+      "interpretation": "tests the unchanged V9 geometry/timing on the crop, separately from the startup classification rule",
+      "ok": false,
+      "toe_off_tolerance_s": 0.08
+    },
+    "overall_ok": false,
+    "startup_rule_gate": {
+      "includes_original_setup_start_non_regression": true,
+      "ok": true,
+      "requires_both_cadences": true
+    }
+  },
+  "detector_contract": {
+    "candidate_id": "H2p50_X3p25_F79p0_P35p00",
+    "candidate_status": "diagnostic_not_promoted",
+    "detector_only": true,
+    "generates_grf": false,
+    "locations_m": {
+      "left_heel": [
+        -0.0981600475,
+        -0.0353195377,
+        0.01399567
+      ],
+      "left_toe": [
+        0.11574858501553537,
+        -0.051129237903540584,
+        0.0030479021621026177
+      ]
+    },
+    "radii_m": {
+      "left_heel": 0.0229053623,
+      "left_toe": 0.0229053623
+    },
+    "roles": {
+      "left_heel": "left_heel",
+      "left_toe": "left_toe"
+    },
+    "sphere_count": 2
+  },
+  "fsm_contract": {
+    "class": "prosthetic_phase_fsm.ProstheticPhaseFSM",
+    "configuration": {
+      "cycle_complete_bonus": 0.7,
+      "duration_history_window_cycles": 5,
+      "event_source": "two_sensor",
+      "failure_extra_penalty": 0.05,
+      "hs_event_credit": 0.1,
+      "landing_force_full_credit_bw": 0.65,
+      "landing_window_end_s": 0.85,
+      "landing_window_start_s": 0.35,
+      "min_cycle_knee_excursion_rad": 0.12,
+      "min_stance_contact_fraction": 0.2,
+      "min_stance_duration_s": 0.3,
+      "min_stance_load_bw_s": 0.04,
+      "min_swing_duration_s": 0.25,
+      "sensor_dwell_s": 0.03,
+      "sensor_off_threshold_n": 0.25,
+      "sensor_on_threshold_n": 0.5,
+      "stance_hard_timeout_s": 2.2,
+      "swing_hard_timeout_s": 1.1,
+      "toe_off_event_credit": 0.2
+    },
+    "detector_generates_grf": false,
+    "event_guards": "V9 heel and forefoot detector loads only",
+    "in_contact": "prescribed left vertical GRF >= 20 N; detector penetration is excluded",
+    "normal_force_bw": "prescribed left vertical GRF / body weight"
+  },
+  "input_type": "prescribed_ik_and_prescribed_vertical_grf",
+  "interpretation": [
+    "PASS validates the new episode-boundary classification and event/cycle completeness; it does not promote the V9 profile.",
+    "All ordered events are gated against the established 50 ms HS and 80 ms TO prescribed tolerances at both cadences."
+  ],
+  "non_actions": {
+    "detector_profile_modified_or_promoted": false,
+    "fsm_modified_by_validator": false,
+    "policy_or_checkpoint_modified": false,
+    "prescribed_data_modified": false,
+    "training_run": false
+  },
+  "objective": "validate causal startup HS classification for the exact V9 heel+forefoot detector without training",
+  "ok": false,
+  "original_setup_start_bootstrap": {
+    "fine_1ms": {
+      "checks": {
+        "initial_pattern_is_heel_on_toe_on": true,
+        "partial_stance_bootstrap_active": true,
+        "zero_invalid_events": true,
+        "zero_startup_hs_candidates": true,
+        "zero_startup_hs_transitions": true,
+        "zero_valid_hs": true
+      },
+      "final_fsm": {
+        "invalid_event_count": 0.0,
+        "sensor_partial_stance_active": 1.0,
+        "state_id": 1.0,
+        "state_name": "STANCE_AFTER_HS",
+        "valid_cycle_count": 0.0,
+        "valid_hs_count": 0.0,
+        "valid_to_count": 0.0
+      },
+      "initial_detector_loads_n": {
+        "heel": 78.11299616305728,
+        "toe": 28.359839966141244
+      },
+      "ok": true,
+      "sample_count": 32,
+      "sample_dt_s": 0.001,
+      "time_range_s": [
+        11.99,
+        12.021
+      ]
+    },
+    "runtime_10ms": {
+      "checks": {
+        "initial_pattern_is_heel_on_toe_on": true,
+        "partial_stance_bootstrap_active": true,
+        "zero_invalid_events": true,
+        "zero_startup_hs_candidates": true,
+        "zero_startup_hs_transitions": true,
+        "zero_valid_hs": true
+      },
+      "final_fsm": {
+        "invalid_event_count": 0.0,
+        "sensor_partial_stance_active": 1.0,
+        "state_id": 1.0,
+        "state_name": "STANCE_AFTER_HS",
+        "valid_cycle_count": 0.0,
+        "valid_hs_count": 0.0,
+        "valid_to_count": 0.0
+      },
+      "initial_detector_loads_n": {
+        "heel": 78.11299616305728,
+        "toe": 28.359839966141244
+      },
+      "ok": true,
+      "sample_count": 5,
+      "sample_dt_s": 0.01,
+      "time_range_s": [
+        11.99,
+        12.03
+      ]
+    }
+  },
+  "prescribed_oracle": {
+    "crop_duration_s": 5.0,
+    "crop_end_s": 18.946870983805102,
+    "crop_reference_shape": {
+      "complete_cycle_count": 3,
+      "heel_strike_count": 4,
+      "strict_hs_to_toe_off_to_hs_order": true,
+      "supports_expected_4_hs_3_to_3_cycles": true,
+      "toe_off_count": 3
+    },
+    "derivation": {
+      "boundary_policy": "only complete HS-to-HS cycles; the contact already active at t_start and the open contact at t_end are boundary-censored",
+      "cycle_count": 4,
+      "external_loads_xml": {
+        "bytes": 1196,
+        "path": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml",
+        "sha256": "a2fb6460fc0f8ae9294b4504eb9bb18f0dcc4b112ec71403448c28f4b5dc3f27"
+      },
+      "method": "output._cycles_from_vertical_grf",
+      "min_contact_duration_s": 0.05,
+      "min_cycle_duration_s": 0.3,
+      "threshold_n": 20.0,
+      "vertical_force_column": "ground_force1_vy",
+      "vertical_force_storage": {
+        "bytes": 37040307,
+        "path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot",
+        "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"
+      }
+    },
+    "initial_heel_strike_s": 13.946870983805102,
+    "no_hardcoded_event_timestamp": true,
+    "startup_hs_selection": "first complete heel_strike returned by prescribed-GRF parser"
+  },
+  "schema_version": 1,
+  "sources": {
+    "detector_profile": {
+      "bytes": 1303,
+      "path": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+      "sha256": "e08a7582776b41e883ae50cfce9ce53b5f6508c00b73ca54957afc98d01a4489"
+    },
+    "model": {
+      "bytes": 501271,
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "prescribed_kinematics": {
+      "bytes": 10701447,
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "production_fsm": {
+      "bytes": 49457,
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "f420b5a8885c79f422a6142acc9d2f2d4bad54f605656e990548c0b660c80cec"
+    },
+    "setup": {
+      "bytes": 629,
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+      "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"
+    },
+    "training_config_for_non_sensor_fsm_gates": {
+      "bytes": 10729,
+      "path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"
+    },
+    "validator": {
+      "bytes": 29519,
+      "path": "validation/validate_two_sensor_startup_hs.py",
+      "sha256": "3723c6c59b0f413ab8eb4edbaa38fdb763b13eed36d8b9c005e1148750f68aa8"
+    }
+  },
+  "startup_crop": {
+    "fine_1ms": {
+      "accepted_gait_sequence": [
+        "heel_strike",
+        "toe_off",
+        "heel_strike",
+        "toe_off",
+        "heel_strike",
+        "toe_off",
+        "heel_strike"
+      ],
+      "checks": {
+        "all_accepted_transitions_match_sensor_candidates": true,
+        "all_hs_within_50ms": false,
+        "all_toe_off_within_80ms": true,
+        "exact_hs_to_toe_off_to_hs_order": true,
+        "exact_reference_and_detector_counts": true,
+        "exact_valid_cycles": true,
+        "exactly_one_startup_hs_accepted": true,
+        "exactly_one_startup_hs_candidate": true,
+        "initial_pattern_is_heel_on_toe_off_for_full_dwell": true,
+        "oracle_supports_expected_shape": true,
+        "startup_hs_confirmation_uses_configured_dwell": true,
+        "startup_hs_onset_matches_prescribed_crop_start": true,
+        "zero_invalid_events": true,
+        "zero_timeout": true,
+        "zero_unaccepted_gait_candidates": true
+      },
+      "final_fsm": {
+        "invalid_event_count": 0.0,
+        "state_name": "STANCE_AFTER_HS",
+        "timeout_exceeded": 0.0,
+        "valid_cycle_count": 3.0,
+        "valid_hs_count": 4.0,
+        "valid_to_count": 3.0
+      },
+      "initial_detector_loads_n": {
+        "heel": 36.488477209605364,
+        "toe": 1.4534907092481182e-09
+      },
+      "ok": false,
+      "ordered_timing_gate": {
+        "heel_strike": {
+          "all_within_tolerance": false,
+          "equal_counts": true,
+          "max_abs_error_s": 0.08207265837367217,
+          "ordered_errors_s": [
+            0.0,
+            -0.060089854303246426,
+            -0.06709700217212244,
+            -0.08207265837367217
+          ],
+          "role": "prescribed_event_timing_gate",
+          "tolerance_s": 0.05
+        },
+        "toe_off": {
+          "all_within_tolerance": true,
+          "equal_counts": true,
+          "max_abs_error_s": 0.040978248622183244,
+          "ordered_errors_s": [
+            -0.040978248622183244,
+            -0.014211812184274919,
+            0.0005087198482840449
+          ],
+          "role": "prescribed_event_timing_gate",
+          "tolerance_s": 0.08
+        }
+      },
+      "predicted_events": {
+        "heel_strike": [
+          13.946870983805102,
+          15.555870983805102,
+          17.0968709838051,
+          18.6348709838051
+        ],
+        "toe_off": [
+          15.085870983805101,
+          16.653870983805103,
+          18.224870983805104
+        ]
+      },
+      "prescribed_timing_ok": false,
+      "reference_events": {
+        "heel_strike": [
+          13.946870983805102,
+          15.615960838108348,
+          17.163967985977223,
+          18.716943642178773
+        ],
+        "toe_off": [
+          15.126849232427285,
+          16.668082795989378,
+          18.22436226395682
+        ]
+      },
+      "reference_shape": {
+        "complete_cycle_count": 3,
+        "heel_strike_count": 4,
+        "strict_hs_to_toe_off_to_hs_order": true,
+        "supports_expected_4_hs_3_to_3_cycles": true,
+        "toe_off_count": 3
+      },
+      "sample_count": 5001,
+      "sample_dt_s": 0.001,
+      "stable_initial_heel_only_through_dwell": true,
+      "startup": {
+        "accepted_count": 1,
+        "candidate": {
+          "confirmation_latency_s": 0.02999999999999936,
+          "confirmed_time": 13.976870983805101,
+          "event": "heel_strike",
+          "forefoot_contact_preceded_heel": false,
+          "observed_at_s": 13.976870983805101,
+          "side": "left",
+          "source": "two_sensor",
+          "startup_contact": true,
+          "startup_pattern": "heel_on_toe_off",
+          "time": 13.946870983805102
+        },
+        "candidate_count": 1,
+        "confirmation_latency_s": 0.02999999999999936,
+        "onset_abs_error_s": 0.0,
+        "transition": {
+          "anchor_geometry_valid": 1.0,
+          "closed_segment_type": "",
+          "confirmed_time_s": 13.976870983805101,
+          "cycle_reject_reason": "",
+          "cycle_valid": -1.0,
+          "event": "heel_strike",
+          "event_time_s": 13.946870983805102,
+          "from_state_id": 0.0,
+          "matched_sensor_candidate": true,
+          "opens_segment_type": "stance",
+          "segment_end_time_s": 13.946870983805102,
+          "segment_start_time_s": -1.0,
+          "segment_valid": 1.0,
+          "startup_contact": 1.0,
+          "to_state_id": 1.0
+        }
+      },
+      "startup_rule_ok": true,
+      "time_range_s": [
+        13.946870983805102,
+        18.946870983805102
+      ],
+      "unaccepted_gait_candidates": []
+    },
+    "runtime_10ms": {
+      "accepted_gait_sequence": [
+        "heel_strike",
+        "toe_off",
+        "heel_strike",
+        "toe_off",
+        "heel_strike",
+        "toe_off",
+        "heel_strike"
+      ],
+      "checks": {
+        "all_accepted_transitions_match_sensor_candidates": true,
+        "all_hs_within_50ms": false,
+        "all_toe_off_within_80ms": true,
+        "exact_hs_to_toe_off_to_hs_order": true,
+        "exact_reference_and_detector_counts": true,
+        "exact_valid_cycles": true,
+        "exactly_one_startup_hs_accepted": true,
+        "exactly_one_startup_hs_candidate": true,
+        "initial_pattern_is_heel_on_toe_off_for_full_dwell": true,
+        "oracle_supports_expected_shape": true,
+        "startup_hs_confirmation_uses_configured_dwell": true,
+        "startup_hs_onset_matches_prescribed_crop_start": true,
+        "zero_invalid_events": true,
+        "zero_timeout": true,
+        "zero_unaccepted_gait_candidates": true
+      },
+      "final_fsm": {
+        "invalid_event_count": 0.0,
+        "state_name": "STANCE_AFTER_HS",
+        "timeout_exceeded": 0.0,
+        "valid_cycle_count": 3.0,
+        "valid_hs_count": 4.0,
+        "valid_to_count": 3.0
+      },
+      "initial_detector_loads_n": {
+        "heel": 36.488477209605364,
+        "toe": 1.4534907092481182e-09
+      },
+      "ok": false,
+      "ordered_timing_gate": {
+        "heel_strike": {
+          "all_within_tolerance": false,
+          "equal_counts": true,
+          "max_abs_error_s": 0.08007265837366973,
+          "ordered_errors_s": [
+            0.0,
+            -0.05908985430324698,
+            -0.06709700217212244,
+            -0.08007265837366973
+          ],
+          "role": "prescribed_event_timing_gate",
+          "tolerance_s": 0.05
+        },
+        "toe_off": {
+          "all_within_tolerance": true,
+          "equal_counts": true,
+          "max_abs_error_s": 0.03997824862218202,
+          "ordered_errors_s": [
+            -0.03997824862218202,
+            -0.011211812184274805,
+            0.0025087198482829365
+          ],
+          "role": "prescribed_event_timing_gate",
+          "tolerance_s": 0.08
+        }
+      },
+      "predicted_events": {
+        "heel_strike": [
+          13.946870983805102,
+          15.556870983805101,
+          17.0968709838051,
+          18.636870983805103
+        ],
+        "toe_off": [
+          15.086870983805102,
+          16.656870983805103,
+          18.226870983805103
+        ]
+      },
+      "prescribed_timing_ok": false,
+      "reference_events": {
+        "heel_strike": [
+          13.946870983805102,
+          15.615960838108348,
+          17.163967985977223,
+          18.716943642178773
+        ],
+        "toe_off": [
+          15.126849232427285,
+          16.668082795989378,
+          18.22436226395682
+        ]
+      },
+      "reference_shape": {
+        "complete_cycle_count": 3,
+        "heel_strike_count": 4,
+        "strict_hs_to_toe_off_to_hs_order": true,
+        "supports_expected_4_hs_3_to_3_cycles": true,
+        "toe_off_count": 3
+      },
+      "sample_count": 501,
+      "sample_dt_s": 0.01,
+      "stable_initial_heel_only_through_dwell": true,
+      "startup": {
+        "accepted_count": 1,
+        "candidate": {
+          "confirmation_latency_s": 0.02999999999999936,
+          "confirmed_time": 13.976870983805101,
+          "event": "heel_strike",
+          "forefoot_contact_preceded_heel": false,
+          "observed_at_s": 13.976870983805101,
+          "side": "left",
+          "source": "two_sensor",
+          "startup_contact": true,
+          "startup_pattern": "heel_on_toe_off",
+          "time": 13.946870983805102
+        },
+        "candidate_count": 1,
+        "confirmation_latency_s": 0.02999999999999936,
+        "onset_abs_error_s": 0.0,
+        "transition": {
+          "anchor_geometry_valid": 1.0,
+          "closed_segment_type": "",
+          "confirmed_time_s": 13.976870983805101,
+          "cycle_reject_reason": "",
+          "cycle_valid": -1.0,
+          "event": "heel_strike",
+          "event_time_s": 13.946870983805102,
+          "from_state_id": 0.0,
+          "matched_sensor_candidate": true,
+          "opens_segment_type": "stance",
+          "segment_end_time_s": 13.946870983805102,
+          "segment_start_time_s": -1.0,
+          "segment_valid": 1.0,
+          "startup_contact": 1.0,
+          "to_state_id": 1.0
+        }
+      },
+      "startup_rule_ok": true,
+      "time_range_s": [
+        13.946870983805102,
+        18.946870983805102
+      ],
+      "unaccepted_gait_candidates": []
+    }
+  },
+  "status": "FAIL"
+}

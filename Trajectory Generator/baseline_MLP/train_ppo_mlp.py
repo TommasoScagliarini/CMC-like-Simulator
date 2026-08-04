@@ -28,7 +28,9 @@ import json  # noqa: E402
 import logging  # noqa: E402
 import math  # noqa: E402
 import signal  # noqa: E402
+import shutil  # noqa: E402
 import subprocess  # noqa: E402
+import tempfile  # noqa: E402
 import threading  # noqa: E402
 import time  # noqa: E402
 import traceback  # noqa: E402
@@ -38,6 +40,7 @@ from datetime import datetime  # noqa: E402
 from typing import Any  # noqa: E402
 
 import progress_display  # noqa: E402
+import start_sampling  # noqa: E402
 import training_config  # noqa: E402
 
 _DEFAULT_SETUP_XML = r"models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
@@ -50,10 +53,21 @@ _DEFAULT_ONLINE_GRF_DETECTOR_PROFILE = None
 _BASELINE_DIR = str(Path(__file__).resolve().parent)
 _SCRIPT_PATH = Path(__file__).resolve()
 _TRAJ_GEN_DIR = _SCRIPT_PATH.parents[1]   # .../Trajectory Generator
+_REPO_ROOT = _SCRIPT_PATH.parents[2]
 _RUNS_ROOT = _TRAJ_GEN_DIR / "runs"
 _TRAINING_RUNS_ROOT = _RUNS_ROOT / "training"
+_CANONICAL_H0_CHECKPOINT = (
+    _REPO_ROOT
+    / "validation"
+    / "critic_warmup"
+    / "2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry"
+    / "checkpoint_last"
+)
 _WATCHDOG_FILENAME = "watchdog_state.json"
 _SUPERVISOR_STATE_FILENAME = "supervisor_state.json"
+_ITERATION_MILESTONE_PREFIX = "milestone_iteration_"
+_ITERATION_MILESTONE_WIDTH = 6
+_MIN_MINIBATCH_MEAN_KL_LOSS_FLOOR = -1.0e-7
 
 
 def _cli_path(value: str | Path) -> Path:
@@ -164,8 +178,14 @@ def _default_training_output_dir(
     return _unique_path((_TRAINING_RUNS_ROOT / folder).resolve())
 
 
-def _warm_start_output_name(name_suffix: str | None) -> str:
-    warm_suffix = "warmstart_asym100_grfsoft"
+def _warm_start_output_name(
+    name_suffix: str | None,
+    *,
+    raw: bool = False,
+) -> str:
+    warm_suffix = (
+        "warmstart_raw_asym100_grfsoft" if raw else "warmstart_h0"
+    )
     if not name_suffix:
         return warm_suffix
     return f"{name_suffix}_{warm_suffix}"
@@ -191,7 +211,8 @@ _TRAINING_STACK_LOADED = False
 def _load_training_stack() -> None:
     """Import Torch/Ray/OpenSim only inside the supervised worker process."""
     global _TRAINING_STACK_LOADED
-    global DefaultModelConfig, PPOConfig, env_factory, ray, reward_function, tb_logging
+    global DefaultModelConfig, PPOConfig, env_factory, ray, reward_function
+    global start_condition_metrics, tb_logging
 
     if _TRAINING_STACK_LOADED:
         return
@@ -210,6 +231,7 @@ def _load_training_stack() -> None:
 
     import env_factory as _env_factory
     import reward_function as _reward_function
+    import start_condition_metrics as _start_condition_metrics
     import tb_logging as _tb_logging
 
     ray = _ray
@@ -217,6 +239,7 @@ def _load_training_stack() -> None:
     DefaultModelConfig = _DefaultModelConfig
     env_factory = _env_factory
     reward_function = _reward_function
+    start_condition_metrics = _start_condition_metrics
     tb_logging = _tb_logging
     _TRAINING_STACK_LOADED = True
 
@@ -659,6 +682,410 @@ def _find_flat_metric(metrics: dict[str, float], *suffixes: str) -> float | None
     return None
 
 
+def _kl_update_metrics(learner_metrics: dict[str, float]) -> dict[str, float | None]:
+    """Extract update-scoped KL diagnostics emitted by the custom PPO Learner."""
+
+    prefix = "/kl_update/"
+
+    def finite_metric(suffix: str) -> float | None:
+        value = _find_flat_metric(learner_metrics, prefix + suffix)
+        return float(value) if _finite(value) else None
+
+    return {
+        "max_minibatch_mean_kl_loss": finite_metric("max_minibatch_mean"),
+        "min_minibatch_mean_kl_loss": finite_metric("min_minibatch_mean"),
+        "kl_minibatch_count": finite_metric("minibatch_count"),
+        "kl_nonfinite_count": finite_metric("nonfinite_count"),
+    }
+
+
+def _enforce_kl_update_guard(
+    learner_metrics: dict[str, float],
+    *,
+    max_minibatch_mean_kl_loss: float | None,
+    logical_iteration: int | None = None,
+) -> dict[str, Any] | None:
+    """Fail closed on an unsafe or incomplete update-scoped KL audit."""
+    if max_minibatch_mean_kl_loss is None:
+        return None
+
+    limit = float(max_minibatch_mean_kl_loss)
+    if not math.isfinite(limit) or limit < 0.0:
+        raise ValueError(
+            "max_minibatch_mean_kl_loss must be finite and >= 0 when enabled"
+        )
+
+    metrics = _kl_update_metrics(learner_metrics)
+    max_kl = metrics["max_minibatch_mean_kl_loss"]
+    min_kl = metrics["min_minibatch_mean_kl_loss"]
+    nonfinite_count = metrics["kl_nonfinite_count"]
+    checks = {
+        "max_present_and_finite": max_kl is not None,
+        "max_nonnegative": max_kl is not None and max_kl >= 0.0,
+        "max_within_limit": max_kl is not None and max_kl <= limit,
+        "min_present_and_finite": min_kl is not None,
+        "min_above_floor": (
+            min_kl is not None
+            and min_kl >= _MIN_MINIBATCH_MEAN_KL_LOSS_FLOOR
+        ),
+        "nonfinite_count_present_and_finite": nonfinite_count is not None,
+        "nonfinite_count_zero": (
+            nonfinite_count is not None and nonfinite_count == 0.0
+        ),
+    }
+    failed_checks = [name for name, passed in checks.items() if not passed]
+    report = {
+        "enabled": True,
+        "pass": not failed_checks,
+        "logical_iteration": (
+            int(logical_iteration) if logical_iteration is not None else None
+        ),
+        "max_minibatch_mean_kl_loss_limit": limit,
+        "min_minibatch_mean_kl_loss_floor": (
+            _MIN_MINIBATCH_MEAN_KL_LOSS_FLOOR
+        ),
+        "required_kl_nonfinite_count": 0.0,
+        "metrics": metrics,
+        "checks": checks,
+        "failed_checks": failed_checks,
+    }
+    if failed_checks:
+        iteration_text = (
+            f" at logical iteration {int(logical_iteration)}"
+            if logical_iteration is not None
+            else ""
+        )
+        raise RuntimeError(
+            f"hard KL update guard failed{iteration_text}: {report}"
+        )
+    return report
+
+
+def _current_start_coverage(metrics: dict[str, float]) -> dict[str, float]:
+    """Extract per-update step counts emitted by RewardComponentsCallback."""
+    marker = "/episode_start_steps_current/"
+    return {
+        key.split(marker, 1)[1]: float(value)
+        for key, value in metrics.items()
+        if marker in key
+    }
+
+
+def _consistent_metric_ending_with(
+    metrics: dict[str, float], suffix: str
+) -> float | None:
+    """Return a metric when every matching module-level copy agrees."""
+    values = [float(value) for key, value in metrics.items() if key.endswith(suffix)]
+    if not values:
+        return None
+    reference = values[0]
+    if any(
+        not math.isclose(value, reference, rel_tol=0.0, abs_tol=0.5)
+        for value in values[1:]
+    ):
+        return None
+    return reference
+
+
+def _advantage_counts_by_start(
+    learner_metrics: dict[str, float],
+) -> dict[str, float]:
+    marker = "/start_condition/"
+    suffix = "/advantage_count"
+    counts: dict[str, float] = {}
+    for key, value in learner_metrics.items():
+        if marker not in key or not key.endswith(suffix):
+            continue
+        label = key.split(marker, 1)[1][: -len(suffix)]
+        counts[label] = float(value)
+    return counts
+
+
+def _exact_start_balance_report(
+    args,
+    env_metrics: dict[str, float],
+    learner_metrics: dict[str, float],
+) -> dict | None:
+    contract = getattr(args, "_start_sampling_contract", None)
+    if contract is None:
+        return None
+    actual = _current_start_coverage(env_metrics)
+    expected = {
+        tb_logging.start_offset_metric_label(offset): float(
+            contract.expected_steps_per_start
+        )
+        for offset in contract.offsets_s
+    }
+    missing = sorted(set(expected) - set(actual))
+    unexpected = sorted(set(actual) - set(expected))
+    mismatched = {
+        label: {"expected": expected[label], "actual": actual.get(label)}
+        for label in expected
+        if label not in actual
+        or not math.isclose(actual[label], expected[label], abs_tol=0.5)
+    }
+
+    expected_real_steps = float(sum(expected.values()))
+    connector_steps_in = _consistent_metric_ending_with(
+        learner_metrics, "/learner_connector_sum_episodes_length_in"
+    )
+    connector_steps_out = _consistent_metric_ending_with(
+        learner_metrics, "/learner_connector_sum_episodes_length_out"
+    )
+    pre_compaction_rows = _consistent_metric_ending_with(
+        learner_metrics, "/start_condition_batch/pre_rows"
+    )
+    removed_compaction_rows = _consistent_metric_ending_with(
+        learner_metrics, "/start_condition_batch/removed_rows"
+    )
+    compacted_rows = _consistent_metric_ending_with(
+        learner_metrics, "/start_condition_batch/compacted_rows"
+    )
+    interleaved_rows = _consistent_metric_ending_with(
+        learner_metrics, "/start_condition_batch/interleaved_rows"
+    )
+    interleaved_start_conditions = _consistent_metric_ending_with(
+        learner_metrics, "/start_condition_batch/interleaved_start_conditions"
+    )
+    interleaved_rows_per_start = _consistent_metric_ending_with(
+        learner_metrics, "/start_condition_batch/interleaved_rows_per_start"
+    )
+    max_start_run_length = _consistent_metric_ending_with(
+        learner_metrics, "/start_condition_batch/max_start_run_length"
+    )
+    module_steps_trained = _consistent_metric_ending_with(
+        learner_metrics, "/num_module_steps_trained"
+    )
+    expected_module_steps_trained = expected_real_steps * float(args.num_epochs)
+    expected_kl_minibatches = expected_module_steps_trained / float(
+        args.minibatch_size
+    )
+    kl_metrics = _kl_update_metrics(learner_metrics)
+    advantage_counts = _advantage_counts_by_start(learner_metrics)
+    learner_checks = {
+        "single_epoch_contract": int(args.num_epochs) == 1,
+        "three_start_contract": (
+            len(expected) == 3
+            and len(set(expected.values())) == 1
+        ),
+        "connector_steps_in": (
+            connector_steps_in is not None
+            and math.isclose(
+                connector_steps_in, expected_real_steps, rel_tol=0.0, abs_tol=0.5
+            )
+        ),
+        "post_gae_compaction": (
+            connector_steps_out is not None
+            and pre_compaction_rows is not None
+            and removed_compaction_rows is not None
+            and compacted_rows is not None
+            and removed_compaction_rows > 0.0
+            and math.isclose(
+                connector_steps_out,
+                pre_compaction_rows,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+            and math.isclose(
+                pre_compaction_rows - removed_compaction_rows,
+                compacted_rows,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+            and math.isclose(
+                compacted_rows,
+                expected_real_steps,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+        ),
+        "module_steps_trained": (
+            module_steps_trained is not None
+            and math.isclose(
+                module_steps_trained,
+                expected_module_steps_trained,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+        ),
+        "start_interleaving": (
+            interleaved_rows is not None
+            and interleaved_start_conditions is not None
+            and interleaved_rows_per_start is not None
+            and max_start_run_length is not None
+            and math.isclose(
+                interleaved_rows,
+                expected_real_steps,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+            and math.isclose(
+                interleaved_start_conditions,
+                3.0,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+            and math.isclose(
+                interleaved_rows_per_start,
+                float(contract.expected_steps_per_start),
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+            and math.isclose(
+                max_start_run_length,
+                1.0,
+                rel_tol=0.0,
+                abs_tol=0.0,
+            )
+        ),
+        "advantage_counts": (
+            set(advantage_counts) == set(expected)
+            and all(
+                math.isclose(
+                    advantage_counts[label], expected[label], rel_tol=0.0, abs_tol=0.5
+                )
+                for label in expected
+            )
+        ),
+        "kl_minibatch_count": (
+            kl_metrics["kl_minibatch_count"] is not None
+            and math.isclose(
+                kl_metrics["kl_minibatch_count"],
+                expected_kl_minibatches,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+        ),
+        "kl_values_finite": (
+            kl_metrics["max_minibatch_mean_kl_loss"] is not None
+            and kl_metrics["min_minibatch_mean_kl_loss"] is not None
+            and kl_metrics["kl_nonfinite_count"] is not None
+            and math.isclose(
+                kl_metrics["kl_nonfinite_count"],
+                0.0,
+                rel_tol=0.0,
+                abs_tol=0.5,
+            )
+        ),
+    }
+    learner_batch_pass = all(learner_checks.values())
+    return {
+        "pass": (
+            not missing
+            and not unexpected
+            and not mismatched
+            and learner_batch_pass
+        ),
+        "expected_steps": expected,
+        "actual_steps": actual,
+        "missing": missing,
+        "unexpected": unexpected,
+        "mismatched": mismatched,
+        "learner_batch_pass": learner_batch_pass,
+        "learner_checks": learner_checks,
+        "expected_real_steps": expected_real_steps,
+        "learner_connector_steps_in": connector_steps_in,
+        "learner_connector_steps_out": connector_steps_out,
+        "pre_compaction_rows": pre_compaction_rows,
+        "removed_compaction_rows": removed_compaction_rows,
+        "compacted_rows": compacted_rows,
+        "interleaved_rows": interleaved_rows,
+        "interleaved_start_conditions": interleaved_start_conditions,
+        "interleaved_rows_per_start": interleaved_rows_per_start,
+        "max_start_run_length": max_start_run_length,
+        "expected_module_steps_trained": expected_module_steps_trained,
+        "module_steps_trained": module_steps_trained,
+        "expected_kl_minibatches": expected_kl_minibatches,
+        **kl_metrics,
+        "advantage_counts": advantage_counts,
+        "rollout_fragment_length": int(contract.rollout_fragment_length),
+        "runners_per_start": int(contract.runners_per_start),
+    }
+
+
+def _metrics_under_section(
+    metrics: dict[str, float], section: str
+) -> dict[str, float]:
+    marker = f"/{section}/"
+    return {
+        key.split(marker, 1)[1]: float(value)
+        for key, value in metrics.items()
+        if marker in key
+    }
+
+
+def _per_start_training_metrics(
+    args,
+    env_metrics: dict[str, float],
+    learner_metrics: dict[str, float],
+) -> dict[str, dict[str, Any]]:
+    """Combine sampled coverage, completed returns, and post-GAE moments."""
+    offsets = list(getattr(args, "episode_start_offset_choices_s", []) or [])
+    if not offsets:
+        return {}
+    labels = [tb_logging.start_offset_metric_label(offset) for offset in offsets]
+    sampled = _metrics_under_section(env_metrics, "episode_start_steps_current")
+    return_sums = _metrics_under_section(env_metrics, "episode_start_return_sum")
+    length_sums = _metrics_under_section(env_metrics, "episode_start_length_sum")
+    episode_counts = _metrics_under_section(
+        env_metrics, "episode_start_episode_count"
+    )
+
+    moment_names = {
+        "advantage_sum",
+        "advantage_sumsq",
+        "advantage_positive_count",
+        "advantage_count",
+    }
+    moments: dict[str, dict[str, float]] = {}
+    marker = "/start_condition/"
+    for key, value in learner_metrics.items():
+        if marker not in key:
+            continue
+        suffix = key.split(marker, 1)[1]
+        try:
+            label, metric_name = suffix.split("/", 1)
+        except ValueError:
+            continue
+        if metric_name in moment_names:
+            moments.setdefault(label, {})[metric_name] = float(value)
+    complete_moments = {
+        label: values
+        for label, values in moments.items()
+        if moment_names.issubset(values)
+    }
+    advantage_stats = (
+        start_condition_metrics.derive_advantage_statistics_by_start(
+            complete_moments
+        )
+        if complete_moments
+        else {}
+    )
+
+    result: dict[str, dict[str, Any]] = {}
+    for offset, label in zip(offsets, labels):
+        count = float(episode_counts.get(label, 0.0))
+        row = {
+            "episode_start_offset_s": float(offset),
+            "sampled_steps": sampled.get(label),
+            "completed_episodes": count,
+            "episode_return_sum": return_sums.get(label),
+            "episode_return_mean": (
+                return_sums[label] / count
+                if count > 0.0 and label in return_sums
+                else None
+            ),
+            "episode_length_mean": (
+                length_sums[label] / count
+                if count > 0.0 and label in length_sums
+                else None
+            ),
+        }
+        row.update(advantage_stats.get(label, {}))
+        result[label] = row
+    return result
+
+
 def _learner_module_state(algo) -> dict[str, Any]:
     """Read the full learner RLModule, including the critic stripped from exports."""
     import warm_start
@@ -802,6 +1229,12 @@ def build_config(
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "phase_fsm_input_mode": args.phase_fsm_input_mode,
+        "phase_sensor_on_threshold_n": args.phase_sensor_on_threshold_n,
+        "phase_sensor_off_threshold_n": args.phase_sensor_off_threshold_n,
+        "phase_sensor_dwell_s": args.phase_sensor_dwell_s,
+        "detector_sample_dt_s": args.detector_sample_dt_s,
+        "event_contract_id": args.event_contract_id,
         "include_online_grf_observation": args.online_grf_observation,
         "critic_privileged_observation": args.asymmetric_actor_critic,
         "prescribed_grf_disabled_sides": args.disable_prescribed_grf_side,
@@ -833,6 +1266,29 @@ def build_config(
     if args.vf_loss_coeff is not None:
         training_kwargs["vf_loss_coeff"] = args.vf_loss_coeff
 
+    sampling_contract = getattr(args, "_start_sampling_contract", None)
+    rollout_fragment_length = (
+        int(sampling_contract.rollout_fragment_length)
+        if sampling_contract is not None
+        else "auto"
+    )
+
+    learner_kwargs = {"num_learners": 0}
+    # Keep legacy multi-start runs on RLlib's stock Learner.  The custom
+    # connector is part of the explicit exact-sampling contract and is enabled
+    # only when that mode has passed its arithmetic preflight above.
+    if sampling_contract is not None:
+        learner_kwargs.update(
+            {
+                "learner_class": (
+                    start_condition_metrics.StartConditionMetricsPPOTorchLearner
+                ),
+                "learner_connector": (
+                    start_condition_metrics.build_start_condition_learner_connector
+                ),
+            }
+        )
+
     config = (
         PPOConfig()
         .environment(env_factory.ENV_NAME, env_config=env_config)
@@ -841,7 +1297,7 @@ def build_config(
         .env_runners(
             num_env_runners=args.num_env_runners,
             num_envs_per_env_runner=1,
-            rollout_fragment_length="auto",
+            rollout_fragment_length=rollout_fragment_length,
             sample_timeout_s=args.sample_timeout_s,
         )
         .fault_tolerance(
@@ -851,7 +1307,7 @@ def build_config(
             restart_failed_env_runners=True,
             ignore_env_runner_failures=True,
         )
-        .learners(num_learners=0)  # learner in the main process (CPU)
+        .learners(**learner_kwargs)  # learner in the main process (CPU)
         .resources(num_cpus_for_main_process=1, num_gpus=0)
         .training(**training_kwargs)
         .reporting(
@@ -1073,7 +1529,8 @@ def run(args: argparse.Namespace) -> dict:
     stop_message: str | None = None
     restored_training_iteration = 0
     restored_logical_iteration = 0
-    warm_start_applied = False
+    checkpoint_restored = False
+    warm_start_raw_transplant_applied = False
     warm_start_report_path: Path | None = None
     warm_start_report: dict[str, Any] | None = None
     actor_freeze_reference_state: dict[str, Any] | None = None
@@ -1178,6 +1635,7 @@ def run(args: argparse.Namespace) -> dict:
                 args.startup_timeout_s,
             ):
                 algo.restore_from_path(resume_path)
+            checkpoint_restored = True
             optimizer_lr_audit.append(
                 {
                     "stage": "after_restore",
@@ -1202,7 +1660,7 @@ def run(args: argparse.Namespace) -> dict:
                 f"{iteration_start}/{args.iterations}."
             )
 
-        if args.warm_start and resume_path is None:
+        if args.warm_start_raw and resume_path is None:
             import warm_start
             from ray.rllib.algorithms.algorithm import (
                 COMPONENT_LEARNER,
@@ -1360,7 +1818,7 @@ def run(args: argparse.Namespace) -> dict:
                     output_dir / "actor_transplant_report.json",
                     warm_start_report,
                 )
-                warm_start_applied = True
+                warm_start_raw_transplant_applied = True
             monitor.log_event(
                 "Applied actor warm-start from "
                 f"{warm_start_report['source_checkpoint']} "
@@ -1464,6 +1922,24 @@ def run(args: argparse.Namespace) -> dict:
             env_metrics = _collect_numeric_metrics(
                 result.get("env_runners"), "env_runners"
             )
+            kl_update_metrics = _kl_update_metrics(learner_metrics)
+            kl_guard_report = _enforce_kl_update_guard(
+                learner_metrics,
+                max_minibatch_mean_kl_loss=(
+                    args.max_minibatch_mean_kl_loss
+                ),
+                logical_iteration=iteration,
+            )
+            start_balance_report = _exact_start_balance_report(
+                args,
+                env_metrics,
+                learner_metrics,
+            )
+            per_start_metrics = _per_start_training_metrics(
+                args,
+                env_metrics,
+                learner_metrics,
+            )
             row = {
                 "iteration": iteration,
                 "episode_return_mean": float(ret) if _finite(ret) else None,
@@ -1483,6 +1959,7 @@ def run(args: argparse.Namespace) -> dict:
                 "mean_kl_loss": _find_flat_metric(
                     learner_metrics, "/mean_kl_loss"
                 ),
+                **kl_update_metrics,
                 "current_kl_coeff": _find_flat_metric(
                     learner_metrics, "/curr_kl_coeff"
                 ),
@@ -1492,7 +1969,11 @@ def run(args: argparse.Namespace) -> dict:
                     key: value
                     for key, value in env_metrics.items()
                     if "/episode_start_steps/" in key
+                    or "/episode_start_steps_current/" in key
                 },
+                "exact_start_balance": start_balance_report,
+                "per_start_metrics": per_start_metrics,
+                "kl_update_guard": kl_guard_report,
                 "termination_metrics": {
                     key: value
                     for key, value in env_metrics.items()
@@ -1501,6 +1982,29 @@ def run(args: argparse.Namespace) -> dict:
                     or key.endswith("/reward_loss/truncated")
                 },
             }
+
+            if start_balance_report is not None and not start_balance_report["pass"]:
+                raise RuntimeError(
+                    "exact multi-start sampling contract failed; checkpoint not "
+                    f"saved: {start_balance_report}"
+                )
+
+            if args.retain_iteration_checkpoints:
+                monitor.set_phase(
+                    f"checkpoint milestone iteration {iteration}",
+                    args.checkpoint_timeout_s,
+                )
+                milestone_path = _save_iteration_milestone(
+                    algo,
+                    output_dir,
+                    iteration,
+                )
+                row["iteration_milestone"] = str(milestone_path)
+
+            # A retained milestone is published before this iteration enters the
+            # canonical history or the monitor announces completion. Retention
+            # failures are therefore fail-closed and cannot produce a successful
+            # iteration row without its requested checkpoint artifacts.
             history = _merge_iteration_history(history, row)
             iterations_completed_this_process += 1
             # Full per-iteration metrics go to a .jsonl log (keeps the terminal
@@ -1596,14 +2100,56 @@ def run(args: argparse.Namespace) -> dict:
         "resume_from": str(resume_path) if resume_path is not None else None,
         "restored_training_iteration": restored_training_iteration,
         "restored_logical_iteration": restored_logical_iteration,
-        "warm_start_requested": bool(args.warm_start),
-        "warm_start_applied": bool(warm_start_applied),
+        # The two public warm-start modes are deliberately distinct:
+        # --warm-start restores the full canonical H0 Algorithm checkpoint,
+        # while --warm-start-raw performs the historical actor-only transplant.
+        # The generic fields remain as an umbrella for older audit consumers.
+        "initialization_mode": (
+            "warm_start_h0"
+            if args.warm_start
+            else "warm_start_raw"
+            if args.warm_start_raw
+            else "resume_from"
+            if resume_path is not None
+            else "fresh"
+        ),
+        "warm_start_requested": bool(args.warm_start or args.warm_start_raw),
+        "warm_start_applied": bool(
+            (args.warm_start and checkpoint_restored)
+            or (
+                args.warm_start_raw
+                and (warm_start_raw_transplant_applied or checkpoint_restored)
+            )
+        ),
+        "warm_start_h0_requested": bool(args.warm_start),
+        "warm_start_h0_applied": bool(
+            args.warm_start and checkpoint_restored
+        ),
+        "warm_start_h0_checkpoint": (
+            str(_CANONICAL_H0_CHECKPOINT.resolve())
+            if args.warm_start
+            else None
+        ),
+        "warm_start_raw_requested": bool(args.warm_start_raw),
+        "warm_start_raw_applied": bool(
+            args.warm_start_raw
+            and (warm_start_raw_transplant_applied or checkpoint_restored)
+        ),
+        "warm_start_raw_transplant_applied_this_process": bool(
+            warm_start_raw_transplant_applied
+        ),
         "warm_start_source": str(args.warm_start_source or ""),
         "warm_start_source_config": str(args.warm_start_source_config or ""),
         "warm_start_source_feature_manifest": str(
             args.warm_start_source_feature_manifest or ""
         ),
-        "warm_start_mode": "drop" if args.warm_start else None,
+        "warm_start_mode": (
+            "full_h0_checkpoint"
+            if args.warm_start
+            else "actor_only_drop"
+            if args.warm_start_raw
+            else None
+        ),
         "freeze_logstd": bool(args.freeze_logstd),
         "warm_start_report": (
             str(warm_start_report_path) if warm_start_report_path is not None else None
@@ -1618,6 +2164,23 @@ def run(args: argparse.Namespace) -> dict:
             env_factory.ENV_NAME if _TRAINING_STACK_LOADED else None
         ),
         "num_env_runners": args.num_env_runners,
+        "exact_start_sampling": bool(args.exact_start_sampling),
+        "exact_start_sampling_contract": (
+            {
+                "offsets_s": list(args._start_sampling_contract.offsets_s),
+                "rollout_fragment_length": int(
+                    args._start_sampling_contract.rollout_fragment_length
+                ),
+                "expected_steps_per_start": int(
+                    args._start_sampling_contract.expected_steps_per_start
+                ),
+                "runners_per_start": int(
+                    args._start_sampling_contract.runners_per_start
+                ),
+            }
+            if getattr(args, "_start_sampling_contract", None) is not None
+            else None
+        ),
         "episode_start_offset_s": float(args.episode_start_offset_s),
         "episode_start_offset_choices_s": list(
             args.episode_start_offset_choices_s
@@ -1627,6 +2190,18 @@ def run(args: argparse.Namespace) -> dict:
         "clip_param": float(args.clip_param),
         "kl_coeff": float(args.kl_coeff),
         "kl_target": float(args.kl_target),
+        "kl_update_guard": {
+            "enabled": args.max_minibatch_mean_kl_loss is not None,
+            "max_minibatch_mean_kl_loss_limit": (
+                float(args.max_minibatch_mean_kl_loss)
+                if args.max_minibatch_mean_kl_loss is not None
+                else None
+            ),
+            "min_minibatch_mean_kl_loss_floor": (
+                _MIN_MINIBATCH_MEAN_KL_LOSS_FLOOR
+            ),
+            "required_kl_nonfinite_count": 0.0,
+        },
         "ray_num_cpus": ray_num_cpus,
         "iteration_timeout_s": args.iteration_timeout_s,
         "max_consecutive_skips": args.max_consecutive_skips,
@@ -1635,6 +2210,22 @@ def run(args: argparse.Namespace) -> dict:
         "checkpoint_timeout_s": args.checkpoint_timeout_s,
         "cleanup_timeout_s": args.cleanup_timeout_s,
         "sample_timeout_s": args.sample_timeout_s,
+        "iteration_checkpoint_retention": {
+            "enabled": bool(args.retain_iteration_checkpoints),
+            "directory_pattern": (
+                f"{_ITERATION_MILESTONE_PREFIX}"
+                f"{{logical_iteration:0{_ITERATION_MILESTONE_WIDTH}d}}"
+            ),
+            "checkpoint_directory": "checkpoint_last",
+            "checkpoint_metadata": "checkpoint_last_meta.json",
+            "rl_module_directory": "rl_module_last",
+            "rl_module_metadata": "rl_module_last_meta.json",
+            "milestones": [
+                row["iteration_milestone"]
+                for row in history
+                if isinstance(row, dict) and row.get("iteration_milestone")
+            ],
+        },
         "step_wall_timeout_s": args.step_wall_timeout_s,
         "grf_penetration_penalty_threshold_m": float(
             args.grf_penetration_penalty_threshold_m
@@ -1645,6 +2236,12 @@ def run(args: argparse.Namespace) -> dict:
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "phase_fsm_input_mode": args.phase_fsm_input_mode,
+        "phase_sensor_on_threshold_n": float(args.phase_sensor_on_threshold_n),
+        "phase_sensor_off_threshold_n": float(args.phase_sensor_off_threshold_n),
+        "phase_sensor_dwell_s": float(args.phase_sensor_dwell_s),
+        "detector_sample_dt_s": float(args.detector_sample_dt_s),
+        "event_contract_id": str(args.event_contract_id),
         "online_grf_observation": bool(args.online_grf_observation),
         "gait_clock_enable": bool(args.gait_clock_enable),
         "deployable_minimal_observation": bool(args.deployable_minimal_observation),
@@ -1727,6 +2324,159 @@ def _save_checkpoint_pair(
             "checkpoint": str(output_dir / f"checkpoint_{label}"),
         },
     )
+
+
+def _iteration_milestone_path(
+    output_dir: Path,
+    logical_iteration: int,
+) -> Path:
+    """Return the stable, run-relative directory for one logical iteration."""
+    iteration = int(logical_iteration)
+    if iteration <= 0:
+        raise ValueError("logical_iteration must be a positive integer")
+    return Path(output_dir) / (
+        f"{_ITERATION_MILESTONE_PREFIX}"
+        f"{iteration:0{_ITERATION_MILESTONE_WIDTH}d}"
+    )
+
+
+def _directory_is_nonempty(path: Path) -> bool:
+    try:
+        return path.is_dir() and next(path.iterdir(), None) is not None
+    except OSError:
+        return False
+
+
+def _validate_iteration_milestone(
+    root: Path,
+    *,
+    logical_iteration: int,
+    published_root: Path,
+) -> None:
+    """Reject an incomplete milestone before it becomes externally visible."""
+    checkpoint_path = root / "checkpoint_last"
+    module_path = root / "rl_module_last"
+    checkpoint_meta_path = root / "checkpoint_last_meta.json"
+    module_meta_path = root / "rl_module_last_meta.json"
+    if not _directory_is_nonempty(checkpoint_path):
+        raise RuntimeError(
+            f"iteration milestone checkpoint is missing or empty: {checkpoint_path}"
+        )
+    if not _directory_is_nonempty(module_path):
+        raise RuntimeError(
+            f"iteration milestone RLModule is missing or empty: {module_path}"
+        )
+
+    expected_iteration = int(logical_iteration)
+    expected_checkpoint = str(published_root / "checkpoint_last")
+    expected_module = str(published_root / "rl_module_last")
+    checkpoint_meta = _read_json_dict(checkpoint_meta_path)
+    module_meta = _read_json_dict(module_meta_path)
+    if (
+        checkpoint_meta.get("logical_iteration") != expected_iteration
+        or checkpoint_meta.get("checkpoint") != expected_checkpoint
+    ):
+        raise RuntimeError(
+            "iteration milestone checkpoint metadata is incomplete or inconsistent: "
+            f"{checkpoint_meta_path}"
+        )
+    if (
+        module_meta.get("logical_iteration") != expected_iteration
+        or module_meta.get("rl_module") != expected_module
+    ):
+        raise RuntimeError(
+            "iteration milestone RLModule metadata is incomplete or inconsistent: "
+            f"{module_meta_path}"
+        )
+
+
+def _remove_iteration_milestone_staging(path: Path) -> None:
+    """Remove a private staging tree, surfacing cleanup failures fail-closed."""
+    if not path.exists():
+        return
+    try:
+        shutil.rmtree(path)
+    except OSError as exc:
+        raise RuntimeError(
+            f"could not remove partial iteration milestone staging directory: {path}"
+        ) from exc
+
+
+def _save_iteration_milestone(
+    algo,
+    output_dir: Path,
+    logical_iteration: int,
+) -> Path:
+    """Atomically retain a full checkpoint/module pair for one iteration.
+
+    Milestones are direct children of the run directory. Consequently
+    ``training_config.load_resolved_for_checkpoint()`` can walk from
+    ``<milestone>/rl_module_last`` to the run's resolved configuration without
+    any milestone-specific copy of that configuration.
+    """
+    output_dir = Path(output_dir).resolve()
+    resolved_config = output_dir / training_config.RESOLVED_CONFIG_NAME
+    if not resolved_config.is_file():
+        raise RuntimeError(
+            "iteration checkpoint retention requires the run-level resolved "
+            f"configuration: {resolved_config}"
+        )
+
+    final_root = _iteration_milestone_path(output_dir, logical_iteration)
+    if final_root.exists():
+        raise FileExistsError(
+            "refusing to overwrite an existing iteration milestone: "
+            f"{final_root}"
+        )
+
+    staging_prefix = f".{final_root.name}.tmp-"
+    for stale in output_dir.glob(f"{staging_prefix}*"):
+        _remove_iteration_milestone_staging(stale)
+    staging_root = Path(
+        tempfile.mkdtemp(prefix=staging_prefix, dir=str(output_dir))
+    )
+    published = False
+    try:
+        algo.save_to_path(staging_root / "checkpoint_last")
+        _save_module(algo, staging_root / "rl_module_last")
+        rllib_iteration = int(getattr(algo, "iteration", 0) or 0)
+        _write_json(
+            staging_root / "checkpoint_last_meta.json",
+            {
+                "logical_iteration": int(logical_iteration),
+                "rllib_training_iteration": rllib_iteration,
+                "checkpoint": str(final_root / "checkpoint_last"),
+            },
+        )
+        _write_json(
+            staging_root / "rl_module_last_meta.json",
+            {
+                "logical_iteration": int(logical_iteration),
+                "rllib_training_iteration": rllib_iteration,
+                "rl_module": str(final_root / "rl_module_last"),
+            },
+        )
+        _validate_iteration_milestone(
+            staging_root,
+            logical_iteration=logical_iteration,
+            published_root=final_root,
+        )
+        # Staging and destination are siblings on the same filesystem. With the
+        # destination required to be absent, this rename publishes the complete
+        # tree atomically on both POSIX and Windows.
+        os.replace(staging_root, final_root)
+        published = True
+        _validate_iteration_milestone(
+            final_root,
+            logical_iteration=logical_iteration,
+            published_root=final_root,
+        )
+    except BaseException:
+        _remove_iteration_milestone_staging(
+            final_root if published else staging_root
+        )
+        raise
+    return final_root
 
 
 def _terminate_process_tree(
@@ -2511,6 +3261,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--iterations", type=int, default=1)
     p.add_argument("--num-env-runners", type=int, default=0)
     p.add_argument(
+        "--exact-start-sampling",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Require deterministic multi-start batches to contain exactly equal "
+            "steps per start. Enforces compatible runner, batch, and minibatch "
+            "arithmetic and verifies the sampled counts before checkpointing."
+        ),
+    )
+    p.add_argument(
         "--ray-num-cpus",
         type=int,
         default=None,
@@ -2614,6 +3374,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--kl-coeff", type=float, default=0.2)
     p.add_argument("--kl-target", type=float, default=0.01)
     p.add_argument(
+        "--max-minibatch-mean-kl-loss",
+        type=float,
+        default=None,
+        help=(
+            "Opt-in hard guard for the largest update-scoped minibatch mean KL. "
+            "Also requires a finite minimum >= -1e-7 and zero non-finite KL "
+            "minibatches. Omit to disable."
+        ),
+    )
+    p.add_argument(
         "--vf-clip-param",
         type=float,
         default=None,
@@ -2673,6 +3443,17 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--seed", type=int, default=123)
     p.add_argument("--checkpoint-every", type=int, default=1)
     p.add_argument(
+        "--retain-iteration-checkpoints",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Atomically retain one full checkpoint and inference RLModule for "
+            "every successful logical iteration under "
+            "<output_dir>/milestone_iteration_NNNNNN. Default off keeps only "
+            "the existing checkpoint_last/checkpoint_best behavior."
+        ),
+    )
+    p.add_argument(
         "--resume-from",
         default=None,
         help="Restore the full RLlib Algorithm state from this checkpoint directory "
@@ -2683,36 +3464,56 @@ def parse_args() -> argparse.Namespace:
         "--warm-start",
         action="store_true",
         help=(
-            "Initialize a new ex-novo asymmetric actor from the official "
-            "asym100_GRFpenalty-lowered imitation rl_module_best. Actor-only: "
-            "critic, optimizer, and PPO state remain fresh. Mutually exclusive "
-            "with a supervisor-level --resume-from."
+            "Start ex-novo training from the canonical full H0 RLlib checkpoint. "
+            "Restores the adapted actor, warmed critic, optimizer, PPO state, and "
+            "counters. Mutually exclusive with --warm-start-raw and a user-supplied "
+            "--resume-from."
         ),
     )
     p.add_argument(
+        "--warm-start-raw",
+        action="store_true",
+        help=(
+            "Historical actor-only warm start: transplant the source actor into a "
+            "fresh ex-novo Algorithm. Critic, optimizer, PPO state, and counters "
+            "remain fresh. Mutually exclusive with --warm-start and a "
+            "supervisor-level --resume-from."
+        ),
+    )
+    p.add_argument(
+        "--warm-start-raw-source",
         "--warm-start-source",
+        dest="warm_start_source",
         default=None,
         help=(
-            "Optional rl_module_best/run/module_state.pkl source for --warm-start. "
-            "Default: MLP_imitation_training_06-23-2026_grfsoft_knee1_ankle2_100iter."
+            "Optional rl_module_best/run/module_state.pkl source for "
+            "--warm-start-raw. --warm-start-source is retained as a deprecated "
+            "alias. Default: "
+            "MLP_imitation_training_06-23-2026_grfsoft_knee1_ankle2_100iter."
         ),
     )
     p.add_argument(
+        "--warm-start-raw-source-config",
         "--warm-start-source-config",
+        dest="warm_start_source_config",
         default=None,
         help=(
-            "Optional resolved source config path recorded in the warm-start audit. "
-            "Default: training_cfg.resolved.yaml next to the warm-start source run."
+            "Optional resolved source config path recorded in the actor-only "
+            "warm-start audit. The shorter historical option is a deprecated "
+            "alias. Default: training_cfg.resolved.yaml next to the raw source run."
         ),
     )
     p.add_argument(
+        "--warm-start-raw-source-feature-manifest",
         "--warm-start-source-feature-manifest",
+        dest="warm_start_source_feature_manifest",
         default=None,
         help=(
             "Optional actor_feature_manifest.json declaring the exact ordered "
-            "source actor observation schema. Adjacent manifests are detected "
-            "automatically; the historical 31-feature source uses a built-in "
-            "compatibility manifest."
+            "source actor observation schema for --warm-start-raw. The shorter "
+            "historical option is a deprecated alias. Adjacent manifests are "
+            "detected automatically; the historical 31-feature source uses a "
+            "built-in compatibility manifest."
         ),
     )
     p.add_argument("--random-init", action="store_true")
@@ -2735,6 +3536,20 @@ def parse_args() -> argparse.Namespace:
             "It is added as sensor-only contact and never applied to dynamics."
         ),
     )
+    p.add_argument(
+        "--phase-fsm-input-mode",
+        choices=("legacy_events", "shadow", "two_sensor"),
+        default="legacy_events",
+        help=(
+            "Input source for the existing prosthetic phase FSM. 'shadow' "
+            "records heel/toe candidates while legacy events remain active."
+        ),
+    )
+    p.add_argument("--phase-sensor-on-threshold-n", type=float, default=5.0)
+    p.add_argument("--phase-sensor-off-threshold-n", type=float, default=2.0)
+    p.add_argument("--phase-sensor-dwell-s", type=float, default=0.03)
+    p.add_argument("--detector-sample-dt-s", type=float, default=0.001)
+    p.add_argument("--event-contract-id", default="legacy_events_v1")
     p.add_argument(
         "--grf-penetration-penalty-threshold-m",
         type=float,
@@ -2831,7 +3646,14 @@ def parse_args() -> argparse.Namespace:
     p.set_defaults(**{k: v for k, v in cfg_defaults.items() if k in valid_dests})
     args = p.parse_args()
     args._cfg_reward = cfg_reward
-    if args.warm_start:
+    # Preserve the value selected by the user/YAML before the H0 convenience
+    # preset maps onto the general full-checkpoint resume mechanism. Worker
+    # children legitimately receive both --warm-start and the supervisor's
+    # current --resume-from checkpoint.
+    args._resume_from_before_warm_start = args.resume_from
+    if args.warm_start and args.resume_from is None:
+        args.resume_from = str(_CANONICAL_H0_CHECKPOINT.resolve())
+    if args.warm_start_raw:
         import warm_start
 
         if args.warm_start_source is None:
@@ -2842,33 +3664,129 @@ def parse_args() -> argparse.Namespace:
         # custom --warm-start-source.
     if args.output_dir is None:
         reward_mode = _resolved_reward_mode_for_run_name(args, cfg_reward)
-        name = _warm_start_output_name(args.name) if args.warm_start else args.name
+        if args.warm_start:
+            name = _warm_start_output_name(args.name)
+        elif args.warm_start_raw:
+            name = _warm_start_output_name(args.name, raw=True)
+        else:
+            name = args.name
         args.output_dir = str(_default_training_output_dir(reward_mode, name))
     return args
 
 
 def _validate_warm_start_args(args: argparse.Namespace) -> None:
-    if not getattr(args, "warm_start", False):
+    h0_requested = bool(getattr(args, "warm_start", False))
+    raw_requested = bool(getattr(args, "warm_start_raw", False))
+    if h0_requested and raw_requested:
+        raise SystemExit(
+            "--warm-start and --warm-start-raw are mutually exclusive"
+        )
+
+    raw_source_options = (
+        getattr(args, "warm_start_source", None),
+        getattr(args, "warm_start_source_config", None),
+        getattr(args, "warm_start_source_feature_manifest", None),
+    )
+    if h0_requested and any(raw_source_options):
+        raise SystemExit(
+            "--warm-start restores the fixed full H0 checkpoint and does not "
+            "accept actor source options; use --warm-start-raw for an actor-only "
+            "source transplant"
+        )
+    if not h0_requested and not raw_requested:
+        if any(raw_source_options):
+            raise SystemExit(
+                "warm-start source options require --warm-start-raw"
+            )
         return
+
     reward_mode = _resolved_reward_mode_for_run_name(
         args,
         getattr(args, "_cfg_reward", None) or {},
     )
     if reward_mode != "ex_novo":
-        raise SystemExit("--warm-start is only valid with reward_mode: ex_novo")
+        flag = "--warm-start" if h0_requested else "--warm-start-raw"
+        raise SystemExit(f"{flag} is only valid with reward_mode: ex_novo")
     if not args.asymmetric_actor_critic:
-        raise SystemExit("--warm-start requires --asymmetric-actor-critic")
-    if not args.worker_process and args.resume_from:
+        flag = "--warm-start" if h0_requested else "--warm-start-raw"
+        raise SystemExit(f"{flag} requires --asymmetric-actor-critic")
+
+    requested_resume = getattr(
+        args,
+        "_resume_from_before_warm_start",
+        args.resume_from,
+    )
+    if not args.worker_process and requested_resume:
+        flag = "--warm-start" if h0_requested else "--warm-start-raw"
         raise SystemExit(
-            "--warm-start cannot be combined with supervisor-level --resume-from. "
-            "Start a fresh warm-start run, or resume an existing warm-start run "
-            "without --warm-start."
+            f"{flag} cannot be combined with a user-supplied --resume-from. "
+            "Use --warm-start for canonical H0, --warm-start-raw for the "
+            "actor-only transplant, or --resume-from alone for an arbitrary "
+            "checkpoint."
         )
+    if h0_requested and not args.worker_process:
+        checkpoint = _resolve_resume_path(args.resume_from)
+        if checkpoint is None or not checkpoint.is_dir():
+            raise SystemExit(
+                "canonical H0 checkpoint not found: "
+                f"{_CANONICAL_H0_CHECKPOINT.resolve()}"
+            )
+
+
+def _validate_start_sampling_args(args: argparse.Namespace) -> None:
+    args._start_sampling_contract = None
+    if not getattr(args, "exact_start_sampling", False):
+        return
+    # Ray's cyclic iterator preserves our post-GAE round-robin order for the first
+    # pass, then shuffles the SampleBatch at the epoch boundary.  Until a future
+    # implementation can re-interleave every epoch, exact minibatch balance is a
+    # deliberately single-epoch contract.
+    if int(args.num_epochs) != 1:
+        raise SystemExit(
+            "--exact-start-sampling requires --num-epochs 1 because RLlib "
+            "reshuffles the batch after the first epoch"
+        )
+    if len(args.episode_start_offset_choices_s) != 3:
+        raise SystemExit(
+            "--exact-start-sampling requires exactly three "
+            "--episode-start-offset-choices-s values"
+        )
+    try:
+        args._start_sampling_contract = (
+            start_sampling.build_exact_start_sampling_contract(
+                offsets_s=args.episode_start_offset_choices_s,
+                random_init=bool(args.random_init),
+                num_env_runners=int(args.num_env_runners),
+                train_batch_size=int(args.train_batch_size),
+                minibatch_size=int(args.minibatch_size),
+            )
+        )
+    except ValueError as exc:
+        raise SystemExit(f"invalid exact multi-start sampling contract: {exc}") from exc
+
+
+def _validate_kl_guard_args(args: argparse.Namespace) -> None:
+    value = getattr(args, "max_minibatch_mean_kl_loss", None)
+    if value is None:
+        return
+    try:
+        value = float(value)
+    except (TypeError, ValueError) as exc:
+        raise SystemExit(
+            "--max-minibatch-mean-kl-loss must be a finite number >= 0"
+        ) from exc
+    if not math.isfinite(value) or value < 0.0:
+        raise SystemExit(
+            "--max-minibatch-mean-kl-loss must be a finite number >= 0"
+        )
+    args.max_minibatch_mean_kl_loss = value
 
 
 def main() -> None:
     args = parse_args()
     _validate_warm_start_args(args)
+    _validate_start_sampling_args(args)
+    _validate_kl_guard_args(args)
     if args.checkpoint_every <= 0:
         raise SystemExit("--checkpoint-every must be >= 1")
     if args.max_consecutive_skips <= 0:

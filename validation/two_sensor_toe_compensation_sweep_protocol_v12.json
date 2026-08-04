@@ -1,0 +1,357 @@
+{
+  "schema_version": 12,
+  "protocol_id": "AB06_TWO_SENSOR_TOE_COMPENSATION_DEVELOPMENT_2026-07-22_V12",
+  "freeze_date": "2026-07-22",
+  "frozen_before_execution": true,
+  "stage": "development_v11_toe_down_boundary_extension",
+  "objective": "Extend only the V11 toe-center local-y plantar compensation beyond its 0.5 mm boundary while fixing heel local-x at +3.5 mm, identify the strict multiresolution candidate selected by the frozen structural, timing, and minimum-displacement ranking, remove the residual 1 ms heel-to-toe gap, and keep the sealed block closed.",
+  "setup": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+  "detector_template_profile": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+  "geometry_reference_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+  "load_evidence_profile": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+  "v11_manifest": "validation/two_sensor_heel_x_sweep_runs/2026-07-22_ab06_open_13p946_100_v11/manifest.json",
+  "data_access": {
+    "already_open_interval_s": [
+      13.946870983805102,
+      100.0
+    ],
+    "upper_bound_is_exclusive": true,
+    "allow_samples_at_or_after_100_s": false,
+    "sealed_block_s": [
+      100.0,
+      155.045
+    ],
+    "sealed_block_status": "CLOSED_UNEVALUATED",
+    "expected_reference_hs": 75,
+    "expected_reference_to": 74,
+    "expected_complete_cycles": 74,
+    "excluded_closing_hs_s": [
+      99.96878691565038
+    ]
+  },
+  "replay": {
+    "sea_plugin": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "event_source": "two_sensor",
+    "sensor_on_threshold_n": 0.5,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_dwell_s": 0.03,
+    "runtime_sample_dt_s": 0.01,
+    "fine_sample_dt_s": 0.001,
+    "evaluate_all_candidates_at_both_resolutions": true,
+    "primary_event_time_field": "confirmed_time_s",
+    "diagnostic_event_time_field": "event_time_s",
+    "phase_reference_mode": "validated_event_intervals",
+    "prescribed_contact_threshold_n": 20.0,
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "hs_tolerance_s": 0.05,
+    "toe_off_tolerance_s": 0.08,
+    "fsm_min_stance_duration_s": 0.3,
+    "fsm_min_stance_contact_fraction": 0.2,
+    "fsm_min_stance_load_bw_s": 0.04,
+    "threshold_fsm_routing_or_radius_changed": false
+  },
+  "toe_center_extension": {
+    "heel_anchor_id": "heel_x_p3p5mm",
+    "heel_x_shift_from_v9_mm": 3.5,
+    "v11_boundary_candidate_id": "toe_down_p0p5mm__heel_x_p3p5mm",
+    "comparator_toe_center_local_y_down_from_v9_mm": 0.5,
+    "selectable_toe_center_local_y_down_from_v9_mm": [
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "selectable_candidate_count": 8,
+    "comparator_count": 1,
+    "total_pair_count": 9,
+    "sensors_per_pair": 2,
+    "only_toe_local_y_changes": true,
+    "heel_and_all_radii_fixed": true,
+    "selectable_domain_mm": [
+      0.5,
+      1.0
+    ],
+    "selectable_lower_bound_is_exclusive": true
+  },
+  "sampling": {
+    "runtime_10ms": {
+      "method": "shared_station_sampling_direct_opensim",
+      "expected_unique_detector_stations": 10,
+      "expected_primary_load_spheres": 8,
+      "expected_total_sampled_stations": 18,
+      "evaluated_pair_count": 9
+    },
+    "fine_1ms": {
+      "method": "shared_station_sampling_direct_opensim",
+      "expected_unique_detector_stations": 10,
+      "expected_primary_load_spheres": 8,
+      "expected_total_sampled_stations": 18,
+      "evaluated_pair_count": 9
+    },
+    "affine_reconstruction": false
+  },
+  "runtime_gate_10ms": {
+    "require_exact_reference_counts": {
+      "heel_strike": 75,
+      "toe_off": 74
+    },
+    "require_exact_detector_counts": {
+      "heel_strike": 75,
+      "toe_off": 74
+    },
+    "require_exact_valid_cycles": 74,
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "minimum_confirmed_fsm_stance_f1": 0.95,
+    "minimum_confirmed_fsm_stance_iou": 0.9,
+    "maximum_transfer_both_latches_off_samples": 0,
+    "maximum_incomplete_heel_to_forefoot_transfers": 0,
+    "maximum_to_candidates_before_min_stance": 0,
+    "maximum_invalid_or_timeout_transitions": 0,
+    "maximum_unaccepted_sensor_events": 0,
+    "maximum_forbidden_phase_mismatches": 0,
+    "maximum_unknown_fsm_phase_samples": 0,
+    "minimum_causal_toe_clear_before_next_hs_onset_s": 0.03,
+    "require_exact_causal_swing_intervals": 74,
+    "require_confirmation_latency_in_range": true,
+    "require_exact_hs_to_toe_off_order_and_cycles": true,
+    "require_mesh_proximity_pre_gate": true
+  },
+  "fine_gate_1ms": {
+    "require_exact_reference_counts": {
+      "heel_strike": 75,
+      "toe_off": 74
+    },
+    "require_exact_detector_counts": {
+      "heel_strike": 75,
+      "toe_off": 74
+    },
+    "require_exact_valid_cycles": 74,
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "minimum_confirmed_fsm_stance_f1": 0.95,
+    "minimum_confirmed_fsm_stance_iou": 0.9,
+    "maximum_transfer_both_latches_off_samples": 0,
+    "maximum_incomplete_heel_to_forefoot_transfers": 0,
+    "maximum_to_candidates_before_min_stance": 0,
+    "maximum_invalid_or_timeout_transitions": 0,
+    "maximum_unaccepted_sensor_events": 0,
+    "maximum_forbidden_phase_mismatches": 0,
+    "maximum_unknown_fsm_phase_samples": 0,
+    "minimum_causal_toe_clear_before_next_hs_onset_s": 0.03,
+    "require_exact_causal_swing_intervals": 74,
+    "require_confirmation_latency_in_range": true,
+    "require_exact_hs_to_toe_off_order_and_cycles": true,
+    "require_mesh_proximity_pre_gate": true
+  },
+  "selection": {
+    "strict_winner_requires_both_resolutions": true,
+    "comparator_is_never_selectable": true,
+    "structural_failures_rank_before_timing_for_diagnostics": true,
+    "selector_implementation": "v11_select_stage_b_with_equal_8_plus_1_cardinality",
+    "ranking": [
+      "multiresolution_structural_gate_failure_count:min",
+      "multiresolution_event_count_deficit:min",
+      "multiresolution_valid_cycle_deficit:min",
+      "multiresolution_invalid_timeout_unaccepted:min",
+      "multiresolution_transfer_gap_samples:min",
+      "multiresolution_incomplete_transfer:min",
+      "multiresolution_early_to_candidates:min",
+      "multiresolution_forbidden_phase_mismatch:min",
+      "multiresolution_unknown_phase_samples:min",
+      "multiresolution_causal_interval_deficit:min",
+      "multiresolution_causal_clear_failure:min",
+      "multiresolution_confirmation_latency_failure:min",
+      "multiresolution_exact_order_failure:min",
+      "multiresolution_mesh_pre_gate_failure:min",
+      "multiresolution_two_window_max_abs_hs_error:min",
+      "multiresolution_global_max_abs_hs_error:min",
+      "multiresolution_global_mean_abs_hs_error:min",
+      "multiresolution_global_max_abs_toe_off_error:min",
+      "multiresolution_fsm_score_deficit:min",
+      "toe_center_down_mm:min",
+      "candidate_id:lexicographic"
+    ],
+    "minimum_displacement_is_final_tie_break": true,
+    "diagnostic_candidate_is_never_promotable": true
+  },
+  "decision_contract": {
+    "candidate_selection_allowed": true,
+    "profile_creation_allowed": false,
+    "profile_promotion_allowed": false,
+    "sealed_validation_allowed": false,
+    "training_allowed": false,
+    "runtime_modification_allowed": false,
+    "v9_v10_v11_files_must_remain_immutable": true
+  },
+  "sources": {
+    "v12_validator": {
+      "path": "validation/sweep_two_sensor_toe_compensation_prescribed_v12.py",
+      "sha256": "d40d6d47de2a17c1ad5c1eff4f99e215928e35c8eaf6fda54f7de9bed4930f39"
+    },
+    "v12_tests": {
+      "path": "validation/test_two_sensor_toe_compensation_sweep_v12.py",
+      "sha256": "8ab5546c69fd3ab95197422a66dcce43350b7619efce2fd5e5107493be5779aa"
+    },
+    "v11_protocol": {
+      "path": "validation/two_sensor_heel_x_sweep_protocol_v11.json",
+      "sha256": "eaecf9c800a4b832d38781f69da41c63844b53a70f9d94118e1e475e51f52b0d"
+    },
+    "v11_manifest": {
+      "path": "validation/two_sensor_heel_x_sweep_runs/2026-07-22_ab06_open_13p946_100_v11/manifest.json",
+      "sha256": "2c4a9fe802f5809fa95702dfd5c9bafdaf12096dfe1452dbc83b30bc6019d54e"
+    },
+    "v11_stage_b_runtime_csv": {
+      "path": "validation/two_sensor_heel_x_sweep_runs/2026-07-22_ab06_open_13p946_100_v11/heel_x_v11_stage_b_runtime_10ms_metrics.csv",
+      "sha256": "459606b59cd2a22ccd6d289e6d613857a40692984de168390eb51ed186d60cd9"
+    },
+    "v11_stage_b_fine_csv": {
+      "path": "validation/two_sensor_heel_x_sweep_runs/2026-07-22_ab06_open_13p946_100_v11/heel_x_v11_stage_b_fine_1ms_metrics.csv",
+      "sha256": "8b9570e67fdf4e4569feeb4da0c828ac6f04cd2d4949fdf66d0958203e26fde8"
+    },
+    "v11_validator": {
+      "path": "validation/sweep_two_sensor_heel_x_prescribed_v11.py",
+      "sha256": "0fb4e49aca735abac8509cbf12ac8e2bbd51826424121e1ccfd6adb6f109b87a"
+    },
+    "v11_tests": {
+      "path": "validation/test_two_sensor_heel_x_sweep_v11.py",
+      "sha256": "97724e74451f1cf44e52ca03db8afbe4fc77f9d26406962a5c4049150577da48"
+    },
+    "v10_validator": {
+      "path": "validation/sweep_two_sensor_center_radius_prescribed_v10.py",
+      "sha256": "d88e1e3d243992f4d2ff979686211428fdc0cde6c6725ec6e5eb04d4dd4883d3"
+    },
+    "v10_protocol": {
+      "path": "validation/two_sensor_center_radius_sweep_protocol_v10.json",
+      "sha256": "a1f8a26757b0784e398ee2c4c0a74f04c468d9a1ab4d04971182864925eb1e93"
+    },
+    "v10_manifest": {
+      "path": "validation/two_sensor_center_radius_sweep_runs/2026-07-22_ab06_open_13p946_100_v10/manifest.json",
+      "sha256": "9553374b6ca2fefb2eb9118607bba5580ed686f790ff9984f36fa261b0bdcbf0"
+    },
+    "v9_validator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v9.py",
+      "sha256": "4c330e3d5298f90c298608bffb94da5ef02f89f3f11efb8408e57468d3e92368"
+    },
+    "v9_profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+      "sha256": "e08a7582776b41e883ae50cfce9ce53b5f6508c00b73ca54957afc98d01a4489"
+    },
+    "v9_protocol": {
+      "path": "validation/two_sensor_timing_placement_sweep_protocol_v9.json",
+      "sha256": "87c79646046f9f4b90d0218ec465a6147fe3d2ffcb78e4a63dbdf41e4bfdfc77"
+    },
+    "v9_manifest": {
+      "path": "validation/two_sensor_timing_placement_sweep_runs/2026-07-22_ab06_50_100_heel_micro_v9/manifest.json",
+      "sha256": "98be213bb620096251bd4a9006e1338867c05f2c6646f8ee48ba7bcdaca2c057"
+    },
+    "v8_validator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v8.py",
+      "sha256": "9d40048cdbabb9fc57b03857509db9c04b444b4618c5e70d6184786124303740"
+    },
+    "v7_validator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v7.py",
+      "sha256": "642566f32e7de342ed231cbfb8307478fca5908ee9d4285ed6329489ea4e8f82"
+    },
+    "v6_evaluator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v6.py",
+      "sha256": "21c72489fce623706bac5b3b652d787fc52080990876113fc659f33c5797a0ad"
+    },
+    "v4_evaluator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v4.py",
+      "sha256": "a10afa80cfb0b8ea5e19a96240bdbc76994690c1fe05715577b2706291429b77"
+    },
+    "v3_evaluator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v3.py",
+      "sha256": "c3a716fd2e827dfee1fe7a7c9d521cd7f1b8b110ae9c2a3c398c7d9c5f4f953b"
+    },
+    "placement_evaluator": {
+      "path": "validation/sweep_two_sensor_mesh_placements_prescribed.py",
+      "sha256": "929e0bbdebaf1f9a9cbe2d021ff6610a22fb2be02f3a6438bb184c3a1ad0a39a"
+    },
+    "profile_comparator": {
+      "path": "validation/compare_two_sensor_mesh_profiles_prescribed.py",
+      "sha256": "12b2738b9af44ffeb914cb95d45a20697b4d151cab9627d5c04d7be1a29eb1cd"
+    },
+    "dual_stream_router": {
+      "path": "validation/diagnose_two_sensor_dual_stream_prescribed.py",
+      "sha256": "e9376dd841456b77af6a6bda97895143e3f8d70023d4282f9a90a2579b37a1a1"
+    },
+    "event_evaluator": {
+      "path": "validation/sweep_two_sensor_prescribed_thresholds.py",
+      "sha256": "1a33efe86f5bbfb986e24dd1d2784e43339dcd8dda3ea23030203781b389f586"
+    },
+    "replay_validator": {
+      "path": "validation/validate_two_sensor_prescribed_replay.py",
+      "sha256": "91dcf134f2978f808457eafd5919985cccbb504dd3c3b75da8f47fa996a39fae"
+    },
+    "open_split_protocol": {
+      "path": "validation/two_sensor_prescribed_threshold_sweep_protocol_v3.json",
+      "sha256": "b8e580bf1b40849c4803adbaff19caa7bd862efdf13968c3fbe407435e365611"
+    },
+    "production_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "f420b5a8885c79f422a6142acc9d2f2d4bad54f605656e990548c0b660c80cec"
+    },
+    "online_grf": {
+      "path": "online_grf.py",
+      "sha256": "8f9dbbf533ffece1c2bf73dcaa19cd2a8b8e8d8993037f0bd590a98543db5dbf"
+    },
+    "training_fsm_config": {
+      "path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"
+    },
+    "setup": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+      "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"
+    },
+    "model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "ik": {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "prescribed_grf": {
+      "path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot",
+      "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"
+    },
+    "external_forces": {
+      "path": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml",
+      "sha256": "a2fb6460fc0f8ae9294b4504eb9bb18f0dcc4b112ec71403448c28f4b5dc3f27"
+    },
+    "foot_mesh": {
+      "path": "Geometry/AM_foot_l.STL",
+      "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"
+    },
+    "primary_load_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+    },
+    "geometry_reference_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+    }
+  },
+  "interpretation_limits": [
+    "V12 is an adaptive development iteration motivated by the V11 boundary result and is not sealed holdout validation.",
+    "The V11 heel local-x +3.5 mm anchor, both sphere radii, heel local-y/local-z, and toe local-x/local-z remain fixed.",
+    "Each selectable candidate changes only the V9 toe local-y center in the plantar direction, with 0.5 < toe-down <= 1.0 mm.",
+    "The V11 0.5 mm boundary comparator is non-selectable and must replay identically before any V12 result is accepted.",
+    "Thresholds, dwell, FSM, load evidence, event routing, policy, reward, and training remain unchanged.",
+    "Timing acceptance uses confirmed_time_s; event_time_s remains diagnostic only.",
+    "Selection prioritizes structural integrity and timing/FSM quality; toe-center displacement is the final tie-break, not the primary objective.",
+    "Heel-off shift remains diagnostic; strict acceptance uses the frozen event, FSM, causal, and transfer gates.",
+    "No profile can be created or promoted, and the 100-155.045 s sealed block remains closed."
+  ]
+}

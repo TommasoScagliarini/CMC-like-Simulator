@@ -1,0 +1,272 @@
+{
+  "inverse_kinematics": {
+    "accuracy": 1e-05,
+    "marker_tasks": [
+      {
+        "apply": true,
+        "name": "R_ASIS",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_ASIS",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_PSIS",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Thigh_Upper",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Thigh_Front",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Thigh_Rear",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Knee_Lat",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Shank_Upper",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Shank_Front",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Shank_Rear",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Ankle_Lat",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Heel",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Toe_Lat",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Toe_Med",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_Toe_Tip",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Thigh_Upper",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Thigh_Front",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Thigh_Rear",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Knee_Lat",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Shank_Upper",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Shank_Front",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Shank_Rear",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Ankle_Lat",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Heel",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Toe_Lat",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Toe_Med",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "L_Toe_Tip",
+        "weight": 1.0
+      },
+      {
+        "apply": true,
+        "name": "R_PSIS",
+        "weight": 1.0
+      }
+    ],
+    "model": {
+      "path": "../../../../../models/AB06_SEASEA-raw/osimxml/AB06_SEASEA_marker_calibrated.osim",
+      "sha256": "98cfcbc4f7155ea4576f583654fbd50a6e8bd2f2f33ff0894c9f3f24dce5fa8d"
+    },
+    "output_ik_sha256": null,
+    "output_motion_file": "treadmill_04_01_ik.mot",
+    "plugin": {
+      "binary_path": "../../../../../plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+      "binary_sha256": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b",
+      "loader_basename": "../../../../../plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff"
+    },
+    "receipt_helper_command": [
+      "python",
+      "../../../../../tools/convert_epic_ab06_tables_recovery.py",
+      "--finalize-ik-output",
+      "treadmill_04_01_ik.mot",
+      "--ik-setup",
+      "treadmill_04_01_iksetup.xml",
+      "--ik-plugin",
+      "../../../../../plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+      "--opensim-version",
+      "4.5.2"
+    ],
+    "required_opensim_version": "4.5.2",
+    "run_helper_command": [
+      "python",
+      "../../../../../tools/convert_epic_ab06_tables_recovery.py",
+      "--run-ik-setup",
+      "treadmill_04_01_iksetup.xml",
+      "--ik-plugin",
+      "../../../../../plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff"
+    ],
+    "setup": {
+      "path": "treadmill_04_01_iksetup.xml",
+      "sha256": "7e0794e008e2f97cef1ec3715aa1b4642db072c36436ef83c1bb32d335b6dac5"
+    },
+    "status": "SETUP_ONLY_NOT_RUN",
+    "time_range_s": [
+      12.485,
+      156.025
+    ]
+  },
+  "outputs": {
+    "dataset_ik": {
+      "path": "treadmill_04_01_ik_dataset_ab06_seasea.mot",
+      "sha256": "ad285ec33ce33057efea84aa4c4c127a3b535de2adb6e2dfe9a8dc1d258d9a5d"
+    },
+    "external_loads": {
+      "path": "treadmill_04_01_ExternalLoads.xml",
+      "sha256": "b33d5a20fe8347747c53a7eef0eec0afde0ecc2333d0ae30be51fe221e1d74c4"
+    },
+    "grf": {
+      "path": "treadmill_04_01_grf.mot",
+      "sha256": "299c5267b06ba5b23921ba586c1b3c02fa23769954e62e5c94175db12a61dbc5"
+    },
+    "markers_trc": {
+      "path": "treadmill_04_01.trc",
+      "sha256": "0bd481ae95cad59c0cf1eb9222424a26b67381036104731e24bcb9f5948b43d1"
+    }
+  },
+  "recovery_lineage": {
+    "original_converter": {
+      "path": "../../../../../tools/convert_epic_ab06_tables.py",
+      "sha256": "015f7e96f4f3dd6a923e3c1115d4f41d07faf1d997419138e11e9d6f9d8433cb"
+    }
+  },
+  "schema_version": 1,
+  "source_time_coverage": {
+    "all_sources_cover_required_range": true,
+    "coverage_rule": "every_source_covers_downstream_required_time_range",
+    "dataset_ik_used_downstream": false,
+    "downstream_required_time_range_s": [
+      12.485,
+      156.025
+    ],
+    "endpoint_tolerance_s": 1e-09,
+    "legacy_inference_rule": "all_source_endpoints_equal_within_tolerance",
+    "range_origin": "explicit_protocol_range",
+    "schema_version": 1,
+    "streams": {
+      "dataset_ik": {
+        "covers_required_range": true,
+        "rows": 28713,
+        "time_range_s": [
+          12.475,
+          156.035
+        ]
+      },
+      "force_plate": {
+        "covers_required_range": true,
+        "rows": 143564,
+        "time_range_s": [
+          12.472,
+          156.035
+        ]
+      },
+      "markers": {
+        "covers_required_range": true,
+        "rows": 28713,
+        "time_range_s": [
+          12.475,
+          156.035
+        ]
+      }
+    }
+  },
+  "sources": {
+    "force_plate": {
+      "filename": "treadmill_04_01.mat",
+      "sha256": "5a36c7ea999227cee9ed72de519010cc01df8779655e0ec12a50751945a21fb3"
+    },
+    "ik": {
+      "filename": "treadmill_04_01.mat",
+      "sha256": "4a5b4afd1ad64333d1a5228dd22f0798119f9a2696f777dedabb4394c539fbf6"
+    },
+    "markers": {
+      "filename": "treadmill_04_01.mat",
+      "sha256": "4dfcc0f0b52756228323c4d87d9b51376589ab259f33d4ab03b2dccaf4a392cc"
+    }
+  },
+  "status": "CONVERTED",
+  "time_range_s": [
+    12.485,
+    156.025
+  ],
+  "trial": "treadmill_04_01"
+}

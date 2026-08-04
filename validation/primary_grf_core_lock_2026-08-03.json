@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "lock_id": "AB06_PRIMARY_GRF_HYBRID_CORE_LOCK_2026-08-03",
+  "freeze_date": "2026-08-03",
+  "status": "PRIMARY_CONTRACT_FROZEN_LIMITED_HYBRID_CLAIM",
+  "scientific_claim": "The frozen primary profile is accepted only for hybrid support: left online physical GRF and right prescribed ExternalForce. This lock does not reopen force, timing, COP or full-wrench validation.",
+  "scientific_core": {
+    "primary_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+    },
+    "runtime_model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "contact_cpp": {
+      "path": "tools/online_grf_contact/OnlineGRFSphereHalfSpaceForce.cpp",
+      "sha256": "e0022a37268b60b51f68a588ceb7c951e0a8e37d1cd0e0016135a458a0cf919a"
+    },
+    "contact_header": {
+      "path": "tools/online_grf_contact/OnlineGRFSphereHalfSpaceForce.h",
+      "sha256": "83890c056286b6cd3eee6852901228794813f5170d89db6ef4d3c3e64e43e272"
+    },
+    "plugin_interface": {
+      "path": "tools/online_grf_contact/Plugin_interface.cpp",
+      "sha256": "5e87f884b023c749239b4484d54ea900862d0c11879d92941ef762aa6901ec99"
+    },
+    "contact_cmake": {
+      "path": "tools/online_grf_contact/CMakeLists.txt",
+      "sha256": "8a2d71eb1535888d6d90c9e8977dae31756dc9947b420b9bf221f7b85cd86913"
+    }
+  },
+  "platform_attestations": {
+    "macos_arm64_dylib": {
+      "path": "plugins/libOnlineGRFContact.dylib",
+      "sha256": "5597a59a5368825fd207753b59291e72240c1ece3aa5280804f1e9b9c7d6a2b3",
+      "role": "platform binary attestation, not part of the portable scientific core"
+    },
+    "windows_x86_64": "PENDING_VERIFIED_DLL_HASH_AND_PARITY"
+  },
+  "routing_contract": {
+    "configuration": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+    "loader": "model_loader.py",
+    "setup": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+    "external_loads": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml",
+    "required": [
+      "grf_mode is online_sensor",
+      "primary profile is the frozen profile",
+      "online applied sides are exactly left",
+      "prescribed support is auto-disabled on applied online sides",
+      "right prescribed ExternalForce remains present",
+      "detector add_online_grf_forces call passes applies_force false",
+      "primary continuous load/contact and detector event streams remain distinct"
+    ],
+    "python_and_yaml_hashes_are_deliberately_not_part_of_scientific_core": true
+  },
+  "scientific_exclusions": [
+    "COP representation or sentinel at zero load",
+    "technical left-only primary-profile loader option",
+    "detector geometry, thresholds, debounce or event timing",
+    "full-wrench production certification",
+    "cross-subject, cross-task, hardware or Windows numerical validation"
+  ],
+  "forbidden_changes": [
+    "primary profile geometry or material",
+    "contact law or C++ plugin semantics",
+    "runtime model",
+    "physical primary-GRF routing"
+  ]
+}

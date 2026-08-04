@@ -1,0 +1,214 @@
+{
+  "schema_version": 2,
+  "protocol_id": "AB06_FULLSPAN_TWO_SENSOR_THRESHOLDS_2026-07-21_V3_CONFIRMED_TIME",
+  "frozen_before_execution": true,
+  "derived_from": {
+    "protocol_id": "AB06_FULLSPAN_TWO_SENSOR_THRESHOLDS_2026-07-21_V2_LOW_FORCE",
+    "path": "validation/two_sensor_prescribed_threshold_sweep_protocol_v2.json",
+    "sha256": "ff5e2b52dc42f85c83dbbdbaf0c142eceff79bf857b87124d8412a0831dfdc9b"
+  },
+  "supersedes_development_only_protocol": "AB06_FULLSPAN_TWO_SENSOR_THRESHOLDS_2026-07-21_V2_LOW_FORCE",
+  "redesign_basis": "A detector event becomes available to the gait FSM only after the 30 ms debounce has been confirmed. Therefore confirmed_time_s, rather than the raw threshold-crossing onset, is the physically observable detector timestamp and is the only timestamp allowed to drive selection or PASS/FAIL. This semantic correction was frozen before opening the 50-100 s validation block; the 100-155.045 s sealed block remains closed.",
+  "objective": "Select a low-force heel/toe detector threshold on the development block using confirmed detector events, lock one candidate, and validate exactly that candidate plus the unchanged 5/2 N comparator on 50-100 s. Detector onset is retained only as a diagnostic of threshold crossing and cannot affect ranking, eligibility, promotion or failure. No policy is trained or evaluated and runtime configuration is not modified.",
+  "sources": {
+    "setup": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+      "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"
+    },
+    "model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "prescribed_kinematics": {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "external_loads_xml": {
+      "path": "models/AB06_SEASEA_Threadmill/data/ExternalForces.xml",
+      "sha256": "a2fb6460fc0f8ae9294b4504eb9bb18f0dcc4b112ec71403448c28f4b5dc3f27"
+    },
+    "prescribed_grf": {
+      "path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot",
+      "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"
+    },
+    "detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+    },
+    "runtime_fsm_configuration": {
+      "path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"
+    },
+    "production_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "ec726fdf392f099ac1135de9e736e984ada695c9704102621d0cd8af2fdc5b45"
+    },
+    "threshold_sweep_validator": {
+      "path": "validation/sweep_two_sensor_prescribed_thresholds.py",
+      "sha256": "1a33efe86f5bbfb986e24dd1d2784e43339dcd8dda3ea23030203781b389f586"
+    },
+    "prescribed_replay_validator": {
+      "path": "validation/validate_two_sensor_prescribed_replay.py",
+      "sha256": "91dcf134f2978f808457eafd5919985cccbb504dd3c3b75da8f47fa996a39fae"
+    },
+    "event_matching_validator": {
+      "path": "validation/validate_online_grf_events.py",
+      "sha256": "6f314854ce80f6ab13eec7ac9a0b02d8014dd02c274c36c6bcdc00982b0ba2f7"
+    },
+    "contact_sampling_validator": {
+      "path": "validation/validate_online_grf.py",
+      "sha256": "d71855951d23660e7eeba3f70da31996a2ff1be8ec9a3a64bd75a4c18613021c"
+    },
+    "online_grf_runtime": {
+      "path": "online_grf.py",
+      "sha256": "201cf8c4451d60afa66e034572469e6c0b121fb541fb528f3044903aad8784b8"
+    }
+  },
+  "replay": {
+    "time_span": "full intersection of prescribed IK and prescribed GRF",
+    "dense_cache_dt_s": 0.001,
+    "primary_sample_dt_s": 0.01,
+    "sensitivity_sample_dt_s": 0.001,
+    "sea_plugin": "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    "event_source": "two_sensor",
+    "primary_event_time_field": "confirmed_time_s",
+    "diagnostic_event_time_field": "event_time_s",
+    "phase_reference_mode": "validated_event_intervals",
+    "sensor_dwell_s": 0.03,
+    "prescribed_contact_threshold_n": 20.0,
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "hs_tolerance_s": 0.05,
+    "toe_off_tolerance_s": 0.08
+  },
+  "event_time_contract": {
+    "primary_detector_timestamp": "confirmed_time_s",
+    "primary_reference_timestamp": "prescribed left vertical-GRF event time at 20 N",
+    "primary_matching": "precision, recall, ordered all-event error, max-absolute error, event order, cycle count and phase-transition timing all use confirmed_time_s",
+    "detector_onset_timestamp": "event_time_s",
+    "detector_onset_role": "diagnostic_only",
+    "onset_error_vs_reference_may_affect_development_eligibility": false,
+    "onset_error_vs_reference_may_affect_ranking": false,
+    "onset_error_vs_reference_may_affect_validation_or_sealed_gate": false,
+    "required_onset_diagnostics": [
+      "ordered onset errors for heel strike and toe off",
+      "onset bias, MAE and maximum absolute error",
+      "confirmation latency = confirmed_time_s - event_time_s"
+    ],
+    "confirmation_latency_gate": "Every accepted gait event must satisfy sensor_dwell_s <= confirmed_time_s - event_time_s <= sensor_dwell_s + sample_dt_s, up to numerical epsilon.",
+    "phase_mismatch_window": "Fixed around the prescribed reference event using the corresponding confirmed-time tolerance plus at most one sample for discretization; do not add sensor_dwell_s again because dwell is already included in confirmed_time_s.",
+    "fail_closed_rule": "Missing, duplicated, unmatched or out-of-order confirmed events fail even when onset diagnostics look correct."
+  },
+  "phase_reference_contract": {
+    "mode": "validated_event_intervals",
+    "source": "the same prescribed left-GRF HS and TO events used by the timing gate",
+    "construction": "stance from each accepted reference HS to the following accepted reference TO; swing from that TO to the following accepted reference HS",
+    "contact_threshold_n": 20.0,
+    "minimum_contact_duration_s": 0.05,
+    "minimum_cycle_duration_s": 0.3,
+    "short_grf_recrossings": "crossings rejected by the frozen event extractor do not create isolated phase labels",
+    "causality_note": "event timestamps remain the physical prescribed-GRF onsets accepted after the frozen minimum-duration check; no future detector or holdout result is used",
+    "reason": "V2 exposed a contradiction in which two short GRF recrossings rejected as HS events were nevertheless counted as instantaneous stance samples. V3 removes that contradiction before opening validation; it does not add a post-hoc detector tolerance."
+  },
+  "candidate_grid": {
+    "generation": "Cartesian low-force grid in listed order plus the unchanged external 5/2 N comparator; every low-force OFF is below every low-force ON",
+    "on_thresholds_n": [0.5, 0.75, 1.0, 1.5, 2.0, 3.0],
+    "off_thresholds_n": [0.01, 0.05, 0.1, 0.25],
+    "append_baseline_outside_cartesian": true,
+    "baseline": {
+      "candidate_id": "on005_off002",
+      "on_threshold_n": 5.0,
+      "off_threshold_n": 2.0
+    }
+  },
+  "chronological_split": {
+    "unit": "complete prescribed left HS-to-HS cycle fully contained in each preregistered time block",
+    "development_time_block_s": [11.99, 50.0],
+    "validation_time_block_s": [50.0, 100.0],
+    "sealed_time_block_s": [100.0, 155.045],
+    "minimum_total_complete_cycles": 20,
+    "minimum_development_cycles": 10,
+    "minimum_validation_cycles": 10,
+    "minimum_sealed_cycles": 10,
+    "development": "rerun all complete cycles with HS start >= 11.99 s and next HS <= 50.0 s under the V3 confirmed-time contract; select and hash-lock exactly one candidate",
+    "validation": "only after the V3 development lock, evaluate the selected candidate and unchanged 5/2 N comparator on complete cycles with HS start >= 50.0 s and next HS <= 100.0 s",
+    "sealed": "complete cycles with HS start >= 100.0 s and next HS <= 155.045 s remain closed and unread during development and validation",
+    "validation_status_at_protocol_freeze": "CLOSED_UNEVALUATED",
+    "sealed_status_at_protocol_freeze": "CLOSED_UNEVALUATED",
+    "selection_may_read_validation_metrics": false,
+    "selection_or_validation_may_read_sealed_metrics": false,
+    "validation_candidates": "V3 development-selected winner and baseline only",
+    "sealed_candidates": "V3 development-selected winner and baseline only",
+    "sealed_open_policy": "Do not open as part of V3 development or middle-block validation. A later explicit authorization may open it once, only after validation PASS, without retuning or replacing the locked candidate."
+  },
+  "development_eligibility": {
+    "primary_event_timestamp": "confirmed_time_s",
+    "onset_is_diagnostic_only": true,
+    "exact_reference_and_detector_event_counts": true,
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "ordered_all_event_maxima_are_authoritative": true,
+    "exact_hs_to_toe_off_to_hs_order_and_cycle_count": true,
+    "confirmation_latency_range": "[sensor_dwell_s, sensor_dwell_s + sample_dt_s]",
+    "no_invalid_or_timeout_transitions": true,
+    "no_unaccepted_sensor_gait_events": true,
+    "zero_phase_mismatches_outside_fixed_confirmed_event_windows": true,
+    "no_unknown_fsm_phase_samples": true
+  },
+  "development_ranking": [
+    "lowest confirmed_time worst_event_normalized_max_abs_error",
+    "lowest confirmed_time mean_event_normalized_mean_abs_error",
+    "highest confirmed_fsm_stance_iou",
+    "lowest normalized_L1_distance_from_5N_2N_baseline",
+    "lexicographically lowest candidate_id"
+  ],
+  "stable_plateau": {
+    "primary_event_timestamp": "confirmed_time_s",
+    "required_axis_adjacent_eligible_neighbors": 2,
+    "maximum_neighbor_worst_timing_score_increase": 0.1,
+    "maximum_neighbor_confirmed_fsm_iou_decrease": 0.005,
+    "purpose": "reject an isolated confirmed-time optimum before ranking"
+  },
+  "sealed_validation_gate": {
+    "applies_to": "50-100 s validation and, only if separately authorized later, the still-sealed 100-155.045 s block",
+    "primary_event_timestamp": "confirmed_time_s",
+    "onset_is_diagnostic_only": true,
+    "precision": 1.0,
+    "recall": 1.0,
+    "max_abs_hs_error_s": 0.05,
+    "max_abs_toe_off_error_s": 0.08,
+    "ordered_all_event_maxima_are_authoritative": true,
+    "no_invalid_or_timeout_transitions": true,
+    "no_unaccepted_sensor_gait_events": true,
+    "exact_hs_to_toe_off_to_hs_order_and_cycle_count": true,
+    "confirmation_latency_range": "[sensor_dwell_s, sensor_dwell_s + sample_dt_s]",
+    "zero_phase_mismatches_outside_fixed_confirmed_event_windows": true,
+    "phase_window_adds_sensor_dwell_again": false,
+    "no_unknown_fsm_phase_samples": true,
+    "minimum_confirmed_fsm_stance_f1": 0.95,
+    "minimum_confirmed_fsm_stance_iou": 0.9,
+    "maximum_confirmed_fsm_iou_regression_vs_baseline": 0.01,
+    "maximum_confirmed_time_worst_timing_regression_vs_baseline": 0.0,
+    "primary_10ms_and_sensitivity_1ms_must_both_pass": true
+  },
+  "contact_diagnostics_not_gates": {
+    "stable_sensor_union": "stable heel latch OR stable toe latch",
+    "legacy_compatible_aggregate": "100 ms causal moving average of aggregate virtual heel+toe normal load > 15 N",
+    "historical_forward_reference": {
+      "f1": 0.9443347231365665,
+      "iou": 0.894539911308204
+    },
+    "warning": "The stable sensor union and legacy-compatible aggregate are distinct signals and must never be reported as the same metric. Neither may replace confirmed FSM phase or confirmed event timing in a gate."
+  },
+  "interpretation_limits": [
+    "V3 changes validation semantics: confirmed_time_s is the observable detector output consumed by the FSM; detector onset remains required for debounce, FSM bookkeeping and latency auditing, but its error against the GRF reference has no timing PASS/FAIL or ranking authority.",
+    "The phase reference is event-consistent: short prescribed-GRF recrossings rejected by the frozen 50 ms event extractor cannot independently label stance samples.",
+    "V3 must rerun development because V2 rankings based on onset timing cannot be reused under the confirmed-time contract.",
+    "The 50-100 s validation block must not be opened before the V3 development candidate and manifest hashes are frozen; the 100-155.045 s sealed block remains closed during this protocol execution.",
+    "Low simulated force thresholds require later hardware/noise validation and are not a final physical sensor specification.",
+    "The chronological holdout remains AB06 treadmill_01_01; passing does not establish cross-subject or cross-task generalization.",
+    "Threshold promotion changes neither the checked-in training configuration nor the runtime detector; promotion requires a separate explicit decision after this report."
+  ]
+}

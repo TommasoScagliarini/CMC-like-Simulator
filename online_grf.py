@@ -244,7 +244,12 @@ class OnlineGRFProfile:
     metadata: Mapping[str, object] = field(default_factory=dict)
 
     @classmethod
-    def from_mapping(cls, raw: Mapping[str, object]) -> "OnlineGRFProfile":
+    def from_mapping(
+        cls,
+        raw: Mapping[str, object],
+        *,
+        required_sides: Iterable[str] = ("left", "right"),
+    ) -> "OnlineGRFProfile":
         version = int(raw.get("version", 1))
         if version != 1:
             raise ValueError(f"Unsupported onlineGRF profile version: {version}")
@@ -256,8 +261,16 @@ class OnlineGRFProfile:
         if len(names) != len(set(names)):
             raise ValueError("onlineGRF sphere names must be unique.")
         sides = {sphere.side for sphere in spheres}
-        if sides != {"left", "right"}:
-            raise ValueError("onlineGRF profile must contain left and right spheres.")
+        required = {str(side).strip().lower() for side in required_sides}
+        if not required or not required.issubset({"left", "right"}):
+            raise ValueError("required_sides must contain left and/or right.")
+        missing = required - sides
+        if missing:
+            missing_text = ", ".join(sorted(missing))
+            raise ValueError(
+                "onlineGRF profile is missing required sphere side(s): "
+                f"{missing_text}."
+            )
         confirmation_raw = raw.get("heel_strike_confirmation_threshold_n")
         confirmation = (
             None if confirmation_raw is None else float(confirmation_raw)
@@ -294,7 +307,11 @@ class OnlineGRFProfile:
         return values
 
 
-def load_online_grf_profile(path: str | os.PathLike[str]) -> OnlineGRFProfile:
+def load_online_grf_profile(
+    path: str | os.PathLike[str],
+    *,
+    required_sides: Iterable[str] = ("left", "right"),
+) -> OnlineGRFProfile:
     profile_path = Path(path)
     if not profile_path.is_file():
         raise FileNotFoundError(f"onlineGRF profile not found: {profile_path}")
@@ -302,7 +319,7 @@ def load_online_grf_profile(path: str | os.PathLike[str]) -> OnlineGRFProfile:
         payload = json.load(fh)
     if not isinstance(payload, dict):
         raise ValueError(f"onlineGRF profile root must be an object: {profile_path}")
-    return OnlineGRFProfile.from_mapping(payload)
+    return OnlineGRFProfile.from_mapping(payload, required_sides=required_sides)
 
 
 def write_online_grf_profile(
@@ -457,6 +474,91 @@ def online_grf_column_names() -> list[str]:
     return columns
 
 
+_SENSOR_KINDS = ("heel", "toe")
+
+
+def online_grf_sensor_role(component_name: str, side: str) -> str | None:
+    """Return a semantic ``<side>_<kind>`` role for heel/toe sensors.
+
+    Runtime force names contain a configurable prefix (for example
+    ``online_grf_detector_``), so consumers must not depend on the complete
+    component name.  The profile sphere name remains embedded as underscore-
+    separated tokens and is sufficient to expose the two detector channels.
+    Unknown sphere names deliberately remain available through the legacy
+    ``spheres`` mapping but are not assigned a sensor role.
+    """
+    side_value = str(side).strip().lower()
+    if side_value not in {"left", "right"}:
+        return None
+    tokens = {
+        token
+        for token in re.split(r"[^a-z0-9]+", str(component_name).lower())
+        if token
+    }
+    for kind in _SENSOR_KINDS:
+        if kind in tokens:
+            return f"{side_value}_{kind}"
+    return None
+
+
+def online_grf_sensor_channels(grf: Mapping[str, object]) -> dict[str, dict]:
+    """Extract JSON-safe heel/toe detector channels from per-sphere data.
+
+    This is an additive view over ``grf['spheres']``.  It neither changes the
+    legacy left/right aggregate nor applies any force to the model.  Contact is
+    the geometrical sphere/plane contact flag (positive penetration), while
+    ``normal_load_n`` is the non-negative normal load reported by the contact
+    component.
+    """
+    spheres = grf.get("spheres", {})
+    if not isinstance(spheres, Mapping):
+        return {}
+
+    channels: dict[str, dict] = {}
+    for component_name, raw_item in spheres.items():
+        if not isinstance(raw_item, Mapping):
+            continue
+        side = str(raw_item.get("side", "")).strip().lower()
+        role_raw = raw_item.get("sensor_role")
+        role = (
+            str(role_raw)
+            if role_raw is not None
+            else online_grf_sensor_role(str(component_name), side)
+        )
+        if role not in {
+            "left_heel",
+            "left_toe",
+            "right_heel",
+            "right_toe",
+        }:
+            continue
+        if role in channels:
+            raise ValueError(
+                f"Multiple online GRF spheres resolve to sensor role {role!r}."
+            )
+        normal_load = float(
+            raw_item.get("normal_load_n", raw_item.get("normal_force", 0.0))
+        )
+        penetration = float(
+            raw_item.get("penetration_m", raw_item.get("penetration", 0.0))
+        )
+        if not np.isfinite(normal_load) or not np.isfinite(penetration):
+            raise FloatingPointError(
+                f"Non-finite online GRF sensor channel {role!r}."
+            )
+        channels[role] = {
+            "component_name": str(component_name),
+            "side": side,
+            "kind": role.rsplit("_", 1)[-1],
+            "normal_load_n": max(0.0, normal_load),
+            "penetration_m": max(0.0, penetration),
+            "in_contact": bool(
+                raw_item.get("in_contact", penetration > 0.0)
+            ),
+        }
+    return channels
+
+
 def read_online_grf(
     model: opensim.Model,
     state: opensim.State,
@@ -494,9 +596,14 @@ def read_online_grf(
         force_vec = values[0:3]
         moment = values[3:6]
         point = values[6:9]
-        normal_force = max(0.0, float(values[9]))
-        penetration = max(0.0, float(values[10]))
-        slip_speed = max(0.0, float(values[11]))
+        scalars = np.asarray(values[9:12], dtype=float)
+        if not np.all(np.isfinite(scalars)):
+            raise FloatingPointError(
+                f"Non-finite online GRF scalar record for {name!r}."
+            )
+        normal_force = max(0.0, float(scalars[0]))
+        penetration = max(0.0, float(scalars[1]))
+        slip_speed = max(0.0, float(scalars[2]))
         normal = values[15:18]
         cop_point = point + penetration * normal
         bucket = aggregated[side]
@@ -507,25 +614,35 @@ def read_online_grf(
         bucket["penetration"] = max(bucket["penetration"], penetration)
         bucket["slip_speed"] = max(bucket["slip_speed"], slip_speed)
         bucket["in_contact"] = bool(bucket["in_contact"] or penetration > 0.0)
+        sensor_role = online_grf_sensor_role(name, side)
         per_sphere[name] = {
             "side": side,
+            "sensor_role": sensor_role,
             "force": force_vec.copy(),
             "moment": moment.copy(),
             "point": point.copy(),
             "cop_point": cop_point.copy(),
             "normal_force": normal_force,
+            "normal_load_n": normal_force,
             "penetration": penetration,
+            "penetration_m": penetration,
             "slip_speed": slip_speed,
+            "in_contact": bool(penetration > 0.0),
         }
 
     for bucket in aggregated.values():
         if bucket["normal_force"] > 1e-12:
             bucket["cop"] = bucket["weighted_point"] / bucket["normal_force"]
         else:
-            bucket["cop"] = np.full(3, np.nan)
+            # COP is undefined without load.  Use a finite neutral sentinel so
+            # runtime observations/recorders never acquire NaN during swing;
+            # all consumers must still mask COP by normal force/contact.
+            bucket["cop"] = np.zeros(3, dtype=float)
         del bucket["weighted_point"]
 
-    return {"sides": aggregated, "spheres": per_sphere}
+    result = {"sides": aggregated, "spheres": per_sphere}
+    result["sensors"] = online_grf_sensor_channels(result)
+    return result
 
 
 def flatten_online_grf(grf: Mapping[str, object]) -> np.ndarray:

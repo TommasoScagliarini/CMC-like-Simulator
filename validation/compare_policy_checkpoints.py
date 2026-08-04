@@ -72,6 +72,57 @@ def _actor_digest(state: Mapping[str, Any]) -> str:
     return digest.hexdigest()
 
 
+def _bit_exact_array(left: Any, right: Any) -> bool:
+    """Compare array representation, including dtype, shape, and raw bits."""
+    left_array = np.ascontiguousarray(_array(left))
+    right_array = np.ascontiguousarray(_array(right))
+    return bool(
+        left_array.dtype == right_array.dtype
+        and left_array.shape == right_array.shape
+        and left_array.tobytes() == right_array.tobytes()
+    )
+
+
+def _logstd_head_comparison(
+    reference: Mapping[str, Any],
+    candidate: Mapping[str, Any],
+    action_dim: int,
+) -> dict[str, Any]:
+    """Audit the Gaussian log-std output rows without numeric tolerances."""
+    rows: dict[str, Any] = {}
+    exact = True
+    max_abs_diff = 0.0
+    for key in ("pi.1.weight", "pi.1.bias"):
+        ref = _array(reference[key])
+        cur = _array(candidate[key])
+        if ref.shape != cur.shape:
+            raise ValueError(f"shape mismatch for {key}: {ref.shape} != {cur.shape}")
+        if ref.ndim < 1 or ref.shape[0] != 2 * int(action_dim):
+            raise ValueError(
+                f"expected {2 * int(action_dim)} Gaussian outputs for {key}, "
+                f"got shape {ref.shape}"
+            )
+        ref_logstd = ref[int(action_dim) :]
+        cur_logstd = cur[int(action_dim) :]
+        row_exact = _bit_exact_array(ref_logstd, cur_logstd)
+        delta = (
+            cur_logstd.astype(np.float64, copy=False)
+            - ref_logstd.astype(np.float64, copy=False)
+        )
+        row_max = float(np.max(np.abs(delta))) if delta.size else 0.0
+        rows[key] = {
+            "bit_exact": row_exact,
+            "max_abs_diff": row_max,
+        }
+        exact = exact and row_exact
+        max_abs_diff = max(max_abs_diff, row_max)
+    return {
+        "bit_exact": bool(exact),
+        "max_abs_diff": max_abs_diff,
+        "per_key": rows,
+    }
+
+
 def _parameter_comparison(
     reference: Mapping[str, Any], candidate: Mapping[str, Any]
 ) -> dict[str, Any]:
@@ -135,6 +186,7 @@ def _fixed_observation_metrics(
         ).tolist(),
         "mean_delta_abs_max": float(np.max(np.abs(mean_delta))),
         "mean_delta_signed_mean_per_action": np.mean(mean_delta, axis=0).tolist(),
+        "logstd_bit_exact": _bit_exact_array(ref_logstd, cur_logstd),
         "logstd_delta_abs_max": float(np.max(np.abs(logstd_delta))),
         "reference_sigma_mean": np.mean(np.exp(ref_logstd), axis=0).tolist(),
         "candidate_sigma_mean": np.mean(np.exp(cur_logstd), axis=0).tolist(),
@@ -188,6 +240,9 @@ def compare(
         "reference_actor_digest": _actor_digest(reference),
         "candidate_actor_digest": _actor_digest(candidate),
         "parameter_comparison": _parameter_comparison(reference, candidate),
+        "logstd_head_comparison": _logstd_head_comparison(
+            reference, candidate, action_dim
+        ),
         "fixed_observation_aggregate": aggregate,
         "fixed_observation_per_trace": per_trace,
     }

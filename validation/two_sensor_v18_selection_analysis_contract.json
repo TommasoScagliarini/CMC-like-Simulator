@@ -1,0 +1,110 @@
+{
+  "schema_version": 18,
+  "analysis_id": "AB06_TWO_SENSOR_V18_FROZEN_SIGNAL_SEMANTIC_SELECTION",
+  "freeze_date": "2026-08-03",
+  "frozen_before_execution": true,
+  "scope": "development-only necessary event-gate comparison; no full-FSM PASS claim",
+  "trials": ["02", "04"],
+  "selection_trial": "04",
+  "challenge_trial": "02",
+  "internal_holdout": {
+    "trial_id": "08",
+    "opened": false,
+    "opening_allowed_by_this_runner": false
+  },
+  "protected_and_reserve_trials": {
+    "ids": ["03", "05", "06", "07"],
+    "opened": false,
+    "reachable": false
+  },
+  "semantics": [
+    "heel_only",
+    "first_stable_regional",
+    "combined_load"
+  ],
+  "consumption_modes": [
+    "sequential_1ms",
+    "batched_10ms_same_samples"
+  ],
+  "detector": {
+    "on_n": 0.5,
+    "off_n": 0.25,
+    "dwell_s": 0.03,
+    "dwell_samples": 30,
+    "sample_dt_s": 0.001,
+    "policy_samples": 10,
+    "policy_step_s": 0.01,
+    "t0_initializes_without_event": true,
+    "new_hs_requires_stable_clear": true
+  },
+  "event_ownership": {
+    "source": "V14 continuous full-trial local-view ownership, now applied to the canonical V17 view events",
+    "filter_time": "confirmed_time_s",
+    "event_onset_must_not_precede_view_start": true,
+    "right_observation_margin_s": 0.06,
+    "hs_tolerance_s": 0.05,
+    "toe_off_tolerance_s": 0.08,
+    "delivered_hs_tolerance_s": 0.06,
+    "delivered_to_tolerance_s": 0.09,
+    "maximum_delivery_delay_s": 0.01,
+    "diagnostic_nearest_association_s": 0.25,
+    "diagnostic_matching_is_not_a_gate": true
+  },
+  "early_stop": {
+    "allowed": true,
+    "condition": "all three semantics fail any necessary count/order/timing/delivery/toe-clear/parity gate on at least one trial-04 unit",
+    "full_fsm_then_required": false,
+    "reason": "A full FSM cannot convert an out-of-contract sensor candidate into an eligible zero-invalidity event without either retaining the timing failure or recording rejection/invalidity.",
+    "best_of_failures_allowed": false,
+    "trial_08_must_remain_closed": true
+  },
+  "interpretation_limits": [
+    "Signal-engine parity is necessary but is not claimed as full production-FSM parity.",
+    "A necessary-gate PASS cannot select a finalist; it requires a separately frozen full-FSM implementation and receipt.",
+    "A necessary-gate FAIL is sufficient to close that semantic without opening further data.",
+    "Trial 08 is an internal procedural holdout only and is not scientifically virgin.",
+    "No result changes the already-final V17 FAIL receipt."
+  ],
+  "sources": {
+    "main_protocol": {
+      "path": "validation/two_sensor_v18_signal_semantics_protocol.json",
+      "sha256": "7bd6db285da14ae102da9c1c33c377f658887cfac25650254428abf9a380dc9a"
+    },
+    "analysis_runner": {
+      "path": "validation/evaluate_two_sensor_v18_signal_semantics.py",
+      "sha256": "8d02e412ea9c7b75c814f0359aa06dcd8ffb2cc72cfcfc056c7ee51082eb4695"
+    },
+    "analysis_tests": {
+      "path": "validation/test_two_sensor_v18_signal_semantics.py",
+      "sha256": "46206075226655eebf147a823549bfae58522823919852e5dfa2236e32701842"
+    },
+    "raw_manifest": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_selection_traces/manifest.json",
+      "sha256": "a64c7ca39602362365468f552e1ac729514c0210c15130b765938ec274250ebd"
+    },
+    "raw_trial_02": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_selection_traces/trial_02_detector_trace_1ms.csv",
+      "sha256": "f89797ebefc452c824a5844cf405bddb076528ac944bca2ede44a03460f0f51b"
+    },
+    "raw_trial_04": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_selection_traces/trial_04_detector_trace_1ms.csv",
+      "sha256": "ee540bc1355b0b01f8427645de54f793bc031b381dc221e2dbfd75642f6d8f9b"
+    },
+    "canonical_trial_02": {
+      "path": "validation/canonical_event_oracles/2026-08-03_v17_development/trial_02_canonical_event_ledger.json",
+      "sha256": "acfb502bd742055dda49ae9f5398900f87f33368c434e986c98fae127c98894d"
+    },
+    "canonical_trial_04": {
+      "path": "validation/canonical_event_oracles/2026-08-03_v17_development/trial_04_canonical_event_ledger.json",
+      "sha256": "4f48813bd8c6bd5117cd52926e9dc921b01296dc548c0d51f3799171d398f813"
+    },
+    "v17_profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v17_high_rate_v13_geometry.json",
+      "sha256": "2225823282743b55f2cbd3bdcb8c345f3d2e3b878bd0646283a4cc0b739df0bc"
+    },
+    "v17_failure_receipt": {
+      "path": "validation/two_sensor_v17_development_runs/2026-08-03_v13_fine_1ms_evidence/development_gate_receipt.json",
+      "sha256": "f2412d28721083fe2a5e654e937ad2dba4da00e0e1185118f56c4dd5cd6077fc"
+    }
+  }
+}

@@ -68,3 +68,7 @@ Decisione: training 20-50/100 iterazioni bloccati.
 - [ ] Richiedere almeno un `HS -> TO` sinistro prima di sbloccare training
       piu' lunghi.
 
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

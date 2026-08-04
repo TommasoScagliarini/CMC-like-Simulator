@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "registry_id": "AB06_TWO_SENSOR_DEVELOPMENT_BASELINE",
+  "updated_at": "2026-07-22",
+  "active_development_baseline": {
+    "baseline_id": "two_sensor_v13_development_baseline",
+    "human_alias": "V13 development baseline",
+    "candidate_id": "toe_down_p0p75mm__heel_x_p3p5mm",
+    "profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "sha256": "06e442bed2e4d2a2bc61f64e3379332d5e8d90695bcc9123585b0fbd008894fc"
+    },
+    "role": "canonical comparator and starting point for future offline detector development",
+    "status": "ACTIVE_DEVELOPMENT_BASELINE"
+  },
+  "historical_baseline": {
+    "baseline_id": "two_sensor_v9_H2p50_X3p25_F79p0_P35p00",
+    "profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+      "sha256": "e08a7582776b41e883ae50cfce9ce53b5f6508c00b73ca54957afc98d01a4489"
+    },
+    "role": "frozen historical comparator"
+  },
+  "designation": {
+    "authority": "explicit post-run user decision",
+    "reason": "V13 improves the priority Heel Strike objective and global FSM overlap relative to V9, while remaining the most useful geometry for subsequent development",
+    "does_not_claim_metric_dominance": true,
+    "does_not_reinterpret_sealed_result": true
+  },
+  "validation_state": {
+    "sealed_conclusion": "PRIMARY_SEALED_FAIL",
+    "sealed_validated": false,
+    "runtime_promoted": false,
+    "training_promoted": false,
+    "runtime_configuration_modified": false,
+    "training_configuration_modified": false
+  },
+  "sealed_evidence": {
+    "candidate_lock": {
+      "path": "validation/two_sensor_sealed_candidate_lock_v13.json",
+      "sha256": "9c062463592b896e5ca6a08b946b3c47b8ea4fa1815943b8b039b846117546cd"
+    },
+    "manifest": {
+      "path": "validation/two_sensor_sealed_runs/2026-07-22_ab06_100_155p045_v13/manifest.json",
+      "sha256": "d55d31188fe3fe853af6618377c6fa5e8cba9f865db9194078820322ed8877a9"
+    }
+  },
+  "unchanged_runtime_inputs": {
+    "detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+    },
+    "training_configuration": {
+      "path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "sha256": "847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13"
+    }
+  },
+  "next_candidate_rule": "Future geometry searches start from V13 on development data; the consumed 100-155.045 s sealed interval is diagnostic-only and cannot be used for selection or retuning."
+}

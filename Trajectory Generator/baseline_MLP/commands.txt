@@ -177,8 +177,9 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # (2) seed di pre-training per il run ex-novo. reward_imitation.json allarga la
 # banda oob al ROM della gamba sana (knee fino a -1.40, ankle +-0.60). In rollout
 # reward_mode arriva dallo snapshot (niente da ri-specificare).
-# IMPORTANTE: obs e action space identici a ex-novo -> il checkpoint imitativo e'
-# un WARM-START per l'ex-novo via --resume-from + --reward-mode ex_novo.
+# IMPORTANTE: `--warm-start` indica ora la baseline ex-novo canonica H0 completa.
+# Per il vecchio trapianto actor-only da un modulo imitativo usare
+# `--warm-start-raw`; `--resume-from` resta il resume completo generico.
 
 # [TRAIN-IMIT-WIN] Windows, pre-training imitativo
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --output-dir "runs/training/baseline_mlp_imit_win" --reward-mode imitation --reward-json "Trajectory Generator/baseline_MLP/reward_imitation.json"
@@ -217,8 +218,13 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # [ROLLOUT-IMIT-V4-C2-OBS-TARGET] ora coincide col default: ultimo training valido
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/rollout_eval.py"
 
-# [WARM-START-EXNOVO] riprendi il checkpoint imitativo come seed ex-novo
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --resume-from "runs/training/baseline_mlp_imit_win/checkpoint_last" --output-dir "runs/training/baseline_mlp_exnovo_from_imit" --reward-mode ex_novo
+# [WARM-START-H0-EXNOVO] baseline canonica H0 completa: actor adattato, critic
+# caldo, optimizer e stato PPO.
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --config "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml" --warm-start --output-dir "runs/training/baseline_mlp_exnovo_from_h0"
+
+# [WARM-START-RAW-EXNOVO] vecchia semantica actor-only; critic, optimizer e
+# stato PPO vengono creati da zero.
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --config "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml" --warm-start-raw --warm-start-raw-source "runs/training/baseline_mlp_imit_win/rl_module_best" --output-dir "runs/training/baseline_mlp_exnovo_from_imit_raw"
 
 
 # ============================================================================

@@ -124,6 +124,14 @@ def _as_finite_float(value: Any) -> float | None:
     return fv if math.isfinite(fv) else None
 
 
+def start_offset_metric_label(value: Any) -> str | None:
+    """Return the stable TensorBoard/JSON label used for one start offset."""
+    offset = _as_finite_float(value)
+    if offset is None:
+        return None
+    return f"offset_{offset:.6f}".replace("-", "m").replace(".", "p") + "s"
+
+
 class RewardComponentsCallback(RLlibCallback):
     """Log reward components + losses as per-iteration env-runner means.
 
@@ -150,11 +158,19 @@ class RewardComponentsCallback(RLlibCallback):
 
         start_offset = _as_finite_float(info.get("episode_start_offset_s"))
         if start_offset is not None:
-            offset_label = f"{start_offset:.6f}".replace("-", "m").replace(".", "p")
+            offset_label = start_offset_metric_label(start_offset)
             metrics_logger.log_value(
-                f"episode_start_steps/offset_{offset_label}s",
+                f"episode_start_steps/{offset_label}",
                 1.0,
                 reduce="lifetime_sum",
+            )
+            # Unlike the compatibility counter above, this value is reduced and
+            # cleared once per training result.  It is the source of truth for the
+            # exact per-update multi-start balance guard.
+            metrics_logger.log_value(
+                f"episode_start_steps_current/{offset_label}",
+                1.0,
+                reduce="sum",
             )
 
         components = info.get("reward_components")
@@ -224,6 +240,63 @@ class RewardComponentsCallback(RLlibCallback):
                 reduce="lifetime_sum",
             )
 
+    def on_episode_end(
+        self,
+        *,
+        episode,
+        prev_episode_chunks=None,
+        metrics_logger=None,
+        **kwargs,
+    ) -> None:
+        """Log completed-episode return and length separately for each start.
+
+        RLlib may split a long episode into multiple rollout fragments.  The
+        callback therefore includes ``prev_episode_chunks`` instead of treating
+        the final chunk as the complete episode.
+        """
+        if metrics_logger is None:
+            return
+        chunks = [*(prev_episode_chunks or []), episode]
+        start_offset = None
+        for chunk in reversed(chunks):
+            try:
+                info = chunk.get_infos(-1)
+            except Exception:
+                continue
+            if isinstance(info, dict):
+                start_offset = _as_finite_float(
+                    info.get("episode_start_offset_s")
+                )
+                if start_offset is not None:
+                    break
+        offset_label = start_offset_metric_label(start_offset)
+        if offset_label is None:
+            return
+
+        try:
+            episode_return = sum(float(chunk.get_return()) for chunk in chunks)
+            episode_length = sum(int(len(chunk)) for chunk in chunks)
+        except Exception:
+            return
+        if not math.isfinite(episode_return) or episode_length <= 0:
+            return
+
+        metrics_logger.log_value(
+            f"episode_start_return_sum/{offset_label}",
+            episode_return,
+            reduce="sum",
+        )
+        metrics_logger.log_value(
+            f"episode_start_length_sum/{offset_label}",
+            float(episode_length),
+            reduce="sum",
+        )
+        metrics_logger.log_value(
+            f"episode_start_episode_count/{offset_label}",
+            1.0,
+            reduce="sum",
+        )
+
     @staticmethod
     def _log(metrics_logger, key: str, value: Any) -> None:
         fv = _as_finite_float(value)
@@ -273,6 +346,10 @@ def log_result_scalars(writer, result: Mapping[str, Any], step: int) -> int:
                 or key.startswith("gait/")
                 or key.startswith("episode_end/")
                 or key.startswith("episode_start_steps/")
+                or key.startswith("episode_start_steps_current/")
+                or key.startswith("episode_start_return_sum/")
+                or key.startswith("episode_start_length_sum/")
+                or key.startswith("episode_start_episode_count/")
             ):
                 tag = key  # dedicated top-level section for reward tuning
             else:

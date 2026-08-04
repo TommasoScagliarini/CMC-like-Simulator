@@ -58,3 +58,7 @@ quello appreso successivamente con PPO ex-novo.
 - [ ] Mantenere bloccati training lunghi e memoria finche' warm start e reward
       non superano il gate comportamentale.
 
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

@@ -1,0 +1,54 @@
+{
+  "schema_version": 7,
+  "protocol_id": "AB06_TWO_SENSOR_TIMING_PLACEMENT_DEVELOPMENT_2026-07-22_V7",
+  "frozen_before_execution": true,
+  "freeze_date": "2026-07-22",
+  "stage": "development_multiresolution_geometry_harness_correction",
+  "objective": "Repeat the unchanged V6 two-sensor multiresolution geometry screen after adding the single inherited gate dictionary omitted by the V6 harness. No geometry, threshold, FSM, sampling, evidence-routing, ranking, or scientific gate change is allowed.",
+  "base_protocol": {
+    "path": "validation/two_sensor_timing_placement_sweep_protocol_v6.json",
+    "sha256": "d339db6a18f1072a83d086fc5436b804ee3a05dc6d5f1bb7b8f1ca4eff844f78"
+  },
+  "scientific_contract_changed_from_v6": false,
+  "correction": {
+    "reason": "add_missing_inherited_sealed_validation_gate",
+    "sealed_validation_gate": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "max_abs_hs_error_s": 0.05,
+      "max_abs_toe_off_error_s": 0.08,
+      "minimum_confirmed_fsm_stance_f1": 0.95,
+      "minimum_confirmed_fsm_stance_iou": 0.9,
+      "maximum_confirmed_fsm_iou_regression_vs_baseline": 0.01,
+      "maximum_confirmed_time_worst_timing_regression_vs_baseline": 0.0
+    }
+  },
+  "sources": {
+    "v7_validator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v7.py",
+      "sha256": "642566f32e7de342ed231cbfb8307478fca5908ee9d4285ed6329489ea4e8f82"
+    },
+    "v6_validator": {
+      "path": "validation/sweep_two_sensor_timing_placements_prescribed_v6.py",
+      "sha256": "21c72489fce623706bac5b3b652d787fc52080990876113fc659f33c5797a0ad"
+    },
+    "v6_protocol": {
+      "path": "validation/two_sensor_timing_placement_sweep_protocol_v6.json",
+      "sha256": "d339db6a18f1072a83d086fc5436b804ee3a05dc6d5f1bb7b8f1ca4eff844f78"
+    },
+    "invalid_v6_manifest": {
+      "path": "validation/two_sensor_timing_placement_sweep_runs/2026-07-22_ab06_50_100_multires_geometry_v6/manifest.json",
+      "sha256": "5d2694695f904bd89a7fa2d47a57d4b4120022aff241482a71f2e68a31e1ba6a"
+    }
+  },
+  "interpretation_limits": [
+    "V6 produced no scientific result; its failure was a missing inherited protocol key before selection.",
+    "V7 changes only the validation harness contract and reuses the hash-pinned V6 grid and all V6 scientific settings unchanged.",
+    "Every detector candidate remains exactly one heel sphere plus one forefoot sphere.",
+    "All candidates are evaluated directly at both 10 ms and 1 ms on the already-open development block 50 <= t < 100 s.",
+    "The mesh is used only offline to place two simple spheres; the detector does not use a contact mesh at runtime.",
+    "A PASS remains development evidence only and cannot create or promote a detector profile.",
+    "The sealed block remains closed, and no policy, training, rollout, runtime default, FSM, or active profile is modified.",
+    "The runtime RL load-routing gap remains unresolved, so a development winner is not deployable or promotable."
+  ]
+}

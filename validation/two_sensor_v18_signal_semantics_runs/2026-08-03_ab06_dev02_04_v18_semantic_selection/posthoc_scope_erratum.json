@@ -1,0 +1,105 @@
+{
+  "schema_version": 18,
+  "status": "V18_TERMINAL_DECISION_UNCHANGED_TOE_CLEAR_CLAIM_WITHDRAWN",
+  "date": "2026-08-03",
+  "scope": "Post-run limitation found by independent code review; this file does not alter or overwrite the frozen manifest or decision lock.",
+  "frozen_sources": {
+    "manifest": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_semantic_selection/manifest.json",
+      "sha256": "2b0e24b3a48dd2b30d18bb90f13ea98c79543e754807905ea1302a193930cba5"
+    },
+    "decision_lock": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_semantic_selection/development_decision_lock.json",
+      "sha256": "ea878673bae0b1c2e959e636f42b9125d13f36cc922b2dbb43cce868d09129f5"
+    },
+    "unit_metrics": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_semantic_selection/semantic_unit_metrics.jsonl",
+      "sha256": "f3166cfe6fda50e0529f56e65aae916f52dc561d50a1236c78a77a2b61205370"
+    }
+  },
+  "supplemental_start_receipt_chain": {
+    "selection_trace_acquisition": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_selection_traces/run_start_receipt.json",
+      "sha256": "41f423f92f4e522af31dd0468542971c78ba26b2c7095eb73fe66d4b1a5e3140"
+    },
+    "semantic_selection": {
+      "path": "validation/two_sensor_v18_signal_semantics_runs/2026-08-03_ab06_dev02_04_v18_semantic_selection/run_start_receipt.json",
+      "sha256": "495dbcad8c30c936d9fac12794f3b117b7fb55b665e3933b12b569dbaf1d2c0c"
+    },
+    "relationship_to_frozen_manifests": "Supplemental provenance only; the already-written manifests were not modified."
+  },
+  "withdrawn_metric_claim": {
+    "metric": "minimum_toe_clear_before_next_hs_s",
+    "reason": "The V18 signal-level implementation subtracts TO confirmation from the next HS onset but does not scan the intervening toe latch for reactivation. It is not equivalent to the V14/V17 causal toe-clear gate.",
+    "future_eligibility_use_allowed": false,
+    "effect_on_current_terminal_decision": "none"
+  },
+  "independent_terminal_proof_trial_04_sequential": {
+    "heel_only": {
+      "plateau_01_hs_count": "23/24",
+      "plateau_02_max_abs_confirmed_hs_error_s": 0.069,
+      "plateau_03_max_abs_confirmed_hs_error_s": 0.054,
+      "plateau_04_max_abs_confirmed_hs_error_s": 0.057,
+      "maximum_allowed_confirmed_hs_error_s": 0.05
+    },
+    "first_stable_regional": {
+      "plateau_01_to_count": "24/23",
+      "plateau_01_max_abs_ordered_confirmed_hs_error_s": 1.446,
+      "plateau_02_hs_count": "45/33",
+      "plateau_02_to_count": "43/32",
+      "plateau_03_hs_count": "41/38",
+      "plateau_03_to_count": "40/37",
+      "plateau_04_max_abs_confirmed_hs_error_s": 0.057,
+      "maximum_allowed_confirmed_hs_error_s": 0.05
+    },
+    "combined_load": {
+      "plateau_01_to_count": "24/23",
+      "plateau_01_max_abs_ordered_confirmed_hs_error_s": 1.446,
+      "plateau_02_hs_count": "45/33",
+      "plateau_02_to_count": "43/32",
+      "plateau_03_hs_count": "41/38",
+      "plateau_03_to_count": "40/37",
+      "plateau_04_max_abs_confirmed_hs_error_s": 0.057,
+      "maximum_allowed_confirmed_hs_error_s": 0.05
+    },
+    "batched_10ms_same_samples_exact_event_and_state_parity": true,
+    "selection_eligible_semantics": [],
+    "terminal_stop_without_trial_08_sampling_or_scoring": true
+  },
+  "data_access_clarification": {
+    "trial_08_new_raw_trace_created": false,
+    "trial_08_scored_by_v18": false,
+    "trial_08_existing_preprocessing_lock_and_canonical_ledger_read_during_identity_preflight": true,
+    "trial_08_interpretation": "internal procedural holdout only; not scientifically virgin before V18",
+    "trials_05_06_read": false,
+    "trials_03_07_read": false
+  },
+  "platform_and_io_limitations": {
+    "numerical_claim": "macOS arm64 only",
+    "windows_numerical_parity": "not attested",
+    "atomic_no_clobber": "Top-level run-directory creation is exclusive; per-file temporary-write plus os.replace is not a race-proof no-clobber primitive against an adversarial concurrent writer.",
+    "pure_python_import": "The evaluator imports the OpenSim-backed V15 acquisition lineage eagerly and therefore requires the project environment even for pure signal tests."
+  },
+  "signal_engine_parity_scope": {
+    "exactly_compared": [
+      "complete emitted event journals",
+      "complete stable edge journals",
+      "active heel/toe/combined latches",
+      "armed, stance and clear-since state digest"
+    ],
+    "not_included_in_state_digest": [
+      "debounce pending_target",
+      "debounce pending_index"
+    ],
+    "full_internal_pending_state_parity_claimed": false,
+    "effect_on_terminal_decision": "none; event and edge outputs are exactly equal and every semantic independently fails count or HS timing in each consumption result"
+  },
+  "t0_scope": {
+    "offline_engine": "Initializes latch state from the t0 load without emitting an event.",
+    "runtime_difference": "The runtime does not deliver the t0 sample and begins with latches OFF before resolving startup/bootstrap.",
+    "independent_check": "A runtime-style latch-OFF replay produced the same HS/TO journals on trials 02 and 04; differences were limited to initial edge/bootstrap state outside all scored views.",
+    "effect_on_terminal_decision": "none",
+    "runtime_equivalence_claimed": false
+  },
+  "final_decision": "STOP_WITHOUT_OPENING_NEW_TRIAL_08_RAW_OR_PROTECTED_DATA"
+}

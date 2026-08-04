@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "grid_id": "AB06_PRIMARY_GRF_CANDIDATE_GRID_V1",
+  "status": "FROZEN",
+  "created_date": "2026-07-24",
+  "step_id": "0",
+  "baseline_profile": {
+    "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+    "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+    "role": "BASELINE_FORENSICS_DIAGNOSTIC_NONSELECTABLE"
+  },
+  "physical_contract": {
+    "primary_applied_side": "left",
+    "right_physical_support": "prescribed",
+    "detector_role": "disabled",
+    "detector_may_affect_primary_metrics": false,
+    "runtime_forbidden_inputs": [
+      "time",
+      "gait_phase",
+      "prescribed_grf",
+      "target_kinematics",
+      "trial_identifier"
+    ]
+  },
+  "upstream_locks": {
+    "surface_velocity_audit": {
+      "path": "validation/primary_grf_surface_velocity_audit_2026-07-24.json",
+      "sha256": "d173af6b1ad025874d45c37d37d41e558f3458761e87a720b3e5b1f2074d02d4"
+    },
+    "model_compatibility_audit": {
+      "path": "validation/primary_grf_model_compatibility_audit_2026-07-24.json",
+      "sha256": "7bda56ec2a11f4ec78fd9a379ab6f3e24f2fda31714f2fb94e414363057be848"
+    }
+  },
+  "geometry_candidate_grid": {
+    "strategy": "MESH_CONSTRAINED_SEQUENTIAL_OFAT",
+    "ground": {
+      "base_origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "normal": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "origin_delta_along_normal_m": [
+        -0.004,
+        -0.002,
+        0.0,
+        0.002,
+        0.004
+      ],
+      "normal_is_frozen": true,
+      "base_origin_evidence": "All prescribed COP ground_force*_py values are exactly zero in development stance samples."
+    },
+    "surface_velocity": {
+      "rule": "METADATA_SPEED_TIMES_FROZEN_DIRECTION",
+      "direction": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "formula": "surface_velocity_mps = [0.0, 0.0, plateau_speed_mps]",
+      "candidate_axis": false,
+      "fitting_allowed": false
+    },
+    "mesh_sole_template": {
+      "design_id": "AB06_LEFT_MESH_SOLE_V1",
+      "mesh": {
+        "path": "Geometry/AM_foot_l.STL",
+        "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9",
+        "bounds_min_m": [
+          -0.1109737753868103,
+          -0.04522102326154709,
+          -0.040552083402872086
+        ],
+        "bounds_max_m": [
+          0.17601655423641205,
+          0.01600000075995922,
+          0.04795738682150841
+        ]
+      },
+      "frame": "/bodyset/foot_l",
+      "longitudinal_fraction_interval": [
+        0.08,
+        0.92
+      ],
+      "longitudinal_count_default": 8,
+      "longitudinal_count_grid": [
+        8,
+        10
+      ],
+      "longitudinal_rule": "linspace(0.08, 0.92, count) over mesh x bounds",
+      "lateral_section_quantiles": [
+        0.25,
+        0.75
+      ],
+      "lateral_rule": "At each longitudinal section, use the 0.25 and 0.75 quantiles of mesh-intersection z coordinates.",
+      "vertical_rule": "center_y = minimum mesh-intersection y at the section + radius_m + forefoot_offset_m * forefoot_ramp",
+      "forefoot_ramp_rule": "clip((longitudinal_fraction - 0.50) / 0.42, 0, 1)",
+      "radius_default_m": 0.02,
+      "radius_grid_m": [
+        0.018,
+        0.02,
+        0.0229053623
+      ],
+      "forefoot_offset_grid_m": [
+        -0.002,
+        0.0,
+        0.002
+      ],
+      "sphere_naming_rule": "left_primary_mesh_x{longitudinal_index:02d}_z{lateral_index:02d}",
+      "duplicate_locations_allowed": false,
+      "sphere_footprint_must_intersect_section": true,
+      "residuals": "ALL_ZERO",
+      "left_sphere_material": "INHERIT_FROZEN_PROFILE_MATERIAL",
+      "right_profile_spheres": "OMITTED_FROM_PRIMARY_CANDIDATE"
+    },
+    "frozen_geometry_stage_material": {
+      "stiffness": 46291.9265,
+      "exponent": 1.5,
+      "dissipation": 0.1920624923,
+      "static_friction": 0.2981956025,
+      "dynamic_friction": 0.2981956025,
+      "viscous_friction": 0.0,
+      "transition_velocity": 0.2,
+      "smoothing": 0.00001
+    },
+    "candidates": [
+      {
+        "id": "G00_mesh_r20_n8_go0_ff0",
+        "axis": "baseline",
+        "value": 0.0
+      },
+      {
+        "id": "G01_ground_m2mm",
+        "axis": "ground_origin_delta_m",
+        "value": -0.002
+      },
+      {
+        "id": "G02_ground_p2mm",
+        "axis": "ground_origin_delta_m",
+        "value": 0.002
+      },
+      {
+        "id": "G03_ground_m4mm",
+        "axis": "ground_origin_delta_m",
+        "value": -0.004
+      },
+      {
+        "id": "G04_ground_p4mm",
+        "axis": "ground_origin_delta_m",
+        "value": 0.004
+      },
+      {
+        "id": "G05_radius_18mm",
+        "axis": "sphere_radius_m",
+        "value": 0.018
+      },
+      {
+        "id": "G06_radius_22p9053623mm",
+        "axis": "sphere_radius_m",
+        "value": 0.0229053623
+      },
+      {
+        "id": "G07_longitudinal_count_10",
+        "axis": "longitudinal_count",
+        "value": 10
+      },
+      {
+        "id": "G08_forefoot_m2mm",
+        "axis": "forefoot_offset_m",
+        "value": -0.002
+      },
+      {
+        "id": "G09_forefoot_p2mm",
+        "axis": "forefoot_offset_m",
+        "value": 0.002
+      }
+    ],
+    "selection_rule": {
+      "eligibility": "Candidate must PASS every geometry gate on all 24 development units.",
+      "ordered_tiebreakers": [
+        "minimum worst_case_hs_confirmed_error_s",
+        "minimum worst_case_to_confirmed_error_s",
+        "maximum worst_case_stance_iou",
+        "minimum worst_case_penetration_m",
+        "minimum absolute ground_origin_delta_m",
+        "minimum sphere_count",
+        "lexicographically smallest candidate_id"
+      ],
+      "no_candidate_passes": "STOP_STEP_0_AND_PUBLISH_FAILURE"
+    }
+  },
+  "material_candidate_grid": {
+    "strategy": "SEQUENTIAL_OFAT_AFTER_GEOMETRY_LOCK",
+    "residuals": "DISABLED_ALL_ZERO",
+    "stages": [
+      {
+        "id": "M1_stiffness",
+        "field": "stiffness",
+        "scale_from_baseline": [
+          0.5,
+          1.0,
+          2.0,
+          4.0
+        ],
+        "absolute_values": [
+          23145.96325,
+          46291.9265,
+          92583.853,
+          185167.706
+        ]
+      },
+      {
+        "id": "M2_exponent",
+        "field": "exponent",
+        "values": [
+          1.25,
+          1.5,
+          1.75
+        ],
+        "reference_penetration_m": 0.01,
+        "stiffness_rule": "k_candidate = k_locked * pow(0.01, exponent_locked - exponent_candidate)",
+        "baseline_equivalent_values": [
+          14638.7925017107,
+          46291.9265,
+          146387.925017107
+        ]
+      },
+      {
+        "id": "M3_dissipation",
+        "field": "dissipation",
+        "values": [
+          0.0,
+          0.1920624923,
+          1.0,
+          3.0
+        ]
+      },
+      {
+        "id": "M4_smoothing",
+        "field": "smoothing",
+        "values": [
+          0.000001,
+          0.00001,
+          0.0001
+        ]
+      },
+      {
+        "id": "M5_friction",
+        "fields": [
+          "static_friction",
+          "dynamic_friction"
+        ],
+        "paired_values": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.2981956025,
+            0.2981956025
+          ],
+          [
+            0.6,
+            0.6
+          ],
+          [
+            0.9,
+            0.9
+          ]
+        ]
+      }
+    ],
+    "stage_selection_rule": {
+      "eligibility": "Candidate must PASS every material and physical gate on all 24 development units.",
+      "ordered_tiebreakers": [
+        "minimum worst_case_force_nrmse",
+        "minimum worst_case_moment_nrmse",
+        "minimum worst_case_cop_horizontal_rmse_m",
+        "minimum worst_case_absolute_impulse_ratio_error",
+        "minimum distance from prior locked value",
+        "lexicographically smallest candidate_id"
+      ],
+      "freeze_between_stages": true,
+      "no_candidate_passes": "STOP_STEP_0_AND_PUBLISH_FAILURE"
+    }
+  }
+}

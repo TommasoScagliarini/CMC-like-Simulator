@@ -373,3 +373,8 @@ per ciclo, la reward non premia piu' il mezzo ciclo incompleto, e l'observation
 ex-novo ricca e' verificata. La parte comportamentale resta aperta: serve un
 training lungo con observation ricca per capire se la policy riesce finalmente a
 chiudere `HS -> TO -> HS`.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

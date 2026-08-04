@@ -266,3 +266,8 @@ training lungo                      non ancora autorizzato
       resta differita finche' non emerga un limite sequenziale misurabile.
 - [ ] Spiegare il TO precoce rifiutato nella seconda stance dell'oracolo
       multi-ciclo, TODO storico ancora non chiuso.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

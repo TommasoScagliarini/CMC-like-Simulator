@@ -152,3 +152,8 @@ separa dagli effetti delle dieci iterazioni PPO.
       dell'oracolo multi-ciclo.
 - [ ] Tenere la memoria in coda finche' non emerge un limite sequenziale reale
       dopo la validazione warm-start.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.

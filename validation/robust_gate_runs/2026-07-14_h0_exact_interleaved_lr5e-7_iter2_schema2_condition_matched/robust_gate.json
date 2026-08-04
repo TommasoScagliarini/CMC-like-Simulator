@@ -1,0 +1,1781 @@
+{
+  "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+  "checkpoint_copied": false,
+  "checkpoint_promoted": false,
+  "configuration_failures": [],
+  "contract": {
+    "action_mode": "absolute",
+    "actor_features": 35,
+    "end_reason": "episode_time_limit",
+    "maximum_action_clipped_steps": 0,
+    "maximum_reserve_norm_nm_inclusive": null,
+    "minimum_valid_cycles": 2,
+    "observation_features": 84,
+    "penetration_limit_m_strict": 0.025,
+    "required_penetration_samples": 500,
+    "reserve_gate": {
+      "case_caps": [
+        {
+          "maximum_candidate_value_inclusive_nm": 548.8303051401444,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 548.8303041401444,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_minus020/rollout_summary.json",
+          "summary_sha256": "b89a18fa3c55d1e0c32b313e51d92ddaebfa424763aa07e9f6e07ec4feaac25e",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        },
+        {
+          "maximum_candidate_value_inclusive_nm": 493.8282061928707,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 493.8282051928707,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_nominal/rollout_summary.json",
+          "summary_sha256": "03ddb2ed18429bf6749a027b170dabb66e71204a0273eb2597163c9fbd104d5b",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        },
+        {
+          "maximum_candidate_value_inclusive_nm": 624.6792573453804,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 624.6792563453804,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_plus020/rollout_summary.json",
+          "summary_sha256": "24abcf977232aa6c7f042f5e92fc0032964bdaf4e4dd26824a846216cd50f313",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        },
+        {
+          "maximum_candidate_value_inclusive_nm": 596.1965636236697,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 596.1965626236697,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/stochastic_plus020_seed123/rollout_summary.json",
+          "summary_sha256": "a20c0555dc2688d44d9d339e30f6f7a9c41a7e16da1fd36257485d2f83513324",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        }
+      ],
+      "comparison": "candidate_case <= H0_same_case + numerical_tolerance",
+      "mode": "condition_matched_non_regression",
+      "percent_tolerance": null,
+      "recommended": true,
+      "reference_checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+      "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+    },
+    "start_offsets_s": [
+      1.756870983805102,
+      1.956870983805102,
+      2.156870983805102
+    ],
+    "steps": 500,
+    "terminated": false,
+    "training": {
+      "exact_steps_per_start": 1536,
+      "iteration": 2,
+      "kl_minibatch_count": 9,
+      "kl_nonfinite_count": 0,
+      "max_minibatch_mean_kl_loss": {
+        "maximum_inclusive": 0.01,
+        "minimum_inclusive": 0.0,
+        "scope": "entire_update"
+      },
+      "maximum_mean_kl_loss_inclusive": 0.01,
+      "mean_kl_loss_scope": "legacy_last_minibatch",
+      "min_minibatch_mean_kl_loss": {
+        "minimum_inclusive": -1e-07,
+        "minimum_rationale": "floating-point numerical tolerance",
+        "scope": "entire_update"
+      },
+      "module_steps_trained": 4608,
+      "post_gae_compacted_real_steps": 4608,
+      "single_epoch_contract": true,
+      "start_interleaving": {
+        "interleaved_rows": 4608,
+        "interleaved_rows_per_start": 1536,
+        "interleaved_start_conditions": 3,
+        "maximum_start_run_length": 1
+      }
+    },
+    "truncated": true,
+    "worst_case": {
+      "action_selection": "stochastic",
+      "offset_s": 2.156870983805102,
+      "seed": 123,
+      "sigma": 0.005
+    }
+  },
+  "failed_invocations": [],
+  "failed_rollouts": [
+    "stochastic_plus020_seed123"
+  ],
+  "gate": "robust_ppo_gate",
+  "generated_at_utc": "2026-07-14T15:42:32.809224+00:00",
+  "invocations": [
+    {
+      "command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "--checkpoint",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+        "--output-dir",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_minus020",
+        "--episode-duration",
+        "5.0",
+        "--max-steps",
+        "500",
+        "--episode-start-offset-s",
+        "1.756870983805102",
+        "--action-mode",
+        "absolute",
+        "--action-selection",
+        "deterministic",
+        "--seed",
+        "123",
+        "--run-timeout-s",
+        "900.0",
+        "--no-record-outputs",
+        "--no-record-policy-trace",
+        "--no-progress"
+      ],
+      "name": "deterministic_minus020",
+      "output_dir": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_minus020",
+      "returncode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "--checkpoint",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+        "--output-dir",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_nominal",
+        "--episode-duration",
+        "5.0",
+        "--max-steps",
+        "500",
+        "--episode-start-offset-s",
+        "1.956870983805102",
+        "--action-mode",
+        "absolute",
+        "--action-selection",
+        "deterministic",
+        "--seed",
+        "123",
+        "--run-timeout-s",
+        "900.0",
+        "--no-record-outputs",
+        "--no-record-policy-trace",
+        "--no-progress"
+      ],
+      "name": "deterministic_nominal",
+      "output_dir": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_nominal",
+      "returncode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "--checkpoint",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+        "--output-dir",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_plus020",
+        "--episode-duration",
+        "5.0",
+        "--max-steps",
+        "500",
+        "--episode-start-offset-s",
+        "2.156870983805102",
+        "--action-mode",
+        "absolute",
+        "--action-selection",
+        "deterministic",
+        "--seed",
+        "123",
+        "--run-timeout-s",
+        "900.0",
+        "--no-record-outputs",
+        "--no-record-policy-trace",
+        "--no-progress"
+      ],
+      "name": "deterministic_plus020",
+      "output_dir": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_plus020",
+      "returncode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "--checkpoint",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+        "--output-dir",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/stochastic_plus020_seed123",
+        "--episode-duration",
+        "5.0",
+        "--max-steps",
+        "500",
+        "--episode-start-offset-s",
+        "2.156870983805102",
+        "--action-mode",
+        "absolute",
+        "--action-selection",
+        "stochastic",
+        "--seed",
+        "123",
+        "--run-timeout-s",
+        "900.0",
+        "--no-record-outputs",
+        "--no-record-policy-trace",
+        "--no-progress"
+      ],
+      "name": "stochastic_plus020_seed123",
+      "output_dir": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/stochastic_plus020_seed123",
+      "returncode": 0,
+      "status": "PASS"
+    }
+  ],
+  "mode": "run_rollouts",
+  "ok": false,
+  "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/robust_gate.json",
+  "reserve_gate_mode": "condition_matched_non_regression",
+  "reserve_reference": {
+    "case_caps": [
+      {
+        "maximum_candidate_value_inclusive_nm": 548.8303051401444,
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 548.8303041401444,
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_minus020/rollout_summary.json",
+        "summary_sha256": "b89a18fa3c55d1e0c32b313e51d92ddaebfa424763aa07e9f6e07ec4feaac25e",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      },
+      {
+        "maximum_candidate_value_inclusive_nm": 493.8282061928707,
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 493.8282051928707,
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_nominal/rollout_summary.json",
+        "summary_sha256": "03ddb2ed18429bf6749a027b170dabb66e71204a0273eb2597163c9fbd104d5b",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      },
+      {
+        "maximum_candidate_value_inclusive_nm": 624.6792573453804,
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 624.6792563453804,
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_plus020/rollout_summary.json",
+        "summary_sha256": "24abcf977232aa6c7f042f5e92fc0032964bdaf4e4dd26824a846216cd50f313",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      },
+      {
+        "maximum_candidate_value_inclusive_nm": 596.1965636236697,
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 596.1965626236697,
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/stochastic_plus020_seed123/rollout_summary.json",
+        "summary_sha256": "a20c0555dc2688d44d9d339e30f6f7a9c41a7e16da1fd36257485d2f83513324",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      }
+    ],
+    "checkpoint": {
+      "failures": [],
+      "files": {
+        "class_and_ctor_args.pkl": {
+          "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/class_and_ctor_args.pkl",
+          "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228"
+        },
+        "metadata.json": {
+          "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/metadata.json",
+          "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12"
+        },
+        "module_state.pkl": {
+          "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/module_state.pkl",
+          "sha256": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b"
+        }
+      },
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+      "status": "PASS"
+    },
+    "mode": "condition_matched_non_regression",
+    "percent_tolerance": null,
+    "rollouts": [
+      {
+        "checks": [
+          {
+            "actual": true,
+            "expected": true,
+            "name": "summary_ok",
+            "status": "PASS"
+          },
+          {
+            "actual": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "name": "checkpoint",
+            "status": "PASS"
+          },
+          {
+            "actual": 1.756870983805102,
+            "expected": 1.756870983805102,
+            "name": "episode_start_offset_s",
+            "status": "PASS"
+          },
+          {
+            "actual": "absolute",
+            "expected": "absolute",
+            "name": "action_mode",
+            "status": "PASS"
+          },
+          {
+            "actual": "deterministic",
+            "expected": "deterministic",
+            "name": "action_selection",
+            "status": "PASS"
+          },
+          {
+            "actual": 123,
+            "expected": 123,
+            "name": "action_seed",
+            "status": "PASS"
+          },
+          {
+            "actual": null,
+            "expected": null,
+            "name": "deterministic_has_no_exploration_sigma",
+            "status": "PASS"
+          },
+          {
+            "actual": null,
+            "expected": null,
+            "name": "deterministic_has_no_exploration_noise_rms",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "steps",
+            "status": "PASS"
+          },
+          {
+            "actual": "episode_time_limit",
+            "expected": "episode_time_limit",
+            "name": "end_reason",
+            "status": "PASS"
+          },
+          {
+            "actual": false,
+            "expected": false,
+            "name": "terminated",
+            "status": "PASS"
+          },
+          {
+            "actual": true,
+            "expected": true,
+            "name": "truncated",
+            "status": "PASS"
+          },
+          {
+            "actual": [
+              2
+            ],
+            "expected": [
+              2
+            ],
+            "name": "action_shape",
+            "status": "PASS"
+          },
+          {
+            "actual": 2,
+            "expected": ">= 2",
+            "name": "phase_valid_cycle_count",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "grf_penetration_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 0.02460202939096984,
+            "expected": "finite and in [0, 0.025)",
+            "name": "grf_penetration_max_m",
+            "status": "PASS"
+          },
+          {
+            "actual": 0,
+            "expected": 0,
+            "name": "action_clipped_steps",
+            "status": "PASS"
+          },
+          {
+            "actual": 35,
+            "expected": 35,
+            "name": "n_actor",
+            "status": "PASS"
+          },
+          {
+            "actual": 84,
+            "expected": 84,
+            "name": "n_observation",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "reserve_norm_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 548.8303041401444,
+            "expected": "finite and in [0, 548.8303041401444]",
+            "name": "reserve_norm_max_nm",
+            "status": "PASS"
+          }
+        ],
+        "condition_matched_cap": {
+          "maximum_candidate_value_inclusive_nm": 548.8303051401444,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 548.8303041401444,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_minus020/rollout_summary.json",
+          "summary_sha256": "b89a18fa3c55d1e0c32b313e51d92ddaebfa424763aa07e9f6e07ec4feaac25e",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        },
+        "expected": {
+          "action_selection": "deterministic",
+          "offset_s": 1.756870983805102,
+          "seed": 123
+        },
+        "failed_checks": [],
+        "name": "deterministic_minus020",
+        "reserve_contract": {
+          "maximum_inclusive_nm": 548.8303041401444,
+          "numerical_tolerance_nm": 0.0,
+          "reference_or_scalar_cap_nm": 548.8303041401444
+        },
+        "status": "PASS",
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_minus020/rollout_summary.json",
+        "summary_sha256": "b89a18fa3c55d1e0c32b313e51d92ddaebfa424763aa07e9f6e07ec4feaac25e"
+      },
+      {
+        "checks": [
+          {
+            "actual": true,
+            "expected": true,
+            "name": "summary_ok",
+            "status": "PASS"
+          },
+          {
+            "actual": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "name": "checkpoint",
+            "status": "PASS"
+          },
+          {
+            "actual": 1.956870983805102,
+            "expected": 1.956870983805102,
+            "name": "episode_start_offset_s",
+            "status": "PASS"
+          },
+          {
+            "actual": "absolute",
+            "expected": "absolute",
+            "name": "action_mode",
+            "status": "PASS"
+          },
+          {
+            "actual": "deterministic",
+            "expected": "deterministic",
+            "name": "action_selection",
+            "status": "PASS"
+          },
+          {
+            "actual": 123,
+            "expected": 123,
+            "name": "action_seed",
+            "status": "PASS"
+          },
+          {
+            "actual": null,
+            "expected": null,
+            "name": "deterministic_has_no_exploration_sigma",
+            "status": "PASS"
+          },
+          {
+            "actual": null,
+            "expected": null,
+            "name": "deterministic_has_no_exploration_noise_rms",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "steps",
+            "status": "PASS"
+          },
+          {
+            "actual": "episode_time_limit",
+            "expected": "episode_time_limit",
+            "name": "end_reason",
+            "status": "PASS"
+          },
+          {
+            "actual": false,
+            "expected": false,
+            "name": "terminated",
+            "status": "PASS"
+          },
+          {
+            "actual": true,
+            "expected": true,
+            "name": "truncated",
+            "status": "PASS"
+          },
+          {
+            "actual": [
+              2
+            ],
+            "expected": [
+              2
+            ],
+            "name": "action_shape",
+            "status": "PASS"
+          },
+          {
+            "actual": 2,
+            "expected": ">= 2",
+            "name": "phase_valid_cycle_count",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "grf_penetration_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 0.02395957553235469,
+            "expected": "finite and in [0, 0.025)",
+            "name": "grf_penetration_max_m",
+            "status": "PASS"
+          },
+          {
+            "actual": 0,
+            "expected": 0,
+            "name": "action_clipped_steps",
+            "status": "PASS"
+          },
+          {
+            "actual": 35,
+            "expected": 35,
+            "name": "n_actor",
+            "status": "PASS"
+          },
+          {
+            "actual": 84,
+            "expected": 84,
+            "name": "n_observation",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "reserve_norm_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 493.8282051928707,
+            "expected": "finite and in [0, 493.8282051928707]",
+            "name": "reserve_norm_max_nm",
+            "status": "PASS"
+          }
+        ],
+        "condition_matched_cap": {
+          "maximum_candidate_value_inclusive_nm": 493.8282061928707,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 493.8282051928707,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_nominal/rollout_summary.json",
+          "summary_sha256": "03ddb2ed18429bf6749a027b170dabb66e71204a0273eb2597163c9fbd104d5b",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        },
+        "expected": {
+          "action_selection": "deterministic",
+          "offset_s": 1.956870983805102,
+          "seed": 123
+        },
+        "failed_checks": [],
+        "name": "deterministic_nominal",
+        "reserve_contract": {
+          "maximum_inclusive_nm": 493.8282051928707,
+          "numerical_tolerance_nm": 0.0,
+          "reference_or_scalar_cap_nm": 493.8282051928707
+        },
+        "status": "PASS",
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_nominal/rollout_summary.json",
+        "summary_sha256": "03ddb2ed18429bf6749a027b170dabb66e71204a0273eb2597163c9fbd104d5b"
+      },
+      {
+        "checks": [
+          {
+            "actual": true,
+            "expected": true,
+            "name": "summary_ok",
+            "status": "PASS"
+          },
+          {
+            "actual": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "name": "checkpoint",
+            "status": "PASS"
+          },
+          {
+            "actual": 2.156870983805102,
+            "expected": 2.156870983805102,
+            "name": "episode_start_offset_s",
+            "status": "PASS"
+          },
+          {
+            "actual": "absolute",
+            "expected": "absolute",
+            "name": "action_mode",
+            "status": "PASS"
+          },
+          {
+            "actual": "deterministic",
+            "expected": "deterministic",
+            "name": "action_selection",
+            "status": "PASS"
+          },
+          {
+            "actual": 123,
+            "expected": 123,
+            "name": "action_seed",
+            "status": "PASS"
+          },
+          {
+            "actual": null,
+            "expected": null,
+            "name": "deterministic_has_no_exploration_sigma",
+            "status": "PASS"
+          },
+          {
+            "actual": null,
+            "expected": null,
+            "name": "deterministic_has_no_exploration_noise_rms",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "steps",
+            "status": "PASS"
+          },
+          {
+            "actual": "episode_time_limit",
+            "expected": "episode_time_limit",
+            "name": "end_reason",
+            "status": "PASS"
+          },
+          {
+            "actual": false,
+            "expected": false,
+            "name": "terminated",
+            "status": "PASS"
+          },
+          {
+            "actual": true,
+            "expected": true,
+            "name": "truncated",
+            "status": "PASS"
+          },
+          {
+            "actual": [
+              2
+            ],
+            "expected": [
+              2
+            ],
+            "name": "action_shape",
+            "status": "PASS"
+          },
+          {
+            "actual": 2,
+            "expected": ">= 2",
+            "name": "phase_valid_cycle_count",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "grf_penetration_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 0.024323924384327976,
+            "expected": "finite and in [0, 0.025)",
+            "name": "grf_penetration_max_m",
+            "status": "PASS"
+          },
+          {
+            "actual": 0,
+            "expected": 0,
+            "name": "action_clipped_steps",
+            "status": "PASS"
+          },
+          {
+            "actual": 35,
+            "expected": 35,
+            "name": "n_actor",
+            "status": "PASS"
+          },
+          {
+            "actual": 84,
+            "expected": 84,
+            "name": "n_observation",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "reserve_norm_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 624.6792563453804,
+            "expected": "finite and in [0, 624.6792563453804]",
+            "name": "reserve_norm_max_nm",
+            "status": "PASS"
+          }
+        ],
+        "condition_matched_cap": {
+          "maximum_candidate_value_inclusive_nm": 624.6792573453804,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 624.6792563453804,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_plus020/rollout_summary.json",
+          "summary_sha256": "24abcf977232aa6c7f042f5e92fc0032964bdaf4e4dd26824a846216cd50f313",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        },
+        "expected": {
+          "action_selection": "deterministic",
+          "offset_s": 2.156870983805102,
+          "seed": 123
+        },
+        "failed_checks": [],
+        "name": "deterministic_plus020",
+        "reserve_contract": {
+          "maximum_inclusive_nm": 624.6792563453804,
+          "numerical_tolerance_nm": 0.0,
+          "reference_or_scalar_cap_nm": 624.6792563453804
+        },
+        "status": "PASS",
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_plus020/rollout_summary.json",
+        "summary_sha256": "24abcf977232aa6c7f042f5e92fc0032964bdaf4e4dd26824a846216cd50f313"
+      },
+      {
+        "checks": [
+          {
+            "actual": true,
+            "expected": true,
+            "name": "summary_ok",
+            "status": "PASS"
+          },
+          {
+            "actual": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+            "name": "checkpoint",
+            "status": "PASS"
+          },
+          {
+            "actual": 2.156870983805102,
+            "expected": 2.156870983805102,
+            "name": "episode_start_offset_s",
+            "status": "PASS"
+          },
+          {
+            "actual": "absolute",
+            "expected": "absolute",
+            "name": "action_mode",
+            "status": "PASS"
+          },
+          {
+            "actual": "stochastic",
+            "expected": "stochastic",
+            "name": "action_selection",
+            "status": "PASS"
+          },
+          {
+            "actual": 123,
+            "expected": 123,
+            "name": "action_seed",
+            "status": "PASS"
+          },
+          {
+            "actual": [
+              0.004999999888241291,
+              0.004999999888241291
+            ],
+            "expected": "two finite values, each == 0.005",
+            "name": "exploration_sigma",
+            "status": "PASS"
+          },
+          {
+            "actual": [
+              0.005043237731417303,
+              0.004636668660030263
+            ],
+            "expected": "two finite positive values in [0.5, 1.5] * sigma",
+            "name": "exploration_noise_realized_rms",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "steps",
+            "status": "PASS"
+          },
+          {
+            "actual": "episode_time_limit",
+            "expected": "episode_time_limit",
+            "name": "end_reason",
+            "status": "PASS"
+          },
+          {
+            "actual": false,
+            "expected": false,
+            "name": "terminated",
+            "status": "PASS"
+          },
+          {
+            "actual": true,
+            "expected": true,
+            "name": "truncated",
+            "status": "PASS"
+          },
+          {
+            "actual": [
+              2
+            ],
+            "expected": [
+              2
+            ],
+            "name": "action_shape",
+            "status": "PASS"
+          },
+          {
+            "actual": 3,
+            "expected": ">= 2",
+            "name": "phase_valid_cycle_count",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "grf_penetration_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 0.02455851576933441,
+            "expected": "finite and in [0, 0.025)",
+            "name": "grf_penetration_max_m",
+            "status": "PASS"
+          },
+          {
+            "actual": 0,
+            "expected": 0,
+            "name": "action_clipped_steps",
+            "status": "PASS"
+          },
+          {
+            "actual": 35,
+            "expected": 35,
+            "name": "n_actor",
+            "status": "PASS"
+          },
+          {
+            "actual": 84,
+            "expected": 84,
+            "name": "n_observation",
+            "status": "PASS"
+          },
+          {
+            "actual": 500,
+            "expected": 500,
+            "name": "reserve_norm_samples",
+            "status": "PASS"
+          },
+          {
+            "actual": 596.1965626236697,
+            "expected": "finite and in [0, 596.1965626236697]",
+            "name": "reserve_norm_max_nm",
+            "status": "PASS"
+          }
+        ],
+        "condition_matched_cap": {
+          "maximum_candidate_value_inclusive_nm": 596.1965636236697,
+          "numerical_tolerance_nm": 1e-06,
+          "reference_cap_nm": 596.1965626236697,
+          "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/stochastic_plus020_seed123/rollout_summary.json",
+          "summary_sha256": "a20c0555dc2688d44d9d339e30f6f7a9c41a7e16da1fd36257485d2f83513324",
+          "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+        },
+        "expected": {
+          "action_selection": "stochastic",
+          "offset_s": 2.156870983805102,
+          "seed": 123
+        },
+        "failed_checks": [],
+        "name": "stochastic_plus020_seed123",
+        "reserve_contract": {
+          "maximum_inclusive_nm": 596.1965626236697,
+          "numerical_tolerance_nm": 0.0,
+          "reference_or_scalar_cap_nm": 596.1965626236697
+        },
+        "status": "PASS",
+        "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/stochastic_plus020_seed123/rollout_summary.json",
+        "summary_sha256": "a20c0555dc2688d44d9d339e30f6f7a9c41a7e16da1fd36257485d2f83513324"
+      }
+    ],
+    "status": "PASS",
+    "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+  },
+  "reserve_reference_failed": false,
+  "rollouts": [
+    {
+      "checks": [
+        {
+          "actual": true,
+          "expected": true,
+          "name": "summary_ok",
+          "status": "PASS"
+        },
+        {
+          "actual": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "name": "checkpoint",
+          "status": "PASS"
+        },
+        {
+          "actual": 1.756870983805102,
+          "expected": 1.756870983805102,
+          "name": "episode_start_offset_s",
+          "status": "PASS"
+        },
+        {
+          "actual": "absolute",
+          "expected": "absolute",
+          "name": "action_mode",
+          "status": "PASS"
+        },
+        {
+          "actual": "deterministic",
+          "expected": "deterministic",
+          "name": "action_selection",
+          "status": "PASS"
+        },
+        {
+          "actual": 123,
+          "expected": 123,
+          "name": "action_seed",
+          "status": "PASS"
+        },
+        {
+          "actual": null,
+          "expected": null,
+          "name": "deterministic_has_no_exploration_sigma",
+          "status": "PASS"
+        },
+        {
+          "actual": null,
+          "expected": null,
+          "name": "deterministic_has_no_exploration_noise_rms",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "steps",
+          "status": "PASS"
+        },
+        {
+          "actual": "episode_time_limit",
+          "expected": "episode_time_limit",
+          "name": "end_reason",
+          "status": "PASS"
+        },
+        {
+          "actual": false,
+          "expected": false,
+          "name": "terminated",
+          "status": "PASS"
+        },
+        {
+          "actual": true,
+          "expected": true,
+          "name": "truncated",
+          "status": "PASS"
+        },
+        {
+          "actual": [
+            2
+          ],
+          "expected": [
+            2
+          ],
+          "name": "action_shape",
+          "status": "PASS"
+        },
+        {
+          "actual": 2,
+          "expected": ">= 2",
+          "name": "phase_valid_cycle_count",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "grf_penetration_samples",
+          "status": "PASS"
+        },
+        {
+          "actual": 0.024138928593056195,
+          "expected": "finite and in [0, 0.025)",
+          "name": "grf_penetration_max_m",
+          "status": "PASS"
+        },
+        {
+          "actual": 0,
+          "expected": 0,
+          "name": "action_clipped_steps",
+          "status": "PASS"
+        },
+        {
+          "actual": 35,
+          "expected": 35,
+          "name": "n_actor",
+          "status": "PASS"
+        },
+        {
+          "actual": 84,
+          "expected": 84,
+          "name": "n_observation",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "reserve_norm_samples",
+          "status": "PASS"
+        },
+        {
+          "actual": 547.6035911571084,
+          "expected": {
+            "finite_non_negative": true,
+            "maximum_inclusive_nm": 548.8303051401444,
+            "numerical_tolerance_nm": 1e-06,
+            "reference_or_scalar_cap_nm": 548.8303041401444
+          },
+          "name": "reserve_norm_max_nm",
+          "status": "PASS"
+        }
+      ],
+      "expected": {
+        "action_selection": "deterministic",
+        "offset_s": 1.756870983805102,
+        "seed": 123
+      },
+      "failed_checks": [],
+      "name": "deterministic_minus020",
+      "reserve_contract": {
+        "maximum_candidate_value_inclusive_nm": 548.8303051401444,
+        "maximum_inclusive_nm": 548.8303051401444,
+        "mode": "condition_matched_non_regression",
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 548.8303041401444,
+        "reference_or_scalar_cap_nm": 548.8303041401444,
+        "reference_summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_minus020/rollout_summary.json",
+        "reference_summary_sha256": "b89a18fa3c55d1e0c32b313e51d92ddaebfa424763aa07e9f6e07ec4feaac25e",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      },
+      "status": "PASS",
+      "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_minus020/rollout_summary.json",
+      "summary_sha256": "851f4732b4ae746a3d379db87d87aad6cfaf75f97584e85c633740916bf477bf"
+    },
+    {
+      "checks": [
+        {
+          "actual": true,
+          "expected": true,
+          "name": "summary_ok",
+          "status": "PASS"
+        },
+        {
+          "actual": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "name": "checkpoint",
+          "status": "PASS"
+        },
+        {
+          "actual": 1.956870983805102,
+          "expected": 1.956870983805102,
+          "name": "episode_start_offset_s",
+          "status": "PASS"
+        },
+        {
+          "actual": "absolute",
+          "expected": "absolute",
+          "name": "action_mode",
+          "status": "PASS"
+        },
+        {
+          "actual": "deterministic",
+          "expected": "deterministic",
+          "name": "action_selection",
+          "status": "PASS"
+        },
+        {
+          "actual": 123,
+          "expected": 123,
+          "name": "action_seed",
+          "status": "PASS"
+        },
+        {
+          "actual": null,
+          "expected": null,
+          "name": "deterministic_has_no_exploration_sigma",
+          "status": "PASS"
+        },
+        {
+          "actual": null,
+          "expected": null,
+          "name": "deterministic_has_no_exploration_noise_rms",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "steps",
+          "status": "PASS"
+        },
+        {
+          "actual": "episode_time_limit",
+          "expected": "episode_time_limit",
+          "name": "end_reason",
+          "status": "PASS"
+        },
+        {
+          "actual": false,
+          "expected": false,
+          "name": "terminated",
+          "status": "PASS"
+        },
+        {
+          "actual": true,
+          "expected": true,
+          "name": "truncated",
+          "status": "PASS"
+        },
+        {
+          "actual": [
+            2
+          ],
+          "expected": [
+            2
+          ],
+          "name": "action_shape",
+          "status": "PASS"
+        },
+        {
+          "actual": 2,
+          "expected": ">= 2",
+          "name": "phase_valid_cycle_count",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "grf_penetration_samples",
+          "status": "PASS"
+        },
+        {
+          "actual": 0.023899916042757364,
+          "expected": "finite and in [0, 0.025)",
+          "name": "grf_penetration_max_m",
+          "status": "PASS"
+        },
+        {
+          "actual": 0,
+          "expected": 0,
+          "name": "action_clipped_steps",
+          "status": "PASS"
+        },
+        {
+          "actual": 35,
+          "expected": 35,
+          "name": "n_actor",
+          "status": "PASS"
+        },
+        {
+          "actual": 84,
+          "expected": 84,
+          "name": "n_observation",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "reserve_norm_samples",
+          "status": "PASS"
+        },
+        {
+          "actual": 493.775511447139,
+          "expected": {
+            "finite_non_negative": true,
+            "maximum_inclusive_nm": 493.8282061928707,
+            "numerical_tolerance_nm": 1e-06,
+            "reference_or_scalar_cap_nm": 493.8282051928707
+          },
+          "name": "reserve_norm_max_nm",
+          "status": "PASS"
+        }
+      ],
+      "expected": {
+        "action_selection": "deterministic",
+        "offset_s": 1.956870983805102,
+        "seed": 123
+      },
+      "failed_checks": [],
+      "name": "deterministic_nominal",
+      "reserve_contract": {
+        "maximum_candidate_value_inclusive_nm": 493.8282061928707,
+        "maximum_inclusive_nm": 493.8282061928707,
+        "mode": "condition_matched_non_regression",
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 493.8282051928707,
+        "reference_or_scalar_cap_nm": 493.8282051928707,
+        "reference_summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_nominal/rollout_summary.json",
+        "reference_summary_sha256": "03ddb2ed18429bf6749a027b170dabb66e71204a0273eb2597163c9fbd104d5b",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      },
+      "status": "PASS",
+      "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_nominal/rollout_summary.json",
+      "summary_sha256": "04b81426b06b0ae0bb06dffc447aee9afbb70d6d3463c8f1e0b2cb81a24c9fa6"
+    },
+    {
+      "checks": [
+        {
+          "actual": true,
+          "expected": true,
+          "name": "summary_ok",
+          "status": "PASS"
+        },
+        {
+          "actual": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "name": "checkpoint",
+          "status": "PASS"
+        },
+        {
+          "actual": 2.156870983805102,
+          "expected": 2.156870983805102,
+          "name": "episode_start_offset_s",
+          "status": "PASS"
+        },
+        {
+          "actual": "absolute",
+          "expected": "absolute",
+          "name": "action_mode",
+          "status": "PASS"
+        },
+        {
+          "actual": "deterministic",
+          "expected": "deterministic",
+          "name": "action_selection",
+          "status": "PASS"
+        },
+        {
+          "actual": 123,
+          "expected": 123,
+          "name": "action_seed",
+          "status": "PASS"
+        },
+        {
+          "actual": null,
+          "expected": null,
+          "name": "deterministic_has_no_exploration_sigma",
+          "status": "PASS"
+        },
+        {
+          "actual": null,
+          "expected": null,
+          "name": "deterministic_has_no_exploration_noise_rms",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "steps",
+          "status": "PASS"
+        },
+        {
+          "actual": "episode_time_limit",
+          "expected": "episode_time_limit",
+          "name": "end_reason",
+          "status": "PASS"
+        },
+        {
+          "actual": false,
+          "expected": false,
+          "name": "terminated",
+          "status": "PASS"
+        },
+        {
+          "actual": true,
+          "expected": true,
+          "name": "truncated",
+          "status": "PASS"
+        },
+        {
+          "actual": [
+            2
+          ],
+          "expected": [
+            2
+          ],
+          "name": "action_shape",
+          "status": "PASS"
+        },
+        {
+          "actual": 2,
+          "expected": ">= 2",
+          "name": "phase_valid_cycle_count",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "grf_penetration_samples",
+          "status": "PASS"
+        },
+        {
+          "actual": 0.024281124381714765,
+          "expected": "finite and in [0, 0.025)",
+          "name": "grf_penetration_max_m",
+          "status": "PASS"
+        },
+        {
+          "actual": 0,
+          "expected": 0,
+          "name": "action_clipped_steps",
+          "status": "PASS"
+        },
+        {
+          "actual": 35,
+          "expected": 35,
+          "name": "n_actor",
+          "status": "PASS"
+        },
+        {
+          "actual": 84,
+          "expected": 84,
+          "name": "n_observation",
+          "status": "PASS"
+        },
+        {
+          "actual": 500,
+          "expected": 500,
+          "name": "reserve_norm_samples",
+          "status": "PASS"
+        },
+        {
+          "actual": 614.6384624376576,
+          "expected": {
+            "finite_non_negative": true,
+            "maximum_inclusive_nm": 624.6792573453804,
+            "numerical_tolerance_nm": 1e-06,
+            "reference_or_scalar_cap_nm": 624.6792563453804
+          },
+          "name": "reserve_norm_max_nm",
+          "status": "PASS"
+        }
+      ],
+      "expected": {
+        "action_selection": "deterministic",
+        "offset_s": 2.156870983805102,
+        "seed": 123
+      },
+      "failed_checks": [],
+      "name": "deterministic_plus020",
+      "reserve_contract": {
+        "maximum_candidate_value_inclusive_nm": 624.6792573453804,
+        "maximum_inclusive_nm": 624.6792573453804,
+        "mode": "condition_matched_non_regression",
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 624.6792563453804,
+        "reference_or_scalar_cap_nm": 624.6792563453804,
+        "reference_summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/deterministic_plus020/rollout_summary.json",
+        "reference_summary_sha256": "24abcf977232aa6c7f042f5e92fc0032964bdaf4e4dd26824a846216cd50f313",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      },
+      "status": "PASS",
+      "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/deterministic_plus020/rollout_summary.json",
+      "summary_sha256": "7da9df514843a42795cd30c30c3a761c5f23b96486fbfc2b8dcc4a4cd2ce2596"
+    },
+    {
+      "checks": [
+        {
+          "actual": true,
+          "expected": true,
+          "name": "summary_ok",
+          "status": "PASS"
+        },
+        {
+          "actual": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "expected": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/rl_module_last",
+          "name": "checkpoint",
+          "status": "PASS"
+        },
+        {
+          "actual": 2.156870983805102,
+          "expected": 2.156870983805102,
+          "name": "episode_start_offset_s",
+          "status": "PASS"
+        },
+        {
+          "actual": "absolute",
+          "expected": "absolute",
+          "name": "action_mode",
+          "status": "PASS"
+        },
+        {
+          "actual": "stochastic",
+          "expected": "stochastic",
+          "name": "action_selection",
+          "status": "PASS"
+        },
+        {
+          "actual": 123,
+          "expected": 123,
+          "name": "action_seed",
+          "status": "PASS"
+        },
+        {
+          "actual": [
+            0.004999999888241291,
+            0.004999999888241291
+          ],
+          "expected": "two finite values, each == 0.005",
+          "name": "exploration_sigma",
+          "status": "PASS"
+        },
+        {
+          "actual": [
+            0.005076304137571325,
+            0.004724241402146786
+          ],
+          "expected": "two finite positive values in [0.5, 1.5] * sigma",
+          "name": "exploration_noise_realized_rms",
+          "status": "PASS"
+        },
+        {
+          "actual": 212,
+          "expected": 500,
+          "name": "steps",
+          "status": "FAIL"
+        },
+        {
+          "actual": "grf_penetration",
+          "expected": "episode_time_limit",
+          "name": "end_reason",
+          "status": "FAIL"
+        },
+        {
+          "actual": true,
+          "expected": false,
+          "name": "terminated",
+          "status": "FAIL"
+        },
+        {
+          "actual": false,
+          "expected": true,
+          "name": "truncated",
+          "status": "FAIL"
+        },
+        {
+          "actual": [
+            2
+          ],
+          "expected": [
+            2
+          ],
+          "name": "action_shape",
+          "status": "PASS"
+        },
+        {
+          "actual": 1,
+          "expected": ">= 2",
+          "name": "phase_valid_cycle_count",
+          "status": "FAIL"
+        },
+        {
+          "actual": 212,
+          "expected": 500,
+          "name": "grf_penetration_samples",
+          "status": "FAIL"
+        },
+        {
+          "actual": 0.025009760092013757,
+          "expected": "finite and in [0, 0.025)",
+          "name": "grf_penetration_max_m",
+          "status": "FAIL"
+        },
+        {
+          "actual": 0,
+          "expected": 0,
+          "name": "action_clipped_steps",
+          "status": "PASS"
+        },
+        {
+          "actual": 35,
+          "expected": 35,
+          "name": "n_actor",
+          "status": "PASS"
+        },
+        {
+          "actual": 84,
+          "expected": 84,
+          "name": "n_observation",
+          "status": "PASS"
+        },
+        {
+          "actual": 212,
+          "expected": 500,
+          "name": "reserve_norm_samples",
+          "status": "FAIL"
+        },
+        {
+          "actual": 673.419582384245,
+          "expected": {
+            "finite_non_negative": true,
+            "maximum_inclusive_nm": 596.1965636236697,
+            "numerical_tolerance_nm": 1e-06,
+            "reference_or_scalar_cap_nm": 596.1965626236697
+          },
+          "name": "reserve_norm_max_nm",
+          "status": "FAIL"
+        }
+      ],
+      "expected": {
+        "action_selection": "stochastic",
+        "offset_s": 2.156870983805102,
+        "seed": 123
+      },
+      "failed_checks": [
+        "steps",
+        "end_reason",
+        "terminated",
+        "truncated",
+        "phase_valid_cycle_count",
+        "grf_penetration_samples",
+        "grf_penetration_max_m",
+        "reserve_norm_samples",
+        "reserve_norm_max_nm"
+      ],
+      "name": "stochastic_plus020_seed123",
+      "reserve_contract": {
+        "maximum_candidate_value_inclusive_nm": 596.1965636236697,
+        "maximum_inclusive_nm": 596.1965636236697,
+        "mode": "condition_matched_non_regression",
+        "numerical_tolerance_nm": 1e-06,
+        "reference_cap_nm": 596.1965626236697,
+        "reference_or_scalar_cap_nm": 596.1965626236697,
+        "reference_summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/robust_reference_runs/2026-07-14_h0_schema2/stochastic_plus020_seed123/rollout_summary.json",
+        "reference_summary_sha256": "a20c0555dc2688d44d9d339e30f6f7a9c41a7e16da1fd36257485d2f83513324",
+        "tolerance_formula": "max(1e-6 Nm, 1e-9 * T_c)"
+      },
+      "status": "FAIL",
+      "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/robust_gate_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2_condition_matched/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+      "summary_sha256": "f55c2f101b0f966097f4f6013c8ef02f33dedd6b61acf747f3a69836014c1940"
+    }
+  ],
+  "schema_version": 2,
+  "status": "FAIL",
+  "training": {
+    "checks": [
+      {
+        "actual": 2,
+        "expected": 2,
+        "name": "iteration",
+        "status": "PASS"
+      },
+      {
+        "actual": 0.00027933064848184586,
+        "expected": "legacy last-minibatch value; finite and in [0, 0.01]",
+        "name": "mean_kl_loss",
+        "status": "PASS"
+      },
+      {
+        "actual": 0.0010523259406909347,
+        "expected": "update-scoped finite maximum in [0, 0.01]",
+        "name": "max_minibatch_mean_kl_loss",
+        "status": "PASS"
+      },
+      {
+        "actual": 0.0,
+        "expected": "update-scoped finite minimum >= -1e-07 (numerical tolerance)",
+        "name": "min_minibatch_mean_kl_loss",
+        "status": "PASS"
+      },
+      {
+        "actual": 9.0,
+        "expected": 9,
+        "name": "kl_minibatch_count",
+        "status": "PASS"
+      },
+      {
+        "actual": 0.0,
+        "expected": 0,
+        "name": "kl_nonfinite_count",
+        "status": "PASS"
+      },
+      {
+        "actual": true,
+        "expected": true,
+        "name": "exact_start_balance.pass",
+        "status": "PASS"
+      },
+      {
+        "actual": {
+          "offset_1p756871s": 1536.0,
+          "offset_1p956871s": 1536.0,
+          "offset_2p156871s": 1536.0
+        },
+        "expected": {
+          "offset_1p756871s": 1536,
+          "offset_1p956871s": 1536,
+          "offset_2p156871s": 1536
+        },
+        "name": "exact_start_balance.expected_steps",
+        "status": "PASS"
+      },
+      {
+        "actual": {
+          "offset_1p756871s": 1536.0,
+          "offset_1p956871s": 1536.0,
+          "offset_2p156871s": 1536.0
+        },
+        "expected": {
+          "offset_1p756871s": 1536,
+          "offset_1p956871s": 1536,
+          "offset_2p156871s": 1536
+        },
+        "name": "exact_start_balance.actual_steps",
+        "status": "PASS"
+      },
+      {
+        "actual": {
+          "offset_1p756871s": 1536.0,
+          "offset_1p956871s": 1536.0,
+          "offset_2p156871s": 1536.0
+        },
+        "expected": {
+          "offset_1p756871s": 1536,
+          "offset_1p956871s": 1536,
+          "offset_2p156871s": 1536
+        },
+        "name": "start_coverage_metrics.episode_start_steps_current",
+        "status": "PASS"
+      },
+      {
+        "actual": true,
+        "expected": true,
+        "name": "exact_start_balance.learner_batch_pass",
+        "status": "PASS"
+      },
+      {
+        "actual": 4608.0,
+        "expected": 4608,
+        "name": "exact_start_balance.expected_real_steps",
+        "status": "PASS"
+      },
+      {
+        "actual": 4608.0,
+        "expected": 4608,
+        "name": "exact_start_balance.learner_connector_steps_in",
+        "status": "PASS"
+      },
+      {
+        "actual": {
+          "compacted_rows": 4608.0,
+          "connector_out": 4622.0,
+          "pre_rows": 4622.0,
+          "removed_rows": 14.0
+        },
+        "expected": {
+          "compacted_rows": 4608,
+          "connector_out": "pre_rows",
+          "pre_rows_minus_removed_rows": 4608,
+          "removed_rows": "> 0"
+        },
+        "name": "exact_start_balance.post_gae_compaction",
+        "status": "PASS"
+      },
+      {
+        "actual": 4608.0,
+        "expected": 4608,
+        "name": "exact_start_balance.interleaved_rows",
+        "status": "PASS"
+      },
+      {
+        "actual": 3.0,
+        "expected": 3,
+        "name": "exact_start_balance.interleaved_start_conditions",
+        "status": "PASS"
+      },
+      {
+        "actual": 1536.0,
+        "expected": 1536,
+        "name": "exact_start_balance.interleaved_rows_per_start",
+        "status": "PASS"
+      },
+      {
+        "actual": 1.0,
+        "expected": 1,
+        "name": "exact_start_balance.max_start_run_length",
+        "status": "PASS"
+      },
+      {
+        "actual": true,
+        "expected": true,
+        "name": "exact_start_balance.learner_checks.start_interleaving",
+        "status": "PASS"
+      },
+      {
+        "actual": true,
+        "expected": true,
+        "name": "exact_start_balance.learner_checks.single_epoch_contract",
+        "status": "PASS"
+      },
+      {
+        "actual": {
+          "actual": 4608.0,
+          "expected": 4608.0
+        },
+        "expected": {
+          "actual": 4608,
+          "expected": 4608
+        },
+        "name": "exact_start_balance.module_steps_trained",
+        "status": "PASS"
+      },
+      {
+        "actual": {
+          "offset_1p756871s": 1536.0,
+          "offset_1p956871s": 1536.0,
+          "offset_2p156871s": 1536.0
+        },
+        "expected": {
+          "offset_1p756871s": 1536,
+          "offset_1p956871s": 1536,
+          "offset_2p156871s": 1536
+        },
+        "name": "exact_start_balance.advantage_counts",
+        "status": "PASS"
+      }
+    ],
+    "classified_iteration": 2,
+    "failed_checks": [],
+    "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-14_h0_exact_interleaved_lr5e-7_iter2_schema2/train_iterations.jsonl",
+    "record_count": 1,
+    "status": "PASS"
+  }
+}

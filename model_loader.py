@@ -30,6 +30,35 @@ _DLL_DIR_HANDLES = []
 _PRELOADED_DLL_HANDLES = []
 
 
+def _primary_profile_required_sides(
+    grf_mode: str,
+    applied_sides: set[str],
+) -> tuple[str, ...]:
+    """Return the sides a primary profile must contain for its runtime role."""
+
+    if grf_mode == "online_sensor" and applied_sides:
+        return tuple(sorted(applied_sides))
+    return ("left", "right")
+
+
+def _validate_hybrid_prescribed_support(
+    applied_online_sides: set[str],
+    added_prescribed_sides: set[str],
+) -> None:
+    """Require prescribed support on sides not replaced by hybrid online GRF."""
+
+    if not applied_online_sides:
+        return
+    missing = (
+        {"left", "right"} - applied_online_sides
+    ) - added_prescribed_sides
+    if missing:
+        raise ValueError(
+            "[ModelLoader] Hybrid GRF is missing prescribed physical support "
+            f"for side(s): {sorted(missing)}."
+        )
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 #  SimulationContext  –  immutable topology snapshot computed at setup time
 # ─────────────────────────────────────────────────────────────────────────────
@@ -847,6 +876,7 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     unfiltered_mot_file = ""
     grf_filter_report_file = ""
     grf_vertical_force_columns: Dict[str, str] = {}
+    added_prescribed_grf_sides: set[str] = set()
     if paths.external_loads_path is not None:
         print(f"[ModelLoader] Loading GRF XML  : {paths.external_loads_path}")
         ext_loads = opensim.ExternalLoads(str(paths.external_loads_path), True)
@@ -907,11 +937,17 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
                 ef_template.get_point_expressed_in_body()
             )
             model.addForce(ef)
+            if side in {"left", "right"}:
+                added_prescribed_grf_sides.add(side)
             print(
                 f"[ModelLoader]   '{ef.getName()}' -> addForce OK "
                 f"(applied_to: {ef.get_applied_to_body()}, "
                 f"force_id: {ef.getForceIdentifier()})"
             )
+        _validate_hybrid_prescribed_support(
+            online_grf_applied_sides,
+            added_prescribed_grf_sides,
+        )
         if grf_mode == "online":
             print("[ModelLoader] Prescribed GRF retained as validation oracle only.")
 
@@ -926,7 +962,14 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     online_grf_detector_hs_confirmation_threshold_n = 0.0
     if grf_mode != "prescribed":
         online_grf_profile_file = str(paths.online_grf_profile_path)
-        profile = load_online_grf_profile(online_grf_profile_file)
+        primary_required_sides = _primary_profile_required_sides(
+            grf_mode,
+            online_grf_applied_sides,
+        )
+        profile = load_online_grf_profile(
+            online_grf_profile_file,
+            required_sides=primary_required_sides,
+        )
         online_grf_hs_confirmation_threshold_n = float(
             profile.heel_strike_confirmation_threshold_n or 0.0
         )
@@ -957,7 +1000,8 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         if detector_path is not None:
             online_grf_detector_profile_file = str(detector_path)
             detector_profile = load_online_grf_profile(
-                online_grf_detector_profile_file
+                online_grf_detector_profile_file,
+                required_sides=("left",),
             )
             online_grf_detector_hs_confirmation_threshold_n = float(
                 detector_profile.heel_strike_confirmation_threshold_n or 0.0

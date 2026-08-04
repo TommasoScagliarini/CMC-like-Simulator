@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "status": "BOUNDARY_RECOVERY_PREREGISTRATION_EVIDENCE",
+  "recovery_id": "AB06_TWO_SENSOR_CROSS_SPEED_V141_TO_V142_BOUNDARY_RECOVERY_2026-07-22",
+  "created_on": "2026-07-22",
+  "parent_v14_1": {
+    "protocol_id": "AB06_TWO_SENSOR_CROSS_SPEED_INTERPOLATION_2026-07-22_V14_1_RECOVERY",
+    "execution_status": "ERROR_AFTER_V14_1_RECOVERY_DESTINATION_CONSUMED",
+    "failure": "ProtocolError: first scoreable HS lacks the frozen 90 ms continuous-state guard",
+    "failed_before_opensim_station_sampling": true,
+    "failed_before_detector_fsm_replay": true,
+    "failed_before_candidate_metrics": true,
+    "rerun_allowed": false,
+    "validation_opened": false,
+    "sealed_opened": false,
+    "reserve_opened": false,
+    "development_trials_opened": [
+      "02"
+    ],
+    "development_trials_not_opened": [
+      "04",
+      "08"
+    ]
+  },
+  "observed_dev02_boundary_diagnosis": {
+    "scope": "already_consumed_v14_1_trial_02_prescribed_grf_only",
+    "candidate_or_detector_outcomes_used": false,
+    "prescribed_contact_threshold_n": 20.0,
+    "reference_min_contact_duration_s": 0.05,
+    "reference_min_cycle_duration_s": 0.3,
+    "left_context_guard_s": 0.09,
+    "plateaus": [
+      {
+        "plateau_index": 1,
+        "interval_s": [
+          11.698,
+          44.883
+        ],
+        "first_hs_s": 11.743851116883118,
+        "first_hs_minus_plateau_start_s": 0.04585111688311727,
+        "raw_complete_cycle_count": 21,
+        "right_confirmable_cycle_count_before_left_recovery": 21,
+        "guard_ok": false
+      },
+      {
+        "plateau_index": 2,
+        "interval_s": [
+          47.55,
+          79.897
+        ],
+        "first_hs_s": 48.15884562580645,
+        "first_hs_minus_plateau_start_s": 0.6088456258064525,
+        "raw_complete_cycle_count": 32,
+        "right_confirmable_cycle_count_before_left_recovery": 31,
+        "guard_ok": true
+      },
+      {
+        "plateau_index": 3,
+        "interval_s": [
+          81.231,
+          114.911
+        ],
+        "first_hs_s": 81.72191658741258,
+        "first_hs_minus_plateau_start_s": 0.4909165874125847,
+        "raw_complete_cycle_count": 37,
+        "right_confirmable_cycle_count_before_left_recovery": 37,
+        "guard_ok": true
+      },
+      {
+        "plateau_index": 4,
+        "interval_s": [
+          117.578,
+          149.927
+        ],
+        "first_hs_s": 118.73991022222222,
+        "first_hs_minus_plateau_start_s": 1.1619102222222182,
+        "raw_complete_cycle_count": 26,
+        "right_confirmable_cycle_count_before_left_recovery": 26,
+        "guard_ok": true
+      }
+    ],
+    "one_cycle_prefix_is_insufficient": {
+      "first_retained_hs_s": 13.497819199999999,
+      "warmup_cutoff_s": 13.4078192,
+      "prescribed_complete_cycle_count_before_cutoff": 0
+    },
+    "minimum_valid_prefix_for_plateau_1": {
+      "excluded_complete_cycle_count": 2,
+      "first_retained_hs_s": 15.159757641618498,
+      "warmup_cutoff_s": 15.069757641618498,
+      "eligible_prescribed_warmup_cycle_s": [
+        11.743851116883118,
+        13.497819199999999
+      ],
+      "retained_scoreable_cycle_count_before_right_censor": 19,
+      "minimum_scoreable_cycle_count": 10
+    }
+  },
+  "frozen_boundary_recovery_contract": {
+    "scope": "prescribed_reference_cycles_only_before_any_station_sampling_or_detector_replay",
+    "applies_candidate_independently": true,
+    "applies_identically_to_both_cadences": true,
+    "plateau_rule": "exclude_the_minimum_complete_cycle_prefix_until_first_retained_hs_minus_plateau_start_is_at_least_90ms",
+    "first_plateau_additional_rule": "the_same_minimum_prefix_must_also_leave_at_least_one_complete_prescribed_trial_warmup_cycle_closed_by_first_retained_hs_minus_90ms",
+    "right_boundary_rule_runs_after_left_prefix_recovery": true,
+    "minimum_scoreable_complete_cycles_after_both_boundary_censors": 10,
+    "warmup_cycles_enter_scoring_denominators": false,
+    "excluded_left_prefix_cycles_enter_scoring_denominators": false,
+    "detector_results_may_change_the_prefix": false,
+    "candidate_results_may_change_the_prefix": false,
+    "validation_or_sealed_results_may_change_the_prefix": false,
+    "remove_or_relax_90ms_guard": false
+  },
+  "frozen_invariants": {
+    "split": {
+      "DEVELOPMENT": [
+        "02",
+        "04",
+        "08"
+      ],
+      "VALIDATION": [
+        "05"
+      ],
+      "SEALED": [
+        "06"
+      ],
+      "RESERVE": [
+        "03",
+        "07"
+      ]
+    },
+    "unchanged_from_v14_1": [
+      "trial_analysis_intervals",
+      "plateau_intervals_and_speed_labels",
+      "heel_x_grid",
+      "heel_radius_grid",
+      "toe_down_grid",
+      "toe_radius_grid",
+      "sampling_cadences",
+      "prescribed_grf_thresholds",
+      "detector_profile_and_fsm",
+      "event_tolerances",
+      "dynamic_and_full_gates",
+      "development_ranking_and_selection",
+      "validation_and_sealed_decisions",
+      "holdout_and_reserve_access_barriers"
+    ],
+    "only_scientific_delta": "deterministic_prescribed_left_boundary_prefix_censor",
+    "v14_2_is_not_claimed_as_exact_scientific_core_v14_or_v14_1": true
+  },
+  "trial_02_reuse_contract": {
+    "raw_mat_redecode_allowed": false,
+    "inverse_kinematics_rerun_allowed": false,
+    "source": "byte_locked_v14_1_preprocessed_trial_02",
+    "copy_required_files_byte_identically_into_v14_2_destination": true,
+    "new_v14_2_import_receipt_required_after_ledger_and_before_copy": true,
+    "new_v14_2_preprocessing_lock_required_before_station_sampling": true
+  },
+  "evidence_sources": {
+    "v14_1_protocol": {
+      "path": "validation/two_sensor_cross_speed_v14_1_protocol.json",
+      "sha256": "e263a624e24a13bafd76bf2858f831184914399d188982deb2520f1f383673f1"
+    },
+    "v14_1_execution_ledger": {
+      "path": "validation/two_sensor_cross_speed_v14_1_execution_ledger.json",
+      "sha256": "2db41fde50d009b57a04b9f51b037c0d4c1363ee202aca0f1592c5b85b87847f"
+    },
+    "v14_1_run_start_receipt": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/run_start_receipt.json",
+      "sha256": "b3b6db3d87349e4d182b0494ca57409567b80fd0641d07d0ef07f80d2b135ba8"
+    },
+    "v14_1_failure": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/failure.json",
+      "sha256": "4009aa12a01a1a0943a2525ea29658d6444d35ce09513db9c80625acb085f56d"
+    },
+    "v14_1_trial_02_access_receipt": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/development_trial_02_preprocessing_access_receipt.json",
+      "sha256": "adcab9090ef724621e798a8bf4a5c6988011f9894dc057a101b8b791b126b4e2"
+    },
+    "v14_1_trial_02_preprocessing_lock": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/preprocessed/trial_02/treadmill_02_01_preprocessing_lock.json",
+      "sha256": "fa45f3e98b2dc83313c9e8171ed84114edc87078750379c05843a525e3a963d8"
+    },
+    "v14_1_trial_02_grf": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/preprocessed/trial_02/treadmill_02_01_grf.mot",
+      "sha256": "36de805e73e1c95d303ba6265ee262099e0a88fc46e7351bae0cdce3877d23d3"
+    },
+    "v14_1_trial_02_external_loads": {
+      "path": "validation/two_sensor_cross_speed_v14_1_runs/2026-07-22_ab06_cross_speed_v14_1_recovery/preprocessed/trial_02/treadmill_02_01_ExternalLoads.xml",
+      "sha256": "060c8add7ba26cf1ddf956fbc7445950aab0ee5c889e57024bb2d394a70bc429"
+    }
+  }
+}

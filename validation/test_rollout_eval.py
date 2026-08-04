@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import sys
 import unittest
 from pathlib import Path
@@ -22,6 +23,28 @@ class _Module:
 
 
 class RolloutObservationContractTests(unittest.TestCase):
+    def test_nonnegative_rollout_metric_accepts_finite_values(self) -> None:
+        self.assertEqual(
+            rollout_eval._validated_nonnegative_rollout_metric(
+                0.0, field="metric"
+            ),
+            0.0,
+        )
+        self.assertEqual(
+            rollout_eval._validated_nonnegative_rollout_metric(
+                1.25, field="metric"
+            ),
+            1.25,
+        )
+
+    def test_nonnegative_rollout_metric_rejects_corrupt_values(self) -> None:
+        for value in (-1.0, math.nan, math.inf, -math.inf, True, None):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(RuntimeError, "non-negative"):
+                    rollout_eval._validated_nonnegative_rollout_metric(
+                        value, field="metric"
+                    )
+
     def test_matching_contract_is_accepted(self) -> None:
         rollout_eval._validate_module_observation_contract(
             _Module(),

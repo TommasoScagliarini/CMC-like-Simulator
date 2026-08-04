@@ -72,7 +72,7 @@ from __future__ import annotations
 import os
 import json
 import time as _time
-from typing import Dict
+from typing import Dict, Mapping
 
 import numpy as np
 import opensim
@@ -85,7 +85,11 @@ from outer_loop import OuterLoop
 from inverse_dynamics import InverseDynamicsComputer, compute_udot_bypass
 from static_optimization import StaticOptimizer
 from output import OutputRecorder
-from online_grf import StreamingGaitEventDetector, read_online_grf
+from online_grf import (
+    StreamingGaitEventDetector,
+    online_grf_sensor_channels,
+    read_online_grf,
+)
 
 
 class SegmentWallClockTimeout(RuntimeError):
@@ -98,6 +102,10 @@ class SegmentWallClockTimeout(RuntimeError):
     numerical fault, so callers should always truncate gracefully on it,
     independent of ``fail_fast``.
     """
+
+
+class PhaseSensorSamplingError(RuntimeError):
+    """Raised when the causal 1 ms heel/toe sample contract is violated."""
 
 
 class SimulationRunner:
@@ -202,6 +210,18 @@ class SimulationRunner:
         self._runtime_time: float | None = None
         self._runtime_step: int = 0
         self._last_step_info: dict = {}
+        self._phase_sensor_sample_dt_s = float(
+            getattr(cfg, "detector_sample_dt_s", 0.001)
+        )
+        if (
+            not np.isfinite(self._phase_sensor_sample_dt_s)
+            or self._phase_sensor_sample_dt_s <= 0.0
+        ):
+            raise ValueError("detector_sample_dt_s must be finite and positive.")
+        self._phase_sensor_last_sample_time_s: float | None = None
+        self._phase_sensor_sampling_enabled = bool(
+            len(getattr(ctx, "online_grf_detector_force_paths", [])) == 2
+        )
         self._online_event_detector = None
         self._online_event_force_paths = list(
             getattr(ctx, "online_grf_detector_force_paths", [])
@@ -289,6 +309,7 @@ class SimulationRunner:
         self._runtime_time = t
         self._runtime_step = 0
         self._last_step_info = {}
+        self._phase_sensor_last_sample_time_s = None
         if self._online_event_detector is not None:
             self._online_event_detector.reset()
 
@@ -304,6 +325,12 @@ class SimulationRunner:
         )
         model.realizeVelocity(state)
         model.setControls(state, self._runtime_controls)
+        if self._phase_sensor_sampling_enabled:
+            # Establish and validate the open-left endpoint.  This sample is
+            # intentionally not returned to the policy step and cannot earn
+            # detector/event credit; the first emitted sample is t + 1 ms.
+            self._sample_phase_detector_channels(state, t)
+            self._phase_sensor_last_sample_time_s = t
         return state
 
     def step_until(
@@ -338,6 +365,8 @@ class SimulationRunner:
         _t_control, h_sub_nominal, n_substeps = self._control_loop_timing()
         step_online_events: list[dict] = []
         sea_segment_samples: list[dict[str, dict[str, float]]] = []
+        phase_sensor_samples: list[dict[str, float]] = []
+        phase_segment_start_time_s = float(t)
         wall_timeout_s = float(wall_timeout_s)
         wall_deadline = (
             _time.monotonic() + wall_timeout_s if wall_timeout_s > 0.0 else None
@@ -416,10 +445,23 @@ class SimulationRunner:
 
                 self._runtime_time = t
                 self._runtime_step += 1
+                self._append_phase_sensor_sample(
+                    state,
+                    t,
+                    phase_sensor_samples,
+                )
 
         self._last_step_info["sea_segment_diagnostics"] = (
             self._summarize_sea_segment_diagnostics(sea_segment_samples)
         )
+        self._finalize_phase_sensor_segment(
+            segment_start_time_s=phase_segment_start_time_s,
+            t_stop=t_stop,
+            samples=phase_sensor_samples,
+        )
+        self._last_step_info["phase_sensor_samples"] = [
+            dict(sample) for sample in phase_sensor_samples
+        ]
         return self.last_step_info
 
     def save_results(self) -> None:
@@ -872,7 +914,12 @@ class SimulationRunner:
 
     @staticmethod
     def _online_grf_info(grf: dict) -> dict:
-        """Return JSON-friendly left/right GRF data for step-wise callers."""
+        """Return JSON-friendly aggregate GRF and per-sensor detector data.
+
+        The existing ``left``/``right`` payload is preserved.  ``sensors`` is
+        additive and exposes the heel/toe normal load, penetration and contact
+        flag without forwarding any contact force into the model dynamics.
+        """
         result = {}
         for side in ("left", "right"):
             item = grf["sides"][side]
@@ -885,7 +932,239 @@ class SimulationRunner:
                 "slip_speed": float(item["slip_speed"]),
                 "in_contact": bool(item["in_contact"]),
             }
+        result["sensors"] = online_grf_sensor_channels(grf)
         return result
+
+    def _sample_phase_detector_channels(
+        self,
+        state: opensim.State,
+        time_s: float,
+    ) -> dict[str, float]:
+        """Read the two non-force-applying prosthetic detector channels.
+
+        This deliberately bypasses ``StreamingGaitEventDetector``: it is a
+        sample transport for the high-rate FSM, not a second event producer.
+        The physical primary GRF stream is neither read nor modified here.
+        """
+        ctx = self._ctx
+        detector_paths = list(
+            getattr(ctx, "online_grf_detector_force_paths", [])
+        )
+        if len(detector_paths) != 2:
+            raise PhaseSensorSamplingError(
+                "High-rate phase sampling requires exactly two detector "
+                f"spheres, got {len(detector_paths)}."
+            )
+        detector_grf = read_online_grf(
+            ctx.model,
+            state,
+            detector_paths,
+            ctx.online_grf_detector_force_sides,
+        )
+        channels = online_grf_sensor_channels(detector_grf)
+        required_roles = {"left_heel", "left_toe"}
+        actual_roles = set(channels)
+        if actual_roles != required_roles:
+            raise PhaseSensorSamplingError(
+                "High-rate phase sampling requires exactly left_heel and "
+                f"left_toe detector roles, got {sorted(actual_roles)}."
+            )
+
+        sample: dict[str, float] = {"time_s": float(time_s)}
+        for role, output_name in (
+            ("left_heel", "left_heel_normal_n"),
+            ("left_toe", "left_toe_normal_n"),
+        ):
+            channel = channels.get(role)
+            if not isinstance(channel, Mapping):
+                raise PhaseSensorSamplingError(
+                    f"Detector channel {role!r} is missing or malformed."
+                )
+            try:
+                value = float(channel["normal_load_n"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise PhaseSensorSamplingError(
+                    f"Detector channel {role!r} has no numeric normal load."
+                ) from exc
+            if not np.isfinite(value) or value < 0.0:
+                raise PhaseSensorSamplingError(
+                    f"Detector channel {role!r} is non-finite or negative "
+                    f"at t={float(time_s):.9g}."
+                )
+            sample[output_name] = value
+
+        if not np.isfinite(sample["time_s"]):
+            raise PhaseSensorSamplingError(
+                "Detector sample timestamp must be finite."
+            )
+        self._last_step_info["online_grf_detector"] = self._online_grf_info(
+            detector_grf
+        )
+        return sample
+
+    def _phase_sensor_sampling_is_enabled(self) -> bool:
+        """Return whether the configured detector is the two-sensor contract."""
+        configured = getattr(self, "_phase_sensor_sampling_enabled", None)
+        if configured is not None:
+            return bool(configured)
+        return bool(
+            len(getattr(self._ctx, "online_grf_detector_force_paths", [])) == 2
+        )
+
+    def _append_phase_sensor_sample(
+        self,
+        state: opensim.State,
+        time_s: float,
+        samples: list[dict[str, float]],
+    ) -> None:
+        """Append one sample on the reset-anchored detector lattice.
+
+        Integrator states before the next 1 ms boundary are ignored.  Crossing
+        a boundary, revisiting it, or moving backwards is a hard error because
+        interpolation would silently change the detector semantics.
+        """
+        if not self._phase_sensor_sampling_is_enabled():
+            return
+        current = float(time_s)
+        if not np.isfinite(current):
+            raise PhaseSensorSamplingError(
+                "Detector sample timestamp must be finite."
+            )
+        previous = self._phase_sensor_last_sample_time_s
+        if previous is None:
+            raise PhaseSensorSamplingError(
+                "Detector sampling baseline is missing; reset_to_time() must "
+                "establish the open-left endpoint first."
+            )
+        dt = float(self._phase_sensor_sample_dt_s)
+        tolerance = max(1e-12, dt * 1e-7)
+        delta = current - float(previous)
+        if delta < -tolerance:
+            raise PhaseSensorSamplingError(
+                "Detector sample timestamps are non-monotonic: "
+                f"{current:.12g} follows {float(previous):.12g}."
+            )
+        if abs(delta) <= tolerance:
+            raise PhaseSensorSamplingError(
+                f"Duplicate detector sample timestamp {current:.12g}."
+            )
+
+        expected = float(previous) + dt
+        if current < expected - tolerance:
+            return
+        if current > expected + tolerance:
+            raise PhaseSensorSamplingError(
+                "Missing detector sample: expected "
+                f"{expected:.12g}, reached {current:.12g}."
+            )
+
+        sample = self._sample_phase_detector_channels(state, expected)
+        for key in (
+            "time_s",
+            "left_heel_normal_n",
+            "left_toe_normal_n",
+        ):
+            try:
+                value = float(sample[key])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise PhaseSensorSamplingError(
+                    f"Detector sample field {key!r} is missing or malformed."
+                ) from exc
+            if not np.isfinite(value) or (key != "time_s" and value < 0.0):
+                raise PhaseSensorSamplingError(
+                    f"Detector sample field {key!r} is non-finite or invalid."
+                )
+            sample[key] = value
+        if samples and sample["time_s"] <= samples[-1]["time_s"] + tolerance:
+            raise PhaseSensorSamplingError(
+                "Detector segment contains duplicate or non-monotonic samples."
+            )
+        samples.append(sample)
+        self._phase_sensor_last_sample_time_s = expected
+
+    def _finalize_phase_sensor_segment(
+        self,
+        *,
+        segment_start_time_s: float,
+        t_stop: float,
+        samples: list[dict[str, float]],
+    ) -> None:
+        """Validate the open-left/closed-right segment before publishing it."""
+        if not self._phase_sensor_sampling_is_enabled():
+            if samples:
+                raise PhaseSensorSamplingError(
+                    "Detector samples exist without a configured detector."
+                )
+            return
+        start = float(segment_start_time_s)
+        stop = float(t_stop)
+        dt = float(self._phase_sensor_sample_dt_s)
+        tolerance = max(1e-12, dt * 1e-7)
+        duration = stop - start
+        if duration < -tolerance:
+            raise PhaseSensorSamplingError(
+                "Detector segment end precedes its start."
+            )
+        if abs(duration) <= tolerance:
+            if samples:
+                raise PhaseSensorSamplingError(
+                    "A zero-duration detector segment must contain no samples."
+                )
+            return
+
+        count_float = duration / dt
+        expected_count = int(round(count_float))
+        if expected_count <= 0 or abs(count_float - expected_count) > 1e-7:
+            raise PhaseSensorSamplingError(
+                "Detector segment is not aligned to detector_sample_dt_s: "
+                f"duration={duration:.12g}, dt={dt:.12g}."
+            )
+        if len(samples) != expected_count:
+            raise PhaseSensorSamplingError(
+                "Detector segment is incomplete: expected "
+                f"{expected_count} samples, got {len(samples)}."
+            )
+        for index, sample in enumerate(samples, start=1):
+            expected_time = start + index * dt
+            try:
+                sample_time = float(sample["time_s"])
+                heel_force = float(sample["left_heel_normal_n"])
+                toe_force = float(sample["left_toe_normal_n"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise PhaseSensorSamplingError(
+                    "Detector segment contains a malformed sample."
+                ) from exc
+            if (
+                not np.isfinite(sample_time)
+                or not np.isfinite(heel_force)
+                or not np.isfinite(toe_force)
+                or heel_force < 0.0
+                or toe_force < 0.0
+            ):
+                raise PhaseSensorSamplingError(
+                    "Detector segment contains a non-finite or invalid sample."
+                )
+            if abs(sample_time - expected_time) > tolerance:
+                raise PhaseSensorSamplingError(
+                    "Detector segment contains a duplicate, non-monotonic, "
+                    "missing, or off-grid timestamp."
+                )
+        expected_first = start + dt
+        expected_last = stop
+        if (
+            abs(float(samples[0]["time_s"]) - expected_first) > tolerance
+            or abs(float(samples[-1]["time_s"]) - expected_last) > tolerance
+        ):
+            raise PhaseSensorSamplingError(
+                "Detector segment violates (previous_time, t_stop] boundaries."
+            )
+        if (
+            self._phase_sensor_last_sample_time_s is None
+            or abs(self._phase_sensor_last_sample_time_s - stop) > tolerance
+        ):
+            raise PhaseSensorSamplingError(
+                "Detector endpoint was not sampled exactly once."
+            )
 
     def _sample_online_grf(
         self,
@@ -931,7 +1210,15 @@ class SimulationRunner:
                 detector_paths,
                 ctx.online_grf_detector_force_sides,
             )
-            vertical_forces = {}
+            detector_event_sides = {
+                str(side).strip().lower()
+                for side in getattr(
+                    ctx,
+                    "online_grf_detector_force_sides",
+                    {},
+                ).values()
+                if str(side).strip().lower() in {"left", "right"}
+            }
             for side in ("left", "right"):
                 item = detector_grf["sides"][side]
                 force = np.asarray(item["force"], dtype=float)
@@ -949,9 +1236,27 @@ class SimulationRunner:
                     raise FloatingPointError(
                         f"Non-finite detector online GRF at t={t:.4f} for {side}."
                     )
-                vertical_forces[side] = float(force[1])
+                # A detector profile may intentionally cover only one side
+                # (for example the prosthetic left foot).  It owns event
+                # detection only for configured sides; uncovered sides keep
+                # their primary-GRF event signal instead of being zeroed by
+                # the empty aggregate returned by ``read_online_grf``.
+                if side in detector_event_sides:
+                    vertical_forces[side] = float(force[1])
 
-        if getattr(ctx, "grf_mode", "prescribed") == "online":
+        grf_mode = str(getattr(ctx, "grf_mode", "prescribed")).strip().lower()
+        if grf_mode == "online":
+            force_applying_sides = {"left", "right"}
+        elif grf_mode == "online_sensor":
+            force_applying_sides = {
+                str(side).strip().lower()
+                for side in getattr(ctx, "online_grf_applied_sides", [])
+                if str(side).strip().lower() in {"left", "right"}
+            }
+        else:
+            force_applying_sides = set()
+
+        if force_applying_sides:
             mass = float(ctx.model.getTotalMass(state))
             max_force = (
                 float(getattr(self._cfg, "online_grf_max_force_bw", 5.0))
@@ -960,11 +1265,11 @@ class SimulationRunner:
             )
             side_forces = [
                 np.asarray(grf["sides"][side]["force"], dtype=float)
-                for side in ("left", "right")
+                for side in sorted(force_applying_sides)
             ]
             peak = max(
                 *(float(np.linalg.norm(force)) for force in side_forces),
-                float(np.linalg.norm(side_forces[0] + side_forces[1])),
+                float(np.linalg.norm(np.sum(side_forces, axis=0))),
             )
             if peak > max_force:
                 raise FloatingPointError(
@@ -974,7 +1279,7 @@ class SimulationRunner:
             max_penetration = float(
                 getattr(self._cfg, "online_grf_max_penetration_m", 0.03)
             )
-            for side in ("left", "right"):
+            for side in sorted(force_applying_sides):
                 penetration = float(grf["sides"][side]["penetration"])
                 if penetration > max_penetration:
                     raise FloatingPointError(

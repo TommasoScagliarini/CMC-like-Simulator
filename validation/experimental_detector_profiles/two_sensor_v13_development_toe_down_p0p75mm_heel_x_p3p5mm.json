@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "source": "v13_post_sealed_development_baseline",
+  "ground": {
+    "origin": [0.0, 0.0148208231, 0.0],
+    "normal": [0.0, 1.0, 0.0],
+    "surface_velocity": [0.0, 0.0, 0.0]
+  },
+  "material": {
+    "stiffness": 46291.9265,
+    "dissipation": 0.1920624923,
+    "static_friction": 0.2981956025,
+    "dynamic_friction": 0.2981956025,
+    "viscous_friction": 0.0,
+    "transition_velocity": 0.2,
+    "smoothing": 0.00001
+  },
+  "spheres": [
+    {
+      "name": "left_heel",
+      "side": "left",
+      "frame": "/bodyset/foot_l",
+      "location": [-0.0946600475, -0.0353195377, 0.01399567],
+      "radius": 0.0229053623
+    },
+    {
+      "name": "left_toe",
+      "side": "left",
+      "frame": "/bodyset/foot_l",
+      "location": [0.11574858501553537, -0.051879237903540584, 0.0030479021621026177],
+      "radius": 0.0229053623
+    }
+  ],
+  "metadata": {
+    "status": "development_baseline_sealed_fail_not_runtime_promoted",
+    "human_alias": "V13 development baseline",
+    "baseline_id": "two_sensor_v13_development_baseline",
+    "baseline_generation": "V13",
+    "candidate_id": "toe_down_p0p75mm__heel_x_p3p5mm",
+    "geometry_origin": "V12 frozen primary evaluated by the V13 sealed protocol",
+    "designation_date": "2026-07-22",
+    "designation_authority": "explicit post-run user decision",
+    "designation_scope": "canonical development comparator only",
+    "supersedes_development_baseline": "two_sensor_v9_H2p50_X3p25_F79p0_P35p00",
+    "sealed_validation": {
+      "conclusion": "PRIMARY_SEALED_FAIL",
+      "passed": false,
+      "sealed_validated": false,
+      "runtime_promoted": false,
+      "training_promoted": false
+    },
+    "geometry_delta_from_v9": {
+      "heel_local_x_mm": 3.5,
+      "toe_local_y_plantar_mm": 0.75,
+      "heel_radius_change_mm": 0.0,
+      "toe_radius_change_mm": 0.0
+    },
+    "lineage": {
+      "candidate_lock": {
+        "path": "validation/two_sensor_sealed_candidate_lock_v13.json",
+        "sha256": "9c062463592b896e5ca6a08b946b3c47b8ea4fa1815943b8b039b846117546cd"
+      },
+      "sealed_manifest": {
+        "path": "validation/two_sensor_sealed_runs/2026-07-22_ab06_100_155p045_v13/manifest.json",
+        "sha256": "d55d31188fe3fe853af6618377c6fa5e8cba9f865db9194078820322ed8877a9"
+      },
+      "historical_v9_profile": {
+        "path": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+        "sha256": "e08a7582776b41e883ae50cfce9ce53b5f6508c00b73ca54957afc98d01a4489"
+      }
+    },
+    "allowed_uses": [
+      "offline development comparison",
+      "diagnostic prescribed replay",
+      "starting geometry for a preregistered future search"
+    ],
+    "forbidden_uses": [
+      "claiming a sealed PASS",
+      "runtime activation",
+      "policy training or inference",
+      "retuning against the consumed V13 sealed interval"
+    ],
+    "contract": "exactly one prosthetic heel detector and one prosthetic forefoot detector; detector-only, never a GRF generator"
+  }
+}

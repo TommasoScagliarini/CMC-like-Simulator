@@ -1,0 +1,96 @@
+{
+  "schema_version": 17,
+  "manifest_id": "AB06_TWO_SENSOR_HIGH_RATE_V17_MANIFEST_2026-08-03",
+  "event_contract_id": "primary_grf_split_v1+two_sensor_highrate_v1",
+  "status": "CONTRACT_AND_CANONICAL_ORACLE_FROZEN_AWAITING_V17_DEVELOPMENT_REPLAY",
+  "created_date": "2026-08-03",
+  "candidate": {
+    "path": "validation/experimental_detector_profiles/two_sensor_v17_high_rate_v13_geometry.json",
+    "sha256": "2225823282743b55f2cbd3bdcb8c345f3d2e3b878bd0646283a4cc0b739df0bc",
+    "sensor_count": 2,
+    "roles": ["left_heel", "left_toe"],
+    "applies_force": false,
+    "geometry": "exact_V13",
+    "runtime_promoted": false,
+    "training_promoted": false
+  },
+  "frozen_contracts": {
+    "v17_high_rate": {
+      "path": "validation/two_sensor_v17_high_rate_contract.json",
+      "sha256": "2ed12e96de2c90cf5b764294a388ac3ceb4078115a31faa08bf0b58a38136ba7"
+    },
+    "primary_grf_core": {
+      "path": "validation/primary_grf_core_lock_2026-08-03.json",
+      "sha256": "e9347bb5e5d04e84ce96f5c3ed354e154d26d0bc5abb750dc68bb8b79d0c06ac"
+    }
+  },
+  "implementation_sources": {
+    "canonical_oracle_builder": {
+      "path": "validation/build_canonical_grf_event_oracle.py",
+      "sha256": "246c7cb326c209fe5bf732e3c5b2d3a9125b33d3cb3208378f7ded0bd7c40a89"
+    },
+    "canonical_oracle_tests": {
+      "path": "validation/test_canonical_grf_event_oracle.py",
+      "sha256": "d7d3f5859d200aa470e75cb77f2388ab8700fc899b67b3d40b6778ae2afc3a0b"
+    },
+    "static_contract_validator": {
+      "path": "validation/validate_two_sensor_v17_contract.py",
+      "sha256": "92cc5fe82f2829780bdbde997e7e7a81883d4cc09ef6cc1d77a01e6c275ed59b"
+    },
+    "static_contract_tests": {
+      "path": "validation/test_two_sensor_v17_contract.py",
+      "sha256": "0afd615a8a9b4db9f0d3b9694b3072fa6f88e04187528d85e02aa4bde58c2cb4"
+    }
+  },
+  "lineage": {
+    "v13_nonselectable_comparator": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v13_development_toe_down_p0p75mm_heel_x_p3p5mm.json",
+      "sha256": "06e442bed2e4d2a2bc61f64e3379332d5e8d90695bcc9123585b0fbd008894fc",
+      "status": "development_baseline_sealed_fail_not_runtime_promoted"
+    },
+    "global_data_access_audit": {
+      "path": "validation/global_data_access_audit_2026-07-23.json",
+      "sha256": "296f7fed463fff07a0125f12b0bbbc8dcff2176cb02f406d6437bd88380ab694"
+    }
+  },
+  "canonical_development_oracles": {
+    "manifest": {
+      "path": "validation/canonical_event_oracles/2026-08-03_v17_development/manifest.json",
+      "sha256": "c743fe0e177e3f5e2c5d12cb4e4def79f18fcfa9dd0fb2b3c018f92364c58ccd"
+    },
+    "trials": ["02", "04", "08"],
+    "plateau_views_per_trial": 4,
+    "shared_by_consumers": ["sequential_1ms", "batched_10ms_same_samples"],
+    "consumer_rethresholding_allowed": false
+  },
+  "static_validation": {
+    "path": "validation/two_sensor_v17_static_validation_2026-08-03.json",
+    "sha256": "4f295f88a10bca908f2e0d0a2a79c97aaa2aa17d693518bccbac964df65f4a9f",
+    "status": "PASS",
+    "scope": "primary core hashes, hybrid routing, detector force isolation, exact V13 geometry and closed protected-data routes"
+  },
+  "gate_state": {
+    "PRIMARY_CONTRACT_FROZEN": "PASS_STATIC_HASH_AND_ROUTING",
+    "CANONICAL_ORACLE_FROZEN": "PASS_DEVELOPMENT_02_04_08_ONLY",
+    "TWO_SENSOR_HIGH_RATE_DEVELOPMENT_READY": "NOT_RUN",
+    "H0_TWO_SENSOR_CANDIDATE_READY": "NOT_RUN",
+    "TWO_SENSOR_EVENT_READY": "NOT_RUN_PROTECTED_CLOSED",
+    "CORRIDOR_TRAINING_READY": "NOT_RUN"
+  },
+  "data_access": {
+    "development_trials_opened": ["02", "04", "08"],
+    "validation_trial_05_opened": false,
+    "sealed_trial_06_opened": false,
+    "reserve_trial_03_opened": false,
+    "reserve_trial_07_opened": false,
+    "historical_trial_01_used_for_v17": false
+  },
+  "decision_contract": {
+    "single_candidate": true,
+    "v13_can_rescue_or_replace_v17": false,
+    "retuning_or_geometry_search_allowed": false,
+    "protected_access_authorized_by_this_manifest": false,
+    "promotion_authorized_by_this_manifest": false,
+    "training_authorized_by_this_manifest": false
+  }
+}

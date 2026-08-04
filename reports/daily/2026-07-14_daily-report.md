@@ -2,9 +2,10 @@
 
 Instruction check token: CMC_AGENT_OK_2026
 
-## Report utente consolidato
+## Report utente consolidati
 
 - `reports/user/2026-07-14_capacita_learning_e_robustezza_multistart.md`
+- `reports/user/2026-07-14_sampling_ppo_bilanciato_e_gate_robusto.md`
 
 ## Sintesi
 
@@ -124,6 +125,83 @@ quindi due limiti distinti:
 Il gate deterministico aveva accettato iter2 perche' vedeva un miglioramento
 medio, ma non includeva il worst case stocastico.
 
+## 7. Sampling PPO esattamente bilanciato nel Learner
+
+La seconda parte della giornata ha corretto il contratto di sampling, andando
+oltre il semplice bilanciamento del numero di EnvRunner. Ogni update usa ora
+esattamente:
+
+| Start | Transizioni reali |
+| --- | ---: |
+| `1,7568709838 s` | 1.536 |
+| `1,9568709838 s` | 1.536 |
+| `2,1568709838 s` | 1.536 |
+| **Totale** | **4.608** |
+
+Ray produceva inizialmente 4.622 righe post-GAE, comprendenti 14 righe di
+bootstrap. La pipeline introdotta:
+
+- conserva soltanto le transizioni reali tramite `loss_mask`;
+- compatta il batch da 4.622 a 4.608 righe;
+- riordina tutte le colonne timestep-aligned in round-robin fra i tre start;
+- limita a uno il massimo run-length della stessa condizione;
+- usa nove minibatch da 512 e una sola epoca.
+
+Ogni minibatch contiene `171/171/170` campioni dei tre start, ruotando la
+condizione da 170. La modalita' exact-start fallisce in modo chiuso se i
+conteggi, la compaction, l'interleaving o il numero di epoche non rispettano il
+contratto.
+
+## 8. Gate reserve condition-matched e update PPO conservativo
+
+Il precedente cap globale delle reserve e' stato sostituito con confronti fra
+candidato e H0 nella stessa condizione:
+
+| Condizione | Reserve H0 |
+| --- | ---: |
+| deterministico `-0,20 s` | 548,830304 Nm |
+| deterministico nominale | 493,828205 Nm |
+| deterministico `+0,20 s` | 624,679256 Nm |
+| stocastico `+0,20 s / seed 123` | 596,196563 Nm |
+
+L'update PPO da H0 con learning rate `5e-7` e' risultato numericamente reale e
+controllato:
+
+- RMS del delta dei parametri actor: `6,282e-7`;
+- massimo delta assoluto: `3,718e-6`;
+- action-mean RMSE: `9,890e-5`;
+- KL empirico medio: `0,0003913`;
+- KL massimo sui minibatch: `0,001052326`;
+- log-standard-deviation invariata.
+
+I tre rollout deterministici completano 500 step e rispettano i cap reserve.
+Il caso stocastico `+0,20 s / seed 123` termina invece a 212 step, con
+penetrazione `25,009760 mm` e reserve `673,419582 Nm`. Il candidato viene
+quindi respinto: l'actor ha imparato, ma ha ristretto il proprio bacino di
+recovery.
+
+## 9. Unico esperimento di recovery preregistrato
+
+La recovery adaptation e' ripartita da un actor bit-exact a H0. Il dataset
+contiene 8.000 ancore H0 e 210 righe recovery derivate da 105 stati visitati
+prima del mismatch FSM. Il fit raw migliora l'RMSE offline del `7,15%`, ma
+viola il guard di preservazione e viene fermato prima dei rollout.
+
+Come preregistrato, e' stata applicata una sola proiezione deterministica verso
+H0, con `alpha=0,0733499862`. Il candidato proiettato recupera il caso critico
+stocastico e completa tutti e quattro i rollout, ma fallisce il gate reserve:
+
+| Condizione | Delta reserve rispetto a H0 | Esito |
+| --- | ---: | --- |
+| deterministico `-0,20 s` | `+0,226292 Nm` | FAIL |
+| deterministico nominale | `-0,533073 Nm` | PASS |
+| deterministico `+0,20 s` | `+2,996802 Nm` | FAIL |
+| stocastico `+0,20 s / seed 123` | `-8,895669 Nm` | PASS |
+
+Il miglioramento del caso critico e' reale, ma seed e trace erano parte della
+costruzione del dataset e due condizioni deterministiche regrediscono. Anche
+questo candidato e' stato respinto e nessun seed held-out e' stato aperto.
+
 ## Decisione finale
 
 Nessun checkpoint actor aggiornato e' stato promosso. La baseline canonica
@@ -149,6 +227,24 @@ che imparano a scapito della robustezza stocastica.
 - `validation/test_compare_rollout_traces.py`
 - `validation/test_analyze_stochastic_rollouts.py`
 
+Ulteriori file modificati nella seconda parte della giornata:
+
+- `Trajectory Generator/baseline_MLP/start_sampling.py`
+- `Trajectory Generator/baseline_MLP/start_condition_metrics.py`
+- `Trajectory Generator/baseline_MLP/train_ppo_mlp.py`
+- `Trajectory Generator/baseline_MLP/tb_logging.py`
+- `Trajectory Generator/baseline_MLP/training_config.py`
+- `Trajectory Generator/baseline_MLP/rollout_eval.py`
+- `validation/robust_ppo_gate.py`
+- `validation/test_start_sampling.py`
+- `validation/test_start_condition_metrics.py`
+- `validation/test_tb_logging_start_metrics.py`
+- `validation/test_training_start_balance.py`
+- `validation/test_robust_ppo_gate.py`
+- `validation/test_rollout_eval.py`
+
+Non sono stati modificati plugin C++, modello SEA, reward o soglie fisiche.
+
 ## Test e verifiche
 
 - test focalizzati configuratori e analizzatori: `18/18` PASS;
@@ -161,25 +257,54 @@ che imparano a scapito della robustezza stocastica.
 - `git diff --check`: PASS;
 - nessun processo training o rollout lasciato attivo.
 
-## TODO aperti e propagati
+Verifiche aggiuntive del sampling e della recovery:
 
-- [ ] Ripartire da H0, non da iter2-iter5.
-- [ ] Inserire nel gate di ogni update i tre start deterministici e almeno il
-      worst case `+0.20 s`, seed 123, stocastico a `sigma=0.005`.
-- [ ] Bilanciare esattamente il sampling dei tre start; usare un numero di
-      EnvRunner multiplo di tre o una riduzione esplicita per start.
+- suite completa `validation/test_*.py`: `131/131` PASS;
+- smoke configurazione: `75/75` PASS;
+- test focalizzati target-domain: `10/10` PASS;
+- restore completo da H0: PASS;
+- actor sorgente adaptation bit-exact a H0: PASS;
+- save/reload della proiezione bit-exact: PASS;
+- logstd e pesi non-actor della proiezione invariati: PASS;
+- nessuna promozione o copia del candidato: verificato.
+
+## TODO chiusi il 14/7
+
+- [x] Ripartire dal full checkpoint H0, non da iter2-iter5.
+- [x] Inserire nel gate i tre start deterministici e il worst case
+      `+0,20 s / seed 123` a `sigma=0.005`.
+- [x] Bilanciare esattamente i tre start anche nel batch realmente visto dal
+      Learner.
+- [x] Rimuovere le righe bootstrap e attestare l'interleaving round-robin.
+- [x] Rendere il gate reserve condition-matched rispetto a H0.
+- [x] Monitorare il picco reserve insieme a durata, cicli, penetrazione e
+      clipping.
+- [x] Verificare una recovery preregistrata senza promuovere il candidato in
+      caso di regressione.
+
+## TODO ancora aperti e propagati
+
 - [ ] Analizzare return e advantage separatamente per start, evitando che la
       media globale sacrifichi il worst case.
 - [ ] Solo dopo un gate completo a `sigma=0.005`, riprovare `sigma=0.0075` su
       almeno tre seed per ciascuno dei tre start.
-- [ ] Se nessun update supera il gate, intervenire sul protocollo di
-      ottimizzazione robusta o su dati on-policy di recovery. Non modificare
-      reward, soglia da 25 mm o informazioni actor per forzare il PASS.
-- [ ] Monitorare e limitare esplicitamente il picco reserve nei futuri H2,
-      oltre a durata, cicli, penetrazione e clipping.
+- [ ] Non eseguire altri dimezzamenti della learning rate o altre proiezioni
+      sulla stessa trace/seed: l'evidenza corrente non li giustifica.
+- [ ] Raccogliere recovery data realmente event-aligned e indipendenti,
+      includendo la regione successiva al mismatch FSM.
+- [ ] Separare rigorosamente seed di costruzione, validation e gate held-out.
+- [ ] Eseguire gli held-out soltanto dopo un PASS completo della matrice base.
+- [ ] Mantenere sampling interleaved, singola epoca e reserve
+      condition-matched nei prossimi esperimenti.
+- [ ] Non allentare reward, soglia da 25 mm, cap reserve o contratto actor per
+      forzare un PASS.
+- [ ] Promuovere un checkpoint soltanto dopo il PASS di tutti i gate
+      preregistrati.
 - [ ] Estendere la validazione a trial, velocita' e soggetti differenti prima
       di dichiarare deployment validato.
 - [ ] La memoria Markov del controller e' presente e validata; una memoria
       ricorrente resta differita finche' non emerge un limite sequenziale.
 - [ ] Spiegare il TO precoce rifiutato nella seconda stance dell'oracolo
       multi-ciclo, TODO storico ancora aperto.
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta,
+      TODO storico ancora aperto dal 13/6.

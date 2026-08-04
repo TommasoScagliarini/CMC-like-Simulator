@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "audit_id": "AB06_PRIMARY_GRF_MODEL_COMPATIBILITY_2026-07-24",
+  "status": "PASS",
+  "decision": "IK_GEOMETRY_COMPATIBLE_WITH_RUNTIME_MODEL",
+  "created_date": "2026-07-24",
+  "scope": {
+    "ik_source_model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA.osim",
+      "sha256": "98cfcbc4f7155ea4576f583654fbd50a6e8bd2f2f33ff0894c9f3f24dce5fa8d"
+    },
+    "runtime_model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "protected_trials_opened": [],
+    "comparison_method": "XML elements compared after stripping comments and insignificant whitespace, normalizing namespace-local tag names, and sorting attributes"
+  },
+  "topology_checks": {
+    "body_set": {
+      "match": true,
+      "canonical_sha256": "9c67532fbaac6df79ab129fb4146d5c8ceb4aa8d622092b0e2a1dbca9490d7ce"
+    },
+    "joint_set": {
+      "match": true,
+      "canonical_sha256": "0d29690db451a65fc78103b90d8fed4148fa0f6f4780845aa8fc66fc3e47896b"
+    },
+    "marker_set": {
+      "match": true,
+      "canonical_sha256": "568a4a79511ab602526cfa02af68a676e7be58b8fb92ca5d601793468394c988"
+    },
+    "constraint_set": {
+      "match": true,
+      "canonical_sha256": "6d00e6c7dcc38d6d8190c6031c68a689e745eadfaa3c091261bcf221c0fc5c30"
+    },
+    "contact_geometry_set": {
+      "match": true,
+      "canonical_sha256": "14c80289963867dfab8176e366dd3b57de211701ed479049bea4d9911a8fff61"
+    },
+    "controller_set": {
+      "match": true,
+      "canonical_sha256": "9c7accd1883e51ad73f5ef3d06699ce6ba06bc5742b1621d9caf77cfbc7e7903"
+    },
+    "coordinate_names": {
+      "match": true,
+      "count": 21
+    },
+    "body_names": {
+      "match": true,
+      "count": 11
+    },
+    "marker_names": {
+      "match": true,
+      "count": 28
+    },
+    "joint_counts": {
+      "match": true,
+      "custom": 8,
+      "pin": 2,
+      "weld": 1
+    }
+  },
+  "force_set_audit": {
+    "force_count_source": 78,
+    "force_count_runtime": 78,
+    "force_identity_keys_match": true,
+    "changed_components": [
+      {
+        "type": "SeriesElasticActuator",
+        "name": "SEA_Knee",
+        "change_scope": [
+          "stiffness",
+          "Kp",
+          "Kd",
+          "Ki_added",
+          "integral_torque_limit_added"
+        ]
+      },
+      {
+        "type": "SeriesElasticActuator",
+        "name": "SEA_Ankle",
+        "change_scope": [
+          "stiffness",
+          "Kp",
+          "Kd",
+          "Ki_added",
+          "integral_torque_limit_added"
+        ]
+      }
+    ],
+    "unexpected_changed_components": []
+  },
+  "interpretation": {
+    "ik_coordinate_mapping_compatible": true,
+    "primary_contact_geometry_compatible": true,
+    "prescribed_kinematic_replay_effect": "SEA actuator parameter changes do not alter the coordinate, body, joint, marker, or foot-mesh geometry used to interpret the frozen IK trajectories.",
+    "forward_runtime_effect": "Forward runs intentionally use the tuned SEA parameters in the runtime model; they are not claimed bit-identical to the IK source model dynamics."
+  },
+  "checks": [
+    {
+      "id": "all_kinematic_and_contact_geometry_subtrees_match",
+      "status": "PASS"
+    },
+    {
+      "id": "coordinate_names_and_counts_match",
+      "status": "PASS"
+    },
+    {
+      "id": "only_two_expected_sea_components_changed",
+      "status": "PASS"
+    },
+    {
+      "id": "no_protected_trial_outcome_access",
+      "status": "PASS"
+    }
+  ],
+  "failed_checks": []
+}

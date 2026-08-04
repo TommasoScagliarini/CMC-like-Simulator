@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "lock_id": "AB06_TWO_SENSOR_V12_PRIMARY_SEALED_LOCK_2026-07-22_V13",
+  "freeze_date": "2026-07-22",
+  "frozen_before_sealed_access": true,
+  "authorization": "explicit_user_authorization_to_freeze_v12_primary_and_open_the_sealed_block",
+  "lineage": {
+    "v12_protocol": {
+      "path": "validation/two_sensor_toe_compensation_sweep_protocol_v12.json",
+      "sha256": "4db3fbd31494f30916d658c5af18ca31f3fb8e64e66878072ddf20d6fc01302b"
+    },
+    "v12_manifest": {
+      "path": "validation/two_sensor_toe_compensation_sweep_runs/2026-07-22_ab06_open_13p946_100_v12/manifest.json",
+      "sha256": "fea71b6ede2b55a95f866cd50e8b5eb7367b8ad370e523751da7e7eb4c9311a1"
+    },
+    "v12_runtime_10ms_csv": {
+      "path": "validation/two_sensor_toe_compensation_sweep_runs/2026-07-22_ab06_open_13p946_100_v12/toe_compensation_v12_runtime_10ms_metrics.csv",
+      "sha256": "989f3f91888c7270d75dbf0ec90fd43b8085f710ce54cf5af006b2ebbe5138c2"
+    },
+    "v12_fine_1ms_csv": {
+      "path": "validation/two_sensor_toe_compensation_sweep_runs/2026-07-22_ab06_open_13p946_100_v12/toe_compensation_v12_fine_1ms_metrics.csv",
+      "sha256": "93f76c6ab4601d35629ccd3bc956c80fc0b95dbef06128e9624ed437d6bf289c"
+    },
+    "v9_profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v9_H2p50_X3p25_F79p0_P35p00.json",
+      "sha256": "e08a7582776b41e883ae50cfce9ce53b5f6508c00b73ca54957afc98d01a4489"
+    },
+    "v9_manifest": {
+      "path": "validation/two_sensor_timing_placement_sweep_runs/2026-07-22_ab06_50_100_heel_micro_v9/manifest.json",
+      "sha256": "98be213bb620096251bd4a9006e1338867c05f2c6646f8ee48ba7bcdaca2c057"
+    }
+  },
+  "primary": {
+    "candidate_id": "toe_down_p0p75mm__heel_x_p3p5mm",
+    "role": "single_frozen_primary_sealed_candidate",
+    "v12_candidate_record_sha256": "08707df347a861f742f7c3e6ccb7768a3d4901eeb7aeb6f3f520d3fe1f110ecf",
+    "heel_location_m": [-0.0946600475, -0.0353195377, 0.01399567],
+    "toe_location_m": [0.11574858501553537, -0.051879237903540584, 0.0030479021621026177],
+    "heel_radius_m": 0.0229053623,
+    "toe_radius_m": 0.0229053623,
+    "heel_x_shift_from_v9_mm": 3.5,
+    "toe_center_down_from_v9_mm": 0.75
+  },
+  "sensitivity": {
+    "candidate_id": "toe_down_p0p7mm__heel_x_p3p5mm",
+    "role": "nonselectable_sensitivity_only",
+    "v12_candidate_record_sha256": "40cfd5f928c62fe68071b7a84c2bfbed98911cbbe2b501f4a21fc52bc5cb904a",
+    "heel_location_m": [-0.0946600475, -0.0353195377, 0.01399567],
+    "toe_location_m": [0.11574858501553537, -0.05182923790354058, 0.0030479021621026177],
+    "heel_radius_m": 0.0229053623,
+    "toe_radius_m": 0.0229053623,
+    "heel_x_shift_from_v9_mm": 3.5,
+    "toe_center_down_from_v9_mm": 0.7
+  },
+  "historical_comparator": {
+    "candidate_id": "v9_baseline",
+    "role": "nonselectable_heel_off_diagnostic_only",
+    "heel_location_m": [-0.0981600475, -0.0353195377, 0.01399567],
+    "toe_location_m": [0.11574858501553537, -0.051129237903540584, 0.0030479021621026177],
+    "heel_radius_m": 0.0229053623,
+    "toe_radius_m": 0.0229053623,
+    "heel_x_shift_from_v9_mm": 0.0,
+    "toe_center_down_from_v9_mm": 0.0
+  },
+  "decision_contract": {
+    "primary_alone_determines_sealed_pass_fail": true,
+    "sensitivity_can_rescue_primary_failure": false,
+    "sensitivity_can_replace_primary": false,
+    "historical_comparator_can_affect_decision": false,
+    "ranking_or_post_hoc_selection_allowed": false,
+    "profile_creation_or_promotion_allowed": false,
+    "runtime_or_training_modification_allowed": false
+  }
+}

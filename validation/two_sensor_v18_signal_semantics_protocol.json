@@ -1,0 +1,202 @@
+{
+  "schema_version": 18,
+  "protocol_id": "AB06_TWO_SENSOR_SIGNAL_SEMANTICS_2026-08-03_V18",
+  "freeze_date": "2026-08-03",
+  "frozen_before_execution": true,
+  "stage": "development_only_signal_semantics",
+  "event_contract_id": "primary_grf_split_v1+two_sensor_highrate_v1",
+  "objective": "Acquire immutable 1 ms V17 heel/toe traces, select one of exactly three fixed signal semantics on trial 04, challenge it on trial 02, and open trial 08 only after a frozen finalist PASS.",
+  "authorization": {
+    "kind": "explicit_user_authorized_new_cycle_after_v17_terminal_fail",
+    "date": "2026-08-03",
+    "v17_receipt_remains_immutable": true,
+    "v17_fail_is_not_reclassified": true
+  },
+  "split": {
+    "DIAGNOSIS_CHALLENGE": ["02"],
+    "SELECTION": ["04"],
+    "INTERNAL_HOLDOUT": ["08"],
+    "VALIDATION_CLOSED": ["05"],
+    "SEALED_CLOSED": ["06"],
+    "RESERVE_CLOSED": ["03", "07"],
+    "HISTORICAL_EXCLUDED": ["01"],
+    "FORBIDDEN": ["01", "03", "05", "06", "07"]
+  },
+  "sampling": {
+    "sample_dt_s": 0.001,
+    "policy_step_s": 0.01,
+    "continuous_absolute_time_grid": true,
+    "t0_initializes_without_event": true,
+    "reuse_v14_2_preprocessing_only": true,
+    "raw_reconversion_allowed": false,
+    "ik_rerun_allowed": false,
+    "trial_intervals_s": {
+      "02": [9.875, 153.08],
+      "04": [12.485, 156.025],
+      "08": [10.69, 154.89]
+    },
+    "expected_sample_counts": {
+      "02": 143206,
+      "04": 143541,
+      "08": 144201
+    },
+    "trace_columns": [
+      "time_s",
+      "left_heel_normal_n",
+      "left_toe_normal_n",
+      "left_heel_penetration_m",
+      "left_toe_penetration_m"
+    ],
+    "selection_acquisition_trials": ["02", "04"],
+    "holdout_open_condition": "frozen finalist passes every selection gate on 04 and every challenge gate on 02"
+  },
+  "detector": {
+    "sensor_on_threshold_n": 0.5,
+    "sensor_off_threshold_n": 0.25,
+    "sensor_dwell_s": 0.03,
+    "policy_step_s": 0.01
+  },
+  "semantics": {
+    "candidate_ids": [
+      "heel_only",
+      "first_stable_regional",
+      "combined_load"
+    ],
+    "heel_only": {
+      "heel_strike": "stable heel ON while HS-armed",
+      "toe_off": "both regional latches stable OFF"
+    },
+    "first_stable_regional": {
+      "heel_strike": "first stable ON among heel and toe while HS-armed",
+      "tie_break": "earliest onset, then heel",
+      "toe_off": "both regional latches stable OFF"
+    },
+    "combined_load": {
+      "signal": "left_heel_normal_n + left_toe_normal_n",
+      "heel_strike": "combined latch stable ON while HS-armed",
+      "toe_off": "combined latch stable OFF"
+    },
+    "new_hs_requires_stable_clear": true,
+    "geometry_sweep_allowed": false,
+    "threshold_or_dwell_sweep_allowed": false,
+    "trial_specific_rule_allowed": false
+  },
+  "oracle": {
+    "canonical_ledgers_only": true,
+    "consumer_contract": "consume scoreable_events verbatim at both cadences; never threshold prescribed GRF in a consumer",
+    "v14_or_v15_cadence_reference_allowed": false,
+    "oracle_reconstruction_allowed": false
+  },
+  "evaluation": {
+    "selection_trial": "04",
+    "challenge_trial": "02",
+    "internal_holdout_trial": "08",
+    "consumption_modes": [
+      "sequential_1ms",
+      "batched_10ms_same_samples"
+    ],
+    "eligibility_requires_all_units_and_aggregate_pass": true,
+    "best_of_failures_allowed": false,
+    "gates": {
+      "exact_event_counts_order_and_cycles": true,
+      "precision": 1.0,
+      "recall": 1.0,
+      "minimum_f1": 0.95,
+      "minimum_iou": 0.9,
+      "maximum_confirmed_hs_error_s": 0.05,
+      "maximum_confirmed_to_error_s": 0.08,
+      "maximum_delivered_hs_error_s": 0.06,
+      "maximum_delivered_to_error_s": 0.09,
+      "maximum_delivery_after_confirmation_s": 0.01,
+      "minimum_toe_clear_s": 0.03,
+      "maximum_invalid_timeout_or_forbidden_count": 0,
+      "all_metrics_finite": true,
+      "sequential_batch_exact_parity": true
+    },
+    "ranking_tuple": [
+      "worst_normalized_latency_ratio",
+      "p95_abs_delivered_hs_error_ms",
+      "p95_abs_delivered_to_error_ms",
+      "negative_minimum_f1",
+      "negative_minimum_iou",
+      "semantic_rank"
+    ],
+    "semantic_rank": {
+      "heel_only": 0,
+      "first_stable_regional": 1,
+      "combined_load": 2
+    },
+    "holdout_is_internal_not_scientifically_virgin": true
+  },
+  "sources": {
+    "v18_plan": {
+      "path": "reports/plans/2026-08-03_piano_detector_v18_semantica_segnale.md",
+      "sha256": "ff882c17deac38d807aedf3f9c9567125298491a5c22c3beb55f2d58124d9c53"
+    },
+    "v18_acquisition_runner": {
+      "path": "validation/acquire_two_sensor_v18_raw_traces.py",
+      "sha256": "59babb1419e0220ac3805309824631cf3d55accb48e16cab3ef676e0bb8d059e"
+    },
+    "v18_acquisition_tests": {
+      "path": "validation/test_two_sensor_v18_raw_trace_acquisition.py",
+      "sha256": "1cac47d386a796ea787414019b9748e735ae57c097cab40ba2837274e7292ef6"
+    },
+    "v15_protocol": {
+      "path": "validation/two_sensor_v15_routing_protocol.json",
+      "sha256": "b18b884239af363dcd08c70101b3416587577d4e5629a124bb843a30caab92a9"
+    },
+    "v15_runner": {
+      "path": "validation/diagnose_two_sensor_v15_routing.py",
+      "sha256": "0548507a123a5bccf9c3739bc995b0fcf0f5a80021b19fd342cae4502f6a107f"
+    },
+    "v17_profile": {
+      "path": "validation/experimental_detector_profiles/two_sensor_v17_high_rate_v13_geometry.json",
+      "sha256": "2225823282743b55f2cbd3bdcb8c345f3d2e3b878bd0646283a4cc0b739df0bc"
+    },
+    "v17_contract": {
+      "path": "validation/two_sensor_v17_high_rate_contract.json",
+      "sha256": "2ed12e96de2c90cf5b764294a388ac3ceb4078115a31faa08bf0b58a38136ba7"
+    },
+    "v17_failure_receipt": {
+      "path": "validation/two_sensor_v17_development_runs/2026-08-03_v13_fine_1ms_evidence/development_gate_receipt.json",
+      "sha256": "f2412d28721083fe2a5e654e937ad2dba4da00e0e1185118f56c4dd5cd6077fc"
+    },
+    "canonical_oracle_manifest": {
+      "path": "validation/canonical_event_oracles/2026-08-03_v17_development/manifest.json",
+      "sha256": "c743fe0e177e3f5e2c5d12cb4e4def79f18fcfa9dd0fb2b3c018f92364c58ccd"
+    },
+    "canonical_oracle_trial_02": {
+      "path": "validation/canonical_event_oracles/2026-08-03_v17_development/trial_02_canonical_event_ledger.json",
+      "sha256": "acfb502bd742055dda49ae9f5398900f87f33368c434e986c98fae127c98894d"
+    },
+    "canonical_oracle_trial_04": {
+      "path": "validation/canonical_event_oracles/2026-08-03_v17_development/trial_04_canonical_event_ledger.json",
+      "sha256": "4f48813bd8c6bd5117cd52926e9dc921b01296dc548c0d51f3799171d398f813"
+    },
+    "canonical_oracle_trial_08": {
+      "path": "validation/canonical_event_oracles/2026-08-03_v17_development/trial_08_canonical_event_ledger.json",
+      "sha256": "aa0cf5a2b044bcf5faecf012e8eac5a3693a48459b9dfabc1317536288021f16"
+    },
+    "primary_core_lock": {
+      "path": "validation/primary_grf_core_lock_2026-08-03.json",
+      "sha256": "e9347bb5e5d04e84ce96f5c3ed354e154d26d0bc5abb750dc68bb8b79d0c06ac"
+    }
+  },
+  "decision_contract": {
+    "selection_requires_full_pass": true,
+    "finalist_must_pass_trial_02_before_trial_08": true,
+    "failure_is_terminal_without_rescue_or_reselection": true,
+    "maximum_output": "TWO_SENSOR_V18_DEVELOPMENT_READY",
+    "h0_or_protected_stage_auto_open_allowed": false
+  },
+  "non_actions": {
+    "primary_grf_modification_allowed": false,
+    "contact_or_cpp_plugin_modification_allowed": false,
+    "sea_semantics_modification_allowed": false,
+    "detector_geometry_modification_allowed": false,
+    "training_allowed": false,
+    "h0_execution_allowed": false,
+    "protected_or_reserve_access_allowed": false,
+    "runtime_promotion_allowed": false
+  }
+}

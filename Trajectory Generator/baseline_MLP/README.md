@@ -82,6 +82,14 @@ generati automaticamente; eventuali flag CLI restano override.
   dal grafo dei gradienti e registra il digest prima/dopo ogni iterazione. Il
   critic caldo va continuato da `checkpoint_last`; gli export `rl_module_*`
   sono inference-only e rimuovono intenzionalmente il value tower.
+- **Inizializzazione ex-novo**: `--warm-start` ripristina il checkpoint completo
+  della baseline canonica H0 (actor adattato, critic caldo, optimizer e stato
+  PPO). `--warm-start-raw` mantiene il precedente trapianto actor-only in un
+  Algorithm nuovo; le opzioni sorgente dedicate iniziano con
+  `--warm-start-raw-source` e gli alias storici restano accettati.
+- **Resume generico**: `--resume-from <checkpoint>` resta il comando tecnico per
+  continuare un checkpoint arbitrario o un training interrotto; non è un alias
+  di H0.
 - **`action_mode`**: `absolute` è l'unica modalità di produzione e **non** è nel
   YAML; `delta`/`raw` restano flag CLI solo per diagnostica.
 - **Layout risultati**: training in `Trajectory Generator/runs/training`;
@@ -156,9 +164,10 @@ python "visualize.py" --mlp --save
   aggiornata, elimina gli eventuali discendenti Ray e ritenta la stessa
   iterazione da `checkpoint_last`. `--max-consecutive-crash-restarts` limita i
   tentativi senza avanzamento del checkpoint.
-- `--resume-from <checkpoint>` ripristina manualmente lo stato completo RLlib.
-  Usare `--checkpoint-every 1` per perdere al massimo una singola iterazione in
-  caso di restart.
+- `--resume-from <checkpoint>` ripristina manualmente lo stato completo RLlib;
+  `--warm-start` è il preset che punta alla baseline H0 canonica. Usare
+  `--checkpoint-every 1` per perdere al massimo una singola iterazione in caso
+  di restart.
 - `rollout_eval.py` importa Torch/RLlib/OpenSim solo nel figlio supervisionato
   e pubblica un heartbeat per ogni reset/step. Prima di run lunghi, eseguire il
   self-test di `process_watchdog.py` e il gate

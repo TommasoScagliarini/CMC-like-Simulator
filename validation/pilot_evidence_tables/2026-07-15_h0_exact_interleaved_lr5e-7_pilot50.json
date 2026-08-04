@@ -1,0 +1,1027 @@
+{
+  "contract": {
+    "arbitrary_score_assigned": false,
+    "checkpoint_copied": false,
+    "checkpoint_promoted": false,
+    "checkpoint_selected": false,
+    "held_out_data_read": false,
+    "operational_failures": [],
+    "ranking_performed": false,
+    "rollouts_launched": false,
+    "screening_complete": true,
+    "training_launched": false
+  },
+  "eligible_logical_iterations": [],
+  "generated_at_utc": "2026-07-15T09:06:25.200856+00:00",
+  "inputs": {
+    "pilot_screen": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/ppo_pilot_screen.json",
+      "sha256": "c24fca54730d7505f383247d4ae97e9a2a3c06b16e00509f7579870c52ec285d"
+    },
+    "policy_drift": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-15_h0_exact_interleaved_lr5e-7_iter2-51_pilot50/policy_drift_from_h0_milestones.json",
+      "sha256": "743c808ca8ae53bd81fbf9a7578db9ab6597b226fa475ac8685e7232c4b9d273"
+    },
+    "protocol": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/pilot_protocols/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50.json",
+      "sha256": "45e2abb226df20bfd1860f5ec22ba1d9e3badc112b89ad62f74fe124f30da3b6"
+    },
+    "selection_addendum": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/pilot_protocols/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_selection_addendum.json",
+      "sha256": "3332b8de1f277a2fcf465c60ac72a23169814a99066902f8ed444d3ca7b67223"
+    },
+    "training_history": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-15_h0_exact_interleaved_lr5e-7_iter2-51_pilot50/train_iterations.jsonl",
+      "sha256": "f7faab4b7798912ec68ccea7aaacf46bbdcac7cbe8e44cefdcd812e7f8f999cc"
+    },
+    "training_summary": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/validation/warm_start_h1_runs/2026-07-15_h0_exact_interleaved_lr5e-7_iter2-51_pilot50/summary.json",
+      "sha256": "e97cef887d8581ab4c50f4e986422f2769857ac271981fb94b2f93d9f87748c7"
+    }
+  },
+  "ok": true,
+  "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/pilot_evidence_tables/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50.json",
+  "preregistered_candidate_ordering": {
+    "cumulative_kl_interpretation": {
+      "candidate_scope": "only_milestones_eligible_under_every_development_gate",
+      "cumulative_means": "direct_H0_to_current_milestone_drift_not_the_sum_of_incremental_update_KLs",
+      "development_trace_set": "the_four_preregistered_fixed_H0_traces",
+      "empirical_kl_max_role": "diagnostic_only_not_a_selection_tie_breaker",
+      "ordering": "ascending",
+      "source_field": "milestones[].kl_reference_to_candidate_mean",
+      "source_report": "policy_drift_from_h0_milestones.json",
+      "statistic": "fixed_observation_aggregate.empirical_kl_reference_to_candidate_mean"
+    },
+    "eligible_set": "only preregistered screened milestones that pass every development gate",
+    "ordering_performed": false,
+    "primary_order": "minimum worst condition-matched reserve ratio versus H0",
+    "selected_logical_iteration": null,
+    "tie_breakers": [
+      "minimum worst penetration ratio versus H0",
+      "minimum cumulative empirical KL versus H0",
+      "earlier pilot update"
+    ]
+  },
+  "rejected_logical_iterations": [
+    2,
+    3,
+    6,
+    11,
+    21,
+    31,
+    41,
+    51
+  ],
+  "row_count": 8,
+  "rows": [
+    {
+      "logical_iteration": 2,
+      "pilot_update_index": 1,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.0003493871281988539,
+        "action_mean_rmse": 9.863970858579506e-05,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "f50259708dcb444f32ee55706c64d1e62dfba6eb45de89bba589b8ed8d7a134e",
+        "empirical_kl_reference_to_candidate_max": 0.002576602911698589,
+        "empirical_kl_reference_to_candidate_mean": 0.00038919173565647567,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": false,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [
+              "steps",
+              "end_reason",
+              "terminated",
+              "truncated",
+              "phase_valid_cycle_count",
+              "grf_penetration_samples",
+              "grf_penetration_max_m",
+              "reserve_norm_samples",
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": -9.760092013755273e-06,
+              "observed_m": 0.025009760092013757,
+              "ratio_vs_h0": 1.0183742505824722,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": -77.22301876057531,
+              "margin_vs_h0_nm": -77.22301976057531,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 673.419582384245,
+              "ratio_vs_h0": 1.1295261069952192,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000002/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "07d22b28a520b3584b2a3173d2cd9de7d5b18370eddbfc26584cc10e0bcc1293"
+            },
+            "steps": 212,
+            "valid_cycles": 1
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": -9.760092013755273e-06,
+          "penetration_ratio_vs_h0_max": 1.0183742505824722,
+          "reserve_margin_to_gate_nm_min": -77.22301876057531,
+          "reserve_ratio_vs_h0_max": 1.1295261069952192
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 217.0,
+        "episode_return_mean": 4.02522308785486,
+        "failed_checks": []
+      }
+    },
+    {
+      "logical_iteration": 3,
+      "pilot_update_index": 2,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.00034224388764891867,
+        "action_mean_rmse": 0.00011681370431970857,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "334f0601d0b9be03e84f2e2b7ee14c05acc360b4c24dbbe82e3f914f8337db2e",
+        "empirical_kl_reference_to_candidate_max": 0.00297841741758742,
+        "empirical_kl_reference_to_candidate_mean": 0.0005458177325659163,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": false,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [
+              "steps",
+              "end_reason",
+              "terminated",
+              "truncated",
+              "phase_valid_cycle_count",
+              "grf_penetration_samples",
+              "grf_penetration_max_m",
+              "reserve_norm_samples",
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": -0.0002508914038838253,
+              "observed_m": 0.025250891403883827,
+              "ratio_vs_h0": 1.0281928941086076,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": -276.35051959200655,
+              "margin_vs_h0_nm": -276.35052059200655,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 872.5470832156763,
+              "ratio_vs_h0": 1.4635224989823434,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000003/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "7e110bdc53e5638c0fa27bbf8ffddede69bad65db8a396cb9c60da017f908869"
+            },
+            "steps": 214,
+            "valid_cycles": 0
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": -0.0002508914038838253,
+          "penetration_ratio_vs_h0_max": 1.0281928941086076,
+          "reserve_margin_to_gate_nm_min": -276.35051959200655,
+          "reserve_ratio_vs_h0_max": 1.4635224989823434
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 464.4166666666667,
+        "episode_return_mean": 39.39410951264481,
+        "failed_checks": []
+      }
+    },
+    {
+      "logical_iteration": 6,
+      "pilot_update_index": 5,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.0006029372900479002,
+        "action_mean_rmse": 0.00014797243578064154,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "3ef44f0af0be4bf6fb7155f4ffa2948fff95785e00d0fe78d1423a2992aae8dd",
+        "empirical_kl_reference_to_candidate_max": 0.008273126102729567,
+        "empirical_kl_reference_to_candidate_mean": 0.0008758337853912298,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": false,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": 0.0002626800757204034,
+              "observed_m": 0.024737319924279598,
+              "ratio_vs_h0": 1.0072807394642496,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": -20.259188620479904,
+              "margin_vs_h0_nm": -20.2591896204799,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 616.4557522441496,
+              "ratio_vs_h0": 1.0339807219473485,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000006/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "f8ff1c59356d258d983eb6c6716cbd37e75ff171a6702e246e598137b1979dee"
+            },
+            "steps": 500,
+            "valid_cycles": 3
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": 0.0002626800757204034,
+          "penetration_ratio_vs_h0_max": 1.0072807394642496,
+          "reserve_margin_to_gate_nm_min": -20.259188620479904,
+          "reserve_ratio_vs_h0_max": 1.0339807219473485
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 364.14285714285717,
+        "episode_return_mean": 18.156312599316518,
+        "failed_checks": []
+      }
+    },
+    {
+      "logical_iteration": 11,
+      "pilot_update_index": 10,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.0005520933651650406,
+        "action_mean_rmse": 0.00016022297662197067,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "b8d9cd167109db21aa4c4870a02acc8b83a88864451a634e547894c0bcf2cb8c",
+        "empirical_kl_reference_to_candidate_max": 0.00750809759709381,
+        "empirical_kl_reference_to_candidate_mean": 0.0010268562247524918,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": true,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "RUN",
+            "failed_checks": [
+              "steps",
+              "end_reason",
+              "terminated",
+              "truncated",
+              "phase_valid_cycle_count",
+              "grf_penetration_samples",
+              "grf_penetration_max_m",
+              "reserve_norm_samples"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": -1.5460815578540593e-05,
+              "observed_m": 0.025015460815578542,
+              "ratio_vs_h0": 1.016804769152924,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 548.8303051401444,
+              "margin_to_gate_nm": 3.870435365735034,
+              "margin_vs_h0_nm": 3.8704343657350364,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 544.9598697744094,
+              "ratio_vs_h0": 0.9929478486582499,
+              "reference_h0_nm": 548.8303041401444
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000011/rollouts/deterministic_minus020/rollout_summary.json",
+              "sha256": "751539d9d7460848d5fdf60691958e7d0e7614b9c8b72e8fc5ca23a79bc73e63"
+            },
+            "steps": 223,
+            "valid_cycles": 1
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "RUN",
+            "failed_checks": [
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": 0.0014356173864685136,
+              "observed_m": 0.023564382613531488,
+              "ratio_vs_h0": 0.9835058464082748,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 493.8282061928707,
+              "margin_to_gate_nm": -53.87500891757912,
+              "margin_vs_h0_nm": -53.87500991757912,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 547.7032151104498,
+              "ratio_vs_h0": 1.1090966642874065,
+              "reference_h0_nm": 493.8282051928707
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000011/rollouts/deterministic_nominal/rollout_summary.json",
+              "sha256": "cd4daeae244999f725c6fada30e579213493aa765ad983e53d66d399791454b4"
+            },
+            "steps": 500,
+            "valid_cycles": 2
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "RUN",
+            "failed_checks": [
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": 0.000699800712239948,
+              "observed_m": 0.024300199287760053,
+              "ratio_vs_h0": 0.9990246188816798,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 624.6792573453804,
+              "margin_to_gate_nm": -10.709086342907085,
+              "margin_vs_h0_nm": -10.709087342907083,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 635.3883436882875,
+              "ratio_vs_h0": 1.0171433375354249,
+              "reference_h0_nm": 624.6792563453804
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000011/rollouts/deterministic_plus020/rollout_summary.json",
+              "sha256": "23db538081eb714d5635b8a34ed17c337ff44482b025c5f3ad30ee279cfd1b1c"
+            },
+            "steps": 500,
+            "valid_cycles": 2
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [],
+            "gate_status": "PASS",
+            "penetration": {
+              "margin_to_strict_gate_m": 0.0003841672972394461,
+              "observed_m": 0.024615832702760555,
+              "ratio_vs_h0": 1.0023338924047565,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": 2.6341306142610392,
+              "margin_vs_h0_nm": 2.6341296142610418,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 593.5624330094087,
+              "ratio_vs_h0": 0.9955817765827615,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000011/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "971e74d62200574111acbf32d1eaefbed5b1a321a57fc7055c69f9050cbf41c8"
+            },
+            "steps": 500,
+            "valid_cycles": 3
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": -1.5460815578540593e-05,
+          "penetration_ratio_vs_h0_max": 1.016804769152924,
+          "reserve_margin_to_gate_nm_min": -53.87500891757912,
+          "reserve_ratio_vs_h0_max": 1.1090966642874065
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 485.6,
+        "episode_return_mean": 44.665682581835995,
+        "failed_checks": []
+      }
+    },
+    {
+      "logical_iteration": 21,
+      "pilot_update_index": 20,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.001267005514546879,
+        "action_mean_rmse": 0.0003590900224584101,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "12e2abcea7def5da309d257207525142e8a2b1b4b28cf879ab82969b58e3c934",
+        "empirical_kl_reference_to_candidate_max": 0.03225551659255477,
+        "empirical_kl_reference_to_candidate_mean": 0.00515782644850998,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": false,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [
+              "steps",
+              "end_reason",
+              "terminated",
+              "truncated",
+              "phase_valid_cycle_count",
+              "grf_penetration_samples",
+              "grf_penetration_max_m",
+              "reserve_norm_samples",
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": -0.00022078991922225982,
+              "observed_m": 0.02522078991922226,
+              "ratio_vs_h0": 1.0269671895528318,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": -272.1636753175078,
+              "margin_vs_h0_nm": -272.1636763175078,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 868.3602389411775,
+              "ratio_vs_h0": 1.4564999085533181,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000021/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "7fb8cd7ba0536d11eeab01dfabaeea3c8f2fcca9a0c4996f81cc2e79a547eb76"
+            },
+            "steps": 214,
+            "valid_cycles": 0
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": -0.00022078991922225982,
+          "penetration_ratio_vs_h0_max": 1.0269671895528318,
+          "reserve_margin_to_gate_nm_min": -272.1636753175078,
+          "reserve_ratio_vs_h0_max": 1.4564999085533181
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 465.375,
+        "episode_return_mean": 42.75831541364731,
+        "failed_checks": []
+      }
+    },
+    {
+      "logical_iteration": 31,
+      "pilot_update_index": 30,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.001627872911167283,
+        "action_mean_rmse": 0.00048809200183990033,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "5a0fba38866f2c1375f617183b3f54033222371457c2ed8ecfe427cfe9b29973",
+        "empirical_kl_reference_to_candidate_max": 0.06688301913439276,
+        "empirical_kl_reference_to_candidate_mean": 0.009529353345524358,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": false,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": 1.0427677437668814e-05,
+              "observed_m": 0.024989572322562333,
+              "ratio_vs_h0": 1.0175522233214993,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": -102.8131022473965,
+              "margin_vs_h0_nm": -102.8131032473965,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 699.0096658710662,
+              "ratio_vs_h0": 1.1724483328031094,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000031/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "24f397d926c00fe2ce2167186fbce4603ad54ceaaf36ea25a565168600d89b52"
+            },
+            "steps": 500,
+            "valid_cycles": 3
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": 1.0427677437668814e-05,
+          "penetration_ratio_vs_h0_max": 1.0175522233214993,
+          "reserve_margin_to_gate_nm_min": -102.8131022473965,
+          "reserve_ratio_vs_h0_max": 1.1724483328031094
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 409.94444444444446,
+        "episode_return_mean": 33.19167081645597,
+        "failed_checks": []
+      }
+    },
+    {
+      "logical_iteration": 41,
+      "pilot_update_index": 40,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.0019382497089653894,
+        "action_mean_rmse": 0.000599591247536044,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "a650eada8aa4a540f21b1ea1415fb0f2ed185790f2b4c14a0ceb2419919bcebd",
+        "empirical_kl_reference_to_candidate_max": 0.10192064992248528,
+        "empirical_kl_reference_to_candidate_mean": 0.014380388458929205,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": false,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [
+              "steps",
+              "end_reason",
+              "terminated",
+              "truncated",
+              "phase_valid_cycle_count",
+              "grf_penetration_samples",
+              "grf_penetration_max_m",
+              "reserve_norm_samples",
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": -2.463739097610662e-05,
+              "observed_m": 0.025024637390976108,
+              "ratio_vs_h0": 1.018980040407154,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": -47.07735792377264,
+              "margin_vs_h0_nm": -47.077358923772636,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 643.2739215474423,
+              "ratio_vs_h0": 1.0789628150766255,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000041/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "1daedb790746eb6d0ecea3f8a1eda3a1c62d08e3a7476b39697b760b0a1de3df"
+            },
+            "steps": 212,
+            "valid_cycles": 1
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": -2.463739097610662e-05,
+          "penetration_ratio_vs_h0_max": 1.018980040407154,
+          "reserve_margin_to_gate_nm_min": -47.07735792377264,
+          "reserve_ratio_vs_h0_max": 1.0789628150766255
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 460.45454545454544,
+        "episode_return_mean": 44.680589258654095,
+        "failed_checks": []
+      }
+    },
+    {
+      "logical_iteration": 51,
+      "pilot_update_index": 50,
+      "policy_drift_from_h0": {
+        "action_mean_abs_max": 0.0024092841622984085,
+        "action_mean_rmse": 0.0007623152156094763,
+        "audit_status": "PASS",
+        "candidate_actor_digest": "97e49b717dcf0b8adb31d732f7131055ca26b36cb0e07301e68b55043de95e2e",
+        "empirical_kl_reference_to_candidate_max": 0.11677459680270619,
+        "empirical_kl_reference_to_candidate_mean": 0.023244982579609885,
+        "logstd_bit_exact": true
+      },
+      "preregistered_ordering_keys": {
+        "eligible_for_ordering": false,
+        "primary_worst_condition_matched_reserve_ratio_vs_h0": null,
+        "tie_breaker_cumulative_empirical_kl_from_h0_mean": null,
+        "tie_breaker_earlier_pilot_update": null,
+        "tie_breaker_worst_penetration_ratio_vs_h0": null
+      },
+      "robustness": {
+        "all_four_observed": false,
+        "all_four_pass": false,
+        "cases": [
+          {
+            "condition": "deterministic_minus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_nominal",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "deterministic_plus020",
+            "execution": "NOT_RUN",
+            "failed_checks": [],
+            "gate_status": "NOT_EVALUATED",
+            "penetration": null,
+            "reason": "critical_stochastic_plus020_failed",
+            "reserve": null,
+            "source_summary": null,
+            "steps": null,
+            "valid_cycles": null
+          },
+          {
+            "condition": "stochastic_plus020_seed123",
+            "execution": "RUN",
+            "failed_checks": [
+              "steps",
+              "end_reason",
+              "terminated",
+              "truncated",
+              "phase_valid_cycle_count",
+              "grf_penetration_samples",
+              "grf_penetration_max_m",
+              "reserve_norm_samples",
+              "reserve_norm_max_nm"
+            ],
+            "gate_status": "FAIL",
+            "penetration": {
+              "margin_to_strict_gate_m": -4.383179551539773e-05,
+              "observed_m": 0.0250438317955154,
+              "ratio_vs_h0": 1.0197616187696077,
+              "strict_gate_m": 0.025
+            },
+            "reserve": {
+              "gate_upper_bound_nm": 596.1965636236697,
+              "margin_to_gate_nm": -47.54804984455848,
+              "margin_vs_h0_nm": -47.548050844558475,
+              "numerical_tolerance_nm": 1e-06,
+              "observed_nm": 643.7446134682282,
+              "ratio_vs_h0": 1.0797523062449652,
+              "reference_h0_nm": 596.1965626236697
+            },
+            "source_summary": {
+              "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/ppo_pilot_screens/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50_retry1/milestone_iteration_000051/rollouts/stochastic_plus020_seed123/rollout_summary.json",
+              "sha256": "1329e443a7e9760912684cb807b86cc51b09386cef516b0923562ecc739b2522"
+            },
+            "steps": 211,
+            "valid_cycles": 1
+          }
+        ],
+        "four_case_status": "FAIL",
+        "worst_observed": {
+          "penetration_margin_to_strict_gate_m_min": -4.383179551539773e-05,
+          "penetration_ratio_vs_h0_max": 1.0197616187696077,
+          "reserve_margin_to_gate_nm_min": -47.54804984455848,
+          "reserve_ratio_vs_h0_max": 1.0797523062449652
+        }
+      },
+      "screen_eligibility": "REJECTED",
+      "training": {
+        "audit_status": "PASS",
+        "episode_len_mean": 500.0,
+        "episode_return_mean": 47.926731582079405,
+        "failed_checks": []
+      }
+    }
+  ],
+  "schema_version": 1,
+  "screened_logical_iterations": [
+    2,
+    3,
+    6,
+    11,
+    21,
+    31,
+    41,
+    51
+  ],
+  "status": "COMPLETE",
+  "table": "ppo_pilot_candidate_evidence"
+}

@@ -256,3 +256,8 @@ Punti non ancora chiusi:
   sostenibile o un problema di scaling della reward/reserve diagnostic.
 - Decidere nel prossimo report se la configurazione corrente va promossa,
   rivista o bloccata.
+
+## TODO storico SEA propagato
+
+- [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta;
+      il punto progettuale del 13/06 non risulta ancora formalmente chiuso.
