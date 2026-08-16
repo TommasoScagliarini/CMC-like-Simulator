@@ -1,0 +1,591 @@
+{
+  "authority": {
+    "actor_fit_authorized": false,
+    "actor_updates_authorized": false,
+    "authority_date": "2026-08-09",
+    "authority_scope": "V12R3_P1_INDEPENDENT_QUALIFICATION_SOURCE_ONLY",
+    "authority_text": "esegui i punti 1-6",
+    "checkpoint_zero_authorized": false,
+    "critic_updates_authorized": false,
+    "design_freeze_source_authorized": true,
+    "future_prerequisite_hash_binding_required": true,
+    "noise_materialization_authorized": false,
+    "offline_teacher_labeling_authorized": false,
+    "positive_morphology_authorized": false,
+    "post_hoc_tuning_authorized": false,
+    "ppo_updates_authorized": false,
+    "qualification_execution_authorized": false,
+    "rescue_authorized": false,
+    "retry_authorized": false,
+    "runtime_promotion_authorized": false,
+    "source_scaffold_authorized": true,
+    "sweep_authorized": false
+  },
+  "checks": {
+    "closed_source_hashes_bound": true,
+    "design_freeze_unoccupied": true,
+    "exact_design_preregistered": true,
+    "qualification_execution_lock_absent": true,
+    "qualification_locked_pending_v12p1s_six_of_six": true,
+    "qualification_noise_root_absent": true,
+    "qualification_protocol_freeze_absent": true,
+    "qualification_run_root_absent": true,
+    "salvage_run_root_absent": true,
+    "schema_125": true,
+    "separate_design_freeze_destination": true,
+    "zero_noise_environment_rollout_update_activity": true
+  },
+  "design_gate": {
+    "checks": {
+      "baseline_original_h0_legacy_exact": true,
+      "candidate_v26_primary_split_exact": true,
+      "exact_p1_identity": true,
+      "morphology_zero": true,
+      "pairwise_tolerance_shape_exact": true,
+      "physical_gate_constants_exact": true,
+      "schema_revision_authority_exact": true,
+      "six_of_six_no_compensation": true,
+      "six_v6_holdouts_exact_and_preexisting": true,
+      "twelve_rollouts_baseline_first": true,
+      "v6_tolerances_unchanged": true
+    },
+    "passed": true
+  },
+  "design_snapshot": {
+    "absolute_rollout_gates": {
+      "binary_phase_sensor_samples": 5000,
+      "blending_enabled": false,
+      "control_windows": 5000,
+      "minimum_valid_cycles": 2,
+      "morphology_weight": 0.0,
+      "penetration_strict_upper_bound_m": 0.025,
+      "raw_sensor_samples": 5000,
+      "safety_latch_enabled": false,
+      "sea_saturation_count": 0,
+      "sea_saturation_fraction": 0.0,
+      "steps": 500,
+      "teacher_enabled": false,
+      "zero_required_counts": [
+        "action_clipped_values",
+        "fallback_count",
+        "timeout_count",
+        "safety_latch_activation_count",
+        "safety_latch_release_count",
+        "safety_intervention_count",
+        "safety_stop_count",
+        "sea_plugin_fallback_count",
+        "so_solver_unaccepted_count",
+        "hard_invalid_count",
+        "invalid_event_count",
+        "nonfinite_count",
+        "routing_failure_count",
+        "step_contract_failure_count",
+        "physical_gate_bypass_count",
+        "multiple_noise_application_count",
+        "noise_application_mismatch_count",
+        "served_action_teacher_dependency_count",
+        "teacher_query_count",
+        "mean_blend_count",
+        "actor_updates",
+        "critic_updates",
+        "ppo_updates"
+      ]
+    },
+    "aggregate": {
+      "allowed_failed_pair_count": 0,
+      "compensation_or_averaging_allowed": false,
+      "post_hoc_tuning_allowed": false,
+      "required_pair_count": 6,
+      "required_passing_pair_count": 6,
+      "rescue_allowed": false,
+      "retry_allowed": false,
+      "runtime_promotion_allowed": false,
+      "sweep_allowed": false
+    },
+    "candidate_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY:p1:ff34e153ae0ac9b6",
+    "candidate_module": {
+      "file_count": 3,
+      "files": [
+        {
+          "path": "class_and_ctor_args.pkl",
+          "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+          "size_bytes": 2262
+        },
+        {
+          "path": "metadata.json",
+          "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+          "size_bytes": 197
+        },
+        {
+          "path": "module_state.pkl",
+          "sha256": "a4331ebff277275abc049732baad49093634168f13efdc1873a45680c9a2fe07",
+          "size_bytes": 604772
+        }
+      ],
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p1/rl_module_target_adapted",
+      "tree_sha256": "ff34e153ae0ac9b6f7b8d7d92766e47eecf087285020ac5332d9bd41170ac3ed"
+    },
+    "holdout_cases": [
+      {
+        "action_seed": null,
+        "action_selection": "deterministic",
+        "case_id": "deterministic_offset_minus_0p30",
+        "episode_start_offset_s": 1.656870983805102,
+        "noise_tape": "Trajectory Generator/baseline_MLP/validation/v12p1q/noise_tapes/deterministic_all_zero.npz",
+        "runtime_seed": 129,
+        "sigma": 0.0
+      },
+      {
+        "action_seed": null,
+        "action_selection": "deterministic",
+        "case_id": "deterministic_offset_plus_0p30",
+        "episode_start_offset_s": 2.256870983805102,
+        "noise_tape": "Trajectory Generator/baseline_MLP/validation/v12p1q/noise_tapes/deterministic_all_zero.npz",
+        "runtime_seed": 129,
+        "sigma": 0.0
+      },
+      {
+        "action_seed": 130,
+        "action_selection": "stochastic",
+        "case_id": "stochastic_nominal_seed_130",
+        "episode_start_offset_s": 1.956870983805102,
+        "noise_tape": "Trajectory Generator/baseline_MLP/validation/v12p1q/noise_tapes/stochastic_seed_130_standard_normal.npz",
+        "runtime_seed": 130,
+        "sigma": 0.005
+      },
+      {
+        "action_seed": 131,
+        "action_selection": "stochastic",
+        "case_id": "stochastic_nominal_seed_131",
+        "episode_start_offset_s": 1.956870983805102,
+        "noise_tape": "Trajectory Generator/baseline_MLP/validation/v12p1q/noise_tapes/stochastic_seed_131_standard_normal.npz",
+        "runtime_seed": 131,
+        "sigma": 0.005
+      },
+      {
+        "action_seed": 132,
+        "action_selection": "stochastic",
+        "case_id": "stochastic_nominal_seed_132",
+        "episode_start_offset_s": 1.956870983805102,
+        "noise_tape": "Trajectory Generator/baseline_MLP/validation/v12p1q/noise_tapes/stochastic_seed_132_standard_normal.npz",
+        "runtime_seed": 132,
+        "sigma": 0.005
+      },
+      {
+        "action_seed": 133,
+        "action_selection": "stochastic",
+        "case_id": "stochastic_nominal_seed_133",
+        "episode_start_offset_s": 1.956870983805102,
+        "noise_tape": "Trajectory Generator/baseline_MLP/validation/v12p1q/noise_tapes/stochastic_seed_133_standard_normal.npz",
+        "runtime_seed": 133,
+        "sigma": 0.005
+      }
+    ],
+    "matrix_order": "BASELINE_SIX_THEN_CANDIDATE_SIX",
+    "pairwise_noninferiority": {
+      "reserve_tolerances": [
+        [
+          "reserve_norm_nm.rms",
+          5.0,
+          0.05
+        ],
+        [
+          "reserve_norm_nm.abs_max",
+          5.0,
+          0.05
+        ],
+        [
+          "residual_norm_nm.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "residual_norm_nm.abs_max",
+          1e-06,
+          0.05
+        ]
+      ],
+      "sea_saturation_nonincreasing": true,
+      "sea_saturation_required_zero": true,
+      "sea_tolerances": [
+        [
+          "pros_knee_angle.torque_error_nm.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.torque_error_nm.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.tau_spring_nm.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.tau_spring_nm.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.tau_spring_rate_nm_s.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.tau_spring_rate_nm_s.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.motor_speed_rad_s.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.motor_speed_rad_s.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.motor_accel_rad_s2.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.motor_accel_rad_s2.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.motor_power_w.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_knee_angle.motor_power_w.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.torque_error_nm.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.torque_error_nm.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.tau_spring_nm.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.tau_spring_nm.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.tau_spring_rate_nm_s.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.tau_spring_rate_nm_s.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.motor_speed_rad_s.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.motor_speed_rad_s.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.motor_accel_rad_s2.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.motor_accel_rad_s2.abs_max",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.motor_power_w.rms",
+          1e-06,
+          0.05
+        ],
+        [
+          "pros_ankle_angle.motor_power_w.abs_max",
+          1e-06,
+          0.05
+        ]
+      ],
+      "tolerance_formula": "max(absolute,relative*abs(baseline))"
+    },
+    "roles": {
+      "baseline": {
+        "actor_id": "original_h0",
+        "actor_input_view": "historical_analog",
+        "actor_module": {
+          "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+          "tree_sha256": "f7f6c898975af109412af8c3f1a338b5076f9fefcec1e2723673fd821f1f13ee"
+        },
+        "actor_updates": 0,
+        "binary_phase_fsm_mode": "disabled",
+        "candidate_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY:p1:ff34e153ae0ac9b6",
+        "contract_id": "original_h0+counterfactual_analog+legacy_events",
+        "critic_updates": 0,
+        "event_contract_id": "legacy_events",
+        "morphology_weight": 0.0,
+        "observation_semantics": "counterfactual_analog",
+        "phase_fsm_input_mode": "legacy_events",
+        "ppo_updates": 0,
+        "primary_load_contract_id": "primary_grf_split_v1",
+        "protected_trials_opened": [],
+        "reserve_trials_opened": [],
+        "role": "baseline",
+        "target_contract_id": "original_h0+counterfactual_analog+legacy_events"
+      },
+      "candidate": {
+        "actor_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY:p1:ff34e153ae0ac9b6",
+        "actor_input_view": "primary_split",
+        "actor_module": {
+          "file_count": 3,
+          "files": [
+            {
+              "path": "class_and_ctor_args.pkl",
+              "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+              "size_bytes": 2262
+            },
+            {
+              "path": "metadata.json",
+              "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+              "size_bytes": 197
+            },
+            {
+              "path": "module_state.pkl",
+              "sha256": "a4331ebff277275abc049732baad49093634168f13efdc1873a45680c9a2fe07",
+              "size_bytes": 604772
+            }
+          ],
+          "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p1/rl_module_target_adapted",
+          "tree_sha256": "ff34e153ae0ac9b6f7b8d7d92766e47eecf087285020ac5332d9bd41170ac3ed"
+        },
+        "actor_updates": 0,
+        "binary_phase_fsm_mode": "binary_active",
+        "candidate_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY:p1:ff34e153ae0ac9b6",
+        "contract_id": "primary_grf_split_v1+binary_point_v25+heel_qualified_fsm_v2",
+        "critic_updates": 0,
+        "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+        "morphology_weight": 0.0,
+        "observation_semantics": "primary_grf_split_v1",
+        "phase_fsm_input_mode": "legacy_events",
+        "ppo_updates": 0,
+        "primary_load_contract_id": "primary_grf_split_v1",
+        "protected_trials_opened": [],
+        "reserve_trials_opened": [],
+        "role": "candidate",
+        "target_contract_id": "primary_grf_split_v1+binary_point_v25+heel_qualified_fsm_v2"
+      }
+    },
+    "rollout_matrix": [
+      {
+        "case_id": "deterministic_offset_minus_0p30",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/baseline/deterministic_offset_minus_0p30",
+        "role": "baseline"
+      },
+      {
+        "case_id": "deterministic_offset_plus_0p30",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/baseline/deterministic_offset_plus_0p30",
+        "role": "baseline"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_130",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/baseline/stochastic_nominal_seed_130",
+        "role": "baseline"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_131",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/baseline/stochastic_nominal_seed_131",
+        "role": "baseline"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_132",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/baseline/stochastic_nominal_seed_132",
+        "role": "baseline"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_133",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/baseline/stochastic_nominal_seed_133",
+        "role": "baseline"
+      },
+      {
+        "case_id": "deterministic_offset_minus_0p30",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/candidate/deterministic_offset_minus_0p30",
+        "role": "candidate"
+      },
+      {
+        "case_id": "deterministic_offset_plus_0p30",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/candidate/deterministic_offset_plus_0p30",
+        "role": "candidate"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_130",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/candidate/stochastic_nominal_seed_130",
+        "role": "candidate"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_131",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/candidate/stochastic_nominal_seed_131",
+        "role": "candidate"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_132",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/candidate/stochastic_nominal_seed_132",
+        "role": "candidate"
+      },
+      {
+        "case_id": "stochastic_nominal_seed_133",
+        "destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12p1q_run_20260809/candidate/stochastic_nominal_seed_133",
+        "role": "candidate"
+      }
+    ]
+  },
+  "freeze_kind": "PRE_SALVAGE_INDEPENDENT_QUALIFICATION_DESIGN",
+  "next_stage": "WAIT_V12P1S_SIX_OF_SIX_THEN_FREEZE_QUALIFICATION_PROTOCOL",
+  "noise_manifest": null,
+  "passed": true,
+  "pipeline_id": "H0_V12R3_P1_V26_SIX_CASE_PAIRED_QUALIFICATION",
+  "protocol_id": "AB06_H0_V12R3_P1_V26_INDEPENDENT_QUALIFICATION",
+  "publication_destination": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12r3_p1_qualification_design_freeze.json",
+  "qualification_access": {
+    "future_prerequisite_hashes": null,
+    "future_prerequisite_requirements": [
+      {
+        "candidate_identity_required": true,
+        "name": "salvage_protocol_freeze",
+        "path": "Trajectory Generator/baseline_MLP/validation/v12p1s/h0_v12r3_p1_salvage_protocol_freeze.json",
+        "required_status": "PASS_H0_V12R3_P1_SALVAGE_PROTOCOL_FREEZE"
+      },
+      {
+        "candidate_identity_required": true,
+        "name": "salvage_execution_lock",
+        "path": "Trajectory Generator/baseline_MLP/validation/v12p1s/h0_v12r3_p1_salvage_execution_lock.json",
+        "required_status": "PASS_H0_V12R3_P1_SALVAGE_EXECUTION_LOCK"
+      },
+      {
+        "candidate_identity_required": true,
+        "name": "salvage_final_development_receipt",
+        "path": "Trajectory Generator/baseline_MLP/validation/v12p1s/h0_v12p1s_run_20260809/finalize/receipt.json",
+        "required_status": "PASS_H0_V12R3_P1_SALVAGE_FINAL_DEVELOPMENT"
+      },
+      {
+        "candidate_identity_required": true,
+        "name": "salvage_terminal_pass_ledger",
+        "path": "Trajectory Generator/baseline_MLP/validation/v12p1s/h0_v12p1s_run_20260809/pipeline_ledger.json",
+        "required_status": "PASS_H0_V12R3_P1_SALVAGE_DEVELOPMENT_TERMINAL"
+      }
+    ],
+    "hash_binding_deferred_until_salvage_terminal_pass": true,
+    "noise_materialization_authorized": false,
+    "qualification_design_frozen": true,
+    "qualification_execution_authorized": false,
+    "qualification_execution_lock": null,
+    "qualification_protocol_freeze": null,
+    "required_salvage_failed_rollout_count": 0,
+    "required_salvage_passing_rollout_count": 6,
+    "required_salvage_rollout_count": 6,
+    "required_salvage_terminal_status": "PASS_H0_V12R3_P1_SALVAGE_DEVELOPMENT_TERMINAL",
+    "runtime_promotion_authorized": false,
+    "status": "LOCKED_PENDING_V12P1S_SIX_OF_SIX_PASS"
+  },
+  "qualification_execution_lock": null,
+  "qualification_protocol_freeze": null,
+  "revision": "2026-08-09",
+  "runtime_promoted": false,
+  "salvage_artifact_hashes": null,
+  "schema_version": 125,
+  "source_gate": {
+    "checks": {
+      "all_hashes_and_sizes_valid": true,
+      "closed_eight_source_list": true,
+      "declared_paths_unique": true,
+      "no_future_open_ended_source_discovery": true,
+      "original_v6_sources_byte_exact": true,
+      "records_match_declared_paths": true
+    },
+    "passed": true
+  },
+  "source_hashes": {
+    "qualification_contract": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12r3_p1_qualification_contract.py",
+      "sha256": "fd0f47e3324e9befd71d1c943a71dbb5dc426cc94f1bbacc4353b54072ed3db9",
+      "size_bytes": 21592
+    },
+    "qualification_contract_and_gates_tests": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12p1q/test_h0_v12r3_p1_qualification_contract_and_gates.py",
+      "sha256": "f1aa19319c1c1d78eccaaee211310895f932440cfb0ec99798bb03f302ec911e",
+      "size_bytes": 28397
+    },
+    "qualification_design_freezer": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12p1q/freeze_h0_v12r3_p1_qualification_design.py",
+      "sha256": "653e4a8193c87fb6cb367ca2d3f9c8d3476ee22a506cd47633e60bf949b78b7a",
+      "size_bytes": 24831
+    },
+    "qualification_design_freezer_tests": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12p1q/test_freeze_h0_v12r3_p1_qualification_design.py",
+      "sha256": "5a73a99a280edac906a9731429a993221e4f40fe0dfb8820f974e9c51e4ce4be",
+      "size_bytes": 10408
+    },
+    "qualification_gates": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12p1q/h0_v12r3_p1_qualification_gates.py",
+      "sha256": "1d12d002cb7b84dee5b095e0f6ae516aedefa9688dfe869b2f08271d35b65487",
+      "size_bytes": 24530
+    },
+    "v6_noise_preparer": {
+      "path": "validation/prepare_h0_primary_split_v6_qualification_noise_tapes.py",
+      "sha256": "1d73370278c46e07b72b43f2b4e6c0fd6d355e3201d95b2f4796c644e8a93248",
+      "size_bytes": 12987
+    },
+    "v6_qualification_contract": {
+      "path": "validation/h0_primary_split_v6_qualification_contract.py",
+      "sha256": "abeb365e786b7f1f4808f6c7d27d8b86f898131a7ede9db406b6e739a17376ec",
+      "size_bytes": 10346
+    },
+    "v6_qualification_gates": {
+      "path": "validation/compare_h0_primary_split_v6_qualification.py",
+      "sha256": "07fb067d580ff93ced95329c6616d409665d9bf0918e49463aa87f232abad371",
+      "size_bytes": 17563
+    }
+  },
+  "status": "PASS_H0_V12R3_P1_QUALIFICATION_DESIGN_FREEZE",
+  "zero_design_activity": {
+    "actor_fit_executions": 0,
+    "actor_updates": 0,
+    "critic_updates": 0,
+    "environment_imports": 0,
+    "environment_reset_calls": 0,
+    "environment_step_calls": 0,
+    "noise_random_draws": 0,
+    "noise_tapes_materialized": 0,
+    "offline_teacher_label_calls": 0,
+    "ppo_updates": 0,
+    "rollout_executions": 0
+  },
+  "zero_design_activity_gate": {
+    "checks": {
+      "all_activity_exactly_zero": true,
+      "closed_zero_schema": true
+    },
+    "passed": true
+  }
+}

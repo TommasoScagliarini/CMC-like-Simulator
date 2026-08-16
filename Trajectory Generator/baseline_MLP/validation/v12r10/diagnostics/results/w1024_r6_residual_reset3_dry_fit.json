@@ -1,0 +1,1120 @@
+{
+  "corpus": {
+    "action_shape": [
+      11875,
+      2
+    ],
+    "observation_shape": [
+      11875,
+      35
+    ],
+    "reset_rows": 26,
+    "rows": 11875,
+    "strata": [
+      "base::deterministic_offset_minus_0p20",
+      "base::deterministic_offset_nominal",
+      "base::deterministic_offset_plus_0p20",
+      "base::stochastic_nominal_seed_126",
+      "base::stochastic_nominal_seed_127",
+      "base::stochastic_nominal_seed_128",
+      "observer::deterministic_offset_minus_0p20",
+      "observer::deterministic_offset_nominal",
+      "observer::deterministic_offset_plus_0p20",
+      "observer::stochastic_nominal_seed_126",
+      "observer::stochastic_nominal_seed_127",
+      "observer::stochastic_nominal_seed_128",
+      "r4_failure::deterministic_offset_plus_0p20"
+    ]
+  },
+  "decision": "REJECT_DIAGNOSTIC_STRATEGY_NO_RETRY",
+  "determinism_replica": {
+    "executed": false,
+    "passed": null,
+    "reason": "preregistered rule: stop after first failed fit"
+  },
+  "diagnostic_source": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r10/diagnostics/dry_fit_w1024_r6_residual.py",
+    "sha256": "945a2181fc8427209a66eb44a5d5846b557b0383af039432ec72f4406b347c9f"
+  },
+  "execution_accounting": {
+    "critic_updates": 0,
+    "diagnostic_fit_processes": 1,
+    "environment_reset_calls": 0,
+    "environment_step_calls": 0,
+    "offline_h0_teacher_queries_per_fit": 0,
+    "offline_h0_teacher_queries_total": 0,
+    "persistent_model_state_writes": 0,
+    "ppo_updates": 0,
+    "production_candidate_created": false,
+    "production_candidate_promoted": false,
+    "temporary_checkpoint_roundtrips_per_fit": 1
+  },
+  "frozen_inputs": {
+    "r6_actor_digest": "3172cf7d34b13c5c13ee4bf5c722ecfa466c85653f41e63774da03100737d986",
+    "r6_manifest_actor_digest": "3172cf7d34b13c5c13ee4bf5c722ecfa466c85653f41e63774da03100737d986",
+    "r9_candidate_tree_sha256": "8bc8554c573f8224ea3fa9d8682d315f9ff30c4aaa1557c4974e4fa422b5d1ff",
+    "r9_corpus_sha256": "1b35d0789d11a0f3bca3cae15c5877ceaf68845bf69ed7231d5a4ecc4d5b9dfe",
+    "r9_gate_sha256": "fe69de6cc8f2ae83bb5838104dd658353a897c95c7ed326a2ec5b605e3af9f2b",
+    "r9_ledger_sha256": "591fdc6ebe6e2a553b24ff210232a0f16185c4bc7b5e33104e34b780a0a18785",
+    "r9_summary_sha256": "88d8318e98e359061d6bb6cbc9cb0f15fffe4af3237474bcbc61a9f2b3e7f44b",
+    "r9_terminal_actor_digest": "7ed67258c97e7108fd6b56f5c94dcc7dc480d89b2a68e40c8c2a46342d364b80"
+  },
+  "limitations": {
+    "interpretation": "acceptance requires the replacement standard-W1024 architecture check plus every unchanged R9 numerical and semantic gate",
+    "known_transition_alias_risk": {
+      "design_changed_after_observation": false,
+      "forensic_interpretation": "legacy teacher timeout transition is not signalled by V26, which remains in STANCE while target action 0 jumps by about 0.18",
+      "implication": "extra capacity may fit the frozen labels but cannot by itself prove that the deployed observation is Markov at this boundary",
+      "observer_case": "deterministic_offset_nominal",
+      "step_window": [
+        385,
+        388
+      ]
+    },
+    "literal_r9_architecture_gate": "necessarily false because its frozen schema requires [512,512]",
+    "production_attestation": false,
+    "rollout_evidence": false
+  },
+  "passed": false,
+  "primary": {
+    "candidate_predictions_sha256": "2aa5c64704163b949525a28a4fd9d3e6688e6f2973fb4fa137fa7ff01f4da48d",
+    "candidate_state_digest": "52aee29da6db7535e8fcfe14f66fa1c7eaa0b95a0ac74fbf5c73b25a1c8fe167",
+    "elapsed_seconds": 319.3506577089429,
+    "history": [
+      {
+        "index": 0,
+        "loss": 0.0003918620070208872,
+        "prediction_abs_max": 0.9016139507293701,
+        "stage": "initial"
+      },
+      {
+        "index": 1,
+        "learning_rate": 0.0003,
+        "loss": 0.0005549365634028421,
+        "prediction_abs_max": 0.8811765909194946,
+        "stage": "adamw"
+      },
+      {
+        "index": 100,
+        "learning_rate": 0.0003,
+        "loss": 0.0002306020475707548,
+        "prediction_abs_max": 0.8991562128067017,
+        "stage": "adamw"
+      },
+      {
+        "index": 250,
+        "learning_rate": 0.0003,
+        "loss": 0.00016577216828106783,
+        "prediction_abs_max": 0.9036516547203064,
+        "stage": "adamw"
+      },
+      {
+        "index": 500,
+        "learning_rate": 0.0003,
+        "loss": 0.00012829169296289092,
+        "prediction_abs_max": 0.9083731174468994,
+        "stage": "adamw"
+      },
+      {
+        "index": 1000,
+        "learning_rate": 0.0003,
+        "loss": 9.89358042716137e-05,
+        "prediction_abs_max": 0.9075779914855957,
+        "stage": "adamw"
+      },
+      {
+        "index": 1500,
+        "learning_rate": 0.0001,
+        "loss": 9.034705425817416e-05,
+        "prediction_abs_max": 0.9070123434066772,
+        "stage": "adamw"
+      },
+      {
+        "index": 2000,
+        "learning_rate": 0.0001,
+        "loss": 8.080914772794388e-05,
+        "prediction_abs_max": 0.9092741012573242,
+        "stage": "adamw"
+      },
+      {
+        "index": 2500,
+        "learning_rate": 3e-05,
+        "loss": 7.758595933594961e-05,
+        "prediction_abs_max": 0.9103020429611206,
+        "stage": "adamw"
+      },
+      {
+        "index": 1,
+        "loss": 7.758595933594961e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 100,
+        "loss": 7.41035713349047e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 250,
+        "loss": 6.913315220677517e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 500,
+        "loss": 6.117999670175843e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 750,
+        "loss": 5.556754074447138e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 1000,
+        "loss": 5.092552673778557e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 1250,
+        "loss": 4.719027122388486e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 1500,
+        "loss": 4.3936274723457105e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 1750,
+        "loss": 4.125598183307837e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 2000,
+        "loss": 3.870926077538381e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 2250,
+        "loss": 3.6422117373082436e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 2500,
+        "loss": 3.4344468090728323e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 2750,
+        "loss": 3.254621936739013e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "index": 3000,
+        "loss": 3.101161451922795e-05,
+        "stage": "lbfgs_closure"
+      },
+      {
+        "global_max_abs_error": 0.11014816164970398,
+        "global_rmse": 0.00610515887072205,
+        "index": 3072,
+        "loss": 3.0605827798686175e-05,
+        "reset_max_abs_error": 0.0015215277671813965,
+        "stage": "terminal_final_state",
+        "w1024_gate_passed": false
+      }
+    ],
+    "initial_equivalence": {
+      "algebra": "R6 + ZERO_HEAD(R9_HIDDEN) = R6",
+      "max_abs_difference": 0.0,
+      "passed": true,
+      "prediction_byte_exact": true,
+      "tolerance": 2e-06
+    },
+    "literal_frozen_r9_gate": {
+      "checks": {
+        "architecture": false,
+        "clock_zero": true,
+        "global": false,
+        "logstd_exact": true,
+        "no_critic_or_ppo": true,
+        "observer_plus_late": true,
+        "observer_recovery": false,
+        "per_case": false,
+        "r4_recovery": true,
+        "reset": true,
+        "save_reload_exact": true,
+        "single_fit": true
+      },
+      "passed": false,
+      "status": "FAIL_H0_V12R9_RECOVERY_FIT"
+    },
+    "metrics": {
+      "global_metrics": {
+        "max_abs_error": 0.11014816164970398,
+        "rmse": 0.00610515887072205
+      },
+      "observer_case_metrics": {
+        "deterministic_offset_minus_0p20": {
+          "max_abs_error": 0.030258655548095703,
+          "rmse": 0.003134442461789453
+        },
+        "deterministic_offset_nominal": {
+          "max_abs_error": 0.11014816164970398,
+          "rmse": 0.008250504971831996
+        },
+        "deterministic_offset_plus_0p20": {
+          "max_abs_error": 0.04350152611732483,
+          "rmse": 0.004349979549218157
+        },
+        "stochastic_nominal_seed_126": {
+          "max_abs_error": 0.04028284549713135,
+          "rmse": 0.005274241743071534
+        },
+        "stochastic_nominal_seed_127": {
+          "max_abs_error": 0.054978787899017334,
+          "rmse": 0.006339915641593402
+        },
+        "stochastic_nominal_seed_128": {
+          "max_abs_error": 0.057292480021715164,
+          "rmse": 0.006381373664441752
+        }
+      },
+      "observer_plus_late_metrics": {
+        "max_abs_error": 0.015089623630046844,
+        "rmse": 0.003662380823765028
+      },
+      "per_case_metrics": {
+        "deterministic_offset_minus_0p20": {
+          "max_abs_error": 0.07145321369171143,
+          "rmse": 0.007594633387506469
+        },
+        "deterministic_offset_nominal": {
+          "max_abs_error": 0.05051031708717346,
+          "rmse": 0.004748735532371562
+        },
+        "deterministic_offset_plus_0p20": {
+          "max_abs_error": 0.05239305645227432,
+          "rmse": 0.005039094331712751
+        },
+        "stochastic_nominal_seed_126": {
+          "max_abs_error": 0.05419100075960159,
+          "rmse": 0.00494164955832877
+        },
+        "stochastic_nominal_seed_127": {
+          "max_abs_error": 0.04043031856417656,
+          "rmse": 0.004248926434662601
+        },
+        "stochastic_nominal_seed_128": {
+          "max_abs_error": 0.041411373764276505,
+          "rmse": 0.004483136361179554
+        }
+      },
+      "r4_failed_plus_metrics": {
+        "max_abs_error": 0.03966724872589111,
+        "rmse": 0.005099344219100451
+      },
+      "reset_max_abs_error": 0.0015215277671813965,
+      "worst_row": {
+        "absolute_error": 0.11014816164970398,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_nominal",
+        "row_index": 10259,
+        "step_index": 385,
+        "stratum_id": "observer::deterministic_offset_nominal",
+        "tranche_id": "observer_probe_p0"
+      }
+    },
+    "normalization_fold_equivalence": {
+      "max_abs_difference": 1.7285346984863281e-06,
+      "passed": true,
+      "tolerance": 2e-06
+    },
+    "optimizer": {
+      "adamw_boundaries": [
+        1000,
+        2000,
+        2500
+      ],
+      "adamw_epochs": 2500,
+      "adamw_rates": [
+        0.0003,
+        0.0001,
+        3e-05
+      ],
+      "adamw_weight_decay": 1e-07,
+      "deterministic_algorithms": true,
+      "early_candidate_selection": false,
+      "full_batch": true,
+      "gradient_clip_norm": 10.0,
+      "lbfgs_closure_calls": 3072,
+      "lbfgs_history_size": 50,
+      "lbfgs_lr": 0.7,
+      "lbfgs_max_eval": 4500,
+      "lbfgs_max_iter": 3000,
+      "repair": false,
+      "retry": false,
+      "seed": 20260814,
+      "sweep": false,
+      "terminal_state_only": true,
+      "torch_threads": 5
+    },
+    "passed": false,
+    "runtime_save_reload_warm_start": {
+      "checks": {
+        "actor_prefix_runtime_exact": true,
+        "checkpoint_logits_byte_exact": true,
+        "checkpoint_state_byte_exact": true,
+        "full_input_runtime_exact": true,
+        "inference_only_actor_state": true,
+        "model_config_w1024_tanh": true,
+        "standard_module_class": true,
+        "warm_start_actor_exact": true,
+        "warm_start_critic_preserved": true,
+        "warm_start_forward_exact": true
+      },
+      "mode": "TEMPORARY_REAL_RLMODULE_CHECKPOINT_RELOAD_AND_FULL_MODULE_TRANSPLANT",
+      "passed": true,
+      "runtime_logits_sha256": "5ba8b4a0ad72a2f335e40f8318562185ae5967abaaf1637e8145f8b486c56480",
+      "source_actor_only": true,
+      "target_non_actor_keys_preserved": [
+        "vf.bias",
+        "vf.weight",
+        "vf_encoder.0.bias",
+        "vf_encoder.0.weight",
+        "vf_encoder.2.bias",
+        "vf_encoder.2.weight"
+      ],
+      "temporary_checkpoint_removed": true
+    },
+    "state_audit": {
+      "actor_digest": "3f446c619cfe0bc4faea487a300fc19fa7742a4574b4d1a3938633b03715a01a",
+      "actor_feature_count": 35,
+      "checks": {
+        "clock_columns_positive_zero": true,
+        "encoder_aliases_byte_exact": true,
+        "float32_finite": true,
+        "key_set_exact": true,
+        "logstd_weight_positive_zero": true,
+        "shapes_exact": true
+      },
+      "hidden_dims": [
+        1024,
+        1024
+      ],
+      "passed": true,
+      "state_digest": "52aee29da6db7535e8fcfe14f66fa1c7eaa0b95a0ac74fbf5c73b25a1c8fe167"
+    },
+    "terminal_reset": {
+      "groups": [
+        {
+          "group_id": 1,
+          "label": [
+            0.21946312487125397,
+            0.0005557090044021606
+          ],
+          "labels_byte_exact": true,
+          "max_abs_error": 0.0008418932557106018,
+          "prediction": [
+            0.2197030484676361,
+            -0.00028618425130844116
+          ],
+          "predictions_byte_exact": true,
+          "row_count": 9,
+          "row_indices": [
+            0,
+            3000,
+            4000,
+            5000,
+            6000,
+            6232,
+            7232,
+            7732,
+            9623
+          ],
+          "source_weight_max": 5.905511811023622,
+          "source_weight_min": 0.40021344717182494,
+          "stratum_ids": [
+            "base::deterministic_offset_minus_0p20",
+            "observer::deterministic_offset_minus_0p20"
+          ]
+        },
+        {
+          "group_id": 2,
+          "label": [
+            0.7314267754554749,
+            0.049909159541130066
+          ],
+          "labels_byte_exact": true,
+          "max_abs_error": 0.0015215277671813965,
+          "prediction": [
+            0.7299052476882935,
+            0.04965737462043762
+          ],
+          "predictions_byte_exact": true,
+          "row_count": 14,
+          "row_indices": [
+            500,
+            1500,
+            2000,
+            2500,
+            3500,
+            4500,
+            5500,
+            6732,
+            8232,
+            8732,
+            9875,
+            10375,
+            10875,
+            11375
+          ],
+          "source_weight_max": 2.9880478087649402,
+          "source_weight_min": 0.49800796812749004,
+          "stratum_ids": [
+            "base::deterministic_offset_nominal",
+            "base::stochastic_nominal_seed_126",
+            "base::stochastic_nominal_seed_127",
+            "base::stochastic_nominal_seed_128",
+            "observer::deterministic_offset_nominal",
+            "observer::stochastic_nominal_seed_126",
+            "observer::stochastic_nominal_seed_127",
+            "observer::stochastic_nominal_seed_128"
+          ]
+        },
+        {
+          "group_id": 3,
+          "label": [
+            0.6843923330307007,
+            0.07869928330183029
+          ],
+          "labels_byte_exact": true,
+          "max_abs_error": 0.000607609748840332,
+          "prediction": [
+            0.6837847232818604,
+            0.07879187166690826
+          ],
+          "predictions_byte_exact": true,
+          "row_count": 3,
+          "row_indices": [
+            1000,
+            9232,
+            9444
+          ],
+          "source_weight_max": 8.287292817679559,
+          "source_weight_min": 2.9880478087649402,
+          "stratum_ids": [
+            "base::deterministic_offset_plus_0p20",
+            "observer::deterministic_offset_plus_0p20",
+            "r4_failure::deterministic_offset_plus_0p20"
+          ]
+        }
+      ],
+      "row_count": 26,
+      "unique_effective_state_count": 3
+    },
+    "terminal_stratum_errors": {
+      "base::deterministic_offset_minus_0p20": {
+        "mass": 499.99999999999994,
+        "max_abs_error": 0.07145321369171143,
+        "objective_sse_share": 0.14435144042554113,
+        "rmse": 0.007594633387506469,
+        "row_weight_max": 0.40021344717182494,
+        "row_weight_min": 0.13340448239060831,
+        "rows": 3732,
+        "unweighted_sse_share": 0.4863262430939219
+      },
+      "base::deterministic_offset_nominal": {
+        "mass": 500.0,
+        "max_abs_error": 0.05051031708717346,
+        "objective_sse_share": 0.05646338720112037,
+        "rmse": 0.004748735532371562,
+        "row_weight_max": 1.4940239043824701,
+        "row_weight_min": 0.49800796812749004,
+        "rows": 1000,
+        "unweighted_sse_share": 0.05094814884881343
+      },
+      "base::deterministic_offset_plus_0p20": {
+        "mass": 500.0,
+        "max_abs_error": 0.05239305645227432,
+        "objective_sse_share": 0.06356781112168097,
+        "rmse": 0.005039094331712751,
+        "row_weight_max": 2.9880478087649402,
+        "row_weight_min": 0.9960159362549801,
+        "rows": 500,
+        "unweighted_sse_share": 0.02868450919218668
+      },
+      "base::stochastic_nominal_seed_126": {
+        "mass": 500.0,
+        "max_abs_error": 0.05419100075960159,
+        "objective_sse_share": 0.061143153863077136,
+        "rmse": 0.00494164955832877,
+        "row_weight_max": 0.49800796812749004,
+        "row_weight_min": 0.16600265604249667,
+        "rows": 3000,
+        "unweighted_sse_share": 0.16551508612285715
+      },
+      "base::stochastic_nominal_seed_127": {
+        "mass": 500.0,
+        "max_abs_error": 0.04043031856417656,
+        "objective_sse_share": 0.04520559601574289,
+        "rmse": 0.004248926434662601,
+        "row_weight_max": 2.9880478087649402,
+        "row_weight_min": 0.9960159362549801,
+        "rows": 500,
+        "unweighted_sse_share": 0.020393927455539234
+      },
+      "base::stochastic_nominal_seed_128": {
+        "mass": 500.0,
+        "max_abs_error": 0.041411373764276505,
+        "objective_sse_share": 0.05032526057356192,
+        "rmse": 0.004483136361179554,
+        "row_weight_max": 2.9880478087649402,
+        "row_weight_min": 0.9960159362549801,
+        "rows": 500,
+        "unweighted_sse_share": 0.022704207328095825
+      },
+      "observer::deterministic_offset_minus_0p20": {
+        "mass": 500.0,
+        "max_abs_error": 0.030258655548095703,
+        "objective_sse_share": 0.02450613979819964,
+        "rmse": 0.003134442461789453,
+        "row_weight_max": 5.905511811023622,
+        "row_weight_min": 1.968503937007874,
+        "rows": 252,
+        "unweighted_sse_share": 0.005593628081520289
+      },
+      "observer::deterministic_offset_nominal": {
+        "mass": 500.0,
+        "max_abs_error": 0.11014816164970398,
+        "objective_sse_share": 0.1704161570001474,
+        "rmse": 0.008250504971831996,
+        "row_weight_max": 2.9880478087649402,
+        "row_weight_min": 0.9960159362549801,
+        "rows": 500,
+        "unweighted_sse_share": 0.07689595715043367
+      },
+      "observer::deterministic_offset_plus_0p20": {
+        "mass": 500.0,
+        "max_abs_error": 0.04350152611732483,
+        "objective_sse_share": 0.04703816726557752,
+        "rmse": 0.004349979549218157,
+        "row_weight_max": 8.287292817679559,
+        "row_weight_min": 2.7624309392265194,
+        "rows": 179,
+        "unweighted_sse_share": 0.0076524394770350135
+      },
+      "observer::stochastic_nominal_seed_126": {
+        "mass": 500.0,
+        "max_abs_error": 0.04028284549713135,
+        "objective_sse_share": 0.06964880688066645,
+        "rmse": 0.005274241743071534,
+        "row_weight_max": 2.9880478087649402,
+        "row_weight_min": 0.9960159362549801,
+        "rows": 500,
+        "unweighted_sse_share": 0.03142407551390069
+      },
+      "observer::stochastic_nominal_seed_127": {
+        "mass": 500.0,
+        "max_abs_error": 0.054978787899017334,
+        "objective_sse_share": 0.10063237243251669,
+        "rmse": 0.006339915641593402,
+        "row_weight_max": 2.9880478087649402,
+        "row_weight_min": 0.9960159362549801,
+        "rows": 500,
+        "unweighted_sse_share": 0.045405598534809445
+      },
+      "observer::stochastic_nominal_seed_128": {
+        "mass": 500.0,
+        "max_abs_error": 0.057292480021715164,
+        "objective_sse_share": 0.10195263124400608,
+        "rmse": 0.006381373664441752,
+        "row_weight_max": 2.9880478087649402,
+        "row_weight_min": 0.9960159362549801,
+        "rows": 500,
+        "unweighted_sse_share": 0.0460013733798803
+      },
+      "r4_failure::deterministic_offset_plus_0p20": {
+        "mass": 500.0,
+        "max_abs_error": 0.03966724872589111,
+        "objective_sse_share": 0.06474907617816178,
+        "rmse": 0.005099344219100451,
+        "row_weight_max": 7.009345794392524,
+        "row_weight_min": 2.336448598130841,
+        "rows": 212,
+        "unweighted_sse_share": 0.012454805821006453
+      }
+    },
+    "terminal_top_error_rows": [
+      {
+        "absolute_error": 0.11014816164970398,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_nominal",
+        "prediction": 0.5190258026123047,
+        "reset": false,
+        "row_index": 10259,
+        "source_equal_stratum_weight": 0.9960159362549801,
+        "step_index": 385,
+        "stratum_id": "observer::deterministic_offset_nominal",
+        "target": 0.4088776409626007,
+        "tranche_id": "observer_probe_p0"
+      },
+      {
+        "absolute_error": 0.07145321369171143,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.5027093887329102,
+        "reset": false,
+        "row_index": 410,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 411,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5741626024246216,
+        "tranche_id": "v8r1p1_base"
+      },
+      {
+        "absolute_error": 0.07063041627407074,
+        "action_dimension": 1,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": -0.1429121494293213,
+        "reset": false,
+        "row_index": 6129,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 130,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": -0.07228173315525055,
+        "tranche_id": "observer_probe_p0"
+      },
+      {
+        "absolute_error": 0.06799530982971191,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.5197844505310059,
+        "reset": false,
+        "row_index": 408,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 409,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5877797603607178,
+        "tranche_id": "v8r1p1_base"
+      },
+      {
+        "absolute_error": 0.06723141670227051,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.5137408971786499,
+        "reset": false,
+        "row_index": 409,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 410,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5809723138809204,
+        "tranche_id": "v8r1p1_base"
+      },
+      {
+        "absolute_error": 0.06474065780639648,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.5295734405517578,
+        "reset": false,
+        "row_index": 407,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 408,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5943140983581543,
+        "tranche_id": "v8r1p1_base"
+      },
+      {
+        "absolute_error": 0.0628824234008789,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.2881610691547394,
+        "reset": false,
+        "row_index": 7650,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 419,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.3510434925556183,
+        "tranche_id": "observer_probe_p1"
+      },
+      {
+        "absolute_error": 0.06263330578804016,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.3188314139842987,
+        "reset": false,
+        "row_index": 7648,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 417,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.38146471977233887,
+        "tranche_id": "observer_probe_p1"
+      },
+      {
+        "absolute_error": 0.06242901086807251,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.47487491369247437,
+        "reset": false,
+        "row_index": 6643,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 412,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5373039245605469,
+        "tranche_id": "v12r3_collect_r1"
+      },
+      {
+        "absolute_error": 0.06008899211883545,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.30501022934913635,
+        "reset": false,
+        "row_index": 7649,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 418,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.3650992214679718,
+        "tranche_id": "observer_probe_p1"
+      },
+      {
+        "absolute_error": 0.059915900230407715,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_nominal",
+        "prediction": 0.46303102374076843,
+        "reset": false,
+        "row_index": 10260,
+        "source_equal_stratum_weight": 0.9960159362549801,
+        "step_index": 386,
+        "stratum_id": "observer::deterministic_offset_nominal",
+        "target": 0.4031151235103607,
+        "tranche_id": "observer_probe_p0"
+      },
+      {
+        "absolute_error": 0.05925780534744263,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.5117731094360352,
+        "reset": false,
+        "row_index": 3411,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 412,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5710309147834778,
+        "tranche_id": "dagger_r1_deterministic_offset_minus_0p20"
+      },
+      {
+        "absolute_error": 0.0590786337852478,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.33847081661224365,
+        "reset": false,
+        "row_index": 7647,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 416,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.39754945039749146,
+        "tranche_id": "observer_probe_p1"
+      },
+      {
+        "absolute_error": 0.05770677328109741,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.509303092956543,
+        "reset": false,
+        "row_index": 411,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 412,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5670098662376404,
+        "tranche_id": "v8r1p1_base"
+      },
+      {
+        "absolute_error": 0.057292480021715164,
+        "action_dimension": 1,
+        "case_id": "stochastic_nominal_seed_128",
+        "prediction": 0.04032173380255699,
+        "reset": false,
+        "row_index": 11692,
+        "source_equal_stratum_weight": 0.9960159362549801,
+        "step_index": 318,
+        "stratum_id": "observer::stochastic_nominal_seed_128",
+        "target": 0.09761421382427216,
+        "tranche_id": "observer_probe_p0"
+      },
+      {
+        "absolute_error": 0.05688321590423584,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.5434873104095459,
+        "reset": false,
+        "row_index": 406,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 407,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.6003705263137817,
+        "tranche_id": "v8r1p1_base"
+      },
+      {
+        "absolute_error": 0.05651766061782837,
+        "action_dimension": 1,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": -0.14929038286209106,
+        "reset": false,
+        "row_index": 6132,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 133,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": -0.0927727222442627,
+        "tranche_id": "observer_probe_p0"
+      },
+      {
+        "absolute_error": 0.056396305561065674,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": -0.31004127860069275,
+        "reset": false,
+        "row_index": 7702,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 471,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": -0.2536449730396271,
+        "tranche_id": "observer_probe_p1"
+      },
+      {
+        "absolute_error": 0.05577349662780762,
+        "action_dimension": 0,
+        "case_id": "deterministic_offset_minus_0p20",
+        "prediction": 0.4707547426223755,
+        "reset": false,
+        "row_index": 6644,
+        "source_equal_stratum_weight": 0.13340448239060831,
+        "step_index": 413,
+        "stratum_id": "base::deterministic_offset_minus_0p20",
+        "target": 0.5265282392501831,
+        "tranche_id": "v12r3_collect_r1"
+      },
+      {
+        "absolute_error": 0.054978787899017334,
+        "action_dimension": 0,
+        "case_id": "stochastic_nominal_seed_127",
+        "prediction": 0.46835857629776,
+        "reset": false,
+        "row_index": 11260,
+        "source_equal_stratum_weight": 0.9960159362549801,
+        "step_index": 386,
+        "stratum_id": "observer::stochastic_nominal_seed_127",
+        "target": 0.5233373641967773,
+        "tranche_id": "observer_probe_p0"
+      }
+    ],
+    "tower_isolation": {
+      "checks": {
+        "cross_blocks_positive_zero": true,
+        "logstd_bias_byte_exact": true,
+        "logstd_full_weight_positive_zero": true,
+        "r6_first_bias_byte_exact": true,
+        "r6_first_weight_byte_exact": true,
+        "r6_mean_head_weight_byte_exact": true,
+        "r6_second_bias_byte_exact": true,
+        "r6_second_weight_byte_exact": true
+      },
+      "passed": true
+    },
+    "w1024_gate": {
+      "checks": {
+        "architecture": true,
+        "architecture_w1024_standard": true,
+        "clock_zero": true,
+        "global": false,
+        "logstd_exact": true,
+        "no_critic_or_ppo": true,
+        "observer_plus_late": true,
+        "observer_recovery": false,
+        "per_case": false,
+        "r4_recovery": true,
+        "reset": true,
+        "save_reload_exact": true,
+        "single_fit": true
+      },
+      "offline_thresholds_unchanged": {
+        "global": {
+          "max_abs_error": 0.06,
+          "rmse": 0.006
+        },
+        "observer_case": {
+          "max_abs_error": 0.06,
+          "rmse": 0.006
+        },
+        "per_case": {
+          "max_abs_error": 0.06,
+          "rmse": 0.006
+        },
+        "r4_failed_plus": {
+          "max_abs_error": 0.06,
+          "rmse": 0.006
+        },
+        "reset_max_abs_error": 0.003
+      },
+      "only_gate_schema_change": "architecture [512,512] replaced by explicitly tested standard [1024,1024]; every numerical threshold and other semantic check is the frozen R9 check",
+      "passed": false,
+      "status": "FAIL_H0_V12R10_STANDARD_W1024_UNCHANGED_NUMERICAL_GATES"
+    }
+  },
+  "scope": "DRY_FIT_ONLY_NO_ENVIRONMENT_NO_TEACHER_NO_PUBLICATION",
+  "status": "COMPLETE_H0_V12R10_W1024_R6_RESIDUAL_RESET3_DRY_FIT",
+  "strategy": {
+    "cross_blocks": "PERMANENT_POSITIVE_ZERO",
+    "initial_output": "EXACT_R6",
+    "objective": "R9_EQUAL_STRATUM_UNIFORM_MSE_RESET_ROWS_X3",
+    "retry": false,
+    "selection": false,
+    "single_preregistered_schedule": true,
+    "standard_rlmodule_topology": [
+      35,
+      1024,
+      1024,
+      2
+    ],
+    "strategy_id": "V12R10_STANDARD_W1024_FROZEN_R6_PLUS_TRAINABLE_R9_HIDDEN_V1",
+    "sweep": false,
+    "tower_a": "IMMUTABLE_R6_W512_FUNCTION",
+    "tower_b": "TRAINABLE_W512_RESIDUAL_R9_HIDDEN_ZERO_HEAD_INITIALIZATION",
+    "unchanged_offline_thresholds": {
+      "global": {
+        "max_abs_error": 0.06,
+        "rmse": 0.006
+      },
+      "observer_case": {
+        "max_abs_error": 0.06,
+        "rmse": 0.006
+      },
+      "per_case": {
+        "max_abs_error": 0.06,
+        "rmse": 0.006
+      },
+      "r4_failed_plus": {
+        "max_abs_error": 0.06,
+        "rmse": 0.006
+      },
+      "reset_max_abs_error": 0.003
+    },
+    "weight_audit": {
+      "only_objective_change_from_r9": "RESET_ROWS_MULTIPLIED_BY_3",
+      "policy": "R9_UNIFORM_EQUAL_STRATUM_WITH_RESET_ROWS_X3",
+      "post_renormalization_reset_mass": 51.29628827935477,
+      "pre_renormalization_reset_mass": 51.62317500225187,
+      "reset_multiplier": 3.0,
+      "reset_row_count": 26,
+      "strata": {
+        "base::deterministic_offset_minus_0p20": {
+          "mass": 499.99999999999994,
+          "reset_rows": 8,
+          "reset_weight": 0.40021344717182494,
+          "row_weight_max": 0.40021344717182494,
+          "row_weight_min": 0.13340448239060831,
+          "rows": 3732
+        },
+        "base::deterministic_offset_nominal": {
+          "mass": 500.0,
+          "reset_rows": 2,
+          "reset_weight": 1.4940239043824701,
+          "row_weight_max": 1.4940239043824701,
+          "row_weight_min": 0.49800796812749004,
+          "rows": 1000
+        },
+        "base::deterministic_offset_plus_0p20": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 2.9880478087649402,
+          "row_weight_max": 2.9880478087649402,
+          "row_weight_min": 0.9960159362549801,
+          "rows": 500
+        },
+        "base::stochastic_nominal_seed_126": {
+          "mass": 500.0,
+          "reset_rows": 6,
+          "reset_weight": 0.49800796812749004,
+          "row_weight_max": 0.49800796812749004,
+          "row_weight_min": 0.16600265604249667,
+          "rows": 3000
+        },
+        "base::stochastic_nominal_seed_127": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 2.9880478087649402,
+          "row_weight_max": 2.9880478087649402,
+          "row_weight_min": 0.9960159362549801,
+          "rows": 500
+        },
+        "base::stochastic_nominal_seed_128": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 2.9880478087649402,
+          "row_weight_max": 2.9880478087649402,
+          "row_weight_min": 0.9960159362549801,
+          "rows": 500
+        },
+        "observer::deterministic_offset_minus_0p20": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 5.905511811023622,
+          "row_weight_max": 5.905511811023622,
+          "row_weight_min": 1.968503937007874,
+          "rows": 252
+        },
+        "observer::deterministic_offset_nominal": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 2.9880478087649402,
+          "row_weight_max": 2.9880478087649402,
+          "row_weight_min": 0.9960159362549801,
+          "rows": 500
+        },
+        "observer::deterministic_offset_plus_0p20": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 8.287292817679559,
+          "row_weight_max": 8.287292817679559,
+          "row_weight_min": 2.7624309392265194,
+          "rows": 179
+        },
+        "observer::stochastic_nominal_seed_126": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 2.9880478087649402,
+          "row_weight_max": 2.9880478087649402,
+          "row_weight_min": 0.9960159362549801,
+          "rows": 500
+        },
+        "observer::stochastic_nominal_seed_127": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 2.9880478087649402,
+          "row_weight_max": 2.9880478087649402,
+          "row_weight_min": 0.9960159362549801,
+          "rows": 500
+        },
+        "observer::stochastic_nominal_seed_128": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 2.9880478087649402,
+          "row_weight_max": 2.9880478087649402,
+          "row_weight_min": 0.9960159362549801,
+          "rows": 500
+        },
+        "r4_failure::deterministic_offset_plus_0p20": {
+          "mass": 500.0,
+          "reset_rows": 1,
+          "reset_weight": 7.009345794392524,
+          "row_weight_max": 7.009345794392524,
+          "row_weight_min": 2.336448598130841,
+          "rows": 212
+        }
+      },
+      "stratum_count": 13,
+      "stratum_mass": 500.0,
+      "total_mass": 6500.0,
+      "weights_sha256": "6f5b6ce4f874e4547d3cdca4a9747be305691aab04fb13849aa050b26beeec00"
+    }
+  },
+  "working_directory": "/Users/tommy/Documents/CMC-like-Simulator - Claude"
+}

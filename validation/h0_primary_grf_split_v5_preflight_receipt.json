@@ -1,0 +1,130 @@
+{
+  "actor_updates": 0,
+  "checks": {
+    "actor_updates_zero": true,
+    "critic_updates_zero": true,
+    "ppo_updates_zero": true,
+    "protected_trials_closed": true,
+    "py_compile_pass": true,
+    "pytest_nonrecursive_11_pass": true,
+    "ruff_pass": true,
+    "v3_seed125_semantic_artifacts_absent": true,
+    "v4_preexecution_failure_valid": true,
+    "v5_lock_absent": true,
+    "v5_run_root_absent": true
+  },
+  "commands": {
+    "py_compile": [
+      "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+      "-m",
+      "py_compile",
+      "validation/h0_primary_grf_split_v5_freeze_contract.py",
+      "validation/freeze_h0_primary_grf_split_v5_execution.py",
+      "validation/build_h0_primary_grf_split_v5_preflight_receipt.py",
+      "validation/run_h0_primary_grf_split_v5_full_mean.py",
+      "validation/test_h0_primary_grf_split_v5_contract.py",
+      "validation/test_freeze_h0_primary_grf_split_v5_execution.py",
+      "validation/test_h0_primary_grf_split_v5_full_mean.py"
+    ],
+    "pytest": [
+      "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "validation/test_h0_primary_grf_split_v5_contract.py",
+      "validation/test_freeze_h0_primary_grf_split_v5_execution.py",
+      "validation/test_h0_primary_grf_split_v5_full_mean.py",
+      "-k",
+      "not test_build_payload_is_complete_and_does_not_publish_lock_or_run"
+    ],
+    "ruff": [
+      "/opt/anaconda3/bin/ruff",
+      "check",
+      "validation/h0_primary_grf_split_v5_freeze_contract.py",
+      "validation/freeze_h0_primary_grf_split_v5_execution.py",
+      "validation/build_h0_primary_grf_split_v5_preflight_receipt.py",
+      "validation/run_h0_primary_grf_split_v5_full_mean.py",
+      "validation/test_h0_primary_grf_split_v5_contract.py",
+      "validation/test_freeze_h0_primary_grf_split_v5_execution.py",
+      "validation/test_h0_primary_grf_split_v5_full_mean.py"
+    ]
+  },
+  "critic_updates": 0,
+  "lineage": {
+    "v3_corpus_receipt": {
+      "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v3_semantic_replay/corpus/receipt.json",
+      "sha256": "dc0cdc5e8cfc0a5b195871ba10562449e4147fa5e613e4df460269fdb816493d",
+      "size_bytes": 5883
+    },
+    "v3_execution_ledger": {
+      "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v3_semantic_replay/execution_ledger.json",
+      "sha256": "f3bff5d7f01cb809ad0f407431be116d787170888b17a56507444b837972ca44",
+      "size_bytes": 1061
+    },
+    "v3_failed_offline_gate": {
+      "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v3_semantic_replay/adaptation/offline_gate.json",
+      "sha256": "57bb187c897145e16fe8d5b2edb74a33561c5dfc55074695a0666748a9fa6d19",
+      "size_bytes": 4106
+    },
+    "v4_preexecution_failure": {
+      "path": "validation/h0_primary_grf_split_v4_preexecution_failure.json",
+      "sha256": "93fe125d15a11be51ad79566b3b86a8cfb3d9623ff7bc315faf4ad4ab4462ceb",
+      "size_bytes": 1551
+    }
+  },
+  "passed": true,
+  "ppo_updates": 0,
+  "protected_trials_opened": [],
+  "protocol_id": "AB06_H0_PRIMARY_GRF_SPLIT_V5_FULL_MEAN",
+  "pytest_passed": 11,
+  "recursive_test_exclusion": {
+    "must_pass_after_receipt_publication": true,
+    "reason": "requires the completed preflight receipt",
+    "test": "test_build_payload_is_complete_and_does_not_publish_lock_or_run"
+  },
+  "revision": "2026-08-06",
+  "schema_version": 5,
+  "status": "PASS_H0_PRIMARY_SPLIT_V5_PREFLIGHT_TESTS",
+  "tested_sources": {
+    "contract_tests": {
+      "path": "validation/test_h0_primary_grf_split_v5_contract.py",
+      "sha256": "668ba09ea14677662910fabf8a763288b960ca0f561a5a2e93b479f9f5092dd8",
+      "size_bytes": 3665
+    },
+    "execution_freezer": {
+      "path": "validation/freeze_h0_primary_grf_split_v5_execution.py",
+      "sha256": "36289ab770930cd9f69d96dbf56a1844f5acab6d0ebe7c79df4284b69da13209",
+      "size_bytes": 12924
+    },
+    "freeze_contract": {
+      "path": "validation/h0_primary_grf_split_v5_freeze_contract.py",
+      "sha256": "2065fa8a672df529a15b1fade0a7916851b6180604980bd1cfba1febf5d135d9",
+      "size_bytes": 11966
+    },
+    "freezer_tests": {
+      "path": "validation/test_freeze_h0_primary_grf_split_v5_execution.py",
+      "sha256": "e2f33d36785ed590b7792a543f3343966f4d81302833f3c1b13bbe73b93bd103",
+      "size_bytes": 3812
+    },
+    "plan_addendum": {
+      "path": "reports/plans/2026-08-06_addendum_h0_primary_split_v5_full_mean.md",
+      "sha256": "11d475dab8e925373a3bba4055f9aff901b835340334f4aececfcc08cbc1de9e",
+      "size_bytes": 3973
+    },
+    "preflight_builder": {
+      "path": "validation/build_h0_primary_grf_split_v5_preflight_receipt.py",
+      "sha256": "72f418b0acb6a6d327ee9cbca4834512fe5ece34a93e08bcf1e68b6dfc8f9424",
+      "size_bytes": 6614
+    },
+    "runner": {
+      "path": "validation/run_h0_primary_grf_split_v5_full_mean.py",
+      "sha256": "b4ef0f57f1ca227979a5b6a28069dca572e4e4146bb8ab369536b2ffedf8abdb",
+      "size_bytes": 51978
+    },
+    "runner_tests": {
+      "path": "validation/test_h0_primary_grf_split_v5_full_mean.py",
+      "sha256": "b5fa5ed8cb548461299b33f018b1bf1206ff48d570c7f2d71d7e4cb18df5ab93",
+      "size_bytes": 6137
+    }
+  }
+}

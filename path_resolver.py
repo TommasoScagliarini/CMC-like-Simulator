@@ -45,6 +45,7 @@ class ResolvedSimulatorPaths:
     external_loads_path: Path | None
     online_grf_profile_path: Path | None
     online_grf_detector_profile_path: Path | None
+    binary_phase_detector_profile_path: Path | None
     online_grf_contact_plugin_path: Path
     reserve_actuators_path: Path
     healthy_dir: Path | None
@@ -167,6 +168,10 @@ def resolve_simulator_paths(cfg: "SimulatorConfig") -> ResolvedSimulatorPaths:
         ),
         online_grf_detector_profile_path=_resolve_optional_bundle_input_path(
             bundle_dir, getattr(cfg, "online_grf_detector_profile_file", "")
+        ),
+        binary_phase_detector_profile_path=_resolve_optional_bundle_input_path(
+            bundle_dir,
+            getattr(cfg, "binary_phase_detector_profile_file", ""),
         ),
         online_grf_contact_plugin_path=resolve_repo_path(
             getattr(cfg, "online_grf_contact_plugin", "plugins/OnlineGRFContact")

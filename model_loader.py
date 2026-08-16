@@ -13,7 +13,9 @@ from __future__ import annotations
 import os
 import glob
 import ctypes
+import hashlib
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List
 from xml.etree import ElementTree as ET
 
@@ -21,13 +23,75 @@ import numpy as np
 
 import opensim
 
+from binary_phase_detector import (
+    BinaryPhaseDetectorProfile,
+    load_binary_phase_detector_profile,
+    validate_binary_phase_detector_frames,
+)
 from config import SimulatorConfig
 from online_grf import GRF_MODES, add_online_grf_forces, load_online_grf_profile
-from path_resolver import resolve_simulator_paths
+from path_resolver import resolve_repo_path, resolve_simulator_paths
 
 
 _DLL_DIR_HANDLES = []
 _PRELOADED_DLL_HANDLES = []
+_V25_BINARY_SHADOW_PROFILE_SHA256 = (
+    "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2"
+)
+_V25_LEGACY_ANALOG_DETECTOR_PROFILE_PATH = resolve_repo_path(
+    "online_grf_profiles/"
+    "AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json"
+)
+_V25_LEGACY_ANALOG_DETECTOR_PROFILE_SHA256 = (
+    "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+)
+
+
+def _validate_binary_detector_coexistence(
+    binary_detector_path,
+    analog_detector_path,
+) -> None:
+    """Allow paired detector profiles only for the frozen V25 shadow geometry."""
+
+    if binary_detector_path is None:
+        return
+    observed_binary_sha256 = hashlib.sha256(
+        Path(binary_detector_path).read_bytes()
+    ).hexdigest()
+    if observed_binary_sha256 == _V25_BINARY_SHADOW_PROFILE_SHA256:
+        if analog_detector_path is None:
+            raise ValueError(
+                "[ModelLoader] Frozen V25 binary shadow requires the analog "
+                "legacy detector profile."
+            )
+        configured_analog_path = Path(analog_detector_path).resolve()
+        expected_analog_path = _V25_LEGACY_ANALOG_DETECTOR_PROFILE_PATH.resolve()
+        if configured_analog_path != expected_analog_path:
+            raise ValueError(
+                "[ModelLoader] V25 analog legacy profile path mismatch: expected "
+                f"{expected_analog_path}, observed {configured_analog_path}."
+            )
+        if not configured_analog_path.is_file():
+            raise ValueError(
+                "[ModelLoader] V25 analog legacy profile is missing: "
+                f"{configured_analog_path}"
+            )
+        observed_analog_sha256 = hashlib.sha256(
+            configured_analog_path.read_bytes()
+        ).hexdigest()
+        if observed_analog_sha256 != _V25_LEGACY_ANALOG_DETECTOR_PROFILE_SHA256:
+            raise ValueError(
+                "[ModelLoader] V25 analog legacy profile hash mismatch: expected "
+                f"{_V25_LEGACY_ANALOG_DETECTOR_PROFILE_SHA256}, observed "
+                f"{observed_analog_sha256}."
+            )
+        return
+    if analog_detector_path is not None:
+        raise ValueError(
+            "[ModelLoader] The force-based detector may coexist only with the "
+            "frozen V25 binary shadow profile; observed binary SHA256 "
+            f"{observed_binary_sha256}."
+        )
 
 
 def _primary_profile_required_sides(
@@ -145,6 +209,8 @@ class SimulationContext:
     online_grf_applied_sides: List[str] = field(default_factory=list)
     online_grf_profile_file: str = ""
     online_grf_detector_profile_file: str = ""
+    binary_phase_detector_profile_file: str = ""
+    binary_phase_detector_profile: BinaryPhaseDetectorProfile | None = None
     online_grf_hs_confirmation_threshold_n: float = 0.0
     online_grf_detector_hs_confirmation_threshold_n: float = 0.0
     online_grf_force_paths: List[str] = field(default_factory=list)
@@ -742,6 +808,32 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
             f"[ModelLoader] grf_mode must be one of {sorted(GRF_MODES)}, "
             f"got {grf_mode!r}."
         )
+    binary_detector_path = getattr(
+        paths,
+        "binary_phase_detector_profile_path",
+        None,
+    )
+    if binary_detector_path is not None and not binary_detector_path.is_file():
+        raise FileNotFoundError(
+            "[ModelLoader] Binary phase detector profile not found: "
+            f"{binary_detector_path}"
+        )
+    analog_detector_path = getattr(
+        paths,
+        "online_grf_detector_profile_path",
+        None,
+    )
+    # The force-based detector remains the authoritative legacy event source;
+    # frozen V25 is sampled independently and adds no Force or ModelComponent.
+    _validate_binary_detector_coexistence(
+        binary_detector_path,
+        analog_detector_path,
+    )
+    binary_phase_detector_profile = (
+        None
+        if binary_detector_path is None
+        else load_binary_phase_detector_profile(binary_detector_path)
+    )
     _load_plugin(str(paths.plugin_path))
     if grf_mode != "prescribed":
         if paths.online_grf_profile_path is None:
@@ -768,6 +860,17 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
     model = opensim.Model(str(paths.model_path))
     model.setName("ProstheticGaitSim")
     model.setUseVisualizer(False)
+    if binary_phase_detector_profile is not None:
+        # Resolve the two PhysicalFrames only.  The binary detector must never
+        # add a Force or another ModelComponent to the physical system.
+        validate_binary_phase_detector_frames(
+            model,
+            binary_phase_detector_profile,
+        )
+        print(
+            "[ModelLoader] Binary phase detector: 2 points "
+            "(force-free, geometry-only)"
+        )
 
     # ── 3. External Loads (GRF) ───────────────────────────────────────────────
     # Strategy:
@@ -1269,6 +1372,10 @@ def setup_model(cfg: SimulatorConfig) -> SimulationContext:
         online_grf_applied_sides = sorted(online_grf_applied_sides),
         online_grf_profile_file = online_grf_profile_file,
         online_grf_detector_profile_file = online_grf_detector_profile_file,
+        binary_phase_detector_profile_file = (
+            "" if binary_detector_path is None else str(binary_detector_path)
+        ),
+        binary_phase_detector_profile = binary_phase_detector_profile,
         online_grf_hs_confirmation_threshold_n = (
             online_grf_hs_confirmation_threshold_n
         ),

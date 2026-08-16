@@ -21,6 +21,31 @@ VALID_CYCLE_COMPLETED = 3
 TIMEOUT = 4
 INVALID_EVENT = 5
 
+BINARY_ACTIVE_ADAPTER_SOURCE = "v25_fsm_v20"
+BINARY_ACTIVE_EVENT_CONTRACT_ID = (
+    "binary_point_v25+functional_contact_fsm_v1"
+)
+BINARY_ACTIVE_V26_ADAPTER_SOURCE = "v25_fsm_v26"
+BINARY_ACTIVE_V26_EVENT_CONTRACT_ID = (
+    "binary_point_v25+heel_qualified_fsm_v2"
+)
+BINARY_ACTIVE_DEBOUNCE_S = 0.005
+BINARY_ACTIVE_MAX_DELIVERY_DELAY_S = 0.010
+
+_BINARY_ACTIVE_CONTRACTS = {
+    "binary_active": {
+        "adapter_source": BINARY_ACTIVE_ADAPTER_SOURCE,
+        "event_contract_id": BINARY_ACTIVE_EVENT_CONTRACT_ID,
+    },
+    "binary_active_v26": {
+        "adapter_source": BINARY_ACTIVE_V26_ADAPTER_SOURCE,
+        "event_contract_id": BINARY_ACTIVE_V26_EVENT_CONTRACT_ID,
+    },
+}
+
+_EVENT_CAUSALITY_TOLERANCE_S = 1e-12
+_BINARY_ACTIVE_EVENT_CAUSALITY_TOLERANCE_S = 1e-9
+
 STATE_NAMES = {
     WAIT_HS: "WAIT_HS",
     STANCE_AFTER_HS: "STANCE_AFTER_HS",
@@ -67,9 +92,16 @@ class ProstheticPhaseFSMConfig:
     duration_history_window_cycles: int = 5
 
     def __post_init__(self) -> None:
-        if self.event_source not in {"legacy_events", "shadow", "two_sensor"}:
+        if self.event_source not in {
+            "legacy_events",
+            "shadow",
+            "two_sensor",
+            "binary_active",
+            "binary_active_v26",
+        }:
             raise ValueError(
-                "event_source must be 'legacy_events', 'shadow', or 'two_sensor'."
+                "event_source must be 'legacy_events', 'shadow', "
+                "'two_sensor', 'binary_active', or 'binary_active_v26'."
             )
         on_threshold = float(self.sensor_on_threshold_n)
         off_threshold = float(self.sensor_off_threshold_n)
@@ -184,6 +216,240 @@ class ProstheticPhaseFSM:
         self.sensor_edges_this_step: list[dict[str, Any]] = []
         self.sensor_events_this_step: list[dict[str, Any]] = []
         self._sensor_batch_last_time_s: float | None = None
+        # Independent cursor for the V25/V20 adapter. It is deliberately not
+        # reused as continuous-evidence time: the actor-facing FSM keeps its
+        # historical first-policy-step accumulation semantics.
+        self._binary_active_last_boundary_time_s: float | None = None
+
+    def reset_from_binary_baseline(
+        self,
+        *,
+        time_s: float,
+        in_contact: bool,
+    ) -> dict[str, Any]:
+        """Reset the actor-facing FSM from one non-event V20 baseline.
+
+        ``AIR`` keeps the normal ``WAIT_HS`` state.  Any contact word enters an
+        uncredited partial stance without inventing a heel strike.  The method
+        is intentionally available only to the explicit V25/V20 active path;
+        legacy and historical two-sensor reset semantics remain untouched.
+        """
+
+        if self.config.event_source not in _BINARY_ACTIVE_CONTRACTS:
+            raise ValueError(
+                "reset_from_binary_baseline requires event_source="
+                "'binary_active' or 'binary_active_v26'."
+            )
+        if isinstance(time_s, (bool, np.bool_)):
+            raise TypeError("Binary baseline time_s must be a finite number.")
+        try:
+            baseline_time = float(time_s)
+        except (TypeError, ValueError) as exc:
+            raise TypeError(
+                "Binary baseline time_s must be a finite number."
+            ) from exc
+        if not np.isfinite(baseline_time):
+            raise ValueError("Binary baseline time_s must be finite.")
+        if type(in_contact) is not bool:
+            raise TypeError("Binary baseline in_contact must be a native bool.")
+
+        self.reset()
+        self._binary_active_last_boundary_time_s = baseline_time
+        if in_contact:
+            self._bootstrap_partial_stance(baseline_time)
+        return self.payload()
+
+    @property
+    def binary_active_last_boundary_time_s(self) -> float | None:
+        """Return the private adapter cursor without changing actor payloads."""
+
+        return self._binary_active_last_boundary_time_s
+
+    def update_from_binary_events(
+        self,
+        *,
+        time_s: float,
+        previous_time_s: float,
+        events: Sequence[Mapping[str, Any]],
+        normal_force_bw: float,
+        in_contact: bool,
+        prosthetic_knee_angle_rad: float | None = None,
+        prosthetic_ankle_angle_rad: float | None = None,
+    ) -> dict[str, Any]:
+        """Consume one already-debounced V20 event batch without re-detection."""
+
+        binary_contract = _BINARY_ACTIVE_CONTRACTS.get(
+            self.config.event_source
+        )
+        if binary_contract is None:
+            raise ValueError(
+                "update_from_binary_events requires event_source="
+                "'binary_active' or 'binary_active_v26'."
+            )
+        if isinstance(events, (str, bytes, bytearray)) or not isinstance(
+            events,
+            Sequence,
+        ):
+            raise TypeError("Adapted binary events must be an ordered sequence.")
+
+        if isinstance(time_s, (bool, np.bool_)):
+            raise TypeError("Binary active policy boundary must be numeric.")
+        boundary = float(time_s)
+        if not np.isfinite(boundary):
+            raise ValueError("Binary active policy boundary must be finite.")
+        if isinstance(previous_time_s, (bool, np.bool_)):
+            raise TypeError("Binary active previous boundary must be numeric.")
+        previous = float(previous_time_s)
+        if not np.isfinite(previous):
+            raise ValueError("Binary active previous boundary must be finite.")
+        cursor = self._binary_active_last_boundary_time_s
+        if cursor is None or abs(float(cursor) - previous) > 1e-9:
+            raise ValueError(
+                "Binary active actor-FSM boundary is discontinuous."
+            )
+        if boundary <= previous:
+            raise ValueError(
+                "Binary active policy boundary must advance monotonically."
+            )
+        if isinstance(normal_force_bw, (bool, np.bool_)):
+            raise TypeError("Binary active normal_force_bw must be numeric.")
+        normal_force_f = float(normal_force_bw)
+        if not np.isfinite(normal_force_f) or normal_force_f < 0.0:
+            raise ValueError(
+                "Binary active normal_force_bw must be finite and non-negative."
+            )
+        if type(in_contact) is not bool:
+            raise TypeError("Binary active in_contact must be a native bool.")
+        for field_name, value in (
+            ("prosthetic_knee_angle_rad", prosthetic_knee_angle_rad),
+            ("prosthetic_ankle_angle_rad", prosthetic_ankle_angle_rad),
+        ):
+            if value is None:
+                continue
+            if isinstance(value, (bool, np.bool_)):
+                raise TypeError(f"Binary active {field_name} must be numeric.")
+            try:
+                finite_value = float(value)
+            except (TypeError, ValueError) as exc:
+                raise TypeError(
+                    f"Binary active {field_name} must be numeric."
+                ) from exc
+            if not np.isfinite(finite_value):
+                raise ValueError(
+                    f"Binary active {field_name} must be finite."
+                )
+        validated: list[dict[str, Any]] = []
+        previous_event_time: float | None = None
+        for index, raw_event in enumerate(events):
+            if not isinstance(raw_event, Mapping):
+                raise TypeError(
+                    f"Adapted binary event {index} must be a mapping."
+                )
+            event = dict(raw_event)
+            if str(event.get("side", "")).strip().lower() != "left":
+                raise ValueError("Adapted binary events must be left-sided.")
+            name = str(event.get("event", "")).strip().lower()
+            if name not in {"heel_strike", "toe_off"}:
+                raise ValueError(
+                    "Adapted binary events must be heel_strike or toe_off."
+                )
+            if event.get("source") != binary_contract["adapter_source"]:
+                raise ValueError("Adapted binary event source mismatch.")
+            if (
+                event.get("event_contract_id")
+                != binary_contract["event_contract_id"]
+            ):
+                raise ValueError("Adapted binary event contract mismatch.")
+            required_times = (
+                "event_time_s",
+                "confirmed_time_s",
+                "delivered_time_s",
+            )
+            if any(field not in event for field in required_times):
+                raise ValueError(
+                    "Adapted binary events require explicit event, confirmed, "
+                    "and delivered timestamps."
+                )
+            if any(
+                isinstance(event[field], (bool, np.bool_))
+                for field in required_times
+            ):
+                raise TypeError(
+                    "Adapted binary event timestamps must be finite numbers."
+                )
+            try:
+                event_time = float(event["event_time_s"])
+            except (TypeError, ValueError) as exc:
+                raise TypeError(
+                    "Adapted binary event timestamps must be finite numbers."
+                ) from exc
+            confirmed, delivered = self._event_confirmation_delivery(
+                event,
+                event_time,
+            )
+            if (
+                abs(
+                    (confirmed - event_time)
+                    - BINARY_ACTIVE_DEBOUNCE_S
+                )
+                > 1e-9
+            ):
+                raise ValueError(
+                    "Adapted binary confirmation latency must equal 5 ms."
+                )
+            if not (
+                confirmed > previous + 1e-9
+                and confirmed <= boundary + 1e-9
+            ):
+                raise ValueError(
+                    "Adapted binary confirmation is outside the current "
+                    "open-left policy interval."
+                )
+            if abs(delivered - boundary) > 1e-9:
+                raise ValueError(
+                    "Adapted binary event must be delivered at the current "
+                    "policy boundary."
+                )
+            if (
+                delivered - confirmed < -1e-9
+                or delivered - confirmed
+                > BINARY_ACTIVE_MAX_DELIVERY_DELAY_S + 1e-9
+            ):
+                raise ValueError(
+                    "Adapted binary delivery latency exceeds 10 ms."
+                )
+            if previous_event_time is not None and (
+                event_time <= previous_event_time + 1e-12
+            ):
+                raise ValueError(
+                    "Adapted binary event timestamps must be strictly ordered."
+                )
+            event["event"] = name
+            event["time"] = event_time
+            event["confirmed_time"] = confirmed
+            event["event_time_s"] = event_time
+            event["confirmed_time_s"] = confirmed
+            event["delivered_time_s"] = delivered
+            validated.append(event)
+            previous_event_time = event_time
+
+        self._sensor_batch_last_time_s = None
+        self._reset_policy_step_transients()
+        self._prepare_policy_continuous_inputs(
+            time_s=boundary,
+            normal_force_bw=normal_force_f,
+            in_contact=bool(in_contact),
+            prosthetic_knee_angle_rad=prosthetic_knee_angle_rad,
+            prosthetic_ankle_angle_rad=prosthetic_ankle_angle_rad,
+        )
+        self._process_events(validated, boundary)
+        result = self._finish_policy_step(
+            time_s=boundary,
+            normal_force_bw=normal_force_f,
+            in_contact=bool(in_contact),
+        )
+        self._binary_active_last_boundary_time_s = boundary
+        return result
 
     @property
     def expected_next_event(self) -> str:
@@ -263,6 +529,11 @@ class ProstheticPhaseFSM:
         time_f = float(time_s)
         normal_force_f = float(normal_force_bw)
         event_source = self.config.event_source
+        if event_source in _BINARY_ACTIVE_CONTRACTS:
+            raise ValueError(
+                f"{event_source} must use update_from_binary_events(); "
+                "generic or legacy event injection is forbidden."
+            )
         sensor_forces: tuple[float, float] | None = None
         if event_source in {"shadow", "two_sensor"}:
             sensor_forces = (
@@ -1180,8 +1451,14 @@ class ProstheticPhaseFSM:
             return False, "cycle_knee_excursion_too_low"
         return True, ""
 
-    @staticmethod
+    def _event_causality_tolerance_s(self) -> float:
+        """Return the timestamp tolerance frozen for the active event source."""
+        if self.config.event_source in _BINARY_ACTIVE_CONTRACTS:
+            return _BINARY_ACTIVE_EVENT_CAUSALITY_TOLERANCE_S
+        return _EVENT_CAUSALITY_TOLERANCE_S
+
     def _event_confirmation_delivery(
+        self,
         event: Mapping[str, Any] | None,
         event_time_s: float,
     ) -> tuple[float, float]:
@@ -1200,12 +1477,13 @@ class ProstheticPhaseFSM:
             delivered = float(delivered_raw)
         except (TypeError, ValueError) as exc:
             raise ValueError("Event timestamps must be numeric and finite.") from exc
+        tolerance = self._event_causality_tolerance_s()
         if not (
             np.isfinite(event_time)
             and np.isfinite(confirmed)
             and np.isfinite(delivered)
-            and event_time <= confirmed + 1e-12
-            and confirmed <= delivered + 1e-12
+            and event_time <= confirmed + tolerance
+            and confirmed <= delivered + tolerance
         ):
             raise ValueError(
                 "Event timestamps must be finite and causal "
@@ -1271,12 +1549,13 @@ class ProstheticPhaseFSM:
             else float(confirmed_time_s)
         )
         delivered = confirmed if delivered_time_s is None else float(delivered_time_s)
+        tolerance = self._event_causality_tolerance_s()
         if not (
             np.isfinite(float(event_time_s))
             and np.isfinite(confirmed)
             and np.isfinite(delivered)
-            and float(event_time_s) <= confirmed + 1e-12
-            and confirmed <= delivered + 1e-12
+            and float(event_time_s) <= confirmed + tolerance
+            and confirmed <= delivered + tolerance
         ):
             raise ValueError(
                 "Accepted transition timestamps must be finite and causal."

@@ -1,0 +1,1940 @@
+{
+  "actor_updates": 0,
+  "authority": {
+    "actor_fit_execution_authorized": true,
+    "authority_date": "2026-08-09",
+    "authority_scope": "V12R5_EXACT_ONE_SHOT_CASE_BALANCED_DEVELOPMENT",
+    "authority_text": "esegui i punti 1-6",
+    "candidate_freeze_authorized": true,
+    "checkpoint_zero_authorized": false,
+    "detector_or_fsm_change_authorized": false,
+    "development_execution_authorized": true,
+    "execution_lock_authorized": true,
+    "new_environment_collection_authorized": false,
+    "positive_morphology_authorized": false,
+    "protocol_freeze_publication_authorized": true,
+    "qualification_execution_authorized": false,
+    "rescue_authorized": false,
+    "resume_authorized": false,
+    "retry_authorized": false,
+    "runtime_promotion_authorized": false,
+    "source_implementation_authorized": true,
+    "sweep_authorized": false
+  },
+  "candidate_selection": {
+    "candidate_id": "DEFERRED_UNTIL_CASE_BALANCED_FIT",
+    "candidate_tree_sha256": "DEFERRED_UNTIL_CASE_BALANCED_FIT",
+    "module_path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/fit/rl_module_target_adapted",
+    "rule": "SOLE_CASE_BALANCED_FIT_OUTPUT_FROM_LOCKED_R5_RUN"
+  },
+  "checkpoint_zero_created": false,
+  "corpus_counts": {
+    "case_count": 6,
+    "case_target_mass": 1000.0,
+    "component_order": [
+      "p2_corpus",
+      "r4_nominal_pass_labels_only"
+    ],
+    "episode_count": 19,
+    "failed_plus_prefix_sample_count": 0,
+    "nominal_pass_sample_count": 500,
+    "nominal_student_exposed_sample_count": 255,
+    "normalized_total_sample_mass": 6000.0,
+    "p2_sample_count": 8732,
+    "reset_row_count": 19,
+    "sample_count": 9232
+  },
+  "critic_updates": 0,
+  "critical_window": {
+    "baseline_source": "BOUND_P2_MODULE_RECOMPUTED_NOT_ROUNDED_LITERAL",
+    "case_id": "deterministic_offset_plus_0p20",
+    "diagnostic_approx_max_abs_error": 0.03706494,
+    "diagnostic_approx_rmse": 0.0056222444,
+    "expected_rows": 123,
+    "step_end_inclusive": 230,
+    "step_start_inclusive": 108,
+    "tranche_id": "v8r1p1_base"
+  },
+  "development_cases": [
+    {
+      "action_seed": null,
+      "action_selection": "deterministic",
+      "behavior": "R5_PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+      "case_id": "deterministic_offset_plus_0p20",
+      "destination": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/development/deterministic_offset_plus_0p20",
+      "episode_start_offset_s": 2.156870983805102,
+      "runtime_seed": 123,
+      "sigma": 0.0
+    },
+    {
+      "action_seed": null,
+      "action_selection": "deterministic",
+      "behavior": "R5_PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+      "case_id": "deterministic_offset_nominal",
+      "destination": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/development/deterministic_offset_nominal",
+      "episode_start_offset_s": 1.956870983805102,
+      "runtime_seed": 123,
+      "sigma": 0.0
+    },
+    {
+      "action_seed": null,
+      "action_selection": "deterministic",
+      "behavior": "R5_PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+      "case_id": "deterministic_offset_minus_0p20",
+      "destination": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/development/deterministic_offset_minus_0p20",
+      "episode_start_offset_s": 1.756870983805102,
+      "runtime_seed": 123,
+      "sigma": 0.0
+    },
+    {
+      "action_seed": 126,
+      "action_selection": "stochastic",
+      "behavior": "R5_PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+      "case_id": "stochastic_nominal_seed_126",
+      "destination": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/development/stochastic_nominal_seed_126",
+      "episode_start_offset_s": 1.956870983805102,
+      "runtime_seed": 126,
+      "sigma": 0.005
+    },
+    {
+      "action_seed": 127,
+      "action_selection": "stochastic",
+      "behavior": "R5_PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+      "case_id": "stochastic_nominal_seed_127",
+      "destination": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/development/stochastic_nominal_seed_127",
+      "episode_start_offset_s": 1.956870983805102,
+      "runtime_seed": 127,
+      "sigma": 0.005
+    },
+    {
+      "action_seed": 128,
+      "action_selection": "stochastic",
+      "behavior": "R5_PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+      "case_id": "stochastic_nominal_seed_128",
+      "destination": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/development/stochastic_nominal_seed_128",
+      "episode_start_offset_s": 1.956870983805102,
+      "runtime_seed": 128,
+      "sigma": 0.005
+    }
+  ],
+  "environment_reset_calls": 0,
+  "environment_step_calls": 0,
+  "execution_lock_created": false,
+  "fit": {
+    "actor_architecture": {
+      "activation": "tanh",
+      "hidden_dims": [
+        256,
+        256
+      ],
+      "input_dim": 35,
+      "kind": "standard_mean_mlp",
+      "output_dim": 2,
+      "residual_actor": false
+    },
+    "adamw": {
+      "epochs": 3000,
+      "full_batch": true,
+      "grad_clip_norm": 10.0,
+      "learning_rate_schedule": [
+        {
+          "end_epoch": 1500,
+          "learning_rate": 0.0003,
+          "start_epoch": 1
+        },
+        {
+          "end_epoch": 2500,
+          "learning_rate": 0.0001,
+          "start_epoch": 1501
+        },
+        {
+          "end_epoch": 3000,
+          "learning_rate": 3e-05,
+          "start_epoch": 2501
+        }
+      ],
+      "optimizer": "AdamW",
+      "seed": 20260807,
+      "weight_decay": 1e-07
+    },
+    "anchor_enabled": false,
+    "continued_from_p2": false,
+    "corpus_loss_reduction": "SUM_WEIGHTED_ROW_LOSS_DIVIDED_BY_SUM_WEIGHTS",
+    "disabled_clock_columns": [
+      0,
+      1
+    ],
+    "fallback_enabled": false,
+    "fit_contract_id": "h0_primary_split_v12r5_case_balanced_full_mean_v1",
+    "freeze_logstd_head": true,
+    "hard_polish_enabled": false,
+    "initial_checkpoint_id": "H0_MARKOV35_PHASE_ALIGNED_SIGMA0005_ITER1_RETRY",
+    "lbfgs": {
+      "deterministic": true,
+      "history_size": 50,
+      "line_search_fn": "strong_wolfe",
+      "lr": 0.7,
+      "max_eval": 1200,
+      "max_iter": 600,
+      "optimizer": "LBFGS",
+      "tolerance_change": 1e-12,
+      "tolerance_grad": 1e-10
+    },
+    "normalization": {
+      "estimator": "population_mean_and_std_float64",
+      "feature_count": 35,
+      "fold_into_first_layer_before_save": true,
+      "frozen_across_fit_stages": true,
+      "prescribed_clock": false,
+      "runtime_normalization_wrapper": false,
+      "scope": "base_corpus_3000_rows_only",
+      "std_floor": 0.0001
+    },
+    "optimizer_phase_order": [
+      "adamw",
+      "lbfgs"
+    ],
+    "row_loss": "MEAN_SQUARED_ERROR_OVER_TWO_ACTIONS",
+    "sweep_enabled": false,
+    "trainable_scope": "full_mean_network",
+    "weighting": {
+      "adaptive_refit": false,
+      "case_balance": "SCALE_EACH_OF_SIX_CASE_IDS_TO_MASS_1000_FLOAT64",
+      "case_target_mass": 1000.0,
+      "expected_hardness_sha256": "54ea40a4b157bdef63de3a22bd110dc40340928dee032bfa8b75320bd2512e4f",
+      "expected_normalized_weights_sha256": "8eae1d8812d403eacab8b17070c29b318f042c3558b5515a1eb059677911a664",
+      "expected_p2_max_abs_error_sha256": "50a6ac8be1d0f98bf036a29e2937a486e377e3d2b53546dab90721afab04c7cd",
+      "expected_source_risk_sha256": "415008f5b86e065eeab6912fc521312025be44fddb7b70bb760c1efc4a6939b3",
+      "hardness_formula": "1+99*min(1,error/0.060)^2",
+      "name": "P2_ERROR_HARDNESS_THEN_CASE_BALANCED_V1",
+      "normalized_total_mass": 6000.0,
+      "p2_prediction_source": {
+        "file_count": 3,
+        "files": [
+          {
+            "path": "class_and_ctor_args.pkl",
+            "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+            "size_bytes": 2262
+          },
+          {
+            "path": "metadata.json",
+            "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+            "size_bytes": 197
+          },
+          {
+            "path": "module_state.pkl",
+            "sha256": "f6753be7ec55e5276c6be824b3a7550880f3ac4fa26a59f2a056a20f0a5ab3f6",
+            "size_bytes": 604772
+          }
+        ],
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p2/rl_module_target_adapted",
+        "tree_sha256": "be0c9711f1f6b7b9dba9cd4ab546a8379f96444ddf02a111d5f3002b9c7e8c4f"
+      },
+      "per_row_error": "MAX_ABS_OVER_TWO_ACTIONS_OF_BOUND_P2_MINUS_TEACHER",
+      "post_fit_reweight": false,
+      "raw_combination": "MAX_SOURCE_RISK_AND_HARDNESS",
+      "source_risk": "P2_RAW_SAMPLE_WEIGHT_OR_NOMINAL_RESET_100_ELSE_1",
+      "sweep": false
+    }
+  },
+  "locked_inputs": {
+    "external_runtime_sources": {
+      "Trajectory Generator/baseline_MLP/_bootstrap.py": {
+        "path": "Trajectory Generator/baseline_MLP/_bootstrap.py",
+        "sha256": "6943e6d187f1c325f98417106c0928d3e4e0f670102686c925b7c2ec667bd63c",
+        "size_bytes": 1049
+      },
+      "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": {
+        "path": "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py",
+        "sha256": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+        "size_bytes": 8081
+      },
+      "Trajectory Generator/baseline_MLP/env_factory.py": {
+        "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+        "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+        "size_bytes": 9701
+      },
+      "Trajectory Generator/baseline_MLP/experimental_morphology_corridor.py": {
+        "path": "Trajectory Generator/baseline_MLP/experimental_morphology_corridor.py",
+        "sha256": "258700b5da99aa9110a92039834bf4061ca81b9eb7ea770b93919a0b3105e801",
+        "size_bytes": 55963
+      },
+      "Trajectory Generator/baseline_MLP/exploration_noise.py": {
+        "path": "Trajectory Generator/baseline_MLP/exploration_noise.py",
+        "sha256": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f",
+        "size_bytes": 1467
+      },
+      "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py": {
+        "path": "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py",
+        "sha256": "56d58e06acba50edebe1239906e1808336f2d343f553de573a69189f4f01b60d",
+        "size_bytes": 18348
+      },
+      "Trajectory Generator/baseline_MLP/process_watchdog.py": {
+        "path": "Trajectory Generator/baseline_MLP/process_watchdog.py",
+        "sha256": "0511fdda6fd0a3d5db0697b56d20226f955c10955fdfb82d6b75d2b6834128e0",
+        "size_bytes": 16669
+      },
+      "Trajectory Generator/baseline_MLP/progress_display.py": {
+        "path": "Trajectory Generator/baseline_MLP/progress_display.py",
+        "sha256": "26e0c59698dc98ebc3f1112ea07cdf054c0b283d9797206eb5664ef92dc777c5",
+        "size_bytes": 9846
+      },
+      "Trajectory Generator/baseline_MLP/reward_function.py": {
+        "path": "Trajectory Generator/baseline_MLP/reward_function.py",
+        "sha256": "f530a24a4122e51fbf5f40d984821dbe15a380f81375281fbd0f28934c471b5d",
+        "size_bytes": 118458
+      },
+      "Trajectory Generator/baseline_MLP/rollout_eval.py": {
+        "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "sha256": "8681bd981a2fb13ce50373188b43140bccc548234bf9d680dcbbf8d0dd76e98f",
+        "size_bytes": 59374
+      },
+      "Trajectory Generator/baseline_MLP/target_domain_imitation.py": {
+        "path": "Trajectory Generator/baseline_MLP/target_domain_imitation.py",
+        "sha256": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3",
+        "size_bytes": 60541
+      },
+      "Trajectory Generator/baseline_MLP/training_config.py": {
+        "path": "Trajectory Generator/baseline_MLP/training_config.py",
+        "sha256": "bf37b27de2e178c7c439e3855dea4dae529ddc139f6206def5167267b3541155",
+        "size_bytes": 13222
+      },
+      "Trajectory Generator/baseline_MLP/validation/freeze_h0_primary_split_v12_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/freeze_h0_primary_split_v12_autonomy_recovery.py",
+        "sha256": "ac87eaefe2030e77da73e05ecc1a1f476aaf513f306783724238800321a9f7a4",
+        "size_bytes": 60997
+      },
+      "Trajectory Generator/baseline_MLP/validation/h0_primary_split_v12_autonomy_recovery_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/h0_primary_split_v12_autonomy_recovery_contract.py",
+        "sha256": "d146562ed1355ac178e3a0abd922568a92d262e6f2ccecfe5ef1e05135e2a4ea",
+        "size_bytes": 97514
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/freeze_h0_primary_split_v12r3_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/freeze_h0_primary_split_v12r3_autonomy_recovery.py",
+        "sha256": "dd43031663faeb867f2f6ec2b80ff3885e1dc35d7be05e291b2e266a9b9dedd7",
+        "size_bytes": 30900
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_autonomy_recovery_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_autonomy_recovery_contract.py",
+        "sha256": "bf4ea138c5391e75aa0648f5bee8cea560298b8dac3a5c01958be6ec6eea18d3",
+        "size_bytes": 46121
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_pure_probe_observer_labeler.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_pure_probe_observer_labeler.py",
+        "sha256": "fc21b3f6e43646a4492372673405e7de43fa0239fb37ae9c36cf5a878fdc92ee",
+        "size_bytes": 82833
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_recovery_weighted_fitter.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_recovery_weighted_fitter.py",
+        "sha256": "6c7c35eed501ddbe0a4fefecd1f76ea321d15baf6d374d87ce1ffbe3f38deeff",
+        "size_bytes": 71952
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_autonomy_recovery.py",
+        "sha256": "350699f731b9afe6d02ff19419b1a6ee0e2371c35e8522354f0eac7280ff2f2c",
+        "size_bytes": 132547
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_design_audit.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_design_audit.py",
+        "sha256": "cd648ac5df1f90266f0c36b3433b8701a22717f22eb30c36c29a9783b2cceb10",
+        "size_bytes": 16953
+      },
+      "Trajectory Generator/baseline_MLP/warm_start.py": {
+        "path": "Trajectory Generator/baseline_MLP/warm_start.py",
+        "sha256": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c",
+        "size_bytes": 22594
+      },
+      "Trajectory Generator/baseline_MLP/win_runtime.py": {
+        "path": "Trajectory Generator/baseline_MLP/win_runtime.py",
+        "sha256": "9088d0e18002b64d70ea38ce9bad2b26c16bfc1e4b77e1caa8afd903261d033f",
+        "size_bytes": 2751
+      },
+      "Trajectory Generator/binary_phase_adapter.py": {
+        "path": "Trajectory Generator/binary_phase_adapter.py",
+        "sha256": "8eba604b4774952f41660e714e5a9913fa2b9c431d19f04711103213d780c109",
+        "size_bytes": 28028
+      },
+      "Trajectory Generator/binary_phase_adapter_v26.py": {
+        "path": "Trajectory Generator/binary_phase_adapter_v26.py",
+        "sha256": "51c5b9c9b8fc7351b7a90909416cfbac0ca06a0485280ed8d663ef3b4bc91582",
+        "size_bytes": 11522
+      },
+      "Trajectory Generator/binary_phase_fsm.py": {
+        "path": "Trajectory Generator/binary_phase_fsm.py",
+        "sha256": "0f7669b60a72c1b27ee3c4f1a43161eeb9f2d091dff5558cc4fa43f1fce8d9c1",
+        "size_bytes": 18908
+      },
+      "Trajectory Generator/binary_phase_fsm_v26.py": {
+        "path": "Trajectory Generator/binary_phase_fsm_v26.py",
+        "sha256": "6d1c6a231f1ffab93d27ecb5967e8b08c6ead26d5a4205990d99f487e33cf02b",
+        "size_bytes": 5422
+      },
+      "Trajectory Generator/osim_trj_cmc_like.py": {
+        "path": "Trajectory Generator/osim_trj_cmc_like.py",
+        "sha256": "7448d8656fed1f5eaba29dfaac45202f9cc402acaeb148907c99d7cdfdfc0f27",
+        "size_bytes": 194221
+      },
+      "Trajectory Generator/prosthetic_phase_fsm.py": {
+        "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+        "sha256": "c647730d028606f967f35b6a2d30ea2b88d4bfae60718851c29eac82abf991e9",
+        "size_bytes": 74309
+      },
+      "binary_phase_detector.py": {
+        "path": "binary_phase_detector.py",
+        "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+        "size_bytes": 14226
+      },
+      "config.py": {
+        "path": "config.py",
+        "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+        "size_bytes": 17291
+      },
+      "inverse_dynamics.py": {
+        "path": "inverse_dynamics.py",
+        "sha256": "81c898f551a81d9af743575e6f6639a3a3bb69ddbe9faffa876f8d3f71df0833",
+        "size_bytes": 9836
+      },
+      "kinematics_interpolator.py": {
+        "path": "kinematics_interpolator.py",
+        "sha256": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede",
+        "size_bytes": 9742
+      },
+      "model_loader.py": {
+        "path": "model_loader.py",
+        "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+        "size_bytes": 58315
+      },
+      "online_grf.py": {
+        "path": "online_grf.py",
+        "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+        "size_bytes": 31439
+      },
+      "outer_loop.py": {
+        "path": "outer_loop.py",
+        "sha256": "a8a05d10d959c5fa98c29ecf703189af73318fd1291a2257315cd81417f5ef0b",
+        "size_bytes": 4558
+      },
+      "output.py": {
+        "path": "output.py",
+        "sha256": "7b03d1031202976fd011288e031f8796364eb35c34d1ed8838f8eff971318acb",
+        "size_bytes": 41834
+      },
+      "path_resolver.py": {
+        "path": "path_resolver.py",
+        "sha256": "2a61b8c54ab68c228ea55a6e28b6334ac0a9539da79f86e9a5ef2970bc937a1d",
+        "size_bytes": 6067
+      },
+      "prosthesis_controller.py": {
+        "path": "prosthesis_controller.py",
+        "sha256": "c0ef2da15b5754c9499f8c40072e655e954cc5085a2a8a858aeb6355b4073338",
+        "size_bytes": 21345
+      },
+      "setup_io.py": {
+        "path": "setup_io.py",
+        "sha256": "9d24df7b272ad6550c2897151b019b53d665a61a715217eeeb6dfbe54a6ae6e3",
+        "size_bytes": 11031
+      },
+      "simulation_runner.py": {
+        "path": "simulation_runner.py",
+        "sha256": "b79cb86c6ecb8d63d9555ccbae85acffaeec223904663a04998db5db6edcca19",
+        "size_bytes": 110192
+      },
+      "static_optimization.py": {
+        "path": "static_optimization.py",
+        "sha256": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+        "size_bytes": 35652
+      },
+      "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py": {
+        "path": "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py",
+        "sha256": "afa7d6959cb6a9337e0c2e0bd463d841ee99ffe49fc1095c8f47241aaab22099",
+        "size_bytes": 22310
+      },
+      "validation/compare_h0_v25_abc.py": {
+        "path": "validation/compare_h0_v25_abc.py",
+        "sha256": "dade1cdd0fd90c31ecf10ce8f84c2027a899e5ccfa53e2e7c486fab41741c028",
+        "size_bytes": 20701
+      },
+      "validation/h0_forensic_rollout.py": {
+        "path": "validation/h0_forensic_rollout.py",
+        "sha256": "e305729eb896335ebb9f492ce449cc5e7656f4fce5968e3fa4359daf38a02ebd",
+        "size_bytes": 20916
+      },
+      "validation/h0_primary_grf_split_v6_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v6_teacher_replay_contract.py",
+        "sha256": "15432db342be3a776b456c848ae013e25b716d106d6c292f68ca913456b3f19c",
+        "size_bytes": 21410
+      },
+      "validation/h0_primary_grf_split_v8_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8_teacher_replay_contract.py",
+        "sha256": "b6656d698eb3bb3c238b2a344a0f6b67dc6c499f815791dc321f67e364b7075c",
+        "size_bytes": 16898
+      },
+      "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py",
+        "sha256": "1ceabe42ca9ba671a1a58100b17251385d2fd10e3be75ebafeb009ba4544e025",
+        "size_bytes": 8159
+      },
+      "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py",
+        "sha256": "65f75895c79db94aa47c61ca7be0406af2d707b525f4fb388809262370b18d33",
+        "size_bytes": 5944
+      },
+      "validation/h0_primary_split_v10_coherent_teacher.py": {
+        "path": "validation/h0_primary_split_v10_coherent_teacher.py",
+        "sha256": "9c88c6a7873fdb197e56b85f855e0c5a6a597d5f053aa81f08aacdb08dab709f",
+        "size_bytes": 25334
+      },
+      "validation/h0_primary_split_v10s_blend.py": {
+        "path": "validation/h0_primary_split_v10s_blend.py",
+        "sha256": "9e11a94eea1c32c187b7a0cf875d889e530252a3fae64cd017c87a2853b1f57d",
+        "size_bytes": 9273
+      },
+      "validation/h0_primary_split_v10s_fit.py": {
+        "path": "validation/h0_primary_split_v10s_fit.py",
+        "sha256": "8ab610373f06e52c293c3da2cbf7409c035fc6366455c1b8052103e820b90594",
+        "size_bytes": 52821
+      },
+      "validation/h0_primary_split_v10s_safe_dagger_contract.py": {
+        "path": "validation/h0_primary_split_v10s_safe_dagger_contract.py",
+        "sha256": "5c6ea0993cb7585e7a588542382350bfdd1fd27b425373ff696d6ccb9cf77e0a",
+        "size_bytes": 48471
+      },
+      "validation/h0_primary_split_v11_weighted_fit.py": {
+        "path": "validation/h0_primary_split_v11_weighted_fit.py",
+        "sha256": "877bb79d9bf4bd8d87b9d07dbdee127ca259cc8cc82fac1e592ea37032029fdc",
+        "size_bytes": 58985
+      },
+      "validation/h0_primary_split_v11_weighted_full_mean_contract.py": {
+        "path": "validation/h0_primary_split_v11_weighted_full_mean_contract.py",
+        "sha256": "1ee981c087973dd417f88214894171be21f75fde54fd821d8a0eb2958db34729",
+        "size_bytes": 56432
+      },
+      "validation/h0_primary_split_v9_causal_teacher.py": {
+        "path": "validation/h0_primary_split_v9_causal_teacher.py",
+        "sha256": "c17defea4867c2088b2ce373d51f36ea7da9224dae96c0aab13224834218fccc",
+        "size_bytes": 5047
+      },
+      "validation/h0_primary_split_v9_causal_teacher_contract.py": {
+        "path": "validation/h0_primary_split_v9_causal_teacher_contract.py",
+        "sha256": "5c73bdafd388395dae1ba86bafb1cd52b2510f082c3b8ece433cd9308aa81d9e",
+        "size_bytes": 6460
+      },
+      "validation/h0_v3_so_recovery_contract.py": {
+        "path": "validation/h0_v3_so_recovery_contract.py",
+        "sha256": "4c8e9407e2c2c42eb6050210ba795dbc215ae7ca57a304a84d344b88b007a26c",
+        "size_bytes": 22774
+      },
+      "validation/run_h0_primary_grf_split_v6_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v6_teacher_replay.py",
+        "sha256": "582401e7ca258a859e1e7b30c6f5e47559db8d4a4afd2b833d9d0e19fc9c4b9b",
+        "size_bytes": 51448
+      },
+      "validation/run_h0_primary_grf_split_v8_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8_teacher_replay.py",
+        "sha256": "a0df53ffd776e1ee6bfcaec72995194d58800f5809373a7582dac857adfe6833",
+        "size_bytes": 34334
+      },
+      "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py",
+        "sha256": "cfc980126a2ef13ae548794ef975dfd885996921bf88aeee11eefa03e146e077",
+        "size_bytes": 21192
+      },
+      "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py",
+        "sha256": "3283e4d010f5e498f3bce4850ccde85d71f9b8620879c02dc48b2f5726aff1a3",
+        "size_bytes": 11744
+      },
+      "validation/run_h0_primary_split_v10s_safe_dagger.py": {
+        "path": "validation/run_h0_primary_split_v10s_safe_dagger.py",
+        "sha256": "4240afdb37b99734f8dbe80b67c9dbef491a43ff65d6bbc78cab2f15a3300faf",
+        "size_bytes": 100367
+      },
+      "validation/run_h0_primary_split_v9_causal_teacher.py": {
+        "path": "validation/run_h0_primary_split_v9_causal_teacher.py",
+        "sha256": "4c95e53645546cbf1cbb197c605866f54403278fb8aec8d59642874d379ea19d",
+        "size_bytes": 20339
+      },
+      "validation/run_h0_v25_abc_preflight.py": {
+        "path": "validation/run_h0_v25_abc_preflight.py",
+        "sha256": "344d55d7ecd1f5b9342b06438ccec769138823f3467706169dc6fc60a35fd128",
+        "size_bytes": 63570
+      }
+    },
+    "p2_adaptation_history": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p2/adaptation_history.json",
+      "sha256": "02341e3b20df60fa279f0a9e5b55b14a2e0c48dccc666e095b27e841c319b1e7",
+      "size_bytes": 1659
+    },
+    "p2_adaptation_report": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p2/adaptation_report.json",
+      "sha256": "776fb10eb10430953105f5e0b818a323449b43f43e70c6649dd7cb4294825324",
+      "size_bytes": 10097
+    },
+    "p2_corpus": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p2/corpus.npz",
+      "sha256": "42a40869447aec0cdce62a6ba5fcb48da4e5f070fac9e8eb19c4f0a8fccc1990",
+      "size_bytes": 18358010
+    },
+    "p2_module": {
+      "file_count": 3,
+      "files": [
+        {
+          "path": "class_and_ctor_args.pkl",
+          "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+          "size_bytes": 2262
+        },
+        {
+          "path": "metadata.json",
+          "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+          "size_bytes": 197
+        },
+        {
+          "path": "module_state.pkl",
+          "sha256": "f6753be7ec55e5276c6be824b3a7550880f3ac4fa26a59f2a056a20f0a5ab3f6",
+          "size_bytes": 604772
+        }
+      ],
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p2/rl_module_target_adapted",
+      "tree_sha256": "be0c9711f1f6b7b9dba9cd4ab546a8379f96444ddf02a111d5f3002b9c7e8c4f"
+    },
+    "production_source_closure": {
+      "Trajectory Generator/baseline_MLP/_bootstrap.py": {
+        "path": "Trajectory Generator/baseline_MLP/_bootstrap.py",
+        "sha256": "6943e6d187f1c325f98417106c0928d3e4e0f670102686c925b7c2ec667bd63c",
+        "size_bytes": 1049
+      },
+      "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": {
+        "path": "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py",
+        "sha256": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+        "size_bytes": 8081
+      },
+      "Trajectory Generator/baseline_MLP/env_factory.py": {
+        "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+        "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+        "size_bytes": 9701
+      },
+      "Trajectory Generator/baseline_MLP/experimental_morphology_corridor.py": {
+        "path": "Trajectory Generator/baseline_MLP/experimental_morphology_corridor.py",
+        "sha256": "258700b5da99aa9110a92039834bf4061ca81b9eb7ea770b93919a0b3105e801",
+        "size_bytes": 55963
+      },
+      "Trajectory Generator/baseline_MLP/exploration_noise.py": {
+        "path": "Trajectory Generator/baseline_MLP/exploration_noise.py",
+        "sha256": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f",
+        "size_bytes": 1467
+      },
+      "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py": {
+        "path": "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py",
+        "sha256": "56d58e06acba50edebe1239906e1808336f2d343f553de573a69189f4f01b60d",
+        "size_bytes": 18348
+      },
+      "Trajectory Generator/baseline_MLP/process_watchdog.py": {
+        "path": "Trajectory Generator/baseline_MLP/process_watchdog.py",
+        "sha256": "0511fdda6fd0a3d5db0697b56d20226f955c10955fdfb82d6b75d2b6834128e0",
+        "size_bytes": 16669
+      },
+      "Trajectory Generator/baseline_MLP/progress_display.py": {
+        "path": "Trajectory Generator/baseline_MLP/progress_display.py",
+        "sha256": "26e0c59698dc98ebc3f1112ea07cdf054c0b283d9797206eb5664ef92dc777c5",
+        "size_bytes": 9846
+      },
+      "Trajectory Generator/baseline_MLP/reward_function.py": {
+        "path": "Trajectory Generator/baseline_MLP/reward_function.py",
+        "sha256": "f530a24a4122e51fbf5f40d984821dbe15a380f81375281fbd0f28934c471b5d",
+        "size_bytes": 118458
+      },
+      "Trajectory Generator/baseline_MLP/rollout_eval.py": {
+        "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "sha256": "8681bd981a2fb13ce50373188b43140bccc548234bf9d680dcbbf8d0dd76e98f",
+        "size_bytes": 59374
+      },
+      "Trajectory Generator/baseline_MLP/target_domain_imitation.py": {
+        "path": "Trajectory Generator/baseline_MLP/target_domain_imitation.py",
+        "sha256": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3",
+        "size_bytes": 60541
+      },
+      "Trajectory Generator/baseline_MLP/training_config.py": {
+        "path": "Trajectory Generator/baseline_MLP/training_config.py",
+        "sha256": "bf37b27de2e178c7c439e3855dea4dae529ddc139f6206def5167267b3541155",
+        "size_bytes": 13222
+      },
+      "Trajectory Generator/baseline_MLP/validation/freeze_h0_primary_split_v12_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/freeze_h0_primary_split_v12_autonomy_recovery.py",
+        "sha256": "ac87eaefe2030e77da73e05ecc1a1f476aaf513f306783724238800321a9f7a4",
+        "size_bytes": 60997
+      },
+      "Trajectory Generator/baseline_MLP/validation/h0_primary_split_v12_autonomy_recovery_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/h0_primary_split_v12_autonomy_recovery_contract.py",
+        "sha256": "d146562ed1355ac178e3a0abd922568a92d262e6f2ccecfe5ef1e05135e2a4ea",
+        "size_bytes": 97514
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/freeze_h0_primary_split_v12r3_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/freeze_h0_primary_split_v12r3_autonomy_recovery.py",
+        "sha256": "dd43031663faeb867f2f6ec2b80ff3885e1dc35d7be05e291b2e266a9b9dedd7",
+        "size_bytes": 30900
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_autonomy_recovery_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_autonomy_recovery_contract.py",
+        "sha256": "bf4ea138c5391e75aa0648f5bee8cea560298b8dac3a5c01958be6ec6eea18d3",
+        "size_bytes": 46121
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_pure_probe_observer_labeler.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_pure_probe_observer_labeler.py",
+        "sha256": "fc21b3f6e43646a4492372673405e7de43fa0239fb37ae9c36cf5a878fdc92ee",
+        "size_bytes": 82833
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_recovery_weighted_fitter.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_recovery_weighted_fitter.py",
+        "sha256": "6c7c35eed501ddbe0a4fefecd1f76ea321d15baf6d374d87ce1ffbe3f38deeff",
+        "size_bytes": 71952
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_autonomy_recovery.py",
+        "sha256": "350699f731b9afe6d02ff19419b1a6ee0e2371c35e8522354f0eac7280ff2f2c",
+        "size_bytes": 132547
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_design_audit.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_design_audit.py",
+        "sha256": "cd648ac5df1f90266f0c36b3433b8701a22717f22eb30c36c29a9783b2cceb10",
+        "size_bytes": 16953
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/freeze_h0_v12r5_case_balanced.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/freeze_h0_v12r5_case_balanced.py",
+        "sha256": "df101f0a228ea09f5f355df479c415bffaad09e5d272e1e16d0bf2d6d53fca94",
+        "size_bytes": 50687
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_contract.py",
+        "sha256": "d17b9556947b12af546cc5ae1f888bd75b197a16a7f21abb66eef6ec70d8b6a7",
+        "size_bytes": 57207
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_fitter.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_fitter.py",
+        "sha256": "96a91f783380b335d7f5b2000593bb5645a480c349bc18994b0647458f2a8293",
+        "size_bytes": 58922
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/run_h0_v12r5_case_balanced.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/run_h0_v12r5_case_balanced.py",
+        "sha256": "ac9bd0819155eebebd02a1b483d9d5da038040acb517381360ce3da469778a2b",
+        "size_bytes": 209891
+      },
+      "Trajectory Generator/baseline_MLP/warm_start.py": {
+        "path": "Trajectory Generator/baseline_MLP/warm_start.py",
+        "sha256": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c",
+        "size_bytes": 22594
+      },
+      "Trajectory Generator/baseline_MLP/win_runtime.py": {
+        "path": "Trajectory Generator/baseline_MLP/win_runtime.py",
+        "sha256": "9088d0e18002b64d70ea38ce9bad2b26c16bfc1e4b77e1caa8afd903261d033f",
+        "size_bytes": 2751
+      },
+      "Trajectory Generator/binary_phase_adapter.py": {
+        "path": "Trajectory Generator/binary_phase_adapter.py",
+        "sha256": "8eba604b4774952f41660e714e5a9913fa2b9c431d19f04711103213d780c109",
+        "size_bytes": 28028
+      },
+      "Trajectory Generator/binary_phase_adapter_v26.py": {
+        "path": "Trajectory Generator/binary_phase_adapter_v26.py",
+        "sha256": "51c5b9c9b8fc7351b7a90909416cfbac0ca06a0485280ed8d663ef3b4bc91582",
+        "size_bytes": 11522
+      },
+      "Trajectory Generator/binary_phase_fsm.py": {
+        "path": "Trajectory Generator/binary_phase_fsm.py",
+        "sha256": "0f7669b60a72c1b27ee3c4f1a43161eeb9f2d091dff5558cc4fa43f1fce8d9c1",
+        "size_bytes": 18908
+      },
+      "Trajectory Generator/binary_phase_fsm_v26.py": {
+        "path": "Trajectory Generator/binary_phase_fsm_v26.py",
+        "sha256": "6d1c6a231f1ffab93d27ecb5967e8b08c6ead26d5a4205990d99f487e33cf02b",
+        "size_bytes": 5422
+      },
+      "Trajectory Generator/osim_trj_cmc_like.py": {
+        "path": "Trajectory Generator/osim_trj_cmc_like.py",
+        "sha256": "7448d8656fed1f5eaba29dfaac45202f9cc402acaeb148907c99d7cdfdfc0f27",
+        "size_bytes": 194221
+      },
+      "Trajectory Generator/prosthetic_phase_fsm.py": {
+        "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+        "sha256": "c647730d028606f967f35b6a2d30ea2b88d4bfae60718851c29eac82abf991e9",
+        "size_bytes": 74309
+      },
+      "binary_phase_detector.py": {
+        "path": "binary_phase_detector.py",
+        "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+        "size_bytes": 14226
+      },
+      "config.py": {
+        "path": "config.py",
+        "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+        "size_bytes": 17291
+      },
+      "inverse_dynamics.py": {
+        "path": "inverse_dynamics.py",
+        "sha256": "81c898f551a81d9af743575e6f6639a3a3bb69ddbe9faffa876f8d3f71df0833",
+        "size_bytes": 9836
+      },
+      "kinematics_interpolator.py": {
+        "path": "kinematics_interpolator.py",
+        "sha256": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede",
+        "size_bytes": 9742
+      },
+      "model_loader.py": {
+        "path": "model_loader.py",
+        "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+        "size_bytes": 58315
+      },
+      "online_grf.py": {
+        "path": "online_grf.py",
+        "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+        "size_bytes": 31439
+      },
+      "outer_loop.py": {
+        "path": "outer_loop.py",
+        "sha256": "a8a05d10d959c5fa98c29ecf703189af73318fd1291a2257315cd81417f5ef0b",
+        "size_bytes": 4558
+      },
+      "output.py": {
+        "path": "output.py",
+        "sha256": "7b03d1031202976fd011288e031f8796364eb35c34d1ed8838f8eff971318acb",
+        "size_bytes": 41834
+      },
+      "path_resolver.py": {
+        "path": "path_resolver.py",
+        "sha256": "2a61b8c54ab68c228ea55a6e28b6334ac0a9539da79f86e9a5ef2970bc937a1d",
+        "size_bytes": 6067
+      },
+      "prosthesis_controller.py": {
+        "path": "prosthesis_controller.py",
+        "sha256": "c0ef2da15b5754c9499f8c40072e655e954cc5085a2a8a858aeb6355b4073338",
+        "size_bytes": 21345
+      },
+      "setup_io.py": {
+        "path": "setup_io.py",
+        "sha256": "9d24df7b272ad6550c2897151b019b53d665a61a715217eeeb6dfbe54a6ae6e3",
+        "size_bytes": 11031
+      },
+      "simulation_runner.py": {
+        "path": "simulation_runner.py",
+        "sha256": "b79cb86c6ecb8d63d9555ccbae85acffaeec223904663a04998db5db6edcca19",
+        "size_bytes": 110192
+      },
+      "static_optimization.py": {
+        "path": "static_optimization.py",
+        "sha256": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+        "size_bytes": 35652
+      },
+      "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py": {
+        "path": "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py",
+        "sha256": "afa7d6959cb6a9337e0c2e0bd463d841ee99ffe49fc1095c8f47241aaab22099",
+        "size_bytes": 22310
+      },
+      "validation/compare_h0_v25_abc.py": {
+        "path": "validation/compare_h0_v25_abc.py",
+        "sha256": "dade1cdd0fd90c31ecf10ce8f84c2027a899e5ccfa53e2e7c486fab41741c028",
+        "size_bytes": 20701
+      },
+      "validation/h0_forensic_rollout.py": {
+        "path": "validation/h0_forensic_rollout.py",
+        "sha256": "e305729eb896335ebb9f492ce449cc5e7656f4fce5968e3fa4359daf38a02ebd",
+        "size_bytes": 20916
+      },
+      "validation/h0_primary_grf_split_v6_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v6_teacher_replay_contract.py",
+        "sha256": "15432db342be3a776b456c848ae013e25b716d106d6c292f68ca913456b3f19c",
+        "size_bytes": 21410
+      },
+      "validation/h0_primary_grf_split_v8_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8_teacher_replay_contract.py",
+        "sha256": "b6656d698eb3bb3c238b2a344a0f6b67dc6c499f815791dc321f67e364b7075c",
+        "size_bytes": 16898
+      },
+      "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py",
+        "sha256": "1ceabe42ca9ba671a1a58100b17251385d2fd10e3be75ebafeb009ba4544e025",
+        "size_bytes": 8159
+      },
+      "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py",
+        "sha256": "65f75895c79db94aa47c61ca7be0406af2d707b525f4fb388809262370b18d33",
+        "size_bytes": 5944
+      },
+      "validation/h0_primary_split_v10_coherent_teacher.py": {
+        "path": "validation/h0_primary_split_v10_coherent_teacher.py",
+        "sha256": "9c88c6a7873fdb197e56b85f855e0c5a6a597d5f053aa81f08aacdb08dab709f",
+        "size_bytes": 25334
+      },
+      "validation/h0_primary_split_v10s_blend.py": {
+        "path": "validation/h0_primary_split_v10s_blend.py",
+        "sha256": "9e11a94eea1c32c187b7a0cf875d889e530252a3fae64cd017c87a2853b1f57d",
+        "size_bytes": 9273
+      },
+      "validation/h0_primary_split_v10s_fit.py": {
+        "path": "validation/h0_primary_split_v10s_fit.py",
+        "sha256": "8ab610373f06e52c293c3da2cbf7409c035fc6366455c1b8052103e820b90594",
+        "size_bytes": 52821
+      },
+      "validation/h0_primary_split_v10s_safe_dagger_contract.py": {
+        "path": "validation/h0_primary_split_v10s_safe_dagger_contract.py",
+        "sha256": "5c6ea0993cb7585e7a588542382350bfdd1fd27b425373ff696d6ccb9cf77e0a",
+        "size_bytes": 48471
+      },
+      "validation/h0_primary_split_v11_weighted_fit.py": {
+        "path": "validation/h0_primary_split_v11_weighted_fit.py",
+        "sha256": "877bb79d9bf4bd8d87b9d07dbdee127ca259cc8cc82fac1e592ea37032029fdc",
+        "size_bytes": 58985
+      },
+      "validation/h0_primary_split_v11_weighted_full_mean_contract.py": {
+        "path": "validation/h0_primary_split_v11_weighted_full_mean_contract.py",
+        "sha256": "1ee981c087973dd417f88214894171be21f75fde54fd821d8a0eb2958db34729",
+        "size_bytes": 56432
+      },
+      "validation/h0_primary_split_v9_causal_teacher.py": {
+        "path": "validation/h0_primary_split_v9_causal_teacher.py",
+        "sha256": "c17defea4867c2088b2ce373d51f36ea7da9224dae96c0aab13224834218fccc",
+        "size_bytes": 5047
+      },
+      "validation/h0_primary_split_v9_causal_teacher_contract.py": {
+        "path": "validation/h0_primary_split_v9_causal_teacher_contract.py",
+        "sha256": "5c73bdafd388395dae1ba86bafb1cd52b2510f082c3b8ece433cd9308aa81d9e",
+        "size_bytes": 6460
+      },
+      "validation/h0_v3_so_recovery_contract.py": {
+        "path": "validation/h0_v3_so_recovery_contract.py",
+        "sha256": "4c8e9407e2c2c42eb6050210ba795dbc215ae7ca57a304a84d344b88b007a26c",
+        "size_bytes": 22774
+      },
+      "validation/run_h0_primary_grf_split_v6_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v6_teacher_replay.py",
+        "sha256": "582401e7ca258a859e1e7b30c6f5e47559db8d4a4afd2b833d9d0e19fc9c4b9b",
+        "size_bytes": 51448
+      },
+      "validation/run_h0_primary_grf_split_v8_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8_teacher_replay.py",
+        "sha256": "a0df53ffd776e1ee6bfcaec72995194d58800f5809373a7582dac857adfe6833",
+        "size_bytes": 34334
+      },
+      "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py",
+        "sha256": "cfc980126a2ef13ae548794ef975dfd885996921bf88aeee11eefa03e146e077",
+        "size_bytes": 21192
+      },
+      "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py",
+        "sha256": "3283e4d010f5e498f3bce4850ccde85d71f9b8620879c02dc48b2f5726aff1a3",
+        "size_bytes": 11744
+      },
+      "validation/run_h0_primary_split_v10s_safe_dagger.py": {
+        "path": "validation/run_h0_primary_split_v10s_safe_dagger.py",
+        "sha256": "4240afdb37b99734f8dbe80b67c9dbef491a43ff65d6bbc78cab2f15a3300faf",
+        "size_bytes": 100367
+      },
+      "validation/run_h0_primary_split_v9_causal_teacher.py": {
+        "path": "validation/run_h0_primary_split_v9_causal_teacher.py",
+        "sha256": "4c95e53645546cbf1cbb197c605866f54403278fb8aec8d59642874d379ea19d",
+        "size_bytes": 20339
+      },
+      "validation/run_h0_v25_abc_preflight.py": {
+        "path": "validation/run_h0_v25_abc_preflight.py",
+        "sha256": "344d55d7ecd1f5b9342b06438ccec769138823f3467706169dc6fc60a35fd128",
+        "size_bytes": 63570
+      }
+    },
+    "r4_nominal_pass_reusable": {
+      "gate": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_nominal/gate.json",
+        "sha256": "cb929362734306dd9a98ddef4d960c32a44e3cb589ff709e381e13cb6fb7721e",
+        "size_bytes": 689
+      },
+      "labels": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_nominal/labels.npz",
+        "sha256": "b7168422c2164050733e0f30f65b031e30e995553f2e64a43f1e73751c2ce7dd",
+        "size_bytes": 793510
+      },
+      "receipt": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_nominal/receipt.json",
+        "sha256": "fc587debdd3e958daadc7c2915f2c81c7d2a8462370cf8b2cdb4bae106bf0ed3",
+        "size_bytes": 1860
+      },
+      "summary": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_nominal/summary.json",
+        "sha256": "c4d1cf17dfbbceeb941104ec7e14cb2831223f8b49d0e5b8ff850393fb8a907a",
+        "size_bytes": 10665
+      },
+      "trace": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_nominal/trace.json",
+        "sha256": "28af9ac6029f99dcf6dbf7cddc5faa48a857e40b7e5458ad41ef163804b0aae5",
+        "size_bytes": 6210162
+      }
+    },
+    "r4_plus_failure_forensic_only": {
+      "failure": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_plus_0p20/failure.json",
+        "sha256": "95dafae160c7e7033bed1962f77000b785181947a9ac02d32700c251917f5aab",
+        "size_bytes": 61090
+      },
+      "gate": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_plus_0p20/gate.json",
+        "sha256": "3c8534f844fa1131d7320a317ff273e307b85e3755185383a35ca638dfa351b9",
+        "size_bytes": 689
+      },
+      "labels_excluded": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_plus_0p20/labels.npz",
+        "sha256": "9ac32c57ceed2863ffc8b7b98d09b6590c04324f65e6fd3b104923a1c1f05981",
+        "size_bytes": 342790
+      },
+      "summary": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/collect/deterministic_offset_plus_0p20/summary.json",
+        "sha256": "f704bce3bfabb2712730263f165ff5adc34c031ddeb5cf698f97ae7245041584",
+        "size_bytes": 8205
+      }
+    },
+    "r4_terminal": {
+      "execution_lock": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_p3_coverage_execution_lock.json",
+        "sha256": "95dd5db4ec35c1bc5ab41feabc33b74b025a30209514a9f95229218446bd8c1c",
+        "size_bytes": 5762
+      },
+      "protocol_freeze": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_p3_coverage_protocol_freeze.json",
+        "sha256": "5a56146c2b674c6dfd734c875db1314ca9473fd3beaa23034b0765bb64cf3646",
+        "size_bytes": 18592
+      },
+      "terminal_ledger": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r4/h0_v12r4_run_20260809/pipeline_ledger.json",
+        "sha256": "4351fd5be9f35f0ab5f5166329344af7e6a8cbf9f0b87691e254d5b7704a805f",
+        "size_bytes": 5898
+      }
+    },
+    "safe_environment_execution_lock": {
+      "path": "validation/h0_primary_grf_split_v8r1p1_teacher_replay_execution_lock.json",
+      "sha256": "2046f33c06d0aa052af8b7ef2089e33a0befb4bb53c75564853d6a29607df6c7",
+      "size_bytes": 40779
+    },
+    "safe_environment_source_closure": {
+      "actor_phase_fsm": {
+        "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+        "sha256": "c647730d028606f967f35b6a2d30ea2b88d4bfae60718851c29eac82abf991e9",
+        "size_bytes": 74309
+      },
+      "binary_phase_detector": {
+        "path": "binary_phase_detector.py",
+        "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+        "size_bytes": 14226
+      },
+      "collector": {
+        "path": "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py",
+        "sha256": "3283e4d010f5e498f3bce4850ccde85d71f9b8620879c02dc48b2f5726aff1a3",
+        "size_bytes": 11744
+      },
+      "contract": {
+        "path": "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py",
+        "sha256": "65f75895c79db94aa47c61ca7be0406af2d707b525f4fb388809262370b18d33",
+        "size_bytes": 5944
+      },
+      "contract_tests": {
+        "path": "validation/test_h0_primary_grf_split_v8r1p1_teacher_replay_contract.py",
+        "sha256": "47e4f55f554f596b6d67567aad633e9d8ed3af1bbc5f7fb49e74d386d56e7047",
+        "size_bytes": 1755
+      },
+      "environment": {
+        "path": "Trajectory Generator/osim_trj_cmc_like.py",
+        "sha256": "7448d8656fed1f5eaba29dfaac45202f9cc402acaeb148907c99d7cdfdfc0f27",
+        "size_bytes": 194221
+      },
+      "forensic_writer": {
+        "path": "validation/h0_forensic_rollout.py",
+        "sha256": "e305729eb896335ebb9f492ce449cc5e7656f4fce5968e3fa4359daf38a02ebd",
+        "size_bytes": 20916
+      },
+      "legacy_v25_runner": {
+        "path": "validation/run_h0_v25_abc_preflight.py",
+        "sha256": "344d55d7ecd1f5b9342b06438ccec769138823f3467706169dc6fc60a35fd128",
+        "size_bytes": 63570
+      },
+      "model_loader": {
+        "path": "model_loader.py",
+        "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+        "size_bytes": 58315
+      },
+      "online_grf": {
+        "path": "online_grf.py",
+        "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+        "size_bytes": 31439
+      },
+      "preexecution_v8r1_collector": {
+        "path": "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py",
+        "sha256": "cfc980126a2ef13ae548794ef975dfd885996921bf88aeee11eefa03e146e077",
+        "size_bytes": 21192
+      },
+      "preexecution_v8r1_contract": {
+        "path": "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py",
+        "sha256": "1ceabe42ca9ba671a1a58100b17251385d2fd10e3be75ebafeb009ba4544e025",
+        "size_bytes": 8159
+      },
+      "preexecution_v8r1_tests": {
+        "path": "validation/test_h0_primary_grf_split_v8r1_teacher_replay_contract.py",
+        "sha256": "72f58def0c916f40643df62099e298305d74da0e5516aed8bb1e1f002939fafe",
+        "size_bytes": 3787
+      },
+      "primary_split_contract": {
+        "path": "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py",
+        "sha256": "56d58e06acba50edebe1239906e1808336f2d343f553de573a69189f4f01b60d",
+        "size_bytes": 18348
+      },
+      "residual_module": {
+        "path": "Trajectory Generator/baseline_MLP/primary_split_v25_residual.py",
+        "sha256": "961ec714673108a713f77332be261cfa01274df6ca9b3fccef0695cfdf73fe5c",
+        "size_bytes": 12509
+      },
+      "rollout_eval": {
+        "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "sha256": "8681bd981a2fb13ce50373188b43140bccc548234bf9d680dcbbf8d0dd76e98f",
+        "size_bytes": 59374
+      },
+      "root_config": {
+        "path": "config.py",
+        "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+        "size_bytes": 17291
+      },
+      "simulation_runner": {
+        "path": "simulation_runner.py",
+        "sha256": "b79cb86c6ecb8d63d9555ccbae85acffaeec223904663a04998db5db6edcca19",
+        "size_bytes": 110192
+      },
+      "so_classifier": {
+        "path": "validation/h0_v3_so_recovery_contract.py",
+        "sha256": "4c8e9407e2c2c42eb6050210ba795dbc215ae7ca57a304a84d344b88b007a26c",
+        "size_bytes": 22774
+      },
+      "static_optimization": {
+        "path": "static_optimization.py",
+        "sha256": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+        "size_bytes": 35652
+      },
+      "terminal_v8_collector": {
+        "path": "validation/run_h0_primary_grf_split_v8_teacher_replay.py",
+        "sha256": "a0df53ffd776e1ee6bfcaec72995194d58800f5809373a7582dac857adfe6833",
+        "size_bytes": 34334
+      },
+      "terminal_v8_contract": {
+        "path": "validation/h0_primary_grf_split_v8_teacher_replay_contract.py",
+        "sha256": "b6656d698eb3bb3c238b2a344a0f6b67dc6c499f815791dc321f67e364b7075c",
+        "size_bytes": 16898
+      },
+      "terminal_v8_tests": {
+        "path": "validation/test_h0_primary_grf_split_v8_teacher_replay_contract.py",
+        "sha256": "496c76319c2f3bcaf6cc1d520158a599549fa3282a64faccf6d36b446b1cef3b",
+        "size_bytes": 7920
+      },
+      "training_config": {
+        "path": "Trajectory Generator/baseline_MLP/training_config.py",
+        "sha256": "bf37b27de2e178c7c439e3855dea4dae529ddc139f6206def5167267b3541155",
+        "size_bytes": 13222
+      },
+      "v26_binary_phase_adapter": {
+        "path": "Trajectory Generator/binary_phase_adapter_v26.py",
+        "sha256": "51c5b9c9b8fc7351b7a90909416cfbac0ca06a0485280ed8d663ef3b4bc91582",
+        "size_bytes": 11522
+      },
+      "v26_binary_phase_fsm": {
+        "path": "Trajectory Generator/binary_phase_fsm_v26.py",
+        "sha256": "6d1c6a231f1ffab93d27ecb5967e8b08c6ead26d5a4205990d99f487e33cf02b",
+        "size_bytes": 5422
+      },
+      "v6_collector_engine": {
+        "path": "validation/run_h0_primary_grf_split_v6_teacher_replay.py",
+        "sha256": "582401e7ca258a859e1e7b30c6f5e47559db8d4a4afd2b833d9d0e19fc9c4b9b",
+        "size_bytes": 51448
+      },
+      "v6_preflight_helpers": {
+        "path": "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py",
+        "sha256": "afa7d6959cb6a9337e0c2e0bd463d841ee99ffe49fc1095c8f47241aaab22099",
+        "size_bytes": 22310
+      },
+      "v6_pure_contract": {
+        "path": "validation/h0_primary_grf_split_v6_teacher_replay_contract.py",
+        "sha256": "15432db342be3a776b456c848ae013e25b716d106d6c292f68ca913456b3f19c",
+        "size_bytes": 21410
+      }
+    },
+    "safe_plus_reference": {
+      "gate": {
+        "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-07_h0_primary_split_v8r1p1_v26_residual/teacher_replay/deterministic_offset_plus_0p20/gate.json",
+        "sha256": "90dd5bc18dbe7ff70b49ac69b36d1d92d7d7b41d9ce1403cf6e0bf1666f9fb52",
+        "size_bytes": 3855
+      },
+      "receipt": {
+        "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-07_h0_primary_split_v8r1p1_v26_residual/teacher_replay/deterministic_offset_plus_0p20/receipt.json",
+        "sha256": "7f89bdc66b91219a7206aca08075e8eff512b5cc25d1791c1e13ac78a4cc8339",
+        "size_bytes": 158695
+      },
+      "summary": {
+        "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-07_h0_primary_split_v8r1p1_v26_residual/teacher_replay/deterministic_offset_plus_0p20/summary.json",
+        "sha256": "b8853f5e3b2ba6027f3edb310dee427ead087e29bdd0c720ddf3ea56dde53f5f",
+        "size_bytes": 10206
+      },
+      "trace": {
+        "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-07_h0_primary_split_v8r1p1_v26_residual/teacher_replay/deterministic_offset_plus_0p20/trace.json",
+        "sha256": "c3ca347011ce79f5c8d1d3235d1a1b2b595eb7fcfafdc1a74f60dc34e640887d",
+        "size_bytes": 13042971
+      }
+    },
+    "source_h0": {
+      "file_count": 3,
+      "files": [
+        {
+          "path": "class_and_ctor_args.pkl",
+          "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+          "size_bytes": 2262
+        },
+        {
+          "path": "metadata.json",
+          "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+          "size_bytes": 197
+        },
+        {
+          "path": "module_state.pkl",
+          "sha256": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b",
+          "size_bytes": 604772
+        }
+      ],
+      "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+      "tree_sha256": "f7f6c898975af109412af8c3f1a338b5076f9fefcec1e2723673fd821f1f13ee"
+    }
+  },
+  "new_collection_count": 0,
+  "new_collection_stages": [],
+  "passed": true,
+  "pipeline_claim_created": false,
+  "pipeline_id": "H0_V12R5_CASE_BALANCED_SINGLE_FIT_CRITICAL_FIRST",
+  "positive_morphology_enabled": false,
+  "ppo_updates": 0,
+  "protocol_id": "AB06_H0_PRIMARY_SPLIT_V12R5_CASE_BALANCED_V26",
+  "q2_historical_design_freeze": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r4q2/h0_v12r4_q2_qualification_design_freeze.json",
+    "sha256": "d92fac765bd192f43ef2e0420a8529e8bb21860a3f47420ab5948863fb53eaf5",
+    "size_bytes": 32166
+  },
+  "q2_unopened_paths": {
+    "execution_lock": "Trajectory Generator/baseline_MLP/validation/v12r4q2/h0_v12r4_q2_qualification_execution_lock.json",
+    "noise_root": "Trajectory Generator/baseline_MLP/validation/v12r4q2/h0_v12r4_q2_qualification_noise_tapes",
+    "protocol_freeze": "Trajectory Generator/baseline_MLP/validation/v12r4q2/h0_v12r4_q2_qualification_protocol_freeze.json",
+    "run_root": "Trajectory Generator/baseline_MLP/validation/v12r4q2/h0_v12r4_q2_run_20260809"
+  },
+  "q3_design_freeze": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r5q3/h0_v12r5_q3_qualification_design_freeze.json",
+    "sha256": "f2764f2cf16abfc168255056fdf0c1407d97c65100bb3965b866f38db084e56d",
+    "size_bytes": 68465
+  },
+  "q3_prerequisites": {
+    "candidate_freeze": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/candidate_freeze_receipt.json",
+      "status": "PASS_H0_V12R5_CASE_BALANCED_CANDIDATE_FREEZE"
+    },
+    "execution_lock": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_execution_lock.json",
+      "status": "PASS_H0_V12R5_CASE_BALANCED_EXECUTION_LOCK"
+    },
+    "final_development_receipt": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/final_development_receipt.json",
+      "status": "PASS_H0_V12R5_CASE_BALANCED_DEVELOPMENT"
+    },
+    "protocol_freeze": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_protocol_freeze.json",
+      "status": "PASS_H0_V12R5_CASE_BALANCED_PROTOCOL_FREEZE"
+    },
+    "terminal_ledger": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_run_20260809/pipeline_ledger.json",
+      "status": "PASS_H0_V12R5_CASE_BALANCED_PIPELINE_TERMINAL"
+    }
+  },
+  "q3_unopened_paths": {
+    "execution_lock": "Trajectory Generator/baseline_MLP/validation/v12r5q3/h0_v12r5_q3_qualification_execution_lock.json",
+    "noise_root": "Trajectory Generator/baseline_MLP/validation/v12r5q3/h0_v12r5_q3_qualification_noise_tapes",
+    "protocol_freeze": "Trajectory Generator/baseline_MLP/validation/v12r5q3/h0_v12r5_q3_qualification_protocol_freeze.json",
+    "run_root": "Trajectory Generator/baseline_MLP/validation/v12r5q3/h0_v12r5_q3_run_20260809"
+  },
+  "raw_sensor_sample_count": 0,
+  "revision": "2026-08-09",
+  "runtime_promoted": false,
+  "schema_version": 1250,
+  "source_precondition_gate": {
+    "absence_checks": {
+      "design_audit": true,
+      "execution_lock": true,
+      "execution_lock_publication_failure": true,
+      "pipeline_claim_failure": true,
+      "protocol_freeze": true,
+      "protocol_publication_failure": true,
+      "q2_execution_lock": true,
+      "q2_noise_root": true,
+      "q2_protocol_freeze": true,
+      "q2_run_root": true,
+      "q3_execution_lock": true,
+      "q3_noise_root": true,
+      "q3_protocol_freeze": true,
+      "q3_run_root": true,
+      "run_root": true
+    },
+    "checks": {
+      "contract": true,
+      "locked_records": true,
+      "locked_semantics": true,
+      "one_shot_no_collection_authority": true,
+      "outputs_unopened": true,
+      "q2_historical_design": true,
+      "q3_design_preregistered": true
+    },
+    "passed": true,
+    "production_source_closure": {
+      "Trajectory Generator/baseline_MLP/_bootstrap.py": {
+        "path": "Trajectory Generator/baseline_MLP/_bootstrap.py",
+        "sha256": "6943e6d187f1c325f98417106c0928d3e4e0f670102686c925b7c2ec667bd63c",
+        "size_bytes": 1049
+      },
+      "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": {
+        "path": "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py",
+        "sha256": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+        "size_bytes": 8081
+      },
+      "Trajectory Generator/baseline_MLP/env_factory.py": {
+        "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+        "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+        "size_bytes": 9701
+      },
+      "Trajectory Generator/baseline_MLP/experimental_morphology_corridor.py": {
+        "path": "Trajectory Generator/baseline_MLP/experimental_morphology_corridor.py",
+        "sha256": "258700b5da99aa9110a92039834bf4061ca81b9eb7ea770b93919a0b3105e801",
+        "size_bytes": 55963
+      },
+      "Trajectory Generator/baseline_MLP/exploration_noise.py": {
+        "path": "Trajectory Generator/baseline_MLP/exploration_noise.py",
+        "sha256": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f",
+        "size_bytes": 1467
+      },
+      "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py": {
+        "path": "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py",
+        "sha256": "56d58e06acba50edebe1239906e1808336f2d343f553de573a69189f4f01b60d",
+        "size_bytes": 18348
+      },
+      "Trajectory Generator/baseline_MLP/process_watchdog.py": {
+        "path": "Trajectory Generator/baseline_MLP/process_watchdog.py",
+        "sha256": "0511fdda6fd0a3d5db0697b56d20226f955c10955fdfb82d6b75d2b6834128e0",
+        "size_bytes": 16669
+      },
+      "Trajectory Generator/baseline_MLP/progress_display.py": {
+        "path": "Trajectory Generator/baseline_MLP/progress_display.py",
+        "sha256": "26e0c59698dc98ebc3f1112ea07cdf054c0b283d9797206eb5664ef92dc777c5",
+        "size_bytes": 9846
+      },
+      "Trajectory Generator/baseline_MLP/reward_function.py": {
+        "path": "Trajectory Generator/baseline_MLP/reward_function.py",
+        "sha256": "f530a24a4122e51fbf5f40d984821dbe15a380f81375281fbd0f28934c471b5d",
+        "size_bytes": 118458
+      },
+      "Trajectory Generator/baseline_MLP/rollout_eval.py": {
+        "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "sha256": "8681bd981a2fb13ce50373188b43140bccc548234bf9d680dcbbf8d0dd76e98f",
+        "size_bytes": 59374
+      },
+      "Trajectory Generator/baseline_MLP/target_domain_imitation.py": {
+        "path": "Trajectory Generator/baseline_MLP/target_domain_imitation.py",
+        "sha256": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3",
+        "size_bytes": 60541
+      },
+      "Trajectory Generator/baseline_MLP/training_config.py": {
+        "path": "Trajectory Generator/baseline_MLP/training_config.py",
+        "sha256": "bf37b27de2e178c7c439e3855dea4dae529ddc139f6206def5167267b3541155",
+        "size_bytes": 13222
+      },
+      "Trajectory Generator/baseline_MLP/validation/freeze_h0_primary_split_v12_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/freeze_h0_primary_split_v12_autonomy_recovery.py",
+        "sha256": "ac87eaefe2030e77da73e05ecc1a1f476aaf513f306783724238800321a9f7a4",
+        "size_bytes": 60997
+      },
+      "Trajectory Generator/baseline_MLP/validation/h0_primary_split_v12_autonomy_recovery_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/h0_primary_split_v12_autonomy_recovery_contract.py",
+        "sha256": "d146562ed1355ac178e3a0abd922568a92d262e6f2ccecfe5ef1e05135e2a4ea",
+        "size_bytes": 97514
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/freeze_h0_primary_split_v12r3_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/freeze_h0_primary_split_v12r3_autonomy_recovery.py",
+        "sha256": "dd43031663faeb867f2f6ec2b80ff3885e1dc35d7be05e291b2e266a9b9dedd7",
+        "size_bytes": 30900
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_autonomy_recovery_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_autonomy_recovery_contract.py",
+        "sha256": "bf4ea138c5391e75aa0648f5bee8cea560298b8dac3a5c01958be6ec6eea18d3",
+        "size_bytes": 46121
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_pure_probe_observer_labeler.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_pure_probe_observer_labeler.py",
+        "sha256": "fc21b3f6e43646a4492372673405e7de43fa0239fb37ae9c36cf5a878fdc92ee",
+        "size_bytes": 82833
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_recovery_weighted_fitter.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_primary_split_v12r3_recovery_weighted_fitter.py",
+        "sha256": "6c7c35eed501ddbe0a4fefecd1f76ea321d15baf6d374d87ce1ffbe3f38deeff",
+        "size_bytes": 71952
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_autonomy_recovery.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_autonomy_recovery.py",
+        "sha256": "350699f731b9afe6d02ff19419b1a6ee0e2371c35e8522354f0eac7280ff2f2c",
+        "size_bytes": 132547
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_design_audit.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r3/run_h0_primary_split_v12r3_design_audit.py",
+        "sha256": "cd648ac5df1f90266f0c36b3433b8701a22717f22eb30c36c29a9783b2cceb10",
+        "size_bytes": 16953
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/freeze_h0_v12r5_case_balanced.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/freeze_h0_v12r5_case_balanced.py",
+        "sha256": "df101f0a228ea09f5f355df479c415bffaad09e5d272e1e16d0bf2d6d53fca94",
+        "size_bytes": 50687
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_contract.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_contract.py",
+        "sha256": "d17b9556947b12af546cc5ae1f888bd75b197a16a7f21abb66eef6ec70d8b6a7",
+        "size_bytes": 57207
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_fitter.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_fitter.py",
+        "sha256": "96a91f783380b335d7f5b2000593bb5645a480c349bc18994b0647458f2a8293",
+        "size_bytes": 58922
+      },
+      "Trajectory Generator/baseline_MLP/validation/v12r5/run_h0_v12r5_case_balanced.py": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v12r5/run_h0_v12r5_case_balanced.py",
+        "sha256": "ac9bd0819155eebebd02a1b483d9d5da038040acb517381360ce3da469778a2b",
+        "size_bytes": 209891
+      },
+      "Trajectory Generator/baseline_MLP/warm_start.py": {
+        "path": "Trajectory Generator/baseline_MLP/warm_start.py",
+        "sha256": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c",
+        "size_bytes": 22594
+      },
+      "Trajectory Generator/baseline_MLP/win_runtime.py": {
+        "path": "Trajectory Generator/baseline_MLP/win_runtime.py",
+        "sha256": "9088d0e18002b64d70ea38ce9bad2b26c16bfc1e4b77e1caa8afd903261d033f",
+        "size_bytes": 2751
+      },
+      "Trajectory Generator/binary_phase_adapter.py": {
+        "path": "Trajectory Generator/binary_phase_adapter.py",
+        "sha256": "8eba604b4774952f41660e714e5a9913fa2b9c431d19f04711103213d780c109",
+        "size_bytes": 28028
+      },
+      "Trajectory Generator/binary_phase_adapter_v26.py": {
+        "path": "Trajectory Generator/binary_phase_adapter_v26.py",
+        "sha256": "51c5b9c9b8fc7351b7a90909416cfbac0ca06a0485280ed8d663ef3b4bc91582",
+        "size_bytes": 11522
+      },
+      "Trajectory Generator/binary_phase_fsm.py": {
+        "path": "Trajectory Generator/binary_phase_fsm.py",
+        "sha256": "0f7669b60a72c1b27ee3c4f1a43161eeb9f2d091dff5558cc4fa43f1fce8d9c1",
+        "size_bytes": 18908
+      },
+      "Trajectory Generator/binary_phase_fsm_v26.py": {
+        "path": "Trajectory Generator/binary_phase_fsm_v26.py",
+        "sha256": "6d1c6a231f1ffab93d27ecb5967e8b08c6ead26d5a4205990d99f487e33cf02b",
+        "size_bytes": 5422
+      },
+      "Trajectory Generator/osim_trj_cmc_like.py": {
+        "path": "Trajectory Generator/osim_trj_cmc_like.py",
+        "sha256": "7448d8656fed1f5eaba29dfaac45202f9cc402acaeb148907c99d7cdfdfc0f27",
+        "size_bytes": 194221
+      },
+      "Trajectory Generator/prosthetic_phase_fsm.py": {
+        "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+        "sha256": "c647730d028606f967f35b6a2d30ea2b88d4bfae60718851c29eac82abf991e9",
+        "size_bytes": 74309
+      },
+      "binary_phase_detector.py": {
+        "path": "binary_phase_detector.py",
+        "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+        "size_bytes": 14226
+      },
+      "config.py": {
+        "path": "config.py",
+        "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+        "size_bytes": 17291
+      },
+      "inverse_dynamics.py": {
+        "path": "inverse_dynamics.py",
+        "sha256": "81c898f551a81d9af743575e6f6639a3a3bb69ddbe9faffa876f8d3f71df0833",
+        "size_bytes": 9836
+      },
+      "kinematics_interpolator.py": {
+        "path": "kinematics_interpolator.py",
+        "sha256": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede",
+        "size_bytes": 9742
+      },
+      "model_loader.py": {
+        "path": "model_loader.py",
+        "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+        "size_bytes": 58315
+      },
+      "online_grf.py": {
+        "path": "online_grf.py",
+        "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+        "size_bytes": 31439
+      },
+      "outer_loop.py": {
+        "path": "outer_loop.py",
+        "sha256": "a8a05d10d959c5fa98c29ecf703189af73318fd1291a2257315cd81417f5ef0b",
+        "size_bytes": 4558
+      },
+      "output.py": {
+        "path": "output.py",
+        "sha256": "7b03d1031202976fd011288e031f8796364eb35c34d1ed8838f8eff971318acb",
+        "size_bytes": 41834
+      },
+      "path_resolver.py": {
+        "path": "path_resolver.py",
+        "sha256": "2a61b8c54ab68c228ea55a6e28b6334ac0a9539da79f86e9a5ef2970bc937a1d",
+        "size_bytes": 6067
+      },
+      "prosthesis_controller.py": {
+        "path": "prosthesis_controller.py",
+        "sha256": "c0ef2da15b5754c9499f8c40072e655e954cc5085a2a8a858aeb6355b4073338",
+        "size_bytes": 21345
+      },
+      "setup_io.py": {
+        "path": "setup_io.py",
+        "sha256": "9d24df7b272ad6550c2897151b019b53d665a61a715217eeeb6dfbe54a6ae6e3",
+        "size_bytes": 11031
+      },
+      "simulation_runner.py": {
+        "path": "simulation_runner.py",
+        "sha256": "b79cb86c6ecb8d63d9555ccbae85acffaeec223904663a04998db5db6edcca19",
+        "size_bytes": 110192
+      },
+      "static_optimization.py": {
+        "path": "static_optimization.py",
+        "sha256": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+        "size_bytes": 35652
+      },
+      "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py": {
+        "path": "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py",
+        "sha256": "afa7d6959cb6a9337e0c2e0bd463d841ee99ffe49fc1095c8f47241aaab22099",
+        "size_bytes": 22310
+      },
+      "validation/compare_h0_v25_abc.py": {
+        "path": "validation/compare_h0_v25_abc.py",
+        "sha256": "dade1cdd0fd90c31ecf10ce8f84c2027a899e5ccfa53e2e7c486fab41741c028",
+        "size_bytes": 20701
+      },
+      "validation/h0_forensic_rollout.py": {
+        "path": "validation/h0_forensic_rollout.py",
+        "sha256": "e305729eb896335ebb9f492ce449cc5e7656f4fce5968e3fa4359daf38a02ebd",
+        "size_bytes": 20916
+      },
+      "validation/h0_primary_grf_split_v6_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v6_teacher_replay_contract.py",
+        "sha256": "15432db342be3a776b456c848ae013e25b716d106d6c292f68ca913456b3f19c",
+        "size_bytes": 21410
+      },
+      "validation/h0_primary_grf_split_v8_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8_teacher_replay_contract.py",
+        "sha256": "b6656d698eb3bb3c238b2a344a0f6b67dc6c499f815791dc321f67e364b7075c",
+        "size_bytes": 16898
+      },
+      "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py",
+        "sha256": "1ceabe42ca9ba671a1a58100b17251385d2fd10e3be75ebafeb009ba4544e025",
+        "size_bytes": 8159
+      },
+      "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py": {
+        "path": "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py",
+        "sha256": "65f75895c79db94aa47c61ca7be0406af2d707b525f4fb388809262370b18d33",
+        "size_bytes": 5944
+      },
+      "validation/h0_primary_split_v10_coherent_teacher.py": {
+        "path": "validation/h0_primary_split_v10_coherent_teacher.py",
+        "sha256": "9c88c6a7873fdb197e56b85f855e0c5a6a597d5f053aa81f08aacdb08dab709f",
+        "size_bytes": 25334
+      },
+      "validation/h0_primary_split_v10s_blend.py": {
+        "path": "validation/h0_primary_split_v10s_blend.py",
+        "sha256": "9e11a94eea1c32c187b7a0cf875d889e530252a3fae64cd017c87a2853b1f57d",
+        "size_bytes": 9273
+      },
+      "validation/h0_primary_split_v10s_fit.py": {
+        "path": "validation/h0_primary_split_v10s_fit.py",
+        "sha256": "8ab610373f06e52c293c3da2cbf7409c035fc6366455c1b8052103e820b90594",
+        "size_bytes": 52821
+      },
+      "validation/h0_primary_split_v10s_safe_dagger_contract.py": {
+        "path": "validation/h0_primary_split_v10s_safe_dagger_contract.py",
+        "sha256": "5c6ea0993cb7585e7a588542382350bfdd1fd27b425373ff696d6ccb9cf77e0a",
+        "size_bytes": 48471
+      },
+      "validation/h0_primary_split_v11_weighted_fit.py": {
+        "path": "validation/h0_primary_split_v11_weighted_fit.py",
+        "sha256": "877bb79d9bf4bd8d87b9d07dbdee127ca259cc8cc82fac1e592ea37032029fdc",
+        "size_bytes": 58985
+      },
+      "validation/h0_primary_split_v11_weighted_full_mean_contract.py": {
+        "path": "validation/h0_primary_split_v11_weighted_full_mean_contract.py",
+        "sha256": "1ee981c087973dd417f88214894171be21f75fde54fd821d8a0eb2958db34729",
+        "size_bytes": 56432
+      },
+      "validation/h0_primary_split_v9_causal_teacher.py": {
+        "path": "validation/h0_primary_split_v9_causal_teacher.py",
+        "sha256": "c17defea4867c2088b2ce373d51f36ea7da9224dae96c0aab13224834218fccc",
+        "size_bytes": 5047
+      },
+      "validation/h0_primary_split_v9_causal_teacher_contract.py": {
+        "path": "validation/h0_primary_split_v9_causal_teacher_contract.py",
+        "sha256": "5c73bdafd388395dae1ba86bafb1cd52b2510f082c3b8ece433cd9308aa81d9e",
+        "size_bytes": 6460
+      },
+      "validation/h0_v3_so_recovery_contract.py": {
+        "path": "validation/h0_v3_so_recovery_contract.py",
+        "sha256": "4c8e9407e2c2c42eb6050210ba795dbc215ae7ca57a304a84d344b88b007a26c",
+        "size_bytes": 22774
+      },
+      "validation/run_h0_primary_grf_split_v6_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v6_teacher_replay.py",
+        "sha256": "582401e7ca258a859e1e7b30c6f5e47559db8d4a4afd2b833d9d0e19fc9c4b9b",
+        "size_bytes": 51448
+      },
+      "validation/run_h0_primary_grf_split_v8_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8_teacher_replay.py",
+        "sha256": "a0df53ffd776e1ee6bfcaec72995194d58800f5809373a7582dac857adfe6833",
+        "size_bytes": 34334
+      },
+      "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py",
+        "sha256": "cfc980126a2ef13ae548794ef975dfd885996921bf88aeee11eefa03e146e077",
+        "size_bytes": 21192
+      },
+      "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py": {
+        "path": "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py",
+        "sha256": "3283e4d010f5e498f3bce4850ccde85d71f9b8620879c02dc48b2f5726aff1a3",
+        "size_bytes": 11744
+      },
+      "validation/run_h0_primary_split_v10s_safe_dagger.py": {
+        "path": "validation/run_h0_primary_split_v10s_safe_dagger.py",
+        "sha256": "4240afdb37b99734f8dbe80b67c9dbef491a43ff65d6bbc78cab2f15a3300faf",
+        "size_bytes": 100367
+      },
+      "validation/run_h0_primary_split_v9_causal_teacher.py": {
+        "path": "validation/run_h0_primary_split_v9_causal_teacher.py",
+        "sha256": "4c95e53645546cbf1cbb197c605866f54403278fb8aec8d59642874d379ea19d",
+        "size_bytes": 20339
+      },
+      "validation/run_h0_v25_abc_preflight.py": {
+        "path": "validation/run_h0_v25_abc_preflight.py",
+        "sha256": "344d55d7ecd1f5b9342b06438ccec769138823f3467706169dc6fc60a35fd128",
+        "size_bytes": 63570
+      }
+    },
+    "protocol_id": "AB06_H0_PRIMARY_SPLIT_V12R5_CASE_BALANCED_V26",
+    "q2_design_checks": {
+      "artifact_exact": true,
+      "candidate_deferred": true,
+      "historical_identity": true
+    },
+    "q2_design_freeze": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r4q2/h0_v12r4_q2_qualification_design_freeze.json",
+      "sha256": "d92fac765bd192f43ef2e0420a8529e8bb21860a3f47420ab5948863fb53eaf5",
+      "size_bytes": 32166
+    },
+    "q2_paths_opened": [],
+    "q3_design_checks": {
+      "artifact_exact": true,
+      "candidate_deferred": true,
+      "identity": true,
+      "present_regular": true,
+      "r5_prerequisites_exact": true
+    },
+    "q3_design_freeze": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5q3/h0_v12r5_q3_qualification_design_freeze.json",
+      "sha256": "f2764f2cf16abfc168255056fdf0c1407d97c65100bb3965b866f38db084e56d",
+      "size_bytes": 68465
+    },
+    "q3_paths_opened": [],
+    "record_checks": {
+      "external_runtime_sources": true,
+      "p2_corpus": true,
+      "p2_history": true,
+      "p2_module": true,
+      "p2_report": true,
+      "production_source_closure": true,
+      "q2_design": true,
+      "q3_design": true,
+      "r4_nominal_pass": true,
+      "r4_plus_failure": true,
+      "r4_terminal": true,
+      "safe_environment_29_source_closure": true,
+      "safe_environment_execution_lock": true,
+      "safe_plus_reference": true,
+      "source_h0": true
+    },
+    "safe_environment_source_closure": {
+      "actor_phase_fsm": {
+        "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+        "sha256": "c647730d028606f967f35b6a2d30ea2b88d4bfae60718851c29eac82abf991e9",
+        "size_bytes": 74309
+      },
+      "binary_phase_detector": {
+        "path": "binary_phase_detector.py",
+        "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+        "size_bytes": 14226
+      },
+      "collector": {
+        "path": "validation/run_h0_primary_grf_split_v8r1p1_teacher_replay.py",
+        "sha256": "3283e4d010f5e498f3bce4850ccde85d71f9b8620879c02dc48b2f5726aff1a3",
+        "size_bytes": 11744
+      },
+      "contract": {
+        "path": "validation/h0_primary_grf_split_v8r1p1_teacher_replay_contract.py",
+        "sha256": "65f75895c79db94aa47c61ca7be0406af2d707b525f4fb388809262370b18d33",
+        "size_bytes": 5944
+      },
+      "contract_tests": {
+        "path": "validation/test_h0_primary_grf_split_v8r1p1_teacher_replay_contract.py",
+        "sha256": "47e4f55f554f596b6d67567aad633e9d8ed3af1bbc5f7fb49e74d386d56e7047",
+        "size_bytes": 1755
+      },
+      "environment": {
+        "path": "Trajectory Generator/osim_trj_cmc_like.py",
+        "sha256": "7448d8656fed1f5eaba29dfaac45202f9cc402acaeb148907c99d7cdfdfc0f27",
+        "size_bytes": 194221
+      },
+      "forensic_writer": {
+        "path": "validation/h0_forensic_rollout.py",
+        "sha256": "e305729eb896335ebb9f492ce449cc5e7656f4fce5968e3fa4359daf38a02ebd",
+        "size_bytes": 20916
+      },
+      "legacy_v25_runner": {
+        "path": "validation/run_h0_v25_abc_preflight.py",
+        "sha256": "344d55d7ecd1f5b9342b06438ccec769138823f3467706169dc6fc60a35fd128",
+        "size_bytes": 63570
+      },
+      "model_loader": {
+        "path": "model_loader.py",
+        "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+        "size_bytes": 58315
+      },
+      "online_grf": {
+        "path": "online_grf.py",
+        "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+        "size_bytes": 31439
+      },
+      "preexecution_v8r1_collector": {
+        "path": "validation/run_h0_primary_grf_split_v8r1_teacher_replay.py",
+        "sha256": "cfc980126a2ef13ae548794ef975dfd885996921bf88aeee11eefa03e146e077",
+        "size_bytes": 21192
+      },
+      "preexecution_v8r1_contract": {
+        "path": "validation/h0_primary_grf_split_v8r1_teacher_replay_contract.py",
+        "sha256": "1ceabe42ca9ba671a1a58100b17251385d2fd10e3be75ebafeb009ba4544e025",
+        "size_bytes": 8159
+      },
+      "preexecution_v8r1_tests": {
+        "path": "validation/test_h0_primary_grf_split_v8r1_teacher_replay_contract.py",
+        "sha256": "72f58def0c916f40643df62099e298305d74da0e5516aed8bb1e1f002939fafe",
+        "size_bytes": 3787
+      },
+      "primary_split_contract": {
+        "path": "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py",
+        "sha256": "56d58e06acba50edebe1239906e1808336f2d343f553de573a69189f4f01b60d",
+        "size_bytes": 18348
+      },
+      "residual_module": {
+        "path": "Trajectory Generator/baseline_MLP/primary_split_v25_residual.py",
+        "sha256": "961ec714673108a713f77332be261cfa01274df6ca9b3fccef0695cfdf73fe5c",
+        "size_bytes": 12509
+      },
+      "rollout_eval": {
+        "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "sha256": "8681bd981a2fb13ce50373188b43140bccc548234bf9d680dcbbf8d0dd76e98f",
+        "size_bytes": 59374
+      },
+      "root_config": {
+        "path": "config.py",
+        "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+        "size_bytes": 17291
+      },
+      "simulation_runner": {
+        "path": "simulation_runner.py",
+        "sha256": "b79cb86c6ecb8d63d9555ccbae85acffaeec223904663a04998db5db6edcca19",
+        "size_bytes": 110192
+      },
+      "so_classifier": {
+        "path": "validation/h0_v3_so_recovery_contract.py",
+        "sha256": "4c8e9407e2c2c42eb6050210ba795dbc215ae7ca57a304a84d344b88b007a26c",
+        "size_bytes": 22774
+      },
+      "static_optimization": {
+        "path": "static_optimization.py",
+        "sha256": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+        "size_bytes": 35652
+      },
+      "terminal_v8_collector": {
+        "path": "validation/run_h0_primary_grf_split_v8_teacher_replay.py",
+        "sha256": "a0df53ffd776e1ee6bfcaec72995194d58800f5809373a7582dac857adfe6833",
+        "size_bytes": 34334
+      },
+      "terminal_v8_contract": {
+        "path": "validation/h0_primary_grf_split_v8_teacher_replay_contract.py",
+        "sha256": "b6656d698eb3bb3c238b2a344a0f6b67dc6c499f815791dc321f67e364b7075c",
+        "size_bytes": 16898
+      },
+      "terminal_v8_tests": {
+        "path": "validation/test_h0_primary_grf_split_v8_teacher_replay_contract.py",
+        "sha256": "496c76319c2f3bcaf6cc1d520158a599549fa3282a64faccf6d36b446b1cef3b",
+        "size_bytes": 7920
+      },
+      "training_config": {
+        "path": "Trajectory Generator/baseline_MLP/training_config.py",
+        "sha256": "bf37b27de2e178c7c439e3855dea4dae529ddc139f6206def5167267b3541155",
+        "size_bytes": 13222
+      },
+      "v26_binary_phase_adapter": {
+        "path": "Trajectory Generator/binary_phase_adapter_v26.py",
+        "sha256": "51c5b9c9b8fc7351b7a90909416cfbac0ca06a0485280ed8d663ef3b4bc91582",
+        "size_bytes": 11522
+      },
+      "v26_binary_phase_fsm": {
+        "path": "Trajectory Generator/binary_phase_fsm_v26.py",
+        "sha256": "6d1c6a231f1ffab93d27ecb5967e8b08c6ead26d5a4205990d99f487e33cf02b",
+        "size_bytes": 5422
+      },
+      "v6_collector_engine": {
+        "path": "validation/run_h0_primary_grf_split_v6_teacher_replay.py",
+        "sha256": "582401e7ca258a859e1e7b30c6f5e47559db8d4a4afd2b833d9d0e19fc9c4b9b",
+        "size_bytes": 51448
+      },
+      "v6_preflight_helpers": {
+        "path": "validation/build_h0_primary_grf_split_v6_teacher_replay_preflight.py",
+        "sha256": "afa7d6959cb6a9337e0c2e0bd463d841ee99ffe49fc1095c8f47241aaab22099",
+        "size_bytes": 22310
+      },
+      "v6_pure_contract": {
+        "path": "validation/h0_primary_grf_split_v6_teacher_replay_contract.py",
+        "sha256": "15432db342be3a776b456c848ae013e25b716d106d6c292f68ca913456b3f19c",
+        "size_bytes": 21410
+      }
+    },
+    "schema_version": 1250,
+    "semantic_checks": {
+      "failed_plus_forensic_only": true,
+      "nominal_pass_reusable": true,
+      "r4_terminal_failure": true,
+      "safe_plus_reference_pass": true
+    },
+    "status": "PASS_H0_V12R5_CASE_BALANCED_SOURCE_PRECONDITIONS"
+  },
+  "source_records": {
+    ".gitattributes": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/.gitattributes",
+      "sha256": "4b78d43c3a5c7eb863fbc2a720627be3a7afd590725d1b229257cad994736c39",
+      "size_bytes": 63
+    },
+    "__init__.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/__init__.py",
+      "sha256": "b48795488be1ec527d23a21071ae83770921cee4a4bb751d765971b8b04c0c56",
+      "size_bytes": 218
+    },
+    "conftest.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/conftest.py",
+      "sha256": "397bd0d634bcf3a8810f0c7b7eaed9ad2d937cbf4faa5646165e13ff67051d0c",
+      "size_bytes": 204
+    },
+    "freeze_h0_v12r5_case_balanced.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/freeze_h0_v12r5_case_balanced.py",
+      "sha256": "df101f0a228ea09f5f355df479c415bffaad09e5d272e1e16d0bf2d6d53fca94",
+      "size_bytes": 50687
+    },
+    "h0_v12r5_case_balanced_contract.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_contract.py",
+      "sha256": "d17b9556947b12af546cc5ae1f888bd75b197a16a7f21abb66eef6ec70d8b6a7",
+      "size_bytes": 57207
+    },
+    "h0_v12r5_case_balanced_fitter.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/h0_v12r5_case_balanced_fitter.py",
+      "sha256": "96a91f783380b335d7f5b2000593bb5645a480c349bc18994b0647458f2a8293",
+      "size_bytes": 58922
+    },
+    "run_h0_v12r5_case_balanced.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/run_h0_v12r5_case_balanced.py",
+      "sha256": "ac9bd0819155eebebd02a1b483d9d5da038040acb517381360ce3da469778a2b",
+      "size_bytes": 209891
+    },
+    "test_freeze_h0_v12r5_case_balanced.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/test_freeze_h0_v12r5_case_balanced.py",
+      "sha256": "4d72be5c5e4676a76bc0624c04efcac1d38b6fb9f3bc2bb6b37668b129308aa4",
+      "size_bytes": 18303
+    },
+    "test_h0_v12r5_case_balanced_contract.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/test_h0_v12r5_case_balanced_contract.py",
+      "sha256": "4d4f17a6e3da5bfd0aae82043cef18ba75207b275942a6e9ab095056fd7edcdd",
+      "size_bytes": 9746
+    },
+    "test_h0_v12r5_case_balanced_fitter.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/test_h0_v12r5_case_balanced_fitter.py",
+      "sha256": "8629bef8893bbf792034b9b5c75e9a3415a30dc8a8ce550c6c993e944ca957e9",
+      "size_bytes": 15889
+    },
+    "test_run_h0_v12r5_case_balanced.py": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r5/test_run_h0_v12r5_case_balanced.py",
+      "sha256": "3286930d6bf3309e2e519d7beea4dfbedba17b891c01f316923075eef0e4d82b",
+      "size_bytes": 97693
+    }
+  },
+  "stage_order": [
+    "attest_locked_inputs",
+    "assemble_case_balanced_corpus",
+    "fit_case_balanced_candidate",
+    "freeze_case_balanced_candidate",
+    "development__deterministic_offset_plus_0p20",
+    "development__deterministic_offset_nominal",
+    "development__deterministic_offset_minus_0p20",
+    "development__stochastic_nominal_seed_126",
+    "development__stochastic_nominal_seed_127",
+    "development__stochastic_nominal_seed_128",
+    "finalize_development"
+  ],
+  "status": "PASS_H0_V12R5_CASE_BALANCED_PROTOCOL_FREEZE",
+  "teacher_query_count": 0,
+  "weighting": {
+    "adaptive_refit": false,
+    "case_balance": "SCALE_EACH_OF_SIX_CASE_IDS_TO_MASS_1000_FLOAT64",
+    "case_target_mass": 1000.0,
+    "expected_hardness_sha256": "54ea40a4b157bdef63de3a22bd110dc40340928dee032bfa8b75320bd2512e4f",
+    "expected_normalized_weights_sha256": "8eae1d8812d403eacab8b17070c29b318f042c3558b5515a1eb059677911a664",
+    "expected_p2_max_abs_error_sha256": "50a6ac8be1d0f98bf036a29e2937a486e377e3d2b53546dab90721afab04c7cd",
+    "expected_source_risk_sha256": "415008f5b86e065eeab6912fc521312025be44fddb7b70bb760c1efc4a6939b3",
+    "hardness_formula": "1+99*min(1,error/0.060)^2",
+    "name": "P2_ERROR_HARDNESS_THEN_CASE_BALANCED_V1",
+    "normalized_total_mass": 6000.0,
+    "p2_prediction_source": {
+      "file_count": 3,
+      "files": [
+        {
+          "path": "class_and_ctor_args.pkl",
+          "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+          "size_bytes": 2262
+        },
+        {
+          "path": "metadata.json",
+          "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+          "size_bytes": 197
+        },
+        {
+          "path": "module_state.pkl",
+          "sha256": "f6753be7ec55e5276c6be824b3a7550880f3ac4fa26a59f2a056a20f0a5ab3f6",
+          "size_bytes": 604772
+        }
+      ],
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/fit/p2/rl_module_target_adapted",
+      "tree_sha256": "be0c9711f1f6b7b9dba9cd4ab546a8379f96444ddf02a111d5f3002b9c7e8c4f"
+    },
+    "per_row_error": "MAX_ABS_OVER_TWO_ACTIONS_OF_BOUND_P2_MINUS_TEACHER",
+    "post_fit_reweight": false,
+    "raw_combination": "MAX_SOURCE_RISK_AND_HARDNESS",
+    "source_risk": "P2_RAW_SAMPLE_WEIGHT_OR_NOMINAL_RESET_100_ELSE_1",
+    "sweep": false
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "actor_updates": 0,
+  "behavior": "PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+  "blending_enabled": false,
+  "candidate_id": "AB06_H0_PRIMARY_SPLIT_V12R2_V26_AUTONOMY_RECOVERY:p0:9fdd96f1d8e02e5d",
+  "candidate_module": {
+    "file_count": 3,
+    "files": [
+      {
+        "path": "class_and_ctor_args.pkl",
+        "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+        "size_bytes": 2262
+      },
+      {
+        "path": "metadata.json",
+        "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+        "size_bytes": 197
+      },
+      {
+        "path": "module_state.pkl",
+        "sha256": "a4e92b7efb239c5ad60b2805f35c3a5d32d6ea49993fc401d3cc8a4c6203249b",
+        "size_bytes": 604772
+      }
+    ],
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r2/h0_v12r2_run_20260809/fit/p0/rl_module_target_adapted",
+    "tree_sha256": "9fdd96f1d8e02e5dc04bdf996a6fb6026d86cbcdbe065f7e3054e49df7a3460a"
+  },
+  "case": {
+    "action_seed": null,
+    "action_selection": "deterministic",
+    "behavior": "PURE_UNBLENDED_NO_TEACHER_NO_LATCH",
+    "candidate_fit_stage": "p0",
+    "case_id": "deterministic_offset_minus_0p20",
+    "destination": "Trajectory Generator/baseline_MLP/validation/v12r2/h0_v12r2_run_20260809/probe/p0",
+    "episode_start_offset_s": 1.756870983805102,
+    "runtime_seed": 123,
+    "sigma": 0.0
+  },
+  "critic_updates": 0,
+  "fit_receipt": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r2/h0_v12r2_run_20260809/fit/p0/receipt.json",
+    "sha256": "618a0a526ee6befcc8c265d3e1235428417dd6fc26225ff700adc72dd169c2cd",
+    "size_bytes": 2400
+  },
+  "fit_stage": "p0",
+  "pipeline_claim": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r2/h0_v12r2_run_20260809/pipeline_claim.json",
+    "sha256": "c361016851a13e1e3d0cd5d20cc4f30bc5b604195017e7c9a2a2007a0548c11e",
+    "size_bytes": 1937
+  },
+  "pipeline_id": "H0_V12R2_V26_RECOVERY_WEIGHTED_PURE_PROBE_DAGGER",
+  "ppo_updates": 0,
+  "probe_replay_schema": {
+    "all_other_actor_columns_byte_exact": true,
+    "boundary_arrays": {
+      "boundary_time_s": "float64[B]",
+      "legacy_left_in_contact": "bool[B]",
+      "legacy_left_normal_grf_bw": "float32[B]",
+      "pros_ankle_angle_rad": "float32[B]",
+      "pros_ankle_speed_rad_s": "float32[B]",
+      "pros_knee_angle_rad": "float32[B]",
+      "pros_knee_speed_rad_s": "float32[B]"
+    },
+    "boundary_count_rule": "B=N+1",
+    "container": "NPZ_ALLOW_PICKLE_FALSE",
+    "left_event_journal_arrays": {
+      "legacy_left_event_boundary_offsets": "int64[B+1]",
+      "legacy_left_event_confirmed_time_s": "float64[E]",
+      "legacy_left_event_contact_duration_present": "bool[E]",
+      "legacy_left_event_contact_duration_s": "float64[E]",
+      "legacy_left_event_cycle_duration_present": "bool[E]",
+      "legacy_left_event_cycle_duration_s": "float64[E]",
+      "legacy_left_event_delivered_time_s": "float64[E]",
+      "legacy_left_event_onset_time_s": "float64[E]",
+      "legacy_left_event_side": "str_<U5[E]",
+      "legacy_left_event_startup_contact": "bool[E]",
+      "legacy_left_event_startup_contact_present": "bool[E]",
+      "legacy_left_event_type": "str_<U11[E]"
+    },
+    "left_event_journal_rules": {
+      "boundary_offsets": "NONDECREASING_START_0_END_E_LENGTH_B_PLUS_1",
+      "event_order": "SOURCE_ORDER_WITHIN_BOUNDARY;_STRICTLY_INCREASING_LEFT_ONSETS_GLOBAL",
+      "event_values": [
+        "heel_strike",
+        "toe_off"
+      ],
+      "optional_bool_absent_value": false,
+      "optional_float_absent_value": 0.0,
+      "reset_boundary_event_count": 0,
+      "side_value": "left",
+      "timestamp_order": "onset<=confirmed<=delivered==owning_boundary_time"
+    },
+    "legacy_fsm_config_arrays": {
+      "legacy_fsm_class_utf8": "uint8[K]",
+      "legacy_fsm_config_json_utf8": "uint8[C]",
+      "legacy_fsm_config_sha256_ascii": "uint8[64]",
+      "legacy_fsm_module_utf8": "uint8[M]"
+    },
+    "legacy_fsm_config_canonicalization": {
+      "encoding": "UTF-8",
+      "hash": "SHA256_OF_EXACT_legacy_fsm_config_json_utf8_BYTES",
+      "input": "DATACLASS_ASDICT_WITH_EVENT_SOURCE_LEGACY_EVENTS",
+      "json": "SORT_KEYS_TRUE_SEPARATORS_COMMA_COLON_ENSURE_ASCII_FALSE_ALLOW_NAN_FALSE",
+      "trailing_newline": false
+    },
+    "probe_teacher_or_h0_load_allowed": false,
+    "scalar_arrays": {
+      "body_weight_n": "float64[1]",
+      "event_contract_id_utf8": "uint8[J]"
+    },
+    "schema_id": "H0_V12R2_OBSERVER_REPLAY_BOUNDARIES_V2",
+    "step_arrays": {
+      "actor_observations": "float32[N,35]",
+      "previous_penetration_m": "float64[N]"
+    },
+    "teacher_mutable_actor_columns": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ]
+  },
+  "protected_trials_opened": [],
+  "protocol_id": "AB06_H0_PRIMARY_SPLIT_V12R2_V26_AUTONOMY_RECOVERY",
+  "reserve_trials_opened": [],
+  "retry_authorized": false,
+  "safety_latch_enabled": false,
+  "schema_version": 122,
+  "stage_id": "probe_p0",
+  "status": "STARTED_H0_PRIMARY_SPLIT_V12R2_PURE_PROBE",
+  "teacher_enabled": false,
+  "teacher_loaded_during_rollout": false,
+  "worker_claim": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r2/h0_v12r2_run_20260809/claims/02_probe_p0.json",
+    "sha256": "8a56efa99b82d55e3d40bd454b856ec1f33fca8c742ffad51675af74051ba3fd",
+    "size_bytes": 1134
+  }
+}

@@ -50,6 +50,11 @@ class SimulatorConfig:
     # The primary profile above remains the physical/sensor stream and may be
     # applied to dynamics; this detector stream is always sensor-only.
     online_grf_detector_profile_file: str = ""
+    # Optional V19 geometry-only detector.  Unlike the legacy detector above,
+    # this profile contains two body-fixed points and creates no ContactSphere
+    # or Force.  Its boolean stream is diagnostic-only until a separate HS/TO
+    # interpretation contract is selected.
+    binary_phase_detector_profile_file: str = ""
     # Causal heel/toe detector lattice.  Policy/control segments may remain at
     # 10 ms; detector samples are transported independently at this cadence.
     detector_sample_dt_s: float = 0.001

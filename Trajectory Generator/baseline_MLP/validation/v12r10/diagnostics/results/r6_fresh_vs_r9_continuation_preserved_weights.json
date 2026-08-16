@@ -1,0 +1,318 @@
+{
+  "candidate_decision": {
+    "fresh_from_locked_r6": "REJECT_DO_NOT_PROMOTE",
+    "continuation_from_terminal_r9": "REJECT_DO_NOT_PROMOTE",
+    "reason": "Both variants are byte-reproducible and numerically stable but fail every unchanged R9 metric gate.",
+    "recommended_next_design": "SEPARATE_PREREGISTERED_TWO_TOWER_RESIDUAL_ACTOR_TO_LIMIT_BASE_POLICY_FORGETTING"
+  },
+  "execution": {
+    "actor_fit_calls": 4,
+    "critic_updates": 0,
+    "environment_reset_calls": 0,
+    "environment_step_calls": 0,
+    "ppo_updates": 0,
+    "publication_writes": 0,
+    "replicates_per_variant": 2,
+    "script": "Trajectory Generator/baseline_MLP/validation/v12r10/diagnostics/compare_r6_fresh_vs_r9_continuation.py",
+    "scope": "NO_ENVIRONMENT_NO_PUBLICATION_NO_CHECKPOINT_WRITE"
+  },
+  "frozen_inputs": {
+    "corpus": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r9/h0_v12r9_run_20260814/fit/corpus.npz",
+      "rows": 11875,
+      "sha256": "1b35d0789d11a0f3bca3cae15c5877ceaf68845bf69ed7231d5a4ecc4d5b9dfe",
+      "stratum_count": 13,
+      "stratum_ids_sha256": "d601978e60065ce9480d296ecb6cd7b44abe39dd1a57e33a62f8838f71e39b14"
+    },
+    "r6_actor_digest": "3172cf7d34b13c5c13ee4bf5c722ecfa466c85653f41e63774da03100737d986",
+    "r9_actor_digest": "7ed67258c97e7108fd6b56f5c94dcc7dc480d89b2a68e40c8c2a46342d364b80",
+    "r9_terminal_ledger": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r9/h0_v12r9_run_20260814/pipeline_ledger.json",
+      "sha256": "591fdc6ebe6e2a553b24ff210232a0f16185c4bc7b5e33104e34b780a0a18785",
+      "status": "FAIL_H0_V12R9_RECOVERY_PIPELINE_TERMINAL"
+    }
+  },
+  "passed": true,
+  "schema_version": 1,
+  "status": "COMPLETE_H0_V12R10_IN_MEMORY_FIT_COMPARISON",
+  "thresholds": {
+    "global": {
+      "max_abs_error": 0.06,
+      "rmse": 0.006
+    },
+    "observer_case": {
+      "max_abs_error": 0.06,
+      "rmse": 0.006
+    },
+    "per_case": {
+      "max_abs_error": 0.06,
+      "rmse": 0.006
+    },
+    "r4_failed_plus": {
+      "max_abs_error": 0.06,
+      "rmse": 0.006
+    },
+    "reset_max_abs_error": 0.003
+  },
+  "variants": {
+    "continuation_from_terminal_r9": {
+      "candidate_actor_digest": "70ebb11451e5b6bdd4d52d81ad9d268ff2f4aa8a223d0277122ba13bfa3a9ed4",
+      "gate": {
+        "checks": {
+          "architecture": true,
+          "clock_zero": true,
+          "global": false,
+          "logstd_exact": true,
+          "no_critic_or_ppo": true,
+          "observer_plus_late": false,
+          "observer_recovery": false,
+          "per_case": false,
+          "r4_recovery": false,
+          "reset": false,
+          "save_reload_exact": true,
+          "single_fit": true
+        },
+        "passed": false,
+        "publication_note": "save_reload_exact is evaluated under the already validated value-agnostic ordinary-W512 publication mechanism; no checkpoint was written by this diagnostic.",
+        "status": "FAIL_H0_V12R9_RECOVERY_FIT"
+      },
+      "metrics": {
+        "global_metrics": {
+          "max_abs_error": 0.13046738505363464,
+          "rmse": 0.012217282340314944
+        },
+        "observer_case_metrics": {
+          "deterministic_offset_minus_0p20": {
+            "max_abs_error": 0.04893136024475098,
+            "rmse": 0.008132807044741574
+          },
+          "deterministic_offset_nominal": {
+            "max_abs_error": 0.13046738505363464,
+            "rmse": 0.015924683263698596
+          },
+          "deterministic_offset_plus_0p20": {
+            "max_abs_error": 0.048700861632823944,
+            "rmse": 0.006902539205842586
+          },
+          "stochastic_nominal_seed_126": {
+            "max_abs_error": 0.06803514063358307,
+            "rmse": 0.0107668592413211
+          },
+          "stochastic_nominal_seed_127": {
+            "max_abs_error": 0.10095417499542236,
+            "rmse": 0.011831955061794235
+          },
+          "stochastic_nominal_seed_128": {
+            "max_abs_error": 0.04722306877374649,
+            "rmse": 0.008618341034486486
+          }
+        },
+        "observer_plus_late_metrics": {
+          "max_abs_error": 0.02416236698627472,
+          "rmse": 0.0060378669613197
+        },
+        "per_case_metrics": {
+          "deterministic_offset_minus_0p20": {
+            "max_abs_error": 0.11624279618263245,
+            "rmse": 0.016963930727309732
+          },
+          "deterministic_offset_nominal": {
+            "max_abs_error": 0.06239314749836922,
+            "rmse": 0.007537824256875857
+          },
+          "deterministic_offset_plus_0p20": {
+            "max_abs_error": 0.07959097623825073,
+            "rmse": 0.012112533957935271
+          },
+          "stochastic_nominal_seed_126": {
+            "max_abs_error": 0.05117309093475342,
+            "rmse": 0.007722572151690247
+          },
+          "stochastic_nominal_seed_127": {
+            "max_abs_error": 0.06111876666545868,
+            "rmse": 0.007648154422326335
+          },
+          "stochastic_nominal_seed_128": {
+            "max_abs_error": 0.06264340132474899,
+            "rmse": 0.008090493722032244
+          }
+        },
+        "r4_failed_plus_metrics": {
+          "max_abs_error": 0.051173508167266846,
+          "rmse": 0.006988085940288211
+        },
+        "reset_max_abs_error": 0.0033317282795906067,
+        "worst_row": {
+          "absolute_error": 0.13046738505363464,
+          "action_dimension": 0,
+          "case_id": "deterministic_offset_nominal",
+          "step_index": 385,
+          "tranche_id": "observer_probe_p0"
+        }
+      },
+      "numerics": {
+        "all_finite": true,
+        "history_all_finite": true,
+        "history_final_loss": 0.0001015972368462227,
+        "history_first_loss": 0.00017544169830769853,
+        "lbfgs_closure_calls": 308,
+        "maximum_absolute_parameter": 5.2983174324035645,
+        "objective_after": 0.00010159724405043399,
+        "objective_before": 0.00017544161115464211
+      },
+      "prediction_sha256": "5542107dcac96d24946012fa244031f5eb5c9962765e6fdc78daab4b3c12546d",
+      "preservation": {
+        "disabled_clock_columns_bit_zero": true,
+        "encoder_aliases_byte_exact": true,
+        "logstd_outputs_byte_exact": true,
+        "logstd_parameter_rows_byte_exact": true,
+        "passed": true
+      },
+      "reproducibility": {
+        "candidate_state_byte_exact": true,
+        "history_exact": true,
+        "normalization_audit_exact": true,
+        "optimizer_audit_exact": true,
+        "passed": true,
+        "predictions_byte_exact": true,
+        "preservation_audit_exact": true
+      }
+    },
+    "fresh_from_locked_r6": {
+      "candidate_actor_digest": "47826214d6c6ce7e7902e272da14c771548c96600e4996e22b17ff1b28e41dbb",
+      "gate": {
+        "checks": {
+          "architecture": true,
+          "clock_zero": true,
+          "global": false,
+          "logstd_exact": true,
+          "no_critic_or_ppo": true,
+          "observer_plus_late": false,
+          "observer_recovery": false,
+          "per_case": false,
+          "r4_recovery": false,
+          "reset": false,
+          "save_reload_exact": true,
+          "single_fit": true
+        },
+        "passed": false,
+        "publication_note": "save_reload_exact is evaluated under the already validated value-agnostic ordinary-W512 publication mechanism; no checkpoint was written by this diagnostic.",
+        "status": "FAIL_H0_V12R9_RECOVERY_FIT"
+      },
+      "metrics": {
+        "global_metrics": {
+          "max_abs_error": 0.13908198475837708,
+          "rmse": 0.01415490045308798
+        },
+        "observer_case_metrics": {
+          "deterministic_offset_minus_0p20": {
+            "max_abs_error": 0.04094702750444412,
+            "rmse": 0.009432192219827234
+          },
+          "deterministic_offset_nominal": {
+            "max_abs_error": 0.13908198475837708,
+            "rmse": 0.018597549741957823
+          },
+          "deterministic_offset_plus_0p20": {
+            "max_abs_error": 0.05087019503116608,
+            "rmse": 0.007653900282190996
+          },
+          "stochastic_nominal_seed_126": {
+            "max_abs_error": 0.06797273457050323,
+            "rmse": 0.011634688643757123
+          },
+          "stochastic_nominal_seed_127": {
+            "max_abs_error": 0.09748709201812744,
+            "rmse": 0.013994952132893333
+          },
+          "stochastic_nominal_seed_128": {
+            "max_abs_error": 0.04462829977273941,
+            "rmse": 0.008639157036135063
+          }
+        },
+        "observer_plus_late_metrics": {
+          "max_abs_error": 0.021511614322662354,
+          "rmse": 0.007238450887211363
+        },
+        "per_case_metrics": {
+          "deterministic_offset_minus_0p20": {
+            "max_abs_error": 0.13509678840637207,
+            "rmse": 0.020371422181599253
+          },
+          "deterministic_offset_nominal": {
+            "max_abs_error": 0.06105048209428787,
+            "rmse": 0.007996020438116688
+          },
+          "deterministic_offset_plus_0p20": {
+            "max_abs_error": 0.08404529094696045,
+            "rmse": 0.012907092790583639
+          },
+          "stochastic_nominal_seed_126": {
+            "max_abs_error": 0.04986065626144409,
+            "rmse": 0.008001493643721744
+          },
+          "stochastic_nominal_seed_127": {
+            "max_abs_error": 0.060185469686985016,
+            "rmse": 0.008336990150817286
+          },
+          "stochastic_nominal_seed_128": {
+            "max_abs_error": 0.06165701523423195,
+            "rmse": 0.008400754666472941
+          }
+        },
+        "r4_failed_plus_metrics": {
+          "max_abs_error": 0.05185997486114502,
+          "rmse": 0.0076525333962979974
+        },
+        "reset_max_abs_error": 0.003717362880706787,
+        "worst_row": {
+          "absolute_error": 0.13908198475837708,
+          "action_dimension": 0,
+          "case_id": "deterministic_offset_nominal",
+          "step_index": 385,
+          "tranche_id": "observer_probe_p0"
+        }
+      },
+      "numerics": {
+        "all_finite": true,
+        "history_all_finite": true,
+        "history_final_loss": 0.00012698281344766213,
+        "history_first_loss": 0.0004687613489986897,
+        "lbfgs_closure_calls": 306,
+        "maximum_absolute_parameter": 5.2983174324035645,
+        "objective_after": 0.00012698283540087094,
+        "objective_before": 0.0004687613645863424
+      },
+      "prediction_sha256": "33d410c164c1052c57941cff229a46ddafb5981e3518a43cde46e01d175c7901",
+      "preservation": {
+        "disabled_clock_columns_bit_zero": true,
+        "encoder_aliases_byte_exact": true,
+        "logstd_outputs_byte_exact": true,
+        "logstd_parameter_rows_byte_exact": true,
+        "passed": true
+      },
+      "reproducibility": {
+        "candidate_state_byte_exact": true,
+        "history_exact": true,
+        "normalization_audit_exact": true,
+        "optimizer_audit_exact": true,
+        "passed": true,
+        "predictions_byte_exact": true,
+        "preservation_audit_exact": true
+      }
+    }
+  },
+  "weighting": {
+    "differs_from_r9_uniform": true,
+    "optimizer_weight_sha256": "2ae0f56c0067f5e67a3469cab59f5a66659e458516d343cd7f2659dcdc2756e3",
+    "policy": "PRESERVE_SOURCE_NORMALIZED_WEIGHTS_WITHIN_EACH_R9_STRATUM",
+    "source_semantics": {
+      "base": "locked R5 effective normalized_sample_weights including risk and P2 hardness",
+      "observer": "locked observer-label normalized_sample_weights",
+      "r4_failure": "unit weights because the locked R4 NPZ has no weight fields"
+    },
+    "stratum_count": 13,
+    "stratum_target_mass": 500.0,
+    "total_mass": 6500.0
+  }
+}

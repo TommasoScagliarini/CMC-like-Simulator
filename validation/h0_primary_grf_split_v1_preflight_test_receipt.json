@@ -1,0 +1,107 @@
+{
+  "actor_updates": 0,
+  "command": [
+    "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "-m",
+    "unittest",
+    "-v",
+    "validation.test_primary_grf_split_adaptation",
+    "validation.test_target_domain_imitation_split",
+    "validation.test_target_domain_imitation",
+    "validation.test_run_h0_primary_grf_split_v1_adaptation",
+    "validation.test_compare_h0_primary_grf_split",
+    "validation.test_h0_v25_abc_preflight",
+    "validation.test_phase_fsm_prescribed_env",
+    "validation.test_prosthetic_phase_fsm_two_sensor"
+  ],
+  "frozen_sources_at_test": {
+    "actor_lock_freezer": {
+      "path": "validation/freeze_h0_primary_grf_split_v1_actor_update.py",
+      "sha256": "b90e4011a40cfa9e3f4436d7c3d7a8fa3b2193bd6c53f2f74796a04a5432ca5b",
+      "size_bytes": 6574
+    },
+    "adapt_actor": {
+      "path": "Trajectory Generator/baseline_MLP/target_domain_imitation.py",
+      "sha256": "f6191fca87373fbb9ad994fc83e7c415b7f9dfb4b697fa296f16a9c584d39d06",
+      "size_bytes": 50440
+    },
+    "collection_lock_freezer": {
+      "path": "validation/freeze_h0_primary_grf_split_v1_execution.py",
+      "sha256": "e3a92340953469e5f3b2fe9549652352a548988ad45458b5e9eafdf24d37e43d",
+      "size_bytes": 9656
+    },
+    "comparator": {
+      "path": "validation/compare_h0_primary_grf_split.py",
+      "sha256": "8874ab37aeb263f631d46a862ad42d3c3ca9d3ccb4875a22f070f68e7b08b6f8",
+      "size_bytes": 29085
+    },
+    "driver": {
+      "path": "validation/run_h0_primary_grf_split_v1_adaptation.py",
+      "sha256": "bf6729a451b9bba4916b042537836ff93624d8e6c3af1fb0c080d6ab93739bc6",
+      "size_bytes": 57866
+    },
+    "environment": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "fed613933abe75102bdd4d0377c2cc987c8f225ea4b4613df2f0a7cb1b44da6a",
+      "size_bytes": 192546
+    },
+    "input_preparer": {
+      "path": "validation/prepare_h0_primary_grf_split_inputs.py",
+      "sha256": "a3f72c3ee7bdfcbd03a9f2e309b28554acefec17a72329e41eaa951efa8237fc",
+      "size_bytes": 5994
+    },
+    "model_loader": {
+      "path": "model_loader.py",
+      "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+      "size_bytes": 58315
+    },
+    "noise_preparer": {
+      "path": "validation/prepare_h0_primary_grf_split_noise_tapes.py",
+      "sha256": "859bc29eb5062ee737653ccc4ea917080e1228362f4986a741221c1f1af5c008",
+      "size_bytes": 3025
+    },
+    "online_grf": {
+      "path": "online_grf.py",
+      "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+      "size_bytes": 31439
+    },
+    "phase_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "cd6578920f01a707695597f487541c7fce4bbf920394bf0328bf24beaf09b282",
+      "size_bytes": 73098
+    },
+    "pure_contract": {
+      "path": "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py",
+      "sha256": "2d7557435ebbbccf705d6f7aef8a026f34b9b9e18857111b6ab3ae5b5e98ea05",
+      "size_bytes": 16567
+    },
+    "qualification_lock_freezer": {
+      "path": "validation/freeze_h0_primary_grf_split_v1_qualification.py",
+      "sha256": "de815b0577e08fddad4644d62e93da76e5de4ea18a466d960331d77edc4171f5",
+      "size_bytes": 7949
+    },
+    "simulation_runner": {
+      "path": "simulation_runner.py",
+      "sha256": "516546be8cb400533a29962bac44c0d577f30516f4d4f73d0ef512f88b2fc9da",
+      "size_bytes": 107398
+    }
+  },
+  "h0_executed": false,
+  "output": "test_group_split_has_two_records_and_no_leakage (validation.test_primary_grf_split_adaptation.DatasetTests) ... ok\ntest_offline_gate_is_view_specific (validation.test_primary_grf_split_adaptation.DatasetTests) ... ok\ntest_only_load_and_contact_are_replaced (validation.test_primary_grf_split_adaptation.PairedViewTests) ... ok\ntest_primary_mismatch_fails_closed (validation.test_primary_grf_split_adaptation.PairedViewTests) ... ok\ntest_reset_requires_both_streams_empty (validation.test_primary_grf_split_adaptation.PairedViewTests) ... ok\ntest_default_split_preserves_seeded_random_fraction_behavior (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_duplicate_indices_are_rejected_in_each_partition (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_empty_partition_is_rejected (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_explicit_indices_must_be_supplied_as_a_pair (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_explicit_split_is_sorted_and_has_order_independent_digests (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_incomplete_coverage_is_rejected (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_out_of_bounds_and_non_integer_indices_are_rejected (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_overlap_is_rejected (validation.test_target_domain_imitation_split.AdaptationSplitTests) ... ok\ntest_absolute_action_encoding (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_absolute_action_encoding_clips_outside_bounds (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_dagger_interpolation_preserves_discrete_features (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_dagger_trace_uses_time_aligned_teacher_labels (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_markov_dataset_accepts_rollout_raw_action_fallback (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_markov_dataset_anchors_nominal_and_labels_recovery_with_teacher (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_markov_update_audit_rejects_changes_outside_selected_columns (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_noise_recovery_stops_before_discrete_phase_mismatch (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_recovery_dataset_uses_nominal_actions_for_disturbed_states (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_target_contract_requires_disabled_clock_and_enabled_slew (validation.test_target_domain_imitation.TargetDomainImitationTests) ... ok\ntest_environment_overlay_is_primary_split_legacy_only (validation.test_run_h0_primary_grf_split_v1_adaptation.PrimarySplitDriverTests) ... ok\ntest_npz_writer_is_no_clobber (validation.test_run_h0_primary_grf_split_v1_adaptation.PrimarySplitDriverTests) ... ok\ntest_preregistered_absolute_times_match_setup_offsets (validation.test_run_h0_primary_grf_split_v1_adaptation.PrimarySplitDriverTests) ... ok\ntest_preregistered_noise_tapes_are_loaded_by_stage (validation.test_run_h0_primary_grf_split_v1_adaptation.PrimarySplitDriverTests) ... ok\ntest_shadow_fsm_consumes_analog_continuous_evidence (validation.test_run_h0_primary_grf_split_v1_adaptation.PrimarySplitDriverTests) ... ok\ntest_complete_valid_summary_passes (validation.test_compare_h0_primary_grf_split.CommonRolloutGateTests) ... ok\ntest_each_mandatory_physical_gate_fails_closed (validation.test_compare_h0_primary_grf_split.CommonRolloutGateTests) ... ok\ntest_missing_or_nonfinite_metric_is_contract_error (validation.test_compare_h0_primary_grf_split.CommonRolloutGateTests) ... ok\ntest_rate_signal_may_have_one_fewer_sample_per_segment (validation.test_compare_h0_primary_grf_split.CommonRolloutGateTests) ... ok\ntest_saturation_statistics_must_be_consistent (validation.test_compare_h0_primary_grf_split.CommonRolloutGateTests) ... ok\ntest_condition_identity_drift_fails (validation.test_compare_h0_primary_grf_split.ConditionMatchedGateTests) ... ok\ntest_exact_addendum_caps_pass_and_epsilon_above_fails (validation.test_compare_h0_primary_grf_split.ConditionMatchedGateTests) ... ok\ntest_relative_tolerance_dominates_for_large_reference (validation.test_compare_h0_primary_grf_split.ConditionMatchedGateTests) ... ok\ntest_saturation_has_no_tolerance (validation.test_compare_h0_primary_grf_split.ConditionMatchedGateTests) ... ok\ntest_stochastic_condition_requires_noise_tape_digest (validation.test_compare_h0_primary_grf_split.ConditionMatchedGateTests) ... ok\ntest_complete_pair_passes_and_hashes_inputs (validation.test_compare_h0_primary_grf_split.CounterfactualAndAggregateTests) ... ok\ntest_counterfactual_limits_are_inclusive (validation.test_compare_h0_primary_grf_split.CounterfactualAndAggregateTests) ... ok\ntest_teacher_dependency_fails_counterfactual_gate (validation.test_compare_h0_primary_grf_split.CounterfactualAndAggregateTests) ... ok\ntest_loader_rejects_duplicate_keys_and_nonfinite_constants (validation.test_compare_h0_primary_grf_split.StrictJsonTests) ... ok\ntest_writer_is_atomic_strict_and_no_clobber (validation.test_compare_h0_primary_grf_split.StrictJsonTests) ... ok\ntest_ab_excludes_only_top_level_binary_namespace (validation.test_h0_v25_abc_preflight.H0V25ComparatorTests) ... ok\ntest_ab_never_truncates_or_tolerates_raw_journal_drift (validation.test_h0_v25_abc_preflight.H0V25ComparatorTests) ... ok\ntest_c_gate_uses_condition_matched_caps_and_no_saturation_tolerance (validation.test_h0_v25_abc_preflight.H0V25ComparatorTests) ... ok\ntest_strict_atomic_writer_is_no_clobber (validation.test_h0_v25_abc_preflight.H0V25ComparatorTests) ... ok\ntest_a_b_configs_differ_only_by_fsm_mode (validation.test_h0_v25_abc_preflight.H0V25DriverPureTests) ... ok\ntest_noise_tape_is_float32_and_replay_exact (validation.test_h0_v25_abc_preflight.H0V25DriverPureTests) ... ok\ntest_sea_sufficient_statistics_finalize_exactly (validation.test_h0_v25_abc_preflight.H0V25DriverPureTests) ... ok\n\n----------------------------------------------------------------------\nRan 50 tests in 0.086s\n\nOK\n",
+  "passed": true,
+  "ppo_updates": 0,
+  "protected_trials_opened": [],
+  "returncode": 0,
+  "schema_version": 1,
+  "status": "PASS_H0_PRIMARY_GRF_SPLIT_PREFLIGHT_TESTS",
+  "test_modules": [
+    "validation.test_primary_grf_split_adaptation",
+    "validation.test_target_domain_imitation_split",
+    "validation.test_target_domain_imitation",
+    "validation.test_run_h0_primary_grf_split_v1_adaptation",
+    "validation.test_compare_h0_primary_grf_split",
+    "validation.test_h0_v25_abc_preflight",
+    "validation.test_phase_fsm_prescribed_env",
+    "validation.test_prosthetic_phase_fsm_two_sensor"
+  ]
+}

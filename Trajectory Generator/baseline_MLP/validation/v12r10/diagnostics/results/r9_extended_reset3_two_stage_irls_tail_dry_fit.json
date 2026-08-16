@@ -1,0 +1,112 @@
+{
+  "decision": "REJECT_DRY_FIT_NO_RETRY",
+  "execution": {
+    "diagnostic_process_rerun": false,
+    "invocation_count": 1,
+    "model_strategy_changed_during_execution": false,
+    "replica_authorized": false,
+    "retry": false,
+    "sweep": false,
+    "terminal_state_only": true
+  },
+  "instrumentation_abort": {
+    "after_terminal_gate_evaluation": true,
+    "exception": "V11WeightedFitError",
+    "failed_check": "normalization_fold_equivalence",
+    "fold_equivalence_passed": false,
+    "full_terminal_metric_payload_serialized": false,
+    "message": "normalization fold equivalence failed",
+    "normalized_runtime_all_finite": true,
+    "normalized_runtime_max_abs_difference": 1.0132789611816406e-06,
+    "tolerance": 1e-06
+  },
+  "objective": {
+    "formula": "0.5*reset3_equal_stratum_mse + 0.5*frozen_boundary_irls_element_mse + 5.0*reset_mse",
+    "irls_element_weight_formula": "reset3_row_weight*(1+4*min((abs_phase_a_error/0.045)^2,9)); each stratum/action dimension renormalized to mass 250",
+    "irls_weights_frozen_before_phase_b_update_one": true,
+    "reset_coefficient": 5.0,
+    "tail_margin": 0.045
+  },
+  "optimizer": {
+    "phase_a": {
+      "adamw_epochs": 1000,
+      "adamw_learning_rate": 3e-05,
+      "byte_exact_to_recorded_phase_a": true,
+      "lbfgs_closure_calls": 2083,
+      "lbfgs_max_eval": 3000,
+      "lbfgs_max_iter": 2000,
+      "terminal_state_digest": "d8ff64158dbd12f058cf172cdf6513fbea2376ee9b7d096bf62929cefe7b74f3"
+    },
+    "phase_b": {
+      "adamw_boundaries": [
+        300,
+        500,
+        600
+      ],
+      "adamw_epochs": 600,
+      "adamw_learning_rates": [
+        2e-05,
+        7e-06,
+        2e-06
+      ],
+      "lbfgs_closure_calls": 1221,
+      "lbfgs_max_eval": 1800,
+      "lbfgs_max_iter": 1200
+    }
+  },
+  "passed": false,
+  "phase_a_receipt": {
+    "global_max_abs_error": 0.12474837899208069,
+    "global_rmse": 0.0072560999046802285,
+    "reset_max_abs_error": 0.0010907649993896484,
+    "result_path": "Trajectory Generator/baseline_MLP/validation/v12r10/diagnostics/results/r9_extended_uniform_reset3_dry_fit.json",
+    "result_sha256": "1aa594a15b6d54a97bf374f1d78801ffa1fafa5050e2add33dd4637f7107c009",
+    "source_path": "Trajectory Generator/baseline_MLP/validation/v12r10/diagnostics/dry_fit_extended_uniform_reset3.py",
+    "source_sha256": "0c7a70ac0bdf08e80409f7b5ccdba1a49400cacbc14981e26092d26a8068f6d2"
+  },
+  "phase_b_terminal_observation": {
+    "all_original_gate_metrics_evaluated_by_terminal_snapshot": true,
+    "gate_passed": false,
+    "global_max_abs_error": 0.09473609924316406,
+    "global_max_abs_threshold": 0.06,
+    "global_rmse": 0.007787642993359861,
+    "global_rmse_threshold": 0.006,
+    "reset_max_abs_error": 3.2804906368255615e-05,
+    "reset_max_abs_threshold": 0.003,
+    "terminal_objective": {
+      "frozen_boundary_irls_element_mse": 0.00010916740757225167,
+      "loss": 7.917118672391258e-05,
+      "reset3_equal_stratum_mse": 4.917342467391735e-05,
+      "reset_mse": 1.5412016561471115e-10
+    },
+    "verdict_available_before_instrumentation_abort": true
+  },
+  "provenance": {
+    "execution_stdout_persisted": false,
+    "result_kind": "FAIL_CLOSED_POST_FIT_INSTRUMENTATION_ABORT_RECEIPT",
+    "script_path": "Trajectory Generator/baseline_MLP/validation/v12r10/diagnostics/dry_fit_two_stage_irls_tail.py",
+    "script_sha256_at_execution": "407d2ac046e1b18611262600f9545b4bf0873ec6c4f003569f8e0f4a850af5ae",
+    "terminal_values_source": "single_process_PTY_terminal_snapshot_before_exception",
+    "working_directory": "/Users/tommy/Documents/CMC-like-Simulator - Claude"
+  },
+  "scope": "DRY_FIT_ONLY_NO_ENVIRONMENT_NO_TEACHER_NO_PUBLICATION",
+  "side_effect_counters": {
+    "candidate_published": false,
+    "checkpoint_writes": 0,
+    "critic_updates": 0,
+    "environment_reset_calls": 0,
+    "environment_step_calls": 0,
+    "offline_h0_target_queries": 0,
+    "ppo_updates": 0,
+    "state_persisted": false,
+    "teacher_queries": 0
+  },
+  "status": "ABORTED_H0_V12R10_TWO_STAGE_IRLS_TAIL_POST_FIT_INSTRUMENTATION",
+  "terminal_interpretation": {
+    "global_max_change_from_phase_a": -0.030012279748916626,
+    "global_rmse_change_from_phase_a": 0.0005315430886796327,
+    "max_tail_reduced_but_still_above_gate": true,
+    "model_result_is_fail_independent_of_fold_instrumentation_abort": true,
+    "rmse_regressed_and_remained_above_gate": true
+  }
+}

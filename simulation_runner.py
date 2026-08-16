@@ -69,6 +69,7 @@ All results are written as OpenSim-compatible .sto files into cfg.output_dir.
 
 from __future__ import annotations
 
+import copy
 import os
 import json
 import time as _time
@@ -77,6 +78,7 @@ from typing import Dict, Mapping
 import numpy as np
 import opensim
 
+from binary_phase_detector import BinaryPhaseDetectorSampler
 from config import SimulatorConfig
 from model_loader import SimulationContext
 from kinematics_interpolator import KinematicsInterpolator
@@ -106,6 +108,10 @@ class SegmentWallClockTimeout(RuntimeError):
 
 class PhaseSensorSamplingError(RuntimeError):
     """Raised when the causal 1 ms heel/toe sample contract is violated."""
+
+
+class BinaryPhaseSensorTransportError(RuntimeError):
+    """Raised when the force-free binary sample contract is violated."""
 
 
 class SimulationRunner:
@@ -222,6 +228,18 @@ class SimulationRunner:
         self._phase_sensor_sampling_enabled = bool(
             len(getattr(ctx, "online_grf_detector_force_paths", [])) == 2
         )
+        binary_profile = getattr(ctx, "binary_phase_detector_profile", None)
+        self._binary_phase_detector_sampler = (
+            None
+            if binary_profile is None
+            else BinaryPhaseDetectorSampler(ctx.model, binary_profile)
+        )
+        self._binary_phase_sensor_sample_dt_s = self._phase_sensor_sample_dt_s
+        self._binary_phase_sensor_last_sample_time_s: float | None = None
+        self._binary_phase_sensor_sampling_enabled = bool(
+            self._binary_phase_detector_sampler is not None
+        )
+        self._binary_phase_sensor_baseline: dict | None = None
         self._online_event_detector = None
         self._online_event_force_paths = list(
             getattr(ctx, "online_grf_detector_force_paths", [])
@@ -310,6 +328,8 @@ class SimulationRunner:
         self._runtime_step = 0
         self._last_step_info = {}
         self._phase_sensor_last_sample_time_s = None
+        self._binary_phase_sensor_last_sample_time_s = None
+        self._binary_phase_sensor_baseline = None
         if self._online_event_detector is not None:
             self._online_event_detector.reset()
 
@@ -331,6 +351,18 @@ class SimulationRunner:
             # detector/event credit; the first emitted sample is t + 1 ms.
             self._sample_phase_detector_channels(state, t)
             self._phase_sensor_last_sample_time_s = t
+        if self._binary_phase_sensor_sampling_enabled:
+            # Establish the same open-left endpoint for the two raw bits.  The
+            # t0 reading is diagnostic only and is never emitted as a sample,
+            # edge, HS, or TO.
+            self._sample_binary_phase_detector_channels(state, t)
+            self._binary_phase_sensor_last_sample_time_s = t
+            self._binary_phase_sensor_baseline = dict(
+                self._last_step_info["binary_phase_sensor_diagnostics"]
+            )
+            self._last_step_info["binary_phase_sensor_baseline"] = dict(
+                self._binary_phase_sensor_baseline
+            )
         return state
 
     def step_until(
@@ -366,6 +398,8 @@ class SimulationRunner:
         step_online_events: list[dict] = []
         sea_segment_samples: list[dict[str, dict[str, float]]] = []
         phase_sensor_samples: list[dict[str, float]] = []
+        binary_phase_sensor_samples: list[dict[str, float | bool]] = []
+        so_solver_audit_entries: list[dict] = []
         phase_segment_start_time_s = float(t)
         wall_timeout_s = float(wall_timeout_s)
         wall_deadline = (
@@ -378,6 +412,26 @@ class SimulationRunner:
                 tau_bio, tau_pros_ff_by_coord, tau_sea_cmd,
                 q_ref_win, qdot_ref_win,
             ) = self._compute_controls_for_window(state, controls, t)
+            so_solver_audit_entries.append(
+                {
+                    "control_window_index": len(so_solver_audit_entries) + 1,
+                    "control_window_time_s": float(t),
+                    "selected_feasibility_attempt_index": self._so.last_diagnostics.get(
+                        "selected_feasibility_attempt_index"
+                    ),
+                    "served_solution_sha256": self._so.last_diagnostics.get(
+                        "served_solution_sha256"
+                    ),
+                    "selected_solver_solution_matches_served": (
+                        self._so.last_diagnostics.get(
+                            "selected_solver_solution_matches_served"
+                        )
+                    ),
+                    "attempts": copy.deepcopy(
+                        self._so.last_diagnostics.get("solver_attempt_audit", [])
+                    ),
+                }
+            )
             self._last_step_info = {
                 "time": t,
                 "u_sea": dict(u_sea),
@@ -385,6 +439,9 @@ class SimulationRunner:
                 "qdot_ref": dict(qdot_ref_win),
                 "tau_pros_ff": dict(tau_pros_ff_by_coord),
                 "so_diagnostics": dict(self._so.last_diagnostics),
+                "so_solver_audit_entries": copy.deepcopy(
+                    so_solver_audit_entries
+                ),
             }
 
             for _sub in range(n_substeps):
@@ -450,6 +507,11 @@ class SimulationRunner:
                     t,
                     phase_sensor_samples,
                 )
+                self._append_binary_phase_sensor_sample(
+                    state,
+                    t,
+                    binary_phase_sensor_samples,
+                )
 
         self._last_step_info["sea_segment_diagnostics"] = (
             self._summarize_sea_segment_diagnostics(sea_segment_samples)
@@ -462,6 +524,19 @@ class SimulationRunner:
         self._last_step_info["phase_sensor_samples"] = [
             dict(sample) for sample in phase_sensor_samples
         ]
+        self._finalize_binary_phase_sensor_segment(
+            segment_start_time_s=phase_segment_start_time_s,
+            t_stop=t_stop,
+            samples=binary_phase_sensor_samples,
+        )
+        if self._binary_phase_sensor_sampling_is_enabled():
+            self._last_step_info["binary_phase_sensor_samples"] = [
+                dict(sample) for sample in binary_phase_sensor_samples
+            ]
+            if self._binary_phase_sensor_baseline is not None:
+                self._last_step_info["binary_phase_sensor_baseline"] = dict(
+                    self._binary_phase_sensor_baseline
+                )
         return self.last_step_info
 
     def save_results(self) -> None:
@@ -782,6 +857,7 @@ class SimulationRunner:
         best_candidate = None
         best_metric = float("inf")
         best_abs = float("inf")
+        solver_attempt_audit: list[dict] = []
 
         # D/F. ID + SO feasibility backtracking. Each candidate recomputes the
         # full inverse-dynamics vector so tau_bio matches the selected biological
@@ -829,6 +905,20 @@ class SimulationRunner:
             )
             diag_candidate["feasibility_attempts"] = float(attempt_idx)
             diag_candidate["feasibility_accepted"] = 1.0 if feasible else 0.0
+            solver_attempt_audit.append(
+                {
+                    "attempt_index": int(attempt_idx),
+                    "feasibility_scale": float(scale),
+                    "feasibility_accepted": bool(feasible),
+                    "residual_norm": residual_norm,
+                    "residual_relative_norm": residual_rel,
+                    "residual_max_abs": residual_max_abs,
+                    "solver_fallback_used": diag_candidate.get(
+                        "solver_fallback_used"
+                    ),
+                    "solver_path": dict(diag_candidate.get("solver_path", {})),
+                }
+            )
 
             metric = residual_rel if np.isfinite(residual_rel) else float("inf")
             abs_metric = (
@@ -870,6 +960,28 @@ class SimulationRunner:
         ) = best_candidate
         selected_diag["feasibility_accepted"] = (
             1.0 if feasibility_accepted else 0.0
+        )
+        selected_diag["selected_feasibility_attempt_index"] = int(
+            selected_diag["feasibility_attempts"]
+        )
+        for audit_entry in solver_attempt_audit:
+            audit_entry["selected"] = bool(
+                audit_entry["attempt_index"]
+                == selected_diag["selected_feasibility_attempt_index"]
+            )
+        selected_diag["solver_attempt_audit"] = solver_attempt_audit
+        served_solution_sha256 = self._so._array_sha256(
+            np.concatenate([a, u_res])
+        )
+        selected_solver_solution_sha256 = (
+            selected_diag.get("solver_path", {})
+            .get("selected_solution", {})
+            .get("output_sha256")
+        )
+        selected_diag["served_solution_sha256"] = served_solution_sha256
+        selected_diag["selected_solver_solution_matches_served"] = bool(
+            served_solution_sha256 is not None
+            and served_solution_sha256 == selected_solver_solution_sha256
         )
         self._so.last_diagnostics = selected_diag
         self._so.remember_solution(a, u_res)
@@ -1164,6 +1276,238 @@ class SimulationRunner:
         ):
             raise PhaseSensorSamplingError(
                 "Detector endpoint was not sampled exactly once."
+            )
+
+    def _binary_phase_sensor_sampling_is_enabled(self) -> bool:
+        """Return whether the force-free two-point sampler is configured."""
+        configured = getattr(
+            self,
+            "_binary_phase_sensor_sampling_enabled",
+            None,
+        )
+        if configured is not None:
+            return bool(configured)
+        return bool(
+            getattr(self, "_binary_phase_detector_sampler", None) is not None
+        )
+
+    def _sample_binary_phase_detector_channels(
+        self,
+        state: opensim.State,
+        time_s: float,
+    ) -> dict[str, float | bool]:
+        """Read two point/plane switches without assigning gait semantics."""
+        sampler = getattr(self, "_binary_phase_detector_sampler", None)
+        if sampler is None:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sampler is missing."
+            )
+        reading = sampler.sample(state, time_s)
+        sample = reading.public_sample()
+        expected_fields = {
+            "time_s",
+            "left_heel_contact",
+            "left_toe_contact",
+        }
+        if set(sample) != expected_fields:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sample fields differ from the frozen schema."
+            )
+        try:
+            timestamp = float(sample["time_s"])
+        except (TypeError, ValueError) as exc:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector timestamp is malformed."
+            ) from exc
+        if not np.isfinite(timestamp):
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector timestamp must be finite."
+            )
+        sample["time_s"] = timestamp
+        for field in ("left_heel_contact", "left_toe_contact"):
+            if type(sample[field]) is not bool:
+                raise BinaryPhaseSensorTransportError(
+                    f"Binary detector field {field!r} must be a Python bool."
+                )
+        diagnostics = reading.diagnostics()
+        json.dumps(diagnostics, allow_nan=False)
+        self._last_step_info["binary_phase_sensor_diagnostics"] = diagnostics
+        return sample
+
+    def _append_binary_phase_sensor_sample(
+        self,
+        state: opensim.State,
+        time_s: float,
+        samples: list[dict[str, float | bool]],
+    ) -> None:
+        """Append one raw binary sample on the reset-anchored 1 ms lattice."""
+        if not self._binary_phase_sensor_sampling_is_enabled():
+            return
+        try:
+            current = float(time_s)
+        except (TypeError, ValueError) as exc:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sample timestamp must be numeric."
+            ) from exc
+        if not np.isfinite(current):
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sample timestamp must be finite."
+            )
+        previous = self._binary_phase_sensor_last_sample_time_s
+        if previous is None:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sampling baseline is missing; "
+                "reset_to_time() must establish t0 first."
+            )
+        dt = float(self._binary_phase_sensor_sample_dt_s)
+        tolerance = max(1e-12, dt * 1e-7)
+        delta = current - float(previous)
+        if delta < -tolerance:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sample timestamps are non-monotonic: "
+                f"{current:.12g} follows {float(previous):.12g}."
+            )
+        if abs(delta) <= tolerance:
+            raise BinaryPhaseSensorTransportError(
+                f"Duplicate binary detector timestamp {current:.12g}."
+            )
+
+        expected = float(previous) + dt
+        if current < expected - tolerance:
+            return
+        if current > expected + tolerance:
+            raise BinaryPhaseSensorTransportError(
+                "Missing binary detector sample: expected "
+                f"{expected:.12g}, reached {current:.12g}."
+            )
+
+        sample = self._sample_binary_phase_detector_channels(state, expected)
+        try:
+            sample_time = float(sample["time_s"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sample timestamp is missing or malformed."
+            ) from exc
+        if not np.isfinite(sample_time):
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sample timestamp must be finite."
+            )
+        sample["time_s"] = sample_time
+        for field in ("left_heel_contact", "left_toe_contact"):
+            if field not in sample or type(sample[field]) is not bool:
+                raise BinaryPhaseSensorTransportError(
+                    f"Binary detector field {field!r} must be a Python bool."
+                )
+        if set(sample) != {
+            "time_s",
+            "left_heel_contact",
+            "left_toe_contact",
+        }:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector sample contains unexpected fields."
+            )
+        if samples and sample_time <= float(samples[-1]["time_s"]) + tolerance:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector segment contains duplicate or "
+                "non-monotonic samples."
+            )
+        samples.append(sample)
+        self._binary_phase_sensor_last_sample_time_s = expected
+
+    def _finalize_binary_phase_sensor_segment(
+        self,
+        *,
+        segment_start_time_s: float,
+        t_stop: float,
+        samples: list[dict[str, float | bool]],
+    ) -> None:
+        """Fail closed before publishing one open-left/closed-right bit batch."""
+        if not self._binary_phase_sensor_sampling_is_enabled():
+            if samples:
+                raise BinaryPhaseSensorTransportError(
+                    "Binary detector samples exist without a configured profile."
+                )
+            return
+        start = float(segment_start_time_s)
+        stop = float(t_stop)
+        dt = float(self._binary_phase_sensor_sample_dt_s)
+        tolerance = max(1e-12, dt * 1e-7)
+        if not np.isfinite(start) or not np.isfinite(stop):
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector segment boundaries must be finite."
+            )
+        duration = stop - start
+        if duration < -tolerance:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector segment end precedes its start."
+            )
+        if abs(duration) <= tolerance:
+            if samples:
+                raise BinaryPhaseSensorTransportError(
+                    "A zero-duration binary detector segment must be empty."
+                )
+            return
+
+        count_float = duration / dt
+        expected_count = int(round(count_float))
+        if expected_count <= 0 or abs(count_float - expected_count) > 1e-7:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector segment is not aligned to "
+                "detector_sample_dt_s."
+            )
+        if len(samples) != expected_count:
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector segment is incomplete: expected "
+                f"{expected_count} samples, got {len(samples)}."
+            )
+        exact_fields = {
+            "time_s",
+            "left_heel_contact",
+            "left_toe_contact",
+        }
+        for index, sample in enumerate(samples, start=1):
+            if set(sample) != exact_fields:
+                raise BinaryPhaseSensorTransportError(
+                    "Binary detector segment contains a malformed sample."
+                )
+            try:
+                sample_time = float(sample["time_s"])
+            except (TypeError, ValueError) as exc:
+                raise BinaryPhaseSensorTransportError(
+                    "Binary detector segment contains a malformed timestamp."
+                ) from exc
+            if not np.isfinite(sample_time):
+                raise BinaryPhaseSensorTransportError(
+                    "Binary detector segment contains a non-finite timestamp."
+                )
+            if (
+                type(sample["left_heel_contact"]) is not bool
+                or type(sample["left_toe_contact"]) is not bool
+            ):
+                raise BinaryPhaseSensorTransportError(
+                    "Binary detector segment contacts must be Python bools."
+                )
+            expected_time = start + index * dt
+            if abs(sample_time - expected_time) > tolerance:
+                raise BinaryPhaseSensorTransportError(
+                    "Binary detector segment contains a duplicate, missing, "
+                    "non-monotonic, or off-grid timestamp."
+                )
+        if (
+            abs(float(samples[0]["time_s"]) - (start + dt)) > tolerance
+            or abs(float(samples[-1]["time_s"]) - stop) > tolerance
+        ):
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector segment violates (previous_time, t_stop] "
+                "boundaries."
+            )
+        if (
+            self._binary_phase_sensor_last_sample_time_s is None
+            or abs(self._binary_phase_sensor_last_sample_time_s - stop)
+            > tolerance
+        ):
+            raise BinaryPhaseSensorTransportError(
+                "Binary detector endpoint was not sampled exactly once."
             )
 
     def _sample_online_grf(
@@ -1552,16 +1896,22 @@ class SimulationRunner:
                 )
 
             base = i * 3
+            tau_input_from_plugin = bool(
+                len(sea_plugin_outputs) > base
+                and np.isfinite(sea_plugin_outputs[base])
+            )
             tau_input = (
                 float(sea_plugin_outputs[base])
-                if len(sea_plugin_outputs) > base
-                and np.isfinite(sea_plugin_outputs[base])
+                if tau_input_from_plugin
                 else float(np.clip(tau_input_raw, -500.0, 500.0))
+            )
+            motor_accel_from_plugin = bool(
+                len(sea_plugin_outputs) > base + 2
+                and np.isfinite(sea_plugin_outputs[base + 2])
             )
             motor_accel = (
                 float(sea_plugin_outputs[base + 2])
-                if len(sea_plugin_outputs) > base + 2
-                and np.isfinite(sea_plugin_outputs[base + 2])
+                if motor_accel_from_plugin
                 else (tau_input - tau_spring - Bm * omega_m) / Jm
             )
             diagnostics[coord_name] = {
@@ -1575,6 +1925,12 @@ class SimulationRunner:
                 "motor_accel_rad_s2": float(motor_accel),
                 "joint_power_w": float(tau_spring * omega_j),
                 "motor_power_w": float(tau_input * omega_m),
+                "tau_input_plugin_fallback": float(
+                    not tau_input_from_plugin
+                ),
+                "motor_accel_plugin_fallback": float(
+                    not motor_accel_from_plugin
+                ),
             }
         return diagnostics
 
@@ -1615,6 +1971,8 @@ class SimulationRunner:
             motor_accel = values("motor_accel_rad_s2")
             joint_power = values("joint_power_w")
             motor_power = values("motor_power_w")
+            tau_input_fallback = values("tau_input_plugin_fallback")
+            motor_accel_fallback = values("motor_accel_plugin_fallback")
 
             def rms(data: np.ndarray) -> float:
                 if data.size == 0:
@@ -1632,8 +1990,18 @@ class SimulationRunner:
 
             joints[coord_name] = {
                 "sample_count": float(len(rows)),
+                # Sufficient statistics are published so zero-update validation
+                # can form episode-level RMS/count values without reconstructing
+                # or approximating the simulator substep trace.
+                "tau_spring_sum_squares_nm2": float(
+                    np.sum(np.square(tau_spring))
+                ),
                 "tau_spring_rms_nm": rms(tau_spring),
                 "tau_spring_abs_max_nm": float(np.max(np.abs(tau_spring))),
+                "tau_spring_rate_sample_count": float(tau_spring_rate.size),
+                "tau_spring_rate_sum_squares_nm2_s2": float(
+                    np.sum(np.square(tau_spring_rate))
+                ),
                 "tau_spring_rate_rms_nm_s": rms(tau_spring_rate),
                 "tau_spring_rate_abs_max_nm_s": (
                     float(np.max(np.abs(tau_spring_rate)))
@@ -1643,10 +2011,23 @@ class SimulationRunner:
                 "tau_input_raw_rms_nm": rms(raw),
                 "tau_input_raw_abs_max_nm": float(np.max(np.abs(raw))),
                 "tau_input_abs_max_nm": float(np.max(np.abs(tau_input))),
+                "tau_input_saturation_count": int(np.count_nonzero(saturated)),
                 "tau_input_saturation_fraction": float(np.mean(saturated)),
+                "torque_error_sum_squares_nm2": float(
+                    np.sum(np.square(torque_error))
+                ),
                 "torque_error_rms_nm": rms(torque_error),
+                "torque_error_abs_max_nm": float(
+                    np.max(np.abs(torque_error))
+                ),
+                "motor_speed_sum_squares_rad2_s2": float(
+                    np.sum(np.square(motor_speed))
+                ),
                 "motor_speed_rms_rad_s": rms(motor_speed),
                 "motor_speed_abs_max_rad_s": float(np.max(np.abs(motor_speed))),
+                "motor_accel_sum_squares_rad2_s4": float(
+                    np.sum(np.square(motor_accel))
+                ),
                 "motor_accel_rms_rad_s2": rms(motor_accel),
                 "motor_accel_abs_max_rad_s2": float(np.max(np.abs(motor_accel))),
                 "joint_power_rms_w": rms(joint_power),
@@ -1657,8 +2038,17 @@ class SimulationRunner:
                 "joint_power_negative_mean_w": float(
                     np.mean(np.minimum(joint_power, 0.0))
                 ),
+                "motor_power_sum_squares_w2": float(
+                    np.sum(np.square(motor_power))
+                ),
                 "motor_power_rms_w": rms(motor_power),
                 "motor_power_abs_max_w": float(np.max(np.abs(motor_power))),
+                "tau_input_plugin_fallback_count": int(
+                    np.count_nonzero(tau_input_fallback)
+                ),
+                "motor_accel_plugin_fallback_count": int(
+                    np.count_nonzero(motor_accel_fallback)
+                ),
             }
         return {"sample_count": int(len(samples)), "joints": joints}
 

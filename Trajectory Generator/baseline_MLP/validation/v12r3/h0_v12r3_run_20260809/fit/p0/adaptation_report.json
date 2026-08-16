@@ -1,0 +1,335 @@
+{
+  "corpus_exact": true,
+  "fit": {
+    "actor_architecture": {
+      "activation": "tanh",
+      "hidden_dims": [
+        256,
+        256
+      ],
+      "input_dim": 35,
+      "kind": "standard_mean_mlp",
+      "output_dim": 2,
+      "residual_actor": false
+    },
+    "adamw": {
+      "epochs": 3000,
+      "full_batch": true,
+      "grad_clip_norm": 10.0,
+      "learning_rate_schedule": [
+        {
+          "end_epoch": 1500,
+          "learning_rate": 0.0003,
+          "start_epoch": 1
+        },
+        {
+          "end_epoch": 2500,
+          "learning_rate": 0.0001,
+          "start_epoch": 1501
+        },
+        {
+          "end_epoch": 3000,
+          "learning_rate": 3e-05,
+          "start_epoch": 2501
+        }
+      ],
+      "optimizer": "AdamW",
+      "seed": 20260807,
+      "weight_decay": 1e-07
+    },
+    "anchor_enabled": false,
+    "coverage_weighting": {
+      "applies_to": "OBSERVER_LABELLED_PURE_PROBE_ROWS_ONLY",
+      "base_observations_sha256": "d367a4697606f7c5d721823c973aabbbc86fb314e9b74e1529afc22e45a4d9ad",
+      "included_feature_indices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "loo_distances_sha256": "17f87f8cdca0b9429dd760b8bf94483bf7a317fb1a85ffa6f6b474eb7ad19673",
+      "loo_nearest_indices_sha256": "aa79fa7e9ab5c4145caa332f9984612d009af2fee7771550ab68db908ce42639",
+      "loo_p95": 0.07945888479650812,
+      "loo_tree": {
+        "balanced_tree": true,
+        "compact_nodes": true,
+        "eps": 0.0,
+        "implementation": "scipy.spatial.cKDTree",
+        "leafsize": 16,
+        "p": 2,
+        "query_k": 8,
+        "self_excluded": true,
+        "tie_break": "minimum_index",
+        "workers": 1
+      },
+      "metric": "nearest_neighbor_rms_z_float64_accumulation",
+      "new_row_query": {
+        "delta_cast": "float64_before_subtraction",
+        "distance": "sqrt(fsum(delta_i_squared_in_feature_order)/33)",
+        "execution_time": "OBSERVER_LABEL_STAGE_ONLY_AFTER_PROBE_CLOSED",
+        "global_minimum_candidate_audit_k": 64,
+        "global_minimum_certificate": "TOP64_BY_FLOAT64_VECTOR_SUM_THEN_FSUM;_REQUIRE_EXCLUDED_MARGIN_GREATER_THAN_1E-10_TIMES_MAX_1_OR_EXCLUDED_MIN_SUM",
+        "included_feature_order": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34
+        ],
+        "input_cast": "contiguous_float32",
+        "normalization": "subtract_float32_mean_divide_float32_std_to_float32",
+        "reference_candidate_count": 6000,
+        "selection": "global_minimum_distance_then_minimum_reference_index"
+      },
+      "normalization_mean_sha256": "2b91c5d2f56ca4188e1e24830fb059ce4e36660337d3670a8ff618a1f5cc6fbe",
+      "normalization_std_sha256": "c17a91bb6746a0292c53c9eb08818c05cea24a5b15d32ccb1a4af958ad20b2c5",
+      "normalized_feature_matrix_sha256": "9e51a72ff44a90509d0ba908fb86210352efd2160d8b13fb2ed98113904a3708",
+      "normalized_observations_sha256": "b6819a920953632751a3a25120d9fe387a21d86e890b5645e225b72e0640beb3",
+      "out_of_distribution_rule": "distance_strictly_greater_than_loo_p95",
+      "out_of_distribution_weight": 100.0,
+      "reference": "V11_P3_CORPUS_6000_ROWS",
+      "reference_derivation_runtime": {
+        "machine": "arm64",
+        "numpy": "2.3.5",
+        "python": "3.13.9",
+        "scipy": "1.16.3",
+        "scope": "REFERENCE_RECEIPT_ONLY_NOT_TARGET_RUNTIME_REQUIREMENT",
+        "system": "Darwin"
+      },
+      "reference_observations_sha256": "e5e8ce0691b907ff21ffdb59a3323b9b9a3e494954919a5f89712af9800b6072",
+      "runtime_actor_feature_change": false,
+      "target_platform_policy": "FAIL_CLOSED_UNLESS_EXACT_REFERENCE_HASH_AND_P95_PARITY_AUDIT_PASSES_BEFORE_EXECUTION_LOCK",
+      "tie_audit": {
+        "extended_query_k": 64,
+        "maximum_minimum_distance_tie_count": 6,
+        "query_k_matches_extended_query": true,
+        "unique_observation_count": 5990
+      }
+    },
+    "disabled_clock_columns": [
+      0,
+      1
+    ],
+    "disabled_clock_policy": "bit_zero_before_and_after_save_reload",
+    "every_fit_restarts_from_h0": true,
+    "fit_contract_id": "h0_primary_split_v12r3_recovery_weighted_full_mean_v1",
+    "freeze_logstd_head": true,
+    "hard_polish_enabled": false,
+    "lbfgs": {
+      "deterministic": true,
+      "history_size": 50,
+      "line_search_fn": "strong_wolfe",
+      "lr": 0.7,
+      "max_eval": 600,
+      "max_iter": 300,
+      "optimizer": "LBFGS",
+      "tolerance_change": 1e-12,
+      "tolerance_grad": 1e-10
+    },
+    "normalization": {
+      "estimator": "population_mean_and_std_float64",
+      "feature_count": 35,
+      "fold_into_first_layer_before_save": true,
+      "frozen_across_fit_stages": true,
+      "prescribed_clock": false,
+      "runtime_normalization_wrapper": false,
+      "scope": "base_corpus_3000_rows_only",
+      "std_floor": 0.0001
+    },
+    "optimizer_phase_order": [
+      "adamw",
+      "lbfgs"
+    ],
+    "p0_reproduction_tolerance": {
+      "absolute": 1e-09,
+      "applies_to": [
+        "rmse",
+        "max_abs_error",
+        "reset_max_abs_error"
+      ],
+      "reference": "SOLE_V12R3_DESIGN_AUDIT_P0_IN_MEMORY_FIT",
+      "relative": 1e-09,
+      "retry_or_retuning": false,
+      "rule": "ABS_OBSERVED_MINUS_REFERENCE_LE_ABS_PLUS_REL_TIMES_ABS_REFERENCE"
+    },
+    "pure_probe_label_corpus": "CUMULATIVE_OBSERVER_ONLY_SAME_STATE_LABELS",
+    "sample_weighting": {
+      "applies_to": "OBSERVER_LABELLED_PURE_PROBE_ROWS_ONLY",
+      "causal_at_action_selection": true,
+      "corpus_loss_reduction": "SUM_WEIGHTED_ROW_LOSS_DIVIDED_BY_SUM_WEIGHTS",
+      "episode_identity": "origin_family+round_or_probe_stage+case_id",
+      "episode_mass_policy": "SCALE_EACH_EPISODE_RAW_WEIGHTS_TO_SUM_500",
+      "episode_target_mass": 500.0,
+      "failed_probe_prefix_kept": true,
+      "latch_activation_m": 0.015,
+      "maximum_weight": 100.0,
+      "near_latch_rule": "linear_1_to_100_between_10_and_15_mm",
+      "nominal_upper_m": 0.01,
+      "nominal_weight": 1.0,
+      "post_hoc_retuning_authorized": false,
+      "reset_weight": 100.0,
+      "row_loss": "MEAN_SQUARED_ERROR_OVER_TWO_ACTIONS",
+      "shielded_dagger_risk_modifier": 1.0,
+      "signal": "previous_penetration_m",
+      "sweep_authorized": false,
+      "terminal_row_kept": true,
+      "weight_combination": "maximum_of_reset_recovery_and_coverage_weight"
+    },
+    "seed_corpus": "V11_P3_6000_ROWS_BYTE_BOUND_WITHOUT_RISK_REWEIGHTING",
+    "trainable_scope": "full_mean_network"
+  },
+  "fit_contract_id": "h0_primary_split_v12r3_recovery_weighted_full_mean_v1",
+  "fit_stage": "p0",
+  "module_reload_exact": true,
+  "normalization": {
+    "base_observations_sha256": "d367a4697606f7c5d721823c973aabbbc86fb314e9b74e1529afc22e45a4d9ad",
+    "clock_columns": [
+      0,
+      1
+    ],
+    "clock_means": [
+      0.0,
+      1.0
+    ],
+    "clock_stds": [
+      9.999999747378752e-05,
+      9.999999747378752e-05
+    ],
+    "dtype": "float32",
+    "folded_into_first_layer_before_save": true,
+    "mean_sha256": "2b91c5d2f56ca4188e1e24830fb059ce4e36660337d3670a8ff618a1f5cc6fbe",
+    "runtime_normalization_wrapper": false,
+    "source": "frozen_base_corpus_only",
+    "source_rows": 3000,
+    "std_floor": 0.0001,
+    "std_sha256": "c17a91bb6746a0292c53c9eb08818c05cea24a5b15d32ccb1a4af958ad20b2c5"
+  },
+  "optimizer_audit": {
+    "adamw_epochs": 3000,
+    "adamw_schedule": [
+      {
+        "end_epoch": 1500,
+        "learning_rate": 0.0003,
+        "start_epoch": 1
+      },
+      {
+        "end_epoch": 2500,
+        "learning_rate": 0.0001,
+        "start_epoch": 1501
+      },
+      {
+        "end_epoch": 3000,
+        "learning_rate": 3e-05,
+        "start_epoch": 2501
+      }
+    ],
+    "adamw_weight_decay": 1e-07,
+    "deterministic_algorithms_enabled": true,
+    "explicit_sample_weights": true,
+    "fallback": false,
+    "fit_contract_id": "h0_primary_split_v12r3_recovery_weighted_full_mean_v1",
+    "full_batch": true,
+    "gradient_clip_norm": 10.0,
+    "hard_polish": false,
+    "lbfgs_closure_calls": 316,
+    "lbfgs_history_size": 50,
+    "lbfgs_line_search": "strong_wolfe",
+    "lbfgs_lr": 0.7,
+    "lbfgs_max_eval": 600,
+    "lbfgs_max_iter": 300,
+    "lbfgs_tolerance_change": 1e-12,
+    "lbfgs_tolerance_grad": 1e-10,
+    "normalized_total_sample_mass": 6000.0,
+    "sample_count": 6000,
+    "sample_weight_dtype": "float64",
+    "sample_weights_sha256": "867ab6b74d85abfb1c93a5b0af073a10e74dc3fabdea0c27586f51c49f71306b",
+    "seed": 20260807,
+    "sweep": false,
+    "torch_threads": 5
+  },
+  "preservation_audit": {
+    "all_candidate_tensors_finite": true,
+    "changes_confined_to_full_mean_network": true,
+    "critic_byte_exact": true,
+    "critic_parameter_count": 0,
+    "critic_present": false,
+    "disabled_clock_columns_bit_zero": true,
+    "encoder_aliases_bit_exact": true,
+    "hidden_mean_network_changed": true,
+    "logstd_outputs_bit_exact": true,
+    "logstd_parameter_rows_bit_exact": true,
+    "mean_output_changed": true,
+    "nonactor_byte_exact": true,
+    "nonactor_keys": [],
+    "passed": true,
+    "source_checkpoint_scope": "actor_only_rl_module",
+    "state_key_set_bit_exact": true
+  },
+  "save_reload": {
+    "clock_columns_bit_zero": true,
+    "critic_byte_exact": true,
+    "exact": true,
+    "logstd_parameter_rows_bit_exact": true,
+    "nonactor_byte_exact": true,
+    "state_key_count": 10
+  },
+  "training_samples": 6000,
+  "validation_samples": 0
+}

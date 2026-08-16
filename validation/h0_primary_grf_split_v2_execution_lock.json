@@ -1,0 +1,638 @@
+{
+  "actor_update_candidate_count": 1,
+  "authority": {
+    "actor_only_adaptation_authorized": true,
+    "critic_updates_authorized": false,
+    "development_qualification_authorized": true,
+    "ppo_updates_authorized": false,
+    "prescribed_teacher_collection_authorized": true,
+    "primary_grf_modification_authorized": false,
+    "protected_trial_access_authorized": false,
+    "runtime_promotion_authorized": false,
+    "sea_semantic_modification_authorized": false,
+    "zero_update_port_authorized": true
+  },
+  "candidate_id": "H0_primary_split_v2",
+  "collection": {
+    "02": {
+      "absolute_start_s": 119.578,
+      "offset_s": 107.88,
+      "seed": 123,
+      "selection": "deterministic",
+      "steps": 500,
+      "trial_id": "02"
+    },
+    "04": {
+      "absolute_start_s": 122.189,
+      "offset_s": 107.55,
+      "seed": 124,
+      "selection": "deterministic",
+      "steps": 500,
+      "trial_id": "04"
+    },
+    "08": {
+      "absolute_start_s": 120.39,
+      "offset_s": 106.878,
+      "seed": 125,
+      "selection": "deterministic",
+      "steps": 500,
+      "trial_id": "08"
+    }
+  },
+  "critic_updates": 0,
+  "destinations": [
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/collection/trial_02",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/collection/trial_04",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/collection/trial_08",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/corpus",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/adaptation",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/gates",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/reference/trial_02_deterministic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/reference/trial_02_stochastic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/reference/trial_04_deterministic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/reference/trial_04_stochastic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/reference/trial_08_deterministic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/reference/trial_08_stochastic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/candidate/trial_02_deterministic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/candidate/trial_02_stochastic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/candidate/trial_04_deterministic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/candidate/trial_04_stochastic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/candidate/trial_08_deterministic",
+    "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher/qualification/candidate/trial_08_stochastic"
+  ],
+  "fit": {
+    "anchor_weight": 0.01,
+    "batch_size": 128,
+    "clip_weight": 1.0,
+    "epochs": 400,
+    "learning_rate": 5e-05,
+    "logstd_weight": 0.0,
+    "patience": 60,
+    "seed": 123,
+    "validation_fraction": 0.3333333333333333
+  },
+  "input_closure": {
+    "actor_layout_reference": {
+      "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/actor_transplant_report.json",
+      "sha256": "6ffc0a4cee96438a529ab398f4730d95cde7a6247e786914ac36ef8ccdd2e4e7",
+      "size_bytes": 13638
+    },
+    "full_layout_reference": {
+      "path": "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_sigma0005_seed123/rollout_summary.json",
+      "sha256": "70676e7d2b4e8c1bca185fe23d1d29f96fa83ac34167ba916250eff6e96f601e",
+      "size_bytes": 9870
+    },
+    "h0_config": {
+      "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/training_cfg.resolved.yaml",
+      "sha256": "6904f7a9000b63b5c1aab661ebcab4974dffdd1cfb8c731df6a953fc9234229e",
+      "size_bytes": 6097
+    },
+    "h0_module_ctor": {
+      "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/class_and_ctor_args.pkl",
+      "sha256": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+      "size_bytes": 2262
+    },
+    "h0_module_metadata": {
+      "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/metadata.json",
+      "sha256": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "size_bytes": 197
+    },
+    "h0_module_state": {
+      "path": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/module_state.pkl",
+      "sha256": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b",
+      "size_bytes": 604772
+    },
+    "morphology_profile_weight_zero_runtime_input": {
+      "path": "Trajectory Generator/baseline_MLP/morphology_profiles/ab06_prosthetic_mean_std_corridor.json",
+      "sha256": "6307119c2bb233831eac7070726fc6e2e0175c8f715a9fbbb787c0763b46fab7",
+      "size_bytes": 20911
+    },
+    "noise_tape_manifest": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/manifest.json",
+      "sha256": "4f736af3f27fb41c9dfe43bc89032400abce1a45f3941dd52695a11178ae62ce",
+      "size_bytes": 3563
+    },
+    "primary_core_lock": {
+      "path": "validation/primary_grf_core_lock_2026-08-03.json",
+      "sha256": "e9347bb5e5d04e84ce96f5c3ed354e154d26d0bc5abb750dc68bb8b79d0c06ac",
+      "size_bytes": 3219
+    },
+    "primary_core_platform_attestations_macos_arm64_dylib": {
+      "path": "plugins/libOnlineGRFContact.dylib",
+      "sha256": "5597a59a5368825fd207753b59291e72240c1ece3aa5280804f1e9b9c7d6a2b3",
+      "size_bytes": 236136
+    },
+    "primary_core_scientific_core_contact_cmake": {
+      "path": "tools/online_grf_contact/CMakeLists.txt",
+      "sha256": "8a2d71eb1535888d6d90c9e8977dae31756dc9947b420b9bf221f7b85cd86913",
+      "size_bytes": 648
+    },
+    "primary_core_scientific_core_contact_cpp": {
+      "path": "tools/online_grf_contact/OnlineGRFSphereHalfSpaceForce.cpp",
+      "sha256": "e0022a37268b60b51f68a588ceb7c951e0a8e37d1cd0e0016135a458a0cf919a",
+      "size_bytes": 6320
+    },
+    "primary_core_scientific_core_contact_header": {
+      "path": "tools/online_grf_contact/OnlineGRFSphereHalfSpaceForce.h",
+      "sha256": "83890c056286b6cd3eee6852901228794813f5170d89db6ef4d3c3e64e43e272",
+      "size_bytes": 3393
+    },
+    "primary_core_scientific_core_plugin_interface": {
+      "path": "tools/online_grf_contact/Plugin_interface.cpp",
+      "sha256": "5e87f884b023c749239b4484d54ea900862d0c11879d92941ef762aa6901ec99",
+      "size_bytes": 483
+    },
+    "primary_core_scientific_core_primary_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+      "size_bytes": 19412
+    },
+    "primary_core_scientific_core_runtime_model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1",
+      "size_bytes": 501271
+    },
+    "profile_overlay_manifest": {
+      "path": "validation/h0_primary_grf_split_inputs/manifest.json",
+      "sha256": "cb35c7a9b8d07f23bd0c8d5043713fd30b345e37ef3fa95b2d09922a1fdc5798",
+      "size_bytes": 2681
+    },
+    "protocol_lock": {
+      "path": "validation/h0_primary_grf_split_v1_adaptation_protocol_lock.json",
+      "sha256": "b4a7bf72bfed2f1d9169395977d07d9119091251e051692dc19cbee94d1173c8",
+      "size_bytes": 34742
+    },
+    "qualification_deterministic_noise_tape": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/qualification_deterministic_all_zero.npz",
+      "sha256": "41e8d13ec17dfe7e6abc66277c856dd6692a436160ceb3313332c6cf977f7cbe",
+      "size_bytes": 4284
+    },
+    "reserve_actuators": {
+      "path": "models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml",
+      "sha256": "238792c0024c405241e4a45b9be88e153660561a02e667aedbd1dd6116df73dd",
+      "size_bytes": 10712
+    },
+    "sea_plugin_header": {
+      "path": "tools/sea_plugin_relative_d/SeriesElasticActuator.h",
+      "sha256": "c8201a61394b4282b05b1f625f7f2cf6611f56986ad4dc3198b3a1afbbbbbf43",
+      "size_bytes": 5689
+    },
+    "sea_plugin_macos": {
+      "path": "plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+      "sha256": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b",
+      "size_bytes": 218560
+    },
+    "sea_plugin_source": {
+      "path": "tools/sea_plugin_relative_d/SeriesElasticActuator.cpp",
+      "sha256": "20b122bd576c8b70933feaa76fe9a3e521e2b2d48ba048be8c725a5ae7976379",
+      "size_bytes": 11978
+    },
+    "trial_02_analog_overlay": {
+      "path": "validation/h0_primary_grf_split_inputs/trial_02_analog_surface_velocity.json",
+      "sha256": "35fb7872594a517d65e8f0d0e42f8a5a5520549547ef5c76b0560553cb08426f",
+      "size_bytes": 1546
+    },
+    "trial_02_collection_noise_tape": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/collection_trial_02_standard_normal.npz",
+      "sha256": "6de3c2ccc35c15409305927e4fccbaca8c0328e7114d8e241aaa81679db3e371",
+      "size_bytes": 4532
+    },
+    "trial_02_primary_overlay": {
+      "path": "validation/h0_primary_grf_split_inputs/trial_02_primary_surface_velocity.json",
+      "sha256": "2c24dd774ddbad14279447e8a4ecd0e2eae7856e4683fbf6c602c852444b01c8",
+      "size_bytes": 19383
+    },
+    "trial_02_qualification_noise_tape": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/qualification_trial_02_standard_normal.npz",
+      "sha256": "829602b41aa1f355bf8c09d06453f8ba89254c5aeba766c51885fc0a827e7d4d",
+      "size_bytes": 4532
+    },
+    "trial_02_semantic_external_loads_xml": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_02/treadmill_02_01_ExternalLoads.xml",
+      "sha256": "060c8add7ba26cf1ddf956fbc7445950aab0ee5c889e57024bb2d394a70bc429",
+      "size_bytes": 1252
+    },
+    "trial_02_semantic_grf_sto": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_02/treadmill_02_01_grf.mot",
+      "sha256": "36de805e73e1c95d303ba6265ee262099e0a88fc46e7351bae0cdce3877d23d3",
+      "size_bytes": 36883453
+    },
+    "trial_02_semantic_ik_sto": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_02/treadmill_02_01_ik.mot",
+      "sha256": "4018b3001a5d293edda799839158f4c154747af5c908a2eb530dae3e37e5a982",
+      "size_bytes": 10712667
+    },
+    "trial_02_semantic_setup": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/trial_02_development_setup.xml",
+      "sha256": "8a67d80597af8688f154031694dc808b0ac10678c1915b2c5344b864d62f63a9",
+      "size_bytes": 875
+    },
+    "trial_02_setup": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/trial_02_development_setup.xml",
+      "sha256": "8a67d80597af8688f154031694dc808b0ac10678c1915b2c5344b864d62f63a9",
+      "size_bytes": 875
+    },
+    "trial_02_source_receipt": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/unit_source_receipts/dev02_p04_10ms.json",
+      "sha256": "9bdda3dce423c2b1a6bafab8e0bcb287d24219af6bb5e530c618c020f019d1ae",
+      "size_bytes": 1416
+    },
+    "trial_04_analog_overlay": {
+      "path": "validation/h0_primary_grf_split_inputs/trial_04_analog_surface_velocity.json",
+      "sha256": "661bdefb9cdfc1df15b9aea5750f5a3cec25cb6b4943eb7b41fd8483202da9a5",
+      "size_bytes": 1546
+    },
+    "trial_04_collection_noise_tape": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/collection_trial_04_standard_normal.npz",
+      "sha256": "63cdfa6e35defb4020325c27c120b4419cce4587b930973e5ad149c28e763aee",
+      "size_bytes": 4532
+    },
+    "trial_04_primary_overlay": {
+      "path": "validation/h0_primary_grf_split_inputs/trial_04_primary_surface_velocity.json",
+      "sha256": "59d3ee250d116e3f65aff2de6696a45ec2de78a3a34206179c51db6634d801a7",
+      "size_bytes": 19383
+    },
+    "trial_04_qualification_noise_tape": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/qualification_trial_04_standard_normal.npz",
+      "sha256": "f30794c2ed6b7156224aa62d9869f7b4db076f836e298e19b06d29d6acc4fa74",
+      "size_bytes": 4532
+    },
+    "trial_04_semantic_external_loads_xml": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_04/treadmill_04_01_ExternalLoads.xml",
+      "sha256": "b33d5a20fe8347747c53a7eef0eec0afde0ecc2333d0ae30be51fe221e1d74c4",
+      "size_bytes": 1252
+    },
+    "trial_04_semantic_grf_sto": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_04/treadmill_04_01_grf.mot",
+      "sha256": "299c5267b06ba5b23921ba586c1b3c02fa23769954e62e5c94175db12a61dbc5",
+      "size_bytes": 36985966
+    },
+    "trial_04_semantic_ik_sto": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_04/treadmill_04_01_ik.mot",
+      "sha256": "ade6b105d2f6f3cdb350852f92caa48b09cdfa8cd769bf5c02ef5fbdd7b7218f",
+      "size_bytes": 10737725
+    },
+    "trial_04_semantic_setup": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/trial_04_development_setup.xml",
+      "sha256": "f099f2f2858be073812784d9e5c2222535f4a54e5c5b3239084ece5abfd19d9a",
+      "size_bytes": 875
+    },
+    "trial_04_setup": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/trial_04_development_setup.xml",
+      "sha256": "f099f2f2858be073812784d9e5c2222535f4a54e5c5b3239084ece5abfd19d9a",
+      "size_bytes": 875
+    },
+    "trial_04_source_receipt": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/unit_source_receipts/dev04_p04_10ms.json",
+      "sha256": "094688f7ad0a5a4c4f004f9c59a312a094a1900db529b5387c18259fc6553e9e",
+      "size_bytes": 1416
+    },
+    "trial_08_analog_overlay": {
+      "path": "validation/h0_primary_grf_split_inputs/trial_08_analog_surface_velocity.json",
+      "sha256": "748cdea67e82b2c750ef4e715d6c7e0bfc3ee0e03b42571005db47ad2545f526",
+      "size_bytes": 1546
+    },
+    "trial_08_collection_noise_tape": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/collection_trial_08_standard_normal.npz",
+      "sha256": "0297005b9d6a2e7bd7aad3f2e34a3aca46abfbd1afcf44b99356008317ade5c0",
+      "size_bytes": 4532
+    },
+    "trial_08_primary_overlay": {
+      "path": "validation/h0_primary_grf_split_inputs/trial_08_primary_surface_velocity.json",
+      "sha256": "7a361839ef94e349dc41fdb312bb4b0bd4c4eb53feedf1f812e586e11da35e84",
+      "size_bytes": 19383
+    },
+    "trial_08_qualification_noise_tape": {
+      "path": "validation/h0_primary_grf_split_noise_tapes/qualification_trial_08_standard_normal.npz",
+      "sha256": "4056cbc6cf6652de636505b6d355884a984ba8899b330bceef0c9ad79d62a465",
+      "size_bytes": 4532
+    },
+    "trial_08_semantic_external_loads_xml": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_08/treadmill_08_01_ExternalLoads.xml",
+      "sha256": "1ce11966ae7154f36999fa77b5162d8383bcbf11284cbdc333c665dc3f6873ac",
+      "size_bytes": 1252
+    },
+    "trial_08_semantic_grf_sto": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_08/treadmill_08_01_grf.mot",
+      "sha256": "7c5d5046e9ff68d8de1c3a0278a36123ccaac7e6315588c721289ba9b76bae7e",
+      "size_bytes": 37262084
+    },
+    "trial_08_semantic_ik_sto": {
+      "path": "validation/two_sensor_cross_speed_v14_2_runs/2026-07-22_ab06_cross_speed_v14_2_boundary_recovery/preprocessed/trial_08/treadmill_08_01_ik.mot",
+      "sha256": "87af7ec5e6530f179bb2fd84c7f2caf78da041f6dcd92966ac8ca1999e1ce14a",
+      "size_bytes": 10787093
+    },
+    "trial_08_semantic_setup": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/trial_08_development_setup.xml",
+      "sha256": "2aed068997af646eb179c285ca965db599b18ee9dcd2fb0c1cdb1a8dc0eeb49b",
+      "size_bytes": 875
+    },
+    "trial_08_setup": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/trial_08_development_setup.xml",
+      "sha256": "2aed068997af646eb179c285ca965db599b18ee9dcd2fb0c1cdb1a8dc0eeb49b",
+      "size_bytes": 875
+    },
+    "trial_08_source_receipt": {
+      "path": "validation/primary_grf_runs/2026-07-24_ab06_primary_grf_readiness_v1/inputs/unit_source_receipts/dev08_p04_10ms.json",
+      "sha256": "891d44297e689c048cd39b741a9d6f37eeb783fd3604cd907abfefe1ac747079",
+      "size_bytes": 1415
+    }
+  },
+  "old_v1_reopened": false,
+  "ppo_updates": 0,
+  "protected_trials_opened": [],
+  "qualification": {
+    "02": {
+      "absolute_start_s": 129.578,
+      "offset_s": 117.88,
+      "seed": 126,
+      "selections": [
+        "deterministic",
+        "stochastic"
+      ],
+      "steps": 500,
+      "trial_id": "02"
+    },
+    "04": {
+      "absolute_start_s": 132.189,
+      "offset_s": 117.55,
+      "seed": 127,
+      "selections": [
+        "deterministic",
+        "stochastic"
+      ],
+      "steps": 500,
+      "trial_id": "04"
+    },
+    "08": {
+      "absolute_start_s": 130.39,
+      "offset_s": 116.878,
+      "seed": 128,
+      "selections": [
+        "deterministic",
+        "stochastic"
+      ],
+      "steps": 500,
+      "trial_id": "08"
+    }
+  },
+  "retry_or_retuning_allowed": false,
+  "revision": "2026-08-06",
+  "run_root": "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v2_prescribed_teacher",
+  "runtime_closure": {
+    "adapt_actor": {
+      "path": "Trajectory Generator/baseline_MLP/target_domain_imitation.py",
+      "sha256": "eab827f4cf2ba4119c8bccaa3e768bfd63c4f4fee05303ae1cd97f83b666729e",
+      "size_bytes": 51998
+    },
+    "asymmetric_rl_module": {
+      "path": "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py",
+      "sha256": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+      "size_bytes": 8081
+    },
+    "binary_phase_adapter": {
+      "path": "Trajectory Generator/binary_phase_adapter.py",
+      "sha256": "34c9044b22edc260265164fe58f9adbe42624187c8fc3c8231af91eaaf2dc48b",
+      "size_bytes": 26325
+    },
+    "binary_phase_detector": {
+      "path": "binary_phase_detector.py",
+      "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+      "size_bytes": 14226
+    },
+    "binary_phase_fsm": {
+      "path": "Trajectory Generator/binary_phase_fsm.py",
+      "sha256": "0f7669b60a72c1b27ee3c4f1a43161eeb9f2d091dff5558cc4fa43f1fce8d9c1",
+      "size_bytes": 18908
+    },
+    "bootstrap": {
+      "path": "Trajectory Generator/baseline_MLP/_bootstrap.py",
+      "sha256": "6943e6d187f1c325f98417106c0928d3e4e0f670102686c925b7c2ec667bd63c",
+      "size_bytes": 1049
+    },
+    "collection_freezer": {
+      "path": "validation/freeze_h0_primary_grf_split_v1_execution.py",
+      "sha256": "32a925c6395a011725e7e740466b7bdc68d64ca6c94631f4dc4b1fdc40be0bce",
+      "size_bytes": 15262
+    },
+    "comparator": {
+      "path": "validation/compare_h0_primary_grf_split.py",
+      "sha256": "5e1edcdee5b46838f2299f798f710c5426cc45eb5b9bad9812a1e37508aa1b19",
+      "size_bytes": 31688
+    },
+    "env_factory": {
+      "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+      "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+      "size_bytes": 9701
+    },
+    "environment": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "fed613933abe75102bdd4d0377c2cc987c8f225ea4b4613df2f0a7cb1b44da6a",
+      "size_bytes": 192546
+    },
+    "execution_driver": {
+      "path": "validation/run_h0_primary_grf_split_v1_adaptation.py",
+      "sha256": "ee523975413db6eaf51e6ad4046ccb16bbc2236c558e3b84d71926a72d4e9428",
+      "size_bytes": 74380
+    },
+    "experimental_morphology_corridor": {
+      "path": "Trajectory Generator/baseline_MLP/experimental_morphology_corridor.py",
+      "sha256": "f861ad6f19c880e3bab6a9c5fd688db68ffad658b08eb6870666f83badc0b1c9",
+      "size_bytes": 36180
+    },
+    "exploration_noise": {
+      "path": "Trajectory Generator/baseline_MLP/exploration_noise.py",
+      "sha256": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f",
+      "size_bytes": 1467
+    },
+    "h0_runtime_adapter": {
+      "path": "validation/run_h0_v25_abc_preflight.py",
+      "sha256": "344d55d7ecd1f5b9342b06438ccec769138823f3467706169dc6fc60a35fd128",
+      "size_bytes": 63570
+    },
+    "input_preparer": {
+      "path": "validation/prepare_h0_primary_grf_split_inputs.py",
+      "sha256": "a3f72c3ee7bdfcbd03a9f2e309b28554acefec17a72329e41eaa951efa8237fc",
+      "size_bytes": 5994
+    },
+    "inverse_dynamics": {
+      "path": "inverse_dynamics.py",
+      "sha256": "81c898f551a81d9af743575e6f6639a3a3bb69ddbe9faffa876f8d3f71df0833",
+      "size_bytes": 9836
+    },
+    "kinematics_interpolator": {
+      "path": "kinematics_interpolator.py",
+      "sha256": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede",
+      "size_bytes": 9742
+    },
+    "model_loader": {
+      "path": "model_loader.py",
+      "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+      "size_bytes": 58315
+    },
+    "noise_tape_preparer": {
+      "path": "validation/prepare_h0_primary_grf_split_noise_tapes.py",
+      "sha256": "859bc29eb5062ee737653ccc4ea917080e1228362f4986a741221c1f1af5c008",
+      "size_bytes": 3025
+    },
+    "online_grf": {
+      "path": "online_grf.py",
+      "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+      "size_bytes": 31439
+    },
+    "outer_loop": {
+      "path": "outer_loop.py",
+      "sha256": "a8a05d10d959c5fa98c29ecf703189af73318fd1291a2257315cd81417f5ef0b",
+      "size_bytes": 4558
+    },
+    "output": {
+      "path": "output.py",
+      "sha256": "7b03d1031202976fd011288e031f8796364eb35c34d1ed8838f8eff971318acb",
+      "size_bytes": 41834
+    },
+    "path_resolver": {
+      "path": "path_resolver.py",
+      "sha256": "2a61b8c54ab68c228ea55a6e28b6334ac0a9539da79f86e9a5ef2970bc937a1d",
+      "size_bytes": 6067
+    },
+    "phase_fsm": {
+      "path": "Trajectory Generator/prosthetic_phase_fsm.py",
+      "sha256": "cd6578920f01a707695597f487541c7fce4bbf920394bf0328bf24beaf09b282",
+      "size_bytes": 73098
+    },
+    "process_watchdog": {
+      "path": "Trajectory Generator/baseline_MLP/process_watchdog.py",
+      "sha256": "0511fdda6fd0a3d5db0697b56d20226f955c10955fdfb82d6b75d2b6834128e0",
+      "size_bytes": 16669
+    },
+    "progress_display": {
+      "path": "Trajectory Generator/baseline_MLP/progress_display.py",
+      "sha256": "26e0c59698dc98ebc3f1112ea07cdf054c0b283d9797206eb5664ef92dc777c5",
+      "size_bytes": 9846
+    },
+    "prosthesis_controller": {
+      "path": "prosthesis_controller.py",
+      "sha256": "c0ef2da15b5754c9499f8c40072e655e954cc5085a2a8a858aeb6355b4073338",
+      "size_bytes": 21345
+    },
+    "pure_contract": {
+      "path": "Trajectory Generator/baseline_MLP/primary_grf_split_adaptation.py",
+      "sha256": "2d7557435ebbbccf705d6f7aef8a026f34b9b9e18857111b6ab3ae5b5e98ea05",
+      "size_bytes": 16567
+    },
+    "reward_function": {
+      "path": "Trajectory Generator/baseline_MLP/reward_function.py",
+      "sha256": "210318ec88642c83876ced8e0fb8b4ba80de0dbbe0cfbcdc48e1d99f327cfeac",
+      "size_bytes": 100717
+    },
+    "rollout_eval": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "8681bd981a2fb13ce50373188b43140bccc548234bf9d680dcbbf8d0dd76e98f",
+      "size_bytes": 59374
+    },
+    "root_config": {
+      "path": "config.py",
+      "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "size_bytes": 17291
+    },
+    "setup_io": {
+      "path": "setup_io.py",
+      "sha256": "9d24df7b272ad6550c2897151b019b53d665a61a715217eeeb6dfbe54a6ae6e3",
+      "size_bytes": 11031
+    },
+    "simulation_runner": {
+      "path": "simulation_runner.py",
+      "sha256": "516546be8cb400533a29962bac44c0d577f30516f4d4f73d0ef512f88b2fc9da",
+      "size_bytes": 107398
+    },
+    "static_optimization": {
+      "path": "static_optimization.py",
+      "sha256": "9a5ae230b8eea3ac48b8917ce0781782576c40e5da0ad9f051e4b2a7e1aeb873",
+      "size_bytes": 28407
+    },
+    "strict_io": {
+      "path": "validation/compare_h0_v25_abc.py",
+      "sha256": "dade1cdd0fd90c31ecf10ce8f84c2027a899e5ccfa53e2e7c486fab41741c028",
+      "size_bytes": 20701
+    },
+    "training_config": {
+      "path": "Trajectory Generator/baseline_MLP/training_config.py",
+      "sha256": "cbc14abec0f696bd3135a459ab6a4b1cab3daf2128178602983943ceeabdfbc2",
+      "size_bytes": 12933
+    },
+    "warm_start": {
+      "path": "Trajectory Generator/baseline_MLP/warm_start.py",
+      "sha256": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c",
+      "size_bytes": 22594
+    },
+    "win_runtime": {
+      "path": "Trajectory Generator/baseline_MLP/win_runtime.py",
+      "sha256": "9088d0e18002b64d70ea38ce9bad2b26c16bfc1e4b77e1caa8afd903261d033f",
+      "size_bytes": 2751
+    }
+  },
+  "schema_version": 2,
+  "status": "H0_PRIMARY_GRF_SPLIT_V2_EXECUTION_FROZEN",
+  "target_contract": "primary_grf_split_v1+legacy_events_v1",
+  "teacher": {
+    "h0_used_for_behavior": false,
+    "h0_used_for_initialization_and_anchor_only": true,
+    "kind": "same_trial_prescribed_prosthetic_ik",
+    "lookahead_s": 0.0,
+    "runtime_available_to_candidate": false
+  },
+  "v2_inputs": {
+    "layout_preflight_receipt": {
+      "path": "validation/h0_primary_grf_split_v2_layout_preflight_receipt.json",
+      "sha256": "12ff9983ae62c3b932a176aad4cf477c0f6f2a48f5cef849b977fefda302ee82",
+      "size_bytes": 13748
+    },
+    "old_terminal_ledger": {
+      "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-05_h0_primary_grf_split_v1_one_shot/collection_execution_ledger.json",
+      "sha256": "63c6b6cdd3e55e0016fbf3692667ff931097da66db795759d02331a33e1cc44a",
+      "size_bytes": 933
+    },
+    "old_v1_lock": {
+      "path": "validation/h0_primary_grf_split_v1_collection_execution_unlock.json",
+      "sha256": "99e721fadf947a60080f8433483f5be4bc0c62db2298c2a0eac2a79c9604d166",
+      "size_bytes": 25103
+    },
+    "preflight_receipt": {
+      "path": "validation/h0_primary_grf_split_v2_preflight_receipt.json",
+      "sha256": "adfc276a97c206250405ec6485b219d4f1c29cf8d4950364eb4e51ddbfb21491",
+      "size_bytes": 1293
+    }
+  },
+  "v2_sources": {
+    "comparator": {
+      "path": "validation/compare_h0_primary_grf_split_v2.py",
+      "sha256": "56ea78e4a86aa934e1025c0719f9f7d12af52ec159ef3b9b0095b29cd449b7b3",
+      "size_bytes": 9462
+    },
+    "freezer": {
+      "path": "validation/freeze_h0_primary_grf_split_v2.py",
+      "sha256": "7489ed431ba210da93f01c519b43fe0599a1476ae19c142b11bca0c17c76c919",
+      "size_bytes": 9104
+    },
+    "plan": {
+      "path": "reports/plans/2026-08-06_protocollo_h0_primary_split_v2_prescribed_teacher.md",
+      "sha256": "e9dafcce705d5f56512689917e19c3c5a6aeef625119c5e32ea6053f862762dc",
+      "size_bytes": 6422
+    },
+    "prescribed_teacher_and_fit": {
+      "path": "Trajectory Generator/baseline_MLP/target_domain_imitation.py",
+      "sha256": "eab827f4cf2ba4119c8bccaa3e768bfd63c4f4fee05303ae1cd97f83b666729e",
+      "size_bytes": 51998
+    },
+    "runner": {
+      "path": "validation/run_h0_primary_grf_split_v2_adaptation.py",
+      "sha256": "6d4b5517910a3e9c24b69a8916b115da1311f4172c69c7fd617246180e1c6c0f",
+      "size_bytes": 46866
+    },
+    "test": {
+      "path": "validation/test_h0_primary_grf_split_v2.py",
+      "sha256": "4d85578597eb6792320fe8072bd12fb0b5f81e2667f00db27af35e5e6e3aa0fc",
+      "size_bytes": 5803
+    }
+  }
+}

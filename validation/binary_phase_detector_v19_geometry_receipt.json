@@ -1,0 +1,117 @@
+{
+  "schema_version": 19,
+  "status": "BINARY_GEOMETRY_READY_HS_TO_UNDEFINED",
+  "date": "2026-08-04",
+  "candidate": {
+    "id": "two_point_binary_v19_outsole_25mm",
+    "profile": {
+      "path": "validation/experimental_detector_profiles/two_point_binary_v19_outsole_25mm.json",
+      "sha256": "fddb17f7bd24e004504de662676d7b5a2cb9e5d0fda77de8dea2664c0b5c7a86"
+    },
+    "detector_type": "binary_point_clearance_v1",
+    "sample_dt_s": 0.001,
+    "ground": {
+      "origin": [0.0, 0.0148208231, 0.0],
+      "normal": [0.0, 1.0, 0.0]
+    },
+    "contact_rule": "signed_clearance_le_zero",
+    "output_fields": [
+      "time_s",
+      "left_heel_contact",
+      "left_toe_contact"
+    ]
+  },
+  "geometry": {
+    "frame": "/bodyset/foot_l",
+    "plantar_mesh": {
+      "path": "Geometry/AM_foot_l.STL",
+      "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"
+    },
+    "common_virtual_outsole_reach_m": 0.025,
+    "points": {
+      "left_heel": [-0.0946600475, -0.06990531781384512, 0.01399567],
+      "left_toe": [0.11574858501553537, -0.06403460020354058, 0.0030479021621026177]
+    },
+    "direct_mesh_surface_candidate": {
+      "status": "REJECTED_BEFORE_EVENT_WORK",
+      "reason": "The toe bit remained false for every DEV02 and DEV04 sample; the display mesh is not the simulator collision sole."
+    },
+    "selection_scope": "Raw boolean continuity only; no GRF, event oracle, FSM, HS/TO metric, or event score was used."
+  },
+  "raw_development_replay": {
+    "validator": {
+      "path": "validation/validate_binary_phase_detector_v19_raw_geometry.py",
+      "sha256": "0e16fba4a26b5910d38004c0c56a98435e9bc889656ea728b831f158d30a0eea"
+    },
+    "development_trials_sampled": ["02", "04"],
+    "protected_trials_opened": [],
+    "reserve_trials_opened": [],
+    "grf_read": false,
+    "oracle_read": false,
+    "fsm_called": false,
+    "hs_to_semantics_evaluated": false,
+    "events_emitted": false,
+    "trials": {
+      "02": {
+        "sample_count": 143206,
+        "heel_on_fraction": 0.5087007527617557,
+        "toe_on_fraction": 0.33407119813415637,
+        "either_on_fraction": 0.680180998002877,
+        "both_off_fraction": 0.31981900199712304,
+        "heel_transition_count": 258,
+        "toe_transition_count": 338,
+        "nonfinite_clearance_count": 0,
+        "nonboolean_bit_count": 0
+      },
+      "04": {
+        "sample_count": 143541,
+        "heel_on_fraction": 0.5219205662493643,
+        "toe_on_fraction": 0.35249162260260136,
+        "either_on_fraction": 0.6897541468987954,
+        "both_off_fraction": 0.31024585310120456,
+        "heel_transition_count": 266,
+        "toe_transition_count": 360,
+        "nonfinite_clearance_count": 0,
+        "nonboolean_bit_count": 0
+      }
+    }
+  },
+  "runtime_transport": {
+    "status": "PASS",
+    "t0_sampled_but_not_emitted": true,
+    "normal_10ms_step_sample_count": 10,
+    "interval_semantics": "(previous_sample_time, t_stop]",
+    "public_contact_type": "Python bool",
+    "clearance_publicly_exposed_in_sample": false,
+    "diagnostic_clearance_available_separately": true,
+    "legacy_analog_stream_reused": false,
+    "fsm_consumer_added": false
+  },
+  "scientific_invariants": {
+    "open_sim_force_added": false,
+    "sphere_or_radius_used": false,
+    "material_or_force_law_used": false,
+    "force_threshold_used": false,
+    "dwell_or_debounce_used": false,
+    "hs_or_to_generated": false,
+    "primary_grf_modified": false,
+    "sea_semantics_modified": false,
+    "active_training_configuration_modified": false,
+    "ppo_started": false
+  },
+  "unchanged_core_hashes": {
+    "online_grf_py": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+    "prosthetic_phase_fsm_py": "8184f91ef6be84ee4c7f3e1a33969b96077d97cafcd74c179f4ec6bc576cf4c5",
+    "primary_grf_profile": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+    "runtime_model": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+  },
+  "implementation_sources": {
+    "binary_phase_detector.py": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+    "config.py": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+    "path_resolver.py": "2a61b8c54ab68c228ea55a6e28b6334ac0a9539da79f86e9a5ef2970bc937a1d",
+    "model_loader.py": "fba3f025a83082bb07276770b21f644e3c84750402d97c6305c7ea0eef8ccd76",
+    "simulation_runner.py": "f609533d69bb056e7eeca1933f934b308df8d5d9d3725387ed1027645fb08a43",
+    "validation/test_binary_phase_detector_v19.py": "f9d5d50791ed63c1f620504d71abe0cc64b619fd8c790517bebe59e6d2a83cd4"
+  },
+  "next_stage": "UNDEFINED_PENDING_USER_DISCUSSION_OF_HS_TO_LOGIC"
+}

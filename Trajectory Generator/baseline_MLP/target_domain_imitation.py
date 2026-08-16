@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 import math
 import os
 import shutil
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -43,6 +45,59 @@ import warm_start  # noqa: E402
 DEFAULT_CONFIG = THIS_DIR / "training_exnovo_cfg.yaml"
 
 
+def _write_strict_json_exclusive(path: Path, payload: Any) -> Path:
+    """Atomically publish finite JSON without replacing an existing artifact."""
+
+    target = Path(path).expanduser().resolve()
+    encoded = (
+        json.dumps(
+            payload,
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode("utf-8")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if os.path.lexists(target):
+        raise FileExistsError(f"refusing to clobber: {target}")
+    descriptor, temporary_raw = tempfile.mkstemp(
+        prefix=f".{target.name}.", suffix=".tmp", dir=target.parent
+    )
+    temporary = Path(temporary_raw)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY | getattr(os, "O_BINARY", 0)
+        try:
+            claim_descriptor = os.open(str(target), flags, 0o600)
+        except FileExistsError as exc:
+            raise FileExistsError(f"refusing to clobber: {target}") from exc
+        else:
+            os.close(claim_descriptor)
+        os.replace(str(temporary), str(target))
+        try:
+            directory_descriptor = os.open(target.parent, os.O_RDONLY)
+        except OSError:
+            directory_descriptor = None
+        if directory_descriptor is not None:
+            try:
+                os.fsync(directory_descriptor)
+            except OSError:
+                pass
+            finally:
+                os.close(directory_descriptor)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+    return target
+
+
 def _cli_path(value: str | Path) -> Path:
     text = os.fspath(value)
     if os.name != "nt":
@@ -67,8 +122,7 @@ def _resolve_output(value: str | None) -> Path:
             path = Path.cwd() / path
         return path.resolve()
     return (
-        TRAINING_RUNS_ROOT
-        / f"target_domain_imitation_{datetime.now():%Y%m%d_%H%M%S}"
+        TRAINING_RUNS_ROOT / f"target_domain_imitation_{datetime.now():%Y%m%d_%H%M%S}"
     ).resolve()
 
 
@@ -136,7 +190,9 @@ def _validate_target_contract(flat: Mapping[str, Any]) -> None:
     if float(flat["pros_ankle_target_slew_rate_limit_rad_s"]) <= 0.0:
         errors.append("ankle target slew limiter must be enabled")
     if errors:
-        raise ValueError("invalid target-domain imitation contract: " + "; ".join(errors))
+        raise ValueError(
+            "invalid target-domain imitation contract: " + "; ".join(errors)
+        )
 
 
 def build_target_env_config(
@@ -155,12 +211,8 @@ def build_target_env_config(
         "action_mode": str(flat["action_mode"]),
         "max_delta_rad": float(flat["max_delta_rad"]),
         "target_slew_rate_limit_rad_s": {
-            "pros_knee_angle": float(
-                flat["pros_knee_target_slew_rate_limit_rad_s"]
-            ),
-            "pros_ankle_angle": float(
-                flat["pros_ankle_target_slew_rate_limit_rad_s"]
-            ),
+            "pros_knee_angle": float(flat["pros_knee_target_slew_rate_limit_rad_s"]),
+            "pros_ankle_angle": float(flat["pros_ankle_target_slew_rate_limit_rad_s"]),
         },
         "enable_pros_ref_governor": bool(flat["pros_ref_governor"]),
         "pros_ref_model": str(flat["pros_ref_model"]),
@@ -170,12 +222,8 @@ def build_target_env_config(
             "pros_ankle_angle": float(flat["pros_ankle_ref_velocity_limit_rad_s"]),
         },
         "pros_ref_acceleration_limit_rad_s2": {
-            "pros_knee_angle": float(
-                flat["pros_knee_ref_acceleration_limit_rad_s2"]
-            ),
-            "pros_ankle_angle": float(
-                flat["pros_ankle_ref_acceleration_limit_rad_s2"]
-            ),
+            "pros_knee_angle": float(flat["pros_knee_ref_acceleration_limit_rad_s2"]),
+            "pros_ankle_angle": float(flat["pros_ankle_ref_acceleration_limit_rad_s2"]),
         },
         "pros_ref_jerk_limit_rad_s3": {
             "pros_knee_angle": float(flat["pros_knee_ref_jerk_limit_rad_s3"]),
@@ -192,12 +240,8 @@ def build_target_env_config(
         "include_controller_diagnostic_observation": bool(
             flat["include_controller_diagnostic_observation"]
         ),
-        "deployable_minimal_observation": bool(
-            flat["deployable_minimal_observation"]
-        ),
-        "imitation_initialize_to_target": bool(
-            flat["imitation_initialize_to_target"]
-        ),
+        "deployable_minimal_observation": bool(flat["deployable_minimal_observation"]),
+        "imitation_initialize_to_target": bool(flat["imitation_initialize_to_target"]),
         "reward_reference_range_floor": float(flat["reward_reference_range_floor"]),
         "reward_reference_velocity_range_floor": float(
             flat["reward_reference_velocity_range_floor"]
@@ -220,9 +264,7 @@ def build_target_env_config(
         "grf_penetration_penalty_threshold_m": float(
             flat["grf_penetration_penalty_threshold_m"]
         ),
-        "grf_penetration_termination_m": float(
-            flat["grf_penetration_termination_m"]
-        ),
+        "grf_penetration_termination_m": float(flat["grf_penetration_termination_m"]),
         "reward": dict(reward),
     }
 
@@ -251,9 +293,9 @@ def prescribed_teacher_action(
     lookahead_s: float | Mapping[str, float] = 0.0,
 ) -> np.ndarray:
     knots = int(base.env_cfg.policy_knots)
-    future_times = base.t + (
-        np.arange(1, knots + 1, dtype=float) / float(knots)
-    ) * max(float(target_t) - float(base.t), float(base.cfg.dt))
+    future_times = base.t + (np.arange(1, knots + 1, dtype=float) / float(knots)) * max(
+        float(target_t) - float(base.t), float(base.cfg.dt)
+    )
     values = np.empty((knots, len(base.cfg.pros_coords)), dtype=float)
     for row, time_value in enumerate(future_times):
         for column, name in enumerate(base.cfg.pros_coords):
@@ -335,18 +377,14 @@ def collect_teacher_dataset(
                 target_t,
                 lookahead_s=teacher_lookahead_s,
             ).astype(np.float32)
-            action_noise = (
-                noise_process.next() * noise_sigma
-            ).astype(np.float32)
+            action_noise = (noise_process.next() * noise_sigma).astype(np.float32)
             executed_action = teacher_action + action_noise
             observations.append(actor_obs.copy())
             actions.append(teacher_action.copy())
             executed_actions.append(executed_action.copy())
             action_noises.append(action_noise.copy())
             times.append(float(base.t))
-            obs, reward, terminated, truncated, final_info = env.step(
-                executed_action
-            )
+            obs, reward, terminated, truncated, final_info = env.step(executed_action)
             rewards.append(float(reward))
             penetration = _term(final_info, "grf_penetration_m")
             reserve_norm = _term(final_info, "reserve_norm_nm")
@@ -368,9 +406,7 @@ def collect_teacher_dataset(
                     "target_slew_limited_fraction": slew_fraction,
                     "valid_hs_count": _term(final_info, "phase_valid_hs_count"),
                     "valid_to_count": _term(final_info, "phase_valid_to_count"),
-                    "valid_cycle_count": _term(
-                        final_info, "phase_valid_cycle_count"
-                    ),
+                    "valid_cycle_count": _term(final_info, "phase_valid_cycle_count"),
                     "terminated": bool(terminated),
                     "truncated": bool(truncated),
                     "end_reason": final_info.get("end_reason"),
@@ -487,6 +523,72 @@ def _zero_disabled_clock_columns(module, feature_names: Sequence[str]) -> list[i
     return indices
 
 
+def _resolve_hard_zero_first_layer_features(
+    feature_names: Sequence[str],
+    requested: Sequence[str] | None,
+) -> tuple[list[str] | None, list[int]]:
+    """Resolve an optional, unambiguous set of first-layer zero constraints."""
+
+    if requested is None:
+        return None, []
+    if isinstance(requested, (str, bytes, bytearray)):
+        raise ValueError(
+            "hard_zero_first_layer_features must be a sequence of feature names"
+        )
+    names = [str(name) for name in requested]
+    if not names:
+        raise ValueError("hard_zero_first_layer_features must not be empty")
+    duplicates = sorted({name for name in names if names.count(name) > 1})
+    if duplicates:
+        raise ValueError(
+            "hard_zero_first_layer_features contains duplicate names: "
+            f"{duplicates}"
+        )
+    schema = [str(name) for name in feature_names]
+    unknown = [name for name in names if name not in schema]
+    if unknown:
+        raise ValueError(
+            "hard-zero first-layer features are absent from the actor schema: "
+            f"{unknown}"
+        )
+    ambiguous = [name for name in names if schema.count(name) != 1]
+    if ambiguous:
+        raise ValueError(
+            "hard-zero first-layer features are not unique in the actor schema: "
+            f"{ambiguous}"
+        )
+    return names, [schema.index(name) for name in names]
+
+
+def _zero_first_layer_columns(module, indices: Sequence[int]) -> None:
+    """Project selected first-layer columns to exact floating-point zero."""
+
+    if not indices:
+        return
+    import torch
+
+    with torch.no_grad():
+        first_layer_weight = module.pi_encoder[0].weight
+        for index in indices:
+            first_layer_weight[:, int(index)].zero_()
+
+
+def _columns_are_bit_exact_zero(value: Any, indices: Sequence[int]) -> bool:
+    """Return whether selected rank-2 columns have the exact all-zero bytes."""
+
+    if not indices:
+        return True
+    if hasattr(value, "detach"):
+        value = value.detach()
+    if hasattr(value, "cpu"):
+        value = value.cpu()
+    array = np.asarray(value)
+    if array.ndim != 2:
+        return False
+    selected = np.ascontiguousarray(array[:, [int(index) for index in indices]])
+    return selected.tobytes(order="C") == np.zeros_like(selected).tobytes(order="C")
+
+
 def _prediction_metrics(prediction: np.ndarray, target: np.ndarray) -> dict[str, Any]:
     error = np.asarray(prediction, dtype=float) - np.asarray(target, dtype=float)
     return {
@@ -510,9 +612,7 @@ def aggregate_dagger_traces(
         raise ValueError("trace_repeat must be >= 1")
     if interpolation_steps < 0:
         raise ValueError("interpolation_steps must be >= 0")
-    teacher_observations = np.asarray(
-        teacher_dataset["observations"], dtype=np.float32
-    )
+    teacher_observations = np.asarray(teacher_dataset["observations"], dtype=np.float32)
     teacher_actions = np.asarray(teacher_dataset["actions"], dtype=np.float32)
     teacher_times = np.asarray(teacher_dataset["times"], dtype=np.float64)
     feature_names = np.asarray(teacher_dataset["actor_feature_names"], dtype=str)
@@ -520,9 +620,7 @@ def aggregate_dagger_traces(
         [
             index
             for index, name in enumerate(feature_names.tolist())
-            if name.endswith(
-                ("_in_contact", "_heel_strike", "_toe_off", "_saturated")
-            )
+            if name.endswith(("_in_contact", "_heel_strike", "_toe_off", "_saturated"))
             or name.startswith(("phase_fsm_", "phase_expected_"))
         ],
         dtype=int,
@@ -634,6 +732,213 @@ def aggregate_dagger_traces(
     return aggregate, summary
 
 
+_SPLIT_INDEX_DIGEST_SCHEMA = "adaptation_split_indices_v1"
+_SPLIT_ASSIGNMENT_DIGEST_SCHEMA = "adaptation_split_assignment_v1"
+
+
+def _canonical_json_sha256(payload: Mapping[str, Any]) -> str:
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _split_index_digest(indices: np.ndarray) -> str:
+    canonical_indices = sorted(int(index) for index in indices)
+    return _canonical_json_sha256(
+        {
+            "schema": _SPLIT_INDEX_DIGEST_SCHEMA,
+            "indices": canonical_indices,
+        }
+    )
+
+
+def _coerce_explicit_split_indices(
+    values: Sequence[int] | np.ndarray,
+    *,
+    name: str,
+    sample_count: int,
+) -> np.ndarray:
+    indices = np.asarray(values)
+    if indices.ndim != 1:
+        raise ValueError(f"{name} must be a one-dimensional integer sequence")
+    if indices.size == 0:
+        raise ValueError(f"{name} must not be empty")
+    if indices.dtype.kind not in ("i", "u"):
+        raise ValueError(f"{name} must contain only integer indices")
+
+    out_of_bounds = indices[(indices < 0) | (indices >= sample_count)]
+    if out_of_bounds.size:
+        invalid = sorted({int(index) for index in out_of_bounds})
+        raise ValueError(
+            f"{name} contains out-of-bounds indices for {sample_count} samples: "
+            f"{invalid}"
+        )
+
+    normalized = np.asarray(indices, dtype=np.int64)
+    unique, counts = np.unique(normalized, return_counts=True)
+    duplicates = unique[counts > 1]
+    if duplicates.size:
+        raise ValueError(
+            f"{name} contains duplicate indices: {duplicates.astype(int).tolist()}"
+        )
+    return np.sort(normalized)
+
+
+def _resolve_adaptation_split(
+    sample_count: int,
+    *,
+    validation_fraction: float,
+    rng: np.random.Generator,
+    training_indices: Sequence[int] | np.ndarray | None = None,
+    validation_indices: Sequence[int] | np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
+    """Resolve and audit the row partition used for actor adaptation.
+
+    Supplying neither explicit index sequence preserves the historical seeded
+    random split. Supplying one requires the other; explicit partitions must be
+    non-empty, unique, in bounds, disjoint, and cover every dataset row once.
+    Digests commit to split membership rather than caller-provided ordering.
+    """
+
+    explicit_training = training_indices is not None
+    explicit_validation = validation_indices is not None
+    if explicit_training != explicit_validation:
+        raise ValueError(
+            "training_indices and validation_indices must be provided together"
+        )
+
+    if explicit_training:
+        resolved_training = _coerce_explicit_split_indices(
+            training_indices,
+            name="training_indices",
+            sample_count=sample_count,
+        )
+        resolved_validation = _coerce_explicit_split_indices(
+            validation_indices,
+            name="validation_indices",
+            sample_count=sample_count,
+        )
+        overlap = np.intersect1d(
+            resolved_training,
+            resolved_validation,
+            assume_unique=True,
+        )
+        if overlap.size:
+            raise ValueError(
+                "training_indices and validation_indices overlap: "
+                f"{overlap.astype(int).tolist()}"
+            )
+        covered = np.sort(np.concatenate([resolved_training, resolved_validation]))
+        expected = np.arange(sample_count, dtype=np.int64)
+        if not np.array_equal(covered, expected):
+            missing = np.setdiff1d(expected, covered, assume_unique=True)
+            raise ValueError(
+                "explicit adaptation split must cover every sample exactly once; "
+                f"missing indices: {missing.astype(int).tolist()}"
+            )
+        mode = "explicit_indices"
+        applied_validation_fraction = None
+    else:
+        indices = rng.permutation(sample_count)
+        validation_count = max(
+            1,
+            int(round(len(indices) * validation_fraction)),
+        )
+        resolved_validation = np.sort(indices[:validation_count])
+        resolved_training = np.asarray(indices[validation_count:], dtype=int)
+        if not len(resolved_training):
+            raise ValueError("validation split left no training samples")
+        mode = "seeded_random_fraction"
+        applied_validation_fraction = float(validation_fraction)
+
+    training_digest = _split_index_digest(resolved_training)
+    validation_digest = _split_index_digest(resolved_validation)
+    assignment_digest = _canonical_json_sha256(
+        {
+            "schema": _SPLIT_ASSIGNMENT_DIGEST_SCHEMA,
+            "sample_count": int(sample_count),
+            "training_indices_sha256": training_digest,
+            "validation_indices_sha256": validation_digest,
+        }
+    )
+    report = {
+        "mode": mode,
+        "sample_count": int(sample_count),
+        "training_count": int(len(resolved_training)),
+        "validation_count": int(len(resolved_validation)),
+        "validation_fraction_applied": applied_validation_fraction,
+        "indices_disjoint": True,
+        "coverage_complete": True,
+        "indices_unique": True,
+        "digest_contract": {
+            "index_schema": _SPLIT_INDEX_DIGEST_SCHEMA,
+            "assignment_schema": _SPLIT_ASSIGNMENT_DIGEST_SCHEMA,
+            "canonicalization": "sorted integer membership; canonical JSON",
+            "algorithm": "sha256",
+        },
+        "training_indices_sha256": training_digest,
+        "validation_indices_sha256": validation_digest,
+        "assignment_sha256": assignment_digest,
+    }
+    return resolved_training, resolved_validation, report
+
+
+def _resolve_fixed_final_epoch_split(
+    sample_count: int,
+    *,
+    validation_fraction: float,
+    patience: int,
+    training_indices: Sequence[int] | np.ndarray | None,
+    validation_indices: Sequence[int] | np.ndarray | None,
+) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
+    """Freeze a train-only split with no validation-driven model selection."""
+    if sample_count <= 0:
+        raise ValueError("fixed_final_epoch requires at least one sample")
+    if validation_fraction != 0.0:
+        raise ValueError("fixed_final_epoch requires validation_fraction=0")
+    if patience != 0:
+        raise ValueError("fixed_final_epoch requires patience=0")
+    if training_indices is not None or validation_indices is not None:
+        raise ValueError(
+            "fixed_final_epoch trains on every supplied row and rejects split indices"
+        )
+    training = np.arange(sample_count, dtype=np.int64)
+    validation = np.empty(0, dtype=np.int64)
+    training_digest = _split_index_digest(training)
+    validation_digest = _split_index_digest(validation)
+    report = {
+        "mode": "fixed_final_epoch_all_rows",
+        "sample_count": int(sample_count),
+        "training_count": int(len(training)),
+        "validation_count": 0,
+        "validation_fraction_applied": None,
+        "indices_disjoint": True,
+        "coverage_complete": True,
+        "indices_unique": True,
+        "digest_contract": {
+            "index_schema": _SPLIT_INDEX_DIGEST_SCHEMA,
+            "assignment_schema": _SPLIT_ASSIGNMENT_DIGEST_SCHEMA,
+            "canonicalization": "sorted integer membership; canonical JSON",
+            "algorithm": "sha256",
+        },
+        "training_indices_sha256": training_digest,
+        "validation_indices_sha256": validation_digest,
+        "assignment_sha256": _canonical_json_sha256(
+            {
+                "schema": _SPLIT_ASSIGNMENT_DIGEST_SCHEMA,
+                "sample_count": int(sample_count),
+                "training_indices_sha256": training_digest,
+                "validation_indices_sha256": validation_digest,
+            }
+        ),
+    }
+    return training, validation, report
+
+
 def adapt_actor(
     checkpoint: Path,
     dataset: Mapping[str, np.ndarray],
@@ -651,10 +956,31 @@ def adapt_actor(
     freeze_logstd_head: bool = False,
     trainable_first_layer_features: Sequence[str] | None = None,
     first_layer_feature_scales: Mapping[str, float] | None = None,
+    hard_zero_first_layer_features: Sequence[str] | None = None,
+    training_indices: Sequence[int] | np.ndarray | None = None,
+    validation_indices: Sequence[int] | np.ndarray | None = None,
+    selection_mode: str = "early_stopping",
 ) -> dict[str, Any]:
     import torch
     import torch.nn.functional as functional
     from ray.rllib.core.rl_module.rl_module import RLModule
+
+    if selection_mode not in {"early_stopping", "fixed_final_epoch"}:
+        raise ValueError(
+            "selection_mode must be 'early_stopping' or 'fixed_final_epoch'"
+        )
+    fixed_final_epoch = selection_mode == "fixed_final_epoch"
+    if fixed_final_epoch:
+        if validation_fraction != 0.0:
+            raise ValueError("fixed_final_epoch requires validation_fraction=0")
+        if patience != 0:
+            raise ValueError("fixed_final_epoch requires patience=0")
+        if training_indices is not None or validation_indices is not None:
+            raise ValueError(
+                "fixed_final_epoch trains on every supplied row and rejects "
+                "split indices"
+            )
+        torch.use_deterministic_algorithms(True)
 
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -688,23 +1014,35 @@ def adapt_actor(
             output_layer.bias[action_dim:].copy_(source_logstd_bias)
 
     clock_indices = _zero_disabled_clock_columns(module, feature_names)
+    hard_zero_feature_names, hard_zero_feature_indices = (
+        _resolve_hard_zero_first_layer_features(
+            feature_names,
+            hard_zero_first_layer_features,
+        )
+    )
+    _zero_first_layer_columns(module, hard_zero_feature_indices)
     raw_tensor_obs = torch.as_tensor(observations, dtype=torch.float32)
     input_scales = np.ones(len(feature_names), dtype=np.float32)
     feature_scale_report: dict[str, float] = {}
     if first_layer_feature_scales:
-        unknown = [name for name in first_layer_feature_scales if name not in feature_names]
+        unknown = [
+            name for name in first_layer_feature_scales if name not in feature_names
+        ]
         if unknown:
-            raise ValueError(f"first-layer feature scales reference unknown inputs: {unknown}")
+            raise ValueError(
+                f"first-layer feature scales reference unknown inputs: {unknown}"
+            )
         first_layer_weight = module.pi_encoder[0].weight.detach()
         for name, raw_scale in first_layer_feature_scales.items():
             scale = float(raw_scale)
             if not np.isfinite(scale) or scale <= 0.0:
-                raise ValueError(f"invalid first-layer feature scale for {name}: {scale}")
+                raise ValueError(
+                    f"invalid first-layer feature scale for {name}: {scale}"
+                )
             index = feature_names.index(name)
             if bool(torch.any(first_layer_weight[:, index] != 0.0)):
                 raise ValueError(
-                    "feature scaling requires a zero source first-layer column: "
-                    f"{name}"
+                    f"feature scaling requires a zero source first-layer column: {name}"
                 )
             input_scales[index] = scale
             feature_scale_report[name] = scale
@@ -725,7 +1063,9 @@ def adapt_actor(
         trainable_feature_names = list(
             dict.fromkeys(str(name) for name in trainable_first_layer_features)
         )
-        unknown = [name for name in trainable_feature_names if name not in feature_names]
+        unknown = [
+            name for name in trainable_feature_names if name not in feature_names
+        ]
         if unknown:
             raise ValueError(
                 "trainable first-layer features are absent from the actor schema: "
@@ -745,12 +1085,24 @@ def adapt_actor(
         )
 
     rng = np.random.default_rng(seed)
-    indices = rng.permutation(len(observations))
-    validation_count = max(1, int(round(len(indices) * validation_fraction)))
-    validation_indices = np.sort(indices[:validation_count])
-    training_indices = np.asarray(indices[validation_count:], dtype=int)
-    if not len(training_indices):
-        raise ValueError("validation split left no training samples")
+    if fixed_final_epoch:
+        training_indices, validation_indices, split_report = (
+            _resolve_fixed_final_epoch_split(
+                len(observations),
+                validation_fraction=validation_fraction,
+                patience=patience,
+                training_indices=training_indices,
+                validation_indices=validation_indices,
+            )
+        )
+    else:
+        training_indices, validation_indices, split_report = _resolve_adaptation_split(
+            len(observations),
+            validation_fraction=validation_fraction,
+            rng=rng,
+            training_indices=training_indices,
+            validation_indices=validation_indices,
+        )
 
     trainable_parameters = [
         parameter for parameter in module.pi.parameters() if parameter.requires_grad
@@ -762,7 +1114,7 @@ def adapt_actor(
     best_validation_mse = float("inf")
     best_epoch = 0
     stale_epochs = 0
-    history: list[dict[str, float]] = []
+    history: list[dict[str, float | None]] = []
 
     def validation_mse() -> float:
         module.pi.eval()
@@ -803,42 +1155,57 @@ def adapt_actor(
             optimizer.step()
             restore_logstd_head()
             _zero_disabled_clock_columns(module, feature_names)
+            _zero_first_layer_columns(module, hard_zero_feature_indices)
             epoch_losses.append(float(loss.item()))
 
-        val_mse = validation_mse()
-        history.append(
-            {
-                "epoch": float(epoch),
-                "train_loss": float(np.mean(epoch_losses)),
-                "validation_mse": val_mse,
-            }
-        )
-        if val_mse < best_validation_mse - 1e-9:
-            best_validation_mse = val_mse
-            best_epoch = epoch
-            best_state = copy.deepcopy(module.pi.state_dict())
-            stale_epochs = 0
-        else:
-            stale_epochs += 1
-        if epoch == 1 or epoch % 25 == 0:
-            print(
-                f"[adapt] epoch={epoch} train={history[-1]['train_loss']:.8f} "
-                f"val_mse={val_mse:.8f}",
-                flush=True,
+        if fixed_final_epoch:
+            history.append(
+                {
+                    "epoch": float(epoch),
+                    "train_loss": float(np.mean(epoch_losses)),
+                    "validation_mse": None,
+                }
             )
-        if stale_epochs >= patience:
+        else:
+            val_mse = validation_mse()
+            history.append(
+                {
+                    "epoch": float(epoch),
+                    "train_loss": float(np.mean(epoch_losses)),
+                    "validation_mse": val_mse,
+                }
+            )
+            if val_mse < best_validation_mse - 1e-9:
+                best_validation_mse = val_mse
+                best_epoch = epoch
+                best_state = copy.deepcopy(module.pi.state_dict())
+                stale_epochs = 0
+            else:
+                stale_epochs += 1
+        if epoch == 1 or epoch % 25 == 0:
+            message = f"[adapt] epoch={epoch} train={history[-1]['train_loss']:.8f}"
+            if not fixed_final_epoch:
+                message += f" val_mse={val_mse:.8f}"
+            print(message, flush=True)
+        if not fixed_final_epoch and stale_epochs >= patience:
             break
 
+    if fixed_final_epoch:
+        best_epoch = len(history)
+        best_validation_mse = None
+        best_state = copy.deepcopy(module.pi.state_dict())
     module.pi.load_state_dict(best_state)
     if first_layer_gradient_hook is not None:
         first_layer_gradient_hook.remove()
     restore_logstd_head()
     _zero_disabled_clock_columns(module, feature_names)
+    _zero_first_layer_columns(module, hard_zero_feature_indices)
     if feature_scale_report:
         with torch.no_grad():
             first_layer_weight = module.pi_encoder[0].weight
             for name, scale in feature_scale_report.items():
                 first_layer_weight[:, feature_names.index(name)].div_(scale)
+    _zero_first_layer_columns(module, hard_zero_feature_indices)
     module.pi.eval()
     with torch.no_grad():
         final_logits = module.pi(raw_tensor_obs)
@@ -869,6 +1236,20 @@ def adapt_actor(
         for name in feature_names
         if name.startswith("phase_")
     }
+    hard_zero_norms = {
+        name: float(np.linalg.norm(first_layer[:, feature_names.index(name)]))
+        for name in hard_zero_feature_names or ()
+    }
+    live_hard_zero_exact = (
+        None
+        if hard_zero_feature_names is None
+        else _columns_are_bit_exact_zero(
+            module.pi_encoder[0].weight,
+            hard_zero_feature_indices,
+        )
+    )
+    if live_hard_zero_exact is False:
+        raise RuntimeError("hard-zero first-layer columns changed before save")
     module_dir = output_dir / "rl_module_target_adapted"
     module.save_to_path(module_dir)
     saved_state = warm_start.load_module_state(module_dir)
@@ -876,6 +1257,19 @@ def adapt_actor(
     save_comparison = warm_start.compare_actor_states(live_state, saved_state)
     if not save_comparison["exact"]:
         raise RuntimeError("saved adapted actor differs from the trained actor")
+    saved_hard_zero_by_key: dict[str, bool] = {}
+    if hard_zero_feature_names is not None:
+        for key in ("pi_encoder.0.weight", "pi.0.0.weight"):
+            if key not in saved_state:
+                raise RuntimeError(
+                    f"saved actor is missing hard-zero first-layer alias {key}"
+                )
+            saved_hard_zero_by_key[key] = _columns_are_bit_exact_zero(
+                saved_state[key],
+                hard_zero_feature_indices,
+            )
+        if not all(saved_hard_zero_by_key.values()):
+            raise RuntimeError("saved actor did not preserve hard-zero columns")
     source_state = warm_start.load_module_state(checkpoint)
     non_actor_comparison = warm_start.compare_non_actor_states(
         source_state, saved_state
@@ -885,13 +1279,15 @@ def adapt_actor(
         raise RuntimeError("adaptation modified critic or other non-actor tensors")
 
     history_path = output_dir / "adaptation_history.json"
-    history_path.write_text(json.dumps(history, indent=2), encoding="utf-8")
+    _write_strict_json_exclusive(history_path, history)
     report = {
         "source_checkpoint": str(checkpoint),
         "output_module": str(module_dir),
         "samples": len(observations),
         "training_samples": len(training_indices),
         "validation_samples": len(validation_indices),
+        "selection_mode": selection_mode,
+        "data_split": split_report,
         "epochs_requested": epochs,
         "epochs_run": len(history),
         "best_epoch": best_epoch,
@@ -901,13 +1297,16 @@ def adapt_actor(
             "batch_size": batch_size,
             "learning_rate": learning_rate,
             "validation_fraction": validation_fraction,
+            "split_mode": split_report["mode"],
             "patience": patience,
+            "selection_mode": selection_mode,
             "clip_weight": clip_weight,
             "logstd_weight": logstd_weight,
             "anchor_weight": anchor_weight,
             "freeze_logstd_head": bool(freeze_logstd_head),
             "trainable_first_layer_features": trainable_feature_names,
             "first_layer_feature_scales": feature_scale_report,
+            "hard_zero_first_layer_features": hard_zero_feature_names,
         },
         "initial_prediction": _prediction_metrics(initial_predictions, targets),
         "adapted_prediction": _prediction_metrics(final_predictions, targets),
@@ -915,6 +1314,19 @@ def adapt_actor(
         "logstd_head_max_abs_parameter_change": logstd_head_parameter_change,
         "disabled_clock_column_norms": clock_norms,
         "fsm_first_layer_column_norms": fsm_norms,
+        "hard_zero_first_layer": {
+            "configured": hard_zero_feature_names is not None,
+            "features": hard_zero_feature_names,
+            "indices": hard_zero_feature_indices,
+            "column_norms": hard_zero_norms,
+            "live_bit_exact_zero": live_hard_zero_exact,
+            "saved_bit_exact_zero_by_key": saved_hard_zero_by_key,
+            "save_reload_bit_exact_zero": (
+                None
+                if hard_zero_feature_names is None
+                else all(saved_hard_zero_by_key.values())
+            ),
+        },
         "source_actor_digest": warm_start.actor_state_digest(source_state),
         "adapted_actor_digest": warm_start.actor_state_digest(saved_state),
         "save_reload": save_comparison,
@@ -927,10 +1339,9 @@ def adapt_actor(
         "actor_feature_names": feature_names,
         "critic_trained": False,
         "ppo_updates": 0,
+        "adaptation_history": str(history_path),
     }
-    (output_dir / "adaptation_report.json").write_text(
-        json.dumps(report, indent=2), encoding="utf-8"
-    )
+    _write_strict_json_exclusive(output_dir / "adaptation_report.json", report)
     return report
 
 

@@ -55,6 +55,7 @@ Possible optimisations (not implemented here):
 
 from __future__ import annotations
 
+import hashlib
 import warnings
 from typing import Dict, List, Optional, Tuple
 
@@ -154,6 +155,9 @@ class StaticOptimizer:
         self._last_equilibrium_failures = 0
         self._baseline_time: Optional[float] = None
         self._baseline_active = False
+        self._solver_fallback_used_this_solve = False
+        self._solver_fallback_count = 0
+        self._solver_path_diagnostics: Dict[str, object] = {}
         self.last_diagnostics: Dict[str, object] = {}
 
         # ── Solver selection ─────────────────────────────────────────────────
@@ -212,18 +216,71 @@ class StaticOptimizer:
             b = tau_bio
 
         # ── Dispatch to selected solver ──────────────────────────────────────
+        self._solver_fallback_used_this_solve = False
+        bound_array = np.asarray(self._bounds, dtype=float)
+        self._solver_path_diagnostics = {
+            "schema": "static_optimization_solver_audit_v1",
+            "primary_solver": "osqp" if self._use_osqp else "slsqp",
+            "input_matrix_shape": [int(value) for value in A.shape],
+            "input_target_shape": [int(value) for value in b.shape],
+            "input_matrix_finite": bool(np.all(np.isfinite(A))),
+            "input_target_finite": bool(np.all(np.isfinite(b))),
+            "weights_finite": bool(np.all(np.isfinite(self._weights))),
+            "bounds_finite": bool(np.all(np.isfinite(bound_array))),
+            "warm_start_finite": bool(np.all(np.isfinite(self._x_prev))),
+            "input_matrix_sha256": self._array_sha256(A),
+            "input_target_sha256": self._array_sha256(b),
+            "weights_sha256": self._array_sha256(self._weights),
+            "bounds_sha256": self._array_sha256(bound_array),
+            "warm_start_sha256": self._array_sha256(self._x_prev),
+            "bounded_lsq_used": False,
+            "reuse_previous_solution": False,
+        }
         if self._use_osqp:
             x, success = self._solve_osqp(A, b)
         else:
             x, success = self._solve_slsqp(A, b)
 
         if not success:
+            self._solver_fallback_used_this_solve = True
             warnings.warn(
                 "[StaticOptimizer] QP did not converge. "
                 "Using bounded least-squares fallback.",
                 RuntimeWarning,
             )
             x = self._solve_bounded_least_squares(A, b)
+
+        if self._solver_fallback_used_this_solve:
+            self._solver_fallback_count += 1
+
+        selected_solution = self._solution_audit(x, A, b)
+        self._solver_path_diagnostics["selected_solution"] = selected_solution
+        bound_violation = selected_solution.get("bound_violation_max")
+        bounded_lsq_success = self._solver_path_diagnostics.get(
+            "bounded_lsq_success"
+        )
+        primary_solution = self._solver_path_diagnostics.get("slsqp_solution", {})
+        hard_fallback = bool(
+            not self._solver_path_diagnostics["input_matrix_finite"]
+            or not self._solver_path_diagnostics["input_target_finite"]
+            or not self._solver_path_diagnostics["weights_finite"]
+            or not self._solver_path_diagnostics["bounds_finite"]
+            or not self._solver_path_diagnostics["warm_start_finite"]
+            or self._solver_path_diagnostics.get("reuse_previous_solution") is True
+            or (
+                isinstance(primary_solution, dict)
+                and primary_solution.get("output_finite") is not True
+            )
+            or selected_solution.get("output_shape_matches") is not True
+            or selected_solution.get("output_finite") is not True
+            or not isinstance(bound_violation, (int, float))
+            or float(bound_violation) > 1.0e-9
+            or (
+                self._solver_path_diagnostics.get("bounded_lsq_used") is True
+                and bounded_lsq_success is not True
+            )
+        )
+        self._solver_path_diagnostics["hard_fallback"] = hard_fallback
 
         self._x_prev = x.copy()
 
@@ -538,6 +595,11 @@ class StaticOptimizer:
             ),
             "equilibrium_failures": float(self._last_equilibrium_failures),
             "feasibility_scale": float(feasibility_scale),
+            "solver_fallback_used": bool(
+                self._solver_fallback_used_this_solve
+            ),
+            "solver_fallback_count": int(self._solver_fallback_count),
+            "solver_path": dict(self._solver_path_diagnostics),
             "tau_target_by_coord": tau_bio.copy(),
             "tau_muscle_by_coord": tau_muscle.copy(),
             "tau_reserve_by_coord": tau_reserve.copy(),
@@ -547,6 +609,69 @@ class StaticOptimizer:
         }
 
     # ── SLSQP via scipy ──────────────────────────────────────────────────────
+    @staticmethod
+    def _array_sha256(value: np.ndarray) -> str | None:
+        """Return a stable digest for a finite little-endian float64 array."""
+        array = np.asarray(value, dtype=np.dtype("<f8"))
+        if not np.all(np.isfinite(array)):
+            return None
+        canonical = np.ascontiguousarray(array)
+        digest = hashlib.sha256()
+        digest.update(str(canonical.shape).encode("ascii"))
+        digest.update(canonical.tobytes(order="C"))
+        return digest.hexdigest()
+
+    def _solution_audit(
+        self,
+        x: np.ndarray,
+        A: np.ndarray,
+        b: np.ndarray,
+    ) -> Dict[str, object]:
+        """Describe solver output without changing its numerical semantics."""
+        solution = np.asarray(x, dtype=float)
+        finite = bool(np.all(np.isfinite(solution)))
+        lower = np.asarray([lo for lo, _ in self._bounds], dtype=float)
+        upper = np.asarray([hi for _, hi in self._bounds], dtype=float)
+        shape_matches = solution.shape == lower.shape
+        if finite and shape_matches:
+            violation = np.maximum(
+                np.maximum(lower - solution, 0.0),
+                np.maximum(solution - upper, 0.0),
+            )
+            residual = np.asarray(A @ solution - b, dtype=float)
+            residual_finite = bool(np.all(np.isfinite(residual)))
+            bound_violation = float(np.max(violation, initial=0.0))
+            residual_norm = (
+                float(np.linalg.norm(residual)) if residual_finite else None
+            )
+            residual_max_abs = (
+                float(np.max(np.abs(residual), initial=0.0))
+                if residual_finite
+                else None
+            )
+            target_norm = float(np.linalg.norm(b))
+            residual_relative_norm = (
+                residual_norm / max(target_norm, 1.0e-12)
+                if residual_norm is not None and np.isfinite(target_norm)
+                else None
+            )
+        else:
+            residual_finite = False
+            bound_violation = None
+            residual_norm = None
+            residual_max_abs = None
+            residual_relative_norm = None
+        return {
+            "output_shape_matches": bool(shape_matches),
+            "output_finite": finite,
+            "output_sha256": self._array_sha256(solution),
+            "bound_violation_max": bound_violation,
+            "equality_residual_finite": residual_finite,
+            "equality_residual_norm": residual_norm,
+            "equality_residual_max_abs": residual_max_abs,
+            "equality_residual_relative_norm": residual_relative_norm,
+        }
+
     def _solve_slsqp(
         self,
         A: np.ndarray,
@@ -585,6 +710,16 @@ class StaticOptimizer:
                 "disp":    False,
             },
         )
+        self._solver_path_diagnostics.update(
+            {
+                "slsqp_invoked": True,
+                "slsqp_success": bool(result.success),
+                "slsqp_status": int(result.status),
+                "slsqp_message": str(result.message),
+                "slsqp_iterations": int(result.nit),
+                "slsqp_solution": self._solution_audit(result.x, A, b),
+            }
+        )
         return result.x, result.success
 
     def _solve_bounded_least_squares(
@@ -600,6 +735,19 @@ class StaticOptimizer:
         objective: among near-feasible controls, reserve usage remains costly.
         """
         if not np.all(np.isfinite(A)) or not np.all(np.isfinite(b)):
+            self._solver_path_diagnostics.update(
+                {
+                    "bounded_lsq_used": True,
+                    "bounded_lsq_invoked": False,
+                    "bounded_lsq_success": False,
+                    "bounded_lsq_status": None,
+                    "bounded_lsq_message": "nonfinite_inputs_reuse_previous",
+                    "reuse_previous_solution": True,
+                    "bounded_lsq_solution": self._solution_audit(
+                        self._x_prev, A, b
+                    ),
+                }
+            )
             warnings.warn(
                 "[StaticOptimizer] Non-finite SO inputs. Reusing previous solution.",
                 RuntimeWarning,
@@ -619,7 +767,28 @@ class StaticOptimizer:
             lsmr_tol="auto",
             max_iter=self._cfg.qp_max_iter,
         )
-        return result.x / scale
+        solution = result.x / scale
+        self._solver_path_diagnostics.update(
+            {
+                "bounded_lsq_used": True,
+                "bounded_lsq_invoked": True,
+                "bounded_lsq_success": bool(result.success),
+                "bounded_lsq_status": int(result.status),
+                "bounded_lsq_message": str(result.message),
+                "bounded_lsq_iterations": int(result.nit),
+                "bounded_lsq_cost": (
+                    float(result.cost) if np.isfinite(result.cost) else None
+                ),
+                "bounded_lsq_optimality": (
+                    float(result.optimality)
+                    if np.isfinite(result.optimality)
+                    else None
+                ),
+                "reuse_previous_solution": False,
+                "bounded_lsq_solution": self._solution_audit(solution, A, b),
+            }
+        )
+        return solution
 
     # ── OSQP via qpsolvers ───────────────────────────────────────────────────
     def _solve_osqp(
@@ -671,6 +840,7 @@ class StaticOptimizer:
             if not success:
                 x_sol = self._x_prev.copy()
         except Exception as e:
+            self._solver_fallback_used_this_solve = True
             warnings.warn(f"[StaticOptimizer] OSQP failed: {e}. Using SLSQP fallback.")
             return self._solve_slsqp(A, b)
 

@@ -1,0 +1,143 @@
+{
+  "actor_updates": 0,
+  "candidate_created": false,
+  "checks": {
+    "action_clipping_zero": true,
+    "analog_teacher_view_bit_exact": true,
+    "bounded_lsq_all_report_success": false,
+    "deterministic_replication_bit_exact": true,
+    "fixed_33_features_bit_exact": true,
+    "grf_penetration_below_25mm": true,
+    "hard_invalid_zero": true,
+    "historical_invalid_event_count_exact": true,
+    "morphology_weight_zero": true,
+    "nonfinite_zero": true,
+    "phase_cycles_at_least_two": true,
+    "primary_left_routing": true,
+    "residual_contract_mismatch_zero": true,
+    "safety_stop_zero": true,
+    "sea_plugin_fallback_zero": true,
+    "selected_infeasible_zero": true,
+    "selected_solution_mismatch_zero": true,
+    "solver_bounds_violation_zero": true,
+    "solver_reuse_previous_zero": true,
+    "steps_500": true,
+    "time_grid_exact": true,
+    "timeout_zero": true,
+    "zero_hard_so_fallback": false,
+    "zero_raw_fallback": false
+  },
+  "critic_updates": 0,
+  "decision_required": {
+    "current_closed_policies": [
+      "strict_zero_all_fallbacks_v1",
+      "verified_historical_bounded_ls_success_v1"
+    ],
+    "measured_status_zero_is_accepted_by_current_policies": false,
+    "recommended_if_historical_dynamics_must_be_preserved": "AUTHORIZE_A_NEW_EXPLICIT_STATUS0_MAX_ITER_POLICY_WITH_FROZEN_NUMERICAL_LIMITS",
+    "required_before": "H0_PRIMARY_GRF_SPLIT_V3_EXECUTION_FREEZE",
+    "strict_terminal_alternative": "KEEP_ZERO_FALLBACK_AND_CLOSE_CURRENT_H0_PATH"
+  },
+  "development_only": true,
+  "diagnostic_determinism_receipts": {
+    "seed_123": {
+      "path": "validation/h0_primary_grf_split_v3_diagnostic_seed123_failure_determinism_receipt.json",
+      "sha256": "4120240509b22913bba7f064aef0f0687c038955c65bd12e80ca88eeb9c44b6a"
+    },
+    "seed_124": {
+      "path": "validation/h0_primary_grf_split_v3_diagnostic_seed124_failure_determinism_receipt.json",
+      "sha256": "ddcbc33a8de0fb13c3393c746a7cf25e2a7f226553557e35685034af33ada4ca"
+    }
+  },
+  "fit_contract_prepared": {
+    "batch_size": 128,
+    "candidate_count": 1,
+    "epochs": 400,
+    "final_holdout_seed": 125,
+    "learning_rate": 0.00005,
+    "selection_mode": "fixed_final_epoch",
+    "train_records": 2000,
+    "train_seeds": [
+      123,
+      124
+    ],
+    "validation_records_during_fit": 0
+  },
+  "metrics_by_seed": {
+    "123": {
+      "bounded_lsq_invocation_count": 596,
+      "bounded_lsq_status0_max_iter_count": 352,
+      "bounded_lsq_success_count": 244,
+      "grf_penetration_max_m": 0.023268426267771973,
+      "phase_valid_cycle_count": 3,
+      "policy_step_terminal_fallback_count": 61,
+      "solver_control_window_count": 5000,
+      "steps": 500
+    },
+    "124": {
+      "bounded_lsq_invocation_count": 593,
+      "bounded_lsq_status0_max_iter_count": 306,
+      "bounded_lsq_success_count": 287,
+      "grf_penetration_max_m": 0.023883867413594984,
+      "phase_valid_cycle_count": 3,
+      "policy_step_terminal_fallback_count": 59,
+      "solver_control_window_count": 5000,
+      "steps": 500
+    }
+  },
+  "numerical_characterization": {
+    "all_status0_cases_bounds_ok": true,
+    "all_status0_cases_feasibility_accepted": true,
+    "all_status0_cases_finite": true,
+    "all_status0_cases_no_previous_solution_reuse": true,
+    "all_status0_cases_residual_contract_consistent": true,
+    "all_status0_cases_selected_solution_matches_served": true,
+    "bounded_lsq_status": 0,
+    "bounded_lsq_status_message": "The maximum number of iterations is exceeded.",
+    "max_bounded_lsq_iterations": 1000,
+    "max_observed_equality_residual_norm": 8.315142436887133e-14,
+    "max_observed_optimality": 2.8493587942727584e-9,
+    "scientific_disposition": "UNACCEPTED_PENDING_EXPLICIT_USER_DECISION"
+  },
+  "platform": {
+    "gymnasium": "1.2.2",
+    "machine": "arm64",
+    "numerical_claim": "macOS-arm64-only",
+    "numpy": "2.2.6",
+    "opensim": "4.5.2-2026-02-28-e0471ab50",
+    "python": "3.10.20",
+    "ray": "2.55.1",
+    "scipy": "1.15.2",
+    "system": "Darwin",
+    "torch": "2.10.0",
+    "windows_claim": "schema-and-path-compatibility-only"
+  },
+  "passed": false,
+  "ppo_updates": 0,
+  "protected_trials_opened": [],
+  "revision": "2026-08-06",
+  "schema_version": 3,
+  "seed_125_semantically_opened": false,
+  "source_frozen": false,
+  "status": "H0_PRIMARY_SPLIT_V3_PREFLIGHT_GATE_DECISION_REQUIRED",
+  "technical_scaffolds": {
+    "candidate_freezer_fail_closed": true,
+    "determinism_comparator_ready": true,
+    "qualification_six_case_manifest_ready": true,
+    "zero_update_port_executed": false,
+    "v25_abc_executed": false
+  },
+  "tested_source_sha256": {
+    "adaptation_engine": "e11498dd20db56413f95d167b2c2765c01c41bb09ea105675d06ff90c33e14d3",
+    "diagnostic_comparator": "113f86c2c0737e6ba2bf47f6df684b6c90f470ef697d3f08cc537e86d58f8f59",
+    "environment": "3e1a69a1a1916e9601e82574cd4825e0084d40630246614a64f69dd7075795a3",
+    "execution_freezer": "535a5f1b6b291051dd5def6298bfc36b300ff521abefdcaf7bf358fc8c029e13",
+    "freeze_contract": "efd45d58fe82bfdd23e91564c2b7d96c1e55392c44125d7fd153d73debaed55f",
+    "primary_split_contract": "56d58e06acba50edebe1239906e1808336f2d343f553de573a69189f4f01b60d",
+    "qualification_scaffold": "d8ceb895ee5904bf732e306da03eb6c655b36979179741609c4b5f4631b7124e",
+    "simulation_runner": "b79cb86c6ecb8d63d9555ccbae85acffaeec223904663a04998db5db6edcca19",
+    "solver_classifier": "5f366e1dde9bec11520db9fa24d287b8bb441bfecf1344a657301ddc053fe24c",
+    "static_optimization": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+    "v3_runner": "3e1ef73d6bbee96ac712594f8d904618c35a3fd7effbf070896dcf8cfdee9db3"
+  }
+}

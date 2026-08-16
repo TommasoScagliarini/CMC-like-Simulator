@@ -512,12 +512,20 @@ def run(args: argparse.Namespace) -> dict:
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "binary_phase_detector_profile_file": (
+            args.binary_phase_detector_profile
+        ),
         "phase_fsm_input_mode": args.phase_fsm_input_mode,
         "phase_sensor_on_threshold_n": args.phase_sensor_on_threshold_n,
         "phase_sensor_off_threshold_n": args.phase_sensor_off_threshold_n,
         "phase_sensor_dwell_s": args.phase_sensor_dwell_s,
         "detector_sample_dt_s": args.detector_sample_dt_s,
         "event_contract_id": args.event_contract_id,
+        "binary_phase_fsm_mode": args.binary_phase_fsm_mode,
+        "binary_phase_debounce_s": args.binary_phase_debounce_s,
+        "binary_phase_event_contract_id": (
+            args.binary_phase_event_contract_id
+        ),
         "include_online_grf_observation": args.online_grf_observation,
         "critic_privileged_observation": args.asymmetric_actor_critic,
         "prescribed_grf_disabled_sides": args.disable_prescribed_grf_side,
@@ -966,12 +974,20 @@ def run(args: argparse.Namespace) -> dict:
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "binary_phase_detector_profile_file": (
+            args.binary_phase_detector_profile
+        ),
         "phase_fsm_input_mode": args.phase_fsm_input_mode,
         "phase_sensor_on_threshold_n": float(args.phase_sensor_on_threshold_n),
         "phase_sensor_off_threshold_n": float(args.phase_sensor_off_threshold_n),
         "phase_sensor_dwell_s": float(args.phase_sensor_dwell_s),
         "detector_sample_dt_s": float(args.detector_sample_dt_s),
         "event_contract_id": str(args.event_contract_id),
+        "binary_phase_fsm_mode": str(args.binary_phase_fsm_mode),
+        "binary_phase_debounce_s": float(args.binary_phase_debounce_s),
+        "binary_phase_event_contract_id": str(
+            args.binary_phase_event_contract_id
+        ),
         "online_grf_observation": bool(args.online_grf_observation),
         "gait_clock_enable": bool(args.gait_clock_enable),
         "deployable_minimal_observation": bool(args.deployable_minimal_observation),
@@ -1283,6 +1299,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument(
+        "--binary-phase-detector-profile",
+        default=None,
+        help=(
+            "Optional force-free V19 heel/toe point profile, used only by "
+            "the independent binary shadow FSM."
+        ),
+    )
+    p.add_argument(
         "--phase-fsm-input-mode",
         choices=("legacy_events", "shadow", "two_sensor"),
         default="legacy_events",
@@ -1296,6 +1320,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--phase-sensor-dwell-s", type=float, default=0.03)
     p.add_argument("--detector-sample-dt-s", type=float, default=0.001)
     p.add_argument("--event-contract-id", default="legacy_events_v1")
+    p.add_argument(
+        "--binary-phase-fsm-mode",
+        choices=("disabled", "binary_shadow", "binary_active"),
+        default="disabled",
+    )
+    p.add_argument("--binary-phase-debounce-s", type=float, default=0.005)
+    p.add_argument(
+        "--binary-phase-event-contract-id",
+        default="binary_events_disabled_v1",
+    )
     p.add_argument(
         "--grf-penetration-penalty-threshold-m",
         type=float,

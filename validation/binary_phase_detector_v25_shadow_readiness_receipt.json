@@ -1,0 +1,231 @@
+{
+  "assertions": {
+    "all_pins_exact": true,
+    "cli_modes_are_disabled_or_shadow_only": true,
+    "default_legacy_and_morphology_zero": true,
+    "historical_v19_to_v25_bridge_explicit": true,
+    "legacy_analog_four_roles_exact": true,
+    "legacy_analog_sensor_only_separate_from_primary": true,
+    "legacy_analog_v25_coexistence_fail_closed": true,
+    "no_h0_or_numerical_gate_claim": true,
+    "observation_layout_not_extended_by_shadow": true,
+    "runner_t0_and_ten_sample_contract": true,
+    "runtime_and_bundle_contract_ids_distinct": true,
+    "runtime_v25_allowlist_exact": true,
+    "v25_candidate_lock_exact": true,
+    "v25_profile_exact_two_force_free_points": true
+  },
+  "authority": {
+    "binary_active_available": false,
+    "corridor_authorized": false,
+    "detector_retuning_authorized": false,
+    "execution_authorized": false,
+    "h0_executed": false,
+    "h0_sep_authorized": false,
+    "ppo_updates_authorized": false,
+    "primary_grf_modification_authorized": false,
+    "protected_trial_access_authorized": false,
+    "reserve_trial_access_authorized": false,
+    "runtime_promotion_authorized": false,
+    "training_authorized": false
+  },
+  "candidate": {
+    "candidate_freeze_lock": {
+      "path": "validation/binary_phase_detector_v25_development_candidate_freeze_lock.json",
+      "sha256": "04ecfe68937bc0d4baa3be9ab9b62060b20eb92c2f218f8540db1cebe423d346",
+      "size_bytes": 7276
+    },
+    "candidate_id": "v25_4b351f67b5b86ab0",
+    "legacy_analog_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e",
+      "size_bytes": 1347
+    },
+    "profile": {
+      "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+      "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+      "size_bytes": 670
+    }
+  },
+  "contracts": {
+    "debounce_s": 0.005,
+    "fsm_geometry_agnostic": true,
+    "fsm_source_unchanged_from_historical_freeze": true,
+    "historical_freeze_fsm_contract_id": "binary_point_v19+functional_contact_fsm_v1_shadow",
+    "historical_freeze_reinterpreted_or_rewritten": false,
+    "policy_step_s": 0.01,
+    "raw_detector_contract_id": "binary_point_clearance_v1",
+    "runtime_binary_phase_event_contract_id": "binary_point_v25+functional_contact_fsm_v1_shadow",
+    "sample_dt_s": 0.001,
+    "samples_per_normal_policy_step": 10,
+    "scientific_shadow_bundle_contract_id": "primary_grf_split_v1+binary_point_v25+functional_contact_fsm_v1_shadow",
+    "t0_is_non_event_baseline": true,
+    "target_active_bundle_contract_id": "primary_grf_split_v1+binary_point_v25+functional_contact_fsm_v1"
+  },
+  "date": "2026-08-04",
+  "dormant_topology": {
+    "actor_observation_count": 35,
+    "authoritative_event_source": "legacy_events",
+    "binary_phase_fsm_mode": "binary_shadow",
+    "full_observation_count": 84,
+    "legacy_analog_applies_force": false,
+    "legacy_analog_distinct_from_primary_grf": true,
+    "legacy_analog_loaded": true,
+    "legacy_analog_roles": [
+      "left_heel",
+      "left_toe",
+      "right_heel",
+      "right_toe"
+    ],
+    "legacy_analog_sensor_only": true,
+    "morphology_weight": 0.0,
+    "v25_adds_force_or_model_component": false,
+    "v25_loaded_and_sampled": true
+  },
+  "freeze_script": {
+    "path": "validation/freeze_v25_shadow_integration_readiness.py",
+    "sha256": "3a1d04c6db6254ecd2e53fb58e5a42b61220c0d6cd486014e8c5fe2b0d15df50",
+    "size_bytes": 26484
+  },
+  "gate_id": "AB06_V25_DORMANT_SHADOW_STRUCTURAL_READINESS",
+  "h0_compatibility_claimed": false,
+  "implementation": {
+    "binary_detector_source": {
+      "path": "binary_phase_detector.py",
+      "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6",
+      "size_bytes": 14226
+    },
+    "environment_source": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "6a6847291dc56431f6263ebd8f02c3edceed2d8d657cfde1e94242ab508d95e3",
+      "size_bytes": 172924
+    },
+    "fsm_v20_source": {
+      "path": "Trajectory Generator/binary_phase_fsm.py",
+      "sha256": "0f7669b60a72c1b27ee3c4f1a43161eeb9f2d091dff5558cc4fa43f1fce8d9c1",
+      "size_bytes": 18908
+    },
+    "model_loader_source": {
+      "path": "model_loader.py",
+      "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+      "size_bytes": 58315
+    },
+    "online_grf_source_untouched": {
+      "path": "online_grf.py",
+      "sha256": "52e39bf9a3b20dd65242f3f9076d76ed788239fe7c3e5b825bc37a9657c4fefa",
+      "size_bytes": 31439
+    },
+    "path_resolver_source": {
+      "path": "path_resolver.py",
+      "sha256": "2a61b8c54ab68c228ea55a6e28b6334ac0a9539da79f86e9a5ef2970bc937a1d",
+      "size_bytes": 6067
+    },
+    "rollout_cli_source": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "8b2972368eca069305d125546b4e20f90b1e69a0fc7099f72c817fcd60954815",
+      "size_bytes": 59357
+    },
+    "runner_source": {
+      "path": "simulation_runner.py",
+      "sha256": "9851d41668fd9a4e16a5761837ed682824bef91a7f07ea46542a0d4b45fd3f18",
+      "size_bytes": 105296
+    },
+    "simulator_config_source": {
+      "path": "config.py",
+      "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "size_bytes": 17291
+    },
+    "training_cli_source": {
+      "path": "Trajectory Generator/baseline_MLP/train_ppo_mlp.py",
+      "sha256": "d94d1ed9c2d9b4af3e06214949929a87b2ca60be026f2ba1791ac7c6703d70cf",
+      "size_bytes": 151742
+    },
+    "training_config_source": {
+      "path": "Trajectory Generator/baseline_MLP/training_config.py",
+      "sha256": "cbc14abec0f696bd3135a459ab6a4b1cab3daf2128178602983943ceeabdfbc2",
+      "size_bytes": 12933
+    },
+    "training_yaml": {
+      "path": "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "sha256": "5d0930e6317330e714fc26231f82e6d062e0ac7c7877e019d21541cf522b0c60",
+      "size_bytes": 10797
+    }
+  },
+  "next_stage": "FREEZE_NON_EXECUTABLE_H0_V25_ABC_PROTOCOL",
+  "numerical_ab_pass_claimed": false,
+  "runner_transport_bridge": {
+    "current_delta": "disabled_publication_guard",
+    "current_runner": {
+      "path": "simulation_runner.py",
+      "sha256": "9851d41668fd9a4e16a5761837ed682824bef91a7f07ea46542a0d4b45fd3f18",
+      "size_bytes": 105296
+    },
+    "current_transport_test": {
+      "path": "validation/test_binary_phase_fsm_env_v20.py",
+      "sha256": "5c9a9d54680d6cc25c7640fc91b643452d118bdc1efa24d64a9edc425ffe5e82",
+      "size_bytes": 18675
+    },
+    "historical_receipt": {
+      "path": "validation/binary_phase_detector_v19_geometry_receipt.json",
+      "sha256": "7d93ef5f5b5c877246025c0f6d7a607783621e7019065ca63b4b889f5a30e0ff",
+      "size_bytes": 4678
+    },
+    "historical_receipt_reinterpreted_or_rewritten": false,
+    "historical_runner_sha256_recorded_by_receipt": "f609533d69bb056e7eeca1933f934b308df8d5d9d3725387ed1027645fb08a43",
+    "historical_transport_contract_preserved": true
+  },
+  "schema_version": 1,
+  "session_test_attestation": {
+    "command_argv": [
+      "/opt/anaconda3/envs/envCMC-like/bin/python",
+      "-m",
+      "unittest",
+      "validation/test_binary_phase_detector_v19.py",
+      "validation/test_binary_phase_fsm_v20.py",
+      "validation/test_binary_phase_fsm_env_v20.py",
+      "validation/test_detector_sensor_data_path.py"
+    ],
+    "errors": 0,
+    "failures": 0,
+    "independently_reproduced_by_this_static_gate": false,
+    "interpreter": "/opt/anaconda3/envs/envCMC-like/bin/python",
+    "numerical_h0_or_ab_rollouts_included": false,
+    "skipped": 0,
+    "status": "PASS_SESSION_ATTESTATION",
+    "tests_run": 65
+  },
+  "status": "V25_SHADOW_STRUCTURALLY_READY_NUMERICAL_AB_UNRUN",
+  "structural_readiness": true,
+  "test_and_static_evidence": {
+    "detector_data_path_test": {
+      "path": "validation/test_detector_sensor_data_path.py",
+      "sha256": "9223a8888ea3529eeedaf02a17c294398ebd22232625d92122e577991242e6f5",
+      "size_bytes": 30494
+    },
+    "fsm_contract_test": {
+      "path": "validation/test_binary_phase_fsm_v20.py",
+      "sha256": "7f88b17ed7fcfb5d4d0ee10557131156d0aeb1b7c167cf68d31208714c8bad7f",
+      "size_bytes": 10566
+    },
+    "layout_evidence": {
+      "path": "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_sigma0005_seed123/rollout_summary.json",
+      "sha256": "70676e7d2b4e8c1bca185fe23d1d29f96fa83ac34167ba916250eff6e96f601e",
+      "size_bytes": 9870
+    },
+    "runner_contract_receipt": {
+      "path": "validation/binary_phase_detector_v19_geometry_receipt.json",
+      "sha256": "7d93ef5f5b5c877246025c0f6d7a607783621e7019065ca63b4b889f5a30e0ff",
+      "size_bytes": 4678
+    },
+    "runner_contract_test": {
+      "path": "validation/test_binary_phase_detector_v19.py",
+      "sha256": "f9d5d50791ed63c1f620504d71abe0cc64b619fd8c790517bebe59e6d2a83cd4",
+      "size_bytes": 11931
+    },
+    "shadow_integration_test": {
+      "path": "validation/test_binary_phase_fsm_env_v20.py",
+      "sha256": "5c9a9d54680d6cc25c7640fc91b643452d118bdc1efa24d64a9edc425ffe5e82",
+      "size_bytes": 18675
+    }
+  }
+}

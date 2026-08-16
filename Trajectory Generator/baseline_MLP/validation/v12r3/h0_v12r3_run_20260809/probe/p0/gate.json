@@ -1,0 +1,242 @@
+{
+  "candidate_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY:p0:9fdd96f1d8e02e5d",
+  "candidate_module_tree_sha256": "9fdd96f1d8e02e5dc04bdf996a6fb6026d86cbcdbe065f7e3054e49df7a3460a",
+  "candidate_promoted": false,
+  "checks": {
+    "cycles": false,
+    "full_duration": false,
+    "integrity": true,
+    "normal_terminal": false,
+    "penetration": false
+  },
+  "fit_stage": "p0",
+  "integrity_gate": {
+    "candidate_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY:p0:9fdd96f1d8e02e5d",
+    "candidate_module_tree_sha256": "9fdd96f1d8e02e5dc04bdf996a6fb6026d86cbcdbe065f7e3054e49df7a3460a",
+    "checks": {
+      "actor_invariants": true,
+      "behavior": true,
+      "candidate_identity": true,
+      "candidate_module": true,
+      "candidate_queries": true,
+      "candidate_stage": true,
+      "case_exact": true,
+      "closed_stop_semantics": true,
+      "deterministic_noise": true,
+      "fit_receipt": true,
+      "layout": true,
+      "morphology_zero": true,
+      "no_latch": true,
+      "no_teacher": true,
+      "observer_replay_payload": true,
+      "persisted_artifacts": true,
+      "protected_closed": true,
+      "protocol": true,
+      "schema": true,
+      "step_shape": true,
+      "unblended": true,
+      "ungated_status": true,
+      "v26_active": true,
+      "worker_claim": true,
+      "zero_invalids": true,
+      "zero_updates": true
+    },
+    "fit_stage": "p0",
+    "next_stage": "EVALUATE_AUTONOMY_GATE",
+    "passed": true,
+    "probe_step_count": 232,
+    "protocol_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY",
+    "replay_payload": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/probe/p0/replay_boundaries.npz",
+      "sha256": "6f0f634be8cf2c5f3ec2a3db69f788ed6494f39548333777290a7a60cd7515fb",
+      "size_bytes": 51856
+    },
+    "replay_schema": {
+      "all_other_actor_columns_byte_exact": true,
+      "boundary_arrays": {
+        "boundary_time_s": "float64[B]",
+        "legacy_left_in_contact": "bool[B]",
+        "legacy_left_normal_grf_bw": "float32[B]",
+        "pros_ankle_angle_rad": "float32[B]",
+        "pros_ankle_speed_rad_s": "float32[B]",
+        "pros_knee_angle_rad": "float32[B]",
+        "pros_knee_speed_rad_s": "float32[B]"
+      },
+      "boundary_count_rule": "B=N+1",
+      "container": "NPZ_ALLOW_PICKLE_FALSE",
+      "left_event_journal_arrays": {
+        "legacy_left_event_boundary_offsets": "int64[B+1]",
+        "legacy_left_event_confirmed_time_s": "float64[E]",
+        "legacy_left_event_contact_duration_present": "bool[E]",
+        "legacy_left_event_contact_duration_s": "float64[E]",
+        "legacy_left_event_cycle_duration_present": "bool[E]",
+        "legacy_left_event_cycle_duration_s": "float64[E]",
+        "legacy_left_event_delivered_time_s": "float64[E]",
+        "legacy_left_event_onset_time_s": "float64[E]",
+        "legacy_left_event_side": "str_<U5[E]",
+        "legacy_left_event_startup_contact": "bool[E]",
+        "legacy_left_event_startup_contact_present": "bool[E]",
+        "legacy_left_event_type": "str_<U11[E]"
+      },
+      "left_event_journal_rules": {
+        "boundary_offsets": "NONDECREASING_START_0_END_E_LENGTH_B_PLUS_1",
+        "event_order": "SOURCE_ORDER_WITHIN_BOUNDARY;_STRICTLY_INCREASING_LEFT_ONSETS_GLOBAL",
+        "event_values": [
+          "heel_strike",
+          "toe_off"
+        ],
+        "optional_bool_absent_value": false,
+        "optional_float_absent_value": 0.0,
+        "reset_boundary_event_count": 0,
+        "side_value": "left",
+        "timestamp_order": "onset<=confirmed<=delivered==owning_boundary_time"
+      },
+      "legacy_fsm_config_arrays": {
+        "legacy_fsm_class_utf8": "uint8[K]",
+        "legacy_fsm_config_json_utf8": "uint8[C]",
+        "legacy_fsm_config_sha256_ascii": "uint8[64]",
+        "legacy_fsm_module_utf8": "uint8[M]"
+      },
+      "legacy_fsm_config_canonicalization": {
+        "encoding": "UTF-8",
+        "hash": "SHA256_OF_EXACT_legacy_fsm_config_json_utf8_BYTES",
+        "input": "DATACLASS_ASDICT_WITH_EVENT_SOURCE_LEGACY_EVENTS",
+        "json": "SORT_KEYS_TRUE_SEPARATORS_COMMA_COLON_ENSURE_ASCII_FALSE_ALLOW_NAN_FALSE",
+        "trailing_newline": false
+      },
+      "probe_teacher_or_h0_load_allowed": false,
+      "scalar_arrays": {
+        "body_weight_n": "float64[1]",
+        "event_contract_id_utf8": "uint8[J]"
+      },
+      "schema_id": "H0_V12R3_OBSERVER_REPLAY_BOUNDARIES_V2",
+      "step_arrays": {
+        "actor_observations": "float32[N,35]",
+        "previous_penetration_m": "float64[N]"
+      },
+      "teacher_mutable_actor_columns": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ]
+    },
+    "schema_version": 123,
+    "status": "PASS_H0_PRIMARY_SPLIT_V12R3_PROBE_INTEGRITY",
+    "trace": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/probe/p0/trace.json",
+      "sha256": "0b9f1374ee84b36716bd241fc05d6d49ff59baf658ed73e78a5bb10b59c14baa",
+      "size_bytes": 974821
+    }
+  },
+  "integrity_passed": true,
+  "next_stage": "OBSERVER_LABEL_P0_REQUIRED_BEFORE_SHIELDED_COLLECTION_R1_DATA_ONLY",
+  "passed": false,
+  "probe_step_count": 232,
+  "protocol_id": "AB06_H0_PRIMARY_SPLIT_V12R3_V26_AUTONOMY_RECOVERY",
+  "recoverable_for_data_collection": true,
+  "replay_payload": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/probe/p0/replay_boundaries.npz",
+    "sha256": "6f0f634be8cf2c5f3ec2a3db69f788ed6494f39548333777290a7a60cd7515fb",
+    "size_bytes": 51856
+  },
+  "replay_schema": {
+    "all_other_actor_columns_byte_exact": true,
+    "boundary_arrays": {
+      "boundary_time_s": "float64[B]",
+      "legacy_left_in_contact": "bool[B]",
+      "legacy_left_normal_grf_bw": "float32[B]",
+      "pros_ankle_angle_rad": "float32[B]",
+      "pros_ankle_speed_rad_s": "float32[B]",
+      "pros_knee_angle_rad": "float32[B]",
+      "pros_knee_speed_rad_s": "float32[B]"
+    },
+    "boundary_count_rule": "B=N+1",
+    "container": "NPZ_ALLOW_PICKLE_FALSE",
+    "left_event_journal_arrays": {
+      "legacy_left_event_boundary_offsets": "int64[B+1]",
+      "legacy_left_event_confirmed_time_s": "float64[E]",
+      "legacy_left_event_contact_duration_present": "bool[E]",
+      "legacy_left_event_contact_duration_s": "float64[E]",
+      "legacy_left_event_cycle_duration_present": "bool[E]",
+      "legacy_left_event_cycle_duration_s": "float64[E]",
+      "legacy_left_event_delivered_time_s": "float64[E]",
+      "legacy_left_event_onset_time_s": "float64[E]",
+      "legacy_left_event_side": "str_<U5[E]",
+      "legacy_left_event_startup_contact": "bool[E]",
+      "legacy_left_event_startup_contact_present": "bool[E]",
+      "legacy_left_event_type": "str_<U11[E]"
+    },
+    "left_event_journal_rules": {
+      "boundary_offsets": "NONDECREASING_START_0_END_E_LENGTH_B_PLUS_1",
+      "event_order": "SOURCE_ORDER_WITHIN_BOUNDARY;_STRICTLY_INCREASING_LEFT_ONSETS_GLOBAL",
+      "event_values": [
+        "heel_strike",
+        "toe_off"
+      ],
+      "optional_bool_absent_value": false,
+      "optional_float_absent_value": 0.0,
+      "reset_boundary_event_count": 0,
+      "side_value": "left",
+      "timestamp_order": "onset<=confirmed<=delivered==owning_boundary_time"
+    },
+    "legacy_fsm_config_arrays": {
+      "legacy_fsm_class_utf8": "uint8[K]",
+      "legacy_fsm_config_json_utf8": "uint8[C]",
+      "legacy_fsm_config_sha256_ascii": "uint8[64]",
+      "legacy_fsm_module_utf8": "uint8[M]"
+    },
+    "legacy_fsm_config_canonicalization": {
+      "encoding": "UTF-8",
+      "hash": "SHA256_OF_EXACT_legacy_fsm_config_json_utf8_BYTES",
+      "input": "DATACLASS_ASDICT_WITH_EVENT_SOURCE_LEGACY_EVENTS",
+      "json": "SORT_KEYS_TRUE_SEPARATORS_COMMA_COLON_ENSURE_ASCII_FALSE_ALLOW_NAN_FALSE",
+      "trailing_newline": false
+    },
+    "probe_teacher_or_h0_load_allowed": false,
+    "scalar_arrays": {
+      "body_weight_n": "float64[1]",
+      "event_contract_id_utf8": "uint8[J]"
+    },
+    "schema_id": "H0_V12R3_OBSERVER_REPLAY_BOUNDARIES_V2",
+    "step_arrays": {
+      "actor_observations": "float32[N,35]",
+      "previous_penetration_m": "float64[N]"
+    },
+    "teacher_mutable_actor_columns": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ]
+  },
+  "schema_version": 123,
+  "status": "FAIL_H0_PRIMARY_SPLIT_V12R3_CANDIDATE_AUTONOMY",
+  "trace": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v12r3/h0_v12r3_run_20260809/probe/p0/trace.json",
+    "sha256": "0b9f1374ee84b36716bd241fc05d6d49ff59baf658ed73e78a5bb10b59c14baa",
+    "size_bytes": 974821
+  }
+}

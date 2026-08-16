@@ -1,0 +1,227 @@
+{
+  "actor_updates": 0,
+  "authority": {
+    "actor_updates_authorized": false,
+    "autonomous_qualification_execution_authorized": true,
+    "baseline_and_tolerances_explicitly_accepted": true,
+    "critic_updates_authorized": false,
+    "ppo_updates_authorized": false,
+    "primary_grf_modification_authorized": false,
+    "protected_trial_access_authorized": false,
+    "reserve_trial_access_authorized": false,
+    "runtime_promotion_authorized": false,
+    "sea_semantic_modification_authorized": false,
+    "v25_abc_execution_authorized": false,
+    "zero_update_port_authorized": false
+  },
+  "baseline": {
+    "baseline_id": "analog_h0_primary_physics_condition_matched_v1",
+    "comparison_scope": "condition_matched_six_cases",
+    "receipt": {
+      "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v5_full_mean/qualification/baseline_receipt.json",
+      "sha256": "605f4a8d82043e9d85e9719e99c29de3ac925b88d75dc2c47779c4b4c00df668",
+      "size_bytes": 12150
+    }
+  },
+  "candidate_holdout_receipt": {
+    "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-06_h0_primary_split_v5_full_mean/holdout/receipt.json",
+    "sha256": "4519e71e315c4b56aa488b839546dcaf8595e5c5b8ce8bd2460244e63a441714",
+    "size_bytes": 1501
+  },
+  "canonical_case_ids": [
+    "deterministic_offset_minus_0p20",
+    "deterministic_offset_nominal",
+    "deterministic_offset_plus_0p20",
+    "stochastic_nominal_seed_126",
+    "stochastic_nominal_seed_127",
+    "stochastic_nominal_seed_128"
+  ],
+  "critic_updates": 0,
+  "decision_authority": "EXPLICIT_USER_DECISION",
+  "fixed_gates": {
+    "expected_steps": 500,
+    "minimum_valid_cycles": 2,
+    "nonincreasing_count_fields": [
+      "invalid_event_count",
+      "pros_knee_angle.tau_input_saturated.count",
+      "pros_ankle_angle.tau_input_saturated.count"
+    ],
+    "penetration_comparison": "strict_less_than",
+    "penetration_limit_m": 0.025,
+    "zero_count_fields": [
+      "action_clipped_values",
+      "fallback_count",
+      "timeout_count",
+      "safety_stop_count",
+      "sea_plugin_fallback_count",
+      "so_solver_unaccepted_hard_fallback_count",
+      "so_solver_unaccepted_bounded_ls_count",
+      "so_solver_reuse_previous_count",
+      "so_solver_bounds_violation_count",
+      "so_solver_nonfinite_count",
+      "so_solver_selected_infeasible_count",
+      "so_solver_selected_solution_mismatch_count",
+      "so_solver_residual_contract_mismatch_count",
+      "hard_invalid_count",
+      "nonfinite_count"
+    ]
+  },
+  "passed": true,
+  "ppo_updates": 0,
+  "protected_trials_opened": [],
+  "protocol_id": "AB06_H0_PRIMARY_GRF_SPLIT_V5_FULL_MEAN",
+  "runtime_contract": {
+    "event_contract_id": "primary_grf_split_v1+legacy_events_v1",
+    "morphology_weight": 0.0,
+    "phase_fsm_input_mode": "legacy_events"
+  },
+  "schema_version": 5,
+  "status": "H0_PRIMARY_SPLIT_V5_QUALIFICATION_BASELINE_TOLERANCE_DECIDED",
+  "tolerances": {
+    "comparison_formula": "candidate <= baseline + max(absolute_tolerance, relative_tolerance * abs(baseline))",
+    "reserve": [
+      {
+        "absolute_tolerance": 5.0,
+        "metric": "reserve_norm_nm.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 5.0,
+        "metric": "reserve_norm_nm.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "residual_norm_nm.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "residual_norm_nm.abs_max",
+        "relative_tolerance": 0.05
+      }
+    ],
+    "sea": [
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.torque_error_nm.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.torque_error_nm.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.tau_spring_nm.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.tau_spring_nm.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.tau_spring_rate_nm_s.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.tau_spring_rate_nm_s.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.motor_speed_rad_s.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.motor_speed_rad_s.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.motor_accel_rad_s2.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.motor_accel_rad_s2.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.motor_power_w.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_knee_angle.motor_power_w.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.torque_error_nm.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.torque_error_nm.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.tau_spring_nm.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.tau_spring_nm.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.tau_spring_rate_nm_s.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.tau_spring_rate_nm_s.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.motor_speed_rad_s.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.motor_speed_rad_s.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.motor_accel_rad_s2.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.motor_accel_rad_s2.abs_max",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.motor_power_w.rms",
+        "relative_tolerance": 0.05
+      },
+      {
+        "absolute_tolerance": 1e-06,
+        "metric": "pros_ankle_angle.motor_power_w.abs_max",
+        "relative_tolerance": 0.05
+      }
+    ]
+  }
+}

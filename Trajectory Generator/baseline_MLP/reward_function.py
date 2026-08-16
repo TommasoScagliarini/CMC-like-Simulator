@@ -38,8 +38,12 @@ import gymnasium as gym
 import numpy as np
 
 from experimental_morphology_corridor import (
+    CAUSAL_DELAYED_PHASE_MODE,
     EXPERIMENTAL_PHASE_MODE,
+    V26_EVENT_CONTRACT_ID,
+    CausalDelayedMorphologyBuffer,
     CompletedSegmentMorphologyLedger,
+    extract_v26_morphology_runtime,
 )
 
 # Loss keys read from ``info["reward_terms"]`` (produced by the env).
@@ -240,20 +244,27 @@ class RewardConfig:
     morphology_hard_q_max: tuple[float, ...] = (0.0, 0.60)
     morphology_hard_termination_enabled: float = 0.0
     morphology_experimental_allow_effects: float = 0.0
+    # Fixed-delay causal V26 corridor.  It stays explicitly opt-in and its
+    # defaults do not alter historical/active training configurations.
+    morphology_reward_delay_s: float = 0.04
+    morphology_max_delivery_latency_s: float = 0.01
+    morphology_causal_max_samples: float = 4096.0
+    morphology_causal_event_contract_id: str = V26_EVENT_CONTRACT_ID
+    morphology_causal_allow_effects: float = 0.0
 
     # Reward objective selector. "ex_novo" (default) = the blend above, UNCHANGED.
     # "imitation" = pre-training reward where the prosthetic joints mirror the
     # sound (contralateral) leg anti-phase (uses ``sound_imitation_loss`` from the
     # env). See the 2026-06-10 imitation-reward report.
     reward_mode: str = "ex_novo"
-    imitation_weight: float = 8.0          # loss -> score sharpness (imitation)
-    served_imitation_weight: float = 8.0   # target -> served-reference quality
+    imitation_weight: float = 8.0  # loss -> score sharpness (imitation)
+    served_imitation_weight: float = 8.0  # target -> served-reference quality
     imitation_knee_position_weight: float = 1.0
     imitation_ankle_position_weight: float = 1.0
     imitation_knee_velocity_weight: float = 0.02
     imitation_ankle_velocity_weight: float = 0.02
-    blend_served_imitation: float = 0.0    # legacy imitation remains unchanged
-    blend_imitation: float = 0.8           # sound-leg imitation score weight
+    blend_served_imitation: float = 0.0  # legacy imitation remains unchanged
+    blend_imitation: float = 0.8  # sound-leg imitation score weight
     blend_imitation_tracking: float = 0.2  # SEA execution-quality weight
 
     @classmethod
@@ -373,7 +384,9 @@ def _resolve_reward_asset_path(spec: str | os.PathLike[str]) -> Path:
     if not text:
         raise FileNotFoundError("empty reward asset path")
     path = Path(text).expanduser()
-    candidates = [path] if path.is_absolute() else [Path.cwd() / path, _REWARD_MODULE_DIR / path]
+    candidates = (
+        [path] if path.is_absolute() else [Path.cwd() / path, _REWARD_MODULE_DIR / path]
+    )
     for candidate in candidates:
         if candidate.is_file():
             return candidate.resolve()
@@ -381,7 +394,9 @@ def _resolve_reward_asset_path(spec: str | os.PathLike[str]) -> Path:
     raise FileNotFoundError(f"reward asset not found: {text!r}; searched: {searched}")
 
 
-def _load_morphology_profile(spec: str | os.PathLike[str] | None) -> dict[str, Any] | None:
+def _load_morphology_profile(
+    spec: str | os.PathLike[str] | None,
+) -> dict[str, Any] | None:
     """Load the AB06 mean/std prosthetic morphology corridor profile.
 
     Empty ``spec`` disables the term. A non-empty but unreadable profile fails
@@ -420,9 +435,13 @@ def _load_morphology_profile(spec: str | os.PathLike[str] | None) -> dict[str, A
                 f"morphology {coord_name} arrays must match phase_grid shape: {path}"
             )
         if not np.all(np.isfinite(mean)) or not np.all(np.isfinite(std)):
-            raise ValueError(f"morphology {coord_name} contains non-finite values: {path}")
+            raise ValueError(
+                f"morphology {coord_name} contains non-finite values: {path}"
+            )
         if np.any(std < 0.0):
-            raise ValueError(f"morphology {coord_name} std_rad must be non-negative: {path}")
+            raise ValueError(
+                f"morphology {coord_name} std_rad must be non-negative: {path}"
+            )
         parsed_coords[coord_name] = {"mean_rad": mean, "std_rad": std}
 
     metadata = data.get("metadata") if isinstance(data.get("metadata"), Mapping) else {}
@@ -546,6 +565,9 @@ def _normalize_morphology_phase_mode(value: str) -> str:
         "event_anchored_completed_segment_experimental": EXPERIMENTAL_PHASE_MODE,
         "completed_segment_experimental": EXPERIMENTAL_PHASE_MODE,
         "event_retrospective_experimental": EXPERIMENTAL_PHASE_MODE,
+        "event_anchored_causal_delayed_experimental": CAUSAL_DELAYED_PHASE_MODE,
+        "causal_delayed_experimental": CAUSAL_DELAYED_PHASE_MODE,
+        "v26_causal_delayed": CAUSAL_DELAYED_PHASE_MODE,
     }
     try:
         return aliases[mode]
@@ -619,12 +641,8 @@ def _fsm_morphology_phase(
     valid_cycle_count = float(fsm.get("valid_cycle_count", 0.0) or 0.0)
     last_period_s = float(fsm.get("last_period_s", 0.0) or 0.0)
     last_stance_fraction = float(fsm.get("last_stance_fraction", 0.0) or 0.0)
-    robust_stance_duration_s = float(
-        fsm.get("robust_stance_duration_s", 0.0) or 0.0
-    )
-    robust_swing_duration_s = float(
-        fsm.get("robust_swing_duration_s", 0.0) or 0.0
-    )
+    robust_stance_duration_s = float(fsm.get("robust_stance_duration_s", 0.0) or 0.0)
+    robust_swing_duration_s = float(fsm.get("robust_swing_duration_s", 0.0) or 0.0)
     duration_history_count = float(fsm.get("duration_history_count", 0.0) or 0.0)
 
     period_s = max(1e-9, float(cfg.phase_period_nominal_s))
@@ -740,12 +758,12 @@ def compute_reward(
     scores/penalties for logging (TensorBoard, summaries).
     """
     tracking_score = _score(reward_terms.get(TRACKING_LOSS, 0.0), cfg.tracking_weight)
-    reference_score = _score(reward_terms.get(REFERENCE_LOSS, 0.0), cfg.reference_weight)
+    reference_score = _score(
+        reward_terms.get(REFERENCE_LOSS, 0.0), cfg.reference_weight
+    )
     bio_score = _score(reward_terms.get(BIO_LOSS, 0.0), cfg.bio_weight)
     contact_load_score = float(reward_terms.get("contact_load_score", 0.0))
-    contact_support_to_score = float(
-        reward_terms.get("contact_support_to_score", 0.0)
-    )
+    contact_support_to_score = float(reward_terms.get("contact_support_to_score", 0.0))
     phase_regular_score = float(reward_terms.get("phase_regular_score", 0.0))
     phase_event_progress_score = float(
         reward_terms.get("phase_event_progress_score", 0.0)
@@ -767,16 +785,14 @@ def compute_reward(
         + cfg.smoothness_weight * float(reward_terms.get(SMOOTHNESS_LOSS, 0.0))
         + cfg.saturation_weight * float(reward_terms.get(SATURATION_LOSS, 0.0))
         + cfg.command_rate_weight * float(reward_terms.get(COMMAND_RATE_LOSS, 0.0))
-        + cfg.segment_delta_weight
-        * float(reward_terms.get(SEGMENT_DELTA_LOSS, 0.0))
+        + cfg.segment_delta_weight * float(reward_terms.get(SEGMENT_DELTA_LOSS, 0.0))
         + cfg.qdot_ref_weight * float(reward_terms.get(QDOT_REF_LOSS, 0.0))
         + cfg.qddot_ref_weight * float(reward_terms.get(QDDOT_REF_LOSS, 0.0))
         + cfg.jerk_ref_weight * float(reward_terms.get(JERK_REF_LOSS, 0.0))
         + cfg.reference_governor_weight
         * float(reward_terms.get(REFERENCE_GOVERNOR_LOSS, 0.0))
         + cfg.u_rate_weight * float(reward_terms.get(U_RATE_LOSS, 0.0))
-        + cfg.sea_saturation_weight
-        * float(reward_terms.get(SEA_SATURATION_LOSS, 0.0))
+        + cfg.sea_saturation_weight * float(reward_terms.get(SEA_SATURATION_LOSS, 0.0))
         + cfg.sea_torque_error_weight
         * float(reward_terms.get(SEA_TORQUE_ERROR_LOSS, 0.0))
         + cfg.sea_tau_spring_effort_weight
@@ -810,9 +826,8 @@ def compute_reward(
         float(reward_terms.get("phase_clawback_penalty", 0.0))
         + float(reward_terms.get("phase_failure_extra_penalty", 0.0))
     )
-    contact_support_clawback_term = (
-        cfg.contact_support_failure_clawback_weight
-        * float(reward_terms.get("contact_support_clawback_penalty", 0.0))
+    contact_support_clawback_term = cfg.contact_support_failure_clawback_weight * float(
+        reward_terms.get("contact_support_clawback_penalty", 0.0)
     )
     exnovo_task_term = (
         cfg.swing_unloading_weight
@@ -822,14 +837,28 @@ def compute_reward(
         + cfg.grf_slip_weight * float(reward_terms.get("grf_slip_loss", 0.0))
         + cfg.reserve_residual_weight
         * float(reward_terms.get("reserve_residual_loss", 0.0))
-        + cfg.pelvis_height_weight
-        * float(reward_terms.get("pelvis_height_loss", 0.0))
+        + cfg.pelvis_height_weight * float(reward_terms.get("pelvis_height_loss", 0.0))
     )
     prosthetic_joint_range_term = cfg.prosthetic_joint_range_weight * float(
         reward_terms.get("prosthetic_joint_range_loss", 0.0)
     )
-    morphology_term = cfg.morphology_weight * float(
-        reward_terms.get("morphology_loss", 0.0)
+    morphology_weight = float(cfg.morphology_weight)
+    if not np.isfinite(morphology_weight) or morphology_weight < 0.0:
+        raise ValueError("morphology_weight must be finite and non-negative")
+    morphology_loss_raw = float(reward_terms.get("morphology_loss", 0.0))
+    morphology_loss_nonfinite = not np.isfinite(morphology_loss_raw)
+    if morphology_weight == 0.0:
+        # Strict no-effect branch: never evaluate ``0 * morphology_loss``.
+        # This preserves reward parity and prevents ``0 * NaN`` propagation.
+        morphology_term = 0.0
+    else:
+        if morphology_loss_nonfinite:
+            raise ValueError(
+                "positive morphology_weight requires a finite morphology_loss"
+            )
+        morphology_term = morphology_weight * morphology_loss_raw
+    morphology_loss_component = (
+        0.0 if morphology_loss_nonfinite else morphology_loss_raw
     )
     if reference is not None and cfg.oob_weight:
         oob_loss, oob_raw_loss = _out_of_band_losses(reference, cfg)
@@ -906,9 +935,7 @@ def compute_reward(
         "bio_loss": float(reward_terms.get(BIO_LOSS, 0.0)),
         "bio_position_loss": float(reward_terms.get("bio_position_loss", 0.0)),
         "sound_imitation_loss": float(reward_terms.get(SOUND_IMITATION_LOSS, 0.0)),
-        "served_imitation_loss": float(
-            reward_terms.get(SERVED_IMITATION_LOSS, 0.0)
-        ),
+        "served_imitation_loss": float(reward_terms.get(SERVED_IMITATION_LOSS, 0.0)),
         "command_rate_loss": float(reward_terms.get(COMMAND_RATE_LOSS, 0.0)),
         "segment_delta_loss": float(reward_terms.get(SEGMENT_DELTA_LOSS, 0.0)),
         "segment_knot_delta_loss": float(
@@ -922,9 +949,7 @@ def compute_reward(
         ),
         "u_rate_loss": float(reward_terms.get(U_RATE_LOSS, 0.0)),
         "sea_saturation_loss": float(reward_terms.get(SEA_SATURATION_LOSS, 0.0)),
-        "sea_torque_error_loss": float(
-            reward_terms.get(SEA_TORQUE_ERROR_LOSS, 0.0)
-        ),
+        "sea_torque_error_loss": float(reward_terms.get(SEA_TORQUE_ERROR_LOSS, 0.0)),
         "sea_tau_spring_effort_loss": float(
             reward_terms.get(SEA_TAU_SPRING_EFFORT_LOSS, 0.0)
         ),
@@ -944,15 +969,11 @@ def compute_reward(
             reward_terms.get("policy_action_clip_abs_max", 0.0)
         ),
         "invalid_event_loss": float(reward_terms.get("invalid_event_loss", 0.0)),
-        "contact_validity_loss": float(
-            reward_terms.get("contact_validity_loss", 0.0)
-        ),
+        "contact_validity_loss": float(reward_terms.get("contact_validity_loss", 0.0)),
         "invalid_event_count": float(reward_terms.get("invalid_event_count", 0.0)),
         "penalty": float(penalty),
         "safety_term": float(safety_term),
-        "grf_penetration_loss": float(
-            reward_terms.get(GRF_PENETRATION_LOSS, 0.0)
-        ),
+        "grf_penetration_loss": float(reward_terms.get(GRF_PENETRATION_LOSS, 0.0)),
         "grf_penetration_term": float(grf_penetration_term),
         "grf_ankle_moment_flip_loss": float(
             reward_terms.get(GRF_ANKLE_MOMENT_FLIP_LOSS, 0.0)
@@ -1019,16 +1040,10 @@ def compute_reward(
         "contact_support_dense_confirmed_reward": float(
             reward_terms.get("contact_support_dense_confirmed_reward", 0.0)
         ),
-        "contact_overload_loss": float(
-            reward_terms.get("contact_overload_loss", 0.0)
-        ),
-        "swing_unloading_loss": float(
-            reward_terms.get("swing_unloading_loss", 0.0)
-        ),
+        "contact_overload_loss": float(reward_terms.get("contact_overload_loss", 0.0)),
+        "swing_unloading_loss": float(reward_terms.get("swing_unloading_loss", 0.0)),
         "grf_slip_loss": float(reward_terms.get("grf_slip_loss", 0.0)),
-        "phase_regularity_loss": float(
-            reward_terms.get("phase_regularity_loss", 0.0)
-        ),
+        "phase_regularity_loss": float(reward_terms.get("phase_regularity_loss", 0.0)),
         "phase_event_order_loss": float(
             reward_terms.get("phase_event_order_loss", 0.0)
         ),
@@ -1049,9 +1064,7 @@ def compute_reward(
         "phase_swing_timeout_loss": float(
             reward_terms.get("phase_swing_timeout_loss", 0.0)
         ),
-        "reserve_residual_loss": float(
-            reward_terms.get("reserve_residual_loss", 0.0)
-        ),
+        "reserve_residual_loss": float(reward_terms.get("reserve_residual_loss", 0.0)),
         "reserve_norm_loss": float(reward_terms.get("reserve_norm_loss", 0.0)),
         "residual_norm_loss": float(reward_terms.get("residual_norm_loss", 0.0)),
         "pelvis_height_loss": float(reward_terms.get("pelvis_height_loss", 0.0)),
@@ -1063,22 +1076,17 @@ def compute_reward(
             reward_terms.get("prosthetic_joint_range_raw_loss", 0.0)
         ),
         "prosthetic_joint_range_term": float(prosthetic_joint_range_term),
-        "morphology_loss": float(reward_terms.get("morphology_loss", 0.0)),
-        "morphology_loss_mean": float(
-            reward_terms.get("morphology_loss_mean", 0.0)
-        ),
+        "morphology_loss": float(morphology_loss_component),
+        "morphology_loss_input_nonfinite": float(morphology_loss_nonfinite),
+        "morphology_loss_mean": float(reward_terms.get("morphology_loss_mean", 0.0)),
         "morphology_inside_score": float(
             reward_terms.get("morphology_inside_score", 0.0)
         ),
         "morphology_inside_fraction": float(
             reward_terms.get("morphology_inside_fraction", 0.0)
         ),
-        "morphology_knee_loss": float(
-            reward_terms.get("morphology_knee_loss", 0.0)
-        ),
-        "morphology_ankle_loss": float(
-            reward_terms.get("morphology_ankle_loss", 0.0)
-        ),
+        "morphology_knee_loss": float(reward_terms.get("morphology_knee_loss", 0.0)),
+        "morphology_ankle_loss": float(reward_terms.get("morphology_ankle_loss", 0.0)),
         "morphology_knee_raw_loss_rad2": float(
             reward_terms.get("morphology_knee_raw_loss_rad2", 0.0)
         ),
@@ -1091,13 +1099,9 @@ def compute_reward(
         "morphology_ankle_excursion_rad": float(
             reward_terms.get("morphology_ankle_excursion_rad", 0.0)
         ),
-        "morphology_available": float(
-            reward_terms.get("morphology_available", 0.0)
-        ),
+        "morphology_available": float(reward_terms.get("morphology_available", 0.0)),
         "morphology_phase": float(reward_terms.get("morphology_phase", 0.0)),
-        "fsm_morphology_phase": float(
-            reward_terms.get("fsm_morphology_phase", 0.0)
-        ),
+        "fsm_morphology_phase": float(reward_terms.get("fsm_morphology_phase", 0.0)),
         "morphology_phase_source_id": float(
             reward_terms.get("morphology_phase_source_id", 0.0)
         ),
@@ -1152,6 +1156,30 @@ def compute_reward(
         "morphology_hard_max_excursion_rad": float(
             reward_terms.get("morphology_hard_max_excursion_rad", 0.0)
         ),
+        "morphology_causal_delay_s": float(
+            reward_terms.get("morphology_causal_delay_s", 0.0)
+        ),
+        "morphology_causal_terminal_flushed": float(
+            reward_terms.get("morphology_causal_terminal_flushed", 0.0)
+        ),
+        "morphology_causal_dropped_pending_count": float(
+            reward_terms.get("morphology_causal_dropped_pending_count", 0.0)
+        ),
+        "morphology_causal_dropped_wait_hs_count": float(
+            reward_terms.get("morphology_causal_dropped_wait_hs_count", 0.0)
+        ),
+        "morphology_causal_cancelled_transition_count": float(
+            reward_terms.get(
+                "morphology_causal_cancelled_transition_count",
+                0.0,
+            )
+        ),
+        "morphology_causal_timeout_transition_count": float(
+            reward_terms.get("morphology_causal_timeout_transition_count", 0.0)
+        ),
+        "morphology_causal_failed_closed": float(
+            reward_terms.get("morphology_causal_failed_closed", 0.0)
+        ),
         "morphology_knee_value_rad": float(
             reward_terms.get("morphology_knee_value_rad", 0.0)
         ),
@@ -1197,9 +1225,7 @@ def load_reward_overrides(spec: str | None) -> dict | None:
     text = path.read_text(encoding="utf-8") if path.exists() else spec
     data = json.loads(text)
     if not isinstance(data, dict):
-        raise ValueError(
-            "reward override must be a JSON object of RewardConfig fields"
-        )
+        raise ValueError("reward override must be a JSON object of RewardConfig fields")
     return data
 
 
@@ -1229,11 +1255,11 @@ class RewardShapingWrapper(gym.Wrapper):
             self.reward_config.morphology_phase_mode
         )
         self._morphology_canonical_to_phase: float | None = None
-        if (
-            self._morphology_profile is not None
-            and self._morphology_phase_mode
-            in {"event_anchored", EXPERIMENTAL_PHASE_MODE}
-        ):
+        if self._morphology_profile is not None and self._morphology_phase_mode in {
+            "event_anchored",
+            EXPERIMENTAL_PHASE_MODE,
+            CAUSAL_DELAYED_PHASE_MODE,
+        }:
             self._morphology_canonical_to_phase = _morphology_canonical_to_phase(
                 self._morphology_profile,
                 require_event_contract=True,
@@ -1249,16 +1275,11 @@ class RewardShapingWrapper(gym.Wrapper):
                 )
             effects_requested = (
                 abs(float(self.reward_config.morphology_weight)) > 0.0
-                or float(
-                    self.reward_config.morphology_hard_termination_enabled
-                )
-                > 0.0
+                or float(self.reward_config.morphology_hard_termination_enabled) > 0.0
             )
             if (
                 effects_requested
-                and float(
-                    self.reward_config.morphology_experimental_allow_effects
-                )
+                and float(self.reward_config.morphology_experimental_allow_effects)
                 <= 0.0
             ):
                 raise ValueError(
@@ -1272,16 +1293,71 @@ class RewardShapingWrapper(gym.Wrapper):
                     self.reward_config.morphology_completed_segment_max_samples
                 )
             )
+        self._causal_morphology_buffer: CausalDelayedMorphologyBuffer | None = None
+        if self._morphology_phase_mode == CAUSAL_DELAYED_PHASE_MODE:
+            if self._morphology_profile is None:
+                raise ValueError(
+                    "causal delayed morphology requires a non-empty "
+                    "event-warped morphology_profile"
+                )
+            if (
+                str(self.reward_config.morphology_causal_event_contract_id)
+                != V26_EVENT_CONTRACT_ID
+            ):
+                raise ValueError(
+                    "causal delayed morphology requires the frozen V26 event "
+                    "contract"
+                )
+            if float(self.reward_config.morphology_hard_termination_enabled) > 0.0:
+                raise ValueError(
+                    "causal delayed morphology does not authorize the "
+                    "retrospective hard-termination hook"
+                )
+            if (
+                float(self.reward_config.morphology_weight) > 0.0
+                and float(self.reward_config.morphology_causal_allow_effects) <= 0.0
+            ):
+                raise ValueError(
+                    "causal delayed morphology positive reward is gated; keep "
+                    "morphology_weight=0 until Q2 authorizes an explicit A/B"
+                )
+            period_s = float(self.reward_config.phase_period_nominal_s)
+            stance_fraction = float(
+                np.clip(
+                    self.reward_config.prosthetic_stance_phase_end,
+                    1e-6,
+                    1.0 - 1e-6,
+                )
+            )
+            self._causal_morphology_buffer = CausalDelayedMorphologyBuffer(
+                delay_s=float(self.reward_config.morphology_reward_delay_s),
+                canonical_to_phase=float(self._morphology_canonical_to_phase),
+                nominal_stance_duration_s=period_s * stance_fraction,
+                nominal_swing_duration_s=period_s * (1.0 - stance_fraction),
+                max_delivery_latency_s=float(
+                    self.reward_config.morphology_max_delivery_latency_s
+                ),
+                max_samples=int(self.reward_config.morphology_causal_max_samples),
+                event_contract_id=str(
+                    self.reward_config.morphology_causal_event_contract_id
+                ),
+            )
         self._morphology_completed_segments_payload: list[dict[str, Any]] = []
+        self._morphology_causal_samples_payload: list[dict[str, Any]] = []
         self._morphology_ledger_diagnostics_payload: dict[str, Any] = {}
+        self._morphology_causal_diagnostics_payload: dict[str, Any] = {}
         self._reset_contact_support_state()
 
     def reset(self, **kwargs):
         self._reset_contact_support_state()
         if self._experimental_morphology_ledger is not None:
             self._experimental_morphology_ledger.reset()
+        if self._causal_morphology_buffer is not None:
+            self._causal_morphology_buffer.reset()
         self._morphology_completed_segments_payload = []
+        self._morphology_causal_samples_payload = []
         self._morphology_ledger_diagnostics_payload = {}
+        self._morphology_causal_diagnostics_payload = {}
         return self.env.reset(**kwargs)
 
     def _reset_contact_support_state(self) -> None:
@@ -1337,9 +1413,7 @@ class RewardShapingWrapper(gym.Wrapper):
         bounded = squared / (1.0 + squared)
         return {
             POLICY_ACTION_CLIP_LOSS: float(np.mean(bounded)),
-            "policy_action_clip_fraction": float(
-                np.mean(clipped_delta > 1e-9)
-            ),
+            "policy_action_clip_fraction": float(np.mean(clipped_delta > 1e-9)),
             "policy_action_clip_abs_max": float(np.max(clipped_delta)),
         }
 
@@ -1373,12 +1447,8 @@ class RewardShapingWrapper(gym.Wrapper):
                 "contact_support_to_score": 0.0,
                 "contact_support_to_timing_score": 0.0,
                 "contact_support_stance_duration_s": 0.0,
-                "contact_support_min_penetration_quality": float(
-                    penetration_quality
-                ),
-                "contact_support_mean_penetration_quality": float(
-                    penetration_quality
-                ),
+                "contact_support_min_penetration_quality": float(penetration_quality),
+                "contact_support_mean_penetration_quality": float(penetration_quality),
                 "contact_support_pending_dense_reward": 0.0,
                 "contact_support_dense_confirmed_reward": 0.0,
                 "contact_support_clawback_penalty": 0.0,
@@ -1435,9 +1505,7 @@ class RewardShapingWrapper(gym.Wrapper):
                 self._contact_support_min_penetration_quality,
                 float(penetration_quality),
             )
-            self._contact_support_penetration_quality_sum += float(
-                penetration_quality
-            )
+            self._contact_support_penetration_quality_sum += float(penetration_quality)
             self._contact_support_penetration_quality_samples += 1
             dense_active = evidence_limit <= 0.0 or not evidence_complete
             if dense_active:
@@ -1476,9 +1544,7 @@ class RewardShapingWrapper(gym.Wrapper):
                     self._contact_support_penetration_quality_sum
                     / max(1, self._contact_support_penetration_quality_samples)
                 )
-                to_score = float(
-                    timing_score * mean_penetration_quality
-                )
+                to_score = float(timing_score * mean_penetration_quality)
             dense_confirmed = float(self._contact_support_pending_dense_reward)
             self._contact_support_pending_dense_reward = 0.0
 
@@ -1525,9 +1591,8 @@ class RewardShapingWrapper(gym.Wrapper):
         last_hs = left_gait.get("last_heel_strike_time")
         last_to = left_gait.get("last_toe_off_time")
         phase_known = last_hs is not None and cycle_duration > 1e-9
-        swing_since_to = (
-            last_to is not None
-            and (last_hs is None or float(last_to) > float(last_hs))
+        swing_since_to = last_to is not None and (
+            last_hs is None or float(last_to) > float(last_hs)
         )
         phase_fsm = info.get("phase_fsm")
         if not isinstance(phase_fsm, Mapping):
@@ -1650,11 +1715,11 @@ class RewardShapingWrapper(gym.Wrapper):
         fsm = info.get("phase_fsm")
         if not isinstance(fsm, Mapping):
             fsm = {}
-        period_soft_low = (
-            float(cfg.phase_period_nominal_s) - float(cfg.phase_period_soft_margin_s)
+        period_soft_low = float(cfg.phase_period_nominal_s) - float(
+            cfg.phase_period_soft_margin_s
         )
-        period_soft_high = (
-            float(cfg.phase_period_nominal_s) + float(cfg.phase_period_soft_margin_s)
+        period_soft_high = float(cfg.phase_period_nominal_s) + float(
+            cfg.phase_period_soft_margin_s
         )
         event_order_loss = float(fsm.get("invalid_event_loss", 0.0) or 0.0)
         last_period_s = float(fsm.get("last_period_s", 0.0) or 0.0)
@@ -1724,7 +1789,8 @@ class RewardShapingWrapper(gym.Wrapper):
         timeout_loss = float(stance_timeout_loss + swing_timeout_loss)
         phase_regularity_loss = float(
             float(cfg.phase_event_order_weight) * event_order_loss
-            + float(cfg.phase_period_weight) * (phase_period_loss + phase_period_hard_loss)
+            + float(cfg.phase_period_weight)
+            * (phase_period_loss + phase_period_hard_loss)
             + float(cfg.phase_periodicity_weight) * phase_periodicity_loss
             + float(cfg.phase_stance_fraction_weight) * stance_fraction_loss
             + float(cfg.phase_timeout_weight) * timeout_loss
@@ -1895,6 +1961,13 @@ class RewardShapingWrapper(gym.Wrapper):
             "morphology_hard_knee_excursion_rad": 0.0,
             "morphology_hard_ankle_excursion_rad": 0.0,
             "morphology_hard_max_excursion_rad": 0.0,
+            "morphology_causal_delay_s": 0.0,
+            "morphology_causal_terminal_flushed": 0.0,
+            "morphology_causal_dropped_pending_count": 0.0,
+            "morphology_causal_dropped_wait_hs_count": 0.0,
+            "morphology_causal_cancelled_transition_count": 0.0,
+            "morphology_causal_timeout_transition_count": 0.0,
+            "morphology_causal_failed_closed": 0.0,
         }
 
     def _experimental_morphology_terms(
@@ -1957,9 +2030,7 @@ class RewardShapingWrapper(gym.Wrapper):
             "nonmonotonic_sample": bool(update.nonmonotonic_sample),
             "pending_sample_count": int(update.pending_sample_count),
             "active_segment_type": str(update.active_segment_type),
-            "active_segment_start_time_s": float(
-                update.active_segment_start_time_s
-            ),
+            "active_segment_start_time_s": float(update.active_segment_start_time_s),
             "completed_segment_count": len(update.completed_segments),
         }
 
@@ -1974,9 +2045,7 @@ class RewardShapingWrapper(gym.Wrapper):
                 "morphology_phase_fsm_available": float(
                     bool(update.active_segment_type)
                 ),
-                "morphology_pending_sample_count": float(
-                    update.pending_sample_count
-                ),
+                "morphology_pending_sample_count": float(update.pending_sample_count),
                 "morphology_active_segment_id": float(active_id),
                 "morphology_discarded_segment_count": float(
                     update.discarded_segment_count
@@ -2033,8 +2102,7 @@ class RewardShapingWrapper(gym.Wrapper):
                     self.reward_config,
                 )
                 inside_score = 0.5 * (
-                    float(knee_excursion == 0.0)
-                    + float(ankle_excursion == 0.0)
+                    float(knee_excursion == 0.0) + float(ankle_excursion == 0.0)
                 )
                 item = {
                     "time_s": float(sample.time_s),
@@ -2108,24 +2176,260 @@ class RewardShapingWrapper(gym.Wrapper):
                 ),
                 "morphology_knee_min_rad": float(last.get("knee_min_rad", 0.0)),
                 "morphology_knee_max_rad": float(last.get("knee_max_rad", 0.0)),
-                "morphology_ankle_min_rad": float(
-                    last.get("ankle_min_rad", 0.0)
+                "morphology_ankle_min_rad": float(last.get("ankle_min_rad", 0.0)),
+                "morphology_ankle_max_rad": float(last.get("ankle_max_rad", 0.0)),
+                "morphology_inside_score": float(inside_score_sum / sample_count),
+                "morphology_inside_fraction": float(inside_score_sum / sample_count),
+                "morphology_settled_this_step": float(len(update.completed_segments)),
+                "morphology_settled_sample_count": float(sample_count),
+                "morphology_segment_duration_s": float(last_segment_duration_s),
+                "morphology_segment_type_id": float(segment_type_id),
+                "morphology_hard_violation": float(hard_max > 0.0),
+                "morphology_hard_knee_excursion_rad": float(knee_hard_max),
+                "morphology_hard_ankle_excursion_rad": float(ankle_hard_max),
+                "morphology_hard_max_excursion_rad": float(hard_max),
+            }
+        )
+        return terms
+
+    def _causal_morphology_terms(
+        self,
+        info: Mapping[str, Any],
+    ) -> dict[str, float]:
+        """Settle fixed-delay morphology losses from exact V26 journals."""
+        terms = self._empty_morphology_terms()
+        terms["morphology_phase_mode_id"] = 4.0
+        terms["morphology_phase_source_id"] = 6.0
+        buffer = self._causal_morphology_buffer
+        profile = self._morphology_profile
+        alpha = self._morphology_canonical_to_phase
+        if buffer is None or profile is None or alpha is None:
+            return terms
+
+        obs = info.get("observation")
+        if not isinstance(obs, Mapping):
+            obs = {}
+        try:
+            time_s = float(info.get("time", float("nan")))
+            knee_value = float(obs.get("pros_knee_angle_served_ref", float("nan")))
+            ankle_value = float(obs.get("pros_ankle_angle_served_ref", float("nan")))
+        except (TypeError, ValueError):
+            time_s = knee_value = ankle_value = float("nan")
+
+        raw_terms = info.get("reward_terms")
+        if not isinstance(raw_terms, Mapping):
+            raw_terms = {}
+        phase = info.get("phase_fsm")
+        if not isinstance(phase, Mapping):
+            phase = {}
+        episode_ended = bool(
+            float(raw_terms.get("terminated", 0.0) or 0.0) > 0.0
+            or float(raw_terms.get("truncated", 0.0) or 0.0) > 0.0
+            or float(phase.get("timeout_exceeded", 0.0) or 0.0) > 0.0
+            or info.get("end_reason")
+        )
+
+        try:
+            runtime = extract_v26_morphology_runtime(info)
+        except (TypeError, ValueError) as exc:
+            update = buffer.fail_closed(
+                f"v26_runtime:{exc}",
+                rejected_samples=1,
+            )
+            runtime = None
+        else:
+            history_count = float(phase.get("duration_history_count", 0.0) or 0.0)
+            robust_stance = float(phase.get("robust_stance_duration_s", 0.0) or 0.0)
+            robust_swing = float(phase.get("robust_swing_duration_s", 0.0) or 0.0)
+            use_robust = bool(
+                np.isfinite(history_count)
+                and history_count > 0.0
+                and np.isfinite(robust_stance)
+                and robust_stance > 0.0
+                and np.isfinite(robust_swing)
+                and robust_swing > 0.0
+            )
+            update = buffer.update(
+                time_s=time_s,
+                knee_rad=knee_value,
+                ankle_rad=ankle_value,
+                accepted_transitions=runtime.accepted_transitions,
+                confirmed_detector_transitions=runtime.detector_transitions,
+                pending_transition=runtime.pending_transition,
+                cancelled_transitions=runtime.cancelled_transitions,
+                episode_ended=episode_ended,
+                actor_state_name=runtime.actor_state_name,
+                partial_stance_active=runtime.partial_stance_active,
+                stance_duration_s=robust_stance if use_robust else None,
+                swing_duration_s=robust_swing if use_robust else None,
+            )
+
+        self._morphology_causal_diagnostics_payload = {
+            "event_contract_id": str(buffer.event_contract_id),
+            "delay_s": float(buffer.delay_s),
+            "failed_closed": bool(update.failed_closed),
+            "failure_reason": str(update.failure_reason),
+            "drop_reason": str(update.drop_reason),
+            "dropped_sample_count": int(update.dropped_sample_count),
+            "dropped_pending_sample_count": int(update.dropped_pending_sample_count),
+            "dropped_wait_hs_sample_count": int(update.dropped_wait_hs_sample_count),
+            "pending_sample_count": int(update.pending_sample_count),
+            "resolved_sample_count": len(update.resolved_samples),
+            "total_resolved_sample_count": int(update.total_resolved_sample_count),
+            "total_dropped_sample_count": int(update.total_dropped_sample_count),
+            "cancelled_transition_count": int(update.cancelled_transition_count),
+            "total_cancelled_transition_count": int(
+                update.total_cancelled_transition_count
+            ),
+            "timeout_transition_count": int(update.timeout_transition_count),
+            "terminal_flushed": bool(update.terminal_flushed),
+            "actor_state_name": (
+                runtime.actor_state_name if runtime is not None else ""
+            ),
+            "partial_stance_active": bool(
+                runtime.partial_stance_active if runtime is not None else False
+            ),
+        }
+        terms.update(
+            {
+                "morphology_canonical_to_phase": float(alpha),
+                "morphology_pending_sample_count": float(update.pending_sample_count),
+                "morphology_discarded_sample_count": float(update.dropped_sample_count),
+                "morphology_ledger_overflow": float(
+                    update.failure_reason == "causal_buffer_overflow"
                 ),
-                "morphology_ankle_max_rad": float(
-                    last.get("ankle_max_rad", 0.0)
+                "morphology_causal_delay_s": float(buffer.delay_s),
+                "morphology_causal_terminal_flushed": float(update.terminal_flushed),
+                "morphology_causal_dropped_pending_count": float(
+                    update.dropped_pending_sample_count
                 ),
-                "morphology_inside_score": float(
-                    inside_score_sum / sample_count
+                "morphology_causal_dropped_wait_hs_count": float(
+                    update.dropped_wait_hs_sample_count
                 ),
-                "morphology_inside_fraction": float(
-                    inside_score_sum / sample_count
+                "morphology_causal_cancelled_transition_count": float(
+                    update.cancelled_transition_count
                 ),
-                "morphology_settled_this_step": float(
-                    len(update.completed_segments)
+                "morphology_causal_timeout_transition_count": float(
+                    update.timeout_transition_count
                 ),
+                "morphology_causal_failed_closed": float(update.failed_closed),
+            }
+        )
+
+        payloads: list[dict[str, Any]] = []
+        knee_loss_sum = 0.0
+        ankle_loss_sum = 0.0
+        knee_raw_sum = 0.0
+        ankle_raw_sum = 0.0
+        knee_excursion_max = 0.0
+        ankle_excursion_max = 0.0
+        knee_hard_max = 0.0
+        ankle_hard_max = 0.0
+        inside_score_sum = 0.0
+        last_payload: dict[str, Any] | None = None
+
+        for resolved in update.resolved_samples:
+            corridor = _morphology_corridor_at(
+                profile,
+                resolved.phase,
+                self.reward_config,
+            )
+            knee_corridor = corridor["pros_knee_angle"]
+            ankle_corridor = corridor["pros_ankle_angle"]
+            knee_loss, knee_raw, knee_excursion = _morphology_interval_losses(
+                resolved.sample.knee_rad,
+                knee_corridor["min_rad"],
+                knee_corridor["max_rad"],
+            )
+            ankle_loss, ankle_raw, ankle_excursion = _morphology_interval_losses(
+                resolved.sample.ankle_rad,
+                ankle_corridor["min_rad"],
+                ankle_corridor["max_rad"],
+            )
+            knee_hard, ankle_hard = _morphology_hard_excursions(
+                resolved.sample.knee_rad,
+                resolved.sample.ankle_rad,
+                self.reward_config,
+            )
+            inside_score = 0.5 * (
+                float(knee_excursion == 0.0) + float(ankle_excursion == 0.0)
+            )
+            item: dict[str, Any] = {
+                "time_s": float(resolved.sample.time_s),
+                "emitted_time_s": float(resolved.emitted_time_s),
+                "delay_s": float(resolved.delay_s),
+                "terminal_flush": bool(resolved.terminal_flush),
+                "segment_type": str(resolved.segment_type),
+                "segment_start_time_s": float(resolved.segment_start_time_s),
+                "anchor_confirmed_time_s": float(resolved.anchor_confirmed_time_s),
+                "anchor_delivered_time_s": float(resolved.anchor_delivered_time_s),
+                "duration_basis_s": float(resolved.duration_basis_s),
+                "phase": float(resolved.phase),
+                "knee_served_ref_rad": float(resolved.sample.knee_rad),
+                "ankle_served_ref_rad": float(resolved.sample.ankle_rad),
+                "knee_min_rad": float(knee_corridor["min_rad"]),
+                "knee_max_rad": float(knee_corridor["max_rad"]),
+                "ankle_min_rad": float(ankle_corridor["min_rad"]),
+                "ankle_max_rad": float(ankle_corridor["max_rad"]),
+                "knee_loss": float(knee_loss),
+                "ankle_loss": float(ankle_loss),
+                "knee_excursion_rad": float(knee_excursion),
+                "ankle_excursion_rad": float(ankle_excursion),
+                "inside_score": float(inside_score),
+                "knee_hard_excursion_rad": float(knee_hard),
+                "ankle_hard_excursion_rad": float(ankle_hard),
+            }
+            payloads.append(item)
+            last_payload = item
+            knee_loss_sum += knee_loss
+            ankle_loss_sum += ankle_loss
+            knee_raw_sum += knee_raw
+            ankle_raw_sum += ankle_raw
+            knee_excursion_max = max(knee_excursion_max, knee_excursion)
+            ankle_excursion_max = max(ankle_excursion_max, ankle_excursion)
+            knee_hard_max = max(knee_hard_max, knee_hard)
+            ankle_hard_max = max(ankle_hard_max, ankle_hard)
+            inside_score_sum += inside_score
+
+        self._morphology_causal_samples_payload = payloads
+        sample_count = len(payloads)
+        if sample_count <= 0:
+            return terms
+
+        total_loss = 0.5 * (knee_loss_sum + ankle_loss_sum)
+        hard_max = max(knee_hard_max, ankle_hard_max)
+        last = last_payload or {}
+        segment_type_id = 1.0 if last.get("segment_type") == "stance" else 2.0
+        terms.update(
+            {
+                "morphology_available": 1.0,
+                "morphology_phase": float(last.get("phase", 0.0)),
+                "fsm_morphology_phase": float(last.get("phase", 0.0)),
+                "morphology_phase_fsm_available": 1.0,
+                "morphology_loss": float(total_loss),
+                "morphology_loss_mean": float(total_loss / sample_count),
+                "morphology_knee_loss": float(knee_loss_sum),
+                "morphology_ankle_loss": float(ankle_loss_sum),
+                "morphology_knee_raw_loss_rad2": float(knee_raw_sum),
+                "morphology_ankle_raw_loss_rad2": float(ankle_raw_sum),
+                "morphology_knee_excursion_rad": float(knee_excursion_max),
+                "morphology_ankle_excursion_rad": float(ankle_excursion_max),
+                "morphology_knee_value_rad": float(
+                    last.get("knee_served_ref_rad", 0.0)
+                ),
+                "morphology_ankle_value_rad": float(
+                    last.get("ankle_served_ref_rad", 0.0)
+                ),
+                "morphology_knee_min_rad": float(last.get("knee_min_rad", 0.0)),
+                "morphology_knee_max_rad": float(last.get("knee_max_rad", 0.0)),
+                "morphology_ankle_min_rad": float(last.get("ankle_min_rad", 0.0)),
+                "morphology_ankle_max_rad": float(last.get("ankle_max_rad", 0.0)),
+                "morphology_inside_score": float(inside_score_sum / sample_count),
+                "morphology_inside_fraction": float(inside_score_sum / sample_count),
+                "morphology_settled_this_step": 1.0,
                 "morphology_settled_sample_count": float(sample_count),
                 "morphology_segment_duration_s": float(
-                    last_segment_duration_s
+                    last.get("duration_basis_s", 0.0)
                 ),
                 "morphology_segment_type_id": float(segment_type_id),
                 "morphology_hard_violation": float(hard_max > 0.0),
@@ -2144,6 +2448,8 @@ class RewardShapingWrapper(gym.Wrapper):
         phase_mode = self._morphology_phase_mode
         if phase_mode == EXPERIMENTAL_PHASE_MODE:
             return self._experimental_morphology_terms(info)
+        if phase_mode == CAUSAL_DELAYED_PHASE_MODE:
+            return self._causal_morphology_terms(info)
         if phase_mode == "event_anchored":
             canonical_to_phase = self._morphology_canonical_to_phase
             if canonical_to_phase is None:
@@ -2300,6 +2606,16 @@ class RewardShapingWrapper(gym.Wrapper):
                 terms["terminated"] = 1.0
                 terms["truncated"] = 0.0
         if (
+            self._morphology_phase_mode == CAUSAL_DELAYED_PHASE_MODE
+            and float(self.reward_config.morphology_weight) > 0.0
+            and float(terms.get("morphology_causal_failed_closed", 0.0) or 0.0) > 0.0
+        ):
+            terminated = True
+            truncated = False
+            info["end_reason"] = "morphology_causal_contract_failure"
+            terms["terminated"] = 1.0
+            terms["truncated"] = 0.0
+        if (
             float(self.reward_config.morphology_hard_termination_enabled) > 0.0
             and float(terms.get("morphology_hard_violation", 0.0) or 0.0) > 0.0
         ):
@@ -2311,9 +2627,7 @@ class RewardShapingWrapper(gym.Wrapper):
             }:
                 terminated = True
                 truncated = False
-                info["end_reason"] = (
-                    "morphology_hard_violation:completed_segment"
-                )
+                info["end_reason"] = "morphology_hard_violation:completed_segment"
                 terms["terminated"] = 1.0
                 terms["truncated"] = 0.0
         info["reward_terms"] = terms
@@ -2325,6 +2639,13 @@ class RewardShapingWrapper(gym.Wrapper):
             ]
             info["morphology_ledger_diagnostics"] = dict(
                 self._morphology_ledger_diagnostics_payload
+            )
+        elif self._morphology_phase_mode == CAUSAL_DELAYED_PHASE_MODE:
+            info["morphology_causal_samples"] = [
+                dict(item) for item in self._morphology_causal_samples_payload
+            ]
+            info["morphology_causal_diagnostics"] = dict(
+                self._morphology_causal_diagnostics_payload
             )
         log = dict(info.get("log") or {})
         for key, value in components.items():

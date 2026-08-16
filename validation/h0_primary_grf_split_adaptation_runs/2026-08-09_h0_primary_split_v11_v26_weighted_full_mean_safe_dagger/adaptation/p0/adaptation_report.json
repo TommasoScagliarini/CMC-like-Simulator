@@ -1,0 +1,177 @@
+{
+  "fallback": false,
+  "fit_contract_id": "h0_primary_split_v11_weighted_full_mean_v1",
+  "fit_design": {
+    "actor_architecture": {
+      "activation": "tanh",
+      "hidden_dims": [
+        256,
+        256
+      ],
+      "input_dim": 35,
+      "kind": "standard_mean_mlp",
+      "output_dim": 2,
+      "residual_actor": false
+    },
+    "adamw": {
+      "epochs": 3000,
+      "full_batch": true,
+      "grad_clip_norm": 10.0,
+      "learning_rate_schedule": [
+        {
+          "end_epoch": 1500,
+          "learning_rate": 0.0003,
+          "start_epoch": 1
+        },
+        {
+          "end_epoch": 2500,
+          "learning_rate": 0.0001,
+          "start_epoch": 1501
+        },
+        {
+          "end_epoch": 3000,
+          "learning_rate": 3e-05,
+          "start_epoch": 2501
+        }
+      ],
+      "optimizer": "AdamW",
+      "seed": 20260807,
+      "weight_decay": 1e-07
+    },
+    "anchor_enabled": false,
+    "disabled_clock_columns": [
+      0,
+      1
+    ],
+    "disabled_clock_policy": "bit_zero_before_and_after_save_reload",
+    "fit_contract_id": "h0_primary_split_v11_weighted_full_mean_v1",
+    "freeze_logstd_head": true,
+    "hard_polish_enabled": false,
+    "lbfgs": {
+      "deterministic": true,
+      "history_size": 50,
+      "line_search_fn": "strong_wolfe",
+      "lr": 0.7,
+      "max_eval": 600,
+      "max_iter": 300,
+      "optimizer": "LBFGS",
+      "tolerance_change": 1e-12,
+      "tolerance_grad": 1e-10
+    },
+    "normalization": {
+      "estimator": "population_mean_and_std_float64",
+      "feature_count": 35,
+      "fold_into_first_layer_before_save": true,
+      "frozen_across_fit_stages": true,
+      "prescribed_clock": false,
+      "runtime_normalization_wrapper": false,
+      "scope": "base_corpus_3000_rows_only",
+      "std_floor": 0.0001
+    },
+    "optimizer_phase_order": [
+      "adamw",
+      "lbfgs"
+    ],
+    "sample_weighting": {
+      "default_weight": 1.0,
+      "reduction": "sum_weighted_squared_error_div_sum_weights",
+      "reset_definition": "case_offset_eq_zero",
+      "reset_weight": 100.0
+    },
+    "trainable_scope": "full_mean_network"
+  },
+  "fit_stage": "p0",
+  "hard_polish": false,
+  "normalization": {
+    "base_observations_sha256": "d367a4697606f7c5d721823c973aabbbc86fb314e9b74e1529afc22e45a4d9ad",
+    "clock_columns": [
+      0,
+      1
+    ],
+    "clock_means": [
+      0.0,
+      1.0
+    ],
+    "clock_stds": [
+      9.999999747378752e-05,
+      9.999999747378752e-05
+    ],
+    "dtype": "float32",
+    "folded_into_first_layer_before_save": true,
+    "mean_sha256": "2b91c5d2f56ca4188e1e24830fb059ce4e36660337d3670a8ff618a1f5cc6fbe",
+    "runtime_normalization_wrapper": false,
+    "source": "frozen_base_corpus_only",
+    "source_rows": 3000,
+    "std_floor": 0.0001,
+    "std_sha256": "c17a91bb6746a0292c53c9eb08818c05cea24a5b15d32ccb1a4af958ad20b2c5"
+  },
+  "optimizer_audit": {
+    "adamw_epochs": 3000,
+    "adamw_schedule": [
+      {
+        "learning_rate": 0.0003,
+        "start_epoch": 1
+      },
+      {
+        "learning_rate": 0.0001,
+        "start_epoch": 1501
+      },
+      {
+        "learning_rate": 3e-05,
+        "start_epoch": 2501
+      }
+    ],
+    "adamw_weight_decay": 1e-07,
+    "deterministic_algorithms_enabled": true,
+    "fallback": false,
+    "fit_contract_id": "h0_primary_split_v11_weighted_full_mean_v1",
+    "full_batch": true,
+    "gradient_clip_norm": 10.0,
+    "hard_polish": false,
+    "lbfgs_closure_calls": 307,
+    "lbfgs_history_size": 50,
+    "lbfgs_line_search": "strong_wolfe",
+    "lbfgs_lr": 0.7,
+    "lbfgs_max_eval": 600,
+    "lbfgs_max_iter": 300,
+    "lbfgs_tolerance_change": 1e-12,
+    "lbfgs_tolerance_grad": 1e-10,
+    "nonreset_weight": 1.0,
+    "reset_count": 6,
+    "reset_weight": 100.0,
+    "sample_count": 3000,
+    "seed": 20260807,
+    "sweep": false,
+    "torch_threads": 5
+  },
+  "preservation_audit": {
+    "all_candidate_tensors_finite": true,
+    "changes_confined_to_full_mean_network": true,
+    "critic_byte_exact": true,
+    "critic_parameter_count": 0,
+    "critic_present": false,
+    "disabled_clock_columns_bit_zero": true,
+    "encoder_aliases_bit_exact": true,
+    "hidden_mean_network_changed": true,
+    "logstd_outputs_bit_exact": true,
+    "logstd_parameter_rows_bit_exact": true,
+    "mean_output_changed": true,
+    "nonactor_byte_exact": true,
+    "nonactor_keys": [],
+    "passed": true,
+    "source_checkpoint_scope": "actor_only_rl_module",
+    "state_key_set_bit_exact": true
+  },
+  "save_reload": {
+    "clock_columns_bit_zero": true,
+    "critic_byte_exact": true,
+    "exact": true,
+    "logstd_parameter_rows_bit_exact": true,
+    "nonactor_byte_exact": true,
+    "state_key_count": 10
+  },
+  "source_checkpoint": "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last",
+  "sweep": false,
+  "training_samples": 3000,
+  "validation_samples": 0
+}

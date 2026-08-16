@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -15,9 +17,9 @@ BASELINE_DIR = (
 if str(BASELINE_DIR) not in sys.path:
     sys.path.insert(0, str(BASELINE_DIR))
 
-import target_domain_imitation
-import target_domain_markov_adaptation
-import target_domain_noise_adaptation
+import target_domain_imitation  # noqa: E402
+import target_domain_markov_adaptation  # noqa: E402
+import target_domain_noise_adaptation  # noqa: E402
 
 
 class TargetDomainImitationTests(unittest.TestCase):
@@ -57,6 +59,213 @@ class TargetDomainImitationTests(unittest.TestCase):
         invalid = dict(valid, pros_ankle_target_slew_rate_limit_rad_s=0.0)
         with self.assertRaisesRegex(ValueError, "ankle target slew"):
             target_domain_imitation._validate_target_contract(invalid)
+
+    def test_hard_zero_first_layer_features_are_optional_unique_and_known(self) -> None:
+        resolve = target_domain_imitation._resolve_hard_zero_first_layer_features
+
+        self.assertEqual(resolve(("a", "b", "c"), None), (None, []))
+        self.assertEqual(resolve(("a", "b", "c"), ("c", "a")), (["c", "a"], [2, 0]))
+        invalid = (
+            ([], "must not be empty"),
+            (["a", "a"], "duplicate names"),
+            (["missing"], "absent from the actor schema"),
+            ("a", "must be a sequence"),
+        )
+        for requested, message in invalid:
+            with self.subTest(requested=requested):
+                with self.assertRaisesRegex(ValueError, message):
+                    resolve(("a", "b", "c"), requested)
+        with self.assertRaisesRegex(ValueError, "not unique in the actor schema"):
+            resolve(("a", "b", "a"), ["a"])
+
+    def test_hard_zero_default_projection_is_a_noop(self) -> None:
+        sentinel = object()
+        target_domain_imitation._zero_first_layer_columns(sentinel, [])
+        positive_zero = np.zeros((2, 2), dtype=np.float32)
+        negative_zero = positive_zero.copy()
+        negative_zero[0, 1] = np.float32(-0.0)
+        self.assertTrue(
+            target_domain_imitation._columns_are_bit_exact_zero(
+                positive_zero,
+                [1],
+            )
+        )
+        self.assertFalse(
+            target_domain_imitation._columns_are_bit_exact_zero(
+                negative_zero,
+                [1],
+            )
+        )
+
+    def test_omitted_hard_zero_option_matches_explicit_none_bit_exactly(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        checkpoint = (
+            repo_root
+            / "validation"
+            / "critic_warmup"
+            / "2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry"
+            / "rl_module_last"
+        )
+        rng = np.random.default_rng(11)
+        dataset = {
+            "observations": rng.normal(size=(4, 35)).astype(np.float32),
+            "actions": rng.uniform(-0.1, 0.1, size=(4, 2)).astype(np.float32),
+            "actor_feature_names": np.asarray(
+                [f"feature_{index}" for index in range(35)],
+                dtype="U16",
+            ),
+        }
+        common = {
+            "seed": 5,
+            "epochs": 1,
+            "batch_size": 4,
+            "learning_rate": 1.0e-4,
+            "validation_fraction": 0.0,
+            "patience": 0,
+            "clip_weight": 1.0,
+            "logstd_weight": 0.0,
+            "anchor_weight": 1.0e-3,
+            "freeze_logstd_head": True,
+            "selection_mode": "fixed_final_epoch",
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            omitted = target_domain_imitation.adapt_actor(
+                checkpoint,
+                dataset,
+                root / "omitted",
+                **common,
+            )
+            explicit_none = target_domain_imitation.adapt_actor(
+                checkpoint,
+                dataset,
+                root / "explicit_none",
+                hard_zero_first_layer_features=None,
+                **common,
+            )
+            omitted_state = target_domain_imitation.warm_start.load_module_state(
+                omitted["output_module"]
+            )
+            explicit_state = target_domain_imitation.warm_start.load_module_state(
+                explicit_none["output_module"]
+            )
+            comparison = target_domain_imitation.warm_start.compare_actor_states(
+                omitted_state,
+                explicit_state,
+            )
+            self.assertTrue(comparison["exact"])
+            self.assertEqual(comparison["max_abs_diff"], 0.0)
+            self.assertEqual(
+                omitted["adapted_prediction"],
+                explicit_none["adapted_prediction"],
+            )
+            self.assertEqual(
+                omitted["hard_zero_first_layer"],
+                {
+                    "configured": False,
+                    "features": None,
+                    "indices": [],
+                    "column_norms": {},
+                    "live_bit_exact_zero": None,
+                    "saved_bit_exact_zero_by_key": {},
+                    "save_reload_bit_exact_zero": None,
+                },
+            )
+
+    def test_hard_zero_columns_survive_fit_checkpoint_and_rlmodule_reload(self) -> None:
+        from ray.rllib.core.rl_module.rl_module import RLModule
+
+        repo_root = Path(__file__).resolve().parents[1]
+        checkpoint = (
+            repo_root
+            / "validation"
+            / "critic_warmup"
+            / "2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry"
+            / "rl_module_last"
+        )
+        feature_names = np.asarray(
+            [f"feature_{index}" for index in range(35)],
+            dtype="U16",
+        )
+        constrained = ["feature_10", "feature_11"]
+        constrained_indices = [10, 11]
+        rng = np.random.default_rng(7)
+        dataset = {
+            "observations": rng.normal(size=(8, 35)).astype(np.float32),
+            "actions": rng.uniform(-0.2, 0.2, size=(8, 2)).astype(np.float32),
+            "actor_feature_names": feature_names,
+        }
+        source_state = target_domain_imitation.warm_start.load_module_state(
+            checkpoint
+        )
+        self.assertGreater(
+            np.count_nonzero(
+                np.asarray(source_state["pi_encoder.0.weight"])[
+                    :, constrained_indices
+                ]
+            ),
+            0,
+        )
+
+        with tempfile.TemporaryDirectory() as raw_output:
+            projection = target_domain_imitation._zero_first_layer_columns
+            with mock.patch.object(
+                target_domain_imitation,
+                "_zero_first_layer_columns",
+                wraps=projection,
+            ) as project:
+                report = target_domain_imitation.adapt_actor(
+                    checkpoint,
+                    dataset,
+                    Path(raw_output),
+                    seed=1,
+                    epochs=2,
+                    batch_size=4,
+                    learning_rate=1.0e-4,
+                    validation_fraction=0.0,
+                    patience=0,
+                    clip_weight=1.0,
+                    logstd_weight=0.0,
+                    anchor_weight=1.0e-3,
+                    freeze_logstd_head=True,
+                    hard_zero_first_layer_features=constrained,
+                    selection_mode="fixed_final_epoch",
+                )
+
+            # One projection before fitting, one after each of four Adam steps,
+            # one after restoring the selected state, and one after rescaling.
+            self.assertEqual(project.call_count, 7)
+            audit = report["hard_zero_first_layer"]
+            self.assertEqual(
+                report["hyperparameters"]["hard_zero_first_layer_features"],
+                constrained,
+            )
+            self.assertEqual(audit["features"], constrained)
+            self.assertEqual(audit["indices"], constrained_indices)
+            self.assertEqual(audit["column_norms"], {name: 0.0 for name in constrained})
+            self.assertTrue(audit["live_bit_exact_zero"])
+            self.assertTrue(audit["save_reload_bit_exact_zero"])
+            self.assertTrue(all(audit["saved_bit_exact_zero_by_key"].values()))
+            self.assertTrue(report["save_reload"]["exact"])
+
+            module_dir = Path(report["output_module"])
+            saved_state = target_domain_imitation.warm_start.load_module_state(
+                module_dir
+            )
+            for key in ("pi_encoder.0.weight", "pi.0.0.weight"):
+                self.assertTrue(
+                    target_domain_imitation._columns_are_bit_exact_zero(
+                        saved_state[key],
+                        constrained_indices,
+                    )
+                )
+            reloaded = RLModule.from_checkpoint(module_dir)
+            self.assertTrue(
+                target_domain_imitation._columns_are_bit_exact_zero(
+                    reloaded.pi_encoder[0].weight,
+                    constrained_indices,
+                )
+            )
 
     def test_dagger_trace_uses_time_aligned_teacher_labels(self) -> None:
         teacher = {

@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import json
 import os
 import traceback
 from dataclasses import dataclass, field
@@ -67,6 +68,17 @@ except ModuleNotFoundError:  # pragma: no cover - small import-time fallback.
     spaces = _Spaces()  # type: ignore[assignment]
 
 from config import SimulatorConfig
+from binary_phase_adapter import (
+    BINARY_ACTIVE_EVENT_CONTRACT_ID,
+    BinaryPhaseActiveAdapter,
+)
+from binary_phase_adapter_v26 import BinaryPhaseActiveAdapterV26
+from binary_phase_fsm import BinaryPhaseFSM, BinaryPhaseFSMConfig
+from binary_phase_fsm_v26 import (
+    HeelQualifiedBinaryPhaseFSM,
+    HeelQualifiedBinaryPhaseFSMConfig,
+    V26_EVENT_CONTRACT_ID,
+)
 from kinematics_interpolator import KinematicsInterpolator
 from model_loader import setup_model
 from online_grf import online_grf_sensor_role
@@ -77,6 +89,41 @@ from simulation_runner import SegmentWallClockTimeout, SimulationRunner
 
 
 CoordDict = Dict[str, float]
+
+
+# The shadow path is deliberately an explicit profile allowlist.  Geometry
+# revisions cannot become runtime inputs merely by selecting ``binary_shadow``:
+# the event contract and the profile bytes must both match a frozen record.
+_BINARY_PHASE_SHADOW_PROFILE_ALLOWLIST = {
+    "binary_point_v19+functional_contact_fsm_v1_shadow": (
+        "V19",
+        "fddb17f7bd24e004504de662676d7b5a2cb9e5d0fda77de8dea2664c0b5c7a86",
+        False,
+    ),
+    "binary_point_v25+functional_contact_fsm_v1_shadow": (
+        "V25",
+        "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+        True,
+    ),
+}
+_BINARY_PHASE_ACTIVE_PROFILE = (
+    "V25",
+    "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+    True,
+)
+_BINARY_PHASE_ACTIVE_EVENT_CONTRACT_IDS = frozenset(
+    {BINARY_ACTIVE_EVENT_CONTRACT_ID, V26_EVENT_CONTRACT_ID}
+)
+_BINARY_PHASE_V25_SHADOW_EVENT_CONTRACT_ID = (
+    "binary_point_v25+functional_contact_fsm_v1_shadow"
+)
+_V25_LEGACY_ANALOG_DETECTOR_PROFILE_PATH = resolve_repo_path(
+    "online_grf_profiles/"
+    "AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json"
+)
+_V25_LEGACY_ANALOG_DETECTOR_PROFILE_SHA256 = (
+    "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e"
+)
 
 
 def _vec3_to_array(vec) -> np.ndarray:
@@ -234,6 +281,7 @@ class CMCEnvConfig:
     grf_mode: Optional[str] = None
     online_grf_profile_file: Optional[str] = None
     online_grf_detector_profile_file: Optional[str] = None
+    binary_phase_detector_profile_file: Optional[str] = None
     include_online_grf_observation: bool = False
     prescribed_grf_disabled_sides: Sequence[str] = ()
     # Hybrid GRF: sides whose online contact is APPLIED (not just sensed), so the
@@ -320,6 +368,13 @@ class CMCEnvConfig:
     phase_sensor_dwell_s: float = 0.03
     detector_sample_dt_s: float = 0.001
     event_contract_id: str = "legacy_events_v1"
+    # Independent V20 routing. ``binary_shadow`` is diagnostic only;
+    # ``binary_active`` replaces only the prosthetic-side (left) legacy events
+    # after the transactional V20 -> ProstheticPhaseFSM adapter.  Neither mode
+    # changes the actor observation schema.
+    binary_phase_fsm_mode: str = "disabled"
+    binary_phase_debounce_s: float = 0.005
+    binary_phase_event_contract_id: str = "binary_events_disabled_v1"
     # Sound-leg imitation target (used only when reward_function shapes the reward
     # in "imitation" mode; the env always emits ``sound_imitation_loss`` so the
     # ex-novo reward is unchanged). A periodic phase-normalized template is built
@@ -1004,6 +1059,240 @@ class PhaseBasedImitationTarget:
         }
 
 
+def _binary_phase_shadow_profile_spec(
+    event_contract_id: object,
+) -> tuple[str, str, bool]:
+    """Return the frozen shadow profile record or fail closed."""
+
+    contract = str(event_contract_id)
+    spec = _BINARY_PHASE_SHADOW_PROFILE_ALLOWLIST.get(contract)
+    if spec is None:
+        allowed = ", ".join(
+            repr(item) for item in sorted(_BINARY_PHASE_SHADOW_PROFILE_ALLOWLIST)
+        )
+        raise ValueError(
+            "binary_shadow requires an allowlisted "
+            "binary_phase_event_contract_id; "
+            f"observed {contract!r}, allowed: {allowed}."
+        )
+    return spec
+
+
+def _validate_v25_legacy_analog_detector_profile(
+    raw_path: object,
+    *,
+    mode_label: str = "binary_shadow",
+) -> Path:
+    """Require the canonical frozen detector that keeps legacy events stable."""
+
+    if raw_path is None or not str(raw_path).strip():
+        raise ValueError(
+            f"{mode_label} V25 requires the frozen analog legacy detector "
+            "profile explicitly."
+        )
+    configured_path = Path(normalize_cli_existing_path(raw_path)).resolve()
+    expected_path = _V25_LEGACY_ANALOG_DETECTOR_PROFILE_PATH.resolve()
+    if configured_path != expected_path:
+        raise ValueError(
+            f"{mode_label} V25 analog legacy profile path mismatch: expected "
+            f"{expected_path}, observed {configured_path}."
+        )
+    if not configured_path.is_file():
+        raise ValueError(
+            f"{mode_label} V25 analog legacy profile is missing: "
+            f"{configured_path}"
+        )
+    observed_sha256 = hashlib.sha256(configured_path.read_bytes()).hexdigest()
+    if observed_sha256 != _V25_LEGACY_ANALOG_DETECTOR_PROFILE_SHA256:
+        raise ValueError(
+            f"{mode_label} V25 analog legacy profile hash mismatch: expected "
+            f"{_V25_LEGACY_ANALOG_DETECTOR_PROFILE_SHA256}, observed "
+            f"{observed_sha256}."
+        )
+    return configured_path
+
+
+def _validate_binary_phase_transport_timing(
+    cfg: CMCEnvConfig,
+    *,
+    detector_dt: float,
+    mode_label: str,
+) -> None:
+    """Require the frozen 1 ms detector / 10 ms policy transport contract."""
+
+    debounce_s = float(cfg.binary_phase_debounce_s)
+    if not np.isfinite(debounce_s) or abs(debounce_s - 0.005) > 1e-12:
+        raise ValueError(
+            f"{mode_label} requires binary_phase_debounce_s=0.005."
+        )
+    detector_dt_s = float(detector_dt)
+    if (
+        not np.isfinite(detector_dt_s)
+        or abs(detector_dt_s - 0.001) > 1e-12
+    ):
+        raise ValueError(
+            f"{mode_label} requires detector_sample_dt_s=0.001."
+        )
+    segment_duration_s = float(cfg.segment_duration)
+    if (
+        not np.isfinite(segment_duration_s)
+        or abs(segment_duration_s - 0.01) > 1e-12
+    ):
+        raise ValueError(f"{mode_label} requires segment_duration=0.01 s.")
+    samples_per_step = segment_duration_s / detector_dt_s
+    if (
+        abs(samples_per_step - round(samples_per_step)) > 1e-9
+        or int(round(samples_per_step)) != 10
+    ):
+        raise ValueError(
+            f"{mode_label} requires exactly ten 1 ms samples per "
+            "10 ms policy step."
+        )
+
+
+def _validate_binary_phase_shadow_configuration(
+    cfg: CMCEnvConfig,
+    *,
+    detector_dt: float,
+) -> tuple[str, str, bool]:
+    """Validate the dormant binary path without changing the active source."""
+
+    if str(cfg.phase_fsm_input_mode).strip().lower() != "legacy_events":
+        raise ValueError(
+            "binary_shadow requires phase_fsm_input_mode='legacy_events' "
+            "so the historical FSM remains authoritative."
+        )
+    if str(cfg.event_contract_id) != "legacy_events_v1":
+        raise ValueError(
+            "binary_shadow requires the authoritative "
+            "event_contract_id='legacy_events_v1'."
+        )
+
+    profile_label, expected_sha256, requires_legacy_analog_detector = (
+        _binary_phase_shadow_profile_spec(cfg.binary_phase_event_contract_id)
+    )
+    if (
+        cfg.online_grf_detector_profile_file is not None
+        and not requires_legacy_analog_detector
+    ):
+        raise ValueError(
+            "binary_shadow V19 forbids the force-based detector profile; "
+            "configure only the V19 binary point profile."
+        )
+
+    binary_profile_raw = cfg.binary_phase_detector_profile_file
+    if binary_profile_raw is None:
+        raise ValueError(
+            f"binary_shadow requires the frozen {profile_label} binary "
+            "detector profile explicitly."
+        )
+    binary_profile_path = Path(normalize_cli_existing_path(binary_profile_raw))
+    if not binary_profile_path.is_file():
+        raise ValueError(
+            f"binary_shadow {profile_label} profile is missing: "
+            f"{binary_profile_path}"
+        )
+    observed_sha256 = hashlib.sha256(binary_profile_path.read_bytes()).hexdigest()
+    if observed_sha256 != expected_sha256:
+        raise ValueError(
+            f"binary_shadow {profile_label} profile hash mismatch: expected "
+            f"{expected_sha256}, observed {observed_sha256}."
+        )
+    if requires_legacy_analog_detector:
+        _validate_v25_legacy_analog_detector_profile(
+            cfg.online_grf_detector_profile_file
+        )
+
+    _validate_binary_phase_transport_timing(
+        cfg,
+        detector_dt=detector_dt,
+        mode_label="binary_shadow",
+    )
+    return profile_label, expected_sha256, requires_legacy_analog_detector
+
+
+def _validate_binary_phase_active_configuration(
+    cfg: CMCEnvConfig,
+    *,
+    detector_dt: float,
+) -> tuple[str, str, bool]:
+    """Validate an exact V25 active adapter lineage fail closed."""
+
+    if str(cfg.phase_fsm_input_mode).strip().lower() != "legacy_events":
+        raise ValueError(
+            "binary_active requires phase_fsm_input_mode='legacy_events'; "
+            "the adapter replaces only left events and preserves right legacy "
+            "routing."
+        )
+    if str(cfg.event_contract_id) != "legacy_events_v1":
+        raise ValueError(
+            "binary_active requires the right-side legacy "
+            "event_contract_id='legacy_events_v1'."
+        )
+    active_contract = str(cfg.binary_phase_event_contract_id)
+    if active_contract not in _BINARY_PHASE_ACTIVE_EVENT_CONTRACT_IDS:
+        raise ValueError(
+            "binary_active requires an exact frozen event contract; expected "
+            f"one of {sorted(_BINARY_PHASE_ACTIVE_EVENT_CONTRACT_IDS)!r}, "
+            f"observed {active_contract!r}."
+        )
+
+    profile_label, expected_sha256, requires_legacy_analog_detector = (
+        _BINARY_PHASE_ACTIVE_PROFILE
+    )
+    binary_profile_raw = cfg.binary_phase_detector_profile_file
+    if binary_profile_raw is None or not str(binary_profile_raw).strip():
+        raise ValueError(
+            "binary_active requires the frozen V25 binary detector profile "
+            "explicitly."
+        )
+    binary_profile_path = Path(normalize_cli_existing_path(binary_profile_raw))
+    if not binary_profile_path.is_file():
+        raise ValueError(
+            "binary_active V25 profile is missing: "
+            f"{binary_profile_path}"
+        )
+    observed_sha256 = hashlib.sha256(binary_profile_path.read_bytes()).hexdigest()
+    if observed_sha256 != expected_sha256:
+        raise ValueError(
+            "binary_active V25 profile hash mismatch: expected "
+            f"{expected_sha256}, observed {observed_sha256}."
+        )
+    if not requires_legacy_analog_detector:
+        raise RuntimeError("The frozen V25 active profile record is inconsistent.")
+    _validate_v25_legacy_analog_detector_profile(
+        cfg.online_grf_detector_profile_file,
+        mode_label="binary_active",
+    )
+    _validate_binary_phase_transport_timing(
+        cfg,
+        detector_dt=detector_dt,
+        mode_label="binary_active",
+    )
+    return profile_label, expected_sha256, requires_legacy_analog_detector
+
+
+def _validate_binary_phase_sampled_disabled_configuration(
+    cfg: CMCEnvConfig,
+    *,
+    detector_dt: float,
+) -> tuple[str, str, bool]:
+    """Validate protocol case A: sample frozen V25 without executing V20."""
+
+    if (
+        str(cfg.binary_phase_event_contract_id)
+        != _BINARY_PHASE_V25_SHADOW_EVENT_CONTRACT_ID
+    ):
+        raise ValueError(
+            "sampled-disabled protocol case A requires the frozen V25 "
+            "shadow event contract."
+        )
+    return _validate_binary_phase_shadow_configuration(
+        cfg,
+        detector_dt=detector_dt,
+    )
+
+
 class CMCLikeProsthesisTrajectoryEnv(Env):
     """
     RL environment that asks a policy for prosthetic trajectory segments.
@@ -1050,6 +1339,39 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         detector_dt = float(self.env_cfg.detector_sample_dt_s)
         if not np.isfinite(detector_dt) or detector_dt <= 0.0:
             raise ValueError("detector_sample_dt_s must be finite and positive.")
+        binary_mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        if binary_mode not in {"disabled", "binary_shadow", "binary_active"}:
+            raise ValueError(
+                "binary_phase_fsm_mode must be 'disabled', 'binary_shadow', "
+                "or 'binary_active'."
+            )
+        if binary_mode == "binary_shadow":
+            _validate_binary_phase_shadow_configuration(
+                self.env_cfg,
+                detector_dt=detector_dt,
+            )
+        elif (
+            binary_mode == "disabled"
+            and getattr(
+                self.env_cfg, "binary_phase_detector_profile_file", None
+            ) is not None
+            and str(
+                getattr(self.env_cfg, "binary_phase_detector_profile_file", "")
+            ).strip()
+        ):
+            # Protocol case A deliberately samples the exact same frozen V25
+            # signal as case B while leaving V20 disabled.  Treat that as a
+            # validated sampled-disabled topology, rather than as the legacy
+            # default where no binary detector is configured at all.
+            _validate_binary_phase_sampled_disabled_configuration(
+                self.env_cfg,
+                detector_dt=detector_dt,
+            )
+        elif binary_mode == "binary_active":
+            _validate_binary_phase_active_configuration(
+                self.env_cfg,
+                detector_dt=detector_dt,
+            )
         if self.env_cfg.phase_fsm_input_mode in {"shadow", "two_sensor"}:
             detector_parameters = (
                 float(self.env_cfg.phase_sensor_on_threshold_n),
@@ -1142,9 +1464,29 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._online_events: list[dict] = []
         self._phase_sensor_samples: list[object] = []
         self._phase_sensor_previous_time_s: float = 0.0
+        self._binary_phase_sensor_samples: list[object] = []
+        self._binary_phase_sensor_baseline: dict = {}
+        self._binary_phase_sensor_previous_time_s: float = 0.0
         self._online_gait_sides: dict[str, dict[str, float | None]] = {}
         self._phase_fsm = ProstheticPhaseFSM(self._phase_fsm_config())
         self._phase_fsm_payload: dict = self._phase_fsm.payload()
+        binary_fsm_config = self._binary_phase_fsm_config()
+        if isinstance(binary_fsm_config, HeelQualifiedBinaryPhaseFSMConfig):
+            self._binary_phase_fsm = HeelQualifiedBinaryPhaseFSM(
+                binary_fsm_config
+            )
+        else:
+            self._binary_phase_fsm = BinaryPhaseFSM(binary_fsm_config)
+        self._binary_phase_fsm_payload: dict = self._binary_phase_fsm.payload()
+        if (
+            binary_mode == "binary_active"
+            and str(self.env_cfg.binary_phase_event_contract_id)
+            == V26_EVENT_CONTRACT_ID
+        ):
+            self._binary_phase_active_adapter = BinaryPhaseActiveAdapterV26()
+        else:
+            self._binary_phase_active_adapter = BinaryPhaseActiveAdapter()
+        self._binary_phase_active_adapter_payload: dict = {}
         self._gait_clock: GaitPhaseClock | None = None
         self._imitation_target: PhaseBasedImitationTarget | None = None
         self._reference_position_ranges: dict[str, float] = {}
@@ -1158,6 +1500,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         self._build_simulator()
         self._validate_phase_sensor_setup()
+        self._validate_binary_phase_sensor_setup()
         self._initialise_episode()
         obs, _ = self._get_observation()
         self.observation_space = spaces.Box(
@@ -1168,6 +1511,16 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         )
 
     def _phase_fsm_config(self) -> ProstheticPhaseFSMConfig:
+        binary_mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        if binary_mode == "binary_active":
+            event_source = (
+                "binary_active_v26"
+                if str(self.env_cfg.binary_phase_event_contract_id)
+                == V26_EVENT_CONTRACT_ID
+                else "binary_active"
+            )
+        else:
+            event_source = str(self.env_cfg.phase_fsm_input_mode)
         return ProstheticPhaseFSMConfig(
             min_stance_duration_s=float(self.env_cfg.phase_min_stance_duration_s),
             min_swing_duration_s=float(self.env_cfg.phase_min_swing_duration_s),
@@ -1189,7 +1542,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             toe_off_event_credit=float(self.env_cfg.phase_to_event_credit),
             cycle_complete_bonus=float(self.env_cfg.phase_cycle_complete_bonus),
             failure_extra_penalty=float(self.env_cfg.phase_failure_extra_penalty),
-            event_source=str(self.env_cfg.phase_fsm_input_mode),
+            event_source=event_source,
             detector_sample_dt_s=float(self.env_cfg.detector_sample_dt_s),
             sensor_on_threshold_n=float(
                 self.env_cfg.phase_sensor_on_threshold_n
@@ -1198,6 +1551,27 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 self.env_cfg.phase_sensor_off_threshold_n
             ),
             sensor_dwell_s=float(self.env_cfg.phase_sensor_dwell_s),
+        )
+
+    def _binary_phase_fsm_config(
+        self,
+    ) -> BinaryPhaseFSMConfig | HeelQualifiedBinaryPhaseFSMConfig:
+        config_type = (
+            HeelQualifiedBinaryPhaseFSMConfig
+            if (
+                str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+                == "binary_active"
+                and str(self.env_cfg.binary_phase_event_contract_id)
+                == V26_EVENT_CONTRACT_ID
+            )
+            else BinaryPhaseFSMConfig
+        )
+        return config_type(
+            sample_dt_s=float(self.env_cfg.detector_sample_dt_s),
+            debounce_s=float(self.env_cfg.binary_phase_debounce_s),
+            event_contract_id=str(
+                self.env_cfg.binary_phase_event_contract_id
+            ),
         )
 
     def _validate_phase_sensor_setup(self) -> None:
@@ -1230,6 +1604,121 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 "shadow/two_sensor phase detection requires exactly one "
                 "left_heel and one left_toe detector component; observed "
                 f"roles={roles}, invalid_counts={missing_or_duplicated}."
+            )
+
+    def _validate_binary_phase_sensor_setup(self) -> None:
+        """Require the frozen two-point routing in binary shadow/active modes."""
+
+        mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        sampled_disabled = bool(
+            mode == "disabled"
+            and getattr(
+                self.env_cfg, "binary_phase_detector_profile_file", None
+            ) is not None
+            and str(
+                getattr(self.env_cfg, "binary_phase_detector_profile_file", "")
+            ).strip()
+        )
+        if mode not in {"binary_shadow", "binary_active"} and not sampled_disabled:
+            return
+        profile = getattr(self.ctx, "binary_phase_detector_profile", None)
+        if profile is None:
+            raise ValueError(
+                f"{mode} requires a loaded binary detector profile."
+            )
+        points = tuple(getattr(profile, "points", ()))
+        roles = tuple(str(getattr(point, "name", "")) for point in points)
+        if roles != ("left_heel", "left_toe"):
+            raise ValueError(
+                f"{mode} requires exactly the ordered force-free points "
+                "('left_heel', 'left_toe'); observed "
+                f"{roles}."
+            )
+        if mode == "binary_active":
+            if str(
+                self.env_cfg.binary_phase_event_contract_id
+            ) not in _BINARY_PHASE_ACTIVE_EVENT_CONTRACT_IDS:
+                raise ValueError(
+                    "binary_active event contract changed after configuration "
+                    "validation."
+                )
+            (
+                _profile_label,
+                _profile_sha256,
+                requires_legacy_analog_detector,
+            ) = _BINARY_PHASE_ACTIVE_PROFILE
+        else:
+            (
+                _profile_label,
+                _profile_sha256,
+                requires_legacy_analog_detector,
+            ) = _binary_phase_shadow_profile_spec(
+                self.env_cfg.binary_phase_event_contract_id
+            )
+        analog_paths_raw = getattr(
+            self.ctx,
+            "online_grf_detector_force_paths",
+            [],
+        )
+        if not requires_legacy_analog_detector:
+            if analog_paths_raw:
+                raise ValueError(
+                    f"{mode} V19 cannot coexist with force-based detector "
+                    "components."
+                )
+            return
+
+        if isinstance(analog_paths_raw, (str, bytes, bytearray)) or not isinstance(
+            analog_paths_raw,
+            Sequence,
+        ):
+            raise ValueError(
+                f"{mode} V25 analog detector routing must be a sequence."
+            )
+        analog_paths = list(analog_paths_raw)
+        analog_sides_raw = getattr(
+            self.ctx,
+            "online_grf_detector_force_sides",
+            {},
+        )
+        if not isinstance(analog_sides_raw, Mapping):
+            raise ValueError(
+                f"{mode} V25 analog detector side routing must be a mapping."
+            )
+        expected_roles = {
+            "left_heel",
+            "left_toe",
+            "right_heel",
+            "right_toe",
+        }
+        analog_roles: list[str] = []
+        unknown_components: list[str] = []
+        for component_path in analog_paths:
+            component_name = str(component_path).rsplit("/", 1)[-1]
+            role = online_grf_sensor_role(
+                component_name,
+                str(analog_sides_raw.get(component_name, "")),
+            )
+            if role is None or role not in expected_roles:
+                unknown_components.append(component_name)
+            else:
+                analog_roles.append(role)
+        invalid_counts = {
+            role: analog_roles.count(role)
+            for role in sorted(expected_roles)
+            if analog_roles.count(role) != 1
+        }
+        if (
+            len(analog_paths) != 4
+            or unknown_components
+            or invalid_counts
+            or set(analog_roles) != expected_roles
+        ):
+            raise ValueError(
+                f"{mode} V25 requires exactly four analog legacy roles "
+                "(left/right heel/toe), with no missing, duplicate, or unknown "
+                f"routing; roles={analog_roles}, invalid_counts={invalid_counts}, "
+                f"unknown_components={unknown_components}."
             )
 
     @property
@@ -1303,6 +1792,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "phase_fsm": copy.deepcopy(self._phase_fsm_payload),
         }
         info.update(self._online_info_payload())
+        info.update(self._binary_phase_info_payload())
         return obs, info
 
     def step(self, action):
@@ -1357,7 +1847,16 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             failure_traceback = traceback.format_exc()
 
         self._update_online_gait_state(step_info)
-        self._update_phase_fsm(require_primary_sample=failure is None)
+        binary_mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        if binary_mode == "binary_active":
+            self._update_binary_active_phase_path(
+                require_batch=failure is None,
+                require_primary_sample=failure is None,
+            )
+        else:
+            # Preserve the historical disabled/shadow ordering exactly.
+            self._update_phase_fsm(require_primary_sample=failure is None)
+            self._update_binary_phase_fsm(require_batch=failure is None)
         obs, obs_dict = self._get_observation()
         reward, reward_terms = self._get_reward(obs_dict)
         unsafe_reason = self._unsafe_end_reason(obs_dict)
@@ -1455,6 +1954,9 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 self._last_sea_segment_diagnostics
             ),
             "so_diagnostics": copy.deepcopy(step_info.get("so_diagnostics", {})),
+            "so_solver_audit_entries": copy.deepcopy(
+                step_info.get("so_solver_audit_entries", [])
+            ),
             "phase_fsm": copy.deepcopy(self._phase_fsm_payload),
             "end_reason": end_reason,
             "grf_mode": self.cfg.grf_mode,
@@ -1466,6 +1968,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             ),
         }
         info.update(self._online_info_payload())
+        info.update(self._binary_phase_info_payload())
         if failure is not None:
             info["failure"] = f"{type(failure).__name__}: {failure}"
             info["failure_traceback"] = failure_traceback
@@ -1600,6 +2103,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         profile = getattr(setup, "online_grf_profile_file", None)
         cfg.online_grf_profile_file = "" if profile is None else str(profile)
         cfg.online_grf_detector_profile_file = ""
+        cfg.binary_phase_detector_profile_file = ""
 
     def _apply_grf_overrides(self, cfg: SimulatorConfig) -> None:
         if self.env_cfg.grf_mode is not None:
@@ -1611,6 +2115,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         if self.env_cfg.online_grf_detector_profile_file is not None:
             cfg.online_grf_detector_profile_file = normalize_cli_existing_path(
                 self.env_cfg.online_grf_detector_profile_file
+            )
+        if self.env_cfg.binary_phase_detector_profile_file is not None:
+            cfg.binary_phase_detector_profile_file = normalize_cli_existing_path(
+                self.env_cfg.binary_phase_detector_profile_file
             )
         cfg.detector_sample_dt_s = float(self.env_cfg.detector_sample_dt_s)
         cfg.prescribed_grf_disabled_sides = [
@@ -2015,6 +2523,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._reset_online_gait_state()
         self._phase_fsm.reset()
         self._phase_fsm_payload = self._phase_fsm.payload()
+        self._prime_binary_phase_fsm_from_runner()
 
     # ------------------------------------------------------------------
     # Action mapping
@@ -2587,6 +3096,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._online_events = []
         self._phase_sensor_samples = []
         self._phase_sensor_previous_time_s = float(self.t)
+        self._binary_phase_sensor_samples = []
+        self._binary_phase_sensor_baseline = {}
+        self._binary_phase_sensor_previous_time_s = float(self.t)
+        self._binary_phase_active_adapter_payload = {}
         self._online_gait_sides = {
             side: {
                 "last_heel_strike_time": None,
@@ -2595,6 +3108,98 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             }
             for side in ("left", "right")
         }
+
+    def _prime_binary_phase_fsm_from_runner(self) -> None:
+        """Prime V20 from the non-event t0 sample or leave it disabled."""
+
+        mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        sampled = bool(
+            mode in {"binary_shadow", "binary_active"}
+            or (
+                getattr(self.env_cfg, "binary_phase_detector_profile_file", None)
+                is not None
+                and str(
+                    getattr(
+                        self.env_cfg,
+                        "binary_phase_detector_profile_file",
+                        "",
+                    )
+                ).strip()
+            )
+        )
+        if not sampled:
+            self._binary_phase_fsm.reset()
+            self._binary_phase_fsm_payload = self._binary_phase_fsm.payload()
+            self._binary_phase_active_adapter_payload = {}
+            return
+
+        baseline = self.runner.last_step_info.get("binary_phase_sensor_baseline")
+        if not isinstance(baseline, Mapping):
+            raise RuntimeError(
+                f"{mode} requires the runner's t0 binary detector "
+                "baseline; no AIR state may be inferred."
+            )
+        try:
+            baseline_time = float(baseline["time_s"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise RuntimeError(
+                "The binary t0 baseline has no finite time_s."
+            ) from exc
+        if not np.isfinite(baseline_time) or abs(baseline_time - self.t) > 1e-9:
+            raise RuntimeError(
+                "The binary t0 baseline timestamp does not match the episode "
+                f"boundary: baseline={baseline_time}, episode={self.t}."
+            )
+        contacts = baseline.get("contacts")
+        if not isinstance(contacts, Mapping) or set(contacts) != {
+            "left_heel",
+            "left_toe",
+        }:
+            raise RuntimeError(
+                "The binary t0 baseline must contain exactly left_heel and "
+                "left_toe contacts."
+            )
+        heel = contacts["left_heel"]
+        toe = contacts["left_toe"]
+        if type(heel) is not bool or type(toe) is not bool:
+            raise RuntimeError(
+                "The binary t0 baseline contacts must be native booleans."
+            )
+        self._binary_phase_sensor_baseline = {
+            "time_s": baseline_time,
+            "left_heel_contact": heel,
+            "left_toe_contact": toe,
+        }
+        if mode == "disabled":
+            # Case A publishes the raw t0/sample journal but must not prime or
+            # execute V20.  Its persistent FSM state stays at the disabled
+            # default and cannot affect the authoritative legacy path.
+            self._binary_phase_fsm.reset()
+            self._binary_phase_fsm_payload = self._binary_phase_fsm.payload()
+            self._binary_phase_active_adapter_payload = {}
+        elif mode == "binary_shadow":
+            self._binary_phase_fsm_payload = self._binary_phase_fsm.reset(
+                time_s=baseline_time,
+                heel_contact=heel,
+                toe_contact=toe,
+            )
+            self._binary_phase_active_adapter_payload = {}
+        else:
+            result = self._binary_phase_active_adapter.prime(
+                binary_fsm=self._binary_phase_fsm,
+                phase_fsm=self._phase_fsm,
+                time_s=baseline_time,
+                heel_contact=heel,
+                toe_contact=toe,
+            )
+            # The adapter has already validated both candidate copies. Commit
+            # the pair only after the complete reset transfer succeeds.
+            self._binary_phase_fsm = result.binary_fsm
+            self._phase_fsm = result.phase_fsm
+            self._binary_phase_fsm_payload = result.binary_payload
+            self._phase_fsm_payload = result.phase_payload
+            self._binary_phase_active_adapter_payload = result.adapter_payload
+        self._binary_phase_sensor_previous_time_s = baseline_time
 
     def _update_online_gait_state(self, step_info: Mapping[str, object]) -> None:
         online_grf = step_info.get("online_grf")
@@ -2626,6 +3231,19 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             self._phase_sensor_samples = list(phase_samples)
         else:
             self._phase_sensor_samples = [phase_samples]
+
+        binary_samples = step_info.get("binary_phase_sensor_samples")
+        if binary_samples is None:
+            self._binary_phase_sensor_samples = []
+        elif isinstance(binary_samples, Sequence) and not isinstance(
+            binary_samples,
+            (str, bytes, bytearray),
+        ):
+            # As above, preserve malformed entries so the independent V20 FSM
+            # can reject the complete batch atomically.
+            self._binary_phase_sensor_samples = list(binary_samples)
+        else:
+            self._binary_phase_sensor_samples = [binary_samples]
 
         # The active event stream is selected only after the existing phase FSM
         # has consumed either legacy events or the two detector-only channels.
@@ -2859,6 +3477,245 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             ]
         self._apply_online_events_to_gait_state()
 
+    def _update_binary_active_phase_path(
+        self,
+        *,
+        require_batch: bool = True,
+        require_primary_sample: bool = True,
+    ) -> None:
+        """Commit one V25/V20 -> actor-FSM policy boundary atomically.
+
+        V20 is the sole source of left HS/TO events.  The historical analog
+        stream remains authoritative only for the right side, while continuous
+        left load/contact evidence remains exclusively on the primary physical
+        GRF stream.  All candidate state is built and validated before any
+        environment cursor, FSM, event list, or gait-state record is replaced.
+        """
+
+        mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        if mode != "binary_active":
+            raise ValueError(
+                "_update_binary_active_phase_path requires "
+                "binary_phase_fsm_mode='binary_active'."
+            )
+        if not require_batch:
+            # The runner failure already truncates the episode.  Do not infer a
+            # missing bit batch, advance either FSM, or move the transport cursor.
+            if require_primary_sample:
+                raise ValueError(
+                    "A required primary sample cannot accompany a missing "
+                    "binary detector batch."
+                )
+            return
+        if not require_primary_sample:
+            raise ValueError(
+                "binary_active cannot consume a detector batch without its "
+                "same-boundary primary GRF sample."
+            )
+
+        grf = self._physical_online_grf_sides(required=True)
+        left = grf.get("left") if isinstance(grf, Mapping) else None
+        if not isinstance(left, Mapping):
+            raise RuntimeError(
+                "binary_active requires the primary left online-GRF aggregate; "
+                "detector or prescribed data are not valid fallbacks."
+            )
+        normal_force_raw = left.get("normal_force")
+        if isinstance(normal_force_raw, (bool, np.bool_)):
+            raise RuntimeError(
+                "Primary left normal_force must be a finite non-negative number."
+            )
+        try:
+            normal_force_n = float(normal_force_raw)
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError(
+                "Primary left normal_force must be a finite non-negative number."
+            ) from exc
+        if not np.isfinite(normal_force_n) or normal_force_n < 0.0:
+            raise RuntimeError(
+                "Primary left normal_force must be a finite non-negative number."
+            )
+        in_contact_raw = left.get("in_contact")
+        if not isinstance(in_contact_raw, (bool, np.bool_)):
+            raise RuntimeError("Primary left in_contact must be boolean.")
+        body_weight_n = float(self._body_weight_n)
+        if not np.isfinite(body_weight_n) or body_weight_n <= 0.0:
+            raise RuntimeError(
+                "Body weight must be finite and positive for primary GRF "
+                "normalisation."
+            )
+
+        sv = self.ctx.model.getStateVariableValues(self.runner.state)
+        knee_q = float(sv.get(self.ctx.q_sv_idx["pros_knee_angle"]))
+        ankle_q = float(sv.get(self.ctx.q_sv_idx["pros_ankle_angle"]))
+
+        result = self._binary_phase_active_adapter.advance(
+            binary_fsm=self._binary_phase_fsm,
+            phase_fsm=self._phase_fsm,
+            time_s=float(self.t),
+            previous_time_s=float(self._binary_phase_sensor_previous_time_s),
+            sensor_samples=self._binary_phase_sensor_samples,
+            normal_force_bw=normal_force_n / body_weight_n,
+            in_contact=bool(in_contact_raw),
+            prosthetic_knee_angle_rad=knee_q,
+            prosthetic_ankle_angle_rad=ankle_q,
+        )
+
+        # Discard every left legacy event by construction.  Validate the right
+        # stream before combining it with accepted V20-derived transitions so a
+        # malformed sound-side timestamp cannot produce a partial commit.
+        right_events: list[dict] = []
+        for index, legacy_event in enumerate(self._legacy_online_events):
+            if str(legacy_event.get("side", "")).strip().lower() != "right":
+                continue
+            event = copy.deepcopy(dict(legacy_event))
+            event_name = str(event.get("event", "")).strip().lower()
+            if event_name not in {"heel_strike", "toe_off"}:
+                raise ValueError(
+                    f"Right legacy event {index} has an unknown event type."
+                )
+            event_time_raw = event.get("time")
+            if isinstance(event_time_raw, (bool, np.bool_)):
+                raise ValueError(
+                    f"Right legacy event {index} has a malformed time."
+                )
+            try:
+                event_time = float(event_time_raw)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"Right legacy event {index} has a malformed time."
+                ) from exc
+            if not np.isfinite(event_time) or event_time > float(self.t) + 1e-9:
+                raise ValueError(
+                    f"Right legacy event {index} has a non-causal time."
+                )
+            event["side"] = "right"
+            event["event"] = event_name
+            event["time"] = event_time
+            right_events.append(event)
+
+        candidate_events = right_events + copy.deepcopy(result.left_events)
+        for index, event in enumerate(candidate_events):
+            try:
+                event_time = float(event["time"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ValueError(
+                    f"Active event {index} has no finite time."
+                ) from exc
+            if not np.isfinite(event_time):
+                raise ValueError(f"Active event {index} has no finite time.")
+        candidate_events.sort(key=lambda item: float(item["time"]))
+
+        candidate_gait_sides = copy.deepcopy(self._online_gait_sides)
+        for event in candidate_events:
+            side = str(event["side"])
+            state = candidate_gait_sides.get(side)
+            if not isinstance(state, dict):
+                raise RuntimeError(
+                    f"Online gait state is missing the {side!r} side."
+                )
+            event_name = str(event["event"])
+            event_time = float(event["time"])
+            if event_name == "heel_strike":
+                state["last_heel_strike_time"] = event_time
+                cycle_duration_raw = event.get("cycle_duration_s")
+                if cycle_duration_raw is not None:
+                    try:
+                        cycle_duration = float(cycle_duration_raw)
+                    except (TypeError, ValueError) as exc:
+                        raise ValueError(
+                            "Heel-strike cycle_duration_s must be finite."
+                        ) from exc
+                    if not np.isfinite(cycle_duration):
+                        raise ValueError(
+                            "Heel-strike cycle_duration_s must be finite."
+                        )
+                    if cycle_duration > 0.0:
+                        state["cycle_duration_s"] = cycle_duration
+            else:
+                state["last_toe_off_time"] = event_time
+
+        try:
+            json.dumps(
+                {
+                    "events": candidate_events,
+                    "gait_sides": candidate_gait_sides,
+                    "adapter": result.adapter_payload,
+                },
+                allow_nan=False,
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "binary_active candidate diagnostics must be strict JSON "
+                "without NaN or Inf."
+            ) from exc
+
+        # No validation or calculation remains after this point: publish the
+        # complete candidate as one logical commit at the policy boundary.
+        self._binary_phase_fsm = result.binary_fsm
+        self._phase_fsm = result.phase_fsm
+        self._binary_phase_fsm_payload = result.binary_payload
+        self._phase_fsm_payload = result.phase_payload
+        self._binary_phase_active_adapter_payload = result.adapter_payload
+        self._binary_phase_sensor_previous_time_s = float(self.t)
+        self._online_events = candidate_events
+        self._online_gait_sides = candidate_gait_sides
+
+    def _update_binary_phase_fsm(self, *, require_batch: bool = True) -> None:
+        """Advance the independent V20 shadow without touching active events."""
+
+        mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        if mode == "disabled" and bool(
+            getattr(self.env_cfg, "binary_phase_detector_profile_file", None)
+        ):
+            if not require_batch:
+                return
+            previous = float(self._binary_phase_sensor_previous_time_s)
+            boundary = float(self.t)
+            expected_count = int(round((boundary - previous) / 0.001))
+            if expected_count != 10 or len(self._binary_phase_sensor_samples) != 10:
+                raise ValueError(
+                    "sampled-disabled V25 requires exactly ten raw samples per "
+                    "policy step."
+                )
+            for index, sample in enumerate(self._binary_phase_sensor_samples, start=1):
+                if not isinstance(sample, Mapping) or set(sample) != {
+                    "time_s",
+                    "left_heel_contact",
+                    "left_toe_contact",
+                }:
+                    raise ValueError(
+                        "sampled-disabled V25 raw sample schema mismatch."
+                    )
+                sample_time = float(sample["time_s"])
+                if (
+                    not np.isfinite(sample_time)
+                    or abs(sample_time - (previous + index * 0.001)) > 1e-9
+                ):
+                    raise ValueError(
+                        "sampled-disabled V25 raw sample timestamp mismatch."
+                    )
+                if (
+                    type(sample["left_heel_contact"]) is not bool
+                    or type(sample["left_toe_contact"]) is not bool
+                ):
+                    raise TypeError(
+                        "sampled-disabled V25 contact bits must be native booleans."
+                    )
+            self._binary_phase_sensor_previous_time_s = boundary
+            return
+        if mode != "binary_shadow" or not require_batch:
+            return
+        payload = self._binary_phase_fsm.update_policy_step(
+            time_s=float(self.t),
+            previous_time_s=float(self._binary_phase_sensor_previous_time_s),
+            sensor_samples=self._binary_phase_sensor_samples,
+        )
+        # Commit the open-left transport boundary only after full validation and
+        # causal processing succeed.  A malformed batch therefore fails closed.
+        self._binary_phase_fsm_payload = payload
+        self._binary_phase_sensor_previous_time_s = float(self.t)
+
     def _phase_fsm_reward_terms(self) -> dict[str, float]:
         payload = self._phase_fsm_payload
         return {
@@ -3014,6 +3871,45 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "detector_sample_dt_s": float(self.env_cfg.detector_sample_dt_s),
             "event_contract_id": str(self.env_cfg.event_contract_id),
         }
+
+    def _binary_phase_info_payload(self) -> dict:
+        """Publish V20 diagnostics and, in active mode, adapter provenance."""
+
+        mode = str(self.env_cfg.binary_phase_fsm_mode).strip().lower()
+        sampled = bool(
+            getattr(self.env_cfg, "binary_phase_detector_profile_file", None)
+            is not None
+            and str(
+                getattr(self.env_cfg, "binary_phase_detector_profile_file", "")
+            ).strip()
+        )
+        if mode == "disabled" and not sampled:
+            return {}
+        payload = {
+            "binary_phase_fsm_mode": mode,
+            "binary_phase_event_contract_id": str(
+                self.env_cfg.binary_phase_event_contract_id
+            ),
+            "binary_phase_sensor_baseline": copy.deepcopy(
+                getattr(self, "_binary_phase_sensor_baseline", {})
+            ),
+            "binary_phase_sensor_samples": copy.deepcopy(
+                self._binary_phase_sensor_samples
+            ),
+            "binary_phase_fsm_executed": mode in {
+                "binary_shadow",
+                "binary_active",
+            },
+        }
+        if mode in {"binary_shadow", "binary_active"}:
+            payload["binary_phase_fsm"] = copy.deepcopy(
+                self._binary_phase_fsm_payload
+            )
+        if mode == "binary_active":
+            payload["binary_phase_active_adapter"] = copy.deepcopy(
+                self._binary_phase_active_adapter_payload
+            )
+        return payload
 
     def _bio_context_coords(self) -> Iterable[str]:
         # The prosthesis is on the left side, but the left hip remains a

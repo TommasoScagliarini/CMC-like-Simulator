@@ -26,8 +26,13 @@ from typing import Any, Mapping, Sequence
 
 EXPERIMENTAL_PHASE_MODE = "event_anchored_completed_segment_experimental"
 CAUSAL_DELAYED_PHASE_MODE = "event_anchored_causal_delayed_experimental"
-TWO_SENSOR_EVENT_CONTRACT_ID = (
-    "primary_grf_split_v1+two_sensor_highrate_v1"
+TWO_SENSOR_EVENT_CONTRACT_ID = "primary_grf_split_v1+two_sensor_highrate_v1"
+V26_SOURCE = "binary_phase_fsm_v26"
+V26_EVENT_CONTRACT_ID = "binary_point_v25+heel_qualified_fsm_v2"
+V26_ACTOR_EVENT_SOURCE = "binary_active_v26"
+V26_BINARY_ACTIVE_MODE = "binary_active"
+_SUPPORTED_CAUSAL_EVENT_CONTRACT_IDS = frozenset(
+    {TWO_SENSOR_EVENT_CONTRACT_ID, V26_EVENT_CONTRACT_ID}
 )
 _TIME_EPS = 1e-12
 
@@ -377,13 +382,187 @@ class CausalMorphologyUpdate:
     resolved_samples: tuple[ResolvedCausalMorphologySample, ...] = ()
     dropped_sample_count: int = 0
     dropped_pending_sample_count: int = 0
+    dropped_wait_hs_sample_count: int = 0
     drop_reason: str = ""
     pending_sample_count: int = 0
+    cancelled_transition_count: int = 0
+    timeout_transition_count: int = 0
     total_resolved_sample_count: int = 0
     total_dropped_sample_count: int = 0
+    total_cancelled_transition_count: int = 0
     terminal_flushed: bool = False
     failed_closed: bool = False
     failure_reason: str = ""
+
+
+@dataclass(frozen=True)
+class V26MorphologyRuntimeInput:
+    """Validated V26 journals consumed by the reward-only morphology buffer.
+
+    The actor FSM is authoritative for accepted transitions.  The binary V26
+    payload contributes only the still-pending debounce candidate and its
+    cancellation journal; neither raw detector edges nor analog GRF may create
+    a morphology anchor.
+    """
+
+    accepted_transitions: tuple[dict[str, Any], ...]
+    detector_transitions: tuple[dict[str, Any], ...]
+    pending_transition: dict[str, Any] | None
+    cancelled_transitions: tuple[dict[str, Any], ...]
+    actor_state_name: str
+    actor_state_id: int
+    partial_stance_active: bool
+    timeout_exceeded: bool
+
+
+def extract_v26_morphology_runtime(
+    info: Mapping[str, Any],
+) -> V26MorphologyRuntimeInput:
+    """Validate and copy the exact V26/actor journals published by the env.
+
+    This is deliberately stricter than a permissive diagnostic reader.  A
+    causal reward must never silently fall back to legacy/two-sensor events or
+    manufacture a pending onset when the frozen V26 payload is unavailable.
+    """
+
+    if not isinstance(info, Mapping):
+        raise ValueError("v26_runtime_info_not_mapping")
+    if str(info.get("binary_phase_fsm_mode", "") or "") != V26_BINARY_ACTIVE_MODE:
+        raise ValueError("v26_binary_active_mode_required")
+    if (
+        str(info.get("binary_phase_event_contract_id", "") or "")
+        != V26_EVENT_CONTRACT_ID
+    ):
+        raise ValueError("v26_top_level_event_contract_mismatch")
+
+    binary = info.get("binary_phase_fsm")
+    if not isinstance(binary, Mapping):
+        raise ValueError("v26_binary_payload_missing")
+    if str(binary.get("source", "") or "") != V26_SOURCE:
+        raise ValueError("v26_binary_source_mismatch")
+    if str(binary.get("event_contract_id", "") or "") != V26_EVENT_CONTRACT_ID:
+        raise ValueError("v26_binary_event_contract_mismatch")
+
+    phase = info.get("phase_fsm")
+    if not isinstance(phase, Mapping):
+        raise ValueError("v26_actor_payload_missing")
+    if str(phase.get("event_source", "") or "") != V26_ACTOR_EVENT_SOURCE:
+        raise ValueError("v26_actor_event_source_mismatch")
+    try:
+        state_id_float = float(phase["state_id"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("v26_actor_state_invalid") from exc
+    if not math.isfinite(state_id_float) or not state_id_float.is_integer():
+        raise ValueError("v26_actor_state_invalid")
+    state_id = int(state_id_float)
+    expected_state_names = {
+        0: "WAIT_HS",
+        1: "STANCE_AFTER_HS",
+        2: "SWING_AFTER_TO",
+        3: "VALID_CYCLE_COMPLETED",
+        4: "TIMEOUT",
+        5: "INVALID_EVENT",
+    }
+    state_name = str(phase.get("state_name", "") or "")
+    if state_name != expected_state_names.get(state_id):
+        raise ValueError("v26_actor_state_name_mismatch")
+
+    accepted_raw = phase.get("accepted_transitions_this_step", ())
+    accepted = _copy_mapping_sequence(
+        accepted_raw,
+        "v26_actor_accepted_transitions_invalid",
+    )
+    detector_transitions = _copy_mapping_sequence(
+        binary.get("events_this_step", ()),
+        "v26_detector_transition_journal_invalid",
+    )
+    for detector_transition in detector_transitions:
+        if str(detector_transition.get("source", "") or "") != V26_SOURCE:
+            raise ValueError("v26_detector_transition_source_mismatch")
+        if (
+            str(detector_transition.get("event_contract_id", "") or "")
+            != V26_EVENT_CONTRACT_ID
+        ):
+            raise ValueError("v26_detector_transition_contract_mismatch")
+    for actor_transition in accepted:
+        event = str(actor_transition.get("event", "") or "").strip().lower()
+        if event == "timeout":
+            continue
+        try:
+            actor_onset = float(actor_transition["event_time_s"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("v26_actor_accepted_transition_invalid") from exc
+        matched = False
+        for detector_transition in detector_transitions:
+            try:
+                detector_onset = float(detector_transition["event_time_s"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if (
+                str(detector_transition.get("event", "") or "").strip().lower() == event
+                and math.isfinite(actor_onset)
+                and math.isfinite(detector_onset)
+                and abs(actor_onset - detector_onset) <= _TIME_EPS
+            ):
+                matched = True
+                break
+        if not matched:
+            raise ValueError("v26_actor_transition_without_detector_event")
+    pending_raw = binary.get("pending_event")
+    if pending_raw is None:
+        pending = None
+    elif isinstance(pending_raw, Mapping):
+        pending = dict(pending_raw)
+    else:
+        raise ValueError("v26_pending_transition_invalid")
+    cancellations = _copy_mapping_sequence(
+        binary.get("candidate_cancellations_this_step", ()),
+        "v26_cancellation_journal_invalid",
+    )
+
+    try:
+        partial_value = float(phase.get("sensor_partial_stance_active", 0.0))
+        timeout_value = float(phase.get("timeout_exceeded", 0.0))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("v26_actor_flags_invalid") from exc
+    if (
+        not math.isfinite(partial_value)
+        or partial_value not in {0.0, 1.0}
+        or not math.isfinite(timeout_value)
+        or timeout_value not in {0.0, 1.0}
+    ):
+        raise ValueError("v26_actor_flags_invalid")
+    partial = bool(partial_value)
+    timed_out = bool(timeout_value)
+    if partial and state_name != "STANCE_AFTER_HS":
+        raise ValueError("v26_partial_stance_state_mismatch")
+    if timed_out != (state_name == "TIMEOUT"):
+        raise ValueError("v26_timeout_state_mismatch")
+
+    return V26MorphologyRuntimeInput(
+        accepted_transitions=accepted,
+        detector_transitions=detector_transitions,
+        pending_transition=pending,
+        cancelled_transitions=cancellations,
+        actor_state_name=state_name,
+        actor_state_id=state_id,
+        partial_stance_active=partial,
+        timeout_exceeded=timed_out,
+    )
+
+
+def _copy_mapping_sequence(
+    value: Any,
+    error_reason: str,
+) -> tuple[dict[str, Any], ...]:
+    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Sequence):
+        raise ValueError(error_reason)
+    copied: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, Mapping):
+            raise ValueError(error_reason)
+        copied.append(dict(item))
+    return tuple(copied)
 
 
 class CausalDelayedMorphologyBuffer:
@@ -440,10 +619,10 @@ class CausalDelayedMorphologyBuffer:
             raise ValueError("max_samples must be at least 2")
         self.max_samples = max_samples_i
         contract = str(event_contract_id or "").strip()
-        if contract != TWO_SENSOR_EVENT_CONTRACT_ID:
+        if contract not in _SUPPORTED_CAUSAL_EVENT_CONTRACT_IDS:
             raise ValueError(
-                "event_contract_id must be "
-                f"{TWO_SENSOR_EVENT_CONTRACT_ID!r}"
+                "event_contract_id must select a supported frozen causal "
+                "detector contract"
             )
         self.event_contract_id = contract
         self.reset()
@@ -456,6 +635,7 @@ class CausalDelayedMorphologyBuffer:
         self._last_pending: tuple[str, float] | None = None
         self._total_resolved_sample_count = 0
         self._total_dropped_sample_count = 0
+        self._total_cancelled_transition_count = 0
         self._failed_reason = ""
         self._episode_ended = False
 
@@ -471,6 +651,17 @@ class CausalDelayedMorphologyBuffer:
     def pending_sample_count(self) -> int:
         return len(self._samples)
 
+    def fail_closed(
+        self,
+        reason: str,
+        *,
+        rejected_samples: int = 0,
+    ) -> CausalMorphologyUpdate:
+        """Permanently disable settlement after an external contract failure."""
+        if self._failed_reason:
+            return self._snapshot(failed_closed=True)
+        return self._fail_closed(reason, rejected_samples=rejected_samples)
+
     def update(
         self,
         *,
@@ -478,8 +669,12 @@ class CausalDelayedMorphologyBuffer:
         knee_rad: float,
         ankle_rad: float,
         accepted_transitions: Sequence[Mapping[str, Any]] | None,
+        confirmed_detector_transitions: Sequence[Mapping[str, Any]] | None = None,
         pending_transition: Mapping[str, Any] | None = None,
+        cancelled_transitions: Sequence[Mapping[str, Any]] | None = None,
         episode_ended: bool = False,
+        actor_state_name: str | None = None,
+        partial_stance_active: bool = False,
         stance_duration_s: float | None = None,
         swing_duration_s: float | None = None,
     ) -> CausalMorphologyUpdate:
@@ -509,13 +704,39 @@ class CausalDelayedMorphologyBuffer:
                 self.nominal_swing_duration_s,
                 "swing_duration_s",
             )
-            anchors = self._parse_anchors(
+            transitions, timeout_count = self._split_transition_batch(
                 accepted_transitions or (),
                 delivered_by_s=sample.time_s,
             )
+            anchors = self._parse_anchors(
+                transitions,
+                delivered_by_s=sample.time_s,
+            )
             pending = self._parse_pending(pending_transition, now_s=sample.time_s)
+            detector_events = self._parse_detector_events(
+                confirmed_detector_transitions or (),
+                delivered_by_s=sample.time_s,
+            )
+            cancellations = self._parse_cancellations(
+                cancelled_transitions or (),
+                now_s=sample.time_s,
+            )
+            runtime_state = self._parse_runtime_state(
+                actor_state_name,
+                partial_stance_active=partial_stance_active,
+            )
             self._validate_anchor_sequence(anchors)
-            pending = self._validate_pending_continuity(pending, anchors)
+            self._validate_runtime_alignment(
+                runtime_state,
+                anchors,
+                timeout_count,
+            )
+            pending = self._validate_pending_continuity(
+                pending,
+                anchors,
+                detector_events,
+                cancellations,
+            )
         except (TypeError, ValueError) as exc:
             return self._fail_closed(str(exc), rejected_samples=1)
 
@@ -547,9 +768,35 @@ class CausalDelayedMorphologyBuffer:
                     ]
             self._anchors.append(anchor)
         self._last_pending = pending
+        cancelled_count = len(cancellations)
+        self._total_cancelled_transition_count += cancelled_count
 
         resolved: list[ResolvedCausalMorphologySample] = []
         cutoff_s = sample.time_s - self.delay_s
+        dropped_wait_hs = 0
+        if not self._anchors and runtime_state in {
+            "WAIT_HS",
+            "PARTIAL_STANCE",
+        }:
+            safe_prefix: list[MorphologySample] = []
+            retained: list[MorphologySample] = []
+            for buffered in self._samples:
+                protected_by_pending = (
+                    pending is not None and buffered.time_s >= pending[1] - _TIME_EPS
+                )
+                if buffered.time_s <= cutoff_s + _TIME_EPS and not protected_by_pending:
+                    safe_prefix.append(buffered)
+                else:
+                    retained.append(buffered)
+            if safe_prefix:
+                dropped_wait_hs = len(safe_prefix)
+                dropped += dropped_wait_hs
+                drop_reasons.append(
+                    "partial_stance_before_anchor"
+                    if runtime_state == "PARTIAL_STANCE"
+                    else "wait_hs_before_anchor"
+                )
+                self._samples = retained
         carry: list[MorphologySample] = []
         for buffered in self._samples:
             if buffered.time_s > cutoff_s + _TIME_EPS:
@@ -573,7 +820,8 @@ class CausalDelayedMorphologyBuffer:
 
         dropped_pending = 0
         terminal_flushed = False
-        if episode_ended:
+        terminal_requested = bool(episode_ended or timeout_count)
+        if terminal_requested:
             terminal_flushed = True
             terminal_resolved: list[ResolvedCausalMorphologySample] = []
             terminal_unresolved = 0
@@ -612,10 +860,14 @@ class CausalDelayedMorphologyBuffer:
             resolved_samples=tuple(resolved),
             dropped_sample_count=dropped,
             dropped_pending_sample_count=dropped_pending,
+            dropped_wait_hs_sample_count=dropped_wait_hs,
             drop_reason="|".join(dict.fromkeys(drop_reasons)),
             pending_sample_count=len(self._samples),
+            cancelled_transition_count=cancelled_count,
+            timeout_transition_count=timeout_count,
             total_resolved_sample_count=self._total_resolved_sample_count,
             total_dropped_sample_count=self._total_dropped_sample_count,
+            total_cancelled_transition_count=(self._total_cancelled_transition_count),
             terminal_flushed=terminal_flushed,
         )
 
@@ -651,6 +903,203 @@ class CausalDelayedMorphologyBuffer:
         name: str,
     ) -> float:
         return default if candidate is None else cls._positive_finite(candidate, name)
+
+    def _split_transition_batch(
+        self,
+        transitions: Sequence[Mapping[str, Any]],
+        *,
+        delivered_by_s: float,
+    ) -> tuple[tuple[Mapping[str, Any], ...], int]:
+        if isinstance(transitions, (str, bytes, bytearray)) or not isinstance(
+            transitions,
+            Sequence,
+        ):
+            raise ValueError("invalid_transition_journal")
+        anchors: list[Mapping[str, Any]] = []
+        timeout_count = 0
+        for transition in transitions:
+            if not isinstance(transition, Mapping):
+                raise ValueError("invalid_transition_record")
+            event = str(transition.get("event", "") or "").strip().lower()
+            if event != "timeout":
+                anchors.append(transition)
+                continue
+            timeout_count += 1
+            if timeout_count > 1:
+                raise ValueError("multiple_timeout_transitions")
+            try:
+                event_time_s = float(transition["event_time_s"])
+                confirmed_time_s = float(transition["confirmed_time_s"])
+                delivered_time_s = float(transition["delivered_time_s"])
+                from_state_id = float(transition["from_state_id"])
+                to_state_id = float(transition["to_state_id"])
+                segment_valid = float(transition["segment_valid"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ValueError("invalid_timeout_transition") from exc
+            if not all(
+                math.isfinite(value)
+                for value in (
+                    event_time_s,
+                    confirmed_time_s,
+                    delivered_time_s,
+                    from_state_id,
+                    to_state_id,
+                    segment_valid,
+                )
+            ):
+                raise ValueError("invalid_timeout_transition")
+            closed = (
+                str(transition.get("closed_segment_type", "") or "").strip().lower()
+            )
+            expected_closed = {1.0: "stance", 2.0: "swing"}.get(from_state_id)
+            if (
+                expected_closed is None
+                or closed != expected_closed
+                or to_state_id != 4.0
+                or segment_valid != 0.0
+                or str(transition.get("opens_segment_type", "") or "").strip()
+            ):
+                raise ValueError("invalid_timeout_transition")
+            if not (
+                event_time_s <= confirmed_time_s + _TIME_EPS
+                and confirmed_time_s <= delivered_time_s + _TIME_EPS
+                and delivered_time_s <= delivered_by_s + _TIME_EPS
+            ):
+                raise ValueError("invalid_timeout_transition")
+        return tuple(anchors), timeout_count
+
+    def _parse_detector_events(
+        self,
+        transitions: Sequence[Mapping[str, Any]],
+        *,
+        delivered_by_s: float,
+    ) -> tuple[tuple[str, float], ...]:
+        if isinstance(transitions, (str, bytes, bytearray)) or not isinstance(
+            transitions,
+            Sequence,
+        ):
+            raise ValueError("invalid_detector_transition_journal")
+        parsed: list[tuple[str, float]] = []
+        for transition in transitions:
+            if not isinstance(transition, Mapping):
+                raise ValueError("invalid_detector_transition_record")
+            event = str(transition.get("event", "") or "").strip().lower()
+            if event not in {"heel_strike", "toe_off"}:
+                raise ValueError("invalid_detector_transition_event")
+            try:
+                onset_s = float(transition["event_time_s"])
+                confirmed_s = float(transition["confirmed_time_s"])
+                delivered_s = float(transition["delivered_time_s"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ValueError("invalid_detector_transition_time") from exc
+            if not all(
+                math.isfinite(value) for value in (onset_s, confirmed_s, delivered_s)
+            ) or not (
+                onset_s <= confirmed_s + _TIME_EPS
+                and confirmed_s <= delivered_s + _TIME_EPS
+                and delivered_s <= delivered_by_s + _TIME_EPS
+            ):
+                raise ValueError("invalid_detector_transition_time")
+            if delivered_s - onset_s > self.delay_s + _TIME_EPS:
+                raise ValueError("detector_transition_exceeds_morphology_delay")
+            if delivered_s - confirmed_s > self.max_delivery_latency_s + _TIME_EPS:
+                raise ValueError("detector_transition_exceeds_delivery_latency")
+            parsed.append((event, onset_s))
+        return tuple(parsed)
+
+    def _parse_cancellations(
+        self,
+        cancellations: Sequence[Mapping[str, Any]],
+        *,
+        now_s: float,
+    ) -> tuple[tuple[str, float, float], ...]:
+        if isinstance(cancellations, (str, bytes, bytearray)) or not isinstance(
+            cancellations,
+            Sequence,
+        ):
+            raise ValueError("invalid_cancellation_journal")
+        parsed: list[tuple[str, float, float]] = []
+        for cancellation in cancellations:
+            if not isinstance(cancellation, Mapping):
+                raise ValueError("invalid_cancellation_record")
+            event = str(cancellation.get("event", "") or "").strip().lower()
+            if event not in {"heel_strike", "toe_off"}:
+                raise ValueError("invalid_cancellation_event")
+            try:
+                onset_s = float(cancellation["event_time_s"])
+                cancelled_s = float(cancellation["cancelled_time_s"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ValueError("invalid_cancellation_time") from exc
+            if (
+                not math.isfinite(onset_s)
+                or not math.isfinite(cancelled_s)
+                or cancelled_s < onset_s - _TIME_EPS
+                or cancelled_s > now_s + _TIME_EPS
+            ):
+                raise ValueError("invalid_cancellation_time")
+            parsed.append((event, onset_s, cancelled_s))
+        parsed.sort(key=lambda item: (item[2], item[1], item[0]))
+        return tuple(parsed)
+
+    @staticmethod
+    def _parse_runtime_state(
+        actor_state_name: str | None,
+        *,
+        partial_stance_active: bool,
+    ) -> str:
+        if type(partial_stance_active) is not bool:
+            raise ValueError("invalid_partial_stance_flag")
+        if actor_state_name is None:
+            if partial_stance_active:
+                raise ValueError("partial_stance_requires_actor_state")
+            return ""
+        state = str(actor_state_name or "").strip().upper()
+        supported = {
+            "WAIT_HS",
+            "STANCE_AFTER_HS",
+            "SWING_AFTER_TO",
+            "VALID_CYCLE_COMPLETED",
+            "TIMEOUT",
+        }
+        if state not in supported:
+            raise ValueError("invalid_actor_runtime_state")
+        if partial_stance_active:
+            if state != "STANCE_AFTER_HS":
+                raise ValueError("partial_stance_state_mismatch")
+            return "PARTIAL_STANCE"
+        return state
+
+    def _validate_runtime_alignment(
+        self,
+        runtime_state: str,
+        new_anchors: Sequence[CausalMorphologyAnchor],
+        timeout_count: int,
+    ) -> None:
+        if not runtime_state:
+            return
+        combined = [*self._anchors, *new_anchors]
+        latest = combined[-1] if combined else None
+        if runtime_state == "WAIT_HS":
+            if latest is not None or timeout_count:
+                raise ValueError("wait_hs_anchor_mismatch")
+            return
+        if runtime_state == "PARTIAL_STANCE":
+            if latest is not None or timeout_count:
+                raise ValueError("partial_stance_anchor_mismatch")
+            return
+        if runtime_state == "TIMEOUT":
+            if timeout_count != 1:
+                raise ValueError("timeout_transition_missing")
+            return
+        if timeout_count:
+            raise ValueError("timeout_runtime_state_mismatch")
+        expected_event = {
+            "STANCE_AFTER_HS": "heel_strike",
+            "VALID_CYCLE_COMPLETED": "heel_strike",
+            "SWING_AFTER_TO": "toe_off",
+        }[runtime_state]
+        if latest is None or latest.event != expected_event:
+            raise ValueError("actor_state_anchor_mismatch")
 
     def _parse_anchors(
         self,
@@ -783,6 +1232,8 @@ class CausalDelayedMorphologyBuffer:
         self,
         pending: tuple[str, float] | None,
         new_anchors: Sequence[CausalMorphologyAnchor],
+        detector_events: Sequence[tuple[str, float]],
+        cancellations: Sequence[tuple[str, float, float]],
     ) -> tuple[str, float] | None:
         previous_pending = self._last_pending
         matched_previous = False
@@ -793,6 +1244,17 @@ class CausalDelayedMorphologyBuffer:
                 and abs(anchor.event_time_s - previous_pending[1]) <= _TIME_EPS
             ):
                 matched_previous = True
+        if previous_pending is not None:
+            matched_previous = matched_previous or any(
+                event == previous_pending[0]
+                and abs(onset_s - previous_pending[1]) <= _TIME_EPS
+                for event, onset_s in detector_events
+            )
+            matched_previous = matched_previous or any(
+                event == previous_pending[0]
+                and abs(onset_s - previous_pending[1]) <= _TIME_EPS
+                for event, onset_s, _cancelled_s in cancellations
+            )
         if previous_pending is not None and not matched_previous:
             if pending is None:
                 raise ValueError("pending_transition_disappeared")
@@ -809,8 +1271,10 @@ class CausalDelayedMorphologyBuffer:
                 for anchor in new_anchors
             ):
                 return None
-            previous = new_anchors[-1] if new_anchors else (
-                self._anchors[-1] if self._anchors else None
+            previous = (
+                new_anchors[-1]
+                if new_anchors
+                else (self._anchors[-1] if self._anchors else None)
             )
             expected = (
                 {"heel_strike", "toe_off"}
@@ -843,9 +1307,7 @@ class CausalDelayedMorphologyBuffer:
         if anchor is None:
             return None
         duration = (
-            stance_duration_s
-            if anchor.segment_type == "stance"
-            else swing_duration_s
+            stance_duration_s if anchor.segment_type == "stance" else swing_duration_s
         )
         progress = float(
             min(1.0, max(0.0, (sample.time_s - anchor.event_time_s) / duration))
@@ -897,6 +1359,7 @@ class CausalDelayedMorphologyBuffer:
             pending_sample_count=len(self._samples),
             total_resolved_sample_count=self._total_resolved_sample_count,
             total_dropped_sample_count=self._total_dropped_sample_count,
+            total_cancelled_transition_count=(self._total_cancelled_transition_count),
             failed_closed=bool(failed_closed or self._failed_reason),
             failure_reason=str(self._failed_reason),
         )
@@ -915,16 +1378,24 @@ def apply_causal_morphology_reward(
     """
     try:
         base = float(base_reward)
-        loss = float(morphology_loss)
         weight = float(morphology_weight)
     except (TypeError, ValueError) as exc:
         raise ValueError("morphology reward inputs must be finite") from exc
-    if not all(math.isfinite(value) for value in (base, loss, weight)):
+    if not math.isfinite(base) or not math.isfinite(weight):
         raise ValueError("morphology reward inputs must be finite")
     if weight < 0.0:
         raise ValueError("morphology_weight must be non-negative")
     if weight == 0.0:
+        # Do not even coerce/evaluate the delayed diagnostic loss on this
+        # branch.  Besides preserving the original float bit-for-bit, this
+        # explicitly prevents IEEE-754 ``0 * NaN`` contamination.
         return base
+    try:
+        loss = float(morphology_loss)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("morphology reward inputs must be finite") from exc
+    if not math.isfinite(loss):
+        raise ValueError("morphology reward inputs must be finite")
     result = base - weight * loss
     if not math.isfinite(result):
         raise ValueError("delayed morphology reward is non-finite")
