@@ -68,6 +68,13 @@ _SUPERVISOR_STATE_FILENAME = "supervisor_state.json"
 _ITERATION_MILESTONE_PREFIX = "milestone_iteration_"
 _ITERATION_MILESTONE_WIDTH = 6
 _MIN_MINIBATCH_MEAN_KL_LOSS_FLOOR = -1.0e-7
+_STANDARD_RL_MODULE_KIND = "standard"
+_V25_RESIDUAL_RL_MODULE_KIND = "primary_split_v25_residual"
+_V25_RESIDUAL_INPUT_COUNT = 33
+_V25_RESIDUAL_ACTION_DIM = 2
+_V25_ACTIVE_EVENT_CONTRACT_ID = (
+    "binary_point_v25+functional_contact_fsm_v1"
+)
 
 
 def _cli_path(value: str | Path) -> Path:
@@ -147,7 +154,14 @@ def _load_reward_json_for_run_name(spec: str | None) -> dict[str, Any]:
     if not spec:
         return {}
     path = _cli_path(spec)
-    text = path.read_text(encoding="utf-8") if path.exists() else spec
+    # A long inline JSON spec can exceed the OS filename limit, in which case
+    # Path.exists() raises OSError (Errno 63 on macOS) instead of returning
+    # False: treat any stat failure as "not a file" and parse the spec inline.
+    try:
+        is_file = path.exists()
+    except OSError:
+        is_file = False
+    text = path.read_text(encoding="utf-8") if is_file else spec
     data = json.loads(text)
     if not isinstance(data, dict):
         raise ValueError("reward override must be a JSON object of RewardConfig fields")
@@ -1174,9 +1188,56 @@ def _optimizer_learning_rates(algo) -> list[Any]:
     return _learner_call_results(algo, _optimizer_learning_rates_on_learner)
 
 
+def _asymmetric_module_selection(
+    args: argparse.Namespace,
+    *,
+    n_actor: int,
+    n_full: int,
+    hiddens: list[int],
+) -> tuple[type, dict[str, Any]]:
+    """Return the explicit custom RLModule class and serialized model config."""
+
+    from asymmetric_rl_module import AsymmetricActorCriticTorchRLModule
+
+    module_class = AsymmetricActorCriticTorchRLModule
+    model_config = {
+        "n_actor": int(n_actor),
+        "n_full": int(n_full),
+        "fcnet_hiddens": list(hiddens),
+        "fcnet_activation": args.fcnet_activation,
+        "freeze_logstd": bool(args.freeze_logstd),
+        "freeze_actor": bool(args.freeze_actor),
+    }
+    if args.rl_module_kind == _V25_RESIDUAL_RL_MODULE_KIND:
+        from primary_split_v25_residual import (
+            PrimarySplitV25ResidualTorchRLModule,
+        )
+
+        module_class = PrimarySplitV25ResidualTorchRLModule
+        model_config.update(
+            {
+                "primary_split_v25_residual_input_mean": list(
+                    args.primary_split_v25_residual_input_mean
+                ),
+                "primary_split_v25_residual_input_std": list(
+                    args.primary_split_v25_residual_input_std
+                ),
+                "primary_split_v25_residual_limits": list(
+                    args.primary_split_v25_residual_limits
+                ),
+                "primary_split_v25_residual_init_seed": int(
+                    args.primary_split_v25_residual_init_seed
+                ),
+                "primary_split_v25_residual_reset_bypass": False,
+            }
+        )
+    return module_class, model_config
+
+
 def build_config(
     args: argparse.Namespace, reward_overrides: dict | None = None
 ) -> PPOConfig:
+    _validate_rl_module_args(args)
     env_factory.register_cmc_env()
 
     env_config = {
@@ -1229,12 +1290,20 @@ def build_config(
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "binary_phase_detector_profile_file": (
+            args.binary_phase_detector_profile
+        ),
         "phase_fsm_input_mode": args.phase_fsm_input_mode,
         "phase_sensor_on_threshold_n": args.phase_sensor_on_threshold_n,
         "phase_sensor_off_threshold_n": args.phase_sensor_off_threshold_n,
         "phase_sensor_dwell_s": args.phase_sensor_dwell_s,
         "detector_sample_dt_s": args.detector_sample_dt_s,
         "event_contract_id": args.event_contract_id,
+        "binary_phase_fsm_mode": args.binary_phase_fsm_mode,
+        "binary_phase_debounce_s": args.binary_phase_debounce_s,
+        "binary_phase_event_contract_id": (
+            args.binary_phase_event_contract_id
+        ),
         "include_online_grf_observation": args.online_grf_observation,
         "critic_privileged_observation": args.asymmetric_actor_critic,
         "prescribed_grf_disabled_sides": args.disable_prescribed_grf_side,
@@ -1332,7 +1401,6 @@ def build_config(
         # the full vector to the value head. n_actor/n_full come from a one-off
         # probe env (single source of truth for the feature layout).
         from ray.rllib.core.rl_module.rl_module import RLModuleSpec
-        from asymmetric_rl_module import AsymmetricActorCriticTorchRLModule
         from osim_trj_cmc_like import CMCLikeProsthesisTrajectoryEnv
 
         probe = CMCLikeProsthesisTrajectoryEnv(
@@ -1349,17 +1417,16 @@ def build_config(
         args._target_observation_feature_names = observation_feature_names
         args._target_n_actor = n_actor
         args._target_n_full = n_full
+        module_class, model_config = _asymmetric_module_selection(
+            args,
+            n_actor=n_actor,
+            n_full=n_full,
+            hiddens=hiddens,
+        )
         config = config.rl_module(
             rl_module_spec=RLModuleSpec(
-                module_class=AsymmetricActorCriticTorchRLModule,
-                model_config={
-                    "n_actor": n_actor,
-                    "n_full": n_full,
-                    "fcnet_hiddens": hiddens,
-                    "fcnet_activation": args.fcnet_activation,
-                    "freeze_logstd": bool(args.freeze_logstd),
-                    "freeze_actor": bool(args.freeze_actor),
-                },
+                module_class=module_class,
+                model_config=model_config,
             )
         )
     else:
@@ -2151,6 +2218,17 @@ def run(args: argparse.Namespace) -> dict:
             else None
         ),
         "freeze_logstd": bool(args.freeze_logstd),
+        "rl_module_kind": str(args.rl_module_kind),
+        "primary_split_v25_residual": (
+            {
+                "input_mean": list(args.primary_split_v25_residual_input_mean),
+                "input_std": list(args.primary_split_v25_residual_input_std),
+                "limits": list(args.primary_split_v25_residual_limits),
+                "init_seed": int(args.primary_split_v25_residual_init_seed),
+            }
+            if args.rl_module_kind == _V25_RESIDUAL_RL_MODULE_KIND
+            else None
+        ),
         "warm_start_report": (
             str(warm_start_report_path) if warm_start_report_path is not None else None
         ),
@@ -2236,12 +2314,20 @@ def run(args: argparse.Namespace) -> dict:
         "grf_mode": args.grf_mode,
         "online_grf_profile_file": args.online_grf_profile,
         "online_grf_detector_profile_file": args.online_grf_detector_profile,
+        "binary_phase_detector_profile_file": (
+            args.binary_phase_detector_profile
+        ),
         "phase_fsm_input_mode": args.phase_fsm_input_mode,
         "phase_sensor_on_threshold_n": float(args.phase_sensor_on_threshold_n),
         "phase_sensor_off_threshold_n": float(args.phase_sensor_off_threshold_n),
         "phase_sensor_dwell_s": float(args.phase_sensor_dwell_s),
         "detector_sample_dt_s": float(args.detector_sample_dt_s),
         "event_contract_id": str(args.event_contract_id),
+        "binary_phase_fsm_mode": str(args.binary_phase_fsm_mode),
+        "binary_phase_debounce_s": float(args.binary_phase_debounce_s),
+        "binary_phase_event_contract_id": str(
+            args.binary_phase_event_contract_id
+        ),
         "online_grf_observation": bool(args.online_grf_observation),
         "gait_clock_enable": bool(args.gait_clock_enable),
         "deployable_minimal_observation": bool(args.deployable_minimal_observation),
@@ -3422,6 +3508,46 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument(
+        "--rl-module-kind",
+        choices=(_STANDARD_RL_MODULE_KIND, _V25_RESIDUAL_RL_MODULE_KIND),
+        default=_STANDARD_RL_MODULE_KIND,
+        help=(
+            "RLModule topology. 'standard' preserves the historical default; "
+            "'primary_split_v25_residual' selects the explicit 35-column H0 + "
+            "bounded V25 residual policy."
+        ),
+    )
+    p.add_argument(
+        "--primary-split-v25-residual-input-mean",
+        type=float,
+        nargs="+",
+        default=None,
+        metavar="VALUE",
+        help="Exactly 33 frozen normalization means for actor columns 2:35.",
+    )
+    p.add_argument(
+        "--primary-split-v25-residual-input-std",
+        type=float,
+        nargs="+",
+        default=None,
+        metavar="VALUE",
+        help="Exactly 33 positive frozen normalization scales.",
+    )
+    p.add_argument(
+        "--primary-split-v25-residual-limits",
+        type=float,
+        nargs="+",
+        default=None,
+        metavar="VALUE",
+        help="Exactly two positive residual action-mean limits.",
+    )
+    p.add_argument(
+        "--primary-split-v25-residual-init-seed",
+        type=int,
+        default=None,
+        help="Frozen non-negative initialization seed for the V25 residual MLP.",
+    )
+    p.add_argument(
         "--freeze-actor",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -3537,6 +3663,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument(
+        "--binary-phase-detector-profile",
+        default=None,
+        help=(
+            "Optional force-free V19 heel/toe point profile. It is consumed "
+            "only by the independent binary shadow FSM."
+        ),
+    )
+    p.add_argument(
         "--phase-fsm-input-mode",
         choices=("legacy_events", "shadow", "two_sensor"),
         default="legacy_events",
@@ -3550,6 +3684,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--phase-sensor-dwell-s", type=float, default=0.03)
     p.add_argument("--detector-sample-dt-s", type=float, default=0.001)
     p.add_argument("--event-contract-id", default="legacy_events_v1")
+    p.add_argument(
+        "--binary-phase-fsm-mode",
+        choices=("disabled", "binary_shadow", "binary_active"),
+        default="disabled",
+    )
+    p.add_argument("--binary-phase-debounce-s", type=float, default=0.005)
+    p.add_argument(
+        "--binary-phase-event-contract-id",
+        default="binary_events_disabled_v1",
+    )
     p.add_argument(
         "--grf-penetration-penalty-threshold-m",
         type=float,
@@ -3733,6 +3877,95 @@ def _validate_warm_start_args(args: argparse.Namespace) -> None:
             )
 
 
+def _validate_rl_module_args(args: argparse.Namespace) -> None:
+    """Validate the explicit RLModule topology without importing Ray or Torch."""
+
+    kind = str(
+        getattr(args, "rl_module_kind", _STANDARD_RL_MODULE_KIND)
+    ).strip().lower()
+    if kind not in {_STANDARD_RL_MODULE_KIND, _V25_RESIDUAL_RL_MODULE_KIND}:
+        raise SystemExit(f"unsupported --rl-module-kind: {kind!r}")
+    args.rl_module_kind = kind
+    field_specs = (
+        ("primary_split_v25_residual_input_mean", _V25_RESIDUAL_INPUT_COUNT, False),
+        ("primary_split_v25_residual_input_std", _V25_RESIDUAL_INPUT_COUNT, True),
+        ("primary_split_v25_residual_limits", _V25_RESIDUAL_ACTION_DIM, True),
+    )
+    configured = [
+        name
+        for name, _, _ in field_specs
+        if getattr(args, name, None) is not None
+    ]
+    seed = getattr(args, "primary_split_v25_residual_init_seed", None)
+    if kind == _STANDARD_RL_MODULE_KIND:
+        if configured or seed is not None:
+            raise SystemExit(
+                "V25 residual parameters require "
+                "--rl-module-kind primary_split_v25_residual"
+            )
+        return
+
+    if not bool(getattr(args, "asymmetric_actor_critic", False)):
+        raise SystemExit(
+            "--rl-module-kind primary_split_v25_residual requires "
+            "--asymmetric-actor-critic"
+        )
+    if bool(getattr(args, "warm_start", False)) or bool(
+        getattr(args, "warm_start_raw", False)
+    ):
+        raise SystemExit(
+            "the V25 residual module must be initialized from its qualified full "
+            "policy/checkpoint; historical warm-start modes would omit residual "
+            "state"
+        )
+    expected_runtime = {
+        "phase_fsm_input_mode": "legacy_events",
+        "event_contract_id": "legacy_events_v1",
+        "binary_phase_fsm_mode": "binary_active",
+        "binary_phase_event_contract_id": _V25_ACTIVE_EVENT_CONTRACT_ID,
+    }
+    drifted = {
+        name: getattr(args, name, None)
+        for name, expected in expected_runtime.items()
+        if getattr(args, name, None) != expected
+    }
+    if drifted:
+        raise SystemExit(
+            "primary_split_v25_residual requires the frozen V25 active event "
+            f"routing; incompatible values: {drifted}"
+        )
+    if not str(getattr(args, "binary_phase_detector_profile", "") or "").strip():
+        raise SystemExit(
+            "primary_split_v25_residual requires an explicit frozen V25 binary "
+            "detector profile"
+        )
+    if not str(getattr(args, "online_grf_detector_profile", "") or "").strip():
+        raise SystemExit(
+            "primary_split_v25_residual requires the frozen legacy analog "
+            "detector profile used by the active V25 transport contract"
+        )
+    for name, length, positive in field_specs:
+        raw = getattr(args, name, None)
+        if raw is None:
+            raise SystemExit(f"--{name.replace('_', '-')} is required")
+        try:
+            values = [float(value) for value in raw]
+        except (TypeError, ValueError) as exc:
+            raise SystemExit(f"--{name.replace('_', '-')} must be numeric") from exc
+        if len(values) != length or any(not math.isfinite(value) for value in values):
+            raise SystemExit(
+                f"--{name.replace('_', '-')} must contain exactly {length} "
+                "finite values"
+            )
+        if positive and any(value <= 0.0 for value in values):
+            raise SystemExit(f"--{name.replace('_', '-')} values must be > 0")
+        setattr(args, name, values)
+    if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
+        raise SystemExit(
+            "--primary-split-v25-residual-init-seed must be a non-negative integer"
+        )
+
+
 def _validate_start_sampling_args(args: argparse.Namespace) -> None:
     args._start_sampling_contract = None
     if not getattr(args, "exact_start_sampling", False):
@@ -3784,6 +4017,7 @@ def _validate_kl_guard_args(args: argparse.Namespace) -> None:
 
 def main() -> None:
     args = parse_args()
+    _validate_rl_module_args(args)
     _validate_warm_start_args(args)
     _validate_start_sampling_args(args)
     _validate_kl_guard_args(args)
