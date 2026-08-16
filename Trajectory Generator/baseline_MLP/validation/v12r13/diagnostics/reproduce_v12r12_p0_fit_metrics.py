@@ -4,11 +4,14 @@ Imports the frozen fitter and calls its pure functions only. No canonical
 write, no retry: the deterministic seed/schedule reproduce the exact failed
 fit so the unpersisted metrics can be recovered for successor design.
 """
+
 import json
 import sys
 from pathlib import Path
 
-NS = Path("/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v12r12")
+NS = Path(
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v12r12"
+)
 sys.path.insert(0, str(NS))
 
 import h0_v12r12_masked_teacher_fitter as fitter  # noqa: E402

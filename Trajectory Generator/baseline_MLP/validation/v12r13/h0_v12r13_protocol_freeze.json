@@ -1,0 +1,185 @@
+{
+  "authorized_stages": [
+    "p0",
+    "p2"
+  ],
+  "design": {
+    "architecture": {
+      "activation": "tanh",
+      "hidden_dims": [
+        256,
+        256
+      ],
+      "input_dim": 35,
+      "logits_dim": 4
+    },
+    "counts": {
+      "actor_fits": 1,
+      "actor_updates": 1,
+      "critic_updates": 0,
+      "environment_resets": 0,
+      "environment_steps": 0,
+      "offline_teacher_queries": 0,
+      "policy_rollouts": 0,
+      "ppo_updates": 0
+    },
+    "fit": {
+      "adamw_boundaries": [
+        1500,
+        2500,
+        3000
+      ],
+      "adamw_epochs": 3000,
+      "adamw_rates": [
+        0.0003,
+        0.0001,
+        3e-05
+      ],
+      "adamw_weight_decay": 1e-07,
+      "lbfgs_lr": 0.7,
+      "lbfgs_max_eval": 4500,
+      "lbfgs_max_iter": 3000,
+      "nonreset_sample_weight": 1.0,
+      "objective": "reset_weighted_full_batch_mean_squared_error_only",
+      "replica": false,
+      "reset_sample_weight": 100.0,
+      "retry": false,
+      "seed": 20260815,
+      "single_fixed_fit_per_stage": true,
+      "sweep": false
+    },
+    "fit_contract_id": "h0_v12r13_masked_v8r1p1_safe_teacher_w256_v1",
+    "gates": {
+      "fresh_critic_preserved": true,
+      "global_max_abs_error": 0.06,
+      "global_rmse": 0.005,
+      "no_optimizer_state_imported": true,
+      "per_case_and_action_rmse": 0.0055,
+      "per_trajectory_and_action_rmse": 0.0055,
+      "predicted_mean_max_abs_strict": 0.95,
+      "reset_max_abs_error": 0.003,
+      "save_reload_exact": true,
+      "temporal_first_difference_max_abs_error": 0.08,
+      "transition_window_max_abs_error": 0.03,
+      "transplant_actor_exact": true
+    },
+    "input_mask": {
+      "active_columns": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "first_layer_mask_persists_at_runtime": true,
+      "masked_columns": [
+        0,
+        1,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "masked_features": [
+        "gait_phase_sin",
+        "gait_phase_cos",
+        "online_left_normal_grf_bw",
+        "online_left_in_contact",
+        "online_left_heel_strike",
+        "online_left_toe_off",
+        "online_left_gait_phase_sin",
+        "online_left_gait_phase_cos",
+        "online_left_cycle_duration_s",
+        "phase_fsm_wait_hs",
+        "phase_fsm_stance_after_hs",
+        "phase_fsm_swing_after_to",
+        "phase_expected_hs",
+        "phase_expected_to",
+        "phase_stance_elapsed_norm",
+        "phase_swing_elapsed_norm",
+        "phase_cycle_progress_credit"
+      ]
+    },
+    "protocol_id": "AB06_H0_V12R13_V26_INVARIANT_SAFE_TEACHER",
+    "source_corpus_id": "H0_V8R1P1_V26_ACTIVE_TEACHER_ACTION_REPLAY",
+    "source_h0_id": "H0_MARKOV35_PHASE_ALIGNED_SIGMA0005_ITER1_RETRY",
+    "stages": {
+      "p0": {
+        "candidate_dirname": "rl_module_p0_masked_safe_teacher",
+        "collector_only": true,
+        "initialization": "same_byte_locked_h0_not_prior_candidate",
+        "next_stage": "RUN_P1_CANDIDATE_EXPOSED",
+        "non_promotable": true,
+        "normalization_scope": "entire_stage_corpus_active18",
+        "output": "Trajectory Generator/baseline_MLP/validation/v12r13/h0_v12r13_run_20260816/p0_fit",
+        "row_count": 3000,
+        "trajectory_count": 6
+      },
+      "p2": {
+        "candidate_dirname": "rl_module_p2_masked_candidate_exposed",
+        "collector_only": false,
+        "initialization": "same_byte_locked_h0_not_prior_candidate",
+        "next_stage": "FREEZE_THEN_RUN_P3_PLUS_0P20_PURE",
+        "non_promotable": false,
+        "normalization_scope": "entire_stage_corpus_active18",
+        "output": "Trajectory Generator/baseline_MLP/validation/v12r13/h0_v12r13_run_20260816/p2_fit",
+        "row_count": 12000,
+        "trajectory_count": 24
+      }
+    },
+    "topology_id": "STANDARD_ACTOR_35_256_256_4_TANH"
+  },
+  "design_sha256": "70f29d9aa5efa951d430de5fcd256b51a35809ab81fbf3ac6d3b96846044b72a",
+  "fit_contract_id": "h0_v12r13_masked_v8r1p1_safe_teacher_w256_v1",
+  "passed": true,
+  "production_fit_executed": false,
+  "production_source_records": {
+    "builder": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r13/h0_v12r13_masked_teacher_fitter.py",
+      "sha256": "2b0c73d8afe2ded994de2e8a6c4e31fd89249a10f534ebf2b5a2f903ed3ccc0d",
+      "size_bytes": 137410
+    },
+    "package": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r13/__init__.py",
+      "sha256": "bc4014f274c1cee5c3772c1a7353547f0ed245e10c6048478a910a0d4d096250",
+      "size_bytes": 69
+    },
+    "runner": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r13/run_h0_v12r13_masked_teacher_fit.py",
+      "sha256": "01a21442f2b1671731d849e65d91aa4373b8c5fa97d33433859eb0bb36b0c5ca",
+      "size_bytes": 3914
+    },
+    "tests": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v12r13/test_h0_v12r13_masked_teacher_fitter.py",
+      "sha256": "c85a0a1311aa8b34e6935e3d5fcfd7d6c159ce623787768120a5ab493320527a",
+      "size_bytes": 46071
+    }
+  },
+  "protocol_id": "AB06_H0_V12R13_V26_INVARIANT_SAFE_TEACHER",
+  "schema_version": 1213,
+  "status": "FROZEN_H0_V12R13_MASKED_TEACHER_FIT_PROTOCOL"
+}
