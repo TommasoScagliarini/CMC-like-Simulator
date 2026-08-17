@@ -71,6 +71,7 @@ from config import SimulatorConfig
 from binary_phase_adapter import (
     BINARY_ACTIVE_EVENT_CONTRACT_ID,
     BinaryPhaseActiveAdapter,
+    BinaryPhaseTransferError,
 )
 from binary_phase_adapter_v26 import BinaryPhaseActiveAdapterV26
 from binary_phase_fsm import BinaryPhaseFSM, BinaryPhaseFSMConfig
@@ -373,6 +374,13 @@ class CMCEnvConfig:
     # after the transactional V20 -> ProstheticPhaseFSM adapter.  Neither mode
     # changes the actor observation schema.
     binary_phase_fsm_mode: str = "disabled"
+    # How the ACTIVE path treats a behaviour-dependent actor-FSM rejection of
+    # a V20/V26 event. "raise" (default) preserves the fail-closed
+    # qualification semantics (worker-fatal). "terminate" ends the episode as
+    # a true MDP termination (end_reason="invalid_binary_event") like the
+    # penetration guard. "reject_continue" drops the candidate commit and
+    # keeps the previous phase state (closest to the legacy timeout spirit).
+    binary_phase_invalid_event_policy: str = "raise"
     binary_phase_debounce_s: float = 0.005
     binary_phase_event_contract_id: str = "binary_events_disabled_v1"
     # Sound-leg imitation target (used only when reward_function shapes the reward
@@ -1345,6 +1353,14 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 "binary_phase_fsm_mode must be 'disabled', 'binary_shadow', "
                 "or 'binary_active'."
             )
+        invalid_event_policy = str(
+            getattr(self.env_cfg, "binary_phase_invalid_event_policy", "raise")
+        ).strip().lower()
+        if invalid_event_policy not in {"raise", "terminate", "reject_continue"}:
+            raise ValueError(
+                "binary_phase_invalid_event_policy must be 'raise', "
+                "'terminate', or 'reject_continue'."
+            )
         if binary_mode == "binary_shadow":
             _validate_binary_phase_shadow_configuration(
                 self.env_cfg,
@@ -1866,10 +1882,21 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         # - unsafe states belong to the task/MDP and are true terminations;
         # - time limits and numerical failures are external truncations.
         # Unsafe events take priority if they coincide with the horizon.
+        invalid_event_terminal = bool(
+            getattr(self, "_binary_phase_invalid_event_terminal", False)
+        )
+        self._binary_phase_invalid_event_terminal = False
         if unsafe_reason is not None:
             terminated = True
             truncated = False
             end_reason = unsafe_reason
+        elif invalid_event_terminal:
+            # Training semantics (a): a behaviour-dependent V26 event
+            # rejection is a task failure of the MDP, exactly like the
+            # penetration guard - never a worker-fatal exception.
+            terminated = True
+            truncated = False
+            end_reason = "invalid_binary_event"
         elif wall_timeout:
             terminated = False
             truncated = True
@@ -1889,7 +1916,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         safety_loss = (
             float(self.env_cfg.truncation_penalty)
-            if unsafe_reason is not None
+            if (unsafe_reason is not None or invalid_event_terminal)
             else 0.0
         )
         if safety_loss:
@@ -3097,6 +3124,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._phase_sensor_samples = []
         self._phase_sensor_previous_time_s = float(self.t)
         self._binary_phase_sensor_samples = []
+        self._binary_phase_invalid_event_terminal = False
+        self._binary_phase_invalid_event_count = 0
         self._binary_phase_sensor_baseline = {}
         self._binary_phase_sensor_previous_time_s = float(self.t)
         self._binary_phase_active_adapter_payload = {}
@@ -3549,17 +3578,35 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         knee_q = float(sv.get(self.ctx.q_sv_idx["pros_knee_angle"]))
         ankle_q = float(sv.get(self.ctx.q_sv_idx["pros_ankle_angle"]))
 
-        result = self._binary_phase_active_adapter.advance(
-            binary_fsm=self._binary_phase_fsm,
-            phase_fsm=self._phase_fsm,
-            time_s=float(self.t),
-            previous_time_s=float(self._binary_phase_sensor_previous_time_s),
-            sensor_samples=self._binary_phase_sensor_samples,
-            normal_force_bw=normal_force_n / body_weight_n,
-            in_contact=bool(in_contact_raw),
-            prosthetic_knee_angle_rad=knee_q,
-            prosthetic_ankle_angle_rad=ankle_q,
-        )
+        try:
+            result = self._binary_phase_active_adapter.advance(
+                binary_fsm=self._binary_phase_fsm,
+                phase_fsm=self._phase_fsm,
+                time_s=float(self.t),
+                previous_time_s=float(self._binary_phase_sensor_previous_time_s),
+                sensor_samples=self._binary_phase_sensor_samples,
+                normal_force_bw=normal_force_n / body_weight_n,
+                in_contact=bool(in_contact_raw),
+                prosthetic_knee_angle_rad=knee_q,
+                prosthetic_ankle_angle_rad=ankle_q,
+            )
+        except BinaryPhaseTransferError:
+            policy = str(
+                getattr(
+                    self.env_cfg, "binary_phase_invalid_event_policy", "raise"
+                )
+            ).strip().lower()
+            if policy not in {"terminate", "reject_continue"}:
+                raise
+            # The adapter is transactional: nothing was committed. Keep every
+            # phase surface unchanged for this boundary, advance only the
+            # sensor cursor so the next 10 ms window stays well-formed, and
+            # either flag a true MDP termination or continue.
+            self._binary_phase_invalid_event_count += 1
+            if policy == "terminate":
+                self._binary_phase_invalid_event_terminal = True
+            self._binary_phase_sensor_previous_time_s = float(self.t)
+            return
 
         # Discard every left legacy event by construction.  Validate the right
         # stream before combining it with accepted V20-derived transitions so a

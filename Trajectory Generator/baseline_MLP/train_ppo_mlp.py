@@ -1301,6 +1301,9 @@ def build_config(
         "event_contract_id": args.event_contract_id,
         "binary_phase_fsm_mode": args.binary_phase_fsm_mode,
         "binary_phase_debounce_s": args.binary_phase_debounce_s,
+        "binary_phase_invalid_event_policy": (
+            args.binary_phase_invalid_event_policy
+        ),
         "binary_phase_event_contract_id": (
             args.binary_phase_event_contract_id
         ),
@@ -2325,6 +2328,9 @@ def run(args: argparse.Namespace) -> dict:
         "event_contract_id": str(args.event_contract_id),
         "binary_phase_fsm_mode": str(args.binary_phase_fsm_mode),
         "binary_phase_debounce_s": float(args.binary_phase_debounce_s),
+        "binary_phase_invalid_event_policy": str(
+            args.binary_phase_invalid_event_policy
+        ),
         "binary_phase_event_contract_id": str(
             args.binary_phase_event_contract_id
         ),
@@ -3690,6 +3696,18 @@ def parse_args() -> argparse.Namespace:
         default="disabled",
     )
     p.add_argument("--binary-phase-debounce-s", type=float, default=0.005)
+    p.add_argument(
+        "--binary-phase-invalid-event-policy",
+        choices=("raise", "terminate", "reject_continue"),
+        default="raise",
+        help=(
+            "binary_active only: how a behaviour-dependent actor-FSM event "
+            "rejection is handled. 'raise' keeps the fail-closed "
+            "qualification semantics (worker-fatal); 'terminate' ends the "
+            "episode as a true termination (end_reason=invalid_binary_event); "
+            "'reject_continue' drops the commit and keeps the prior phase."
+        ),
+    )
     p.add_argument(
         "--binary-phase-event-contract-id",
         default="binary_events_disabled_v1",

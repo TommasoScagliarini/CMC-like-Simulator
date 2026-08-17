@@ -170,6 +170,7 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "event_contract_id": str,
         "binary_phase_fsm_mode": str,
         "binary_phase_debounce_s": float,
+        "binary_phase_invalid_event_policy": str,
         "binary_phase_event_contract_id": str,
         "online_grf_observation": _to_bool,
         "online_grf_applied_side": _list_str,

@@ -49,6 +49,14 @@ _ACTIVE_PHASE_RUNTIME_STATE_IDS = {
 }
 
 
+class BinaryPhaseTransferError(ValueError):
+    """Behaviour-dependent actor-FSM rejection of a V20/V26 active event.
+
+    Subclasses ``ValueError`` so every existing fail-closed consumer keeps
+    its semantics; training runtimes may catch THIS type specifically to
+    terminate the episode instead of killing the worker."""
+
+
 @dataclass(frozen=True)
 class BinaryPhaseActiveResult:
     """A fully validated candidate commit for one reset or policy boundary."""
@@ -580,7 +588,7 @@ class BinaryPhaseActiveAdapter:
                 sort_keys=True,
                 separators=(",", ":"),
             )
-            raise ValueError(
+            raise BinaryPhaseTransferError(
                 "Actor FSM rejected a V20 active event: " + encoded
             )
         transitions_raw = phase_payload.get("accepted_transitions_this_step")
