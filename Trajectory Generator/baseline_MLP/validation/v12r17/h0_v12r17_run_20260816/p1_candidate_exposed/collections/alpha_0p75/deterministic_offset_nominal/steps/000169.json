@@ -1,0 +1,462 @@
+{
+  "applied_action": [
+    0.7446779012680054,
+    0.13342499732971191
+  ],
+  "blended_mean": [
+    0.7446779012680054,
+    0.13342499732971191
+  ],
+  "candidate_mean": [
+    0.7452377676963806,
+    0.13361871242523193
+  ],
+  "candidate_mean_query_count": 1,
+  "candidate_std": [
+    0.004999999888241291,
+    0.004999999888241291
+  ],
+  "case_id": "deterministic_offset_nominal",
+  "checks": {
+    "action_unclipped": true,
+    "binary_active_routing_exact": true,
+    "blend_exact": true,
+    "candidate_queried_once": true,
+    "causal_latch_exact": true,
+    "effective_alpha_exact": true,
+    "finite": true,
+    "no_hard_invalid": true,
+    "no_sea_fallback": true,
+    "no_timeout": true,
+    "no_unaccepted_so": true,
+    "runtime_tape_time_aligned": true,
+    "same_case_step_tape_target": true,
+    "single_frozen_noise_exact": true,
+    "support_decision_exact": true,
+    "teacher_model_not_queried": true,
+    "ten_control_windows": true,
+    "ten_sensor_samples": true
+  },
+  "effective_alpha": 0.75,
+  "end_reason": null,
+  "fallback_reasons": [],
+  "grf_penetration_m": 0.005671737668934605,
+  "legacy_shadow_query_count": 0,
+  "observer_raw_sensor_journal": {
+    "accepted_events": [
+      {
+        "confirmed_contact_state": "HEEL",
+        "confirmed_time": 15.62987098380417,
+        "confirmed_time_s": 15.62987098380417,
+        "contact_leader": "heel",
+        "delivered_time_s": 15.636870983804165,
+        "event": "heel_strike",
+        "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+        "event_time_s": 15.624870983804172,
+        "hs_semantics": "first_stable_heel_contact",
+        "landing_sensor": "heel",
+        "onset_contact_state": "HEEL",
+        "semantic": "heel_qualified_initial_contact",
+        "side": "left",
+        "source": "binary_phase_fsm_v26",
+        "time": 15.624870983804172
+      }
+    ],
+    "availability": {
+      "binary_contact_samples": true,
+      "clearance": false,
+      "per_sensor_analog_grf": false,
+      "step_online_grf": true
+    },
+    "blocker_if_field_unavailable": false,
+    "control_dependency": false,
+    "gate_dependency": false,
+    "observer_only": true,
+    "online_grf": {
+      "left": {
+        "cop": [
+          0.41235645069852184,
+          -0.009503943826791228,
+          -1.0008606998821912
+        ],
+        "force": [
+          3.534439296949315,
+          104.40183535664286,
+          0.9858386978925154
+        ],
+        "in_contact": true,
+        "moment": [
+          103.01166283258428,
+          -5.286809578399951,
+          43.02445567474412
+        ],
+        "normal_force": 104.40183535664286,
+        "penetration": 0.005671737668934605,
+        "slip_speed": 3.0628535165560584
+      },
+      "right": {
+        "cop": [
+          0.7591425821054497,
+          -0.009503942364827201,
+          -0.61874853186648
+        ],
+        "force": [
+          -1.457414086777295,
+          67.10369544907397,
+          0.6412143562903363
+        ],
+        "in_contact": true,
+        "moment": [
+          39.63995683190552,
+          2.5365830607857602,
+          49.44687911286117
+        ],
+        "normal_force": 67.10369544907397,
+        "penetration": 0.014261525008434854,
+        "slip_speed": 2.6667823083359843
+      },
+      "sensors": {}
+    },
+    "online_grf_detector": {
+      "left": {
+        "cop": [
+          0.4103364346398921,
+          0.01482082310057917,
+          -1.009424276102338
+        ],
+        "force": [
+          7.802488779248266,
+          230.38309253095215,
+          66.66958722269186
+        ],
+        "in_contact": true,
+        "moment": [
+          231.59529661039795,
+          -35.2329823074663,
+          94.64680948029297
+        ],
+        "normal_force": 230.38309253095215,
+        "penetration": 0.029205039867970767,
+        "slip_speed": 0.9179857938704011
+      },
+      "right": {
+        "cop": [
+          0.6998984444928869,
+          0.014820823100000003,
+          -0.6277018200329572
+        ],
+        "force": [
+          5.055377765652387,
+          329.29713667123644,
+          -91.10955112579197
+        ],
+        "in_contact": true,
+        "moment": [
+          207.55685838494458,
+          60.78904755640097,
+          230.51458560899704
+        ],
+        "normal_force": 329.29713667123644,
+        "penetration": 0.026808485393074545,
+        "slip_speed": 0.5105359227657345
+      },
+      "sensors": {
+        "left_heel": {
+          "component_name": "online_grf_detector_left_heel",
+          "in_contact": false,
+          "kind": "heel",
+          "normal_load_n": 6.326745254874522e-08,
+          "penetration_m": 0.0,
+          "side": "left"
+        },
+        "left_toe": {
+          "component_name": "online_grf_detector_left_toe",
+          "in_contact": true,
+          "kind": "toe",
+          "normal_load_n": 230.3830924676847,
+          "penetration_m": 0.029205039867970767,
+          "side": "left"
+        },
+        "right_heel": {
+          "component_name": "online_grf_detector_right_heel",
+          "in_contact": true,
+          "kind": "heel",
+          "normal_load_n": 128.11794183329457,
+          "penetration_m": 0.02012770725947092,
+          "side": "right"
+        },
+        "right_toe": {
+          "component_name": "online_grf_detector_right_toe",
+          "in_contact": true,
+          "kind": "toe",
+          "normal_load_n": 201.1791948379419,
+          "penetration_m": 0.026808485393074545,
+          "side": "right"
+        }
+      }
+    },
+    "pending_event": null,
+    "samples": [
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 1,
+        "time_s": 15.62787098380417
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 2,
+        "time_s": 15.62887098380417
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 3,
+        "time_s": 15.62987098380417
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 4,
+        "time_s": 15.630870983804169
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 5,
+        "time_s": 15.631870983804168
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 6,
+        "time_s": 15.632870983804168
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 7,
+        "time_s": 15.633870983804167
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 8,
+        "time_s": 15.634870983804166
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 9,
+        "time_s": 15.635870983804166
+      },
+      {
+        "left_heel_clearance_m": null,
+        "left_heel_contact": true,
+        "left_heel_normal_n": null,
+        "left_toe_clearance_m": null,
+        "left_toe_contact": false,
+        "left_toe_normal_n": null,
+        "sensor_index": 10,
+        "time_s": 15.636870983804165
+      }
+    ],
+    "step": 169
+  },
+  "phase_fsm": {
+    "accepted_transitions_this_step": [
+      {
+        "anchor_geometry_valid": 1.0,
+        "closed_segment_type": "swing",
+        "confirmed_time_s": 15.62987098380417,
+        "cycle_reject_reason": "",
+        "cycle_valid": -1.0,
+        "delivered_time_s": 15.636870983804165,
+        "event": "heel_strike",
+        "event_time_s": 15.624870983804172,
+        "from_state_id": 2.0,
+        "opens_segment_type": "stance",
+        "segment_end_time_s": 15.624870983804172,
+        "segment_start_time_s": 15.111870983804456,
+        "segment_valid": 1.0,
+        "to_state_id": 1.0
+      }
+    ],
+    "contact_validity_loss": 0.0,
+    "cycle_ankle_excursion_rad": 0.0,
+    "cycle_completed_this_step": 0.0,
+    "cycle_knee_excursion_rad": 0.0,
+    "cycle_progress_credit": 0.25,
+    "cycle_reject_reason": "",
+    "cycle_rejected_this_step": 0.0,
+    "duration_history_count": 0.0,
+    "event_source": "binary_active_v26",
+    "expected_next_event": "toe_off",
+    "invalid_event_count": 0.0,
+    "invalid_event_loss": 0.0,
+    "invalid_event_this_step": 0.0,
+    "invalid_event_type": "",
+    "landing_window_active": 0.0,
+    "landing_window_contact_score": 0.0,
+    "last_period_s": 0.0,
+    "last_stance_fraction": 0.0,
+    "last_valid_hs_time_s": 15.624870983804172,
+    "last_valid_to_time_s": 15.111870983804456,
+    "pending_cycle_credit": 0.1,
+    "phase_clawback_penalty": 0.0,
+    "phase_cycle_complete_bonus": 0.0,
+    "phase_cycle_failed_this_step": 0.0,
+    "phase_event_progress_score": 0.1,
+    "phase_failure_extra_penalty": 0.0,
+    "previous_period_s": 0.0,
+    "robust_stance_duration_s": 0.0,
+    "robust_swing_duration_s": 0.0,
+    "sensor_edges_this_step": [],
+    "sensor_events_this_step": [],
+    "sensor_forefoot_first": 0.0,
+    "sensor_heel_contact": 0.0,
+    "sensor_hs_armed": 0.0,
+    "sensor_partial_stance_active": 0.0,
+    "sensor_toe_contact": 0.0,
+    "stance_contact_fraction": 0.0,
+    "stance_contact_time_s": 0.0,
+    "stance_elapsed_s": 0.01199999999999335,
+    "stance_load_integral_bw_s": 0.0,
+    "stance_mean_load_bw": 0.0,
+    "state_id": 1.0,
+    "state_name": "STANCE_AFTER_HS",
+    "swing_elapsed_s": 0.0,
+    "timeout_exceeded": 0.0,
+    "timeout_side": 0.0,
+    "valid_cycle_count": 0.0,
+    "valid_hs_count": 1.0,
+    "valid_to_count": 1.0
+  },
+  "previous_penetration_m": 0.005706976050985975,
+  "protocol_id": "AB06_H0_V12R17_V26_INVARIANT_SAFE_TEACHER",
+  "raw_action": [
+    0.7446779012680054,
+    0.13342499732971191
+  ],
+  "recovery": false,
+  "requested_alpha": 0.75,
+  "reserve_norm_nm": 88.11928852294402,
+  "residual_norm_nm": 1.3278509614991535e-10,
+  "reward": 0.09365257367490411,
+  "runtime_time_s": 15.636870983804165,
+  "safety_intervened": false,
+  "safety_latch_active": false,
+  "safety_latch_entered": false,
+  "safety_latch_released": false,
+  "schema_version": 12171,
+  "single_frozen_noise": [
+    0.0,
+    0.0
+  ],
+  "stage_id": "P1_CANDIDATE_EXPOSED_TAPE_REFERENCE",
+  "step": 169,
+  "support_distance_rms_z": 0.0031875143557698556,
+  "support_id": "GLOBAL_3000_INVARIANT18_LOO_NN_RMS_Z_P99",
+  "support_intervened": false,
+  "support_nearest_case_id": "deterministic_offset_nominal",
+  "support_nearest_step": 169,
+  "support_p99": 0.1937808123139821,
+  "support_within_p99": true,
+  "tape_reference_lookup_count": 1,
+  "tape_runtime_time_s": 15.636870983804165,
+  "tape_target_mean": [
+    0.7429982423782349,
+    0.13284388184547424
+  ],
+  "target_provenance": {
+    "legacy_gait_shadow_query": false,
+    "source_case_id": "deterministic_offset_nominal",
+    "source_field": "frozen_teacher_mean",
+    "source_step": 169,
+    "source_trace": {
+      "path": "validation/h0_primary_grf_split_adaptation_runs/2026-08-07_h0_primary_split_v8r1p1_v26_residual/teacher_replay/deterministic_offset_nominal/trace.json",
+      "sha256": "93bca26abd90ab7a930421c8b6d172d7998cd7e1aa9c62a126b78614f66820a8",
+      "size_bytes": 13036427
+    },
+    "tape_id": "V8R1P1_V26_SAFE_TAPE_6X500_FROZEN_MEAN",
+    "teacher_model_query": false
+  },
+  "teacher_model_query_count": 0,
+  "terminated": false,
+  "trajectory_id": "alpha_0p75__deterministic_offset_nominal",
+  "truncated": false,
+  "v26_observation": [
+    0.0,
+    1.0,
+    -0.4056136906147003,
+    2.434830665588379,
+    0.07564660161733627,
+    0.09936180710792542,
+    -0.4107225835323334,
+    2.564145088195801,
+    0.06659135222434998,
+    0.05094737559556961,
+    0.12995485961437225,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    1.0,
+    0.0,
+    0.0,
+    0.4681818187236786,
+    0.5,
+    -0.22226178646087646,
+    -0.4053894579410553,
+    2.4592549800872803,
+    -0.5915045738220215,
+    -0.014327374286949635,
+    0.09121178090572357,
+    0.06893084943294525,
+    0.1252378672361374,
+    5.549431800842285,
+    -0.01814732886850834
+  ]
+}
