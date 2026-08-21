@@ -154,9 +154,22 @@ class BinaryPhaseActiveAdapter:
         in_contact: bool,
         prosthetic_knee_angle_rad: float | None = None,
         prosthetic_ankle_angle_rad: float | None = None,
+        invalid_event_mode: str = "raise",
     ) -> BinaryPhaseActiveResult:
-        """Advance V20 then the actor FSM and return one atomic candidate."""
+        """Advance V20 then the actor FSM and return one atomic candidate.
 
+        ``invalid_event_mode="drop"`` returns the candidate even when the
+        actor FSM rejects the transferred event: both candidate FSMs have
+        already consumed the 10 ms window at that point, so committing them
+        is the only way to keep the sensor cursor and the FSM clocks aligned.
+        The rejected event is not published (``left_events`` is empty) and the
+        drop is flagged in ``adapter_payload``. The default ``"raise"`` keeps
+        the fail-closed qualification behaviour byte for byte.
+        """
+
+        mode_label = str(invalid_event_mode).strip().lower()
+        if mode_label not in {"raise", "drop"}:
+            raise ValueError("invalid_event_mode must be 'raise' or 'drop'.")
         self._validate_pair(binary_fsm, phase_fsm)
         boundary = self._finite_number(time_s, "policy time_s")
         previous = self._finite_number(previous_time_s, "previous_time_s")
@@ -200,11 +213,20 @@ class BinaryPhaseActiveAdapter:
             prosthetic_knee_angle_rad=knee,
             prosthetic_ankle_angle_rad=ankle,
         )
-        self._validate_transfer(adapted_events, phase_payload)
-        left_events = self._accepted_left_events(
-            phase_payload,
-            adapted_events=adapted_events,
-        )
+        invalid_event_dropped = False
+        try:
+            self._validate_transfer(adapted_events, phase_payload)
+        except BinaryPhaseTransferError:
+            if mode_label != "drop":
+                raise
+            invalid_event_dropped = True
+        if invalid_event_dropped:
+            left_events = []
+        else:
+            left_events = self._accepted_left_events(
+                phase_payload,
+                adapted_events=adapted_events,
+            )
         adapter_payload = {
             "mode": "binary_active",
             "adapter_source": BINARY_ACTIVE_ADAPTER_SOURCE,
@@ -215,6 +237,12 @@ class BinaryPhaseActiveAdapter:
             "event_order_this_step": [
                 str(event["event"]) for event in adapted_events
             ],
+            "invalid_event_dropped": invalid_event_dropped,
+            "invalid_event_type": (
+                str(phase_payload.get("invalid_event_type", ""))
+                if invalid_event_dropped
+                else ""
+            ),
             "atomic_commit_ready": True,
         }
         self._validate_strict_json(

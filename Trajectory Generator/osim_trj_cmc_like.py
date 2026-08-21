@@ -86,7 +86,11 @@ from online_grf import online_grf_sensor_role
 from path_resolver import normalize_cli_existing_path, resolve_repo_path
 from prosthetic_phase_fsm import ProstheticPhaseFSM, ProstheticPhaseFSMConfig
 from setup_io import read_last_setup_path, read_setup_xml
-from simulation_runner import SegmentWallClockTimeout, SimulationRunner
+from simulation_runner import (
+    OnlineGRFPenetrationLimitExceeded,
+    SegmentWallClockTimeout,
+    SimulationRunner,
+)
 
 
 CoordDict = Dict[str, float]
@@ -1830,6 +1834,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         failure: Exception | None = None
         failure_traceback = ""
         wall_timeout = False
+        penetration_hard = False
         step_info: dict = {}
 
         try:
@@ -1856,6 +1861,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             wall_timeout = True
             failure = exc
             failure_traceback = traceback.format_exc()
+        except OnlineGRFPenetrationLimitExceeded as exc:
+            # Physics guard one policy step above the 28 mm episode termination:
+            # a foreseeable MDP failure, never a worker-fatal fault (even with
+            # fail_fast). The episode terminates as grf_penetration_hard.
+            penetration_hard = True
+            failure = exc
+            failure_traceback = traceback.format_exc()
         except Exception as exc:  # Native OpenSim faults cannot always be caught.
             if self.env_cfg.fail_fast:
                 raise
@@ -1876,7 +1888,14 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         obs, obs_dict = self._get_observation()
         reward, reward_terms = self._get_reward(obs_dict)
         unsafe_reason = self._unsafe_end_reason(obs_dict)
-        reached_horizon = self.t >= self._episode_end - 1e-12
+        # Half-step tolerance: after ~500 accumulated policy steps self.t can
+        # sit up to ~1e-12 s short of _episode_end, and a 1e-12 epsilon then
+        # lets a degenerate femtosecond step run, which the binary sensor
+        # transport rejects as a duplicate timestamp (worker-fatal).
+        reached_horizon = (
+            self.t >= self._episode_end
+            - 0.5 * float(self.env_cfg.segment_duration)
+        )
 
         # Gymnasium semantics:
         # - unsafe states belong to the task/MDP and are true terminations;
@@ -1897,6 +1916,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             terminated = True
             truncated = False
             end_reason = "invalid_binary_event"
+        elif penetration_hard:
+            terminated = True
+            truncated = False
+            end_reason = "grf_penetration_hard"
         elif wall_timeout:
             terminated = False
             truncated = True
@@ -1916,7 +1939,11 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         safety_loss = (
             float(self.env_cfg.truncation_penalty)
-            if (unsafe_reason is not None or invalid_event_terminal)
+            if (
+                unsafe_reason is not None
+                or invalid_event_terminal
+                or penetration_hard
+            )
             else 0.0
         )
         if safety_loss:
@@ -3578,6 +3605,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         knee_q = float(sv.get(self.ctx.q_sv_idx["pros_knee_angle"]))
         ankle_q = float(sv.get(self.ctx.q_sv_idx["pros_ankle_angle"]))
 
+        policy = str(
+            getattr(self.env_cfg, "binary_phase_invalid_event_policy", "raise")
+        ).strip().lower()
+        # An uncommitted rejection desyncs the sensor cursor from the FSM
+        # clocks and kills the worker one step later: for the tolerant
+        # policies the adapter must drop the event and return the
+        # window-consistent candidate, which is then committed normally.
         try:
             result = self._binary_phase_active_adapter.advance(
                 binary_fsm=self._binary_phase_fsm,
@@ -3589,24 +3623,24 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 in_contact=bool(in_contact_raw),
                 prosthetic_knee_angle_rad=knee_q,
                 prosthetic_ankle_angle_rad=ankle_q,
+                invalid_event_mode=(
+                    "drop" if policy in {"terminate", "reject_continue"} else "raise"
+                ),
             )
         except BinaryPhaseTransferError:
-            policy = str(
-                getattr(
-                    self.env_cfg, "binary_phase_invalid_event_policy", "raise"
-                )
-            ).strip().lower()
+            # A state-level rejection (e.g. latch/phase coherence) has no
+            # committable candidate, unlike the droppable event-transfer case:
+            # the only cursor-safe tolerant handling is terminating the episode
+            # (reset re-baselines every clock), exactly like `terminate` mode.
             if policy not in {"terminate", "reject_continue"}:
                 raise
-            # The adapter is transactional: nothing was committed. Keep every
-            # phase surface unchanged for this boundary, advance only the
-            # sensor cursor so the next 10 ms window stays well-formed, and
-            # either flag a true MDP termination or continue.
+            self._binary_phase_invalid_event_count += 1
+            self._binary_phase_invalid_event_terminal = True
+            return
+        if bool(result.adapter_payload.get("invalid_event_dropped", False)):
             self._binary_phase_invalid_event_count += 1
             if policy == "terminate":
                 self._binary_phase_invalid_event_terminal = True
-            self._binary_phase_sensor_previous_time_s = float(self.t)
-            return
 
         # Discard every left legacy event by construction.  Validate the right
         # stream before combining it with accepted V20-derived transitions so a

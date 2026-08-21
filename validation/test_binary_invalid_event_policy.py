@@ -124,11 +124,37 @@ def _base_env(env):
     return env.unwrapped
 
 
-@pytest.mark.parametrize("policy", ["terminate"])
+def _inject_single_transfer_rejection(
+    monkeypatch: pytest.MonkeyPatch, adapter
+) -> dict:
+    """Force exactly one transfer rejection through the REAL advance path.
+
+    Patching ``_validate_transfer`` (instead of ``advance``) exercises the
+    drop machinery inside the adapter, including the window-consistent commit
+    that keeps the sensor cursor aligned with the FSM clocks.
+    """
+    adapter_cls = type(adapter)
+    original = adapter_cls._validate_transfer  # noqa: SLF001
+    calls = {"raised": 0}
+
+    def raising(cls, adapted_events, phase_payload):
+        if calls["raised"] == 0:
+            calls["raised"] += 1
+            raise binary_phase_adapter.BinaryPhaseTransferError(
+                "injected deterministic rejection"
+            )
+        return original.__func__(cls, adapted_events, phase_payload)
+
+    monkeypatch.setattr(
+        adapter_cls, "_validate_transfer", classmethod(raising)
+    )
+    return calls
+
+
 def test_injected_rejection_terminates_the_episode_cleanly(
-    policy: str, monkeypatch: pytest.MonkeyPatch
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    env = _make_env(policy, monkeypatch)
+    env = _make_env("terminate", monkeypatch)
     try:
         env.reset()
         action = np.zeros(env.action_space.shape, dtype=np.float32)
@@ -136,17 +162,44 @@ def test_injected_rejection_terminates_the_episode_cleanly(
             _obs, _reward, terminated, truncated, _info = env.step(action)
             assert not terminated and not truncated
         base = _base_env(env)
-
-        def injected(**_kwargs):
-            raise binary_phase_adapter.BinaryPhaseTransferError(
-                "injected deterministic rejection"
-            )
-
-        base._binary_phase_active_adapter.advance = injected  # noqa: SLF001
+        calls = _inject_single_transfer_rejection(
+            monkeypatch, base._binary_phase_active_adapter  # noqa: SLF001
+        )
         _obs, _reward, terminated, truncated, info = env.step(action)
+        assert calls["raised"] == 1
         assert terminated is True
         assert truncated is False
         assert info.get("end_reason") == "invalid_binary_event"
+        assert base._binary_phase_invalid_event_count == 1  # noqa: SLF001
+    finally:
+        env.close()
+
+
+def test_reject_continue_drops_the_event_and_survives_later_steps(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression for the cursor/FSM-clock desync: after an absorbed
+    rejection the episode must keep stepping (the old absorb path crashed
+    the worker with an off-grid ValueError exactly one step later)."""
+    env = _make_env("reject_continue", monkeypatch)
+    try:
+        env.reset()
+        action = np.zeros(env.action_space.shape, dtype=np.float32)
+        for _ in range(5):
+            _obs, _reward, terminated, truncated, _info = env.step(action)
+            assert not terminated and not truncated
+        base = _base_env(env)
+        calls = _inject_single_transfer_rejection(
+            monkeypatch, base._binary_phase_active_adapter  # noqa: SLF001
+        )
+        _obs, _reward, terminated, truncated, info = env.step(action)
+        assert calls["raised"] == 1
+        assert not terminated and not truncated
+        assert info.get("end_reason") in (None, "")
+        assert base._binary_phase_invalid_event_count == 1  # noqa: SLF001
+        for _ in range(3):
+            _obs, _reward, terminated, truncated, _info = env.step(action)
+            assert not terminated and not truncated
         assert base._binary_phase_invalid_event_count == 1  # noqa: SLF001
     finally:
         env.close()
@@ -162,13 +215,9 @@ def test_injected_rejection_with_default_raise_stays_fail_closed(
         _obs, _reward, terminated, truncated, _info = env.step(action)
         assert not terminated and not truncated
         base = _base_env(env)
-
-        def injected(**_kwargs):
-            raise binary_phase_adapter.BinaryPhaseTransferError(
-                "injected deterministic rejection"
-            )
-
-        base._binary_phase_active_adapter.advance = injected  # noqa: SLF001
+        _inject_single_transfer_rejection(
+            monkeypatch, base._binary_phase_active_adapter  # noqa: SLF001
+        )
         with pytest.raises(binary_phase_adapter.BinaryPhaseTransferError):
             env.step(action)
     finally:

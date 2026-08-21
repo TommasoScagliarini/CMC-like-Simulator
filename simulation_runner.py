@@ -106,6 +106,18 @@ class SegmentWallClockTimeout(RuntimeError):
     """
 
 
+class OnlineGRFPenetrationLimitExceeded(FloatingPointError):
+    """Raised when contact penetration crosses ``online_grf_max_penetration_m``.
+
+    With the June safety envelope (episode termination at 28 mm) the 30 mm
+    hard limit sits one policy step away from reachable states, so a chaotic
+    policy can cross both inside a single 10 ms window. RL callers treat this
+    as a clean MDP termination (``grf_penetration_hard``) instead of a
+    worker-fatal fault; subclassing ``FloatingPointError`` keeps every legacy
+    catch site behaviourally identical.
+    """
+
+
 class PhaseSensorSamplingError(RuntimeError):
     """Raised when the causal 1 ms heel/toe sample contract is violated."""
 
@@ -1626,7 +1638,7 @@ class SimulationRunner:
             for side in sorted(force_applying_sides):
                 penetration = float(grf["sides"][side]["penetration"])
                 if penetration > max_penetration:
-                    raise FloatingPointError(
+                    raise OnlineGRFPenetrationLimitExceeded(
                         f"Online GRF penetration exceeds {max_penetration:g} m "
                         f"at t={t:.4f} for {side}: {penetration:.6f} m."
                     )

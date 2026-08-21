@@ -12,13 +12,12 @@ import copy
 from typing import Any, Mapping, Sequence
 
 from binary_phase_adapter import (
-    BINARY_ACTIVE_ADAPTER_SOURCE,
     BINARY_ACTIVE_EVENT_CONTRACT_ID,
     BinaryPhaseActiveAdapter,
     BinaryPhaseActiveResult,
+    BinaryPhaseTransferError,
     V20_SOURCE,
     _BINARY_STATE_IDS,
-    _TIME_TOLERANCE_S,
 )
 from binary_phase_fsm_v26 import (
     HeelQualifiedBinaryPhaseFSM,
@@ -90,6 +89,7 @@ class BinaryPhaseActiveAdapterV26(BinaryPhaseActiveAdapter):
         in_contact: bool,
         prosthetic_knee_angle_rad: float | None = None,
         prosthetic_ankle_angle_rad: float | None = None,
+        invalid_event_mode: str = "raise",
     ) -> BinaryPhaseActiveResult:
         result = super().advance(
             binary_fsm=binary_fsm,
@@ -101,6 +101,7 @@ class BinaryPhaseActiveAdapterV26(BinaryPhaseActiveAdapter):
             in_contact=in_contact,
             prosthetic_knee_angle_rad=prosthetic_knee_angle_rad,
             prosthetic_ankle_angle_rad=prosthetic_ankle_angle_rad,
+            invalid_event_mode=invalid_event_mode,
         )
         payload = {
             "mode": "binary_active",
@@ -113,6 +114,12 @@ class BinaryPhaseActiveAdapterV26(BinaryPhaseActiveAdapter):
             "event_order_this_step": [
                 str(event["event"]) for event in result.left_events
             ],
+            "invalid_event_dropped": bool(
+                result.adapter_payload.get("invalid_event_dropped", False)
+            ),
+            "invalid_event_type": str(
+                result.adapter_payload.get("invalid_event_type", "")
+            ),
             "atomic_commit_ready": True,
         }
         self._validate_strict_json(payload, "V26 binary active adapter")
@@ -192,15 +199,23 @@ class BinaryPhaseActiveAdapterV26(BinaryPhaseActiveAdapter):
         if type(in_contact) is not bool:
             raise TypeError("V26 in_contact must be a native bool.")
         stable = str(payload["stable_contact_state"])
+        # Latch/phase coherence is behaviour-dependent (chaotic training gaits
+        # can produce these payloads): typed as BinaryPhaseTransferError so RL
+        # callers terminate the episode instead of losing the worker. Schema
+        # and type violations above stay fatal.
         if stable == "AIR" and in_contact:
-            raise ValueError("V26 AIR cannot hold the functional stance latch.")
+            raise BinaryPhaseTransferError(
+                "V26 AIR cannot hold the functional stance latch."
+            )
         if stable in {"HEEL", "BOTH"} and not in_contact:
-            raise ValueError(
+            raise BinaryPhaseTransferError(
                 "V26 heel-bearing stable contact requires the stance latch."
             )
         expected_phase = "STANCE" if in_contact else "SWING"
         if payload.get("gait_phase") != expected_phase:
-            raise ValueError("V26 gait phase and functional latch disagree.")
+            raise BinaryPhaseTransferError(
+                "V26 gait phase and functional latch disagree."
+            )
         cls._validate_strict_json(payload, "V26 payload")
 
     @classmethod

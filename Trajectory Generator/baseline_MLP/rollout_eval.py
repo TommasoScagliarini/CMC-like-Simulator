@@ -522,6 +522,9 @@ def run(args: argparse.Namespace) -> dict:
         "detector_sample_dt_s": args.detector_sample_dt_s,
         "event_contract_id": args.event_contract_id,
         "binary_phase_fsm_mode": args.binary_phase_fsm_mode,
+        "binary_phase_invalid_event_policy": (
+            args.binary_phase_invalid_event_policy
+        ),
         "binary_phase_debounce_s": args.binary_phase_debounce_s,
         "binary_phase_event_contract_id": (
             args.binary_phase_event_contract_id
@@ -1324,6 +1327,16 @@ def parse_args() -> argparse.Namespace:
         "--binary-phase-fsm-mode",
         choices=("disabled", "binary_shadow", "binary_active"),
         default="disabled",
+    )
+    p.add_argument(
+        "--binary-phase-invalid-event-policy",
+        choices=("raise", "terminate", "reject_continue"),
+        default="raise",
+        help=(
+            "Invalid binary event handling in the rollout env. The layered "
+            "config default follows the training yaml so rollouts qualify "
+            "under the same semantics the training will use."
+        ),
     )
     p.add_argument("--binary-phase-debounce-s", type=float, default=0.005)
     p.add_argument(
