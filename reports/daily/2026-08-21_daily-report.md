@@ -46,7 +46,7 @@ rossi (57/57 + 101/102→102/102).
   `validation/sweep_fsm_v3_prescribed_starts.py` (+ receipt).
 - Config: canonico con v3; snapshot B0820 esplicitamente v2; candidato V26
   promosso. Figure corridoio: `plot/08_21_2026_1_*`, `plot/08_21_2026_2_*`.
-- Commit presente in git: `e95a56c9` "new warm start with v26" (utente).
+- Commit presente in git: `c8d2ddca` "new warm start with v26" (utente).
 
 ## Test e verifiche
 
@@ -69,6 +69,6 @@ rossi (57/57 + 101/102→102/102).
 - [ ] Fix probe `train_ppo_mlp.py:1408` solo con migrazione di schema
   dichiarata.
 - [ ] Commit checkpoint del lavoro FSM v3 / corridoio / governance (verificare
-  cosa resta fuori da `e95a56c9`).
+  cosa resta fuori da `c8d2ddca`).
 - [ ] Amministrativo (dal 15/08): pin V20, anomalia best==last, metrica
   `fit_p2` V12R3, deflessione SEA iniziale (storico).

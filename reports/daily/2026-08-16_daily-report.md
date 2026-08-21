@@ -34,7 +34,7 @@ della baseline legacy a V26 è un problema di recovery fuori supporto.
 - Gate P2 calibrati sul dry-fit persistito (R16); matrice P3 eseguita.
 - Workaround Errno 63 per `--reward-json` inline (file JSON), poi fix in
   `_load_reward_json_for_run_name`.
-- Commit `22dae86b` (lineage R13–R16) e `cb62b56` (.gitattributes v12 +
+- Commit `218492d3` (lineage R13–R16) e `cb62b56` (.gitattributes v12 +
   OSError guard).
 
 ## Test e verifiche

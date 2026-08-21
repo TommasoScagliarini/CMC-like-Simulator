@@ -21,7 +21,7 @@ sub-millimetrici. **Pivot**: su intuizione dell'utente, rifare il training
 imitativo nativamente sotto V26 (reward, non label: immune al tetto delle
 label). Autorizzata la modifica runtime «evento invalido → terminazione
 episodio» (policy `terminate`) con test live, e lo smoke da 5 iterazioni
-prima del run da 100. Commit `7af93f4c` (R17 + probe) e `a72ef97a`
+prima del run da 100. Commit `6ab6612f` (R17 + probe) e `68a62cd8`
 (invalid-event policy + test + smoke + diagnosi).
 
 ## Lavoro svolto
