@@ -125,3 +125,69 @@ Nuovo: suite L0 v3, replayer v2/v3 con diff (L1), sweep di start (L2/L3).
 5. L3 rollout + smoke — 0,5 g (macchina)
 
 Totale ~3 giorni, di cui ~1 di macchina.
+
+## Esiti (aggiornati al 2026-08-21, sera)
+
+- **L0**: 23/23 PASS (`validation/test_prosthetic_phase_fsm_v3_resync.py`);
+  identità v2 a flag spenti verificata contro golden pre-modifica
+  (`validation/fixtures/fsm_v2_golden_scripted_sequence.json`, 615 payload);
+  suite preesistenti FSM/adapter 65/65, env live 26/26.
+- **L1** (`validation/replay_actor_fsm_v3_on_traces.py`, receipt
+  `validation/actor_fsm_v3_replay_receipt.json`): replay v2 fedele alla
+  registrazione su 7/7 trace (match 1,0); v3 ≡ v2 sui 3 trace puliti; sui
+  4 trace con lock desync da 1,9–2,1 s a ≤ 0,08 s (o 0 con cancellazione),
+  mai timeout. **Correzione di design emersa**: verità del resync = latch
+  funzionale del detector, non contatto grezzo (il contatto di sola punta è
+  swing legittimo nel contratto V26).
+- **L2** (`validation/sweep_fsm_v3_prescribed_starts.py`): 23 start × 2
+  versioni, 0 errori, 0 timeout, 0 eventi invalidi, 0 resync — v3 identica a
+  v2 a ogni fase di start; i 5 start che non chiudevano un ciclo in 3 s lo
+  chiudono con orizzonte 4,5 s (artefatto di finestra; receipt
+  `validation/fsm_v3_prescribed_start_sweep_long.json`): gate L2 soddisfatto
+  al 100 % dei 23 start per entrambe le versioni. Meccanica C confermata
+  già robusta in v2 sul gait perfetto.
+- **L3a, prima esecuzione**: stance-lock eliminato ai 3 start esatti, ma il
+  **ledger causale del corridoio** falliva chiuso sul repair
+  (`unsupported_transition_event`): il suo contratto (ancore entro 40 ms,
+  segmento valido, stato attore ⇔ ultima ancora) non può rappresentare una
+  riparazione. Implementato il **ri-armo** (scarto pendenti, azzero ancore,
+  allineamento sospeso fino alla prima ancora reale), test dedicati
+  `validation/test_causal_ledger_fsm_repair.py` 5/5, readiness corridoio
+  7/8 (l'unica rossa è la governance del canonico, decisione utente).
+  L3a in riesecuzione.
+- **L3b** (smoke 3 iter ex-novo dal checkpoint-zero, v3 vs controllo v2,
+  delta dei contatori sulle iterazioni 7–8): `phase_timeout_stance` **+0**
+  (v2: +12) — il muro dello stance-lock è eliminato in training;
+  `episode_time_limit` +11 (v2: +4) — più episodi a orizzonte;
+  `morphology_causal_contract_failure` +11 (v2: +8) — il contratto causale
+  del corridoio è il muro residuo; 0 worker morti; return più negativi
+  (episodi più lunghi che accumulano penalità di fase della policy a
+  caviglia scarica: non è un gate dello smoke).
+- **L3a, seconda esecuzione** (con ri-armo): nessuno stance-lock; i 3 start
+  terminano ancora per `morphology_causal_contract_failure`, ma più tardi e
+  dopo 1–3 riparazioni assorbite → una seconda regola del contratto causale
+  è attiva; telemetria `morphology_causal_diagnostics` (con
+  `failure_reason`) ora registrata nei trace di rollout; probe in corso.
+- **Seconda regola trovata (probe con hook)**: `invalid_pending_transition_time`
+  — `info["time"] = 17.076870983804135` vs onset del candidato pendente
+  `17.07687098380528` (Δ = 1,1e-12) contro `_TIME_EPS = 1e-12` del corridoio
+  causale. I due orologi sono accumulatori float indipendenti (tempo env vs
+  griglia campioni binari); il resto dello stack V26 tollera 1e-9. **Bug
+  preesistente e indipendente dalla v3**: spiega il ~43 % di episodi
+  terminati per contract failure anche nello smoke v2 e verosimilmente gran
+  parte delle 298 failure del training B0820 da 50 iter. Fix: `_TIME_EPS`
+  1e-12 → 1e-9 + test di regressione (drift accettato, futuro vero 1 µs
+  ancora fail-closed).
+- **L3a, terza esecuzione (v3 + ri-armo + tolleranza 1e-9)**: start −0,20 e
+  nominale arrivano a `episode_time_limit` (orizzonte pieno) con 2 e 5
+  eventi invalidi assorbiti; **+0,20 idem** (5 assorbiti, 22,1 mm): L3a 3/3 a orizzonte pieno.
+- **L3b, v3 sul corridoio corretto** (delta iter 6→8): contract failure
+  **+0**, stance timeout **+0**, episodi a orizzonte **+20**, len media 500
+  alla iter 7, 0 worker morti. Gate L3 (muri −50 %) superato: −100 %.
+  Controllo v2 sul corridoio corretto in corso (per separare l'effetto
+  della tolleranza da quello della v3).
+- **L3b controllo v2 sul corridoio corretto** (delta iter 6→8): contract
+  failure +5 (era +8), stance timeout +12, orizzonte +7. Attribuzione: la
+  tolleranza da sola riduce poco (lo stance-lock uccide prima gli episodi
+  e genera a sua volta disallineamenti stato/ancore); v3 + tolleranza =
+  entrambi i muri a zero. **Protocollo L0–L3 completato: PASS.**

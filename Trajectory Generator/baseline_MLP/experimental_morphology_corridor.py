@@ -34,7 +34,15 @@ V26_BINARY_ACTIVE_MODE = "binary_active"
 _SUPPORTED_CAUSAL_EVENT_CONTRACT_IDS = frozenset(
     {TWO_SENSOR_EVENT_CONTRACT_ID, V26_EVENT_CONTRACT_ID}
 )
-_TIME_EPS = 1e-12
+FSM_REPAIR_EVENTS = frozenset(
+    {"toe_off_resync", "heel_strike_resync", "heel_strike_cancelled"}
+)
+# Timestamp tolerance. The env clock and the binary sensor grid are two
+# independent float accumulators and drift by ~1e-12 within an episode
+# (measured 1.1e-12 at t=17.08 s); the rest of the V26 stack tolerates
+# 1e-9. A 1e-12 tolerance turned any boundary-coincident pending
+# candidate into a spurious causal contract failure (2026-08-21).
+_TIME_EPS = 1e-9
 
 
 @dataclass(frozen=True)
@@ -234,6 +242,11 @@ class CompletedSegmentMorphologyLedger:
 
         if event == "timeout":
             return self._discard_open("fsm_timeout")
+        if event in FSM_REPAIR_EVENTS:
+            # v3 actor-FSM repairs (resync / bounced-HS cancellation) close the
+            # open segment as invalid: an ordinary discard, never a causal
+            # contract failure.
+            return self._discard_open(f"fsm_{event}")
         if event not in {"heel_strike", "toe_off"}:
             return {
                 "completed": None,
@@ -390,6 +403,7 @@ class CausalMorphologyUpdate:
     total_resolved_sample_count: int = 0
     total_dropped_sample_count: int = 0
     total_cancelled_transition_count: int = 0
+    total_repair_transition_count: int = 0
     terminal_flushed: bool = False
     failed_closed: bool = False
     failure_reason: str = ""
@@ -486,7 +500,7 @@ def extract_v26_morphology_runtime(
             raise ValueError("v26_detector_transition_contract_mismatch")
     for actor_transition in accepted:
         event = str(actor_transition.get("event", "") or "").strip().lower()
-        if event == "timeout":
+        if event == "timeout" or event in FSM_REPAIR_EVENTS:
             continue
         try:
             actor_onset = float(actor_transition["event_time_s"])
@@ -636,6 +650,10 @@ class CausalDelayedMorphologyBuffer:
         self._total_resolved_sample_count = 0
         self._total_dropped_sample_count = 0
         self._total_cancelled_transition_count = 0
+        self._total_repair_transition_count = 0
+        # v3 actor-FSM repairs re-arm the causal chain: anchors are cleared and
+        # runtime alignment is suspended until the first real anchor after it.
+        self._rearming = False
         self._failed_reason = ""
         self._episode_ended = False
 
@@ -704,10 +722,18 @@ class CausalDelayedMorphologyBuffer:
                 self.nominal_swing_duration_s,
                 "swing_duration_s",
             )
-            transitions, timeout_count = self._split_transition_batch(
+            transitions, timeout_count, repair_count = self._split_transition_batch(
                 accepted_transitions or (),
                 delivered_by_s=sample.time_s,
             )
+            if repair_count:
+                rearm_dropped = len(self._samples)
+                self._samples = []
+                self._anchors = []
+                self._last_pending = None
+                self._rearming = True
+                self._total_repair_transition_count += int(repair_count)
+                self._total_dropped_sample_count += rearm_dropped
             anchors = self._parse_anchors(
                 transitions,
                 delivered_by_s=sample.time_s,
@@ -767,6 +793,8 @@ class CausalDelayedMorphologyBuffer:
                         if item.time_s >= anchor.event_time_s - _TIME_EPS
                     ]
             self._anchors.append(anchor)
+        if anchors:
+            self._rearming = False
         self._last_pending = pending
         cancelled_count = len(cancellations)
         self._total_cancelled_transition_count += cancelled_count
@@ -868,6 +896,7 @@ class CausalDelayedMorphologyBuffer:
             total_resolved_sample_count=self._total_resolved_sample_count,
             total_dropped_sample_count=self._total_dropped_sample_count,
             total_cancelled_transition_count=(self._total_cancelled_transition_count),
+            total_repair_transition_count=int(self._total_repair_transition_count),
             terminal_flushed=terminal_flushed,
         )
 
@@ -909,7 +938,7 @@ class CausalDelayedMorphologyBuffer:
         transitions: Sequence[Mapping[str, Any]],
         *,
         delivered_by_s: float,
-    ) -> tuple[tuple[Mapping[str, Any], ...], int]:
+    ) -> tuple[tuple[Mapping[str, Any], ...], int, int]:
         if isinstance(transitions, (str, bytes, bytearray)) or not isinstance(
             transitions,
             Sequence,
@@ -917,10 +946,14 @@ class CausalDelayedMorphologyBuffer:
             raise ValueError("invalid_transition_journal")
         anchors: list[Mapping[str, Any]] = []
         timeout_count = 0
+        repair_count = 0
         for transition in transitions:
             if not isinstance(transition, Mapping):
                 raise ValueError("invalid_transition_record")
             event = str(transition.get("event", "") or "").strip().lower()
+            if event in FSM_REPAIR_EVENTS:
+                repair_count += 1
+                continue
             if event != "timeout":
                 anchors.append(transition)
                 continue
@@ -966,7 +999,7 @@ class CausalDelayedMorphologyBuffer:
                 and delivered_time_s <= delivered_by_s + _TIME_EPS
             ):
                 raise ValueError("invalid_timeout_transition")
-        return tuple(anchors), timeout_count
+        return tuple(anchors), timeout_count, repair_count
 
     def _parse_detector_events(
         self,
@@ -1075,7 +1108,7 @@ class CausalDelayedMorphologyBuffer:
         new_anchors: Sequence[CausalMorphologyAnchor],
         timeout_count: int,
     ) -> None:
-        if not runtime_state:
+        if not runtime_state or self._rearming:
             return
         combined = [*self._anchors, *new_anchors]
         latest = combined[-1] if combined else None
@@ -1185,7 +1218,9 @@ class CausalDelayedMorphologyBuffer:
         previous = self._anchors[-1] if self._anchors else None
         last_emitted = self._last_emitted_sample_time_s
         for anchor in candidates:
-            if previous is None and anchor.initial_partial_bootstrap:
+            if previous is None and self._rearming:
+                expected = anchor.event
+            elif previous is None and anchor.initial_partial_bootstrap:
                 expected = "toe_off"
             else:
                 expected = (
@@ -1360,6 +1395,7 @@ class CausalDelayedMorphologyBuffer:
             total_resolved_sample_count=self._total_resolved_sample_count,
             total_dropped_sample_count=self._total_dropped_sample_count,
             total_cancelled_transition_count=(self._total_cancelled_transition_count),
+            total_repair_transition_count=int(self._total_repair_transition_count),
             failed_closed=bool(failed_closed or self._failed_reason),
             failure_reason=str(self._failed_reason),
         )

@@ -385,6 +385,9 @@ class CMCEnvConfig:
     # penetration guard. "reject_continue" drops the candidate commit and
     # keeps the previous phase state (closest to the legacy timeout spirit).
     binary_phase_invalid_event_policy: str = "raise"
+    # Actor-FSM behaviour: "v2" (frozen) or "v3" (resync + bounced-HS
+    # cancellation, design 2026-08-21). Detector and event contract unchanged.
+    binary_phase_actor_fsm_version: str = "v3"
     binary_phase_debounce_s: float = 0.005
     binary_phase_event_contract_id: str = "binary_events_disabled_v1"
     # Sound-leg imitation target (used only when reward_function shapes the reward
@@ -1541,6 +1544,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             )
         else:
             event_source = str(self.env_cfg.phase_fsm_input_mode)
+        actor_fsm_version = str(
+            getattr(self.env_cfg, "binary_phase_actor_fsm_version", "v2")
+        ).strip().lower()
+        if actor_fsm_version not in {"v2", "v3"}:
+            raise ValueError(
+                "binary_phase_actor_fsm_version must be 'v2' or 'v3'."
+            )
         return ProstheticPhaseFSMConfig(
             min_stance_duration_s=float(self.env_cfg.phase_min_stance_duration_s),
             min_swing_duration_s=float(self.env_cfg.phase_min_swing_duration_s),
@@ -1563,6 +1573,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             cycle_complete_bonus=float(self.env_cfg.phase_cycle_complete_bonus),
             failure_extra_penalty=float(self.env_cfg.phase_failure_extra_penalty),
             event_source=event_source,
+            resync_enabled=actor_fsm_version == "v3",
+            hs_cancel_enabled=actor_fsm_version == "v3",
             detector_sample_dt_s=float(self.env_cfg.detector_sample_dt_s),
             sensor_on_threshold_n=float(
                 self.env_cfg.phase_sensor_on_threshold_n

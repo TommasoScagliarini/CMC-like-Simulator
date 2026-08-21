@@ -271,28 +271,36 @@ class MorphologyCorridorV26ReadinessTests(unittest.TestCase):
 
         return _runtime_trace(contact_at_ms, end_ms=90)
 
-    def test_v26_candidate_is_additive_weight_zero_and_q2_blocked(self) -> None:
+    def test_v26_candidate_is_promoted_post_q2_and_guard_preserved(self) -> None:
+        """Governance after decision (ii) of 2026-08-21: the V26 causal corridor
+        candidate is promoted post-Q2 and the active config runs it at the
+        sanctioned A/B weight; the runtime Q2 guard itself is preserved."""
         candidate = yaml.safe_load(V26_CANDIDATE.read_text(encoding="utf-8"))
         active = yaml.safe_load(
             (BASELINE_ROOT / "training_exnovo_cfg.yaml").read_text(encoding="utf-8")
         )
         self.assertEqual(
             candidate["candidate"]["status"],
-            "v26_runtime_ready_q2_blocked",
+            "v26_promoted_post_q2_2026-08-21",
         )
-        self.assertFalse(candidate["candidate"]["ppo_updates_authorized"])
-        self.assertFalse(candidate["candidate"]["qualifying_rollouts_authorized"])
+        self.assertTrue(candidate["candidate"]["ppo_updates_authorized"])
+        self.assertTrue(candidate["candidate"]["qualifying_rollouts_authorized"])
+        self.assertTrue(candidate["candidate"]["active_training_config_replaced"])
         self.assertEqual(
             candidate["grf"]["binary_phase_event_contract_id"],
             V26_EVENT_CONTRACT_ID,
         )
-        self.assertEqual(candidate["reward"]["morphology_weight"], 0.0)
+        weight = float(candidate["reward"]["morphology_weight"])
+        self.assertIn(weight, candidate["invariants"]["positive_ab_weights_after_q2"])
+        self.assertGreater(weight, 0.0)
+        self.assertEqual(candidate["reward"]["morphology_causal_allow_effects"], 1.0)
+        self.assertEqual(float(active["reward"]["morphology_weight"]), weight)
+        self.assertEqual(active["reward"]["morphology_causal_allow_effects"], 1.0)
         self.assertEqual(
-            candidate["reward"]["morphology_causal_allow_effects"],
-            0.0,
+            active["reward"]["morphology_phase_mode"],
+            candidate["reward"]["morphology_phase_mode"],
         )
-        self.assertEqual(active["reward"]["morphology_weight"], 0.0)
-        self.assertEqual(active["reward"]["morphology_phase_mode"], "event_anchored")
+        self.assertEqual(active["grf"]["binary_phase_actor_fsm_version"], "v3")
         self.assertEqual(
             hashlib.sha256(PROFILE.read_bytes()).hexdigest(),
             candidate["reward"]["morphology_profile_sha256"],
@@ -309,13 +317,21 @@ class MorphologyCorridorV26ReadinessTests(unittest.TestCase):
         )
         self.assertEqual(resolved.morphology_reward_delay_s, 0.04)
 
+        # The runtime Q2 guard is untouched: positive weight without the
+        # explicit authorization flag still fails closed...
         blocked = _reward_config(causal=True)
         blocked.morphology_weight = 0.0025
+        blocked.morphology_causal_allow_effects = 0.0
         with self.assertRaisesRegex(ValueError, "Q2"):
             reward_function.RewardShapingWrapper(
                 _ScriptedV26Env(()),
                 blocked,
             )
+        # ...and the promoted configuration constructs.
+        promoted = _reward_config(causal=True)
+        promoted.morphology_weight = weight
+        promoted.morphology_causal_allow_effects = 1.0
+        reward_function.RewardShapingWrapper(_ScriptedV26Env(()), promoted)
 
     def test_weight_zero_is_bit_exact_and_never_multiplies_nan(self) -> None:
         cfg = _reward_config(causal=False)

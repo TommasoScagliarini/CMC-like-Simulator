@@ -212,6 +212,10 @@ class BinaryPhaseActiveAdapter:
             in_contact=contact,
             prosthetic_knee_angle_rad=knee,
             prosthetic_ankle_angle_rad=ankle,
+            # Truth for the v3 resync monitor: the detector's FUNCTIONAL stance
+            # latch (gait phase), not the raw contact word — toe-only contact
+            # is legitimate swing (drag) in the heel-qualified contract.
+            binary_contact=bool(binary_payload.get("in_contact", False)),
         )
         invalid_event_dropped = False
         try:
@@ -363,6 +367,20 @@ class BinaryPhaseActiveAdapter:
     ) -> None:
         for name, raw_value in vars(phase_fsm.config).items():
             if name == "event_source":
+                continue
+            # v3 recovery flags are typed (bool / enumerated str), not numbers.
+            if name in {"resync_enabled", "hs_cancel_enabled"}:
+                if type(raw_value) is not bool:
+                    raise TypeError(
+                        f"Actor FSM config {name} must be a native bool."
+                    )
+                continue
+            if name == "resync_contact_source":
+                if raw_value not in {"binary", "primary"}:
+                    raise ValueError(
+                        "Actor FSM config resync_contact_source must be "
+                        "'binary' or 'primary'."
+                    )
                 continue
             if isinstance(raw_value, bool):
                 raise TypeError(

@@ -525,6 +525,7 @@ def run(args: argparse.Namespace) -> dict:
         "binary_phase_invalid_event_policy": (
             args.binary_phase_invalid_event_policy
         ),
+        "binary_phase_actor_fsm_version": args.binary_phase_actor_fsm_version,
         "binary_phase_debounce_s": args.binary_phase_debounce_s,
         "binary_phase_event_contract_id": (
             args.binary_phase_event_contract_id
@@ -857,6 +858,11 @@ def run(args: argparse.Namespace) -> dict:
                         ),
                         "morphology_ledger_diagnostics": _jsonable(
                             info.get("morphology_ledger_diagnostics", {})
+                        ),
+                        # Causal-delayed corridor mode: carries failure_reason,
+                        # the only way to diagnose a contract failure offline.
+                        "morphology_causal_diagnostics": _jsonable(
+                            info.get("morphology_causal_diagnostics", {})
                         ),
                         "reward_terms": dict(info.get("reward_terms", {}) or {}),
                     }
@@ -1337,6 +1343,12 @@ def parse_args() -> argparse.Namespace:
             "config default follows the training yaml so rollouts qualify "
             "under the same semantics the training will use."
         ),
+    )
+    p.add_argument(
+        "--binary-phase-actor-fsm-version",
+        choices=("v2", "v3"),
+        default="v3",
+        help="Actor-FSM behaviour version (v2 frozen / v3 resync).",
     )
     p.add_argument("--binary-phase-debounce-s", type=float, default=0.005)
     p.add_argument(

@@ -90,8 +90,19 @@ class ProstheticPhaseFSMConfig:
     cycle_complete_bonus: float = 0.70
     failure_extra_penalty: float = 0.05
     duration_history_window_cycles: int = 5
+    # v3 recovery mechanics (design 2026-08-21). Both flags off reproduces the
+    # v2 behaviour on every v2 payload field.
+    resync_enabled: bool = False
+    hs_cancel_enabled: bool = False
+    resync_dwell_s: float = 0.08
+    resync_contact_source: str = "binary"
 
     def __post_init__(self) -> None:
+        dwell_resync = float(self.resync_dwell_s)
+        if not np.isfinite(dwell_resync) or dwell_resync <= 0.0:
+            raise ValueError("resync_dwell_s must be finite and positive.")
+        if self.resync_contact_source not in {"binary", "primary"}:
+            raise ValueError("resync_contact_source must be 'binary' or 'primary'.")
         if self.event_source not in {
             "legacy_events",
             "shadow",
@@ -220,6 +231,14 @@ class ProstheticPhaseFSM:
         # reused as continuous-evidence time: the actor-facing FSM keeps its
         # historical first-policy-step accumulation semantics.
         self._binary_active_last_boundary_time_s: float | None = None
+        # v3 recovery state (diagnostics only; never enters observation()).
+        self._resync_contra_since_s: float | None = None
+        self._previous_valid_hs_time: float | None = None
+        self._last_hs_closed_valid_cycle = False
+        self.resync_event_this_step = 0.0
+        self.resync_count = 0
+        self.hs_cancelled_count = 0
+        self.cycle_degraded = False
 
     def reset_from_binary_baseline(
         self,
@@ -275,8 +294,16 @@ class ProstheticPhaseFSM:
         in_contact: bool,
         prosthetic_knee_angle_rad: float | None = None,
         prosthetic_ankle_angle_rad: float | None = None,
+        binary_contact: bool | None = None,
     ) -> dict[str, Any]:
-        """Consume one already-debounced V20 event batch without re-detection."""
+        """Consume one already-debounced V20 event batch without re-detection.
+
+        ``binary_contact`` is the detector's stable contact truth (``True`` if
+        the stable contact state is not AIR). It only feeds the v3 resync
+        monitor; with ``resync_enabled=False`` it is validated and ignored.
+        """
+        if binary_contact is not None and type(binary_contact) is not bool:
+            raise TypeError("Binary active binary_contact must be a native bool.")
 
         binary_contract = _BINARY_ACTIVE_CONTRACTS.get(
             self.config.event_source
@@ -443,10 +470,15 @@ class ProstheticPhaseFSM:
             prosthetic_ankle_angle_rad=prosthetic_ankle_angle_rad,
         )
         self._process_events(validated, boundary)
+        if self.config.resync_contact_source == "binary" and binary_contact is not None:
+            resync_contact: bool | None = bool(binary_contact)
+        else:
+            resync_contact = bool(in_contact)
         result = self._finish_policy_step(
             time_s=boundary,
             normal_force_bw=normal_force_f,
             in_contact=bool(in_contact),
+            resync_contact=resync_contact,
         )
         self._binary_active_last_boundary_time_s = boundary
         return result
@@ -506,8 +538,12 @@ class ProstheticPhaseFSM:
         time_s: float,
         normal_force_bw: float,
         in_contact: bool,
+        resync_contact: bool | None = None,
     ) -> dict[str, Any]:
         self._refresh_time_terms(time_s)
+        self.resync_event_this_step = 0.0
+        if resync_contact is not None:
+            self._refresh_resync(time_s, bool(resync_contact))
         self._refresh_stance_diagnostics()
         self._refresh_cycle_excursions()
         self._refresh_scores(normal_force_bw, bool(in_contact))
@@ -1181,6 +1217,20 @@ class ProstheticPhaseFSM:
                     delivered_time_s=delivered_time,
                 )
                 return
+            if self.cycle_degraded:
+                self.cycle_degraded = False
+                self.cycle_rejected_this_step = 1.0
+                self.cycle_reject_reason = "cycle_degraded"
+                self._accept_hs(
+                    event_time,
+                    progress=0.25,
+                    closed_segment_valid=True,
+                    cycle_valid=False,
+                    cycle_reject_reason="cycle_degraded",
+                    confirmed_time_s=confirmed_time,
+                    delivered_time_s=delivered_time,
+                )
+                return
             valid, reason = self._cycle_valid_for_completion(event_time)
             if not valid:
                 self._reject_cycle(
@@ -1245,6 +1295,9 @@ class ProstheticPhaseFSM:
             # and cannot complete a cycle.
             if not partial_stance:
                 if stance_elapsed < float(cfg.min_stance_duration_s):
+                    if cfg.hs_cancel_enabled and not self._last_hs_closed_valid_cycle:
+                        self._cancel_bounced_heel_strike(confirmed_time, delivered_time)
+                        return
                     self._mark_invalid("to_too_early_after_hs")
                     return
                 valid, reason = self._stance_valid_for_toe_off(
@@ -1315,6 +1368,8 @@ class ProstheticPhaseFSM:
             cycle_reject_reason=cycle_reject_reason,
             startup_contact=startup_contact,
         )
+        self._previous_valid_hs_time = self.last_valid_hs_time
+        self._last_hs_closed_valid_cycle = bool(cycle_valid)
         self.last_valid_hs_time = float(event_time)
         self._partial_stance_start_time_s = None
         self.valid_hs_count += 1
@@ -1655,6 +1710,135 @@ class ProstheticPhaseFSM:
                 self.timeout_side = 2.0
                 self._apply_cycle_failure()
 
+    def _refresh_resync(self, time_s: float, contact: bool) -> None:
+        """v3 mechanic A: repair a state that contradicts physical contact.
+
+        A rejected event leaves the FSM in a state the detector's stable
+        contact disproves (STANCE while airborne, SWING/WAIT_HS while loaded).
+        After ``resync_dwell_s`` of sustained contradiction the FSM performs a
+        *degraded* transition: no credit, segment invalid, cycle degraded.
+        """
+        cfg = self.config
+        if not cfg.resync_enabled or self.state_id not in (
+            WAIT_HS,
+            STANCE_AFTER_HS,
+            SWING_AFTER_TO,
+        ):
+            self._resync_contra_since_s = None
+            return
+        contradiction = (
+            (self.state_id == STANCE_AFTER_HS and not contact)
+            or (self.state_id in (SWING_AFTER_TO, WAIT_HS) and contact)
+        )
+        if not contradiction:
+            self._resync_contra_since_s = None
+            return
+        if self._resync_contra_since_s is None:
+            self._resync_contra_since_s = float(time_s)
+            return
+        if float(time_s) - self._resync_contra_since_s + 1e-9 < float(cfg.resync_dwell_s):
+            return
+        onset = float(self._resync_contra_since_s)
+        self._resync_contra_since_s = None
+        if self.state_id == STANCE_AFTER_HS:
+            self._apply_resync_toe_off(onset, float(time_s))
+        else:
+            self._apply_resync_heel_strike(onset, float(time_s))
+
+    def _apply_resync_toe_off(self, onset: float, time_s: float) -> None:
+        self._record_accepted_transition(
+            event="toe_off_resync",
+            event_time_s=onset,
+            confirmed_time_s=time_s,
+            delivered_time_s=time_s,
+            from_state_id=STANCE_AFTER_HS,
+            to_state_id=SWING_AFTER_TO,
+            closed_segment_type="stance",
+            segment_start_time_s=self._stance_anchor_time(),
+            segment_valid=False,
+            opens_segment_type="swing",
+            cycle_valid=None,
+            cycle_reject_reason="resync",
+        )
+        self.last_valid_to_time = float(onset)
+        self.state_id = SWING_AFTER_TO
+        self.cycle_progress_credit = 0.50
+        self._partial_stance_start_time_s = None
+        self.cycle_degraded = True
+        self.resync_event_this_step = 1.0
+        self.resync_count += 1
+
+    def _apply_resync_heel_strike(self, onset: float, time_s: float) -> None:
+        from_state_id = int(self.state_id)
+        closes_swing = from_state_id == SWING_AFTER_TO
+        closes_cycle = closes_swing and self.last_valid_hs_time is not None
+        self._record_accepted_transition(
+            event="heel_strike_resync",
+            event_time_s=onset,
+            confirmed_time_s=time_s,
+            delivered_time_s=time_s,
+            from_state_id=from_state_id,
+            to_state_id=STANCE_AFTER_HS,
+            closed_segment_type="swing" if closes_swing else "",
+            segment_start_time_s=self.last_valid_to_time if closes_swing else None,
+            segment_valid=False,
+            opens_segment_type="stance",
+            cycle_valid=False if closes_cycle else None,
+            cycle_reject_reason="resync",
+        )
+        if closes_cycle:
+            self.cycle_rejected_this_step = 1.0
+            self.cycle_reject_reason = "resync"
+        self._previous_valid_hs_time = self.last_valid_hs_time
+        self.last_valid_hs_time = float(onset)
+        self._last_hs_closed_valid_cycle = False
+        self._partial_stance_start_time_s = None
+        self.state_id = STANCE_AFTER_HS
+        self.cycle_progress_credit = 0.25
+        self.pending_cycle_credit = 0.0
+        self._reset_cycle_evidence()
+        self._record_cycle_kinematics(
+            getattr(self, "_current_knee_angle_rad", None),
+            getattr(self, "_current_ankle_angle_rad", None),
+        )
+        self.cycle_degraded = True
+        self.resync_event_this_step = 1.0
+        self.resync_count += 1
+
+    def _cancel_bounced_heel_strike(
+        self,
+        confirmed_time_s: float | None,
+        delivered_time_s: float | None,
+    ) -> None:
+        """v3 mechanic B: a TO inside the minimum stance revokes a young HS."""
+        cancelled_hs_time = float(self.last_valid_hs_time)
+        next_state = (
+            SWING_AFTER_TO if self.last_valid_to_time is not None else WAIT_HS
+        )
+        self._record_accepted_transition(
+            event="heel_strike_cancelled",
+            event_time_s=cancelled_hs_time,
+            confirmed_time_s=confirmed_time_s,
+            delivered_time_s=delivered_time_s,
+            from_state_id=STANCE_AFTER_HS,
+            to_state_id=next_state,
+            closed_segment_type="stance",
+            segment_start_time_s=cancelled_hs_time,
+            segment_valid=False,
+            opens_segment_type="swing" if next_state == SWING_AFTER_TO else "",
+            cycle_valid=None,
+            cycle_reject_reason="hs_bounce_cancelled",
+        )
+        self.last_valid_hs_time = self._previous_valid_hs_time
+        self.valid_hs_count = max(0, int(self.valid_hs_count) - 1)
+        self.state_id = next_state
+        self.cycle_progress_credit = 0.50 if next_state == SWING_AFTER_TO else 0.0
+        self._partial_stance_start_time_s = None
+        self.hs_cancelled_count += 1
+        # The bounce stays a penalised behaviour (pending clawback + failure
+        # penalty, exactly like v2); only the FSM state is kept coherent.
+        self._mark_invalid("hs_bounce_cancelled")
+
     def _refresh_scores(self, normal_force_bw: float, in_contact: bool) -> None:
         cfg = self.config
         if self.state_id == WAIT_HS:
@@ -1795,4 +1979,13 @@ class ProstheticPhaseFSM:
             "cycle_ankle_excursion_rad": float(self.cycle_ankle_excursion_rad),
             "cycle_rejected_this_step": float(self.cycle_rejected_this_step),
             "cycle_reject_reason": self.cycle_reject_reason,
+            "resync_event_this_step": float(self.resync_event_this_step),
+            "resync_count": float(self.resync_count),
+            "hs_cancelled_count": float(self.hs_cancelled_count),
+            "cycle_degraded": float(bool(self.cycle_degraded)),
+            "fsm_behaviour_version": (
+                "v3"
+                if (self.config.resync_enabled or self.config.hs_cancel_enabled)
+                else "v2"
+            ),
         }

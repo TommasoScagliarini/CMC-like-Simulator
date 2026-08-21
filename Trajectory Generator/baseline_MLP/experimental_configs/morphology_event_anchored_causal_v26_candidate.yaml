@@ -1,15 +1,16 @@
-# Additive V26 readiness contract for the delayed causal morphology corridor.
+# V26 delayed causal morphology corridor — PROMOTED (2026-08-21, decision ii).
 #
-# This document does not replace training_exnovo_cfg.yaml.  It keeps the
-# morphology term exactly weight-zero and forbids PPO/qualifying rollouts;
-# positive A/B and checkpoint promotion remain blocked by Q2.
-
+# Q2 positive A/B evidence: exploratory 2026-08-16, chain B0820 (warmup,
+# qualification, preflight) and the FSM v3 validation L0-L3 (report
+# 2026-08-21): with actor FSM v3 and the 1e-9 corridor time tolerance the
+# causal contract failures drop to zero in the preflight smoke. The corridor
+# runs at the sanctioned post-Q2 A/B weight 0.0025 in training_exnovo_cfg.yaml.
 candidate:
-  status: v26_runtime_ready_q2_blocked
-  positive_ab_gate: Q2
-  ppo_updates_authorized: false
-  qualifying_rollouts_authorized: false
-  active_training_config_replaced: false
+  status: v26_promoted_post_q2_2026-08-21
+  positive_ab_gate: Q2_passed_2026-08-21
+  ppo_updates_authorized: true
+  qualifying_rollouts_authorized: true
+  active_training_config_replaced: true
 
 simulation:
   segment_duration: 0.01
@@ -34,8 +35,8 @@ reward:
   morphology_max_delivery_latency_s: 0.01
   morphology_causal_max_samples: 4096
   morphology_causal_event_contract_id: binary_point_v25+heel_qualified_fsm_v2
-  morphology_causal_allow_effects: 0.0
-  morphology_weight: 0.0
+  morphology_causal_allow_effects: 1.0
+  morphology_weight: 0.0025
   morphology_hard_termination_enabled: 0.0
 
 invariants:

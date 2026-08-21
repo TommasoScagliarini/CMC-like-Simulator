@@ -27,12 +27,16 @@ regole d'igiene fail-closed ma **nessuna via di recupero** dopo un rigetto:
 Stati invariati: WAIT_HS(0), STANCE_AFTER_HS(1), SWING_AFTER_TO(2),
 VALID_CYCLE_COMPLETED(3), TIMEOUT(4), INVALID_EVENT(5).
 `observation()` **byte-identica** alla v2 (8 feature: nessuna nuova chiave).
-Segnale di verità fisica per il resync: **stato di contatto stabile del
-detector binario** (`stable_contact_state` ∈ {AIR, HEEL, TOE, BOTH},
-geometrico, già debounced 5 ms), passato dall'adapter come nuovo kwarg
-`binary_contact: bool` (True se ≠ AIR). Stesso sensore che genera gli
-eventi → nessun disaccordo cross-sensore. `in_contact` (GRF primaria) resta
-per evidenza di carico e crediti, come oggi.
+Segnale di verità per il resync — **corretto dopo L1 (2026-08-21)**: il
+**latch funzionale di stance del detector** (`in_contact`/`gait_phase` del
+payload binario V26: STANCE dal HS qualificato fino al TO), passato
+dall'adapter come kwarg `binary_contact: bool`. NON il contatto stabile
+grezzo: nel contratto heel-qualified il contatto di sola punta è swing
+legittimo (trascinamento), e usarlo come verità genera contraddizioni
+spurie (L1: 8–9 resync e cicli validi azzerati su trace puliti). Con il
+latch, detector e FSM attore sono guidati dagli stessi eventi: nessuna
+contraddizione in cammino nominale, contraddizione solo dopo un rigetto.
+`in_contact` (GRF primaria) resta per evidenza di carico e crediti.
 
 ## 3. Meccanica A — Resync su desincronizzazione (nuovo)
 
@@ -164,3 +168,23 @@ Nessuna modifica al detector V26 (geometria, debounce, qualificazione
 HS), alla reward ex-novo, allo schema osservazioni, ai timeout hard
 (valori), alla semantica `raise` della qualifica. Riduzione dello swing
 timeout e re-taratura dei crediti: lineage successiva.
+
+## 11. Tassonomia misurata dei rigetti (L1, 2026-08-21) e copertura v3
+
+Dai trace di qualifica B0820 ed ex-novo best (env di catena: `min_stance
+0,3 s`, `min_stance_load 0,04 BW·s`, `min_stance_contact_fraction 0,2`):
+
+| Trace | Rigetto | Dati | Meccanica v3 |
+|---|---|---|---|
+| qual −0,20 | `to_too_early_after_hs` | TO a 147 ms dall'HS (< 0,3 s) | B: HS giovane cancellato (stance corta = "bounce" nel senso del gate) |
+| qual nominale | `stance_load_too_low` | stance 0,33 s, integrale 0,020 < 0,040 BW·s, carico medio 0,06 BW | A: TO resync dopo 80 ms di latch detector in swing |
+| qual +0,20 | `stance_load_too_low` | idem | A |
+| ex-novo best | `stance_load_too_low` | idem | A |
+
+Lettura: il lock converte uno "stance non accreditabile" (troppo corto o
+troppo poco caricato — tratto della policy a caviglia scarica) in episodio
+morto. Con v3 l'episodio prosegue e la reward di fase continua a segnalare
+il difetto (penalità di rigetto, nessun credito) senza uccidere l'episodio.
+Nota semantica: con `min_stance_duration_s = 0,3` la cancellazione B
+cancella qualunque stance più corta del minimo (non solo rimbalzi da 50 ms):
+è coerente con l'intento del gate ("non è una stance reale").

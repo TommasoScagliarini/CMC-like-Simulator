@@ -1304,6 +1304,7 @@ def build_config(
         "binary_phase_invalid_event_policy": (
             args.binary_phase_invalid_event_policy
         ),
+        "binary_phase_actor_fsm_version": args.binary_phase_actor_fsm_version,
         "binary_phase_event_contract_id": (
             args.binary_phase_event_contract_id
         ),
@@ -2331,6 +2332,7 @@ def run(args: argparse.Namespace) -> dict:
         "binary_phase_invalid_event_policy": str(
             args.binary_phase_invalid_event_policy
         ),
+        "binary_phase_actor_fsm_version": str(args.binary_phase_actor_fsm_version),
         "binary_phase_event_contract_id": str(
             args.binary_phase_event_contract_id
         ),
@@ -3706,6 +3708,15 @@ def parse_args() -> argparse.Namespace:
             "qualification semantics (worker-fatal); 'terminate' ends the "
             "episode as a true termination (end_reason=invalid_binary_event); "
             "'reject_continue' drops the commit and keeps the prior phase."
+        ),
+    )
+    p.add_argument(
+        "--binary-phase-actor-fsm-version",
+        choices=("v2", "v3"),
+        default="v3",
+        help=(
+            "Actor-FSM behaviour version: v2 frozen, v3 = resync + bounced-HS "
+            "cancellation (design 2026-08-21). Detector contract unchanged."
         ),
     )
     p.add_argument(
