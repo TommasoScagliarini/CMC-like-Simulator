@@ -1,0 +1,68 @@
+{
+  "amendment_id": "rev3b_r0a_order_correction",
+  "date": "2026-08-24",
+  "authorized_by": "architect (decision after the R0 feasibility diagnostic: the diagnosis approves the ORDER correction, not a beta/threshold tuning)",
+  "kind": "ADDITIVE order correction of stage V2; NO frozen artefact is mutated; NO beta/threshold/budget change",
+  "parents_immutable": {
+    "v26b_protocol.json": {
+      "sha256": "5e0b6a5cdbec89f97b03bb0262142e53ba4c03affe0dd31fde9f813c778708d3"
+    },
+    "PROTOCOL_V26B.md": {
+      "sha256": "7ef70cbf2f7253406e15e0714c68c05455d672120a039dd43fdfa139152b913c"
+    },
+    "v26b_amendment_rev3a_q2b_causal_order.json": {
+      "sha256": "f74672ad9d60775f18049bec058d793c246bac739fbf18a023a32798d9bb78a0"
+    },
+    "diagnostic_report": {
+      "path": "reports/user/2026-08-24_v26b_r0_feasibility_diagnostic.md",
+      "sha256": "a7a740d72cdb08c9a6152640408d7d17e136d69efc45d316302760a59e4b48cd"
+    },
+    "diagnostic_results": {
+      "path": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/r0_feasibility_diag_20260824_144743.json",
+      "sha256": "61a09baf9a2ad3465312687180e4ad07fc7d6dd6f1480cf6a5637e8bb0f1b5f8"
+    },
+    "r0_fail_report_negative_evidence": {
+      "path": "reports/user/2026-08-24_v26b_v2_r0_offline_gate_fail.md",
+      "sha256": "994ec5974b316e77cd0a418146c4011b81eb42b4e9818cbb999cbfc41b5e84be"
+    }
+  },
+  "statement": {
+    "r0_fail": "the R0 offline-gate FAIL stays as IMMUTABLE NEGATIVE EVIDENCE (target conflict proven); its datasets, log and report are frozen and never rewritten",
+    "r0a_definition": "R0a replicates July's FIRST stage (2026-07-11 'Strategia 3: behavior cloning actor-only'): MONO-ROLE BC on the NOMINAL prescribed-IK teacher (never the alt-starts), initialised from the approved V1 35D transplant of V26 (actor ae846220..., module_state 16c2d1ae...)",
+    "v26_role": "V26 remains the lineage/init source and a DIAGNOSTIC control; Q1 vs raw V26 actions is NOT an R0a gate: the diagnostic proved it incompatible with the IK objective on overlapping states, and July's first BC had NO data-preservation role (its only anchor was the parameter-space regulariser 'piccolo anchor loss rispetto ai pesi iniziali')",
+    "r0a_gate_fail_closed": {
+      "rmse_vs_uIK_nominal_max_per_joint": 0.15,
+      "evaluated_on": "ALL 500 nominal-grid rows (training-rows convention of the rev3 Q criteria); the deterministic 400/100 holdout RMSE is reported as DIAGNOSTICS, never a gate",
+      "Q3_invariants": [
+        "10 keys",
+        "clock columns zero",
+        "log-std constant (frozen placeholder sigma 0.005)",
+        "save/reload bit-exact",
+        "clock invariance bit-identical"
+      ],
+      "constraints": "log-std frozen, critic absent, FULL mean network trainable, frozen budget (300 epochs, Adam lr 1e-4, batch 256, seed 2026) and identical regularisers (lambda_clip 1.0, lambda_phi 0.1 training-only aux head, lambda_anchor 1e-3 towards theta_V1)",
+      "productive_refit": "the diagnostic task-only state is NEVER reused: R0a re-runs the fit in the productive path, fail-closed, with a no-clobber transactional export",
+      "v26_mean_comparison": "RMSE of the R0a student vs the deterministic V26 mean on the same rows is RECORDED AS DIAGNOSTICS in the receipt (not a criterion)"
+    },
+    "after_pass": "on R0a PASS: export + STOP; receipt/hashes/report delivered for the architect's audit BEFORE any rollout/DAgger"
+  },
+  "r0a_dataset": {
+    "rows": "exactly the 500 nominal-grid rows: obs35 of the pinned deterministic nominal anchor trace (rollout_policy_trace 3a66d109...), labels u_IK(t_pre) from the FULL-pinned nominal privileged cache (exact float grid lookup)",
+    "exclusions": "NO alt-start rows, NO raw-V26 action labels in this stage",
+    "dedup": "bitwise dedup within the 500 rows, exact count and kept-row digest reported (no silent removal)",
+    "deviation_from_july_documented": "July's 500 BC states were visited BY the teacher in its own closed-loop episode (collect_teacher_dataset, Trajectory Generator/baseline_MLP/target_domain_imitation.py line 328: 'obs, final_info = env.reset(seed=seed)' then teacher-driven stepping); R0a uses the V26-deterministic visited states on the SAME nominal grid because no env stepping/rollout is authorised in this stage; this is same-state IK relabelling (the same operation the later DAgger stage applies to on-policy states)",
+    "july_split_citation": "target_domain_imitation.py lines ~794-918: rng.permutation(sample_count) with validation_fraction (11/07: 400/100, early stopping with patience, best epoch 368) AND the historical 'fixed_final_epoch' mode that REQUIRES validation_fraction=0 and patience=0; split indices digested (_split_index_digest, line 749)",
+    "rev3b_split_decision": "R0a trains with the FROZEN 300-epoch budget on all rows (= the historical fixed_final_epoch mode; no early stopping = no tuning); a deterministic July-style 400/100 permutation split (numpy default_rng(2026)) is computed, its indices digested, and its holdout RMSE reported as DIAGNOSTICS only; no augmentation is invented"
+  },
+  "terminology_clarification": "continuity_anchor / target_anchor in the 2026-07-11 report are anchors of the RUNTIME SLEW LIMITER (reference-governor fix in osim_trj_cmc_like.py), NOT dataset roles; they are never used to justify the dataset construction",
+  "next_stage_prepared_not_executed": "July-faithful continuation AFTER the architect's R0a audit: (i) nominal deterministic rollout of the R0a student; (ii) DAgger same-state IK labels with truncation at the FIRST discrete FSM mismatch (unchanged rule); (iii) ONLY THEN a preservation role defined w.r.t. the already-adapted actor (source == init, as on 13/07) + phase-aligned stochastic recovery + alt-start teacher rows. PREREQUISITE before implementing: identify from the historical code how the 16000 nominal anchors of 13/07 were built (target_domain_markov_adaptation.py / target_domain_dagger.py); no assumptions; no automatic reuse of raw-V26 labels",
+  "hardened_pins": {
+    "ik_cache_digests_full_sha256_mandatory_in_productive_path": {
+      "minus020": "f97ad154f75541626565f7d6fd392dface4f723c2861143f1dc8172536767230",
+      "nominal": "3dd878d4d6d2930d730c1a67f39d6799f20221e7659a435c02d062bfd553d9b0",
+      "plus020": "f15d624cc910b815ee4c511e6702e1312cc4be0f67e93ae435b3e14b850f7d20"
+    },
+    "rule": "the productive rev3b tooling verifies the FULL 64-hex digests fail-closed (prefix pins are no longer sufficient); v26b_v2.py and the frozen R0 FAIL report are NOT modified"
+  },
+  "consumers": "every rev3b receipt pins: the rev3 parents, rev3a, THIS amendment, the diagnostic report+results, the R0-fail negative evidence, the full IK cache digests and the V1/V26 sources"
+}

@@ -1,0 +1,133 @@
+{
+  "amendment_id": "rev4b_july_faithful_dagger_from_s1a",
+  "date": "2026-08-24",
+  "token": "V26B-REV4B-JULY-DAGGER",
+  "kind": "ADDITIVE and IMMUTABLE. One July-faithful DAgger round initialised exclusively from S1A. No prior artifact is mutated",
+  "architect_decision": "L20 is NOT promoted and does not become baseline, init or source: it stays CLOSED_LOOP_ELIGIBLE_PENDING_ARCHITECT_AUDIT and NON-DEPLOYABLE. Its closed-loop PASS proves margin but does not recover the biological requirement (ankle_q min +0.0061516, frac_negative 0, 88.66% of the 97 negative-IK-target states still commanded positive). S1A is the causal 35D BC-IK clone in the historically correct role and is therefore the init of this stage",
+
+  "JULY_VALUES_VERIFIED_FROM_SOURCE_NOT_MEMORY": {
+    "sources_read": [
+      "Trajectory Generator/baseline_MLP/target_domain_imitation.py (argument defaults at lines 1353-1361; training loop at 1129-1160; aggregate_dagger_traces)",
+      "Trajectory Generator/baseline_MLP/target_domain_dagger.py (argument defaults at lines 57-67; main at 71-140)",
+      "Trajectory Generator/runs/training/target_domain_dagger_2026-07-11_r1/dagger_dataset_report.json",
+      "reports/user/2026-07-11_riadattamento_imitativo_target_domain.md"
+    ],
+    "epochs": 400,
+    "batch_size": 64,
+    "learning_rate": 0.0003,
+    "validation_fraction": 0.20,
+    "patience": 60,
+    "early_stopping": "YES, on the validation split, with patience 60 (the 11/07 run reports best epoch 368 of 400 requested)",
+    "clip_weight": 1.0,
+    "logstd_weight": 0.1,
+    "anchor_weight": 1e-05,
+    "seed": 123,
+    "trace_repeat": 4,
+    "interpolation_steps": 0,
+    "gradient_clipping": "NONE - grep for clip_grad_norm / clip_grad_value returns 0 occurrences in both July scripts. The word 'clip' in July refers to the action-clip PENALTY relu(|mean|-1)^2, not to gradient clipping",
+    "loss_verbatim": "loss = mse_loss(means, targets) + clip_weight * relu(|means| - 1)^2.mean() + logstd_weight * mse_loss(logstd_rows, source_logstd) + anchor_weight * mean over trainable pi parameters of (p - p_init)^2.mean()",
+    "post_step_operations": "restore_logstd_head() and zeroing of the disabled clock columns after EVERY optimizer step",
+    "no_phase_aux_head": "confirmed: the July BC/DAgger loss has no auxiliary phase term",
+    "aggregation_verbatim": "aggregate_dagger_traces: observations = concat(teacher_observations, tile(visited, (trace_repeat, 1))); NO truncation and NO dedup; labels are the TIME-ALIGNED prescribed teacher action at teacher_index = step - 1, with fail-closed contiguity of the step sequence",
+    "july_r1_actuals": {"teacher_samples": 500, "unique_dagger_samples": 68, "trace_repeat": 4, "dagger_training_samples": 272, "aggregate_samples": 772, "on_policy_share": 0.352}
+  },
+
+  "ANCHOR_1e-3_NOT_CONFIRMED_BY_JULY": {
+    "architect_condition": "keep anchor = 1e-3 only if confirmed by the successful July protocol",
+    "verification_result": "NOT CONFIRMED. The July scripts default to anchor_weight = 1e-05 and the 11/07 BC and DAgger runs used that default. The 1e-3 value I verified earlier belongs to the AUGUST R-series receipts (V2_R0a and V2_DAGGER_R1 both record 0.001), i.e. exactly the divergent protocol to which the architect attributed the R0a -> R1 degradation",
+    "decision": "this stage uses anchor_weight = 1e-05, the verified July value",
+    "note": "the 13/07 markov35 adaptation used 0.01, a different stage; the DAgger stage being replicated here is the 11/07 one, whose value is 1e-05"
+  },
+
+  "init_and_roles": {
+    "init": "EXCLUSIVELY the S1A actor 8f3e0ce17eff7c741dcf72de6d0fec0c372f9dbc7a9b3119d41c155ec8603e35, module candidates/S1A_IK_AB06_35D_NONDEPLOYABLE/rl_module",
+    "collection_policy": "S1A, already frozen: its EXISTING nominal rollout of 392 steps is reused. NO new collection is performed",
+    "anchor_parameter": "the same S1A weights (the July anchor is always to the init)",
+    "forbidden": "no S0D, L20, A2, W2/W4/W8, L05/L10, A1-A6 data, init, label or anchor; JUL_H0 is never init nor label",
+    "logstd": "byte-identical to the S1A placeholder, restored after every optimizer step; sigma stays UNRESOLVED and is never chosen"
+  },
+
+  "dataset_july_semantics": {
+    "teacher_corpus": "the original BC-IK corpus of 500 rows: obs35 visited by S0D on the frozen nominal trace, labels u_IK AB06 same-time from the pinned cache 3dd878d4...",
+    "on_policy_prefix": "the 392 rows of the frozen S1A nominal rollout, labels = the time-aligned teacher action at teacher_index = step - 1",
+    "aggregate": "concat(500, tile(392, 4)) = 2068 rows, no truncation, no dedup, exactly the July operation",
+    "verified_preflight_facts": {
+      "s1a_trace_rows": 392,
+      "s1a_trace_sha256": "6546befcd4a2e26711137a807cd43a797e47abd62500243fe6c015d7abcfcf21",
+      "steps_contiguous_1_to_392": true,
+      "obs35_all_finite": true,
+      "time_alignment_max_abs_difference_s": 0.0,
+      "negative_ik_ankle_rows_in_corpus": 97,
+      "negative_ik_ankle_rows_covered_by_the_prefix": 65,
+      "negative_windows_covered_by_the_prefix": [[6, 14], [112, 132], [174, 179], [267, 290], [330, 334]],
+      "exact_duplicates_in_corpus": 0,
+      "exact_duplicates_in_prefix": 0,
+      "bitwise_collisions_corpus_prefix": 2,
+      "collisions_with_conflicting_labels": 0
+    }
+  },
+
+  "DECLARED_DEVIATIONS_FROM_JULY": {
+    "1_on_policy_balance": {
+      "what": "trace_repeat = 4 is replicated verbatim, but our prefix is 392 rows against July's 68, so the on-policy share becomes 75.8% (1568 of 2068) against July's 35.2% (272 of 772)",
+      "choice": "the July PARAMETER is replicated, not the July BALANCE; the two cannot both hold with a longer prefix",
+      "status": "declared, not hidden. The architect may prefer a repeat that restores the 35% balance, which would require trace_repeat below 1 and is therefore impossible as an integer"
+    },
+    "2_holdout_absorbed": {
+      "what": "the teacher corpus is the FULL 500-row BC-IK corpus as instructed, so the chain's contiguous holdout 201-300 is absorbed into the fit. July's protocol provides its own held-out set: the internal 20% random validation split with seed 123 used for early stopping",
+      "consequence": "after this stage, any S0D-anchored out-of-sample measurement on rows 201-300 would be IN-SAMPLE for this candidate. This is a material change to what the frozen split can measure later",
+      "status": "declared. It follows the explicit instruction 'corpus BC-IK originale 500 righe' and July's own protocol, which had no contiguous holdout"
+    },
+    "3_physical_scaling": {
+      "what": "the fit is parametrised in the July PHYSICAL SCALING space and the scales are absorbed at export, with T1/T2 <= 1e-5 verified",
+      "why": "the 13/07 report documents that unscaled served-reference accelerations reach 60 rad/s2 and numerically dominate the position inputs; scaling is July's own documented fix",
+      "nature": "function-preserving reparametrisation only: it changes no loss term, no split, no label and no hyperparameter",
+      "status": "declared; the architect may reject it, in which case the fit would run in raw space"
+    }
+  },
+
+  "blocking_preflight": [
+    "392 real rows, contiguous step order, trace digest verified",
+    "obs35 causal same-state/time, all finite, width 35",
+    "labels recomputed with the SAME teacher semantics: time-aligned u_IK, not healthy symmetry and not time-shifted",
+    "exact duplicate audit and collision audit; a collision with CONFLICTING labels is fail-closed",
+    "dataset composed only of the BC-IK corpus and the S1A prefix; no S0D, L20 or A2 data",
+    "coverage of the negative-ankle-target phases quantified, with proof that the alignment actually permits sign recovery",
+    "logstd byte-identical to the S1A placeholder; sigma UNRESOLVED",
+    "on failure of any item: documented STOP and NO fit"
+  ],
+
+  "offline_gates_coherent_with_the_IK_July_role": {
+    "binding": {
+      "integrity_invariants": "10 pi keys, clock columns zero, clock invariance bit-identical, logstd byte-identical to the S1A placeholder, save/reload exact, no critic",
+      "function_preservation": "T1 and T2 <= 1e-5 for the scaling absorption",
+      "fit_convergence": "the adapted aggregate RMSE must be strictly lower than the initial aggregate RMSE, the only July-documentable offline criterion (11/07 reports 0.973332 -> 0.011002)"
+    },
+    "preregistered_measures_without_invented_thresholds": [
+      "RMSE per joint versus the IK target, on the aggregate, on the corpus and on the prefix",
+      "Pearson correlation per joint versus the IK target",
+      "amplitude ratio per joint",
+      "sign agreement and negative-window coverage on the rows whose IK ankle target is negative",
+      "max_abs versus S0D: INFORMATIONAL, never a gate, because S1C-3 proved it mathematically incompatible with sign recovery",
+      "healthy contralateral symmetry: DIAGNOSTIC, never binding, because the target of this stage is the prosthetic IK"
+    ],
+    "promotion_rule": "no invented threshold. Where July documents none, the measure is preregistered and promotion is left to the Codex audit"
+  },
+
+  "closed_loop_stage_if_offline_passes": {
+    "trigger": "executed automatically and only if every binding offline gate passes",
+    "execution": "exactly ONE deterministic nominal rollout in the same frozen harness, no retry",
+    "seven_gates_unchanged": "completion 500/500 episode_time_limit; phase_timeout stance 0 and swing 0; morphology_causal_contract_failure 0 per row; hs_cancelled max 0 and final 0; resync max <= 1 and final <= 1; valid_cycle_count >= 1; penetration <= 0.020 m and no grf_penetration termination",
+    "additional_binding_qualitative_gate": {
+      "requirement": "negative ankle_q values must APPEAR inside a window defined ex ante",
+      "ex_ante_window": "the rows of the actor's own trace whose decoded IK ankle target is negative - defined by the frozen IK target, never by the phase field, which is identically zero",
+      "binding_test": "min ankle_q inside that window < 0, i.e. at least one negative realised value appears",
+      "documented_reference_threshold": "the F2R protocol gate B3 requires the ankle minimum <= -0.03; that threshold is DOCUMENTED and is reported, but its native phase window [0.55, 0.80] is unavailable because the phase field is null. The -0.03 test is therefore reported against the ex-ante window and its use for promotion is left to the Codex audit",
+      "sign_agreement_improvement_vs_L20": "PREREGISTERED MEASURE, no invented threshold: L20 leaves 88.66% of its negative-target rows with a positive ankle command; the candidate's figure is reported and compared, and promotion is left to the audit"
+    }
+  },
+
+  "prohibitions": ["no new collection", "no second fit or rollout", "no retry", "no PPO", "no sigma choice", "no promotion or deploy",
+                    "no production/env/reward/FSM/morphology/SEA/C++ change", "no phase auxiliary head", "no hinge or window loss",
+                    "no S0D preservation term", "no mutation of any prior artifact", "no use of JUL_H0 as init or label"]
+}

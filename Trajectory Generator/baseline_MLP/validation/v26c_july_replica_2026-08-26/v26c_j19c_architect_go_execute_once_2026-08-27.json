@@ -1,0 +1,64 @@
+{
+  "kind": "ARCHITECT GO — SINGLE EXECUTION",
+  "stage": "V26C_J19C_J19A_HELDOUT_G_I",
+  "date": "2026-08-27",
+  "approved_by": "Codex architect after independent audit",
+  "authorises_execution": true,
+  "authorises_rollout": true,
+  "execution_limit": 1,
+  "retry_authorised": false,
+  "scope": "Execute exactly once the frozen three-cell G-I held-out nominal stochastic qualification of the unchanged J19A actor, sequentially and without behavioural fail-fast, and write only j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1.",
+  "authorised_stage_token": "V26C_J19C_J19A_HELDOUT_G_I",
+  "authorised_output": "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1",
+  "frozen_protocol": {
+    "cell_order": [
+      "G",
+      "H",
+      "I"
+    ],
+    "mode": "stochastic_held",
+    "seeds": [
+      126,
+      127,
+      128
+    ],
+    "episode_start_offset_s_all_cells": 1.956870983805102,
+    "sigma": 0.005,
+    "noise_hold_steps": 1,
+    "steps_per_cell": 500,
+    "aggregate_pass_iff": "3/3 behavioural PASS and 3/3 telemetry-valid",
+    "penetration_contract": {
+      "soft_diagnostic_mm": 20.0,
+      "july_diagnostic_mm": 25.0,
+      "binding_hard_fail_mm": "strictly greater than 28.0; exactly 28.0 passes"
+    }
+  },
+  "failure_handling": {
+    "behavioural_failure": "preserve all evidence and continue the remaining preregistered cells; do not retry",
+    "technical_or_integrity_exception": "stop the run, preserve available evidence and do not retry"
+  },
+  "actor_immutability_required": true,
+  "explicitly_not_authorised": [
+    "any autonomous retry",
+    "any seed other than 126, 127 or 128",
+    "any start offset other than the frozen nominal offset",
+    "any fit, optimizer step or actor update",
+    "critic creation or critic warm-up",
+    "PPO or ex-novo training",
+    "new data collection outside the three preregistered rollout cells",
+    "changes to FSM v3, detector, morphology corridor, reward, sigma, SEA, C++ plugin, network architecture or production configuration",
+    "promotion to any subsequent pipeline phase"
+  ],
+  "pinned_artefacts_sha256": {
+    "v26c_j19c_prereg_heldout_g_i.json": "54a1e6fc1f469ba169c80cc851be3fb1ab551e399553ed26c58aa1f101349e2d",
+    "v26c_j19c_derive_from_j19b.py": "db63979fadaea96d7dc41427e40308b4a6ac4dce9c1371ad47ffdfefa3e7435e",
+    "v26c_j19c_heldout_g_i.py": "b63a108259eac856ce9890bfa2a49437ed05489dc957ae5ad03b81c7abea2d8b",
+    "test_v26c_j19c_heldout_g_i.py": "d27a1e7b0ce876bd4818a1edcd36978b95ec4a52290aabd5862b6950b5b478cc",
+    "v26c_j19b_closed_loop.py": "327b8fe39edae290fd8ed806f6b34715313b8d82d7c08ba600054eb191bdcb19",
+    "v26c_j16_closed_loop.py": "6ac4585424cbce34957722e8fc64dc0669de14c57a0418e6aa940b1303cc2e34",
+    "v26c_penetration_contract.py": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/v26c_j19b_closed_loop_receipt.json": "789c57ca293ae7d5f578d4b3cae4e9aec599fa3edf4ce87239ad5fc8a7b1b509",
+    "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/commit_verification.json": "0ded736553a55eba6ac600340750d40aa82f7ebf4689bcdd4717dc3636907776"
+  }
+}

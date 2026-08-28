@@ -1,0 +1,142 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, ARCHITECT GO RECORD",
+  "record": "v26c_j15_architect_go_2026-08-27.json",
+  "stage_authorised": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "execution_permitted_now": true,
+  "executions_authorised": 1,
+  "date": "2026-08-27",
+  "decision": "GO for ONE and ONLY ONE execution of V26C_J15_FRESH_35D_POST_MISMATCH_REFIT.",
+  "granted_by": "the architect (Codex), on the conclusion of the J15-readiness audit of 2026-08-27. This record does not grant itself: it transcribes a decision taken elsewhere and pins by exact hash the five artefacts the architect verified.",
+  "pinned_artifacts_sha256": {
+    "v26c_j15_prereg_fresh_refit.json": "49c748b3a20925a0c270768aa6fddcd3adee474eb1de1cfaa885f849719d1ad2",
+    "v26c_j15_fresh_refit.py": "7b0073c8832e1af64a243cf9bff70662fb786f84691d3a5eab451e230192507a",
+    "test_v26c_j15_fresh_refit.py": "5bdeaf8d72b3619c5bca0b99b9bfa1da1644804fe043ba32936e95d920fd1176",
+    "v26c_j15_fresh_refit_authorization.json": "61b6fa4fd45fcf00a418efdcb3a450b7eeaddd56b486cc481ef9de44f127a3c4",
+    "reports/user/2026-08-27_v26c_j15_fresh_refit_readiness.md": "949cd6859d3a5b648bc549bde9e0431436a0d1e8529dd3d5a8f4eb6570e5ed40"
+  },
+  "pinned_artifacts_note": "the first four paths are relative to the validation root; the fifth is relative to the repository root. All five were re-verified on disk immediately before this record was written.",
+  "authorization_revision_pinned": "rev3",
+  "architect_independent_audit": {
+    "selftest": {
+      "result": "PASS",
+      "checks": 208,
+      "environment": "PYTHONDONTWRITEBYTECODE and PYTHONPYCACHEPREFIX both ABSENT",
+      "invocation": "as a SCRIPT"
+    },
+    "preflight": {
+      "verdict": "GO",
+      "blockers": 0,
+      "pinned_sources": 23,
+      "writes": "nothing",
+      "torch_imported": false
+    },
+    "gate": {
+      "binding_count": 17,
+      "composition": "16 = the preserved J11 binding subset, + 1 = j14_increment_rmse_decreases on the whole 854-row J14 block",
+      "identical_to_j11": false,
+      "j11_subset_preserved_exactly": true,
+      "binding_rmse_subsets": 5,
+      "only_the_whole_j14_block_binds": true,
+      "diagnostic_only": [
+        "cells E and F separately",
+        "post-mismatch 671",
+        "pre-mismatch 183",
+        "phase-invalid fraction 671/854",
+        "j11_prefix_rmse",
+        "nominal_rmse",
+        "nominal_mean_shift",
+        "best_validation_mse",
+        "clipping_out_of_bounds_rows",
+        "epochs_run",
+        "stopped_early",
+        "torch_backend_observed"
+      ]
+    },
+    "no_j15_artifacts_before_go": {
+      "j15_runs": false,
+      "lock": false,
+      "staging": false,
+      "sentinel": false,
+      "verified": "immediately before this record was written"
+    }
+  },
+  "frozen_argv": {
+    "environment": "PYTHONDONTWRITEBYTECODE and PYTHONPYCACHEPREFIX must BOTH be ABSENT from the environment. This is the exact supported invocation the architect verified.",
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "selftest": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/test_v26c_j15_fresh_refit.py"
+      ],
+      "expect": "exit 0, selftest PASS, checks == 208"
+    },
+    "preflight": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j15_fresh_refit.py",
+        "--preflight"
+      ],
+      "expect": "exit 0, verdict GO, 0 blockers, 23 pinned sources, writes nothing"
+    },
+    "fit": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j15_fresh_refit.py",
+        "--fit",
+        "--authorized-stage",
+        "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+        "--out",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j15_runs/j15_fresh_refit_v26c_2026-08-27_r1"
+      ],
+      "times_permitted": 1,
+      "identical_to_the_argv_frozen_in_authorization_rev3": true
+    }
+  },
+  "leaf": {
+    "relative": "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1",
+    "expected_files": [
+      "v26c_j15_aggregate_dataset.npz",
+      "v26c_j15_fresh_refit_receipt.json",
+      "history.json",
+      "commit_verification.json",
+      "rl_module/module_state.pkl",
+      "rl_module/actor_feature_manifest.json",
+      "rl_module/class_and_ctor_args.pkl",
+      "rl_module/metadata.json"
+    ],
+    "count": 8,
+    "no_clobber": true,
+    "fail_closed": true,
+    "born_invalid": "a TECHNICAL_INVALID marker is written into staging BEFORE the rename and removed only as the last write, after the post-commit verification passes."
+  },
+  "not_authorised_by_this_record": [
+    "a rollout",
+    "an environment",
+    "a critic",
+    "critic warm-up",
+    "PPO",
+    "J16",
+    "a second execution of the fit",
+    "an autonomous retry after a failure",
+    "a probe of the frozen argv after a successful run",
+    "reading seeds 126, 127 or 128",
+    "promotion",
+    "deployability",
+    "any closed-loop claim",
+    "changing production, FSM v3, the morphology corridor, the reward, sigma, the SEA or the C++ plugin",
+    "modifying any existing prereg, authorization, receipt, leaf or report"
+  ],
+  "on_failure": "the evidence is preserved fail-closed and the stage STOPS for the architect. No deletion, no repair, no second attempt without a further GO record.",
+  "closing_rule": {
+    "rule": "at the end of the J15-fit phase a dedicated user report must be written in reports/user/, and it must be audited by the architect BEFORE J16 begins.",
+    "source": "binding user instruction of 2026-08-27",
+    "also_standing": "probes of a frozen argv after a successful run are FORBIDDEN"
+  },
+  "self_consistency": {
+    "contains_no_self_hash": true,
+    "why": "a record that hashed itself, or that hashed a set including itself, would invalidate its own value in the act of being written. This record therefore carries NO digest of itself and NO digest of any set containing it.",
+    "how_to_verify_this_record": "recompute the SHA-256 of each of the five pinned artefacts and compare with pinned_artifacts_sha256. That check is stable and reproducible for as long as those five files are unchanged.",
+    "verifiable_without_this_file": true
+  }
+}

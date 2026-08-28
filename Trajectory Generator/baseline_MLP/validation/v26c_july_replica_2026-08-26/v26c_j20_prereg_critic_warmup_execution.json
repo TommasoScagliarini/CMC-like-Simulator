@@ -1,0 +1,278 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION, MACHINE-READABLE",
+  "stage": "V26C_J20_CRITIC_WARMUP",
+  "executes": "the sealed warm-up command preregistered by V26C_J20_CRITIC_WARMUP_READINESS",
+  "date": "2026-08-27",
+  "status": "READINESS ONLY. Implemented and statically tested; NOT EXECUTED. No warm-up has been run.",
+  "contains_no_self_hash": true,
+  "requires_architect_go_before_execution": true,
+  "objective": "run the critic-only warm-up exactly once - one child process, one logical iteration, actor and log-std frozen - and grade it immediately against the preregistered gates. The critic learns; the actor must not move by a single byte.",
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> J8 -> J18 c13 -> J19A",
+    "july_is_methodological_only": "no July checkpoint, dataset or label is an operational input. July supplies the warm-up MECHANICS, re-derived here from committed August evidence.",
+    "one_actor_35d": "one actor, 35 wide. No 25D variant, no widening, no contralateral feature.",
+    "unchanged": "FSM v3, the detector, the morphology corridor, the reward, sigma 0.005, the SEA plugin, the C++ code, the network architecture and the scientific configuration are untouched."
+  },
+  "entry_evidence_required": {
+    "rule": "the preflight reads each of these and refuses to proceed unless it says what it is supposed to say",
+    "j19b": "PASS, closed-loop A-F, 6/6",
+    "j19c": "PASS, held-out G/H/I, 3/3, 42/42 gates",
+    "k1": "FAIL_CLOSED 28/29 - the record stays as it is, permanently",
+    "k1r1": "PASS, composite 29/29 - the amended P24 measured vf_encoder.0.weight at gradient norm 15.325",
+    "why_k1_being_FAIL_CLOSED_is_not_a_blocker": "its sole failure was a degenerate probe stimulus, not a property of the module. K1R1 measured the missing quantity and the composite reads 29/29."
+  },
+  "the_config_amendment": {
+    "decision": "architect decision of 2026-08-27: adopt an ADDITIVE critic-only amendment. Do not modify or overwrite v26c_j20_warmup_cfg.yaml and do not modify train_ppo_mlp.py.",
+    "new_config": "v26c_j20_warmup_critic_only_cfg.yaml",
+    "derived_from": "v26c_j20_warmup_cfg.yaml",
+    "derived_from_sha256": "d8bcfd39f6015eaf7a41deda2edec201e9dbe89df6c425a67f3bf14bc5e4f525",
+    "semantic_differences": 1,
+    "the_only_difference": {
+      "section": "supervision",
+      "key": "max_minibatch_mean_kl_loss",
+      "from": 0.01,
+      "to": null
+    },
+    "note_on_the_section": "the key lives under `supervision:`, not under `training:`. training_config.SECTION_MAP places it there and the J20 config carries it at line 109. Corrected after the architect's own verification.",
+    "sections_asserted_identical": [
+      "model",
+      "ppo",
+      "parallelism",
+      "simulation",
+      "grf",
+      "logging",
+      "reward"
+    ],
+    "exact_start_sampling_stays_false": true,
+    "why_this_amendment_is_necessary": {
+      "mechanism": "_enforce_kl_update_guard (train_ppo_mlp.py:716-773) runs on EVERY iteration and requires the four kl_update/* metrics. Those metrics exist only when the custom learner is installed, and that happens only under the exact-start-sampling contract (train_ppo_mlp.py:1380-1394).",
+      "why_exact_start_sampling_cannot_be_turned_on": "_validate_start_sampling_args requires num_epochs 1 and exactly three start offsets. July's mechanics, which this stage replicates, are 10 epochs and one nominal start. Turning it on would break the replication the architect ordered.",
+      "measured_not_predicted": "the guard was executed as a PURE FUNCTION on the metric set the stock RLlib learner produces. All four kl_update/* metrics come back None and 7 of 7 checks fail: max_present_and_finite, max_nonnegative, max_within_limit, min_present_and_finite, min_above_floor, nonfinite_count_present_and_finite, nonfinite_count_zero. The child would abort at iteration 1 with RuntimeError, caught as stop_reason 'error', ok false, exit 1.",
+      "july_precedent": "both July critic warm-ups that succeeded carried no such guard: the key is absent from both of their resolved configs.",
+      "why_it_is_scientifically_inert_here": "the guard exists to catch a runaway ACTOR update. In a critic-only warm-up the actor and the log-std are frozen, the policy ratio is identically 1 and the KL is identically 0, so the guard cannot bind on anything.",
+      "what_replaces_it": "direct evidence, all gated: G5 actor byte-identical at every audit, G6 log-std byte-identical and sigma 0.005, G4 standard policy mean KL within 1e-09.",
+      "cli_cannot_do_this": "there is no --no- form for the option and any numeric value keeps the guard enabled; the failure is the ABSENCE of the metrics, not a threshold breach. Only null disables it, and only the YAML can express null."
+    },
+    "verified_by": "the preflight parses both YAMLs and refuses to proceed unless the semantic diff is exactly one key, that key is the declared one, and all seven other sections are identical"
+  },
+  "the_command": {
+    "source": "sealed_command() in v26c_j20_critic_warmup_readiness.py, imported after its bytes are verified against the pinned hash",
+    "one_substitution": "exactly one token is replaced - the --config path - from v26c_j20_warmup_cfg.yaml to v26c_j20_warmup_critic_only_cfg.yaml. The runner verifies the token it is about to replace really is the J20 config path, and that no other token moved.",
+    "why_not_a_second_command_string": "a divergent restatement would be a second thing to keep in agreement, and this chain has already paid for that kind of duplication.",
+    "token_count": 23,
+    "one_child": "--worker-process makes main() fall through to run() instead of entering run_supervised()'s restart loop. No supervisor, no restart, no crash-retry.",
+    "one_iteration": "--iterations 1",
+    "launch": "exactly one subprocess.Popen followed by communicate(). Popen rather than run() because the PID must be on the record. There is one Popen in the runner and no code path reaches it twice.",
+    "captured": [
+      "the full argv",
+      "the working directory",
+      "the PID",
+      "start and finish timestamps in UTC",
+      "the exit code",
+      "stdout and stderr merged, written to the leaf and hashed"
+    ]
+  },
+  "the_destination": {
+    "leaf": "j20_runs/j20_critic_warmup_v26c_2026-08-27_r1",
+    "must_be_absent_at_preflight": true,
+    "j20_runs_must_hold_only_k1_and_k1r1_at_preflight": true,
+    "born_invalid": "the runner creates the leaf and writes TECHNICAL_INVALID into it FIRST. The child then writes into the same directory, so there is no staging-then-rename here: the marker is what makes the leaf invalid from its first byte.",
+    "clean_before_the_child": "immediately after creating the marker the runner asserts the leaf holds NOTHING ELSE. This is load-bearing: run() does not refuse a non-empty output_dir, _load_iteration_history silently inherits pre-existing rows, and an inherited milestone_iteration_000001 would hard-fail the child.",
+    "final_marker": "on success TECHNICAL_INVALID is replaced by RESTORE_AUDIT_PENDING. On any failure TECHNICAL_INVALID stays."
+  },
+  "the_verdict_cannot_be_PASS": {
+    "rule": "the best outcome available to this stage is AWAITING_RESTORE_AUDIT, not PASS.",
+    "why": "gate G9 has two halves. The structural half - a complete checkpoint carrying the optimizer and the sixteen-key module state - is evaluated here. The exact half - reload the checkpoint and reproduce both the actor digest and the critic digest - requires a restore, which this stage is structurally forbidden from performing. Declaring PASS would claim evidence that does not exist yet.",
+    "on_failure": "FAIL_CLOSED: the evidence is preserved, TECHNICAL_INVALID stays in place, and there is NO retry.",
+    "nothing_is_promoted": "promotion NONE, training_ready false, next_stage_authorized false"
+  },
+  "the_immediate_gates": [
+    {
+      "id": "G1",
+      "criterion": "train_iterations.jsonl holds exactly one row, its iteration is 1, and summary.iterations_completed_this_process is 1"
+    },
+    {
+      "id": "G2",
+      "criterion": "BOTH figures are exactly 4096.0: the lifetime counter num_env_steps_sampled_lifetime, and the per-iteration figure the trainer actually emits, learners/__all_modules__/learner_connector_sum_episodes_length_in",
+      "note": "4096 is TIMESTEPS SAMPLED in the single iteration. It is NOT a number of environments: those are 13 EnvRunners. On one fresh iteration the lifetime and the delta coincide, which is exactly why BOTH are checked: a gate that read only the lifetime would not notice if they ever stopped coinciding. The per-iteration key is read from a real artefact - in the August five-iteration run it holds 4608 on every iteration while the lifetime climbs 4608, 9216, 13824, 18432, 23040."
+    },
+    {
+      "id": "G3",
+      "criterion": "vf_loss and learners/default_policy/vf_explained_var are present and FINITE. vf_loss is read from the hoisted row key when the trainer's suffix match found it, and falls back to the literal learner_metrics key learners/default_policy/vf_loss otherwise; vf_explained_var is NEVER hoisted and is only ever read from learner_metrics. The source actually used is recorded.",
+      "note": "no threshold. July passed EV 0.598 and EV 0.238 alike."
+    },
+    {
+      "id": "G4",
+      "criterion": "the mean KL is finite and its absolute value is <= 1e-09"
+    },
+    {
+      "id": "G5",
+      "criterion": "every actor_freeze_audit entry has exact true and max_abs_diff 0.0 and carries the digest d4a13ff7...; and the ten actor tensors in the committed learner module state are byte-identical to J19A's"
+    },
+    {
+      "id": "G6",
+      "criterion": "rows 2:4 of pi.1.weight and pi.1.bias are byte-identical to J19A's, and sigma is 0.005 within 1e-09"
+    },
+    {
+      "id": "G7",
+      "criterion": "critic_state_audit's first and last digests differ"
+    },
+    {
+      "id": "G8",
+      "criterion": "the SHA-256 of the committed learner module state differs from J19A's module_state.pkl",
+      "note": "it must differ: the file carries six critic tensors J19A does not have. The binding comparison is on the actor TENSORS, which G5 covers."
+    },
+    {
+      "id": "G9",
+      "criterion": "STRUCTURAL HALF ONLY: checkpoint_last exists; the optimizer is at learner_group/learner/state.pkl with the four expected top-level keys and a default_policy_default_optimizer entry; its param group holds 12 parameters and the Adam moments sit at EXACTLY the indices [6, 7, 8, 9, 10, 11]; the learner module state is at learner_group/learner/rl_module/default_policy/module_state.pkl with all sixteen keys",
+      "note": "the layout was READ from committed July artefacts, not assumed. Two paths inside the checkpoint are decoys - learner_group/state.pkl and learner_group/learner/rl_module/module_state.pkl are five-byte EMPTY dicts - and the runner records what it found at both so a future reader cannot repeat the mistake. The index set is checked, not merely the count: named_parameters() orders the six unique actor tensors 0-5 and the value tower 6-11, so six entries at the wrong indices would mean the actor took a gradient and some critic tensor did not, and a count alone cannot tell."
+    },
+    {
+      "id": "G10",
+      "criterion": "child exit code 0, summary.ok true, stop_reason 'completed', timed_out false, interrupted false, and NO supervisor_state.json in the leaf",
+      "note": "the worker path never writes supervisor_state.json, so its absence is direct evidence that no supervisor ran."
+    },
+    {
+      "id": "G11",
+      "criterion": "the training_health block is present with all eight fields non-null, missing_telemetry_rows 0, and observed_rows + missing_telemetry_rows equal to 4096"
+    },
+    {
+      "id": "G12",
+      "criterion": "all seven J19A leaf files re-hash to their pinned values, before and after"
+    }
+  ],
+  "the_six_adam_entries_are_an_independent_reading_of_the_freeze": "of the twelve parameters in the optimizer group, only six carry Adam moments, and they must sit at EXACTLY indices 6 through 11 - the six critic tensors. A frozen actor takes no gradient, so it can never acquire a moment, and an entry below index 6 would mean the freeze leaked. This is read from the optimizer rather than from the digests, and July's own artefact shows exactly the same 6-of-12 signature at those indices.",
+  "telemetry_is_recorded_not_bounded": {
+    "rule": "architect decision of 2026-08-27, point 6. Presence and completeness are the GATE (G11); the values are MEASUREMENTS.",
+    "recorded_without_any_behavioural_threshold": [
+      "phase_timeout_stance_rows",
+      "morphology_causal_contract_failure_rows",
+      "resync_event_rows",
+      "resync_count_max",
+      "hs_cancelled_count_max"
+    ],
+    "also_recorded": [
+      "observed_rows",
+      "missing_telemetry_rows",
+      "timeout_side_disagreement_rows"
+    ],
+    "why_no_threshold": "this stage measures whether the critic can be warmed with the actor frozen. Bounding FSM incidents here would import a behavioural judgement the stage is not designed to make, and would turn a measurement into a gate nobody calibrated.",
+    "no_artefact_precedent": "no existing run carries a training_health block; this facility is newer than every recorded run. The auditor therefore treats an absent field as null, never as zero."
+  },
+  "what_could_abort_the_child": {
+    "rule": "enumerated from the code so the failure modes are known in advance rather than discovered",
+    "caught_inside_run_and_reported_as_stop_reason_error": [
+      "the freeze_actor audit failing after the iteration (train_ppo_mlp.py:1998)",
+      "any warm-start integration check: learner actor, target critic, per-EnvRunner actor, re-saved actor (1791, 1831, 1839, 1861, 1878, 1887, 1901)",
+      "the KL update guard (772) - which is exactly what this amendment disables",
+      "the exact-start balance guard (2090) - inert here, exact_start_sampling is false",
+      "a pre-existing milestone_iteration_000001 (2553) - which the clean-leaf assertion prevents"
+    ],
+    "not_caught_process_dies": "the child self-timeout watchdog hard-exits with 124 after writing a timeout summary",
+    "how_the_auditor_tells_them_apart": "exit 0 plus summary.ok true is the only success signal. Exit 1 can mean either 'ran and failed with a summary' or 'never started, no summary'; exit 124 is always a timeout with a written summary."
+  },
+  "execution_discipline": {
+    "single_execution": true,
+    "no_retry": "whatever the outcome",
+    "no_restore": "this runner performs none and cannot",
+    "no_ppo_ex_novo": true,
+    "no_promotion": true,
+    "no_training_ready_claim": true,
+    "structurally_forbidden_calls": [
+      "train",
+      "build_algo",
+      "PPOConfig",
+      "make_cmc_env",
+      "make_env",
+      "save_to_path",
+      "restore_from_path",
+      "from_checkpoint",
+      "sync_weights",
+      "backward",
+      "step",
+      "sample",
+      "call",
+      "check_output",
+      "system"
+    ],
+    "structurally_forbidden_imports": [
+      "torch",
+      "ray",
+      "gymnasium",
+      "torch.optim",
+      "env_factory",
+      "rollout_eval",
+      "train_ppo_mlp",
+      "warm_start",
+      "asymmetric_rl_module"
+    ],
+    "why_the_runner_imports_no_torch": "it starts a child and reads files. Everything numeric it needs comes from pickles and JSON that the child wrote; numpy is imported lazily only for the byte comparisons.",
+    "enforced_by": "the test suite walks the runner's own AST, so the absence is asserted rather than promised",
+    "preflight": "fail-closed; no torch, no ray, no child, no write",
+    "post_commit_verification": "every leaf-relative path named by the COMMITTED receipt is re-hashed against it and against the written bytes, and the J19A, K1 and K1R1 leaves are re-hashed against their pins"
+  },
+  "go_requirements": {
+    "pin_count": 41,
+    "pins_are_labels_not_paths": "the GO payload carries labels and hashes only. Each label is resolved by the runner's closed go_pin_targets() map, never by the payload. Labels outside this directory - the four production modules, the telemetry suite, the pinned runtime config - are resolved from internal constants, which is the reason the map exists.",
+    "coverage": "this stage's three artefacts; both configs; the overlay; the deriver; the readiness runner, preregistration and GO; the K1R1 preregistration, runner and GO; the four production modules the CHILD executes; the telemetry suite; the pinned runtime config; all seven J19A leaf files; the J19B and J19C qualification receipts and commit verifications; all six K1 leaf files; all five K1R1 leaf files.",
+    "no_report_is_pinned": "reports are narrative, not inputs to the computation",
+    "must_not_set": [
+      "authorises_restore",
+      "authorises_retry",
+      "authorises_ppo",
+      "authorises_ex_novo",
+      "authorises_promotion",
+      "authorises_rewriting_k1"
+    ],
+    "a_DRAFT_or_PROPOSED_go_is_refused": "the runner rejects a GO whose status is DRAFT or PROPOSED, so a draft cannot start anything even by accident"
+  },
+  "invariants": {
+    "not_modified": [
+      "v26c_j20_warmup_cfg.yaml - read, never written",
+      "train_ppo_mlp.py, warm_start.py, asymmetric_rl_module.py, tb_logging.py",
+      "the K1 and K1R1 leaves, their runners, preregistrations and GOs",
+      "J19A, J19B, J19C and every earlier leaf and runner",
+      "training_exnovo_cfg.yaml and training_cfg.yaml",
+      "the C++ SEA plugin and the OpenSim model",
+      "FSM v3, the detector, the morphology corridor",
+      "the reward function",
+      "the network architecture",
+      "sigma",
+      "every directory under Trajectory Generator/runs"
+    ],
+    "added": [
+      "this preregistration",
+      "v26c_j20_critic_warmup_execution.py",
+      "test_v26c_j20_critic_warmup_execution.py",
+      "v26c_j20_warmup_critic_only_cfg.yaml"
+    ],
+    "dirty_worktree": "preserved untouched"
+  },
+  "what_this_stage_cannot_establish": {
+    "not_established": [
+      "that the critic learned anything useful - no explained-variance bar exists, deliberately",
+      "that the checkpoint restores exactly - that is the owed gate",
+      "anything about the actor's behaviour under a subsequent unfrozen update",
+      "any generalisation beyond the nine cells of the combined J19B and J19C qualification",
+      "deployability of anything"
+    ],
+    "the_next_stage_is_the_restore_audit": "a zero-iteration reload that must reproduce both the actor digest and the critic digest. It requires its own architect GO and is not reachable from here."
+  },
+  "deferred_todo": [
+    "the restore audit that closes gate G9",
+    "policy_std always null, a cosmetic defect inherited from J12",
+    "the J8 leaf manifest remains stale, left unchanged by architect decision",
+    "the J8 leaf has no commit_verification.json, like the J2 leaf",
+    "nominal_mean_shift declared and not measured in the J15R1 runner",
+    "ENV_MUTATION_POLICY in J19C remains a conservative inherited superset",
+    "validation/verify_h1_readiness.py: its > 0.0 branch was satisfied by an input-independent bias gradient; known debt, left untouched as July evidence",
+    "the readiness suites of J18, J19A, J19B, J19C, J20 and K1R1, unmodified after their GOs",
+    "LOTO, LOCO, B1R1, B1R2",
+    "the multi-model generalisation Epic"
+  ],
+  "architect_review_2026_08_27": {
+    "1_G2_checks_both_figures": "the lifetime AND the per-iteration delta, using the field the trainer really emits, not the lifetime alone",
+    "2_G9_checks_the_index_set": "Adam moments at exactly [6,7,8,9,10,11], not merely six entries",
+    "3_vf_loss_has_a_fallback": "the hoisted row key when present, otherwise the literal learners/default_policy/vf_loss; the source used is recorded"
+  }
+}

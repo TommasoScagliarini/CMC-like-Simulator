@@ -1,0 +1,203 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j14_prereg_dagger_dataset",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_proposed": "V26C_J14_POST_MISMATCH_DAGGER_DATASET",
+  "authorisation_status": "NOT_GRANTED at the time of writing - the architect authorises execution internally after auditing this readiness bundle",
+  "date_utc": "2026-08-27",
+  "architectural_supplement_to_j13": {
+    "what_j13_concluded": "the J12 E/F failure is a support gap: the corpus has no post-mismatch, prolonged-swing coverage, because the only mechanism that adds off-nominal rows truncates at the first discrete mismatch",
+    "accepted_by_the_architect": true,
+    "corrections_the_architect_issued": [
+      "the F2R protocol of 2026-08-23 that reserved seed 125 was explicitly 'PROPOSTA NON ANCORA AUTORIZZATA', used JUL_H0 as its operational init, and has been superseded: the operational base is August V26 -> J2 35D, with July as methodological source only",
+      "in the current J lineage J7 ALREADY contains 11 rows from seed 125, so F/125 is not and cannot be called genuinely held out",
+      "both failed J12 traces are authorised as DAgger sources: E seed 124 with 500 rows and F seed 125 with 354 rows, every available row, post-mismatch regions included",
+      "the next A-F matrix is a REGRESSION gate on known failure modes, not a statistical held-out",
+      "the genuine held-out reserve is seeds 126, 127 and 128 at sigma 0.005, never opened",
+      "a future fresh fit starts from J2, not from J11"
+    ],
+    "what_j13_got_wrong": "J13 proposed excluding cell F on the strength of the 23/08 protocol. That protocol was never authorised and is superseded; and the exclusion was in any case unsound, because seed 125 is already inside J7. J13 did flag that its binding force was the architect's decision, but it should have checked J7's own composition before proposing the exclusion.",
+    "j13_report_unmodified": "reports/user/2026-08-27_v26c_j13_j12_failure_diagnosis_and_recovery_plan.md"
+  },
+  "what_this_stage_is": "ONE content-addressed dataset leaf holding the 854 corrective rows: every step the J11 student visited in the two FAILED J12 cells, labelled with the J1 teacher at the same step",
+  "what_this_stage_is_not": [
+    "not a rollout",
+    "not a fit",
+    "not a critic and not PPO",
+    "no environment is constructed and torch is never imported",
+    "not a promotion and not a deployability claim",
+    "not a truncation: every row is kept"
+  ],
+  "source_cells": [
+    {
+      "cell": "E",
+      "seed": 124,
+      "rows": 500,
+      "mode": "stochastic_held",
+      "offset_s": 1.956870983805102,
+      "j12_verdict": "FAIL",
+      "failure": "swing 253-498, swing_elapsed 2.461 s, rescued at step 499"
+    },
+    {
+      "cell": "F",
+      "seed": 125,
+      "rows": 354,
+      "mode": "stochastic_held",
+      "offset_s": 1.956870983805102,
+      "j12_verdict": "FAIL",
+      "failure": "TO at 94, HS at 266 cancelled at 282, phase_timeout:swing at 354"
+    }
+  ],
+  "reference_cell": {
+    "cell": "A",
+    "rows": 500,
+    "why": "the deterministic nominal rollout of the SAME actor. It shares the episode start with E and F, so an index-aligned discrete comparison is meaningful. Cells B and C have different starts and are NOT index-comparable to A.",
+    "role": "reference for the mismatch FLAG only; cell A contributes no row"
+  },
+  "totals": {
+    "new_rows": 854,
+    "cell_E": 500,
+    "cell_F": 354,
+    "future_aggregate_rows": 25567,
+    "future_arithmetic": "16713 + 8x(500+500) + 854 = 25567",
+    "verified_from_files": "the runner recomputes every component from the pinned files and FAILS CLOSED if the total is not 25567"
+  },
+  "new_row_repeat": 1,
+  "why_repeat_one": "no evidence justifies a repeat. July did not weight corrective rows: influence came only from np.tile multiplicity, and the factor 8 it used elsewhere has no documented rationale. This stage invents none.",
+  "no_dedup": true,
+  "no_balancing": true,
+  "truncation": {
+    "applied": false,
+    "julys_dagger_did_not_truncate": "target_domain_dagger.py never calls truncate_before_discrete_mismatch; the 11/07 DAgger ingested every row of each terminated episode (68, 45, 356)",
+    "j7_did_truncate": "429/273/11 of 500 per seed, which is exactly why the corpus lacks post-mismatch coverage",
+    "julys_binding_todo_2026_07_14": "raccogliere dati recovery realmente event-aligned e indipendenti, includendo la regione successiva al mismatch FSM invece di sole interpolazioni pre-evento",
+    "status": "never executed by July; it is the substance of this stage"
+  },
+  "mismatch_flag": {
+    "binding": false,
+    "is_a_filter": false,
+    "operator": "target_domain_noise_adaptation.truncate_before_discrete_mismatch, transcribed via v26c_j7_markov_dataset, used ONLY to compute the first mismatching step",
+    "discrete_columns": "names ending _in_contact/_heel_strike/_toe_off/_saturated or starting phase_fsm_/phase_expected_",
+    "comparison": "exact != against cell A at the same step index",
+    "recorded_as": "a per-row boolean, post_mismatch, plus the first mismatching step and columns"
+  },
+  "labels": {
+    "source": "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz",
+    "mapping": "actions[step - 1] - the SAME instant, no lead and no lag",
+    "july_faithful": "July's DAgger labelled by step number, never by state (target_domain_imitation.py: label = teacher_actions[teacher_index])",
+    "teacher_observations_read": false,
+    "why_this_is_legal": "prescribed_teacher_action is a pure function of TIME through the IK spline, and the J12 time grids are BIT-IDENTICAL to J1's. The runner proves that identity row by row and refuses otherwise.",
+    "known_risk": "in a phase-diverged state a same-step label may be phase-invalid. July measured 76.27% phase-misaligned rows in its markov recovery block. This is recorded as a DIAGNOSTIC, with no threshold attached."
+  },
+  "clock_policy": {
+    "columns": [
+      0,
+      1
+    ],
+    "projected_to": "EXACT zero",
+    "raw_state": "the environment records (sin, cos) = (0, 1) with the gait clock disabled",
+    "non_clock_columns_untouched": true,
+    "both_hashed": "the RAW and the PROJECTED content hashes are both recorded"
+  },
+  "provenance_per_row": [
+    "cell",
+    "seed",
+    "step (1-based within its cell)",
+    "post_mismatch flag",
+    "time_before"
+  ],
+  "seeds": {
+    "read_here": [
+      124,
+      125
+    ],
+    "sealed": [
+      126,
+      127,
+      128
+    ],
+    "seed_125_is_held_out": false,
+    "why_not": "J7 rows [16702:16713] are bit-identical to the J6 seed-125 probe. A seed already inside the training corpus cannot be called held out.",
+    "genuine_reserve": "seeds 126, 127 and 128 at sigma 0.005, opened by no stage so far. The runner refuses any pinned source whose path names one of them.",
+    "future_independent_gate": "after an A-F PASS, the minimum independent gate is G/H/I: nominal start, stochastic_held, seeds 126/127/128, same per-job gates. NOT opened now and NOT authorised by this stage."
+  },
+  "future_matrix_is_a_regression_gate": "the next A-F run tests known failure modes on an actor trained partly on those very cells. It is a REGRESSION/qualification gate, not a statistical held-out, and must be reported as such.",
+  "future_fit": {
+    "init": "FRESH from J2, not from J11",
+    "hyperparameters_unchanged_vs_j11": {
+      "seed": 123,
+      "epochs_max": 400,
+      "batch_size": 128,
+      "learning_rate": 5e-05,
+      "patience": 60,
+      "clip_weight": 1.0,
+      "logstd_weight": 0.0,
+      "anchor_weight": 0.01,
+      "logstd_frozen": true,
+      "physical_scaling": "July, absorbed at save time",
+      "trainable": "the full mean actor",
+      "critic": "excluded"
+    },
+    "not_part_of_this_stage": "J14 materialises data and authorises no fit"
+  },
+  "unchanged": [
+    "FSM v3",
+    "morphology corridor",
+    "reward",
+    "sigma 0.005",
+    "SEA",
+    "the C++ plugin",
+    "the 35D architecture",
+    "production configuration",
+    "every J0-J13 artefact and report"
+  ],
+  "swing_clock_observation": "the failure to reset swing_elapsed_s after hs_bounce_cancelled remains a DIAGNOSTIC observation from J13. It is not a change request and nothing here touches FSM v3.",
+  "future_leaf": {
+    "relative_leaf": "j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1",
+    "is_the_only_destination": true,
+    "must_not_exist_before": true,
+    "contents": [
+      "v26c_j14_dagger_increment.npz",
+      "v26c_j14_dagger_dataset_receipt.json",
+      "commit_verification.json"
+    ],
+    "write_protocol": "atomic, no-clobber, under an exclusive sibling lock taken with O_CREAT|O_EXCL: sibling staging, receipt, leaf re-check, rename, THEN post-commit verification",
+    "validity_is_conditional": "valid evidence if and only if commit_verification.json exists and declares pass true. The leaf is born carrying a TECHNICAL_INVALID marker, committed by the rename and removed only on a pass.",
+    "no_autonomous_retry": true
+  },
+  "preflight": {
+    "inert": "no torch, no ray, no OpenSim, no environment, no write",
+    "strongest_claim": "this stage never needs torch or an environment at ANY point, not even in the materialise path: it reads committed bytes and writes committed bytes",
+    "sentinel": "_j14_preflight_sentinel_never_created"
+  },
+  "deferred_todo": {
+    "loto": "NOT integrated. Future TODO, not J14.",
+    "loco": "NOT integrated. Future TODO, not J14.",
+    "b1r1": "NOT integrated. Future TODO, not J14.",
+    "b1r2": "NOT integrated. Future TODO, not J14.",
+    "generalisation_dataset_epic": "OPEN. Still AB06, one trial, three starts.",
+    "critic_warm_up": "NOT part of this stage and NOT authorised.",
+    "ppo": "NOT authorised.",
+    "seeds_126_127_128": "sealed; the G/H/I gate is defined but NOT opened."
+  },
+  "pinned_sources_sha256": {
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/commit_verification.json": "59cd1563ad23713ef00ac5b2e95a334a088257af95c6727520fb895c61a8c61c",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/commit_verification.json": "a5ef34e758c50437d28dfbf4413e5a18a2e3ad7ba9d6ec4fb164431b17fcb175",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_A_trace.json": "5e1b91999c2fc764a233b215e204ded00608894cc36a6dac8e6129b09d306e30",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_E_trace.json": "69f031c1ca69e0a4060d52e2d6c9d107987c91c4e63bb4a021e42b81398b3995",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_F_trace.json": "86f16eba23c82cc94404199bea5c482a590f3e4bc96238e4d405906a6afdeb3e",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/v26c_j12_closed_loop_receipt.json": "2b3e20362bb54ea545db3495d2a468d33138555cccf8bd20d3e5ecc3d75caf11",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "v26c_j12_closed_loop.py": "65d7b8619074c909753750f03aec751d38179c2226e50c87da62113ea5769fca",
+    "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+    "v26c_j7_markov_dataset.py": "b3cc2b88997ccb7c23964123d70ac3fb524adf4fdf3e8882d26ce20ff87d1461"
+  }
+}

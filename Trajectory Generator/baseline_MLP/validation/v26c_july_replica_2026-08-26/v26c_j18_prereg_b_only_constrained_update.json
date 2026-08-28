@@ -1,0 +1,236 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION",
+  "stage": "V26C_J18_J8_B_ONLY_CONSTRAINED_UPDATE",
+  "date": "2026-08-27",
+  "status": "READINESS ONLY. Not executed. No fit, no rollout, no environment, no critic, no PPO, no new collection, no candidate actor, no j18_runs, no sealed seed.",
+  "contains_no_self_hash": true,
+  "requires_architect_go_before_execution": true,
+
+  "objective": {
+    "one_sentence": "produce ONE candidate 35D actor that corrects J8's behaviour on cell B in OUTPUT/ACTION space while provably preserving its behaviour everywhere it already works.",
+    "parent": "J8, immutable, pinned by actual byte hash",
+    "what_is_trained": "the entire mean network: pi.0.0.weight, pi.0.0.bias, pi.0.2.weight, pi.0.2.bias, and ROWS 0:2 of pi.1.weight and pi.1.bias",
+    "what_is_frozen": "the log-std, which is ROWS 2:4 of pi.1.weight and pi.1.bias, held byte-identical to J8. The actor has no separate log-std key: its head emits four values, two means and two log-stds, so both the freeze and its gate are expressed as a row slice.",
+    "what_is_excluded": "the critic. J8 carries no value-function key and none is created.",
+    "why_this_is_not_a_generic_aggregate_refit": "the loss constrains the network's OUTPUT on four named, disjoint state sets, two of which are preservation anchors labelled with J8's own outputs. J15R1 failed with only a PARAMETER-space anchor at weight 0.01 and no output-space constraint; J17 measured that its nominal anchor block was self-distilled from the parent and therefore contributed no gradient at initialisation (squared error 5.63e-10). Blocks C and D are the structural answer to that finding."
+  },
+
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> J8 -> this constrained B-only incremental update",
+    "july": "methodological source only. No July artefact enters the lineage.",
+    "j11_and_j14": "diagnostic evidence only, not parents",
+    "j15r1_and_j16": "diagnostic evidence only, not parents",
+    "closed_loop_standing": {"J8": "5/6", "J11": "4/6", "J15R1": "0/6"}
+  },
+
+  "pinned_inputs": {
+    "dataset_manifest": "v26c_j18_dataset_manifest.json",
+    "provenance_overlay": "v26c_j18_provenance_overlay_j8_2026-08-27.json",
+    "parent_module_actual_byte_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "note": "the parent is bound by the ACTUAL BYTES of module_state.pkl. The J8 leaf sidecar manifest is stale and is never read as an identity source; the overlay records this and proves, documentarily and empirically, that these bytes are the actor that produced the A-F 5/6 rollouts."
+  },
+
+  "loss": {
+    "form": "L(theta) = w_A * MSE_A(theta) + w_B * MSE_B(theta) + w_C * MSE_C(theta) + w_D * MSE_D(theta)",
+    "per_block_reduction": "mean over that block's own rows and over the two action dimensions",
+    "blocks_are_disjoint": true,
+    "priority_order": ["A", "B", "C", "D"],
+    "weights": {
+      "w_A": "fixed at 1.0, the reference scale",
+      "w_B": "the gridded on-policy weight beta",
+      "w_C": "the gridded preservation weight lambda",
+      "w_D": "the gridded preservation weight lambda, the same value as w_C"
+    },
+    "why_w_C_equals_w_D": "C and D are both preservation anchors and are held at one common strength so the grid keeps a single preservation axis. Splitting them would double the grid without a measurement motivating the split."
+  },
+
+  "candidate_grid": {
+    "is_finite": true,
+    "is_preregistered": true,
+    "no_adaptive_retry": "no candidate is ever re-run, re-seeded or re-tuned in response to its own result. The grid is fixed before execution and executed exactly once.",
+    "axes": [
+      {"name": "preservation_weight_lambda", "values": [1.0, 3.0, 10.0, 30.0], "applies_to": ["w_C", "w_D"]},
+      {"name": "on_policy_weight_beta", "values": [1.0, 5.0], "applies_to": ["w_B"]},
+      {"name": "learning_rate", "values": [1e-05, 5e-05]}
+    ],
+    "enumeration_rule": "nested loops in the axis order declared above, outermost first: for lambda in [1.0, 3.0, 10.0, 30.0]: for beta in [1.0, 5.0]: for lr in [1e-05, 5e-05]. The resulting position is the candidate_index, 0 through 15.",
+    "total_candidates": 16,
+    "candidate_index_is_unique": true,
+    "why_these_values": {
+      "lambda": "spans a factor of 30 around parity. Block B holds 14 rows against 3707 preservation rows, so with per-block means the preservation pressure is set entirely by lambda, not by row counts. The measured baseline gives no reason to prefer one value, so the range is spanned rather than guessed.",
+      "beta": "1.0 is parity with the teacher block; 5.0 upweights the 14-row on-policy block, which is the block the phase exists to fix.",
+      "learning_rate": "5e-05 is the frozen JULY_HP value used by J8, J11 and J15R1 and is carried for continuity; 1e-05 is the gentler alternative appropriate to an incremental update from a working parent. No third value is introduced."
+    }
+  },
+
+  "fit_protocol_fixed_outside_the_grid": {
+    "seed": 123,
+    "seed_note": "123 is the established fit seed. Seeds 126, 127 and 128 remain sealed and are not read, generated or used.",
+    "epochs": 200,
+    "batch_size": 128,
+    "optimizer": "Adam",
+    "batches_per_epoch": 33,
+    "max_optimizer_updates": 6600,
+    "shuffling": "deterministic, derived from the seed alone",
+    "logstd_freeze_method": "PROJECTION on a ROW SLICE. After every optimizer step, rows 2:4 of pi.1.weight and pi.1.bias are overwritten with J8's values. They are not merely excluded from the optimizer, so no update can leak into them, and because the freeze is a slice of a trained tensor rather than a separate parameter, exclusion alone would not have worked at all. The Adam moment buffers for the head are polluted and then discarded, as in J11 and J15R1.",
+    "clock_columns": "columns 0 and 1 of the first layer are hard-zeroed after every optimizer step and again at save",
+    "encoder_aliases": "the four pi_encoder.* aliases are rebuilt as bit-identical copies of the trained pi.* tensors at save",
+    "physical_scales": "absorbed into layer 1 at save, so the committed actor consumes RAW observations, as in J11 and J15R1",
+    "validation_split": "NONE",
+    "why_no_validation_split": "blocks C and D are anchors, not a generalisation target, so a random split of them measures nothing meaningful, and block B holds 14 rows and cannot be split. Instead the composite objective is evaluated on the FULL blocks at every epoch. This is disclosed rather than hidden: it means the within-run checkpoint choice is not an out-of-sample estimate, and the acceptance decision therefore rests on the preregistered gates below and, ultimately, on closed-loop requalification.",
+    "checkpoint_selection_within_a_run": {
+      "rule": "keep the epoch with the lowest composite objective L evaluated on the full blocks; ties broken by the EARLIEST epoch",
+      "is_total_and_deterministic": true
+    }
+  },
+
+  "thresholds": {
+    "derivation_principle": "every numeric threshold below is derived from a MEASURED baseline quantity recorded in v26c_j18_dataset_manifest.json. None is chosen by preference.",
+
+    "hard_gates_all_must_pass": [
+      {
+        "id": "G1",
+        "name": "preservation_max_drift_C",
+        "statement": "max absolute difference between the candidate's mean output and block C's labels, over all 2497 rows and both actions, <= 0.005",
+        "threshold": 0.005,
+        "units": "normalised action units",
+        "physical": "0.00175 rad",
+        "derivation": "2.91x below 0.014557, the smallest maximum perturbation among the stochastic cells J8 actually PASSED (cell E); and below the median one-step command change on both actions (knee 0.011918, ankle 0.007493).",
+        "baseline_value_at_parent": 1.435e-07
+      },
+      {
+        "id": "G2",
+        "name": "preservation_max_drift_D",
+        "statement": "the same bound on block D, over all 1210 rows and both actions",
+        "threshold": 0.005,
+        "units": "normalised action units",
+        "derivation": "as G1",
+        "baseline_value_at_parent": 2.971e-08
+      },
+      {
+        "id": "G3",
+        "name": "preservation_bias_C",
+        "statement": "absolute SIGNED MEAN drift, computed per action over block C, <= 0.0014557",
+        "threshold": 0.0014557,
+        "units": "normalised action units",
+        "derivation": "one tenth of 0.014557, the smallest tolerated perturbation. The tenth is not decoration: the perturbation J8 demonstrably absorbed was ZERO-MEAN and step-varying, whereas a weight drift is systematic and persistent, so that evidence does not cover a bias of the same magnitude and the bias is held an order of magnitude tighter.",
+        "why_a_separate_bias_gate": "J17 measured that the J16 failure involved the knee being systematically UNDER-COMMANDED before the breach. A bounded worst case does not exclude a small persistent bias, and a persistent bias is the failure mode already observed.",
+        "baseline_value_at_parent": "below 1.5e-07 per action"
+      },
+      {
+        "id": "G4",
+        "name": "preservation_bias_D",
+        "statement": "the same bound on block D",
+        "threshold": 0.0014557,
+        "derivation": "as G3"
+      },
+      {
+        "id": "G5",
+        "name": "on_policy_improvement_B",
+        "statement": "MSE_B(candidate) <= 0.09546555953591015",
+        "threshold": 0.09546555953591015,
+        "derivation": "exactly one half of the measured baseline MSE_B = 0.1909311190718203. The runner DERIVES this value as BASELINE_MSE_B / 2.0 rather than storing a rounded literal, so the threshold cannot drift away from the measurement it claims. Block B is the reason the phase exists; a candidate that does not at least halve the on-policy error has not done the job.",
+        "baseline_value_at_parent": 0.1909311190718203
+      },
+      {
+        "id": "G6",
+        "name": "teacher_non_regression_A",
+        "statement": "MSE_A(candidate) <= 0.004108013186414973",
+        "threshold": 0.004108013186414973,
+        "derivation": "the measured baseline MSE_A itself, at full double precision. Block A is not required to improve, but it must not get worse.",
+        "baseline_value_at_parent": 0.004108013186414973
+      },
+      {
+        "id": "G7",
+        "name": "logstd_frozen_and_state_independent",
+        "statement": "rows 2:4 of pi.1.weight and pi.1.bias are byte-identical to J8's, AND the log-std rows of pi.1.weight remain exactly zero",
+        "threshold": "exact equality",
+        "derivation": "structural invariant, not a measured quantity",
+        "why_this_is_expressed_as_a_slice": "the actor has NO separate log-std key. The output head emits four values, [mean_knee, mean_ankle, logstd_knee, logstd_ankle], so the log-std is rows 2:4 of pi.1.weight and pi.1.bias. An earlier draft of the runner searched for a key whose name contained 'logstd', found nothing, and would therefore have made this gate VACUOUSLY TRUE. The readiness test suite caught that before any execution. The gate now compares the actual slice and additionally requires the log-std weight rows to stay exactly zero, so the log-std cannot silently become state-dependent.",
+        "parent_values": {
+          "logstd_bias_rows": [-5.2983174324035645, -5.2983174324035645],
+          "implied_sigma": [0.004999999670722372, 0.004999999670722372],
+          "logstd_weight_rows_max_abs": 0.0
+        }
+      },
+      {
+        "id": "G8",
+        "name": "no_critic",
+        "statement": "the candidate's key set contains no value-function or critic key",
+        "threshold": "count == 0",
+        "derivation": "structural invariant"
+      },
+      {
+        "id": "G9",
+        "name": "clock_columns_zero",
+        "statement": "first-layer weight columns 0 and 1 are exactly zero",
+        "threshold": "exact zero",
+        "derivation": "structural invariant carried from J8"
+      },
+      {
+        "id": "G10",
+        "name": "key_set_identical",
+        "statement": "the candidate's key set is identical to J8's ten keys, with identical shapes",
+        "threshold": "exact set and shape equality",
+        "derivation": "structural invariant. No widening, no separate 25D actor, no contralateral feature, 35D throughout."
+      },
+      {
+        "id": "G11",
+        "name": "finiteness",
+        "statement": "every tensor of the candidate and every reported metric is finite",
+        "threshold": "no NaN, no Inf",
+        "derivation": "structural invariant"
+      }
+    ],
+
+    "ranking_applied_only_to_candidates_that_pass_every_hard_gate": {
+      "is_total": true,
+      "is_deterministic": true,
+      "keys_in_order": [
+        {"rank": 1, "key": "MSE_B", "direction": "minimise", "why": "the on-policy block is the phase's target"},
+        {"rank": 2, "key": "MSE_A", "direction": "minimise", "why": "teacher fidelity as first tie-break"},
+        {"rank": 3, "key": "max_abs_drift over C union D", "direction": "minimise", "why": "least disturbance to what already works"},
+        {"rank": 4, "key": "candidate_index", "direction": "minimise", "why": "the grid index is unique, so the order is TOTAL and no tie can remain unresolved"}
+      ],
+      "selected_candidate": "the first candidate under this ordering. Exactly one candidate is selected."
+    },
+
+    "fail_closed_rule": {
+      "if_no_candidate_passes_every_hard_gate": "the phase FAILS. No candidate is promoted, no threshold is relaxed, no axis value is added, no candidate is re-run. The failure is reported with all sixteen candidates' measured metrics preserved, and the next step returns to the architect.",
+      "no_autonomous_retry": true,
+      "no_threshold_relaxation_after_seeing_results": true
+    }
+  },
+
+  "what_this_phase_can_and_cannot_establish": {
+    "can": "that a candidate improves the on-policy block by at least half while its output stays within a measured drift budget on 3707 preservation states.",
+    "cannot": "that the candidate passes closed loop. J17 measured this directly: J15R1 improved on its corrective rows offline and then scored 0/6 in closed loop, because a bit-identical observation at step 1 diverged into a different trajectory. Offline gates SHORTLIST; they do not certify.",
+    "consequence": "the binding verdict on any candidate produced here is a later closed-loop A-F requalification, which this phase does not perform and does not preauthorise.",
+    "epistemic_labels": "every claim in the eventual execution report must be labelled evidence, inference or hypothesis to be tested. A correlation is never to be called a cause."
+  },
+
+  "artefacts_this_phase_will_produce_when_authorised": {
+    "runner": "v26c_j18_b_only_update.py",
+    "test_suite": "test_v26c_j18_b_only_update.py",
+    "preflight_output": "written to stdout and to a preflight JSON OUTSIDE j18_runs; --preflight-only writes no actor and creates no leaf",
+    "execution_leaf": "j18_runs/... , created ONLY under an explicit architect GO, content-addressed and no-clobber, with a born-invalid TECHNICAL_INVALID leaf removed only as the last write after post-commit verification"
+  },
+
+  "invariants": {
+    "not_modified": [
+      "J0 through J12 artefacts", "production configuration", "FSM v3", "detector and morphology",
+      "reward", "sigma", "SEA and the C++ plugin", "network architecture"
+    ],
+    "single_35D_actor": true,
+    "no_separate_25D_actor": true,
+    "no_widening": true,
+    "no_contralateral_feature": true,
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "phase_G_to_I": "not opened",
+    "LOTO_LOCO_B1R1_B1R2_and_generalisation_Epic": "remain future TODO, untouched",
+    "dirty_worktree": "preserved untouched",
+    "artefacts_are_additive_content_addressed_no_clobber": true,
+    "editing_method": "patch-based tools only; no cat, no shell redirection, no shell write tricks",
+    "subagents_used": 0
+  }
+}

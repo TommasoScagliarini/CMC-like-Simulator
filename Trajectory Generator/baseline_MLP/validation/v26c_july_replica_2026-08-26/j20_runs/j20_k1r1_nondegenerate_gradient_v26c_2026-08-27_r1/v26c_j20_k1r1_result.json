@@ -1,0 +1,271 @@
+{
+  "amended_checks": {
+    "A01_original_k1_is_exactly_fail_closed_28_of_29_before_AND_after": true,
+    "A02_stimulus_satisfies_every_preregistered_property": true,
+    "A03_stimulus_matches_the_pinned_digest": true,
+    "A04_module_loaded_exactly_from_the_k1_leaf_with_the_freeze_contract_live": true,
+    "A05_loss_is_finite": true,
+    "A06_all_six_critic_tensors_have_strictly_positive_gradient_norm": true,
+    "A07_vf_encoder_0_weight_specifically_has_gradient": true,
+    "A08_no_actor_parameter_received_gradient": true,
+    "A09_logstd_rows_unchanged": true,
+    "A10_all_sixteen_tensors_byte_identical_before_and_after": true,
+    "A11_ten_actor_tensors_still_byte_identical_to_j19a": true,
+    "A12_actor_digest_still_reproduces_j19a": true
+  },
+  "amended_checks_passed": 12,
+  "amended_checks_total": 12,
+  "amends": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "authorised_differences_from_k1": {
+    "W1_stimulus": {
+      "abs_min": 0.0052083334885537624,
+      "digest_float32_c_order": "4f643e9cf7d46fb95044cf87ad09342ba56c2e22ca7cda4b72bd57e2a537fb35",
+      "k1": "an all-zero 8x84 batch",
+      "k1r1": "value[p-1][q-1] = sign * ((p*37 + q*53 + p*q) mod 191 + 1) / 192.0, with p and q 1-based and sign = -1 when (p+q) is odd",
+      "negative_elements": 336,
+      "positive_elements": 336,
+      "properties": {
+        "all_eight_rows_are_distinct": true,
+        "dtype_is_float32": true,
+        "every_element_is_nonzero": true,
+        "every_element_is_within_minus_one_and_one": true,
+        "is_not_the_degenerate_zero_batch": true,
+        "matches_the_pinned_absolute_minimum": true,
+        "matches_the_pinned_digest": true,
+        "matches_the_pinned_maximum": true,
+        "matches_the_pinned_minimum": true,
+        "no_column_is_constant": true,
+        "shape_is_8x84": true
+      },
+      "range": [
+        -0.9947916865348816,
+        0.9947916865348816
+      ],
+      "why": "for y = Wx + b the first-layer weight gradient is dL/dW = (dL/dy) x^T, identically zero when x = 0, whatever the freeze does. K1 could not observe vf_encoder.0.weight for that reason and no other."
+    },
+    "W2_row_weights": {
+      "k1": "the value term summed with unit weights",
+      "k1r1": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0
+      ],
+      "why": "eight distinct positive weights, so the rows cannot cancel one another symmetrically in the first-layer weight gradient"
+    },
+    "the_EVIDENTIARY_PATH_differs_intentionally": "K1 built a module and transplanted an actor into it. K1R1 reconstructs a module and loads the complete post-K1 sixteen-tensor state byte for byte instead of re-running the transplant, because re-running it would re-measure evidence K1 already produced under a GO. This stage is therefore NOT operationally identical to K1; it is identical in what is measured, and every tensor the gradient is computed from is proven byte-identical to the one K1 committed.",
+    "these_are_the_only_SCIENTIFIC_differences": "W1 and W2 are the only differences in the gradient computation itself: same class, same geometry, same freeze flags, same forward path, same single backward, same byte re-verification."
+  },
+  "byte_identity": {
+    "actor_digest_after": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "actor_digest_expected": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "all_sixteen_before_vs_after": {
+      "pi.0.0.bias": true,
+      "pi.0.0.weight": true,
+      "pi.0.2.bias": true,
+      "pi.0.2.weight": true,
+      "pi.1.bias": true,
+      "pi.1.weight": true,
+      "pi_encoder.0.bias": true,
+      "pi_encoder.0.weight": true,
+      "pi_encoder.2.bias": true,
+      "pi_encoder.2.weight": true,
+      "vf.bias": true,
+      "vf.weight": true,
+      "vf_encoder.0.bias": true,
+      "vf_encoder.0.weight": true,
+      "vf_encoder.2.bias": true,
+      "vf_encoder.2.weight": true
+    },
+    "method": "same dtype, same shape, same C-order bytes. Deliberately NOT numpy.array_equal, which is numeric.",
+    "ten_actor_tensors_vs_j19a": {
+      "pi.0.0.bias": true,
+      "pi.0.0.weight": true,
+      "pi.0.2.bias": true,
+      "pi.0.2.weight": true,
+      "pi.1.bias": true,
+      "pi.1.weight": true,
+      "pi_encoder.0.bias": true,
+      "pi_encoder.0.weight": true,
+      "pi_encoder.2.bias": true,
+      "pi_encoder.2.weight": true
+    }
+  },
+  "composite": {
+    "amended_p24_passes": true,
+    "composite_passed": 29,
+    "composite_total": 29,
+    "original_passing_checks": 28,
+    "original_sole_failure": "P24_frozen_module_still_gives_the_critic_gradient",
+    "rule": "PASS 29/29 if and only if the immutable K1 record is exactly FAIL_CLOSED 28/29 with P24 as its sole failure, its other twenty-eight checks are intact, and the amended P24 passes here",
+    "the_k1_leaf_still_reads_fail_closed": true,
+    "the_k1_result_is_NOT_rewritten": true,
+    "verdict": "PASS",
+    "why_composition_and_not_a_retry": "K1's twenty-eight passing checks are evidence that was produced once, under a GO, and re-running them would replace evidence rather than add to it. The amendment measures ONLY the quantity K1 could not observe."
+  },
+  "freeze_contract": {
+    "_action_dim": 2,
+    "_freeze_actor": true,
+    "_freeze_logstd": true,
+    "_n_actor": 35,
+    "_n_full": 84,
+    "contract_holds": true,
+    "has_vf": true,
+    "has_vf_encoder": true,
+    "inference_only": false
+  },
+  "gradient_norms": {
+    "actor_unique_parameters": {
+      "pi.1.bias": null,
+      "pi.1.weight": null,
+      "pi_encoder.0.bias": null,
+      "pi_encoder.0.weight": null,
+      "pi_encoder.2.bias": null,
+      "pi_encoder.2.weight": null
+    },
+    "all": {
+      "pi.1.bias": null,
+      "pi.1.weight": null,
+      "pi_encoder.0.bias": null,
+      "pi_encoder.0.weight": null,
+      "pi_encoder.2.bias": null,
+      "pi_encoder.2.weight": null,
+      "vf.bias": 36.0,
+      "vf.weight": 37.812931060791016,
+      "vf_encoder.0.bias": 10.401909828186035,
+      "vf_encoder.0.weight": 15.325203895568848,
+      "vf_encoder.2.bias": 20.145442962646484,
+      "vf_encoder.2.weight": 32.9008903503418
+    },
+    "critic": {
+      "vf.bias": 36.0,
+      "vf.weight": 37.812931060791016,
+      "vf_encoder.0.bias": 10.401909828186035,
+      "vf_encoder.0.weight": 15.325203895568848,
+      "vf_encoder.2.bias": 20.145442962646484,
+      "vf_encoder.2.weight": 32.9008903503418
+    }
+  },
+  "inert": {
+    "actor_edited": false,
+    "actor_transplanted": false,
+    "algo_train_called": false,
+    "checkpoint_promoted": false,
+    "critic_replaced": false,
+    "environment_constructed": false,
+    "environment_stepped": false,
+    "k1_result_rewritten": false,
+    "k1_retried": false,
+    "optimizer_constructed": false,
+    "optimizer_step_taken": false,
+    "ppo_updates": 0,
+    "ray_cluster_started": false,
+    "rollout_performed": false,
+    "warmup_executed": false
+  },
+  "kind": "K1R1 AMENDMENT RESULT",
+  "load_exactness": {
+    "all_identical": true,
+    "identical_count": 16,
+    "keys_live": [
+      "pi.0.0.bias",
+      "pi.0.0.weight",
+      "pi.0.2.bias",
+      "pi.0.2.weight",
+      "pi.1.bias",
+      "pi.1.weight",
+      "pi_encoder.0.bias",
+      "pi_encoder.0.weight",
+      "pi_encoder.2.bias",
+      "pi_encoder.2.weight",
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "keys_saved": [
+      "pi.0.0.bias",
+      "pi.0.0.weight",
+      "pi.0.2.bias",
+      "pi.0.2.weight",
+      "pi.1.bias",
+      "pi.1.weight",
+      "pi_encoder.0.bias",
+      "pi_encoder.0.weight",
+      "pi_encoder.2.bias",
+      "pi_encoder.2.weight",
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "method": "same dtype, same shape, same C-order bytes, per key",
+    "missing_keys": [],
+    "per_key_byte_identical": {
+      "pi.0.0.bias": true,
+      "pi.0.0.weight": true,
+      "pi.0.2.bias": true,
+      "pi.0.2.weight": true,
+      "pi.1.bias": true,
+      "pi.1.weight": true,
+      "pi_encoder.0.bias": true,
+      "pi_encoder.0.weight": true,
+      "pi_encoder.2.bias": true,
+      "pi_encoder.2.weight": true,
+      "vf.bias": true,
+      "vf.weight": true,
+      "vf_encoder.0.bias": true,
+      "vf_encoder.0.weight": true,
+      "vf_encoder.2.bias": true,
+      "vf_encoder.2.weight": true
+    },
+    "same_key_set": true,
+    "tensor_count_live": 16,
+    "tensor_count_saved": 16,
+    "unexpected_keys": []
+  },
+  "next_stage_authorized": false,
+  "original_k1_record": {
+    "checks_passed": 28,
+    "checks_total": 29,
+    "commit_verification_ok": true,
+    "failed_checks": [
+      "P24_frozen_module_still_gives_the_critic_gradient"
+    ],
+    "hashes_after_measurement": {
+      "commit_verification.json": "06b60b92af40b852cdbff77551421189c2235f8b64165d972f7e4784e6eeb063",
+      "probe_actor_transplant_report.json": "73bb4c78f9e3910d552308250bf6dda29028bf6182a9760d0965db3c45ff0f80",
+      "probe_full_module_state.pkl": "b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2",
+      "probe_module_manifest.json": "eab14deedfe88449bac9ab37f5f56959d3213a3d0830ce7f22b71bb3aedfceaa",
+      "v26c_j20_critic_warmup_readiness_receipt.json": "8d2a4ba9a8e286194eb239665b0d1d71179cf52160b4bed93a4a99cddb18d128",
+      "v26c_j20_probe_result.json": "51b5f999f22fbd937b754159fc7a44f2fc3efa72463ea137154829b9d71d2452"
+    },
+    "hashes_before_measurement": {
+      "commit_verification.json": "06b60b92af40b852cdbff77551421189c2235f8b64165d972f7e4784e6eeb063",
+      "probe_actor_transplant_report.json": "73bb4c78f9e3910d552308250bf6dda29028bf6182a9760d0965db3c45ff0f80",
+      "probe_full_module_state.pkl": "b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2",
+      "probe_module_manifest.json": "eab14deedfe88449bac9ab37f5f56959d3213a3d0830ce7f22b71bb3aedfceaa",
+      "v26c_j20_critic_warmup_readiness_receipt.json": "8d2a4ba9a8e286194eb239665b0d1d71179cf52160b4bed93a4a99cddb18d128",
+      "v26c_j20_probe_result.json": "51b5f999f22fbd937b754159fc7a44f2fc3efa72463ea137154829b9d71d2452"
+    },
+    "it_is_read_never_edited_never_re_run": true,
+    "leaf": "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1",
+    "post_commit_re_hash": "recorded in commit_verification.json",
+    "unchanged_across_measurement": true,
+    "unchanged_is_DERIVED_not_declared": "this flag is the conjunction of two independent re-hashes of all six K1 files, before and after the backward, both compared to the pinned values. A third re-hash runs after the commit and is recorded in commit_verification.json.",
+    "verdict": "FAIL_CLOSED",
+    "verified_ok_after_measurement": true,
+    "verified_ok_before_measurement": true
+  },
+  "promotion": "NONE",
+  "stage": "V26C_J20_K1R1_NONDEGENERATE_GRADIENT_AMENDMENT",
+  "verdict": "PASS"
+}

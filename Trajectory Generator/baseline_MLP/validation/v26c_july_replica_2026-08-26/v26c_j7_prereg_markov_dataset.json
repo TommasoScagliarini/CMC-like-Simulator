@@ -1,0 +1,178 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j7_prereg_markov_dataset",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_authorised": "V26C-J7-MARKOV-DATASET",
+  "authorised_by": "THE USER, explicitly, on the architect's selection. The architect is gate owner and reviewer, not approver.",
+  "date_utc": "2026-08-26",
+  "decision_recorded": {
+    "sigma_selected": 0.005,
+    "sigma_status": "SELECTED - no longer a hypothesis under test",
+    "recovery_repeat": 1,
+    "why_repeat_1": "713 unique recovery rows x 1 against 500 nominal x 32 gives 713/16000 = 4.45625%, which reproduces July's 356 x 2 / 16000 = 4.45% almost exactly. Repeat 2 would double the recovery weight merely because today's prefixes happen to be longer.",
+    "multistart": "EXPLICITLY DEFERRED - the two teacher datasets at start offsets -0.20 and +0.20 rad, 8000 rows in July, are not reproduced"
+  },
+  "corrects_two_defects_of_j4": {
+    "defect_1_alignment_reference": {
+      "j4_did": "truncated the recovery trace against the J1 TEACHER trace",
+      "consequence": "the first contact-onset difference (teacher step 14, student step 13) truncated everything: 12 aligned rows",
+      "j7_does": "the nominal trace and the ONLY truncation reference is J3, the deterministic rollout of the J2 student. J1 is NEVER the alignment reference.",
+      "july_evidence": "target_domain_markov_adaptation.py --nominal-trace was .../2026-07-13_markov35_zero_column_deterministic/rollout_policy_trace.json, a deterministic STUDENT rollout"
+    },
+    "defect_2_nominal_states": {
+      "j4_did": "used the J1 teacher STATES as the nominal anchor block, with self-distilled labels on those teacher states",
+      "consequence": "the anchors described a distribution the student never visits, so the self-distillation anchored the wrong states",
+      "j7_does": "the nominal anchor STATES are the ones actually visited in J3. The nominal LABELS are the same J2 parent's means on those J3 states, cross-checked against the policy_mean J3 recorded.",
+      "july_evidence": "target_domain_markov_adaptation.build_markov_recovery_dataset reads nominal_obs from the nominal TRACE and labels them with _actor_means of the source actor on those same states"
+    },
+    "j4_role_here": "IMPLEMENTATION SOURCE ONLY, for the physical scaling and the future fit. The J4 module, dataset, receipts and traces are forensic artefacts and are never a parent, weights, labels or data."
+  },
+  "dataset_specification": {
+    "nominal_block": {
+      "states": "the 500 actor_observation_vector_before rows of the J3 trace",
+      "states_source": "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json",
+      "labels": "the J2 parent's mean actions on those J3 states",
+      "labels_method": "the July _actor_means path: target_domain_noise_adaptation._forward on float32 observations and float32 weights, returning logits[:, :2]",
+      "labels_cross_check": "compared against the policy_mean recorded in the J3 trace; bit-equality does NOT hold across the torch and numpy kernels, the measured agreement is 5.96e-07 and the tolerance is stated in the runner",
+      "repeat": 32,
+      "rows": 16000
+    },
+    "recovery_block": {
+      "states": "the RAW actor_observation_vector_before rows of the three J6 traces, truncated against J3 with the July-strict rule",
+      "expected_prefixes": {
+        "seed123": 429,
+        "seed124": 273,
+        "seed125": 11,
+        "total": 713
+      },
+      "labels": "EXCLUSIVELY j1_runs/.../teacher_dataset.npz actions[step - 1], the same fixed-start episode step",
+      "repeat": 1,
+      "rows": 713
+    },
+    "order": "nominal block first, then the recovery block concatenated by seed in the order 123, 124, 125",
+    "total_rows": 16713,
+    "ratios": {
+      "recovery_over_nominal": 0.0445625,
+      "july_recovery_over_nominal": 0.0445,
+      "recovery_over_aggregate": 0.04266140130437384,
+      "recovery_over_aggregate_exact": "713 / 16713"
+    },
+    "no_dedup": true,
+    "no_downsampling": true,
+    "no_multistart": true
+  },
+  "column_policy": {
+    "actor_width": 35,
+    "clock_columns": [
+      0,
+      1
+    ],
+    "clock_in_dataset": "projected to exact zero",
+    "clock_in_weights": "hard-zero, unchanged",
+    "clock_projection_is_safe": "the parent's first-layer clock columns are already zero, so zeroing the input clock changes the means by exactly 0.0 - measured, not assumed",
+    "controller_columns": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "controller_in_dataset": "RAW and NOT masked",
+    "controller_audit": "non-degeneracy: every controller column must carry non-zero signal in the assembled dataset",
+    "controller_future": "becomes trainable in the LATER fit, with the July physical scales verbatim"
+  },
+  "future_fit_specification_only": {
+    "trainable": "the entire mean network",
+    "scales": "target_domain_markov_adaptation.MARKOV_CONTROLLER_FEATURE_SCALES, verbatim",
+    "logstd": "frozen",
+    "critic": "excluded",
+    "status": "SPECIFICATION ONLY - this stage runs no fit"
+  },
+  "invariants": {
+    "operational_parent": "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module, module_state 0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "no_j4_or_j5_as_parent": true,
+    "actor": "the same single 35D student; no separate 25D artefact; no widening; no contralateral features",
+    "unchanged": "FSM, morphology corridor, reward, SEA, C++ plugin - none is touched",
+    "july_is_methodological_only": "no July artefact is an operational parent, dataset or label"
+  },
+  "this_stage_does_not": [
+    "write the dataset",
+    "fit, adapt or train anything",
+    "construct, reset or step an environment",
+    "run any rollout",
+    "touch the critic or run PPO",
+    "promote anything or authorise a next stage",
+    "modify any existing artefact"
+  ],
+  "metrics_to_report": {
+    "per_seed": [
+      "policy_mean_vs_teacher rmse and max_abs on the retained prefix",
+      "stance and swing row counts",
+      "penetration band coverage"
+    ],
+    "no_invented_gates": "there is NO minimum on prefix length, and none on any per-seed metric. They are reported, never thresholded."
+  },
+  "outcome_policy": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "output": "content-addressed, no-clobber, explicit --out"
+  },
+  "pinned_artefacts_sha256": {
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "v26c_penetration_contract.py": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "v26c_j6_amendment_recovery_probe.json": "e063946ac323ace9120a1de6214e69f57b1cdf336bf52faaabb0930d0a1a3fa6",
+    "v26c_j6_amendment_recovery_probe_rev2.json": "cea7b9ac310eebeab3b528ec7bc6f142b59564fc76427686f51627b5c1968d19",
+    "v26c_j6_prefix_audit_2026-08-26.json": "9efd420893e6cac91b8d49caebda2716288bf2b422eb88f26b8ce6fe9f523f9f",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/history.json": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed123/j6_trace.json": "96115593fcfd36eb2651f5e4e8f3a019b0833cbf0c0259e5bc114547c23d053b",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed123/v26c_j6_recovery_probe_receipt.json": "77f8df26ce4a026145d1af12bed6061efb3aaf1424788579e10786bff1e7e32a",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed124/j6_trace.json": "729128a8236f7189284e57267e964dd9e478e75d895c3b88287a537f75f67dab",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed124/v26c_j6_recovery_probe_receipt.json": "73887c6b652983c3a640975d9d433e0e06672d98feaffc115512eb433e73fa78",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed125/j6_trace.json": "8e7060a0d32a05e275f41839cd0d7d453c792e33e65ab8d76bba4d7c588ec02e",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed125/v26c_j6_recovery_probe_receipt.json": "d7040aeb8a1b95d683d7eb432aefeaced9ab0a14de4dc13513bfb0bbd318ced0",
+    "v26c_j4_recovery.py": "24dceef98242cc9e02f63d0442e8361bae32994c0829859b1747f0e7091a6841",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed123/j6_penetration.npz": "0250c2c82afca4406b08fb8f69174c15da41d60b99d63c400ce442da32939b01",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed124/j6_penetration.npz": "19dff986e90aae27622e23904316091e4eb85bc9b0754a61696479ca0fc4c87e",
+    "j6_runs/j6_recovery_probe_v26c_2026-08-26_seed125/j6_penetration.npz": "5276af956f0003820fc9a2f3e55e0946b38e7f9b9023fd300731ad151de9f89c"
+  },
+  "immutability": "this file is content-addressed by the artefacts it pins. Any change to a pinned artefact invalidates it. It is never edited in place.",
+  "penetration_metrics": {
+    "series_source": "the j6_penetration.npz of each seed, pinned DIRECTLY by hash. The J6 receipt alone does not substitute for the pin.",
+    "cross_check": "penetration_m must be bit-identical to reward_terms.grf_penetration_m of the same trace",
+    "evaluator": "v26c_penetration_contract.load_contract + evaluate_series on the retained prefix. No local or manual threshold is applied anywhere.",
+    "evaluator_is_pinned": "both the contract JSON and v26c_penetration_contract.py are pinned. The JSON alone would bind the thresholds but not the implementation that applies them.",
+    "reported": [
+      "counts",
+      "fractions",
+      "band",
+      "binding_pass",
+      "binding_verdict",
+      "semantics"
+    ]
+  },
+  "time_identity": {
+    "rule": "for EVERY retained row k: recovery time_before == teacher_dataset.times[k] == J3 time_before, tolerance 1e-9",
+    "teacher_fields_read": [
+      "actions",
+      "times",
+      "actor_feature_names"
+    ],
+    "teacher_observations": "NEVER read - the teacher supplies labels and timing only"
+  }
+}

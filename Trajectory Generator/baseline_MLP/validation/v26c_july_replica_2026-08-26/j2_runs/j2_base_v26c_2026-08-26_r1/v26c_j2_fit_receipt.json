@@ -1,0 +1,277 @@
+{
+  "schema": "v26c_j2_fit.1",
+  "stage": "V26C-J2-BASE-FIT",
+  "j1_input": {
+    "artefacts_sha256": {
+      "teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+      "teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+      "v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd"
+    },
+    "amendment_sha256": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9",
+    "authorisation": "the J1 dataset may be used EXCLUSIVELY as the input of J2, the supervised base fit",
+    "not_granted": [
+      "no promotion of any actor",
+      "no ex-novo training",
+      "no J3 closed-loop qualification is waived",
+      "no rollout, no DAgger, no Markov phase",
+      "no use of the dataset for any purpose other than J2"
+    ],
+    "j1_verdict_stands": "FAIL, recorded and not overturned",
+    "soft_fail": {
+      "observed_m": 0.02294380435912411,
+      "soft_threshold_m": 0.02,
+      "hard_termination_m": 0.028
+    }
+  },
+  "derivation": {
+    "parent": {
+      "path": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+      "module_state_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+      "manifest39_sha256": "2837779ceb5953b18cf9be0e62836c8cc56d3fe871c48b869a5cedb6b0d81945",
+      "width": 39,
+      "sidecars_sha256": {
+        "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+        "class_and_ctor_args.pkl": "79dce56ebc56cc53a0b87d06532b00ed0df827e49a08ea454637e35779327700"
+      },
+      "sidecar_policy": {
+        "copied_verbatim": [
+          "metadata.json"
+        ],
+        "derived_for_35d": "class_and_ctor_args.pkl",
+        "why": "the parent sidecar declares a 39-input actor; copying it verbatim would wrap 35-input weights in a 39-input constructor"
+      },
+      "role": "the ONLY actor input to J2",
+      "v1_b0_not_required": "neither V1 nor B0 is read by verify_parent, by the derivation or by the fit; they are an optional diagnostic oracle only",
+      "july_status": "methodological evidence only; no July checkpoint or dataset is an input"
+    },
+    "mapping": {
+      "kind": "by feature name, order-preserving",
+      "dropped_39d_indices": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "dropped_names": [
+        "healthy_knee_angle_imitation_target",
+        "healthy_knee_angle_imitation_target_vel",
+        "healthy_ankle_angle_imitation_target",
+        "healthy_ankle_angle_imitation_target_vel"
+      ],
+      "kept": 35
+    },
+    "mean_bias_compensation": {
+      "applied": true,
+      "float64": [
+        -0.4178210582236449,
+        0.013012918564180534,
+        0.2354582386215528,
+        0.006400180162861944
+      ],
+      "formula": "b1 += W1_39[:, dropped] @ m, in float64",
+      "bias_max_abs_change": 0.12750129401683807
+    },
+    "logstd_head": {
+      "rows_zeroed": true,
+      "constant_bias": -5.2983174324035645,
+      "sigma": 0.004999999670722372
+    },
+    "hard_zero_columns": [
+      0,
+      1,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "derived_actor_digest": "2ebc8c5adf33ed287aba17088b5fc07de16a276106743f2e7c6d3e26a67f3f5d",
+    "width": 35,
+    "critic": "never loaded; the parent's non-actor tensors are not read"
+  },
+  "ctor_sidecar": {
+    "source_sha256": {
+      "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "class_and_ctor_args.pkl": "79dce56ebc56cc53a0b87d06532b00ed0df827e49a08ea454637e35779327700"
+    },
+    "copied_verbatim": [
+      "metadata.json"
+    ],
+    "derived": {
+      "changed": {
+        "model_config.n_actor": {
+          "from": 39,
+          "to": 35
+        },
+        "observation_space.shape": {
+          "from": [
+            88
+          ],
+          "to": [
+            84
+          ]
+        }
+      },
+      "privileged_width_computed_from_parent": 49,
+      "unchanged": [
+        "action_space",
+        "catalog_class",
+        "inference_only",
+        "learner_only"
+      ],
+      "model_config_unchanged": [
+        "fcnet_activation",
+        "fcnet_hiddens",
+        "freeze_actor",
+        "freeze_logstd",
+        "n_full",
+        "vf_share_layers"
+      ],
+      "rule": "observation width = n_actor + privileged; privileged is the parent's own observation width minus its own n_actor, never a literal"
+    },
+    "staged": {
+      "path": "class_and_ctor_args.pkl",
+      "sha256": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "n_actor": 35,
+      "observation_shape": [
+        84
+      ],
+      "verified": "reloaded from disk and confirmed to describe a 35D actor"
+    }
+  },
+  "diagnostic_oracle": {
+    "consulted": false,
+    "reason": "the oracle is out of band: neither preflight nor fit opens it, and both work if it is absent"
+  },
+  "dataset": {
+    "rows": 500,
+    "label_source": "prescribed_teacher_action on states visited by that teacher",
+    "controller_columns_present_in_data": true,
+    "note": "the ten controller columns carry real values in the dataset; the mask is a FIT constraint, not a reason to have omitted them from the collection"
+  },
+  "masking": {
+    "masked_columns": [
+      0,
+      1,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "clock": [
+      0,
+      1
+    ],
+    "controller": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "effective_support_dimensions": 23
+  },
+  "hyperparameters": {
+    "seed": 123,
+    "batch_size": 64,
+    "learning_rate": 0.0003,
+    "epochs_max": 400,
+    "patience": 60,
+    "validation_fraction": 0.2,
+    "clip_weight": 1.0,
+    "logstd_weight": 0.1,
+    "anchor_weight": 1e-05,
+    "freeze_logstd_head": false,
+    "scope": "the ENTIRE mean network",
+    "critic": "excluded, never loaded, never trained"
+  },
+  "hyperparameter_provenance": "Trajectory Generator/runs/training/target_domain_imitation_no_controller_memory_2026-07-13/adaptation_report.json :: hyperparameters",
+  "july_reference_outcome_NOT_A_TARGET": {
+    "best_epoch": 183,
+    "epochs_run": 243,
+    "best_validation_mse": 0.00014186832413543016,
+    "adapted_rmse": 0.011782177113774129,
+    "note": "July's own numbers on July's own data; a REFERENCE, never a target and never a gate"
+  },
+  "split": {
+    "training_rows": 400,
+    "validation_rows": 100,
+    "mode": "seeded_random_fraction",
+    "seed": 123,
+    "validation_fraction": 0.2,
+    "training_sha256": "76c9c4bcb8bfffd1427354ac2f3ca3b1205b28af9f9328c44c952534362e4282",
+    "validation_sha256": "359bb3af28628e5333bc1d32cfa7b54a5e7a579171cb5121b1b8422e3071f27f",
+    "rng_stream": "the SAME generator continues into the epoch shuffles",
+    "provenance": "target_domain_imitation._resolve_adaptation_split + adapt_actor"
+  },
+  "selection": {
+    "best_epoch": 378,
+    "best_validation_mse": 0.00022101702052168548,
+    "epochs_run": 400,
+    "stopped_at_epoch": null,
+    "rule": "first epoch improving by more than 1e-9; stop after 60 stale epochs; best state restored"
+  },
+  "metrics": {
+    "initial": {
+      "rmse": 0.8352148532867432,
+      "max_abs_error": 2.3306493759155273
+    },
+    "adapted": {
+      "rmse": 0.013858708553016186,
+      "max_abs_error": 0.0731852725148201
+    },
+    "adapted_validation_rmse": 0.014866637997329235,
+    "adapted_training_rmse": 0.013595054857432842
+  },
+  "logstd": {
+    "freeze_logstd_head": false,
+    "logstd_weight": 0.1,
+    "weight_max_abs_change": 0.0,
+    "bias_max_abs_change": 0.0,
+    "note": "anchored by the loss, not frozen by construction"
+  },
+  "critic": "never loaded, never trained",
+  "deployable": false,
+  "promotion": "NONE",
+  "gating": {
+    "j3_still_required": true,
+    "j3_penetration_max_m": 0.02,
+    "no_promotion_without_j3": true,
+    "forbidden_here": [
+      "rollout",
+      "J3",
+      "retry",
+      "Markov",
+      "LOTO",
+      "LOCO",
+      "B1R1",
+      "B1R2",
+      "promotion",
+      "ex-novo"
+    ]
+  },
+  "output_files_sha256": {
+    "actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+  },
+  "generated_at_utc": "2026-08-26T08:05:30Z",
+  "history_sha256": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777"
+}

@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "date": "2026-07-13",
+  "decision": "PASS_ACTOR_ROBUSTNESS_AND_CRITIC_WARMUP",
+  "ready_for_conservative_h1": true,
+  "scope": {
+    "subject": "AB06",
+    "start": "fixed",
+    "trial": "fixed target-domain contract",
+    "generalization_validated": false
+  },
+  "cause": {
+    "configured_sigma": 0.005,
+    "empirical_noise_rms": [0.0051026297, 0.0045535516],
+    "policy_mean_drift_rms": [0.24057627, 0.09503047],
+    "first_mean_drift_over_0_05_step": 76,
+    "first_discrete_phase_mismatch_step": 120,
+    "controller_reference_memory_fraction_of_drift_removed": 0.47519723,
+    "diagnosis": "Imitation used actor-generated reference and command memory as an autoregressive proxy for prescribed action; small action noise moved those inputs and amplified policy-mean drift before FSM phase mismatch."
+  },
+  "actor_contract": {
+    "checkpoint": "Trajectory Generator/runs/training/target_domain_warm_start_deployable_sigma0005_2026-07-13/rl_module_warm_start",
+    "actor_digest": "5616be85c815eece79c08730d05529a7b41ea60f3e36033fb5276edc83dd2bf7",
+    "actor_feature_count": 25,
+    "full_critic_feature_count": 84,
+    "controller_state_actor_visible": false,
+    "prescribed_actor_visible": false,
+    "controller_state_critic_visible": true,
+    "prescribed_critic_visible": true,
+    "exploration_sigma": [0.005, 0.005]
+  },
+  "actor_gates": {
+    "deterministic": {
+      "steps": 500,
+      "episode_return": 64.0396588,
+      "valid_hs": 3,
+      "valid_to": 3,
+      "valid_cycles": 2,
+      "max_penetration_m": 0.0227482468,
+      "clipping_fraction": 0.0,
+      "end_reason": "episode_time_limit",
+      "pass": true
+    },
+    "stochastic_sigma_0_005": [
+      {
+        "seed": 123,
+        "steps": 500,
+        "episode_return": 72.71456569,
+        "valid_hs": 4,
+        "valid_to": 3,
+        "valid_cycles": 3,
+        "max_penetration_m": 0.0227262757,
+        "clipping_fraction": 0.0,
+        "pass": true
+      },
+      {
+        "seed": 124,
+        "steps": 500,
+        "episode_return": 66.55752906,
+        "valid_hs": 3,
+        "valid_to": 3,
+        "valid_cycles": 2,
+        "max_penetration_m": 0.0222851522,
+        "clipping_fraction": 0.0,
+        "pass": true
+      },
+      {
+        "seed": 125,
+        "steps": 500,
+        "episode_return": 67.35269844,
+        "valid_hs": 3,
+        "valid_to": 3,
+        "valid_cycles": 2,
+        "max_penetration_m": 0.0225390494,
+        "clipping_fraction": 0.0,
+        "pass": true
+      }
+    ],
+    "stochastic_pass_count": 3,
+    "stochastic_trial_count": 3
+  },
+  "critic_warmup": {
+    "full_checkpoint": "validation/critic_warmup/2026-07-13_deployable_sigma0005_iter1/checkpoint_last",
+    "iterations": 1,
+    "sampled_steps": 4096,
+    "train_batch_size": 4096,
+    "num_epochs": 10,
+    "learning_rate": 0.0001,
+    "initial_critic_digest": "89dbf05c5990763e66f589459afec9465c0fd35ce6fe041bf4a7523d2c236052",
+    "warmed_critic_digest": "c0b159c9463f25c9ec357ae86bc24bfefff93110b78a866f88a9c394a7b27fdb",
+    "restored_critic_digest": "c0b159c9463f25c9ec357ae86bc24bfefff93110b78a866f88a9c394a7b27fdb",
+    "vf_loss": 0.3440060914,
+    "vf_explained_variance": 0.5983695984,
+    "mean_kl": 0.0,
+    "actor_digest_before": "5616be85c815eece79c08730d05529a7b41ea60f3e36033fb5276edc83dd2bf7",
+    "actor_digest_after": "5616be85c815eece79c08730d05529a7b41ea60f3e36033fb5276edc83dd2bf7",
+    "actor_max_abs_parameter_change": 0.0,
+    "pass": true
+  },
+  "next_gate": "Resume checkpoint_last with freeze_actor=false, freeze_logstd=true, conservative actor update and explicit KL/rollback gate."
+}

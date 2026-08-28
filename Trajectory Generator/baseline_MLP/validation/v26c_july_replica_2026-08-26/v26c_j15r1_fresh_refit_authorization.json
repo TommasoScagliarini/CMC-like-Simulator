@@ -1,0 +1,178 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, CORRECTIVE READINESS AND FROZEN EXECUTION RECORD",
+  "stage_proposed": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "operational_name": "J15R1",
+  "authorisation_status": "NOT_GRANTED_PENDING_ARCHITECT_AUDIT",
+  "execution_permitted_now": false,
+  "date": "2026-08-27",
+  "what_this_record_is": "the corrective readiness of a stage whose ONE authorised execution FAILED. It grants nothing. A corrected execution requires a NEW architect GO record and will itself be permitted exactly once.",
+  "prior_execution": {
+    "executions_performed": 1,
+    "outcome": "FAILED, exit 1, 0.062 s",
+    "cause": "NameError: name 'verify_warm_start_source' is not defined, raised in run_fit before data, torch, the optimizer or any write path",
+    "authorised_by": "v26c_j15_architect_go_2026-08-27_rev2.json, now CONSUMED",
+    "leaf_created": false,
+    "lock_taken": false,
+    "staging_created": false,
+    "gates_evaluated": 0,
+    "torch_imported": false,
+    "sealed_seeds_read": 0,
+    "further_executions_of_the_failed_runner": "FORBIDDEN. The failed runner is preserved as evidence and is never to be invoked again."
+  },
+  "consumed_failure_chain_preserved_byte_identical": {
+    "v26c_j15_fresh_refit.py": "7b0073c8832e1af64a243cf9bff70662fb786f84691d3a5eab451e230192507a",
+    "test_v26c_j15_fresh_refit.py": "5bdeaf8d72b3619c5bca0b99b9bfa1da1644804fe043ba32936e95d920fd1176",
+    "v26c_j15_fresh_refit_authorization.json": "61b6fa4fd45fcf00a418efdcb3a450b7eeaddd56b486cc481ef9de44f127a3c4",
+    "v26c_j15_architect_go_2026-08-27.json": "d6c661aa2dd826c73d022420414783810d964e29680be5e8b6468cbca6ff093c",
+    "v26c_j15_architect_go_2026-08-27_rev2.json": "05d58a33fe1a8f5dbaeec156e588ea4cb4b4c0ad0fa0c9638da51a80c841a3a2",
+    "j15_runs/j15_execution_exit_2026-08-27.json": "9c27a8b8556e4046cfebf08b40925a0e97eeac9991b6026c5bc6001e5bcb70c5",
+    "j15_runs/j15_execution_stderr_2026-08-27.txt": "310cba674c013003a9ab36f78dd0e7d6690e375107b20c531af098edb27342b5",
+    "j15_runs/j15_execution_stdout_2026-08-27.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reports/user/2026-08-27_v26c_j15_fresh_refit_execution.md": "92eaa78787c0f9cfb934cfeb9c879844bda3982ef36fffb80cc5976d49187ee5"
+  },
+  "preservation_rule": "none of the above may be modified, repaired or deleted. They are the record of a failed execution and its authorisation chain.",
+  "the_correction": {
+    "approved_by": "the architect, 2026-08-27, as the ONLY change permitted",
+    "what": "bind verify_warm_start_source to J11.verify_warm_start_source at module level",
+    "why": "run_fit is spliced verbatim from J11 and calls it as a bare name, resolved in its origin's module namespace. Every other helper was aliased; this one was not.",
+    "textual_diff_vs_the_failed_runner": "13 changed lines: 1 docstring line replaced by 5 that identify the file as the additive successor, plus 5 comment lines and the 1 binding. No other line differs.",
+    "mechanical_proof_of_scientific_identity": [
+      "every module-level function shared by the two runners compiles to IDENTICAL bytecode (co_code compared function by function)",
+      "21 scientific constants compared equal: STAGE, TOTAL_ROWS, EXPECTED_N_VAL, EXPECTED_N_TRAIN, NEW_ROWS, CELL_REPEAT, CLOCK_COLUMNS, ACTOR_WIDTH, ACTION_DIM, DIRECT_KEYS, ALIAS_PAIRS, J15_BINDING_NAMES, J11_BINDING_SUBSET, J15_ADDITIONAL_BINDING, RELATIVE_LEAF, PIN_PREREG, PIN_PARENT_STATE, JULY_HP, BEST_EPSILON, NEW_CELL_SPANS, BLOCKS",
+      "pinned_sources() returns an identical set in both",
+      "gate_matrix() returns an identical structure in both - 17 binding rules, unchanged",
+      "the corrected module adds EXACTLY one name and removes none"
+    ],
+    "preregistration": "REUSED UNCHANGED, byte-identical: 49c748b3a20925a0c270768aa6fddcd3adee474eb1de1cfaa885f849719d1ad2",
+    "leaf": "the same still-absent authoritative leaf, reused because every commit semantic is proved unchanged"
+  },
+  "new_readiness_check": {
+    "name": "namespace closure",
+    "method": "Python code semantics, not text search: every module-level function's code object and every nested code object in its co_consts are disassembled, and the argval of every LOAD_GLOBAL / STORE_GLOBAL / DELETE_GLOBAL is collected. That is exactly what CPython will look up in the module namespace at run time.",
+    "assertion": "ZERO unresolved globals across every module-level function, and individually across 22 execution-critical ones including run_fit.",
+    "explicit_regression": "run_fit reads verify_warm_start_source as a global, the corrected runner binds it, and it is bound to J11's frozen implementation.",
+    "proved_to_bite_before_being_trusted": "the same analysis applied to the FAILED runner reports exactly {'run_fit': ['verify_warm_start_source']}. Had this check existed in the J15 readiness suite, the failed execution would never have been authorised.",
+    "why_j15_missed_it": "the suite never called run_fit - the materialisation tests use an injected double so as not to require a 400-epoch training run - and the preflight never reaches it. 208 checks and a GO preflight passed while the production fit entry path was not executable."
+  },
+  "scientific_contract_unchanged": {
+    "lineage": "August V26 imitation -> J2 35D",
+    "aggregate_rows": 25567,
+    "split": [
+      5113,
+      20454
+    ],
+    "hyperparameters": "exactly J11's, from the frozen J8 source; no threshold or hyperparameter changes",
+    "actor": "one 35D actor; no widening, no 25D actor, no contralateral features",
+    "trainable": "the entire mean network",
+    "clock": "hard-zeroed",
+    "logstd": "projected and frozen",
+    "critic": "absent",
+    "binding_gates": 17,
+    "includes_the_whole_854_row_j14_gate": true
+  },
+  "frozen_inputs_sha256": {
+    "v26c_j15_prereg_fresh_refit.json": "49c748b3a20925a0c270768aa6fddcd3adee474eb1de1cfaa885f849719d1ad2",
+    "v26c_j15_fresh_refit_r1.py": "2972e4b4dbfe6e247b48b94cb6c4c8606cd8c893b59f0cbdc30c72220129efb1",
+    "test_v26c_j15_fresh_refit_r1.py": "8a7f00775cb4b848f80bceebe6066ce7a521b1642c9044d2e5724a2bd56a4c5a"
+  },
+  "frozen_sources_sha256": {
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j11_multistart_fit.py": "2b4ac9f496f7a412d40fec0eb5a0d9b69ee22ac634b8e7ed020ca5480cf26242",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "Trajectory Generator/baseline_MLP/warm_start.py": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c",
+    "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_increment.npz": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_dataset_receipt.json": "e7262bf9d96e57fda6b3ecee18c58eb4f29ee48f71ff71bc5eba07a3d6abd79b",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/commit_verification.json": "24ef5e2cbab291037c05906f592e60f04da64df614c50189303ccdec7ac3bd97",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/commit_verification.json": "1d24eed05dd04c187c014181c89a0611a648e5601cacff5e1ae0221adcfb8643",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/module_state.pkl": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_prereg_dagger_dataset_rev1.json": "877cccc1bb93868a5f1050a7cf2cfc1f5776d18437e099996f059373a6cb36d5",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset.py": "fe7c4951c195224b8006655b831549b4b613cfd80a346b7174c58962263e2e0c",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset_authorization_rev3.json": "46bbaa262fa0aeea9b3b09608196556f68ac602bdc9b265df4e344d41159dc2f",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_architect_go_2026-08-27.json": "483b8d558eb8e2245d645384b62d59e9931a1f9270eaed2c715c8a0bea998e3d"
+  },
+  "frozen_argv_when_authorised": {
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "environment_for_the_fit": "PYTHONDONTWRITEBYTECODE and PYTHONPYCACHEPREFIX both ABSENT",
+    "environment_for_this_readiness": "PYTHONDONTWRITEBYTECODE=1, as the architect required for the corrective readiness checks. The two are different and are deliberately kept apart.",
+    "selftest": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/test_v26c_j15_fresh_refit_r1.py"
+      ],
+      "expect": "exit 0, selftest PASS, checks == 300"
+    },
+    "preflight": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j15_fresh_refit_r1.py",
+        "--preflight"
+      ],
+      "expect": "exit 0, verdict GO, 0 blockers, 23 pinned sources, writes nothing"
+    },
+    "fit": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j15_fresh_refit_r1.py",
+        "--fit",
+        "--authorized-stage",
+        "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+        "--out",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j15_runs/j15_fresh_refit_v26c_2026-08-27_r1"
+      ],
+      "times_permitted_once_authorised": 1,
+      "requires": "a NEW architect GO record. This record grants none.",
+      "note": "PROBES OF THIS ARGV AFTER A SUCCESSFUL RUN ARE FORBIDDEN."
+    }
+  },
+  "verified_at_this_readiness": {
+    "selftest_checks": 300,
+    "environment": "PYTHONDONTWRITEBYTECODE=1",
+    "preflight": "GO, 0 blockers, 23 pinned sources, torch-free, writes nothing",
+    "namespace_closure": "zero unresolved globals in every module-level function",
+    "no_fit_invoked": "neither the failed nor the corrected --fit argv was invoked in this phase",
+    "authoritative_leaf": "ABSENT",
+    "lock": "ABSENT",
+    "staging": "ABSENT",
+    "sentinel": "ABSENT"
+  },
+  "forbidden_here": [
+    "a rollout",
+    "an environment",
+    "a critic",
+    "critic warm-up",
+    "PPO",
+    "promotion",
+    "deployability",
+    "a closed-loop claim",
+    "an optimizer over anything but the six direct tensors",
+    "reading seeds 126, 127 or 128",
+    "a second parent",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "dedup",
+    "class balancing",
+    "filtering by post_mismatch",
+    "a repeat factor on the new rows",
+    "an autonomous retry",
+    "an invented threshold",
+    "changing production, FSM v3, the morphology corridor, the reward, sigma, the SEA or the C++ plugin"
+  ],
+  "requires_to_fit": "a NEW architect GO record, additive, pinning the three input hashes above. It will permit exactly ONE execution.",
+  "closing_rule": "this corrective readiness phase closes with a dedicated user report, to be audited before any further step.",
+  "self_consistency": {
+    "contains_no_self_hash": true,
+    "how_to_verify": "recompute the SHA-256 of the three frozen inputs, the 23 frozen sources and the nine preserved failure-chain artefacts"
+  }
+}

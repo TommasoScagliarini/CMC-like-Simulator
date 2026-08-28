@@ -1,0 +1,48 @@
+{
+  "amendment_id": "rev3i_r2_corrected",
+  "date": "2026-08-24",
+  "authorized_by": "architect (rev3h audit + head-term correction): rev3i authorised ONLY as amendment+tooling+tests; the single deterministic fit V26B-R2I runs IF AND ONLY IF every test passes; any gate/test failure -> STOP, no export/rollout",
+  "kind": "ADDITIVE, immutable; corrective re-execution of the rev3g stage with the EXACT historical anchor and the deterministic global-constant data loss. NO rollout/PPO/critic/sigma sweep; production untouched; sigma stays the UNDECIDED placeholder",
+  "parents_immutable": {
+    "rev3g": "bb4401fc7003d1c8a5c30ed04fe75a1bd5d3fbec555fc91c2f5e681fa12656b5",
+    "rev3h_memo": "e2f31d1eab306625456195d9e71348457d66e7d527060e012c9a06a58dc85081",
+    "rev3h_supplement_anchor_head": "b7fe2b9a3de943892e4855eee25b6d8949f37c7083ca99667a0d9fc72e018a00",
+    "r2g_artifact_status": {
+      "actor_digest": "65276df60b20b0180cfea6695bbbf4fb82e685b0dd0ea52578297e0f147c891a",
+      "receipt": "5374f1af7529272827b8327b1a00483d4ffe9e81f24374c920d370373251bc3c",
+      "status": "AUDIT-REJECTED: preserved on disk, NEVER an init, NEVER rolled out"
+    },
+    "init": {
+      "module": "student/V2_DAGGER_R1/rl_module",
+      "actor_digest": "c7bcee1c1165625d0c574a709a9444a98ea95edea8fcddd5d81f59dfa2e3d31e",
+      "note": "init stays R1, NOT R2G"
+    },
+    "preexisting_tooling": {
+      "v26b_r2g.py (shared split/gates/scaling/transforms)": "f4ba832ae8e2c898d4d49f7ce92ff71b2b629803d4a47acaf60ffd756149028b",
+      "v26b_r2_offline.py (dataset builder)": "7c310fc3cc3bb1ea0b5edf84917156e61b3fa376d370b325ef0cff9361fc49ee"
+    }
+  },
+  "unchanged_from_rev3g": "dataset (992+97+6447+6429, dedup, G1), preregistered split (group 3/13 alt, blocked+embargo base/prefix), prefit battery (G3-blocked binding, envelope kappa_m=10 binding, diagnostics, counterfactual 144), July physical scaling with T1/T2 preservation tests (tol 1e-5, all rows), postfit battery (holdout binding per role+aggregate 0.15, fit-corpus distinct, Q3, save/reload, smoke), chain numerics 300 epochs fixed / batch 256 / lr 1e-4 / seed 2026, action-clip penalty 1.0 (historical, stays), aux phase loss ABSENT, provenance block built BEFORE any fit",
+  "correction_1_exact_historical_anchor": {
+    "formula": "anchor_loss = mean over the SIX July tensors of mean-squared deltas, with the head terms computed on the FULL [4,256]/[4] tensors whose logstd rows sit at the anchor (delta zero) at every loss evaluation: 0.01 * mean([MSE_W1, MSE_b1, MSE_W2, MSE_b2, MSE_W3full, MSE_b3full]) = 0.01 * mean([MSE_W1, MSE_b1, MSE_W2, MSE_b2, 0.5*MSE_W3m, 0.5*MSE_b3m])",
+    "implementation": "explicit 0.5 factors on the two head mean-only terms (equivalent to zero-padded full-tensor deltas), then mean of 6, weight 0.01, anchored to theta_R1_scaled",
+    "mandatory_test": "VALUE and GRADIENT equality against a synthetic reference that builds the full [4,h]/[4] zero-padded delta tensors",
+    "rev3g_vs_historical_ratio_corrected": "6x on the first 4 tensors, 12x on the two head mean-only terms (rev3h supplement)"
+  },
+  "correction_2_deterministic_data_loss": {
+    "formula": "l_data(B) = K * sum_{i in B} lambda_i * e_i, with K = ceil(10727/256) = 42 CONSTANT; lambda_i = w_r/n_r_train (exact masses 0.6474587245063127 / 0.028811913240530916 / 0.16186468112657817 x2), e_i = mean_j (m_ij - y_ij)^2 flat",
+    "mandatory_tests": [
+      "at frozen parameters: sum over the epoch's batches of l_data(B) == K * global objective sum(lambda*e) exactly (order-only float delta)",
+      "per-row coefficient: every row's loss weight equals K*lambda_i INDEPENDENT of batch composition (checked across different partitions)"
+    ],
+    "adam_declaration_for_receipt": "each Adam step minimises l(B) = K*sum_B(lambda*e) + clip_mean(B) + 0.01*anchor; the per-row weight is constant, the epoch-sum of data terms equals K*L_global, but the Adam TRAJECTORY is NOT equivalent to a full-batch optimisation and no such equivalence is claimed"
+  },
+  "execution": {
+    "stage_token": "V26B-R2I",
+    "out_dir": "student/V2_R2I (no-clobber)",
+    "receipt": "v26b_r2i_receipt.json",
+    "order": "amendment (this file) -> tool+tests -> ALL relevant tests PASS -> single deterministic fit -> postfit gates -> conditional export -> STOP for the architect audit",
+    "on_any_fail": "STOP, no export, no rollout"
+  },
+  "report_requirements": "the final report must state: the rev3h imprecision corrected by the supplement, R2G AUDIT-REJECTED, and that no rollout/PPO/critic/sigma sweep was executed"
+}

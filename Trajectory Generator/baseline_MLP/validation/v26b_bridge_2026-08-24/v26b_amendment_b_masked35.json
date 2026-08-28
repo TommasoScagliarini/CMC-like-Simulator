@@ -1,0 +1,101 @@
+{
+  "amendment_id": "b_masked35_single_contract",
+  "date": "2026-08-25",
+  "kind": "ADDITIVE and IMMUTABLE. Protocol for the 35D-masked branch. It SUPERSEDES the 25D branch, which was never executed and is quarantined by v26b_addendum_a0a1_superseded.json",
+  "tokens": {"B0": "V26B-B0-MASKED35-TRANSPLANT", "B1": "V26B-B1-BASE-FIT-MASKED35", "B2": "V26B-B2-MARKOV-PHASE (declared, not designed here)"},
+  "execution_status": "NOTHING EXECUTED. Protocol, tooling, tests and preflight only. No fit, training, rollout, collection or materialised candidate",
+
+  "architecture": {
+    "final_student": "35D FROM CREATION. One contract, one manifest, one feature list: the v3 canonical 35D contract, unmodified",
+    "single_runtime_pin": "runtime config a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db and manifest c6f8602816059b5c3508c626e5ce08d3ba922710f8b48c9557af9056f1155004. No second observation contract exists",
+    "base_phase": "the ten controller/Markov features stay in the vector and in the manifest but are neutralised twice: an INPUT HARD MASK sets those observation columns to 0.0, and the corresponding first-layer columns are exactly zero, frozen, and restored to zero after every optimizer step",
+    "why_two_guarantees": "they are independent and cover different failure modes. The input mask alone secures functional equivalence with the 25D subspace, because a leaking column multiplies a zero input. The zero columns alone secure the bit-exact unmask transition. A leak in either mechanism is detected by the other's test",
+    "markov_phase": "only after the base gates pass: remove the mask and adapt. Because the columns are still exactly zero at that moment, the transition is BIT-EXACT by construction: no contract switch, no re-export, no second manifest"
+  },
+
+  "masked_channel": {
+    "columns": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34],
+    "names": ["pros_knee_angle_previous_endpoint", "pros_knee_angle_served_ref", "pros_knee_angle_served_ref_vel", "pros_knee_angle_served_ref_accel", "pros_knee_angle_sea_u", "pros_ankle_angle_previous_endpoint", "pros_ankle_angle_served_ref", "pros_ankle_angle_served_ref_vel", "pros_ankle_angle_served_ref_accel", "pros_ankle_angle_sea_u"],
+    "mask_value": 0.0,
+    "derivation": "by NAME from the pinned 35D manifest, then checked against the expected tuple; a tampered expectation fails closed",
+    "clock_columns": [0, 1],
+    "clock_rule": "the two clock columns stay present in the vector and their first-layer columns stay zero. The actor never receives the gait clock",
+    "contralateral": "no contralateral feature exists in the 35D actor manifest"
+  },
+
+  "lineage_exclusive": {
+    "parent_B0": "EXCLUSIVELY the August V26 imitation actor 39D, digest 5bbc6cbd3c7e3ec37524b7b6b69ca017af48057cac5207cf755d3b2f72c2709e",
+    "forbidden_as_parent_or_data": ["S0D_35D_DISTILLED", "S1A_*", "S1B_*", "S1C1_*", "S1C2Z_*", "REV4B", "REV4C", "REV4D", "REV4E", "V2_*"],
+    "july": "METHOD ONLY. No July checkpoint, dataset, label or anchor",
+    "superseded_25d_branch": "never imported, never executed, never used to produce any artifact"
+  },
+
+  "B0_transplant": {
+    "recipe": "the frozen V1 39->35 transplant reproduced from V26 (healthy targets mean-compensated, clock columns zeroed, hidden layer and mean head copied bit-identically), then the ten controller first-layer columns set to exactly zero",
+    "mean_compensation_rule": {
+      "healthy_targets": "COMPENSATED. Those four columns leave the vector for good, so their anchor mean is folded into the bias, exactly as the frozen V1 recipe does",
+      "controller_columns": "NOT COMPENSATED, deliberately. They stay in the vector and return in the Markov phase; folding their mean into the bias would pre-load a constant the adaptation would have to unlearn. The July expansion started from a clean zero for the same reason"
+    },
+    "verifications": ["parent digest equal to the pin", "the 39->35 recipe reproduces its own pinned digest ae846220...", "every kept first-layer column bit-identical to that recipe", "every other tensor bit-identical to that recipe", "masked and clock columns exactly zero", "structural validation at width 35"]
+  },
+
+  "B1_base_fit": {
+    "parent": "the B0 masked state, and nothing else",
+    "dataset": {
+      "source": "the three PINNED V26 anchor trajectories A_ISO39CLK_V3 - nominal, -0.20 s, +0.20 s - 500 rows each",
+      "rows": 1500, "trajectories": 3,
+      "labels": "prescribed AB06 u_IK at the anchor's own times, EXACT float lookup on the pinned privileged caches; no interpolation",
+      "collection_performed": false,
+      "note": "no new collection is required, and no S0D/S1A/REV4*/V2_* row enters"
+    },
+    "split": {
+      "policy": "FAIL-CLOSED leave-one-trajectory-out, never random",
+      "folds": 3, "train_rows_per_fold": 1000, "holdout_rows_per_fold": 500,
+      "rationale": "consecutive steps of one trajectory are strongly dependent; a random split leaks the neighbours of every held-out row into training"
+    },
+    "per_optimizer_step_protocol": [
+      "mask the input batch on the ten columns",
+      "forward and backward",
+      "zero the gradient on the masked and clock first-layer columns (defensive: with masked inputs it is already identically zero)",
+      "optimizer step",
+      "restore the masked and clock first-layer columns to exactly zero",
+      "assert_no_masked_update: bit-identical AND still exactly zero",
+      "restore the frozen log-std head"
+    ],
+    "frozen": ["log-std head", "critic (never touched)", "the ten masked first-layer columns", "the two clock first-layer columns"],
+    "no_ppo": true,
+    "binding_offline_gates": ["integrity invariants including width 35, masked columns zero, clock columns zero, log-std byte-identical, no masked update", "functional equivalence with the 25D subspace, BIT-EXACT", "fit convergence: aggregate RMSE strictly lower than the initial one"],
+    "ik_metrics_reported_without_invented_threshold": ["aggregate RMSE", "per-joint RMSE and max absolute error"]
+  },
+
+  "B1_declared_closed_loop_gates": {
+    "completion": {"steps": 500, "end_reason": "episode_time_limit"},
+    "valid_cycle_count_min": 2,
+    "critical_counters_zero": ["phase_timeout_stance", "phase_timeout_swing", "morphology_causal_contract_failure", "hs_cancelled_count"],
+    "resync_count_max": 1,
+    "penetration_max_m": 0.020,
+    "kinematic_quality": {"ankle_min_rad": -0.03, "ankle_amplitude_min_rad": 0.30, "knee_amplitude_min_rad": 0.60, "knee_strictly_flexed": true, "within_bounds": true},
+    "reference_used_to_motivate": {"knee": {"min": -1.0165, "max": -0.1640, "amplitude": 0.8525}, "ankle": {"min": -0.1552, "max": 0.4002, "amplitude": 0.5553, "negative_row_fraction": 0.1940}},
+    "ankle_note": "q_min <= -0.03 rad is 19.3% of the reference plantarflexion depth. A minimum of -0.0099 rad DOES NOT satisfy it: -0.0099 > -0.03, and it is only 33% of the threshold in magnitude",
+    "no_guard_relaxed": "every threshold is the current v3 value or stricter; FSM v3, the morphology corridor, the contact model, the reward, the limiter, the governor and every safety guard are untouched"
+  },
+
+  "B2_markov_phase_declared_only": {
+    "trigger": "ONLY after the base gates pass",
+    "operation": "remove the input mask; the ten first-layer columns are still exactly zero, so the transition is bit-exact",
+    "dataset": ["nominal anchors of the base actor labelled with the actor's OWN means", "same-actor phase-consistent recoveries", "multistart only if separately authorised"],
+    "frozen": ["log-std", "critic"],
+    "whole_mean_network_adaptation": "NOT DECIDED NOW. It is preregistered at that stage, not here",
+    "sigma": "OPEN. 0.005 is NOT assumed and must be MEASURED on the base actor before any stochastic recovery is collected"
+  },
+
+  "tooling": {
+    "v26b_b0_masked35.py": "835f5b6dcb2a8355efa5132864188164577baef13ceee923a8115ef12fd4fe4c",
+    "v26b_b1_base_fit.py": "8e2fcff74d4d9fa72972bcd806e0602d4dacc162671cfca02ae84eb03f0cefec",
+    "test_v26b_b0b1_masked35.py": "8c11fc0fde7c82eed79ee55930914f21beed4c45473ed3281f2103a3f9dd578e",
+    "cross_platform": "pathlib only, no shell invocation, no os-specific path handling",
+    "production_untouched": "nothing outside this validation directory is modified; no C++, no SEA, no FSM, no morphology, no contact model, no reward, no guard"
+  },
+
+  "prohibitions": ["no fit", "no training", "no rollout", "no collection", "no candidate materialised", "no PPO", "no sigma decision", "no contralateral feature", "no gait clock in the actor", "no second observation contract", "no import or execution of the superseded 25D branch", "no S0D/S1A/REV4*/V2_* as parent or data", "no July artifact"]
+}

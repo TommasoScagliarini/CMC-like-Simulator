@@ -1,0 +1,5 @@
+# V26B — Addendum al report S0D fit: test reso stage-aware (correzione finale Codex; solo test/doc)
+
+**Data:** 2026-08-24. `test_v26b_s0d_fit.py` era **pre-run**: dopo il successo dell'export falliva sul solo check `OUT_S0D.exists() is False`. **Il 22/22 originale era valido pre-run ma non rerunnable** — fatto storico, nessuna invalidazione. Correzione (solo test; `v26b_s0d_fit.py`, rev3k, checkpoint e receipt intoccati): il check è ora **stage-aware** — output assente → precondizione no-clobber; output presente → verifica integrità dell'export: receipt/completion-marker `1b2dbab43bd945ca8afb1c9651c8de969e30813a539c99623e06ff116ed9e859`, `module_state.pkl` `cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597`, actor digest `481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a`, assenza di staging/lock orfani.
+
+**Selftest post-run rieseguito: 25/25 PASS.** Nuovo hash del test: `test_v26b_s0d_fit.py` → **`9bb2c8a4b1632e7ca983c12afa1883be92b824ca09c01de0a678fe615de72f29`**. Nessun fit/export/rollout eseguito; artefatti congelati ri-verificati byte-identici dal test stesso.

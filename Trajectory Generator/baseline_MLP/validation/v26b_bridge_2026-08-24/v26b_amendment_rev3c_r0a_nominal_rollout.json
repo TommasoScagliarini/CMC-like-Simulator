@@ -1,0 +1,43 @@
+{
+  "amendment_id": "rev3c_r0a_nominal_rollout",
+  "date": "2026-08-24",
+  "authorized_by": "architect (R0a audit ACCEPTED: independent selftest 42/42, reload, gate RMSE uIK knee 0.0715586813 / ankle 0.0500693838, digest 8567071e...; GO for the next stage with the architect as gate owner)",
+  "kind": "ADDITIVE; defines ONLY the deterministic nominal rollout of the R0a actor; NO production/env/reward/FSM/morphology-corridor/SEA/C++ change; NO frozen artefact mutated",
+  "parents_immutable": {
+    "chain": "rev3 (5e0b6a5c... / 7ef70cbf...), rev3a (f74672ad...), rev3b (52c87999...)",
+    "r0a_receipt": {
+      "path": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/student/V2_R0a/v26b_r0a_receipt.json",
+      "sha256": "ff92d2fc8e730d4a9ad61c3b0f4be64741b3988196d37040cb1841260e278040"
+    },
+    "r0a_report": {
+      "path": "reports/user/2026-08-24_v26b_r0a_nominal_ik_bc_pass.md",
+      "sha256": "6b4dfac417009fedfa8f6c4fb46d980b03b4b097af0755e0d01078b888c8667f"
+    },
+    "r0a_module": {
+      "actor_digest": "8567071e1185d6719290255cb1cb2f062d235a929d39b5b4767d1b613ee38959",
+      "note": "module file digests pinned from the R0a receipt output_files_sha256 (verified fail-closed at launch)"
+    }
+  },
+  "july_archaeology_citations": {
+    "harness": "the July nominal rollouts of the adapted actors were rollout_eval.py CLI runs (watchdog-supervised), seed 123, --record-outputs; deterministic action = Gaussian mean via to_deterministic().sample() (no exploration sigma; rollout_eval.py _policy_action/_deterministic_action); start offset NOT typed on the CLI but auto-loaded from the checkpoint-sibling training_cfg.resolved.yaml (offset 1.956870983805102, random_init false); verbatim commands preserved in runs/rollout/2026-07-11_*/watchdog_summary.json; the July gates on the actor rollout were REPORT-LEVEL criteria (full episode 500/500, >=1 valid cycle, penetration < 25 mm hard guard, clipping 0, positive return, reserve peak), while the only programmatic gate was on the TEACHER (collect_teacher_dataset gate_pass; target_domain_dagger.py:85-87 refuses non-gated teachers)",
+    "dagger_semantics": "July DAgger labelling is SAME-STEP on the fixed-start grid, not same-state: aggregate_dagger_traces labels each on-policy row with teacher_actions[step-1] (target_domain_imitation.py:640-676); the 11/07 rounds had NO truncation; truncation was introduced on 13/07 for STOCHASTIC recovery traces: truncate_before_discrete_mismatch (target_domain_noise_adaptation.py:75-101) compares the DISCRETE observation components (feature names ending _in_contact/_heel_strike/_toe_off/_saturated or starting phase_fsm_/phase_expected_; _discrete_feature_indices lines 61-72) of the disturbed trace against the SOURCE ACTOR'S OWN nominal deterministic trace, per step index; at the first inequality the row and all later rows are discarded (500->119/118/119, first mismatch 120/119/120, 76.27% out-of-phase; markov_dataset_report.json)",
+    "anchors_16000": "16000 nominal anchors of 13/07 = ONE deterministic 500-step episode of the source checkpoint x np.tile 32 verbatim copies (target_domain_markov_adaptation.py:174-200, --nominal-repeat 32, markov_dataset_report.json nominal_steps 500 / nominal_repeat 32); labels = the recorded raw_policy_action (= deterministic mean) of the source actor itself; source == init PROVEN: the same --checkpoint is both the anchor source and the training init (lines 420-426; adaptation_report source_checkpoint == nominal rollout checkpoint; digest chain 42837d48... -> adapted a0801a9e...; float32 identity source_vs_target rmse 1.19e-07); NO dedup (pure tiling); the 20% validation split permuted TILED rows (identical copies on both sides); the run's own offline nominal-shift gate FAILED (run_summary ok:false) and selection happened via the closed-loop gate — practices the rev3 protocol deliberately forbids (row duplication, split leakage), recorded here as historical fact, not as precedent to reuse"
+  },
+  "r0a_nominal_rollout_definition": {
+    "exactly_one_job": "deterministic nominal rollout of the R0a 35D actor under the pinned v3 canonical runtime (config a870cc38..., detector V26 binary heel-qualified, FSM actor v3, event-anchored morphology corridor 33b1dd7c... already configured; NOTHING changed)",
+    "command_shape": "rollout_eval.py (pinned 5433bcbc...) --checkpoint <R0a rl_module> --no-auto-config --config <v3 canonical resolved yaml> --episode-start-offset-s 1.956870983805102 --action-selection deterministic --seed 123 --output-dir <job dir> --record-outputs --record-policy-trace --step-timeout-s 900 --startup-timeout-s 900",
+    "explicit_config_note": "July auto-loaded the checkpoint-sibling resolved yaml; the V26B chain passes the pinned v3 config EXPLICITLY (--no-auto-config) as in every F0/F1/F2R job — same runtime semantics, pinned provenance",
+    "determinism": "action = Gaussian mean (July semantics); the constant sigma 0.005 serialisation placeholder is never sampled; no exploration",
+    "no_clobber": "job dir and log created exclusively; the rollout runs EXACTLY ONCE; on failure: fail-closed STOP + diagnosis, NO retry, NO DAgger",
+    "receipt_minimum": [
+      "completion/steps/rows/time and end_reason",
+      "first discrete FSM mismatch vs the pinned det nominal V26 anchor trace (July-faithful discrete-feature comparison on the same fixed-start grid; the July reference was the source actor's own nominal det trace — unavailable for R0a's first-ever rollout, so the det nominal V26 anchor is the declared grid-aligned reference; the choice is explicit and audit-gated)",
+      "phase timeout (timeout_exceeded/timeout_side), morphology causal contract failure / settled / discarded",
+      "resync_count, hs_cancelled_count, invalid_event_count, valid hs/to/cycle counts",
+      "knee/ankle trajectory quality: min/max/mean, sign, bounds check, RMSE vs prescribed targets (diagnostic)",
+      "July report-level gates recorded: full episode, >=1 valid cycle, penetration vs 20/28 mm v3 guards, clipping, return",
+      "pinned config/source/trace digests"
+    ],
+    "after_rollout": "if it completes: prepare the DAgger PLAN/DATASET MANIFEST ONLY (R0a-visited rows, same-step u_IK labels on the fixed-start grid — the July semantics behind the 'same-state' shorthand — truncation counts at the first discrete mismatch, provenance); NO refit, NO aggregation, NO further rollout; then immutable report + STOP for the architect audit"
+  }
+}

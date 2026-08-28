@@ -1,0 +1,38 @@
+{
+  "addendum_id": "rev3x_a_aggregate_status_semantics",
+  "date": "2026-08-24",
+  "kind": "ADDITIVE, IMMUTABLE, AUTHORITATIVE on status semantics. The S1C-1 aggregate and the three candidate receipts are NOT mutated",
+  "parent": {
+    "aggregate": {
+      "path": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/v26b_s1c1_fit_aggregate_20260824_210626.json",
+      "sha256": "58874483683ff3f9eb6741f7f752fbb5b9c8fec96b3277c3543f0eae58b7d3e4",
+      "status": "PRESERVED, never rewritten"
+    },
+    "amendment_rev3x": "041bbc38dec9209d1b0420be8b641da4224fb256f11e420204710476e871f433",
+    "candidate_receipts": {
+      "W2": "69de4d29e469c972c38c2fd3838b441d08e853bd4ae77692c22e2c91635a09fb",
+      "W4": "eb51092ade1f9fe1763c472763bb5288d40fd462f0b556a1bb4458b12cf73202",
+      "W8": "9f1a705e71efe03f77f30dcdc1bef23c9a82acc2dbf6b46966b227281c7c223d"
+    }
+  },
+  "defect_corrected": {
+    "what": "the aggregate and each candidate receipt carry the generic non-deployable flag block, which includes rollout_pending: true and promotion_requires: 'closed-loop nominal rollout under a separate token', plus a top-level next_stage_locked field naming the rollout token",
+    "why_it_is_misleading": "all three candidates FAILED the binding offline gate P_preservation and are quarantined (may_not_be_source: true). For a candidate that failed the offline hierarchy NO rollout is pending, planned or permitted: it is not a next step, it is an excluded path",
+    "root_cause": "the flag block was inherited verbatim from rev3q, where it described a candidate that had PASSED its offline stage. It was never conditioned on the offline verdict",
+    "not_a_data_error": "every measured number, digest, verdict and gate evaluation in the aggregate and in the receipts is correct and stands unchanged. Only the STATUS WORDING is corrected here"
+  },
+  "authoritative_status": {
+    "W2": "OFFLINE_FAILED_QUARANTINED - no rollout pending, no rollout permitted, may not be init/source/anchor of any later stage",
+    "W4": "OFFLINE_FAILED_QUARANTINED - idem",
+    "W8": "OFFLINE_FAILED_QUARANTINED - idem",
+    "reading_rule": "wherever the aggregate or a candidate receipt shows rollout_pending: true, promotion_requires or next_stage_locked for W2/W4/W8, read this addendum instead: those fields do NOT apply to a candidate that failed the offline hierarchy",
+    "unchanged_facts": [
+      "deployable: false",
+      "quarantined: true",
+      "may_not_be_source: true",
+      "sigma_unresolved: true",
+      "S0D remains the only chain actor with closed-loop evidence"
+    ]
+  },
+  "forward_rule": "any future stage of this chain must set the rollout/promotion status FROM the offline verdict, never inherit it unconditionally"
+}

@@ -1,0 +1,79 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, RECONCILIATION AND CORRECTIONS",
+  "stage": "V26C_J17_CAUSAL_DIAGNOSIS",
+  "date": "2026-08-27",
+  "supersedes_nothing": "the executor's measurement artefact is left byte-identical; this record adds the reconciliation and the corrections it produced",
+  "measurements_artefact": {
+    "path": "v26c_j17_diagnostic_measurements.json",
+    "sha256": "5c5f309a5cde39a6233d52afe65d90be17a999879ea8acbecb64f53429434e5c"
+  },
+  "independent_audits": {
+    "count": 2,
+    "scope": [
+      "lineage and structural integrity",
+      "committed-trace temporal analysis"
+    ],
+    "read_only": true,
+    "wrote_nothing_to_the_repository": true
+  },
+  "agreement": [
+    "lineage verifies end to end by hash: the August V26 root records initialization_mode 'fresh' with every resume/warm-start field null or false; J2 derives from it; BOTH actors declare the same J2 parent and it matches disk",
+    "no July artefact is a parent, checkpoint or operational dataset anywhere in the chain; the only July file ever opened is a repository SOURCE module, AST-scanned for one literal",
+    "structural integrity: identical key sets, shapes and dtypes; clock columns [0,1] exactly zero in both students; log-std bit-identical to the parent in both; no critic key anywhere; class_and_ctor_args byte-identical across J2, J11 and J15R1",
+    "the physical-scale absorption was applied IDENTICALLY to both actors - independently proved by forward reconstruction on raw versus scaled inputs",
+    "the J7 nominal labels are self-distilled from the J2 parent, which is why that block carries zero error at initialisation",
+    "the action divergence is present at step 1 on a bit-identical observation"
+  ],
+  "corrections_to_the_executor_s_own_conclusions": [
+    {
+      "what": "the executor reported a clean temporal gap of 15-35 steps between kinematic divergence and the penetration rise",
+      "correction": "that gap is PARTLY MASKED, not fully resolved. In A, B, D, E and F penetration is identically 0.0 in BOTH runs for the first 10-14 steps because the foot is airborne; a difference in a quantity that is zero in both runs is structurally unmeasurable. In cell C, where the foot is loaded at reset, the kinematic and penetration differences appear at the SAME physical instant and cannot be ordered.",
+      "what_survives": "the action-before-kinematics ordering, which holds BY CONSTRUCTION because the step-1 observation is bit-identical between runs"
+    },
+    {
+      "what": "the executor concluded from within-run correlations that the simple kinematic mechanism was NOT supported",
+      "correction": "that conclusion was drawn from a CONFOUNDED statistic. Within a single run, knee, ankle and penetration all co-vary with gait phase, so their correlation cannot carry a cross-run claim. The PAIRED comparison, which the executor did not exploit for this question, does identify the mechanism.",
+      "what_replaces_it": "in the pre-breach window J16 commands systematically LESS knee action than J12 in every failing cell (delta -0.0447 to -0.2243 normalised, verified independently by the executor), the knee then collapses into flexion under load, and penetration tracks the collapse"
+    },
+    {
+      "what": "the executor treated the recorded index of knee/ankle and of penetration as the same instant",
+      "correction": "knee_rad and ankle_rad are the PRE-step state (bit-identical to observation components 2 and 4); penetration_m is the POST-step value. A one-step offset must be applied when ordering them. This does not change the direction of any conclusion but it changes the numbers."
+    }
+  ],
+  "material_facts_the_audits_added": [
+    {
+      "fact": "the 854 corrective rows ARE, row by row, the trajectory the J11 actor walked in J12",
+      "verified_by_the_executor": "max|difference| = 0.000e+00 over the 33 non-clock observation columns, cells E and F; the two clock columns are projected to zero in J14 and carry zero weight in the network",
+      "why_it_matters": "the states are J11's, but the fit that consumed them started FRESH from J2. The aggregated states were therefore off-policy for the initialisation and for the resulting actor. This is a departure from the DAgger premise that states come from the policy being improved."
+    },
+    {
+      "fact": "cell D is a perfectly controlled comparison: the exploration noise is bit-identical between J12 and J16 across all 500 steps, and so is the reset state",
+      "verified_by_the_executor": "max|noise difference| = 0.000e+00; max|obs[0] difference| = 0.000e+00"
+    },
+    {
+      "fact": "in cell D's stance window the J12 knee holds within 0.004504 rad while the J16 knee swings 0.148062 rad, and J16's penetration peaks at 0.026870843 - within 0.001129157 of the binding bar",
+      "verified_by_the_executor": true
+    },
+    {
+      "fact": "J16 saturates the action in cell C: 12 clipped steps, raw knee action up to 1.188135. J12 clips ZERO steps in any cell.",
+      "verified_by_the_executor": true
+    },
+    {
+      "fact": "J16 cell D lost its second gait cycle to a forefoot-only landing: the heel sensor records exactly 0.0 penetration for all 64 terminal steps while the knee stalls between -0.69 and -0.97 rad and never extends. No cycle was rejected, cancelled, resynced or timed out - the landing was still unconfirmed when the clock ran out.",
+      "source": "independent trace audit"
+    },
+    {
+      "fact": "the pre-breach deviation is NOT detectable inside a single run: J16's knee tracking error against the imitation target is comparable to J12's, and better in two cells. Only the paired comparison reveals it.",
+      "source": "independent trace audit",
+      "why_it_matters": "an offline or single-run monitor would not have caught this before the penetration rise"
+    }
+  ],
+  "divergences_between_the_executor_and_the_audits": "NONE on any verifiable quantity. Every number the audits reported that the executor re-measured reproduced exactly. The three corrections above are places where the audits went FURTHER than the executor had, not places where they disagreed with a measured value.",
+  "disclosure_gaps_noted_by_the_lineage_audit": [
+    "neither the J11 nor the J15R1 leaf pins the runner that wrote it; for J15R1 two runners target the same leaf path and only records OUTSIDE the leaf identify which one ran",
+    "the J2 leaf carries no commit_verification.json and its manifest has no actor_digest; J15R1's manifest discloses this, J11's does not",
+    "J11's receipt omits scales_verified, which J15R1's includes",
+    "J11's fit is not bit-reproducible from its own artefacts: no torch version, no resolved Adam arguments. J15R1 records both.",
+    "both fits place the same unique rows in the train and validation partitions, so best_validation_mse is a training diagnostic in both"
+  ]
+}

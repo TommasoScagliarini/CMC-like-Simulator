@@ -1,0 +1,158 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION",
+  "stage": "V26C_J20_RESTORE_AUDIT",
+  "closes": "gate G9 of V26C_J20_CRITIC_WARMUP, whose immediate half was passed and whose restore half was explicitly left owed",
+  "written_at_stage": "preparation only; this document is sealed before any execution and is never rewritten",
+  "contains_no_self_hash": true,
+  "self_hash_note": "this file deliberately carries no hash of itself. The runner embeds this file's sha256 as PIN_PREREG and re-hashes it at preflight, so the seal is external and cannot be forged from inside the document.",
+
+  "purpose": {
+    "one_sentence": "Reload the warm-up's checkpoint_last through the real production restore path, run ZERO new iterations, and prove that the actor, the log-std, the critic, the full module and the Adam optimizer all come back exactly as they were written.",
+    "why_a_separate_stage": "The warm-up runner could not perform this. Rebuilding the algorithm and calling restore_from_path is a different action with a different blast radius, so it was preregistered as owed and the leaf was marked RESTORE_AUDIT_PENDING rather than PASS.",
+    "what_it_does_not_do": [
+      "it does not train: no algo.train() call is reachable",
+      "it does not sample and does not roll out: the iteration loop range is empty by construction",
+      "it does not transplant: the warm-start branch is skipped whenever a resume path is present",
+      "it does not promote anything, does not start PPO, does not start an ex-novo run",
+      "it does not modify production code, the SEA plugin, FSM v3, the detector, the morphology, the reward, the thresholds, sigma or the architecture",
+      "it does not retry, under any outcome"
+    ]
+  },
+
+  "lineage": {
+    "operational": "V26 August imitation -> J2 35D -> J8 -> J18 c13 -> J19A -> J20 critic-only warm-up",
+    "july": "methodological source only, never an operational input",
+    "actor": "one single 35D actor; no separate 25D, no widening, no contralateral feature"
+  },
+
+  "source_under_audit": {
+    "leaf": "j20_runs/j20_critic_warmup_v26c_2026-08-27_r1",
+    "verdict_it_carries": "AWAITING_RESTORE_AUDIT",
+    "marker_it_carries": "RESTORE_AUDIT_PENDING",
+    "checkpoint": "j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/checkpoint_last",
+    "checkpoint_meta": "j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/checkpoint_last_meta.json",
+    "read_only": "this stage only reads the source leaf. Gate R11 re-hashes the whole tree before and after and fails closed on any difference."
+  },
+
+  "the_command": {
+    "derivation": "taken from sealed_command() in v26c_j20_critic_warmup_readiness.py, the single source of the J20 invocation, and transformed by exactly three auditable operations",
+    "operation_1_substitute": {
+      "what": "the --config value",
+      "from": "v26c_j20_warmup_cfg.yaml",
+      "to": "v26c_j20_warmup_critic_only_cfg.yaml",
+      "why": "the checkpoint under audit was produced with the critic-only config; restoring it under a different config would be auditing a different object"
+    },
+    "operation_2_remove": {
+      "tokens": ["--warm-start-raw", "--warm-start-raw-source", "<J19A rl_module path>", "--warm-start-raw-source-feature-manifest", "<overlay path>"],
+      "count": 5,
+      "why": "with a resume path present, train_ppo_mlp.py skips the transplant (train_ppo_mlp.py:1919, 'if args.warm_start_raw and resume_path is None'), so these tokens would be inert. They are removed anyway because leaving them would make summary.json report initialization_mode 'warm_start_raw' for a run that performed no transplant. Removing them makes the record say exactly what happened: 'resume_from'."
+    },
+    "operation_3_append": {
+      "tokens": ["--resume-from", "<absolute path to the warm-up checkpoint_last>"],
+      "count": 2,
+      "why": "this is the whole point of the stage"
+    },
+    "token_count_expected": 20,
+    "tokens_retained_and_why": {
+      "--worker-process": "makes main() fall through to run() instead of run_supervised(); a crash is a failure, never a restart",
+      "--asymmetric-actor-critic": "required by --freeze-actor, and it is what makes the trainer record the restored critic digest and the restored actor digest into summary.json",
+      "--freeze-actor": "records actor_freeze_audit[before_training] from the live restored module; with zero iterations no after_iteration entry can exist",
+      "--freeze-logstd": "kept identical to the run under audit",
+      "--iterations 1": "this is what makes the loop empty. iteration_start is derived as restored_logical_iteration + 1 = 2, so range(2, 1 + 1) = range(2, 2) has no members",
+      "--checkpoint-every 1 --retain-iteration-checkpoints": "kept identical to the run under audit; both are reachable only from inside the loop body, so with zero iterations neither writes anything",
+      "--tensorboard": "kept identical; creates an empty writer directory",
+      "--no-progress": "non-interactive",
+      "--no-update-history": "the global runs/historical_runs index must not be touched by an audit"
+    },
+    "iteration_start_is_not_passed": "--iteration-start is deliberately absent so that args.iteration_start stays 0 and train_ppo_mlp.py:1755-1756 derives it from the restored checkpoint. Passing it would let this stage assert the number it is supposed to measure."
+  },
+
+  "declared_side_effects": {
+    "honest_statement": "Building the Algorithm constructs the EnvRunners, and constructing an EnvRunner constructs its OpenSim environment; RLlib may reset an environment during setup to read its spaces. That is environment CONSTRUCTION, not sampling and not a rollout, and this preregistration declares it rather than pretending the restore is free.",
+    "what_bounds_it": "no algo.train() call is reachable, so no batch is collected, no gradient is computed and no parameter is written. Gates R1, R2 and R10 measure this rather than assuming it.",
+    "cost": "13 EnvRunners plus one local runner, ray_num_cpus 14, as in the run under audit"
+  },
+
+  "gates": {
+    "count": 12,
+    "note": "named R1..R12 so they are never confused with the warm-up's G1..G12. All twelve must pass; the verdict is fail-closed.",
+    "R1_zero_new_iterations": "train_iterations.jsonl in the audit leaf is absent or holds zero rows, AND summary.iterations_run == 0, AND summary.iterations_completed_this_process == 0",
+    "R2_empty_history": "summary.history == [] exactly",
+    "R3_restored_iteration_is_one": "summary.restored_training_iteration == 1 AND summary.restored_logical_iteration == 1",
+    "R4_next_and_start_are_two": "summary.iteration_start == 2 AND summary.next_iteration == 2",
+    "R5_the_restore_path_was_taken": "summary.resume_from is the audited checkpoint_last, AND summary.initialization_mode == 'resume_from', AND summary.warm_start_raw_transplant_applied_this_process is false or absent, AND no actor_transplant_report.json exists in the audit leaf",
+    "R6_restored_actor_digest": "summary.actor_freeze_audit holds exactly one entry, its stage is 'before_training', and its actor_digest == d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96. This is the digest of the LIVE restored learner module, produced by production code, not by this runner.",
+    "R7_restored_critic_digest": "summary.critic_state_audit holds exactly one entry, its stage is 'before_training', and its critic_digest == 2fa9c124e7b49b679df6db35f6cd4577a70e543541feaa3e6b32bac7afa0a410, over exactly the six critic keys",
+    "R8_hermetic_full_module_restore": "out of process, with no Ray and no environment, the runner builds one AsymmetricActorCriticTorchRLModule at the pinned geometry, calls load_state_dict(strict=True) with the checkpoint's sixteen keys and gets empty missing/unexpected lists, and then finds every one of the sixteen tensors byte-identical to module_state.pkl. Includes the log-std slice: rows 2:4 of pi.1.weight are exactly zero and rows 2:4 of pi.1.bias are exactly -5.2983174324035645, so sigma is 0.005 on both dimensions.",
+    "R9_optimizer_really_restorable": "out of process, the runner rebuilds a torch Adam over the module's twelve parameters in named_parameters() order and calls load_state_dict on the pickled optimizer state after converting its numpy arrays to tensors. It must not raise; the restored state must hold exactly six entries at indices [6, 7, 8, 9, 10, 11]; each entry's exp_avg and exp_avg_sq shape must equal the shape of the parameter at that index; every step must be 81; and the parameters at those six indices must be exactly the six critic tensors, which is what upgrades 'six entries at those indices' from a positional claim to an identified one. The production path must additionally have recorded an optimizer_lr_audit entry with stage 'after_restore'.",
+    "R10_nothing_was_trained": "the audit leaf holds no checkpoint_last, no checkpoint_best, no checkpoint_last_meta.json, no rl_module_last, no rl_module_best, no milestone_iteration_* directory, no rl_module_initial_warm_start and no actor_transplant_report.json",
+    "R11_sources_unchanged": "the entire source leaf tree, hashed file by file before the child starts and again after it exits, is identical; and every pinned artefact of J19A, J19B, J19C, K1, K1R1, the two configs, the overlay and the four production modules re-hashes to its pin",
+    "R12_single_clean_process": "exactly one child process was launched, its returncode is 0, summary.stop_reason == 'completed', summary.interrupted is false, summary.timed_out is false, no supervisor_state.json exists in the audit leaf, and no retry occurred"
+  },
+
+  "what_closes_G9": {
+    "immediate_half_already_passed": "the structural half: twelve parameters in the group, six Adam entries at indices [6..11], each with step/exp_avg/exp_avg_sq",
+    "restore_half_closed_here": ["R5", "R6", "R7", "R8", "R9"],
+    "supporting": ["R1", "R2", "R3", "R4", "R10"],
+    "integrity": ["R11", "R12"]
+  },
+
+  "expected_values": {
+    "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "critic_digest": "2fa9c124e7b49b679df6db35f6cd4577a70e543541feaa3e6b32bac7afa0a410",
+    "module_state_sha256": "57720e2e3fa8a1fd412ba028e2452dead681d57ea1357be1c9f44f152b3cd168",
+    "module_state_keys": 16,
+    "named_parameters": 12,
+    "actor_parameter_indices": [0, 1, 2, 3, 4, 5],
+    "critic_parameter_indices": [6, 7, 8, 9, 10, 11],
+    "adam_step": 81,
+    "logstd_bias": -5.2983174324035645,
+    "sigma": 0.005,
+    "restored_training_iteration": 1,
+    "restored_logical_iteration": 1,
+    "iteration_start": 2,
+    "next_iteration": 2,
+    "iterations_run": 0,
+    "iterations_completed_this_process": 0,
+    "iterations_completed_carried_forward": 1
+  },
+
+  "byte_identity_definition": "same dtype, same shape, same C-order bytes. Deliberately NOT numpy.array_equal, which is numeric and would treat -0.0 as equal to +0.0 and a float32 tensor as equal to its float64 copy.",
+
+  "protocol": {
+    "destination": "j20_runs/j20_restore_audit_v26c_2026-08-27_r1",
+    "no_clobber": "the runner refuses to start if the destination exists",
+    "born_invalid": "the leaf is created with TECHNICAL_INVALID written FIRST, before anything else, and the runner asserts that marker is the only resident before launching the child",
+    "marker_removed_last": "TECHNICAL_INVALID is replaced by RESTORE_AUDIT_PASSED only after all twelve gates pass AND post-commit verification passes",
+    "post_commit_verification": "every leaf-relative path named by the committed receipt is re-hashed against the receipt and against the bytes that were written, and the source leaf and all pinned artefacts are re-hashed",
+    "single_execution": "one subprocess.Popen, no loop that can reach it twice, no supervisor, no retry under any outcome",
+    "go_required": "--execute refuses to run without a valid architect GO whose status is not DRAFT or PROPOSED and whose closed set of pins all re-hash correctly",
+    "inert_modes": "--preflight-only and --dry-run write nothing, launch nothing, and import neither torch nor ray"
+  },
+
+  "verdicts": {
+    "on_success": "RESTORE_AUDIT_PASS",
+    "on_failure": "FAIL_CLOSED",
+    "what_success_still_does_not_authorise": [
+      "PPO",
+      "an ex-novo run",
+      "any promotion",
+      "training readiness",
+      "any subsequent stage"
+    ],
+    "fields_that_stay_false_on_success": {
+      "promotion": "NONE",
+      "training_ready": false,
+      "next_stage_authorized": false
+    }
+  },
+
+  "prohibitions": [
+    "no retry, whatever the outcome",
+    "no second execution of this stage",
+    "no rewriting or overwriting of the warm-up leaf, the K1 leaf, the K1R1 leaf or any J0-J19C artefact",
+    "no modification of train_ppo_mlp.py, tb_logging.py, warm_start.py, asymmetric_rl_module.py or any other production module",
+    "no modification of v26c_j20_warmup_cfg.yaml, v26c_j20_warmup_critic_only_cfg.yaml, the overlay or training_exnovo_cfg.yaml",
+    "no post-success probing of the frozen argv"
+  ]
+}

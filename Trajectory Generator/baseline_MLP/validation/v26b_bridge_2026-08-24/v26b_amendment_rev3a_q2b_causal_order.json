@@ -1,0 +1,25 @@
+{
+  "amendment_id": "rev3a_q2b_causal_order",
+  "date": "2026-08-24",
+  "authorized_by": "architect (V2 GO message after the V1 gate; immutability correction ordered by the architect: amendment recorded in this ADDITIVE file, parents untouched)",
+  "kind": "CLARIFICATION of causal order; NO threshold, recipe or budget change; NOT a waiver",
+  "parents_immutable": {
+    "v26b_protocol.json": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v26b_bridge_2026-08-24/v26b_protocol.json",
+      "sha256": "5e0b6a5cdbec89f97b03bb0262142e53ba4c03affe0dd31fde9f813c778708d3"
+    },
+    "PROTOCOL_V26B.md": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v26b_bridge_2026-08-24/PROTOCOL_V26B.md",
+      "sha256": "7ef70cbf2f7253406e15e0714c68c05455d672120a039dd43fdfa139152b913c"
+    },
+    "note": "both parent files are byte-identical to the hashes pinned by the V1 receipt 65b447ea331d58b457fe6df48e67697dbd6693986552411c0f9780c75ffb995c"
+  },
+  "statement": [
+    "Q2b (RMSE vs u_IK on ON-POLICY rows) is temporally applicable only when on-policy rows EXIST.",
+    "R0 is STATIC (no rollout has occurred): its dataset is anchors_preservation + the alternative-start prescribed IK rows reconstructed on the anchor grids; R0 must PASS Q1 + Q2 + Q3 (each at its unchanged preregistered threshold) BEFORE the first V3 deterministic gate.",
+    "If V3 fails, the V3 det seed-123 rows (and the stochastic seed-124 DAgger collection foreseen by the preregistered DAgger stage) are truncated at the FIRST FSM mismatch (unchanged phase-alignment rule) and aggregated for R1.",
+    "From R1 onwards Q1 + Q2 + Q2b + Q3 are ALL mandatory before the next rollout.",
+    "The rev3 sentence 'Q1, Q2, Q2b and Q3 all mandatory; any FAIL -> no export, no rollout' is read with this causal order; thresholds and every other rule are unchanged."
+  ],
+  "consumers": "V2 tooling MUST pin BOTH the rev3 parents (by the hashes above) AND this amendment file in every receipt"
+}

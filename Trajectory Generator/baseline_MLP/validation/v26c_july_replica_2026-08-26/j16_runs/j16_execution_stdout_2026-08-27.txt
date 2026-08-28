@@ -1,0 +1,915 @@
+
+
+****************************************************************
+[DEBUG] >>> SYSTEM ALERT: IL PLUGIN E' STATO CARICATO IN MEMORIA.
+[DEBUG] >>> INIZIO REGISTRAZIONE OGGETTI...
+[DEBUG] >>> SEA: registered.
+****************************************************************
+
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Recruit t=13.947] muscle_share=0.632  capable_share=1.000  |tau_m|=142.62  |tau_res|=83.09  act>thr=0.47  |u_res|=0.831
+{"cell": "A", "step": 1, "reward": 0.0}
+[Recruit t=13.997] muscle_share=0.452  capable_share=1.000  |tau_m|=134.64  |tau_res|=163.22  act>thr=0.39  |u_res|=1.632
+[Recruit t=14.047] muscle_share=0.317  capable_share=1.000  |tau_m|=114.23  |tau_res|=245.96  act>thr=0.41  |u_res|=2.460
+[Recruit t=14.097] muscle_share=0.219  capable_share=1.000  |tau_m|=88.80  |tau_res|=316.13  act>thr=0.45  |u_res|=3.161
+[Recruit t=14.147] muscle_share=0.260  capable_share=1.000  |tau_m|=86.59  |tau_res|=245.86  act>thr=0.51  |u_res|=2.459
+[Recruit t=14.197] muscle_share=0.420  capable_share=1.000  |tau_m|=125.86  |tau_res|=173.55  act>thr=0.43  |u_res|=1.736
+[Recruit t=14.247] muscle_share=0.306  capable_share=1.000  |tau_m|=82.46  |tau_res|=187.18  act>thr=0.49  |u_res|=1.872
+[Recruit t=14.297] muscle_share=0.124  capable_share=1.000  |tau_m|=40.81  |tau_res|=288.82  act>thr=0.45  |u_res|=2.888
+[Recruit t=14.347] muscle_share=0.118  capable_share=1.000  |tau_m|=44.34  |tau_res|=332.53  act>thr=0.43  |u_res|=3.325
+[Recruit t=14.397] muscle_share=0.119  capable_share=1.000  |tau_m|=36.17  |tau_res|=268.19  act>thr=0.47  |u_res|=2.682
+{"cell": "A", "step": 50, "reward": 0.0}
+[Recruit t=14.447] muscle_share=0.318  capable_share=1.000  |tau_m|=61.46  |tau_res|=131.97  act>thr=0.49  |u_res|=1.320
+[Recruit t=14.497] muscle_share=0.273  capable_share=1.000  |tau_m|=49.76  |tau_res|=132.25  act>thr=0.46  |u_res|=1.322
+[Recruit t=14.547] muscle_share=0.175  capable_share=1.000  |tau_m|=44.94  |tau_res|=212.31  act>thr=0.45  |u_res|=2.123
+[Recruit t=14.597] muscle_share=0.190  capable_share=1.000  |tau_m|=70.01  |tau_res|=299.15  act>thr=0.46  |u_res|=2.992
+[Recruit t=14.647] muscle_share=0.443  capable_share=1.000  |tau_m|=62.37  |tau_res|=78.40  act>thr=0.43  |u_res|=0.784
+[Recruit t=14.697] muscle_share=0.084  capable_share=1.000  |tau_m|=57.24  |tau_res|=622.06  act>thr=0.46  |u_res|=6.221
+[Recruit t=14.747] muscle_share=0.091  capable_share=1.000  |tau_m|=43.10  |tau_res|=429.39  act>thr=0.43  |u_res|=4.294
+[Recruit t=14.797] muscle_share=0.309  capable_share=1.000  |tau_m|=61.86  |tau_res|=138.58  act>thr=0.47  |u_res|=1.386
+[Recruit t=14.847] muscle_share=0.237  capable_share=1.000  |tau_m|=72.42  |tau_res|=232.90  act>thr=0.50  |u_res|=2.329
+[Recruit t=14.897] muscle_share=0.148  capable_share=1.000  |tau_m|=56.72  |tau_res|=327.04  act>thr=0.42  |u_res|=3.270
+{"cell": "A", "step": 100, "reward": 0.0}
+[Recruit t=14.947] muscle_share=0.154  capable_share=1.000  |tau_m|=69.07  |tau_res|=379.74  act>thr=0.46  |u_res|=3.797
+[Recruit t=14.997] muscle_share=0.276  capable_share=1.000  |tau_m|=86.73  |tau_res|=227.12  act>thr=0.49  |u_res|=2.271
+[Recruit t=15.047] muscle_share=0.372  capable_share=1.000  |tau_m|=91.88  |tau_res|=154.99  act>thr=0.43  |u_res|=1.550
+[Recruit t=15.097] muscle_share=0.445  capable_share=1.000  |tau_m|=96.48  |tau_res|=120.52  act>thr=0.45  |u_res|=1.205
+[Recruit t=15.147] muscle_share=0.472  capable_share=1.000  |tau_m|=100.99  |tau_res|=112.97  act>thr=0.47  |u_res|=1.130
+[Recruit t=15.197] muscle_share=0.497  capable_share=1.000  |tau_m|=97.61  |tau_res|=98.83  act>thr=0.47  |u_res|=0.988
+[Recruit t=15.247] muscle_share=0.486  capable_share=1.000  |tau_m|=95.71  |tau_res|=101.17  act>thr=0.42  |u_res|=1.012
+[Recruit t=15.297] muscle_share=0.493  capable_share=1.000  |tau_m|=101.58  |tau_res|=104.33  act>thr=0.46  |u_res|=1.043
+[Recruit t=15.347] muscle_share=0.472  capable_share=1.000  |tau_m|=110.75  |tau_res|=123.90  act>thr=0.47  |u_res|=1.239
+[Recruit t=15.397] muscle_share=0.515  capable_share=1.000  |tau_m|=104.65  |tau_res|=98.67  act>thr=0.46  |u_res|=0.987
+{"cell": "A", "step": 150, "reward": -7.927438384116537e-14}
+[Recruit t=15.447] muscle_share=0.511  capable_share=1.000  |tau_m|=104.26  |tau_res|=99.72  act>thr=0.43  |u_res|=0.997
+[Recruit t=15.497] muscle_share=0.528  capable_share=1.000  |tau_m|=112.48  |tau_res|=100.43  act>thr=0.39  |u_res|=1.004
+[Recruit t=15.547] muscle_share=0.721  capable_share=1.000  |tau_m|=119.10  |tau_res|=46.08  act>thr=0.39  |u_res|=0.461
+[Recruit t=15.597] muscle_share=0.654  capable_share=1.000  |tau_m|=125.49  |tau_res|=66.43  act>thr=0.39  |u_res|=0.664
+[Recruit t=15.647] muscle_share=0.392  capable_share=0.530  |tau_m|=110.77  |tau_res|=171.64  act>thr=1.00  |u_res|=1.716
+[Recruit t=15.697] muscle_share=0.371  capable_share=0.483  |tau_m|=91.90  |tau_res|=156.09  act>thr=1.00  |u_res|=1.561
+[Recruit t=15.747] muscle_share=0.300  capable_share=0.417  |tau_m|=77.12  |tau_res|=180.17  act>thr=1.00  |u_res|=1.802
+[Recruit t=15.797] muscle_share=0.438  capable_share=1.000  |tau_m|=90.02  |tau_res|=115.40  act>thr=0.46  |u_res|=1.154
+[Recruit t=15.847] muscle_share=0.188  capable_share=1.000  |tau_m|=52.84  |tau_res|=228.70  act>thr=0.49  |u_res|=2.287
+[Recruit t=15.897] muscle_share=0.120  capable_share=1.000  |tau_m|=56.41  |tau_res|=413.41  act>thr=0.46  |u_res|=4.134
+{"cell": "A", "step": 200, "reward": -0.3238981625653622}
+[Recruit t=15.947] muscle_share=0.181  capable_share=1.000  |tau_m|=75.87  |tau_res|=343.32  act>thr=0.45  |u_res|=3.433
+[Recruit t=15.997] muscle_share=0.259  capable_share=1.000  |tau_m|=56.27  |tau_res|=160.72  act>thr=0.47  |u_res|=1.607
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs/j1_teacher_episode_gait_events_online.csv (7 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_sim_outputs
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.6355 rad
+[Runner] SEA_Ankle motor_angle = -0.0039 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.6355 rad
+[Runner] SEA_Ankle motor_angle = -0.0039 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Recruit t=13.747] muscle_share=0.518  capable_share=1.000  |tau_m|=102.39  |tau_res|=95.13  act>thr=0.49  |u_res|=0.951
+{"cell": "B", "step": 1, "reward": 0.0}
+[Recruit t=13.797] muscle_share=0.451  capable_share=1.000  |tau_m|=108.04  |tau_res|=131.54  act>thr=0.54  |u_res|=1.315
+[Recruit t=13.847] muscle_share=0.550  capable_share=1.000  |tau_m|=117.52  |tau_res|=96.22  act>thr=0.45  |u_res|=0.962
+[Recruit t=13.897] muscle_share=0.635  capable_share=1.000  |tau_m|=136.89  |tau_res|=78.56  act>thr=0.46  |u_res|=0.786
+[Recruit t=13.947] muscle_share=0.640  capable_share=1.000  |tau_m|=138.98  |tau_res|=78.17  act>thr=0.47  |u_res|=0.782
+[Recruit t=13.997] muscle_share=0.435  capable_share=1.000  |tau_m|=129.27  |tau_res|=167.72  act>thr=0.39  |u_res|=1.677
+[Recruit t=14.047] muscle_share=0.311  capable_share=1.000  |tau_m|=113.44  |tau_res|=250.82  act>thr=0.45  |u_res|=2.508
+[Recruit t=14.097] muscle_share=0.234  capable_share=1.000  |tau_m|=89.18  |tau_res|=291.14  act>thr=0.45  |u_res|=2.911
+[Recruit t=14.147] muscle_share=0.357  capable_share=1.000  |tau_m|=96.08  |tau_res|=172.97  act>thr=0.53  |u_res|=1.730
+[Recruit t=14.197] muscle_share=0.436  capable_share=1.000  |tau_m|=109.56  |tau_res|=141.64  act>thr=0.45  |u_res|=1.416
+{"cell": "B", "step": 50, "reward": -0.014796404233499615}
+[Recruit t=14.247] muscle_share=0.217  capable_share=1.000  |tau_m|=57.81  |tau_res|=208.30  act>thr=0.49  |u_res|=2.083
+[Recruit t=14.297] muscle_share=0.115  capable_share=1.000  |tau_m|=41.33  |tau_res|=319.33  act>thr=0.45  |u_res|=3.193
+[Recruit t=14.347] muscle_share=0.106  capable_share=1.000  |tau_m|=38.61  |tau_res|=325.98  act>thr=0.45  |u_res|=3.260
+[Recruit t=14.397] muscle_share=0.162  capable_share=1.000  |tau_m|=54.94  |tau_res|=284.73  act>thr=0.47  |u_res|=2.847
+[Recruit t=14.447] muscle_share=0.217  capable_share=1.000  |tau_m|=63.03  |tau_res|=227.25  act>thr=0.47  |u_res|=2.272
+[Recruit t=14.497] muscle_share=0.146  capable_share=1.000  |tau_m|=53.39  |tau_res|=312.53  act>thr=0.45  |u_res|=3.125
+[Recruit t=14.547] muscle_share=0.156  capable_share=1.000  |tau_m|=77.43  |tau_res|=418.66  act>thr=0.47  |u_res|=4.187
+[Recruit t=14.597] muscle_share=0.248  capable_share=1.000  |tau_m|=60.22  |tau_res|=182.41  act>thr=0.45  |u_res|=1.824
+[Recruit t=14.647] muscle_share=0.086  capable_share=1.000  |tau_m|=51.04  |tau_res|=542.87  act>thr=0.43  |u_res|=5.429
+[Recruit t=14.697] muscle_share=0.070  capable_share=1.000  |tau_m|=55.79  |tau_res|=746.54  act>thr=0.47  |u_res|=7.465
+{"cell": "B", "step": 100, "reward": -0.015167754262912458}
+[Recruit t=14.747] muscle_share=0.135  capable_share=1.000  |tau_m|=91.88  |tau_res|=589.23  act>thr=0.43  |u_res|=5.892
+[Recruit t=14.797] muscle_share=0.195  capable_share=1.000  |tau_m|=89.75  |tau_res|=370.12  act>thr=0.43  |u_res|=3.701
+[Recruit t=14.847] muscle_share=0.420  capable_share=1.000  |tau_m|=74.65  |tau_res|=103.24  act>thr=0.51  |u_res|=1.032
+[Recruit t=14.897] muscle_share=0.153  capable_share=1.000  |tau_m|=56.48  |tau_res|=311.72  act>thr=0.42  |u_res|=3.117
+[Recruit t=14.947] muscle_share=0.179  capable_share=1.000  |tau_m|=74.39  |tau_res|=340.89  act>thr=0.46  |u_res|=3.409
+[Recruit t=14.997] muscle_share=0.305  capable_share=1.000  |tau_m|=95.34  |tau_res|=217.58  act>thr=0.47  |u_res|=2.176
+[Recruit t=15.047] muscle_share=0.576  capable_share=1.000  |tau_m|=100.65  |tau_res|=74.17  act>thr=0.45  |u_res|=0.742
+[Recruit t=15.097] muscle_share=0.314  capable_share=1.000  |tau_m|=109.31  |tau_res|=239.28  act>thr=0.46  |u_res|=2.393
+[Recruit t=15.147] muscle_share=0.307  capable_share=1.000  |tau_m|=102.20  |tau_res|=230.44  act>thr=0.50  |u_res|=2.304
+[Recruit t=15.197] muscle_share=0.416  capable_share=1.000  |tau_m|=103.36  |tau_res|=145.30  act>thr=0.51  |u_res|=1.453
+{"cell": "B", "step": 150, "reward": -7.62346832870226e-05}
+[Recruit t=15.247] muscle_share=0.435  capable_share=1.000  |tau_m|=99.79  |tau_res|=129.88  act>thr=0.50  |u_res|=1.299
+[Recruit t=15.297] muscle_share=0.483  capable_share=1.000  |tau_m|=101.42  |tau_res|=108.65  act>thr=0.45  |u_res|=1.087
+[Recruit t=15.347] muscle_share=0.475  capable_share=1.000  |tau_m|=110.82  |tau_res|=122.56  act>thr=0.45  |u_res|=1.226
+[Recruit t=15.397] muscle_share=0.520  capable_share=1.000  |tau_m|=104.90  |tau_res|=96.94  act>thr=0.46  |u_res|=0.969
+[Recruit t=15.447] muscle_share=0.547  capable_share=1.000  |tau_m|=106.66  |tau_res|=88.25  act>thr=0.45  |u_res|=0.882
+[Recruit t=15.497] muscle_share=0.664  capable_share=1.000  |tau_m|=110.62  |tau_res|=55.96  act>thr=0.37  |u_res|=0.560
+[Recruit t=15.547] muscle_share=0.729  capable_share=1.000  |tau_m|=119.48  |tau_res|=44.49  act>thr=0.39  |u_res|=0.445
+[Recruit t=15.597] muscle_share=0.597  capable_share=1.000  |tau_m|=124.57  |tau_res|=84.11  act>thr=0.42  |u_res|=0.841
+[Recruit t=15.647] muscle_share=0.457  capable_share=0.532  |tau_m|=110.68  |tau_res|=131.57  act>thr=1.00  |u_res|=1.316
+[Recruit t=15.697] muscle_share=0.405  capable_share=0.491  |tau_m|=91.67  |tau_res|=134.77  act>thr=1.00  |u_res|=1.348
+{"cell": "B", "step": 200, "reward": 0.3418036524246199}
+[Recruit t=15.747] muscle_share=0.281  capable_share=0.409  |tau_m|=75.91  |tau_res|=193.89  act>thr=1.00  |u_res|=1.939
+[Recruit t=15.797] muscle_share=0.457  capable_share=1.000  |tau_m|=103.26  |tau_res|=122.45  act>thr=0.45  |u_res|=1.224
+[Recruit t=15.847] muscle_share=0.442  capable_share=1.000  |tau_m|=82.98  |tau_res|=104.88  act>thr=0.49  |u_res|=1.049
+[Recruit t=15.897] muscle_share=0.248  capable_share=1.000  |tau_m|=69.96  |tau_res|=211.93  act>thr=0.46  |u_res|=2.119
+[Recruit t=15.947] muscle_share=0.188  capable_share=1.000  |tau_m|=68.64  |tau_res|=296.98  act>thr=0.43  |u_res|=2.970
+[Recruit t=15.997] muscle_share=0.204  capable_share=1.000  |tau_m|=56.56  |tau_res|=221.20  act>thr=0.45  |u_res|=2.212
+[Recruit t=16.047] muscle_share=0.332  capable_share=1.000  |tau_m|=63.05  |tau_res|=126.94  act>thr=0.49  |u_res|=1.269
+[Recruit t=16.097] muscle_share=0.348  capable_share=1.000  |tau_m|=55.45  |tau_res|=104.08  act>thr=0.49  |u_res|=1.041
+[Recruit t=16.147] muscle_share=0.295  capable_share=1.000  |tau_m|=38.55  |tau_res|=92.07  act>thr=0.49  |u_res|=0.921
+[Recruit t=16.197] muscle_share=0.209  capable_share=1.000  |tau_m|=29.69  |tau_res|=112.15  act>thr=0.46  |u_res|=1.121
+{"cell": "B", "step": 250, "reward": 0.23084424692557692}
+[Recruit t=16.247] muscle_share=0.148  capable_share=1.000  |tau_m|=35.67  |tau_res|=205.00  act>thr=0.41  |u_res|=2.050
+[Recruit t=16.297] muscle_share=0.157  capable_share=1.000  |tau_m|=40.26  |tau_res|=216.71  act>thr=0.49  |u_res|=2.167
+[Recruit t=16.347] muscle_share=0.384  capable_share=1.000  |tau_m|=53.19  |tau_res|=85.17  act>thr=0.45  |u_res|=0.852
+[Recruit t=16.397] muscle_share=0.422  capable_share=1.000  |tau_m|=85.49  |tau_res|=116.89  act>thr=0.45  |u_res|=1.169
+[Recruit t=16.447] muscle_share=0.251  capable_share=0.319  |tau_m|=61.51  |tau_res|=183.68  act>thr=1.00  |u_res|=1.837
+[Recruit t=16.497] muscle_share=0.386  capable_share=1.000  |tau_m|=102.99  |tau_res|=163.56  act>thr=0.50  |u_res|=1.636
+[Recruit t=16.547] muscle_share=0.468  capable_share=1.000  |tau_m|=108.33  |tau_res|=123.26  act>thr=0.50  |u_res|=1.233
+[Recruit t=16.597] muscle_share=0.174  capable_share=0.288  |tau_m|=68.13  |tau_res|=322.78  act>thr=1.00  |u_res|=3.228
+[Recruit t=16.647] muscle_share=0.091  capable_share=0.298  |tau_m|=53.42  |tau_res|=531.43  act>thr=1.00  |u_res|=5.314
+[Recruit t=16.697] muscle_share=0.204  capable_share=0.344  |tau_m|=65.19  |tau_res|=253.78  act>thr=1.00  |u_res|=2.538
+{"cell": "B", "step": 300, "reward": 0.2253386620739437}
+[Recruit t=16.747] muscle_share=0.238  capable_share=0.336  |tau_m|=53.59  |tau_res|=171.85  act>thr=1.00  |u_res|=1.718
+[Recruit t=16.797] muscle_share=0.473  capable_share=1.000  |tau_m|=100.38  |tau_res|=111.69  act>thr=0.45  |u_res|=1.117
+[Recruit t=16.847] muscle_share=0.455  capable_share=1.000  |tau_m|=99.90  |tau_res|=119.74  act>thr=0.49  |u_res|=1.197
+[Recruit t=16.897] muscle_share=0.475  capable_share=1.000  |tau_m|=102.41  |tau_res|=113.03  act>thr=0.39  |u_res|=1.130
+[Recruit t=16.947] muscle_share=0.466  capable_share=1.000  |tau_m|=99.68  |tau_res|=114.45  act>thr=0.49  |u_res|=1.144
+[Recruit t=16.997] muscle_share=0.470  capable_share=1.000  |tau_m|=96.34  |tau_res|=108.84  act>thr=0.46  |u_res|=1.088
+[Recruit t=17.047] muscle_share=0.653  capable_share=1.000  |tau_m|=99.63  |tau_res|=52.85  act>thr=0.41  |u_res|=0.528
+[Recruit t=17.097] muscle_share=0.653  capable_share=1.000  |tau_m|=109.07  |tau_res|=58.05  act>thr=0.41  |u_res|=0.580
+[Recruit t=17.147] muscle_share=0.379  capable_share=1.000  |tau_m|=113.60  |tau_res|=186.04  act>thr=0.39  |u_res|=1.860
+[Recruit t=17.197] muscle_share=0.303  capable_share=1.000  |tau_m|=140.99  |tau_res|=324.25  act>thr=0.45  |u_res|=3.243
+{"cell": "B", "step": 350, "reward": -0.008583680677695993}
+[Recruit t=17.247] muscle_share=0.298  capable_share=1.000  |tau_m|=139.97  |tau_res|=329.11  act>thr=0.53  |u_res|=3.291
+[Recruit t=17.297] muscle_share=0.393  capable_share=1.000  |tau_m|=101.99  |tau_res|=157.73  act>thr=0.47  |u_res|=1.577
+[Recruit t=17.347] muscle_share=0.304  capable_share=1.000  |tau_m|=71.23  |tau_res|=162.95  act>thr=0.45  |u_res|=1.630
+[Recruit t=17.397] muscle_share=0.169  capable_share=1.000  |tau_m|=64.11  |tau_res|=315.01  act>thr=0.49  |u_res|=3.150
+[Recruit t=17.447] muscle_share=0.174  capable_share=1.000  |tau_m|=61.96  |tau_res|=294.50  act>thr=0.51  |u_res|=2.945
+[Recruit t=17.497] muscle_share=0.153  capable_share=1.000  |tau_m|=66.23  |tau_res|=366.05  act>thr=0.47  |u_res|=3.661
+[Recruit t=17.547] muscle_share=0.106  capable_share=1.000  |tau_m|=53.24  |tau_res|=449.76  act>thr=0.45  |u_res|=4.498
+[Recruit t=17.597] muscle_share=0.148  capable_share=1.000  |tau_m|=62.39  |tau_res|=360.10  act>thr=0.47  |u_res|=3.601
+[Recruit t=17.647] muscle_share=0.210  capable_share=1.000  |tau_m|=62.36  |tau_res|=233.91  act>thr=0.49  |u_res|=2.339
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs/j1_teacher_episode_gait_events_online.csv (11 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_sim_outputs
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.2380 rad
+[Runner] SEA_Ankle motor_angle = 0.0425 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.2380 rad
+[Runner] SEA_Ankle motor_angle = 0.0425 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Recruit t=14.147] muscle_share=0.202  capable_share=1.000  |tau_m|=72.81  |tau_res|=288.27  act>thr=0.47  |u_res|=2.883
+{"cell": "C", "step": 1, "reward": 0.09632491845903315}
+[Recruit t=14.197] muscle_share=0.179  capable_share=1.000  |tau_m|=80.43  |tau_res|=369.44  act>thr=0.45  |u_res|=3.694
+[Recruit t=14.247] muscle_share=0.318  capable_share=1.000  |tau_m|=115.86  |tau_res|=248.62  act>thr=0.50  |u_res|=2.486
+[Recruit t=14.297] muscle_share=0.220  capable_share=1.000  |tau_m|=49.30  |tau_res|=175.03  act>thr=0.47  |u_res|=1.750
+[Recruit t=14.347] muscle_share=0.134  capable_share=1.000  |tau_m|=49.50  |tau_res|=319.44  act>thr=0.46  |u_res|=3.194
+[Recruit t=14.397] muscle_share=0.111  capable_share=1.000  |tau_m|=42.05  |tau_res|=337.56  act>thr=0.51  |u_res|=3.376
+[Recruit t=14.447] muscle_share=0.114  capable_share=1.000  |tau_m|=45.83  |tau_res|=354.55  act>thr=0.49  |u_res|=3.546
+[Recruit t=14.497] muscle_share=0.116  capable_share=1.000  |tau_m|=67.46  |tau_res|=513.26  act>thr=0.45  |u_res|=5.133
+[Recruit t=14.547] muscle_share=0.142  capable_share=1.000  |tau_m|=79.08  |tau_res|=479.03  act>thr=0.47  |u_res|=4.790
+[Recruit t=14.597] muscle_share=0.301  capable_share=1.000  |tau_m|=65.91  |tau_res|=153.30  act>thr=0.45  |u_res|=1.533
+{"cell": "C", "step": 50, "reward": -0.022614347038978355}
+[Recruit t=14.647] muscle_share=0.134  capable_share=1.000  |tau_m|=56.89  |tau_res|=367.93  act>thr=0.45  |u_res|=3.679
+[Recruit t=14.697] muscle_share=0.070  capable_share=1.000  |tau_m|=69.90  |tau_res|=931.60  act>thr=0.49  |u_res|=9.316
+[Recruit t=14.747] muscle_share=0.102  capable_share=1.000  |tau_m|=119.65  |tau_res|=1053.14  act>thr=0.46  |u_res|=10.531
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs/j1_teacher_episode_gait_events_online.csv (2 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_sim_outputs
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Recruit t=13.947] muscle_share=0.632  capable_share=1.000  |tau_m|=142.62  |tau_res|=83.09  act>thr=0.47  |u_res|=0.831
+{"cell": "D", "step": 1, "reward": 0.0}
+[Recruit t=13.997] muscle_share=0.452  capable_share=1.000  |tau_m|=134.62  |tau_res|=163.20  act>thr=0.39  |u_res|=1.632
+[Recruit t=14.047] muscle_share=0.317  capable_share=1.000  |tau_m|=114.22  |tau_res|=246.05  act>thr=0.41  |u_res|=2.460
+[Recruit t=14.097] muscle_share=0.223  capable_share=1.000  |tau_m|=88.74  |tau_res|=309.59  act>thr=0.45  |u_res|=3.096
+[Recruit t=14.147] muscle_share=0.254  capable_share=1.000  |tau_m|=86.14  |tau_res|=253.59  act>thr=0.51  |u_res|=2.536
+[Recruit t=14.197] muscle_share=0.419  capable_share=1.000  |tau_m|=127.32  |tau_res|=176.49  act>thr=0.43  |u_res|=1.765
+[Recruit t=14.247] muscle_share=0.317  capable_share=1.000  |tau_m|=86.37  |tau_res|=186.46  act>thr=0.49  |u_res|=1.865
+[Recruit t=14.297] muscle_share=0.127  capable_share=1.000  |tau_m|=40.78  |tau_res|=279.83  act>thr=0.45  |u_res|=2.798
+[Recruit t=14.347] muscle_share=0.120  capable_share=1.000  |tau_m|=45.42  |tau_res|=334.62  act>thr=0.43  |u_res|=3.346
+[Recruit t=14.397] muscle_share=0.119  capable_share=1.000  |tau_m|=36.12  |tau_res|=267.56  act>thr=0.45  |u_res|=2.676
+{"cell": "D", "step": 50, "reward": 0.0}
+[Recruit t=14.447] muscle_share=0.321  capable_share=1.000  |tau_m|=63.77  |tau_res|=134.64  act>thr=0.49  |u_res|=1.346
+[Recruit t=14.497] muscle_share=0.281  capable_share=1.000  |tau_m|=50.35  |tau_res|=128.78  act>thr=0.46  |u_res|=1.288
+[Recruit t=14.547] muscle_share=0.175  capable_share=1.000  |tau_m|=49.47  |tau_res|=233.13  act>thr=0.45  |u_res|=2.331
+[Recruit t=14.597] muscle_share=0.181  capable_share=1.000  |tau_m|=72.67  |tau_res|=328.69  act>thr=0.46  |u_res|=3.287
+[Recruit t=14.647] muscle_share=0.426  capable_share=1.000  |tau_m|=64.59  |tau_res|=86.86  act>thr=0.45  |u_res|=0.869
+[Recruit t=14.697] muscle_share=0.082  capable_share=1.000  |tau_m|=60.02  |tau_res|=673.74  act>thr=0.46  |u_res|=6.737
+[Recruit t=14.747] muscle_share=0.080  capable_share=1.000  |tau_m|=45.54  |tau_res|=520.66  act>thr=0.46  |u_res|=5.207
+[Recruit t=14.797] muscle_share=0.407  capable_share=1.000  |tau_m|=63.98  |tau_res|=93.28  act>thr=0.46  |u_res|=0.933
+[Recruit t=14.847] muscle_share=0.320  capable_share=1.000  |tau_m|=82.45  |tau_res|=175.56  act>thr=0.50  |u_res|=1.756
+[Recruit t=14.897] muscle_share=0.272  capable_share=1.000  |tau_m|=70.61  |tau_res|=189.28  act>thr=0.41  |u_res|=1.893
+{"cell": "D", "step": 100, "reward": 0.0}
+[Recruit t=14.947] muscle_share=0.353  capable_share=1.000  |tau_m|=80.33  |tau_res|=147.36  act>thr=0.47  |u_res|=1.474
+[Recruit t=14.997] muscle_share=0.331  capable_share=1.000  |tau_m|=88.58  |tau_res|=178.93  act>thr=0.49  |u_res|=1.789
+[Recruit t=15.047] muscle_share=0.370  capable_share=1.000  |tau_m|=91.89  |tau_res|=156.68  act>thr=0.43  |u_res|=1.567
+[Recruit t=15.097] muscle_share=0.438  capable_share=1.000  |tau_m|=96.23  |tau_res|=123.45  act>thr=0.43  |u_res|=1.234
+[Recruit t=15.147] muscle_share=0.474  capable_share=1.000  |tau_m|=101.11  |tau_res|=112.37  act>thr=0.47  |u_res|=1.124
+[Recruit t=15.197] muscle_share=0.501  capable_share=1.000  |tau_m|=98.27  |tau_res|=97.70  act>thr=0.49  |u_res|=0.977
+[Recruit t=15.247] muscle_share=0.480  capable_share=1.000  |tau_m|=95.91  |tau_res|=103.70  act>thr=0.46  |u_res|=1.037
+[Recruit t=15.297] muscle_share=0.485  capable_share=1.000  |tau_m|=101.41  |tau_res|=107.77  act>thr=0.46  |u_res|=1.078
+[Recruit t=15.347] muscle_share=0.475  capable_share=1.000  |tau_m|=111.06  |tau_res|=122.77  act>thr=0.47  |u_res|=1.228
+[Recruit t=15.397] muscle_share=0.518  capable_share=1.000  |tau_m|=105.41  |tau_res|=97.92  act>thr=0.46  |u_res|=0.979
+{"cell": "D", "step": 150, "reward": -9.321401485771604e-14}
+[Recruit t=15.447] muscle_share=0.542  capable_share=1.000  |tau_m|=106.06  |tau_res|=89.74  act>thr=0.43  |u_res|=0.897
+[Recruit t=15.497] muscle_share=0.641  capable_share=1.000  |tau_m|=109.62  |tau_res|=61.27  act>thr=0.37  |u_res|=0.613
+[Recruit t=15.547] muscle_share=0.575  capable_share=1.000  |tau_m|=121.48  |tau_res|=89.77  act>thr=0.45  |u_res|=0.898
+[Recruit t=15.597] muscle_share=0.566  capable_share=1.000  |tau_m|=123.21  |tau_res|=94.49  act>thr=0.38  |u_res|=0.945
+[Recruit t=15.647] muscle_share=0.450  capable_share=0.524  |tau_m|=110.83  |tau_res|=135.60  act>thr=1.00  |u_res|=1.356
+[Recruit t=15.697] muscle_share=0.437  capable_share=0.495  |tau_m|=91.78  |tau_res|=118.37  act>thr=1.00  |u_res|=1.184
+[Recruit t=15.747] muscle_share=0.294  capable_share=0.420  |tau_m|=76.79  |tau_res|=184.48  act>thr=1.00  |u_res|=1.845
+[Recruit t=15.797] muscle_share=0.365  capable_share=1.000  |tau_m|=93.55  |tau_res|=162.43  act>thr=0.45  |u_res|=1.624
+[Recruit t=15.847] muscle_share=0.319  capable_share=1.000  |tau_m|=78.32  |tau_res|=167.27  act>thr=0.49  |u_res|=1.673
+[Recruit t=15.897] muscle_share=0.229  capable_share=1.000  |tau_m|=73.61  |tau_res|=248.52  act>thr=0.46  |u_res|=2.485
+{"cell": "D", "step": 200, "reward": 0.0}
+[Recruit t=15.947] muscle_share=0.178  capable_share=1.000  |tau_m|=70.56  |tau_res|=326.61  act>thr=0.42  |u_res|=3.266
+[Recruit t=15.997] muscle_share=0.198  capable_share=1.000  |tau_m|=61.96  |tau_res|=251.53  act>thr=0.46  |u_res|=2.515
+[Recruit t=16.047] muscle_share=0.241  capable_share=1.000  |tau_m|=63.18  |tau_res|=199.44  act>thr=0.47  |u_res|=1.994
+[Recruit t=16.097] muscle_share=0.173  capable_share=1.000  |tau_m|=38.23  |tau_res|=183.27  act>thr=0.49  |u_res|=1.833
+[Recruit t=16.147] muscle_share=0.180  capable_share=1.000  |tau_m|=33.06  |tau_res|=151.08  act>thr=0.47  |u_res|=1.511
+[Recruit t=16.197] muscle_share=0.272  capable_share=1.000  |tau_m|=29.39  |tau_res|=78.59  act>thr=0.41  |u_res|=0.786
+[Recruit t=16.247] muscle_share=0.169  capable_share=1.000  |tau_m|=34.50  |tau_res|=169.57  act>thr=0.43  |u_res|=1.696
+[Recruit t=16.297] muscle_share=0.103  capable_share=1.000  |tau_m|=45.34  |tau_res|=393.69  act>thr=0.49  |u_res|=3.937
+[Recruit t=16.347] muscle_share=0.166  capable_share=1.000  |tau_m|=58.43  |tau_res|=293.27  act>thr=0.42  |u_res|=2.933
+[Recruit t=16.397] muscle_share=0.424  capable_share=1.000  |tau_m|=87.56  |tau_res|=118.80  act>thr=0.46  |u_res|=1.188
+{"cell": "D", "step": 250, "reward": 0.0}
+[Recruit t=16.447] muscle_share=0.224  capable_share=0.328  |tau_m|=59.62  |tau_res|=206.69  act>thr=1.00  |u_res|=2.067
+[Recruit t=16.497] muscle_share=0.266  capable_share=1.000  |tau_m|=86.94  |tau_res|=239.98  act>thr=0.50  |u_res|=2.400
+[Recruit t=16.547] muscle_share=0.183  capable_share=1.000  |tau_m|=75.11  |tau_res|=334.58  act>thr=0.46  |u_res|=3.346
+[Recruit t=16.597] muscle_share=0.190  capable_share=0.324  |tau_m|=51.11  |tau_res|=217.63  act>thr=1.00  |u_res|=2.176
+[Recruit t=16.647] muscle_share=0.244  capable_share=0.309  |tau_m|=51.23  |tau_res|=159.03  act>thr=1.00  |u_res|=1.590
+[Recruit t=16.697] muscle_share=0.221  capable_share=0.306  |tau_m|=54.07  |tau_res|=190.97  act>thr=1.00  |u_res|=1.910
+[Recruit t=16.747] muscle_share=0.230  capable_share=0.311  |tau_m|=50.96  |tau_res|=170.59  act>thr=1.00  |u_res|=1.706
+[Recruit t=16.797] muscle_share=0.542  capable_share=1.000  |tau_m|=101.20  |tau_res|=85.38  act>thr=0.46  |u_res|=0.854
+[Recruit t=16.847] muscle_share=0.521  capable_share=1.000  |tau_m|=98.84  |tau_res|=90.95  act>thr=0.49  |u_res|=0.909
+[Recruit t=16.897] muscle_share=0.465  capable_share=1.000  |tau_m|=102.39  |tau_res|=117.76  act>thr=0.43  |u_res|=1.178
+{"cell": "D", "step": 300, "reward": -8.115616973712228e-14}
+[Recruit t=16.947] muscle_share=0.457  capable_share=1.000  |tau_m|=98.86  |tau_res|=117.36  act>thr=0.47  |u_res|=1.174
+[Recruit t=16.997] muscle_share=0.465  capable_share=1.000  |tau_m|=95.89  |tau_res|=110.46  act>thr=0.45  |u_res|=1.105
+[Recruit t=17.047] muscle_share=0.643  capable_share=1.000  |tau_m|=97.21  |tau_res|=54.03  act>thr=0.41  |u_res|=0.540
+[Recruit t=17.097] muscle_share=0.617  capable_share=1.000  |tau_m|=106.06  |tau_res|=65.74  act>thr=0.41  |u_res|=0.657
+[Recruit t=17.147] muscle_share=0.540  capable_share=1.000  |tau_m|=115.30  |tau_res|=98.42  act>thr=0.42  |u_res|=0.984
+[Recruit t=17.197] muscle_share=0.385  capable_share=1.000  |tau_m|=122.40  |tau_res|=195.16  act>thr=0.41  |u_res|=1.952
+[Recruit t=17.247] muscle_share=0.545  capable_share=1.000  |tau_m|=111.61  |tau_res|=93.09  act>thr=0.49  |u_res|=0.931
+[Recruit t=17.297] muscle_share=0.351  capable_share=1.000  |tau_m|=121.55  |tau_res|=224.64  act>thr=0.47  |u_res|=2.246
+[Recruit t=17.347] muscle_share=0.304  capable_share=1.000  |tau_m|=94.44  |tau_res|=216.46  act>thr=0.50  |u_res|=2.165
+[Recruit t=17.397] muscle_share=0.437  capable_share=1.000  |tau_m|=60.05  |tau_res|=77.40  act>thr=0.47  |u_res|=0.774
+{"cell": "D", "step": 350, "reward": 0.2108408367446003}
+[Recruit t=17.447] muscle_share=0.163  capable_share=1.000  |tau_m|=50.67  |tau_res|=260.22  act>thr=0.47  |u_res|=2.602
+[Recruit t=17.497] muscle_share=0.177  capable_share=1.000  |tau_m|=85.19  |tau_res|=397.35  act>thr=0.43  |u_res|=3.973
+[Recruit t=17.547] muscle_share=0.240  capable_share=1.000  |tau_m|=90.70  |tau_res|=287.74  act>thr=0.43  |u_res|=2.877
+[Recruit t=17.597] muscle_share=0.273  capable_share=1.000  |tau_m|=65.11  |tau_res|=173.53  act>thr=0.46  |u_res|=1.735
+[Recruit t=17.647] muscle_share=0.355  capable_share=1.000  |tau_m|=51.35  |tau_res|=93.34  act>thr=0.49  |u_res|=0.933
+[Recruit t=17.697] muscle_share=0.114  capable_share=0.211  |tau_m|=62.99  |tau_res|=487.55  act>thr=1.00  |u_res|=4.875
+[Recruit t=17.747] muscle_share=0.279  capable_share=1.000  |tau_m|=91.44  |tau_res|=235.83  act>thr=0.42  |u_res|=2.358
+[Recruit t=17.797] muscle_share=0.268  capable_share=1.000  |tau_m|=71.26  |tau_res|=194.22  act>thr=0.37  |u_res|=1.942
+[Recruit t=17.847] muscle_share=0.319  capable_share=1.000  |tau_m|=45.53  |tau_res|=97.36  act>thr=0.42  |u_res|=0.974
+[Recruit t=17.897] muscle_share=0.243  capable_share=1.000  |tau_m|=57.88  |tau_res|=179.93  act>thr=0.45  |u_res|=1.799
+{"cell": "D", "step": 400, "reward": 0.2208228150153285}
+[Recruit t=17.947] muscle_share=0.302  capable_share=1.000  |tau_m|=73.72  |tau_res|=170.29  act>thr=0.45  |u_res|=1.703
+[Recruit t=17.997] muscle_share=0.422  capable_share=1.000  |tau_m|=93.95  |tau_res|=128.93  act>thr=0.50  |u_res|=1.289
+[Recruit t=18.047] muscle_share=0.468  capable_share=1.000  |tau_m|=117.42  |tau_res|=133.43  act>thr=0.49  |u_res|=1.334
+[Recruit t=18.097] muscle_share=0.533  capable_share=1.000  |tau_m|=106.08  |tau_res|=92.97  act>thr=0.47  |u_res|=0.930
+[Recruit t=18.147] muscle_share=0.263  capable_share=0.317  |tau_m|=57.16  |tau_res|=160.53  act>thr=1.00  |u_res|=1.605
+[Recruit t=18.197] muscle_share=0.287  capable_share=0.348  |tau_m|=56.44  |tau_res|=140.02  act>thr=1.00  |u_res|=1.400
+[Recruit t=18.247] muscle_share=0.231  capable_share=0.354  |tau_m|=58.91  |tau_res|=196.09  act>thr=1.00  |u_res|=1.961
+[Recruit t=18.297] muscle_share=0.425  capable_share=1.000  |tau_m|=107.10  |tau_res|=145.17  act>thr=0.45  |u_res|=1.452
+[Recruit t=18.347] muscle_share=0.552  capable_share=1.000  |tau_m|=97.20  |tau_res|=78.79  act>thr=0.51  |u_res|=0.788
+[Recruit t=18.397] muscle_share=0.554  capable_share=1.000  |tau_m|=106.50  |tau_res|=85.61  act>thr=0.53  |u_res|=0.856
+{"cell": "D", "step": 450, "reward": 0.18169904152912814}
+[Recruit t=18.447] muscle_share=0.539  capable_share=1.000  |tau_m|=109.70  |tau_res|=94.01  act>thr=0.50  |u_res|=0.940
+[Recruit t=18.497] muscle_share=0.510  capable_share=1.000  |tau_m|=110.94  |tau_res|=106.41  act>thr=0.46  |u_res|=1.064
+[Recruit t=18.547] muscle_share=0.504  capable_share=1.000  |tau_m|=115.68  |tau_res|=114.00  act>thr=0.49  |u_res|=1.140
+[Recruit t=18.597] muscle_share=0.637  capable_share=1.000  |tau_m|=121.28  |tau_res|=69.08  act>thr=0.47  |u_res|=0.691
+[Recruit t=18.647] muscle_share=0.746  capable_share=1.000  |tau_m|=128.28  |tau_res|=43.77  act>thr=0.46  |u_res|=0.438
+[Recruit t=18.697] muscle_share=0.736  capable_share=1.000  |tau_m|=133.02  |tau_res|=47.65  act>thr=0.43  |u_res|=0.476
+[Recruit t=18.747] muscle_share=0.504  capable_share=1.000  |tau_m|=138.12  |tau_res|=135.91  act>thr=0.39  |u_res|=1.359
+[Recruit t=18.797] muscle_share=0.283  capable_share=0.497  |tau_m|=89.30  |tau_res|=226.62  act>thr=1.00  |u_res|=2.266
+[Recruit t=18.847] muscle_share=0.199  capable_share=0.458  |tau_m|=75.84  |tau_res|=305.53  act>thr=1.00  |u_res|=3.055
+[Recruit t=18.897] muscle_share=0.140  capable_share=1.000  |tau_m|=64.55  |tau_res|=396.65  act>thr=0.46  |u_res|=3.967
+{"cell": "D", "step": 500, "reward": 0.23406574437866778}
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs/j1_teacher_episode_gait_events_online.csv (16 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_sim_outputs
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Recruit t=13.947] muscle_share=0.632  capable_share=1.000  |tau_m|=142.62  |tau_res|=83.09  act>thr=0.47  |u_res|=0.831
+{"cell": "E", "step": 1, "reward": 0.0}
+[Recruit t=13.997] muscle_share=0.452  capable_share=1.000  |tau_m|=134.62  |tau_res|=163.24  act>thr=0.39  |u_res|=1.632
+[Recruit t=14.047] muscle_share=0.317  capable_share=1.000  |tau_m|=114.24  |tau_res|=245.86  act>thr=0.41  |u_res|=2.459
+[Recruit t=14.097] muscle_share=0.218  capable_share=1.000  |tau_m|=88.94  |tau_res|=318.18  act>thr=0.46  |u_res|=3.182
+[Recruit t=14.147] muscle_share=0.287  capable_share=1.000  |tau_m|=91.88  |tau_res|=228.81  act>thr=0.51  |u_res|=2.288
+[Recruit t=14.197] muscle_share=0.438  capable_share=1.000  |tau_m|=121.28  |tau_res|=155.42  act>thr=0.43  |u_res|=1.554
+[Recruit t=14.247] muscle_share=0.264  capable_share=1.000  |tau_m|=68.67  |tau_res|=191.08  act>thr=0.50  |u_res|=1.911
+[Recruit t=14.297] muscle_share=0.117  capable_share=1.000  |tau_m|=41.12  |tau_res|=309.90  act>thr=0.45  |u_res|=3.099
+[Recruit t=14.347] muscle_share=0.111  capable_share=1.000  |tau_m|=39.98  |tau_res|=319.24  act>thr=0.45  |u_res|=3.192
+[Recruit t=14.397] muscle_share=0.146  capable_share=1.000  |tau_m|=44.19  |tau_res|=259.46  act>thr=0.47  |u_res|=2.595
+{"cell": "E", "step": 50, "reward": 0.0}
+[Recruit t=14.447] muscle_share=0.275  capable_share=1.000  |tau_m|=68.81  |tau_res|=181.72  act>thr=0.49  |u_res|=1.817
+[Recruit t=14.497] muscle_share=0.146  capable_share=1.000  |tau_m|=28.54  |tau_res|=166.85  act>thr=0.46  |u_res|=1.668
+[Recruit t=14.547] muscle_share=0.170  capable_share=1.000  |tau_m|=71.00  |tau_res|=347.27  act>thr=0.46  |u_res|=3.473
+[Recruit t=14.597] muscle_share=0.206  capable_share=1.000  |tau_m|=67.40  |tau_res|=259.39  act>thr=0.46  |u_res|=2.594
+[Recruit t=14.647] muscle_share=0.121  capable_share=1.000  |tau_m|=61.53  |tau_res|=447.76  act>thr=0.45  |u_res|=4.478
+[Recruit t=14.697] muscle_share=0.067  capable_share=1.000  |tau_m|=53.62  |tau_res|=746.35  act>thr=0.51  |u_res|=7.464
+[Recruit t=14.747] muscle_share=0.129  capable_share=1.000  |tau_m|=47.24  |tau_res|=320.13  act>thr=0.42  |u_res|=3.201
+[Recruit t=14.797] muscle_share=0.449  capable_share=1.000  |tau_m|=80.16  |tau_res|=98.57  act>thr=0.47  |u_res|=0.986
+[Recruit t=14.847] muscle_share=0.407  capable_share=1.000  |tau_m|=77.72  |tau_res|=113.41  act>thr=0.51  |u_res|=1.134
+[Recruit t=14.897] muscle_share=0.477  capable_share=1.000  |tau_m|=65.95  |tau_res|=72.32  act>thr=0.42  |u_res|=0.723
+{"cell": "E", "step": 100, "reward": 0.0}
+[Recruit t=14.947] muscle_share=0.435  capable_share=1.000  |tau_m|=84.37  |tau_res|=109.62  act>thr=0.47  |u_res|=1.096
+[Recruit t=14.997] muscle_share=0.314  capable_share=1.000  |tau_m|=89.94  |tau_res|=196.48  act>thr=0.49  |u_res|=1.965
+[Recruit t=15.047] muscle_share=0.373  capable_share=1.000  |tau_m|=92.10  |tau_res|=154.56  act>thr=0.43  |u_res|=1.546
+[Recruit t=15.097] muscle_share=0.427  capable_share=1.000  |tau_m|=95.92  |tau_res|=128.75  act>thr=0.43  |u_res|=1.288
+[Recruit t=15.147] muscle_share=0.466  capable_share=1.000  |tau_m|=99.91  |tau_res|=114.53  act>thr=0.47  |u_res|=1.145
+[Recruit t=15.197] muscle_share=0.508  capable_share=1.000  |tau_m|=98.62  |tau_res|=95.64  act>thr=0.49  |u_res|=0.956
+[Recruit t=15.247] muscle_share=0.497  capable_share=1.000  |tau_m|=95.44  |tau_res|=96.54  act>thr=0.45  |u_res|=0.965
+[Recruit t=15.297] muscle_share=0.480  capable_share=1.000  |tau_m|=101.41  |tau_res|=109.96  act>thr=0.42  |u_res|=1.100
+[Recruit t=15.347] muscle_share=0.475  capable_share=1.000  |tau_m|=110.92  |tau_res|=122.81  act>thr=0.47  |u_res|=1.228
+[Recruit t=15.397] muscle_share=0.518  capable_share=1.000  |tau_m|=105.74  |tau_res|=98.28  act>thr=0.46  |u_res|=0.983
+{"cell": "E", "step": 150, "reward": -1.2137239125943027e-13}
+[Recruit t=15.447] muscle_share=0.541  capable_share=1.000  |tau_m|=106.18  |tau_res|=90.03  act>thr=0.43  |u_res|=0.900
+[Recruit t=15.497] muscle_share=0.565  capable_share=1.000  |tau_m|=110.52  |tau_res|=85.26  act>thr=0.38  |u_res|=0.853
+[Recruit t=15.547] muscle_share=0.598  capable_share=1.000  |tau_m|=120.33  |tau_res|=80.91  act>thr=0.42  |u_res|=0.809
+[Recruit t=15.597] muscle_share=0.667  capable_share=1.000  |tau_m|=123.57  |tau_res|=61.72  act>thr=0.42  |u_res|=0.617
+[Recruit t=15.647] muscle_share=0.317  capable_share=0.535  |tau_m|=112.19  |tau_res|=241.37  act>thr=1.00  |u_res|=2.414
+[Recruit t=15.697] muscle_share=0.354  capable_share=0.484  |tau_m|=91.54  |tau_res|=166.89  act>thr=1.00  |u_res|=1.669
+[Recruit t=15.747] muscle_share=0.305  capable_share=0.420  |tau_m|=77.35  |tau_res|=176.33  act>thr=1.00  |u_res|=1.763
+[Recruit t=15.797] muscle_share=0.447  capable_share=1.000  |tau_m|=78.83  |tau_res|=97.65  act>thr=0.47  |u_res|=0.977
+[Recruit t=15.847] muscle_share=0.194  capable_share=1.000  |tau_m|=49.36  |tau_res|=205.00  act>thr=0.49  |u_res|=2.050
+[Recruit t=15.897] muscle_share=0.118  capable_share=1.000  |tau_m|=55.69  |tau_res|=415.25  act>thr=0.47  |u_res|=4.152
+{"cell": "E", "step": 200, "reward": -0.337668658822538}
+[Recruit t=15.947] muscle_share=0.145  capable_share=1.000  |tau_m|=71.46  |tau_res|=419.86  act>thr=0.46  |u_res|=4.199
+[Recruit t=15.997] muscle_share=0.182  capable_share=1.000  |tau_m|=54.02  |tau_res|=243.02  act>thr=0.46  |u_res|=2.430
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs/j1_teacher_episode_gait_events_online.csv (7 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_sim_outputs
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Recruit t=13.947] muscle_share=0.632  capable_share=1.000  |tau_m|=142.62  |tau_res|=83.09  act>thr=0.47  |u_res|=0.831
+{"cell": "F", "step": 1, "reward": 0.0}
+[Recruit t=13.997] muscle_share=0.452  capable_share=1.000  |tau_m|=134.49  |tau_res|=163.22  act>thr=0.39  |u_res|=1.632
+[Recruit t=14.047] muscle_share=0.317  capable_share=1.000  |tau_m|=114.22  |tau_res|=245.99  act>thr=0.41  |u_res|=2.460
+[Recruit t=14.097] muscle_share=0.238  capable_share=1.000  |tau_m|=89.90  |tau_res|=287.87  act>thr=0.46  |u_res|=2.879
+[Recruit t=14.147] muscle_share=0.328  capable_share=1.000  |tau_m|=96.24  |tau_res|=197.31  act>thr=0.53  |u_res|=1.973
+[Recruit t=14.197] muscle_share=0.437  capable_share=1.000  |tau_m|=112.06  |tau_res|=144.60  act>thr=0.45  |u_res|=1.446
+[Recruit t=14.247] muscle_share=0.244  capable_share=1.000  |tau_m|=65.05  |tau_res|=201.42  act>thr=0.47  |u_res|=2.014
+[Recruit t=14.297] muscle_share=0.119  capable_share=1.000  |tau_m|=39.36  |tau_res|=290.05  act>thr=0.45  |u_res|=2.901
+[Recruit t=14.347] muscle_share=0.113  capable_share=1.000  |tau_m|=38.50  |tau_res|=303.21  act>thr=0.45  |u_res|=3.032
+[Recruit t=14.397] muscle_share=0.171  capable_share=1.000  |tau_m|=51.74  |tau_res|=250.19  act>thr=0.49  |u_res|=2.502
+{"cell": "F", "step": 50, "reward": 0.0}
+[Recruit t=14.447] muscle_share=0.265  capable_share=1.000  |tau_m|=71.92  |tau_res|=199.45  act>thr=0.49  |u_res|=1.994
+[Recruit t=14.497] muscle_share=0.144  capable_share=1.000  |tau_m|=35.02  |tau_res|=207.71  act>thr=0.46  |u_res|=2.077
+[Recruit t=14.547] muscle_share=0.161  capable_share=1.000  |tau_m|=81.95  |tau_res|=426.69  act>thr=0.45  |u_res|=4.267
+[Recruit t=14.597] muscle_share=0.214  capable_share=1.000  |tau_m|=66.83  |tau_res|=245.84  act>thr=0.45  |u_res|=2.458
+[Recruit t=14.647] muscle_share=0.094  capable_share=1.000  |tau_m|=55.84  |tau_res|=535.69  act>thr=0.43  |u_res|=5.357
+[Recruit t=14.697] muscle_share=0.057  capable_share=1.000  |tau_m|=47.34  |tau_res|=776.21  act>thr=0.50  |u_res|=7.762
+[Recruit t=14.747] muscle_share=0.105  capable_share=1.000  |tau_m|=36.22  |tau_res|=309.43  act>thr=0.41  |u_res|=3.094
+[Recruit t=14.797] muscle_share=0.459  capable_share=1.000  |tau_m|=76.46  |tau_res|=90.06  act>thr=0.47  |u_res|=0.901
+[Recruit t=14.847] muscle_share=0.507  capable_share=1.000  |tau_m|=87.39  |tau_res|=84.94  act>thr=0.50  |u_res|=0.849
+[Recruit t=14.897] muscle_share=0.571  capable_share=1.000  |tau_m|=77.80  |tau_res|=58.39  act>thr=0.41  |u_res|=0.584
+{"cell": "F", "step": 100, "reward": 0.0}
+[Recruit t=14.947] muscle_share=0.493  capable_share=1.000  |tau_m|=90.20  |tau_res|=92.88  act>thr=0.47  |u_res|=0.929
+[Recruit t=14.997] muscle_share=0.430  capable_share=1.000  |tau_m|=95.47  |tau_res|=126.68  act>thr=0.49  |u_res|=1.267
+[Recruit t=15.047] muscle_share=0.370  capable_share=1.000  |tau_m|=91.87  |tau_res|=156.53  act>thr=0.45  |u_res|=1.565
+[Recruit t=15.097] muscle_share=0.419  capable_share=1.000  |tau_m|=95.97  |tau_res|=133.31  act>thr=0.38  |u_res|=1.333
+[Recruit t=15.147] muscle_share=0.450  capable_share=1.000  |tau_m|=98.95  |tau_res|=120.93  act>thr=0.45  |u_res|=1.209
+[Recruit t=15.197] muscle_share=0.516  capable_share=1.000  |tau_m|=100.00  |tau_res|=93.91  act>thr=0.49  |u_res|=0.939
+[Recruit t=15.247] muscle_share=0.508  capable_share=1.000  |tau_m|=95.36  |tau_res|=92.22  act>thr=0.49  |u_res|=0.922
+[Recruit t=15.297] muscle_share=0.455  capable_share=1.000  |tau_m|=102.43  |tau_res|=122.48  act>thr=0.47  |u_res|=1.225
+[Recruit t=15.347] muscle_share=0.475  capable_share=1.000  |tau_m|=110.54  |tau_res|=122.33  act>thr=0.47  |u_res|=1.223
+[Recruit t=15.397] muscle_share=0.518  capable_share=1.000  |tau_m|=106.00  |tau_res|=98.50  act>thr=0.46  |u_res|=0.985
+{"cell": "F", "step": 150, "reward": -1.5424700506776353e-13}
+[Recruit t=15.447] muscle_share=0.547  capable_share=1.000  |tau_m|=106.94  |tau_res|=88.55  act>thr=0.45  |u_res|=0.885
+[Recruit t=15.497] muscle_share=0.673  capable_share=1.000  |tau_m|=110.92  |tau_res|=53.80  act>thr=0.37  |u_res|=0.538
+[Recruit t=15.547] muscle_share=0.581  capable_share=1.000  |tau_m|=121.69  |tau_res|=87.85  act>thr=0.45  |u_res|=0.878
+[Recruit t=15.597] muscle_share=0.579  capable_share=1.000  |tau_m|=124.55  |tau_res|=90.53  act>thr=0.41  |u_res|=0.905
+[Recruit t=15.647] muscle_share=0.297  capable_share=0.524  |tau_m|=110.50  |tau_res|=261.07  act>thr=1.00  |u_res|=2.611
+[Recruit t=15.697] muscle_share=0.326  capable_share=0.488  |tau_m|=91.48  |tau_res|=188.92  act>thr=1.00  |u_res|=1.889
+[Recruit t=15.747] muscle_share=0.303  capable_share=0.411  |tau_m|=77.06  |tau_res|=177.52  act>thr=1.00  |u_res|=1.775
+[Recruit t=15.797] muscle_share=0.440  capable_share=1.000  |tau_m|=86.11  |tau_res|=109.45  act>thr=0.46  |u_res|=1.094
+[Recruit t=15.847] muscle_share=0.267  capable_share=1.000  |tau_m|=53.63  |tau_res|=147.05  act>thr=0.50  |u_res|=1.471
+[Recruit t=15.897] muscle_share=0.124  capable_share=1.000  |tau_m|=54.19  |tau_res|=382.50  act>thr=0.45  |u_res|=3.825
+{"cell": "F", "step": 200, "reward": -0.350674138083807}
+[Recruit t=15.947] muscle_share=0.132  capable_share=1.000  |tau_m|=69.40  |tau_res|=455.66  act>thr=0.45  |u_res|=4.557
+[Recruit t=15.997] muscle_share=0.157  capable_share=1.000  |tau_m|=57.55  |tau_res|=308.03  act>thr=0.47  |u_res|=3.080
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs/j1_teacher_episode_gait_events_online.csv (7 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/.staging_j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_sim_outputs
+{
+  "verdict": "FAIL",
+  "stage": "V26C_J16_J15R1_CLOSED_LOOP_REQUALIFICATION",
+  "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/j16_closed_loop_v26c_2026-08-27_r1",
+  "aggregate_pass": false,
+  "cells": [
+    {
+      "id": "A",
+      "mode": "deterministic",
+      "seed": 123,
+      "offset_s": 1.956870983805102,
+      "verdict": "FAIL",
+      "failed": [
+        "end_reason",
+        "penetration_hard_binding",
+        "steps",
+        "valid_cycles"
+      ],
+      "max_penetration_m": 0.028012525687130103,
+      "band": "above_hard"
+    },
+    {
+      "id": "B",
+      "mode": "deterministic",
+      "seed": 123,
+      "offset_s": 1.756870983805102,
+      "verdict": "FAIL",
+      "failed": [
+        "end_reason",
+        "kinematic_ankle_min",
+        "kinematic_knee_amplitude",
+        "penetration_hard_binding",
+        "steps",
+        "valid_cycles"
+      ],
+      "max_penetration_m": 0.028365651033869416,
+      "band": "above_hard"
+    },
+    {
+      "id": "C",
+      "mode": "deterministic",
+      "seed": 123,
+      "offset_s": 2.156870983805102,
+      "verdict": "FAIL",
+      "failed": [
+        "end_reason",
+        "kinematic_ankle_amplitude",
+        "kinematic_ankle_min",
+        "kinematic_knee_amplitude",
+        "penetration_hard_binding",
+        "steps",
+        "valid_cycles"
+      ],
+      "max_penetration_m": 0.028931729269403607,
+      "band": "above_hard"
+    },
+    {
+      "id": "D",
+      "mode": "stochastic_held",
+      "seed": 123,
+      "offset_s": 1.956870983805102,
+      "verdict": "FAIL",
+      "failed": [
+        "valid_cycles"
+      ],
+      "max_penetration_m": 0.02687084341604908,
+      "band": "july_legacy_breach_within_hard"
+    },
+    {
+      "id": "E",
+      "mode": "stochastic_held",
+      "seed": 124,
+      "offset_s": 1.956870983805102,
+      "verdict": "FAIL",
+      "failed": [
+        "end_reason",
+        "penetration_hard_binding",
+        "steps",
+        "valid_cycles"
+      ],
+      "max_penetration_m": 0.02814224135855094,
+      "band": "above_hard"
+    },
+    {
+      "id": "F",
+      "mode": "stochastic_held",
+      "seed": 125,
+      "offset_s": 1.956870983805102,
+      "verdict": "FAIL",
+      "failed": [
+        "end_reason",
+        "penetration_hard_binding",
+        "steps",
+        "valid_cycles"
+      ],
+      "max_penetration_m": 0.028105596381560672,
+      "band": "above_hard"
+    }
+  ],
+  "receipt_sha256": "7cceb98f33f548e5930fb8e37846a08738c360aa801216533e59003f2b6ebbc9",
+  "commit_verification": {
+    "file": "commit_verification.json",
+    "pass": true,
+    "files_checked": 132,
+    "rule": "the leaf is valid evidence only while this is true"
+  },
+  "lock_released": true,
+  "staging_removed": true,
+  "authoritative": true,
+  "outcome": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false
+  }
+}

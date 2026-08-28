@@ -1,0 +1,383 @@
+{
+  "schema": "v26c_j3_closed_loop.1",
+  "stage": "V26C-J3-CLOSED-LOOP",
+  "verdict": "FAIL",
+  "gate_pass": false,
+  "qualification_technically_valid": true,
+  "stack": {
+    "name": "production",
+    "operational": true,
+    "injected": false,
+    "note": "the production torch/RLlib/OpenSim stack"
+  },
+  "inputs_sha256": {
+    "pinned_runtime_config": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "env_config": "48de040747afcc79c944c4b6d3a46a710e2b0369beb02d97d38766fdf127b5e2",
+    "j2_artefacts": {
+      "history.json": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777",
+      "rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e"
+    },
+    "j1_receipt": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j1_amendment": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9"
+  },
+  "j2_actor": {
+    "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1",
+    "artefacts_sha256": {
+      "history.json": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777",
+      "rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e"
+    },
+    "best_epoch": 378,
+    "adapted_rmse": 0.013858708553016186,
+    "deployable": false,
+    "promotion": "NONE",
+    "role": "the ONLY actor J3 may qualify"
+  },
+  "j1_lineage_preserved": {
+    "j1_receipt_sha256": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j1_amendment_sha256": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9",
+    "j1_verdict": "FAIL",
+    "j1_failed": [
+      "max_penetration_m"
+    ],
+    "j1_max_penetration_m": 0.02294380435912411,
+    "statement": "the J1 soft fail STANDS. J3 neither re-scores it nor retroactively promotes it, whatever J3 itself finds."
+  },
+  "runtime_contract": {
+    "actor_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos",
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "actor_feature_count": 35,
+    "observation_feature_count": 84,
+    "n_actor": 35,
+    "expected_steps": 500,
+    "manifest_matches_pinned_j2": true,
+    "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+  },
+  "runtime_identity": {
+    "fsm_behaviour_version": "v3",
+    "event_source": "binary_active_v26",
+    "observed_versions": [
+      "v3"
+    ],
+    "observed_event_sources": [
+      "binary_active_v26"
+    ]
+  },
+  "deterministic_semantics": {
+    "seed": 123,
+    "seeded": [
+      "numpy.random.seed(123)",
+      "torch.manual_seed(123)",
+      "env.reset(seed=123)"
+    ],
+    "action_selection": "deterministic",
+    "path": "module.forward_inference({'obs': ...}) -> get_inference_action_dist_cls().from_logits(logits).to_deterministic().sample(); flat Box fallback = the Gaussian mean, i.e. logits[..., :dim]",
+    "exploration_noise": "NONE: no noise is drawn, injected or held",
+    "sigma": "forbidden at this stage. It is never set and never varied; the policy std is only RECORDED as a per-step diagnostic",
+    "stepped_with": "the RAW deterministic action, exactly as rollout_eval.run does. The clipped action is a DIAGNOSTIC mirror and is never passed to the environment",
+    "max_abs_action_minus_mean": 0.0,
+    "rollout_eval_parity_steps": 500,
+    "rollout_eval_parity_checked": true
+  },
+  "actor_contract": {
+    "width": 35,
+    "masked_columns": [
+      0,
+      1,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "zero_columns_observed": [
+      0,
+      1,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "input_layers_verified": {
+      "pi.0.0.weight": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "pi_encoder.0.weight": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ]
+    },
+    "note": "one 35D actor; EVERY input layer carries the mask in J3"
+  },
+  "summary": {
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "max_penetration_m": 0.02704966381076714,
+    "valid_cycle_count": 2,
+    "valid_hs_count": 3,
+    "valid_to_count": 3,
+    "phase_timeout_stance": 0,
+    "phase_timeout_swing": 0,
+    "morphology_causal_contract_failure": 0,
+    "hs_cancelled_count": 0,
+    "resync_count": 0,
+    "action_clipped_steps": 0,
+    "fsm_behaviour_versions": [
+      "v3"
+    ],
+    "event_sources": [
+      "binary_active_v26"
+    ],
+    "episode_return": 40.253612057120854,
+    "realized_noise_rms": [
+      0.0,
+      0.0
+    ],
+    "action_noise_sigma": [
+      0.0,
+      0.0
+    ],
+    "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+  },
+  "kinematics": {
+    "steps": 500,
+    "knee_min_rad": -0.9923681020736694,
+    "knee_max_rad": -0.1437608152627945,
+    "ankle_min_rad": -0.10713271051645279,
+    "ankle_max_rad": 0.4093189835548401,
+    "source": "the per-step PRE-ACTION prosthetic_state, read by name from the pinned actor feature manifest"
+  },
+  "j3_gate": {
+    "common": {
+      "steps_required": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycles_min": 2,
+      "phase_timeout_stance_max": 0,
+      "phase_timeout_swing_max": 0,
+      "morphology_causal_contract_failure_max": 0,
+      "hs_cancelled_count_max": 0,
+      "resync_count_max": 1,
+      "max_penetration_m_max": 0.02
+    },
+    "kinematic_quality": {
+      "ankle_min_rad_max": -0.03,
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [
+        -1.5,
+        0.0
+      ],
+      "ankle_bounds_rad": [
+        -0.7,
+        0.7
+      ]
+    }
+  },
+  "gate": {
+    "common": {
+      "checks": {
+        "steps": true,
+        "end_reason": true,
+        "valid_cycles": true,
+        "phase_timeout_stance": true,
+        "phase_timeout_swing": true,
+        "morphology_causal_contract_failure": true,
+        "hs_cancelled_count": true,
+        "resync_count": true,
+        "max_penetration_m": false
+      },
+      "failed": [
+        "max_penetration_m"
+      ],
+      "pass": false,
+      "kinematic_quality_applies": false
+    },
+    "kinematic_quality": {
+      "ankle_min": {
+        "observed_rad": -0.10713271051645279,
+        "threshold_rad": -0.03,
+        "pass": true
+      },
+      "ankle_amplitude": {
+        "observed_rad": 0.5164516940712929,
+        "threshold_rad": 0.3,
+        "pass": true
+      },
+      "knee_amplitude": {
+        "observed_rad": 0.8486072868108749,
+        "threshold_rad": 0.6,
+        "pass": true
+      },
+      "knee_strictly_flexed": {
+        "fraction_negative": 1.0,
+        "max_rad": -0.1437608152627945,
+        "pass": true
+      },
+      "within_bounds": {
+        "knee_outside": 0,
+        "ankle_outside": 0,
+        "knee_bounds_rad": [
+          -1.5,
+          0.0
+        ],
+        "ankle_bounds_rad": [
+          -0.7,
+          0.7
+        ],
+        "pass": true
+      }
+    },
+    "checks": {
+      "steps": true,
+      "end_reason": true,
+      "valid_cycles": true,
+      "phase_timeout_stance": true,
+      "phase_timeout_swing": true,
+      "morphology_causal_contract_failure": true,
+      "hs_cancelled_count": true,
+      "resync_count": true,
+      "max_penetration_m": false,
+      "kinematic_ankle_min": true,
+      "kinematic_ankle_amplitude": true,
+      "kinematic_knee_amplitude": true,
+      "kinematic_knee_strictly_flexed": true,
+      "kinematic_within_bounds": true
+    },
+    "failed": [
+      "max_penetration_m"
+    ],
+    "pass": false,
+    "kinematic_quality_applies": true,
+    "telemetry_integrity_evaluated_separately": true,
+    "diagnostics_not_binding": {
+      "action_clipped_steps": 0
+    }
+  },
+  "telemetry_integrity": {
+    "kind": "TELEMETRY INTEGRITY INVARIANT",
+    "valid_hs_count": 3,
+    "valid_to_count": 3,
+    "valid_cycle_count": 2,
+    "checks": {
+      "hs_at_least_cycles": true,
+      "to_at_least_cycles": true,
+      "hs_to_difference_within_one": true
+    },
+    "pass": true,
+    "qualification_technically_valid": true,
+    "invariant": {
+      "hs_at_least_cycles": true,
+      "to_at_least_cycles": true,
+      "hs_to_difference_max": 1,
+      "kind": "TELEMETRY INTEGRITY INVARIANT",
+      "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+      "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+    },
+    "is_behavioural_gate": false,
+    "is_promotion_threshold": false
+  },
+  "diagnostics_not_binding": {
+    "action_clipped_steps": 0
+  },
+  "deployable": false,
+  "promotion": "NONE",
+  "next_stage_authorized": false,
+  "forbidden_here": [
+    "retry",
+    "Markov",
+    "DAgger",
+    "sigma",
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "promotion",
+    "ex-novo"
+  ],
+  "quarantine": {
+    "applies": true,
+    "artefacts_preserved": true,
+    "retry": "FORBIDDEN without an explicit architect authorisation; this stage never retries itself",
+    "rule": "an ordinary gate FAIL is preserved as evidence and quarantined. It is not an error to be repaired by rerunning"
+  },
+  "generated_at_utc": "2026-08-26T08:47:47Z",
+  "outputs_sha256": {
+    "j3_kinematics.npz": "402040d7cc794a26213ece8abd04a6e945fa46050f20d4ecc402bf78df0b97fc",
+    "j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae"
+  }
+}

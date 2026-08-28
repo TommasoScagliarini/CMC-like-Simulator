@@ -1,0 +1,203 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION, MACHINE-READABLE",
+  "stage": "V26C_J19C_J19A_HELDOUT_G_I",
+  "date": "2026-08-27",
+  "status": "READINESS ONLY. Implemented and statically tested; NOT executed. No rollout, no fit, no PPO, no critic, no collection, no j19c_runs, no GO.",
+  "contains_no_self_hash": true,
+  "requires_architect_go_before_execution": true,
+
+  "objective": "the FINAL held-out phase: qualify the J19A actor on three cells never used by any prior stage, drawn with the sealed seeds 126, 127 and 128.",
+
+  "preregistration_precedes_any_use_of_the_seeds": {
+    "rule": "the sealed seeds 126, 127 and 128 were not read, generated or used by any stage before this document. THIS DOCUMENT IS THE FIRST ARTEFACT IN WHICH THEY APPEAR, and it is written before the runner that consumes them.",
+    "authorised_by": "architect directive of 2026-08-27 opening V26C_J19C_J19A_HELDOUT_G_I",
+    "seeds": [126, 127, 128],
+    "they_remain_out_of_perimeter_for_every_other_stage": true,
+    "no_seed_was_used_to_produce_this_document": "the seeds are declared here as integers; nothing was sampled, drawn or simulated with them"
+  },
+
+  "actor_under_test": {
+    "identity": "J19A, the single operational actor, unchanged",
+    "leaf": "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1",
+    "module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "parent": "J8",
+    "it_is_read_never_edited_never_copied": true
+  },
+
+  "entry_evidence_pinned": {
+    "rule": "this phase runs only behind a J19B that PASSED and whose leaf verifies. Both are pinned.",
+    "j19b_leaf": "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1",
+    "j19b_receipt_sha256": "789c57ca293ae7d5f578d4b3cae4e9aec599fa3edf4ce87239ad5fc8a7b1b509",
+    "j19b_commit_verification_sha256": "0ded736553a55eba6ac600340750d40aa82f7ebf4689bcdd4717dc3636907776",
+    "j19b_verdict_required": "PASS",
+    "j19b_cells_required": "6 behavioural PASS and 6 telemetry-valid out of 6",
+    "j19b_prereg_sha256": "31c2705a8c9501969ddc39a37db43c3a419187febcd5cc830ff3cbfce57347b8"
+  },
+
+  "derivation": {
+    "decision": "J19C is a MECHANICAL, AUDITABLE COPY of the J19B runner, produced by v26c_j19c_derive_from_j19b.py from a closed, pinned substitution map. J19B and J16 are both left byte-unchanged.",
+    "source": "v26c_j19b_closed_loop.py",
+    "source_sha256": "327b8fe39edae290fd8ed806f6b34715313b8d82d7c08ba600054eb191bdcb19",
+    "why_a_tool": "the same reason as J19B: retyping a safety-critical closed-loop path by hand is the silent-divergence risk the mechanical-copy requirement exists to prevent. The transformation is the auditable artefact.",
+    "j16_remains_the_ultimate_frozen_source": "6ac4585424cbce34957722e8fc64dc0669de14c57a0418e6aa940b1303cc2e34"
+  },
+
+  "the_three_cells": {
+    "count": 3,
+    "cells": [
+      {"id": "G", "mode": "stochastic_held", "seed": 126, "offset_s": 1.956870983805102, "label": "heldout nominal sigma 0.005"},
+      {"id": "H", "mode": "stochastic_held", "seed": 127, "offset_s": 1.956870983805102, "label": "heldout nominal sigma 0.005"},
+      {"id": "I", "mode": "stochastic_held", "seed": 128, "offset_s": 1.956870983805102, "label": "heldout nominal sigma 0.005"}
+    ],
+    "start": "the NOMINAL start 1.956870983805102 s, which is J9R1's frozen nominal offset, for all three",
+    "mode": "stochastic_held for all three",
+    "sigma": 0.005,
+    "noise_hold_steps": 1,
+    "steps_per_cell": 500,
+    "order": "G, H, I, sequential",
+    "seeds_used": [126, 127, 128],
+    "relation_to_J19B": "these are J19B's cell-D protocol with the held-out seed substituted. Every other field - mode, offset, sigma, noise hold, steps - is identical to J19B's D, E and F."
+  },
+
+  "gates": {
+    "per_cell_count": 14,
+    "per_cell": [
+      "steps", "end_reason", "valid_cycles", "phase_timeout_stance", "phase_timeout_swing",
+      "morphology_causal_contract_failure", "hs_cancelled_count", "resync_count",
+      "penetration_hard_binding", "kinematic_ankle_min", "kinematic_ankle_amplitude",
+      "kinematic_knee_amplitude", "kinematic_knee_strictly_flexed", "kinematic_within_bounds"
+    ],
+    "identical_to_J19B": true,
+    "telemetry_integrity": "the same invariant as J19B, evaluated separately from the 14 gates",
+    "fail_fast": "TECHNICAL and INTEGRITY only. A behavioural failure in one cell never stops the remaining cells.",
+    "aggregate_rule": "PASS iff 3/3 behavioural PASS AND 3/3 telemetry-valid",
+    "thresholds_invented_in_this_stage": 0
+  },
+
+  "penetration_contract": {
+    "authority": "v26c_penetration_contract.py, pinned; the runner writes down no threshold of its own",
+    "module_sha256": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "soft_diagnostic": "> 0.020 m, NEVER binding",
+    "july_legacy_diagnostic": ">= 0.025 m, comparative only, NEVER binding",
+    "hard_binding": "> 0.028 m is the SOLE blocking threshold; exactly 0.028 PASSES",
+    "unchanged_from_j19b_and_j16": true
+  },
+
+  "core_scientific_equivalence": {
+    "decision": "architect directive of 2026-08-27. A cell-by-cell comparison against J9R1's A-F matrix is NOT forced. In its place J19C asserts a CORE SCIENTIFIC EQUIVALENCE against J19B, fail-closed, with a CLOSED WHITELIST of authorised differences.",
+    "rule": "every item below must be IDENTICAL to J19B. Any difference outside the whitelist BLOCKS THE PREFLIGHT.",
+
+    "must_be_identical_to_J19B": {
+      "scientific_functions_bytecode": [
+        "base_env_config", "cell_env_config", "expected_reset_time", "unit_correction",
+        "evaluate_cell_gate", "cell_verdict", "penetration_report", "production_stack"
+      ],
+      "gate_tables": ["J19B_COMMON_GATE equivalent", "J19B_KINEMATIC_GATE equivalent"],
+      "per_cell_gate_count": 14,
+      "telemetry_integrity": "the same invariant, evaluated separately",
+      "sigma": 0.005,
+      "sigma_tolerance": 1e-06,
+      "noise_hold_steps": 1,
+      "expected_steps": 500,
+      "nominal_offset_s": 1.956870983805102,
+      "frozen_offsets": "the J9R1 tuple, unchanged",
+      "action_path": "inference_action_dist.to_deterministic().sample() for deterministic cells; the stochastic_held path unchanged",
+      "env_config": "base and per-cell construction unchanged; only output_dir and episode_start_offset_s may be mutated, as J19B already declared",
+      "penetration_contract": "the pinned v26c_penetration_contract module, unchanged",
+      "recording_instrumentation": "unchanged",
+      "commit_and_fail_fast": "atomic commit under an exclusive lock, born-invalid marker, post-commit verification; fail-fast TECHNICAL and INTEGRITY only",
+      "actor_width_clock_controller_columns": "unchanged",
+      "reset_time_tolerance_s": "unchanged"
+    },
+
+    "authorised_differences_closed_whitelist": [
+      {"id": "W1", "what": "matrix size", "from": 6, "to": 3},
+      {"id": "W2", "what": "cell ids", "from": ["A", "B", "C", "D", "E", "F"], "to": ["G", "H", "I"]},
+      {"id": "W3", "what": "every cell mode", "to": "stochastic_held", "note": "J19B mixed three deterministic and three stochastic_held; J19C is stochastic_held throughout"},
+      {"id": "W4", "what": "seeds", "from": [123, 124, 125], "to": [126, 127, 128]},
+      {"id": "W5", "what": "stage-specific strings and paths", "note": "stage token, preregistration path and pin, leaf, staging, lock, sentinel, receipt name, output names, prose"},
+      {"id": "W6", "what": "aggregate rule", "from": "PASS iff 6/6 behavioural PASS AND 6/6 telemetry-valid", "to": "PASS iff 3/3 behavioural PASS AND 3/3 telemetry-valid"}
+    ],
+    "anything_outside_this_whitelist_blocks_the_preflight": true,
+
+    "the_runner_cannot_be_asked_for_anything_else": {
+      "rule": "seed, start offset, mode and sigma are MODULE CONSTANTS. The command line exposes no option that can change them, and the preflight refuses a matrix that departs from the preregistration.",
+      "cli_options": ["--preflight", "--run", "--authorized-stage", "--out", "--no-progress"],
+      "no_cli_option_sets": ["seed", "start", "offset", "mode", "sigma", "steps"],
+      "matrix_assertions_at_preflight": [
+        "exactly three cells",
+        "ids exactly G, H, I in order",
+        "every mode is stochastic_held",
+        "every offset_s equals the frozen nominal 1.956870983805102",
+        "seeds exactly 126, 127, 128 in order",
+        "no seed from 123 to 125 appears anywhere in the matrix",
+        "sigma is 0.005 and noise_hold_steps is 1",
+        "steps per cell is 500"
+      ]
+    },
+
+    "still_proven_identical_to_J9R1_through_J19B": [
+      "COMMON_GATE", "KINEMATIC_GATE", "SIGMA", "SIGMA_TOLERANCE", "NOISE_HOLD_STEPS",
+      "EXPECTED_STEPS", "RESET_TIME_TOLERANCE_S", "CLOCK_COLUMNS", "CONTROLLER_COLUMNS",
+      "ACTOR_WIDTH", "FROZEN_OFFSETS"
+    ],
+    "declared_not_assumed": "the replacement of the A-F cell comparison is a structural entry in the derivation map, not an omission discovered at run time"
+  },
+
+  "execution_discipline": {
+    "single_execution": true,
+    "no_retry": "whatever the outcome",
+    "no_fit": true, "no_critic": true, "no_ppo": true, "no_collection": true,
+    "no_scientific_modification": true,
+    "no_sigma_change": true,
+    "preflight": "fail-closed, no heavy import, no environment, no rollout, no write",
+    "output": "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1, content-addressed, no-clobber, atomic commit under an exclusive lock, born-invalid marker written FIRST into staging and removed only as the LAST write after post-commit verification",
+    "go_must_pin": [
+      "v26c_j19c_prereg_heldout_g_i.json",
+      "v26c_j19c_heldout_g_i.py",
+      "v26c_j19c_derive_from_j19b.py",
+      "test_v26c_j19c_heldout_g_i.py",
+      "v26c_j19b_closed_loop.py",
+      "v26c_j16_closed_loop.py",
+      "v26c_penetration_contract.py",
+      "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl"
+    ]
+  },
+
+  "env_mutation_policy_note": {
+    "why_this_note_exists": "ENV_MUTATION_POLICY is a PINNED CORE CONSTANT, byte-identical to J19B's, and the core scientific equivalence requires it to stay so. Its 'why' field reads 'the matrix is a sweep over the three preregistered start offsets', which describes J19B's A-F matrix and NOT this one. It is left byte-unchanged deliberately.",
+    "what_it_actually_is_here": "a CONSERVATIVE SUPERSET. The policy AUTHORISES mutating episode_start_offset_s between cells; J19C simply never exercises that authorisation.",
+    "the_only_field_that_actually_varies_between_J19C_cells": "output_dir",
+    "episode_start_offset_s_is_constant_across_G_H_I": 1.956870983805102,
+    "enforced_by": "the core equivalence refuses any cell whose offset_s differs from the frozen nominal, and the test suite freezes it",
+    "why_not_reword_it": "rewording the constant would break the byte-identity that the core scientific equivalence exists to prove. Documenting the gap is correct; editing a pinned scientific constant to make prose read better is not.",
+    "the_comment_beside_it_IS_corrected": "the surrounding source comment, which is not part of the pinned constant, is rewritten to describe J19C truthfully"
+  },
+
+  "what_this_stage_establishes": {
+    "is": "whether the J19A actor holds under THREE NEW NOISE REALISATIONS at the SAME nominal start, drawn with seeds it has never been exposed to.",
+    "precise_wording": "J19C does NOT test new start offsets. All three cells begin at the frozen nominal 1.956870983805102 s, exactly as J19B's cells D, E and F do. What is new is the SEED, and therefore the realisation of the held exploration noise.",
+    "what_would_be_a_new_start": "a different episode_start_offset_s. J19B already covered -0.20 s and +0.20 s in cells B and C; J19C covers neither.",
+    "cannot": "generalisation beyond these three cells and the six of J19B. LOTO, LOCO, B1R1, B1R2 and the multi-model Epic remain out of perimeter.",
+    "no_promotion": "nothing is promoted and nothing is called deployable by this stage."
+  },
+
+  "deferred_todo": [
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "the multi-model generalisation Epic",
+    "the declared-but-unmeasured nominal_mean_shift inside the J15R1 runner",
+    "the stale actor_feature_manifest.json sidecar in the J8 leaf, left unmodified by architectural decision",
+    "the J8 leaf carries no commit_verification.json, as the J2 leaf does not",
+    "policy_std is always null, a cosmetic defect inherited from J12",
+    "every phase closes with a user report, audited before the next begins"
+  ],
+
+  "invariants": {
+    "not_modified": ["v26c_j19b_closed_loop.py", "v26c_j16_closed_loop.py and every historical runner", "the J19B leaf", "the J19A leaf", "the J18 leaf", "J8", "J2", "J4", "J7", "J9R1", "J10R1", "production configuration", "FSM v3", "detector and morphology", "reward", "sigma", "SEA and the C++ plugin", "network architecture"],
+    "dirty_worktree": "preserved untouched"
+  }
+}

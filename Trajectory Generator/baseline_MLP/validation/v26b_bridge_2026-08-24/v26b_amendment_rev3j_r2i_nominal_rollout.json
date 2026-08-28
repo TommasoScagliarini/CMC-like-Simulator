@@ -1,0 +1,50 @@
+{
+  "amendment_id": "rev3j_r2i_nominal_rollout",
+  "date": "2026-08-24",
+  "authorized_by": "architect gate: V2_R2I accepted as the SOLE candidate for the deterministic nominal rollout (NOT promoted to PPO baseline); independent Codex audit: selftests 19/19 + 20/20 repeated, receipt 07fdce69..., digest f6579a7f..., init R1 never R2G",
+  "kind": "ADDITIVE, immutable; authorises EXACTLY ONE deterministic nominal rollout of V2_R2I; NO retry, NO stochastic rollout, NO PPO/critic/training/DAgger/sigma sweep; no production change; thresholds neither invented nor relaxed after seeing outcomes",
+  "parents_immutable": {
+    "chain": "rev3..rev3f + rev3g (bb4401fc) + rev3h memo (e2f31d1e) + rev3h supplement (b7fe2b9a) + rev3i (7cde9329afd90aadd30206e8c060ef341f34b67049867cf3f441881ec78b73d6)",
+    "r2i_receipt": {
+      "sha256": "07fdce69fd85b21519c71c73e4ec79347f0f06cfc162c19591310936eb33a2bd"
+    },
+    "r2i_module": {
+      "actor_digest": "f6579a7fdf27dc6af32d4cc6a2b9e2dbb182fc3c7cb888d83ed1a50de4490ae2",
+      "files_sha256": {
+        "actor_feature_manifest.json": "2192948b40dab91dc8c5b4c99c28bbb0ebae74d241c268f5149cad80eb3bec8e",
+        "class_and_ctor_args.pkl": "c9a6722ff95642795bfe1146d0087a68b5861fd508cbe3692195b2d820d810a7",
+        "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+        "module_state.pkl": "61bfb835e63629bc75899a185195e830b0b815e07d4eabec0af88e6172818635"
+      }
+    },
+    "r2g_status": "V2_R2G (65276df6...) stays AUDIT-REJECTED, never rolled out",
+    "rollout_tooling_reused": {
+      "v26b_r0a_rollout.py": "06eebb28efb3bd7ef854b5a1ac6e91ab389c03229ef2cf6158ce608f5bd26bc8",
+      "v26b_r1_rollout.py": "c63949cde72638c90d2cc81f99aa4c3766f25aa7403b3f692aa58284b55f7ec4",
+      "v26b_r2i.py": "44bc8b3a7c03029170c8296d6ec8f119ac9b55ac811196155e995bee7563bb9f",
+      "v26b_r1_postrun_audit.py": "503ab902ea64e36c70c1d5835a6f690800ca273a20b73ba73b23393438845fd6"
+    },
+    "production_configuration_pins": {
+      "rollout_eval.py": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba",
+      "v3_canonical_resolved_yaml": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+      "morphology_corridor_profile": "33b1dd7cb0db40110a4f9c1b8c0dd49a498662211e6e132f0f3cefe8edc02a55",
+      "actor_manifest_35": "c6f8602816059b5c3508c626e5ce08d3ba922710f8b48c9557af9056f1155004"
+    }
+  },
+  "canonical_command_reused_exactly": "identical to the rev3c/rev3e executed pattern (R0a/R1 rollouts): rollout_eval.py --checkpoint <V2_R2I/rl_module> --no-auto-config --config <v3 canonical yaml> --episode-start-offset-s 1.956870983805102 --action-selection deterministic --seed 123 --output-dir <job dir> --record-outputs --record-policy-trace --step-timeout-s 900 --startup-timeout-s 900 (FSM v3 canonical + event-anchored morphology corridor embedded in the pinned config; NOTHING changed)",
+  "output": "no-clobber dedicated dir rollouts/r2i_nominal_det/R2I_35D__v3_canonical__nominal__det/ + exclusive log; tooling only inside v26b_bridge_2026-08-24/",
+  "preregistered_gates_vs_diagnostics": {
+    "preregistered_binding": "completion 500/500 with end_reason episode_time_limit (the rev3c/rev3e criterion); an early end is FAIL and is diagnosed WITHOUT relaunch",
+    "recorded_diagnostics_never_relaxed": [
+      "July report-level gates as recorded in R0a/R1 receipts (full episode, >=1 valid cycle, penetration vs v3 guards 20/28 mm, clipping, return)",
+      "whole-trace corrected counters (architect-mandated formulas): morphology_causal_contract_failure rows/max, phase_timeout_stance/swing rows, resync/hs_cancelled/invalid max+final, dropped_wait_hs/terminal_flushed",
+      "first discrete FSM mismatch vs the pinned V26 anchor reference (grid-aligned proxy, declared in rev3c)",
+      "kinematic shape: knee/ankle q min/max/mean + temporal stats, RMSE vs prescribed targets, ankle NEGATIVE tract presence and amplitude (overall min, fraction of negative steps, min within valid-cycle late-stance window when cycles exist; reference protocol criterion B3 'ankle min <= -0.03' recorded as DIAGNOSTIC, not a rollout-blocking gate)",
+      "prescribed reference (privileged targets) range/temporal stats on the grid",
+      "raw+applied action stats whole-trace (max, saturation fraction, final-20 means)",
+      "three-way comparison R0a (493 joint_divergence) / R1 (242 grf_penetration) / R2I"
+    ],
+    "no_new_thresholds": "every number above already exists in the chain (rev3c/rev3e receipts, protocol gate tables); none is invented or relaxed post-hoc"
+  },
+  "execution_order": "this amendment FIRST -> additive tooling v26b_r2i_rollout.py + post-run-safe tests -> tests PASS -> exactly ONE rollout -> receipt (gates vs diagnostics distinguished, all input/config/tooling hashes, trace/log SHAs) -> additive honest report -> STOP for the architect audit; nothing implicitly promoted"
+}

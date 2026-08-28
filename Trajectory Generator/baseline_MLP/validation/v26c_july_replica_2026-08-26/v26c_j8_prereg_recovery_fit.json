@@ -1,0 +1,341 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j8_prereg_recovery_fit",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_authorised": "V26C-J8-RECOVERY-FIT",
+  "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer, not approver. This preregistration authorises NOTHING by itself: the fit requires an explicit stage token and an explicit --out.",
+  "date_utc": "2026-08-26",
+  "what_this_stage_is": "one actor-only supervised fit of the FULL mean network on the materialised J7 Markov recovery dataset, starting from the J2 parent.",
+  "what_this_stage_is_not": [
+    "a fit of anything but the actor's mean network",
+    "a critic warm-up",
+    "a PPO run of any kind",
+    "a closed-loop evaluation",
+    "a promotion, a deployability claim or an authorisation of any next stage"
+  ],
+  "actor": {
+    "width": 35,
+    "single_actor": "one 35D actor. No 25D artefact, no widening, no contralateral feature.",
+    "trainable": "the entire mean network: the six DIRECT parameters pi.0.0.weight, pi.0.0.bias, pi.0.2.weight, pi.0.2.bias, pi.1.weight, pi.1.bias",
+    "aliases": {
+      "keys": [
+        "pi_encoder.0.weight",
+        "pi_encoder.0.bias",
+        "pi_encoder.2.weight",
+        "pi_encoder.2.bias"
+      ],
+      "status": "ALIASES, not independent parameters. They are never optimised. They are written at the end as bit-identical copies of the corresponding pi.0.* tensors and verified as such.",
+      "measured_in_parent": "all four are already bit-identical to their pi.0.* counterparts in the J2 parent"
+    },
+    "logstd": {
+      "rows": "output rows [2:] of pi.1.weight and pi.1.bias",
+      "policy": "FROZEN. Restored from the parent after EVERY optimizer step and verified bit-identical to the parent at the end.",
+      "measured_in_parent": "pi.1.weight[2:] is exactly zero; pi.1.bias[2:] is [-5.2983174324035645, -5.2983174324035645]. Bit-identity to the parent is the binding requirement; the zero weight is an observation, not the rule."
+    },
+    "critic": "ABSENT. The parent state carries no critic key and none is created."
+  },
+  "inputs": {
+    "dataset": {
+      "path": "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz",
+      "sha256": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+      "loaded_directly": true,
+      "never_rebuilt": "the J7 builder is NEVER imported and the dataset is NEVER reconstructed. This stage reads the materialised bytes.",
+      "observations_content_sha256": "a59fb89b43a372162661ec8cf131b5abbf1e9ce32b16f98518af9010a4cf587a",
+      "actions_content_sha256": "6e920c2f890dbdc2cfacf6a2c6842b34c6f33e24499d0d8716bd6347624bde4f",
+      "shape": {
+        "observations": [
+          16713,
+          35
+        ],
+        "actions": [
+          16713,
+          2
+        ]
+      },
+      "layout": "rows 0..15999 are the nominal block: 32 bit-identical repeats of the same 500 states and labels. Rows 16000..16712 are the 713 recovery rows.",
+      "nominal_unique_states": 500,
+      "nominal_repeat": 32,
+      "recovery_rows": 713
+    },
+    "parent": {
+      "module": "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+      "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "is_the_only_parent": true,
+      "loaded_fresh": "unpickled from disk at the start of the fit; no cached, adapted or intermediate state is ever a parent",
+      "no_j4_or_j5_or_july_as_parent": true
+    },
+    "j4_role": "IMPLEMENTATION REFERENCE ONLY for the shape of the training loop. v26c_j4_recovery.py is never imported, never a parent, never data and never an output.",
+    "july_role": "METHODOLOGY AND REFERENCE ONLY. No July artefact is an operational parent, dataset, label or output."
+  },
+  "physical_scaling": {
+    "source": "Trajectory Generator/baseline_MLP/target_domain_markov_adaptation.py",
+    "source_sha256": "7518f1d4bdaa31505d8335934ce3478ebc03dc1cb1f31b508b5ec4a229cba7e0",
+    "symbol": "MARKOV_CONTROLLER_FEATURE_SCALES",
+    "verification": "the runner extracts the literal from the pinned source by AST and compares it, key by key and value by value, against its own transcription. It does NOT import the module: that import pulls torch, and the preflight must stay free of it.",
+    "scales": {
+      "pros_knee_angle_previous_endpoint": 1.0,
+      "pros_knee_angle_served_ref": 1.0,
+      "pros_knee_angle_served_ref_vel": 4.0,
+      "pros_knee_angle_served_ref_accel": 60.0,
+      "pros_knee_angle_sea_u": 1.0,
+      "pros_ankle_angle_previous_endpoint": 1.0,
+      "pros_ankle_angle_served_ref": 1.0,
+      "pros_ankle_angle_served_ref_vel": 3.5,
+      "pros_ankle_angle_served_ref_accel": 55.0,
+      "pros_ankle_angle_sea_u": 1.0
+    },
+    "application": "the fit runs on observations / scale. After the best state is restored, the scale is ABSORBED by dividing the corresponding columns of pi.0.0.weight by their scale. The saved module therefore consumes RAW observations.",
+    "why_absorbed": "the deployed actor is fed raw observations by the environment; the scaling is a conditioning device for the optimiser only and must not survive into the artefact."
+  },
+  "columns": {
+    "clock": {
+      "indices": [
+        0,
+        1
+      ],
+      "in_data": "already exactly zero in the J7 dataset",
+      "in_weights": "pi.0.0.weight[:, [0,1]] is zeroed after EVERY optimizer step and again before saving, and the same zero is carried into the pi_encoder.0.weight alias. Both are verified bit-zero.",
+      "measured_in_parent": "already bit-zero"
+    },
+    "controller": {
+      "indices": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "masked": false,
+      "requirement": "all ten columns of pi.0.0.weight must carry a strictly positive norm after the fit",
+      "note": "the indices are resolved by FEATURE NAME from the actor manifest, never hard-coded positionally"
+    }
+  },
+  "hyperparameters": {
+    "provenance": "the hyperparameter VALUES of the selected July run target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13, taken value for value. The values are July's; the data, the parent and the result are not.",
+    "seed": 123,
+    "epochs": 400,
+    "batch_size": 128,
+    "learning_rate": 5e-05,
+    "validation_fraction": 0.2,
+    "patience": 60,
+    "clip_weight": 1.0,
+    "logstd_weight": 0.0,
+    "anchor_weight": 0.01,
+    "trainable_first_layer_features": null,
+    "trainable_first_layer_features_meaning": "null = the FULL mean network is trainable, not a column subset"
+  },
+  "parent_preconditions": {
+    "status": "BINDING, checked BEFORE the optimizer is constructed. A violation aborts pre-commit.",
+    "controller_columns_bit_zero": {
+      "requirement": "all ten columns 25:35 of the parent's first actor layer pi.0.0.weight must be EXACTLY 0.0, every element",
+      "measured": "all ten are bit-zero in the J2 parent",
+      "recorded": "per-column norm, max_abs and a bit-zero boolean, plus the aggregate boolean",
+      "on_violation": "abort before the optimizer, leaf never created"
+    },
+    "raw_vs_scaled_equivalence": {
+      "claim": "with the parent's weights used directly, the mean network gives the SAME output on raw observations as on physically scaled observations",
+      "requirement": "max_abs_diff must be EXACTLY 0.0",
+      "measured_numpy": 0.0,
+      "measured_torch": 0.0,
+      "bit_identical": true,
+      "tolerance": "NONE. Bit-exactness was measured in both kernels before being required; no tolerance is assumed and none is granted.",
+      "why_it_holds": "only four columns carry a scale different from 1.0 (27, 28, 32, 33), and all four are inside the bit-zero controller block. A zero weight multiplied by either the raw or the scaled input contributes exactly the same signed zero, so every term of the accumulation is bit-identical.",
+      "what_it_justifies": "this is the mathematical justification for the inverse-scale absorption at save time: dividing pi.0.0.weight's scaled columns by their scale converts a network that consumes obs/scale into one that consumes raw obs, and at initialisation the two representations coincide exactly."
+    }
+  },
+  "determinism": {
+    "torch_manual_seed": 123,
+    "numpy_legacy_global_seed": {
+      "value": 123,
+      "call": "np.random.seed(123)",
+      "count": 1,
+      "where": "the --fit path only, immediately BEFORE the single np.default_rng(123)",
+      "what_it_is": "July's legacy GLOBAL seed. It is NOT a second Generator and it seeds no draw used by this fit; it is carried for protocol fidelity with the July run.",
+      "not_in_preflight": "the preflight does not set it, because the preflight performs no fit"
+    },
+    "generator": "exactly ONE np.default_rng(123), and it is the only Generator. The split permutation is drawn from it FIRST, and the SAME generator then produces every epoch shuffle. No second Generator is created anywhere.",
+    "split": "ROW-LEVEL permutation over all 16713 rows. There is NO group split and none is introduced.",
+    "split_ordering": {
+      "rule": "initial permutation first; validation membership SORTED; training order PRESERVED; the same Generator then produces the epoch shuffles",
+      "source": "target_domain_imitation._resolve_adaptation_split, seeded_random_fraction branch",
+      "transcription": "indices = rng.permutation(sample_count); validation_count = max(1, int(round(len(indices) * validation_fraction))); resolved_validation = np.sort(indices[:validation_count]); resolved_training = np.asarray(indices[validation_count:], dtype=int)",
+      "training_is_not_sorted": "the training half keeps the order the initial permutation gave it. This is NOT cosmetic: each epoch shuffles with rng.permutation(train_idx), which permutes POSITIONS, so a sorted training array would yield a different batch sequence in every epoch and the run would not be July-faithful.",
+      "dtype": "np.int64, explicit. July writes dtype=int, which is int64 on macOS/Linux; the explicit width keeps Windows identical rather than platform-dependent.",
+      "validation_count_rule": "max(1, int(round(rows * fraction))), transcribed including the max(1, ...) guard",
+      "measured": {
+        "n_train": 13370,
+        "n_val": 3343,
+        "train_is_sorted": false,
+        "validation_is_sorted": true
+      },
+      "digests": "membership digests sort both halves, matching July's _split_index_digest, which commits to membership and not to caller ordering. Order-sensitive hashes are recorded SEPARATELY, because order is what actually drives the batching.",
+      "corrected_on": "2026-08-26, on architect review: an earlier draft sorted the training half too, which would have changed every epoch shuffle."
+    },
+    "known_property": "because the nominal block is 32 bit-identical repeats, the same nominal state appears in both the train and the validation partition. This is inherited from July by construction, it is recorded here as a known property, and it is NOT corrected: the validation MSE is therefore a diagnostic, never a generalisation estimate.",
+    "backend_not_forced_and_not_claimed": {
+      "torch_use_deterministic_algorithms": "NOT SET by J8",
+      "torch_set_num_threads": "NOT SET by J8",
+      "evidence": "the repository snapshot closest to the 2026-07-13 run (bdbf99c1, 2026-07-14) contains neither call anywhere in the tree; the run's own adaptation_report.json records no determinism setting; and in today's source use_deterministic_algorithms sits only inside the fixed_final_epoch branch, which requires validation_fraction 0 and patience 0 and is therefore mutually exclusive with that run's early stopping.",
+      "inference_boundary": "that the run executed WITHOUT them is an INFERENCE from the next-day snapshot plus the absence of any contrary record. There is no execution log of that run's torch configuration, and a thread count set through OMP_NUM_THREADS or MKL_NUM_THREADS would leave no trace in source or reports.",
+      "consequence": "J8 forces neither, and claims replication of neither. Their OBSERVED values are recorded at fit time as non-binding diagnostics, with forced_by_j8 false."
+    },
+    "executive_order": {
+      "source": "target_domain_imitation.adapt_actor",
+      "sequence": [
+        "import torch, in the --fit path only",
+        "torch.manual_seed(123)",
+        "np.random.seed(123)",
+        "deterministic initialisation from the parent: tensors, parameters, initial forward - no RNG is consulted",
+        "the single np.default_rng(123) inside build_split, which draws the split first and then every epoch shuffle",
+        "the optimizer"
+      ],
+      "input_verification": "the input pins and the numpy preconditions run BEFORE the torch import, which is why the preflight can be torch-free",
+      "corrected_on": "2026-08-26, on architect review: an earlier draft seeded numpy before importing torch and forced two backend settings July never recorded."
+    }
+  },
+  "objective": {
+    "loss": "mean_MSE + clip_weight * clip_penalty + logstd_weight * logstd_loss + anchor_weight * anchor_loss",
+    "mean_mse": "MSE of the first two logits against the dataset labels",
+    "clip_penalty": "relu(|mean| - 1).square().mean()",
+    "logstd_loss": "MSE of the logstd logits against the source actor's, weighted 0.0 - computed and reported, contributing nothing",
+    "anchor_loss": "mean over the six direct parameters of (param - parent_param).square().mean()",
+    "optimizer": "Adam, lr 5e-05, on the six direct parameters only"
+  },
+  "selection": {
+    "best_update_iff": "validation_mse < best - 1e-9",
+    "early_stop": "60 consecutive epochs without a best update",
+    "restore": "the best state is restored before the scale absorption and before saving",
+    "reconstructible": "the receipt carries the full per-epoch history, so the best epoch can be recomputed from it under the stated rule and is checked to agree"
+  },
+  "future_leaf": {
+    "relative_leaf": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+    "is_the_only_destination": true,
+    "must_not_exist_before": true,
+    "does_not_exist_yet": "this preregistration turn creates nothing",
+    "contents": {
+      "rl_module/module_state.pkl": "the fitted actor, 10 keys, same shapes and dtype as the parent",
+      "rl_module/class_and_ctor_args.pkl": "BYTE-IDENTICAL copy of the parent's",
+      "rl_module/metadata.json": "BYTE-IDENTICAL copy of the parent's",
+      "rl_module/actor_feature_manifest.json": "BYTE-IDENTICAL copy of the parent's",
+      "v26c_j8_recovery_fit_receipt.json": "the receipt",
+      "history.json": "the full per-epoch history"
+    },
+    "write_protocol": "atomic commit, no-clobber under exclusive fit lock: sibling lock taken with O_CREAT|O_EXCL, sibling staging directory, verification of the staged bytes, re-check of the leaf, then rename. The lock serialises fit instances only and claims nothing against a writer that ignores it.",
+    "cleanup_on_failure": "recursive removal of the exact staging directory this run created, unlink of its own lock, and at most a NON-RECURSIVE rmdir of the parent if this run created it and it is empty. Nothing else is ever removed.",
+    "no_autonomous_retry": true,
+    "output_root_override": {
+      "permitted_for": "synthetic, isolated tests ONLY, in a temporary root",
+      "always_stamps": "authoritative = false",
+      "forbidden_in_the_authorised_fit": "the authorised --fit command REFUSES to run while the override is set. This is a blocker, not a warning.",
+      "relative_leaf_never_overridable": "only the root can be redirected; j8_runs/j8_recovery_fit_v26c_2026-08-26_r1 is a constant"
+    }
+  },
+  "torch_provenance": {
+    "requirement": "the preflight must not introduce torch into the process",
+    "recorded": [
+      "torch_present_before",
+      "torch_present_after",
+      "torch_imported_by_preflight"
+    ],
+    "definition": "torch_imported_by_preflight = (present_after and not present_before), which must be false",
+    "pre_existing_torch": "if some other caller already imported torch, that is an OBSERVATION only and never a blocker: it says nothing about whether this preflight wrote or trained anything"
+  },
+  "historical_tests": {
+    "test_v26c_j7_materialize.py": "EXPECTED FAIL in the current state, and NOT a regression. It asserts that the J7 materialize preflight is GO, a precondition that ceased to hold the moment the authorised J7 leaf was materialised. The stage is SPENT and that suite is a historical, non-rerunnable-in-GO-state artefact. It is not a J8 blocker, it is not modified, and only its applicable read-only checks are exercised."
+  },
+  "offline_gate": {
+    "binding": {
+      "recovery_rmse_decreases": "the RMSE of the actor's means against the teacher labels on the 713 recovery rows must be strictly lower after the fit than before",
+      "all_finite": "every saved parameter and every reported metric is finite",
+      "keys_and_shapes_match_parent": "the saved state has exactly the parent's 10 keys, with identical shapes and float32 dtype",
+      "clock_bit_zero": "pi.0.0.weight[:, [0,1]] and pi_encoder.0.weight[:, [0,1]] are exactly 0.0",
+      "aliases_bit_identical": "each pi_encoder.* equals its pi.0.* counterpart bit for bit",
+      "logstd_bit_identical_to_parent": "pi.1.weight[2:] and pi.1.bias[2:] equal the parent's bit for bit",
+      "controller_columns_nonzero": "all ten pi.0.0.weight controller columns have a strictly positive norm",
+      "sidecars_byte_identical": "class_and_ctor_args.pkl, metadata.json and actor_feature_manifest.json are byte-identical to the parent's",
+      "inputs_unchanged": "the J7 dataset and the J2 parent hash exactly as pinned, re-verified after the fit",
+      "no_critic_no_ppo_no_env_no_rollout": "no critic key, zero PPO updates, no environment constructed, no rollout run"
+    },
+    "enforcement": {
+      "status": "CONFIRMED BY THE ARCHITECT",
+      "integrity_and_precondition_group": "parent controller columns bit-zero, raw-vs-scaled equivalence, keys/shapes, finiteness, clock, aliases, logstd, sidecars, inputs unchanged, no critic, best state reconstructible - a violation ABORTS before a single byte is written and the leaf is never created, because such an artefact is unsound",
+      "outcome_group": "the two binding outcomes, recovery RMSE decrease and controller column norms > 0 - a violation writes the leaf ATOMICALLY with verdict FAIL and exits 1, so the evidence of the single attempt survives",
+      "no_retry": "there is exactly one attempt either way; the run never retries itself",
+      "both_are_binding": "neither group promotes anything; the split concerns only whether the failed evidence is worth keeping on disk"
+    },
+    "diagnostic_nonbinding": {
+      "nominal_rmse_before_after": "against the nominal labels, which ARE the parent's own means: the 'before' value is ~0 by construction and only the kernel difference separates it from exactly 0",
+      "nominal_shift_vs_parent": "rms and max_abs of the change in the actor's means on the 500 nominal states",
+      "clipping_out_of_bounds": "fraction of |mean| > 1, reported for the aggregate, the nominal block and the recovery block separately",
+      "best_validation_mse": "the selected epoch's validation MSE"
+    },
+    "no_invented_thresholds": "no numeric threshold is invented anywhere. The only numeric comparison in the gate is 'strictly lower than before' on the recovery RMSE and 'strictly greater than zero' on the controller norms.",
+    "no_closed_loop_claim": "this stage evaluates nothing in closed loop and claims nothing about deployability"
+  },
+  "outcome_policy": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "closed_loop": false,
+    "single_execution": true,
+    "no_autonomous_retry": "on failure the evidence is preserved and the run stops"
+  },
+  "deferred_todo": {
+    "loto": "NOT integrated. Leave-one-trial-out remains a future TODO.",
+    "loco": "NOT integrated. Leave-one-condition-out remains a future TODO.",
+    "b1r1": "NOT integrated. Future TODO.",
+    "b1r2": "NOT integrated. Future TODO.",
+    "multistart_training_data": "DEFERRED. The two July teacher datasets at start offsets -0.20 and +0.20 rad, 8000 rows, are not reproduced and are not part of this dataset.",
+    "multistart_closed_loop_validation": "A DIFFERENT AND UNRELATED THING, also future. Deferring the multistart TRAINING DATA says nothing about the future multistart CLOSED-LOOP validation, and the two must never be conflated."
+  },
+  "untouched": {
+    "j0_to_j7": "no existing J0-J7 artefact, runner, test, receipt, trace or run leaf is modified",
+    "production": "FSM, morphology corridor, reward, SEA and the C++ plugin are not touched",
+    "reports": "no existing report is modified",
+    "scope": "everything this stage adds lives inside Trajectory Generator"
+  },
+  "cross_platform": "pathlib and os.rename only; no shell, no os-specific path handling; macOS arm64 and Windows x86",
+  "pinned_artefacts_sha256": {
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "v26c_j7_prereg_markov_dataset.json": "bea97f268d2080968954cd694c7244cc3dc9d1f40ea4ae4ec79e9726fa9edf96",
+    "v26c_j7_markov_dataset.py": "b3cc2b88997ccb7c23964123d70ac3fb524adf4fdf3e8882d26ce20ff87d1461",
+    "v26c_j7_materialize_authorization.json": "a64cf7348705528cb84638143ca00f481b9c8ef432146a4989b09ad09a62383f",
+    "v26c_j7_materialize.py": "776ae5c4564204f99ff35363c5f5045636c8c0d2ee69d24244cae429d6b6dcb3",
+    "v26c_j4_recovery.py": "24dceef98242cc9e02f63d0442e8361bae32994c0829859b1747f0e7091a6841"
+  },
+  "pinned_repo_artefacts_sha256": {
+    "Trajectory Generator/baseline_MLP/target_domain_markov_adaptation.py": "7518f1d4bdaa31505d8335934ce3478ebc03dc1cb1f31b508b5ec4a229cba7e0"
+  },
+  "what_july_faithful_means": {
+    "replicates": [
+      "the algorithm",
+      "the physical scaling",
+      "the hyperparameters",
+      "the documented seeding protocol",
+      "the Generator / split / shuffle order"
+    ],
+    "does_not_replicate": [
+      "July's dataset",
+      "July's parent",
+      "July's actor",
+      "July's output"
+    ],
+    "is_not": "a reproduction of the July run. No number produced here is comparable to a July number as if it were the same experiment.",
+    "operational_lineage": "the AUGUST V26 J2 parent (module_state 0f182ea9...) and the CURRENT J7 dataset of 16713 rows, materialised and audited in this pipeline",
+    "july_multistart_training_block": "ABSENT / DEFERRED",
+    "makes_no_claim_about": [
+      "the deterministic-algorithms backend",
+      "the thread count"
+    ]
+  }
+}

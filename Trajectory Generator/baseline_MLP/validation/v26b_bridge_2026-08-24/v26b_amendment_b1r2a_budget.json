@@ -1,0 +1,133 @@
+{
+  "schema": "v26b_amendment.1",
+  "amendment": "B1R2A-BUDGET",
+  "stage_token": "V26B-B1R2A-BUDGET",
+  "status": "PRE-REGISTERED BEFORE EXECUTION. Immutable and additive. Nothing in this file may be edited after the first execution; a correction must be a new additive addendum.",
+  "authorized_by": "architect, 2026-08-25",
+
+  "hypothesis": {
+    "single_variable": "optimisation budget",
+    "statement": "The B1R2 all-data reconstruction curve attained its best aggregate RMSE at epoch 396 of a 400-epoch budget, i.e. at the boundary. B1R2-A tests ONLY whether the budget was the binding constraint, by extending it to 1200 epochs and changing nothing else.",
+    "what_is_NOT_tested_here": [
+      "no reweighting of the head cycles",
+      "no learning-rate or scheduler change",
+      "no architecture, observation-contract or masking change",
+      "no dataset, label, cache or gate change",
+      "no controller/contralateral/clock feature reintroduction",
+      "no FSM v3, morphology, contact, reward or SEA change"
+    ]
+  },
+
+  "experiment_matrix": [
+    {
+      "arm": "A",
+      "binding": true,
+      "epochs_max": 1200,
+      "optimizer": "Adam",
+      "batch": 64,
+      "lr": 0.0003,
+      "seed": 123,
+      "loss": "flat MSE + clip 1.0 + logstd 0.1 + anchor 1e-5",
+      "shuffle": "np.random.default_rng(123).permutation per epoch, unchanged",
+      "init": "B0 35D masked, byte-identical",
+      "everything_else": "identical to B1R1"
+    }
+  ],
+  "matrix_rows": 1,
+
+  "parent": {
+    "actor": "B0_35D_MASKED",
+    "module_state_sha256": "aa7ea0fa1bbef8bb6ef2a33ee8ebe5defeeb4959148a589b81ff994cf291171f",
+    "actor_digest": "b2429a8217f99ed7ab4e61620480f797d4617c7713b857624e85c095bed57c55",
+    "role": "the ONLY parent; every fold and the final fit start byte-identical from it",
+    "forbidden_parents": "any B1_*, B1R1_*, S0D_*, S1*, REV4* artefact; July checkpoints",
+    "july_status": "methodological reference only; no July checkpoint, label or cache is used"
+  },
+
+  "student": {
+    "width": 35,
+    "hard_masked_input_columns": "0:2 (clock) and 25:35 (controller/Markov)",
+    "effective_support": "23D, columns 2..24",
+    "first_layer_columns": "zeroed, frozen, and restored to zero after every optimizer step",
+    "logstd_head": "hard-frozen, byte-identical to B0",
+    "critic": "never loaded, never touched",
+    "no_25d_actor": true
+  },
+
+  "validation_design": {
+    "folds": 11,
+    "semantics": "8 structurally complete cycles + 3 tails",
+    "composition": "6 cycles held out by B1R1, plus 2 structurally complete cycles that begin at the episode origin (nominal 0:163, plus020 0:143), plus 3 genuine tails (minus020 489:499, nominal 468:499, plus020 448:499)",
+    "structure_derivation": "derived from the FSM columns, never hardcoded: a segment is a complete cycle when a full stance then a full swing closes on the next heel-strike; it is a tail when the episode ends inside it",
+    "embargo_rows": 20,
+    "coverage": "every one of the 1313 non-WAIT rows is held out EXACTLY ONCE",
+    "wait_policy": "the 187 WAIT rows are NEVER held out; they remain reconstruction-only and are explicitly not a generalisation measurement",
+    "all_rows_binding": "all 1500 rows remain binding in the final gates, unchanged"
+  },
+
+  "epoch_selection_rule": {
+    "no_future_reading": "e* is a function of the pooled VALIDATION curve alone. The final all-1500 fit and its metrics never enter the selection. The gates are applied only after e* is fixed. No fold is ever evaluated at its own best epoch.",
+    "step_1": "Eleven independent fits, all starting byte-identically from B0, one per fold. Each runs the FULL 1200-epoch budget with NO internal early stop, recording val_mse at every epoch 1..1200. fit_masked is reused unchanged.",
+    "step_2": "pooled(e) = sum_k n_k * mse_k(e) / sum_k n_k, with n_k the validation rows of fold k and sum_k n_k = 1313.",
+    "step_2_identity": "Because the eleven folds partition the non-WAIT rows exactly once, pooled(e) IS the out-of-fold mean squared error over EVERY one of the 1313 non-WAIT rows, each scored by the one fold that held it out. No non-WAIT row is ignored and none is counted twice. sqrt(pooled(e)) is therefore the out-of-fold aggregate RMSE over the whole non-WAIT set.",
+    "step_3": "e* = July's rule applied to pooled(): the stale counter resets only on strict improvement greater than 1e-9; e* is the FIRST epoch attaining the pooled minimum; the curve is considered stopped after 60 consecutive stale epochs. The function is v26b_b1r1_exec.pooled_best_epoch, reused unchanged, with patience 60 and eps 1e-9.",
+    "step_4": "Every fold is evaluated at the SAME e*, never at its own best.",
+    "step_5": "The final fit restarts byte-identically from B0 on ALL 1500 rows for exactly e* epochs, in fixed_final_epoch mode with no validation.",
+    "auditability": "Two-pass determinism: re-running a fold for exactly k epochs reproduces bit-for-bit the state the 1200-epoch run held at epoch k. The test asserts it.",
+    "patience_unchanged": "patience stays at July's 60. It is part of the pinned protocol, not part of the budget; changing it would be a second variable."
+  },
+
+  "budget_readout": {
+    "purpose": "the actual measurement of the hypothesis, at zero extra compute",
+    "method": "the July rule is applied twice to the SAME recorded curve: once truncated to the first 400 epochs and once over the full 1200. This is an exact apples-to-apples budget contrast on identical fits and an identical design.",
+    "binding_selection": "e_star_1200 only",
+    "diagnostic_only": "e_star_400 is DIAGNOSTIC and can never change e*, the gates or the verdict",
+    "budget_was_binding_if": "e_star_1200 > e_star_400, or pooled(e_star_1200) < pooled(e_star_400) by more than 1e-9",
+    "budget_still_insufficient_if": "the pooled curve never exhausts its 60-epoch patience within 1200 epochs. This outcome is to be REPORTED, not fixed: no autonomous extension of the budget is permitted."
+  },
+
+  "gates": {
+    "source": "imported from v26b_b1r1_exec; never restated by hand; not relaxed",
+    "binding": [
+      {"gate": "integrity_invariants", "requirement": "10 keys, width 35, columns 0:2 and 25:35 exactly zero, no masked update, logstd byte-identical to B0, critic never loaded"},
+      {"gate": "functional_equivalence_25", "requirement": "bit-exact"},
+      {"gate": "every_fold_improves_over_b0", "requirement": "11 of 11"},
+      {"gate": "fold_heldout_rmse", "threshold": 0.05, "applies_to": "each of the 11 folds"},
+      {"gate": "pooled_validation_rmse", "threshold": 0.03, "definition": "sqrt(pooled(e*)), the out-of-fold aggregate RMSE over all 1313 non-WAIT rows"},
+      {"gate": "final_aggregate_rmse", "threshold": 0.02, "applies_to": "all 1500 rows"},
+      {"gate": "final_per_joint_rmse", "threshold": 0.03, "applies_to": "all 1500 rows"},
+      {"gate": "final_per_joint_max_abs", "threshold": 0.15, "applies_to": "all 1500 rows"},
+      {"gate": "wait_reconstruction", "thresholds": [0.02, 0.03, 0.15], "note": "explicitly NON-generalisation; reconstruction only"}
+    ]
+  },
+
+  "stop_go": {
+    "GO": "promote a candidate ONLY if ALL binding gates pass. Promotion writes candidates/B1R2A_BASE35_BUDGET1200/.",
+    "NO_GO": "if ANY binding gate fails: STOP offline. No candidate is promoted, no rollout, no collection, no DAgger, no B1R2-B. Report exactly which gates, which folds and which regions fail.",
+    "always": "the diagnostic receipt and a NON-DEPLOYABLE state are written under diagnostics/b1r2a/ regardless of the verdict, so the evidence survives a failure",
+    "no_post_hoc": "no threshold, hyperparameter or rule may be changed after seeing any number. A failure is recorded as a failure.",
+    "single_execution": "one execution only; no retry; artefacts are preserved on failure"
+  },
+
+  "prohibited_in_this_stage": [
+    "rollout",
+    "teacher collection",
+    "DAgger",
+    "Markov phase",
+    "PPO",
+    "gradient clipping",
+    "any change to fit_masked semantics",
+    "any promotion without a full gate pass",
+    "any autonomous follow-up arm B"
+  ],
+
+  "immutability_to_verify": {
+    "B0_module_state": "aa7ea0fa1bbef8bb6ef2a33ee8ebe5defeeb4959148a589b81ff994cf291171f",
+    "B1_receipt": "e7328ac2eb49787e905ef0919f06c540bdd2ce4ec30d290e711f8b0af42f53b1",
+    "B1_module_state": "778ff748bd33ca658b62aae1b091be7b702242e9faabb8e0192daf7453e80a5b",
+    "B1R1_receipt": "6a604ada500f6f51594500f596ba7a7797cd1350a110b9d0fe1807ee4d2cadbb",
+    "B1R1_module_state": "9ffcdceb7f90f12cbcca0c151f8b667e3003ba4f48a124e630582d76cf0bd980",
+    "B1R2_receipt_pre_revision": "ebf0c8e88762c3bb826754753def2d1980ff0c43cfdbd2108062221cf1cb114f",
+    "B1R2_receipt_rev1": "d0f1e5155d8273651f6055ca9a47601ad5f265720db2d8aca295dabefc84ff4c"
+  }
+}

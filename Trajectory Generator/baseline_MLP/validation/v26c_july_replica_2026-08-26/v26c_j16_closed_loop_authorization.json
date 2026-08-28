@@ -1,0 +1,247 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, READINESS AND FROZEN EXECUTION RECORD",
+  "stage_proposed": "V26C_J16_J15R1_CLOSED_LOOP_REQUALIFICATION",
+  "operational_name": "J16",
+  "authorisation_status": "NOT_GRANTED_PENDING_ARCHITECT_AUDIT",
+  "execution_permitted_now": false,
+  "date": "2026-08-27",
+  "what_this_record_is": "the frozen description of the ONE A-F matrix this stage would run. It grants nothing: only a further architect GO record can permit execution.",
+  "the_only_scientific_variable": {
+    "changed": "the actor",
+    "from": {
+      "stage": "V26C_J11_MULTISTART_FIT",
+      "leaf": "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1",
+      "module_state_sha256": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+      "outcome_on_this_same_matrix": "FAILED 4/6 in J12"
+    },
+    "to": {
+      "stage": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+      "leaf": "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1",
+      "module_state_sha256": "4d084a2a7f0012bd711f39a987dbb7af30b04e265484128c45b0a92b612ab928",
+      "actor_digest": "c3551341b9b017b40585ee1f50f8ee4ecaa7ec50722f37142badc2a44b6c8590"
+    },
+    "proved_mechanically_not_asserted": [
+      "every function on the scientific path - evaluate_cell_gate, cell_verdict, penetration_report, expected_reset_time, base_env_config, cell_env_config, unit_correction - compiles to BYTECODE IDENTICAL to J12's, with identical constants",
+      "across the WHOLE runner exactly ONE function changes a numeric constant: verify_actor, and the change is 24713 -> 25567, the J15R1 aggregate row count",
+      "27 frozen constants compared equal to J12's, including MATRIX, the three offsets, SIGMA, EXPECTED_STEPS, the mask columns, RESET_SEMANTICS and ENV_MUTATION_POLICY",
+      "both gates identical to J12's value for value, and re-derived at run time from J1_GATE and J3_KINEMATIC_GATE against the frozen J9R1 module"
+    ]
+  },
+  "delta_versus_j12": {
+    "scientific": "NONE beyond the actor",
+    "categories_of_change": [
+      "stage token, preregistration, output leaf, receipt name and per-cell artefact names",
+      "the actor leaf, its eight pins, its digest and its receipt filename",
+      "verify_actor's provenance block, adapted to the J15R1 receipt SCHEMA: the parent lives at lineage.parent, the aggregate gained a fourth source (the J14 increment), the row count is 25567, and the J11 disclaimer is asserted from lineage.not_j11",
+      "two prose fields in verify_scientific_equivalence: actor_before and actor_now",
+      "a NEW declaration of the sealed seed reserve, which J12 did not carry"
+    ],
+    "what_did_not_change": "the matrix, every threshold, the gate path, the telemetry semantics, the penetration contract, the outcome rule, the environment builder, the reset semantics, the commit machinery, FSM v3, the morphology corridor, the reward, sigma, the SEA, the C++ plugin and the production config"
+  },
+  "matrix": {
+    "cells": [
+      {
+        "id": "A",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 1.956870983805102,
+        "label": "nominal"
+      },
+      {
+        "id": "B",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 1.756870983805102,
+        "label": "-0.20 s"
+      },
+      {
+        "id": "C",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 2.156870983805102,
+        "label": "+0.20 s"
+      },
+      {
+        "id": "D",
+        "mode": "stochastic_held",
+        "seed": 123,
+        "offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "E",
+        "mode": "stochastic_held",
+        "seed": 124,
+        "offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "F",
+        "mode": "stochastic_held",
+        "seed": 125,
+        "offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      }
+    ],
+    "count": 6,
+    "order": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+    ],
+    "offsets_full_precision": {
+      "nominal": 1.956870983805102,
+      "minus": 1.756870983805102,
+      "plus": 2.156870983805102
+    },
+    "steps_per_cell": 500,
+    "sim_output_files_per_cell": 19,
+    "behavioural_fail_fast": false,
+    "every_cell_runs_once_even_after_a_FAIL": true,
+    "adaptive_selection": "FORBIDDEN",
+    "retry": "FORBIDDEN"
+  },
+  "outcome_rule": "aggregate PASS iff 6/6 behavioural PASS AND 6/6 telemetry valid; any telemetry invalidity yields INVALID regardless of behaviour; a FAIL is COMMITTED as evidence, not discarded",
+  "penetration_bands": {
+    "soft_diagnostic": "> 0.020",
+    "july_legacy_diagnostic": ">= 0.025",
+    "hard_binding_pass_iff": "<= 0.028, so exactly 0.028 PASSES",
+    "hard_binding_fail_iff": "> 0.028",
+    "local_threshold_literals_in_the_runner": 0
+  },
+  "seeds": {
+    "read": [
+      123,
+      124,
+      125
+    ],
+    "sealed_never_read": [
+      126,
+      127,
+      128
+    ],
+    "sealing_is_new_here": "J12 declared no sealed reserve; this stage introduces the declaration deliberately. It constrains only J16 and changes no threshold, gate or cell."
+  },
+  "frozen_inputs_sha256": {
+    "v26c_j16_prereg_closed_loop_requalification.json": "150f49b1bd2865d9224d43336d50098c2fd610b4b5d121dd1ce737213a0864aa",
+    "v26c_j16_closed_loop.py": "6ac4585424cbce34957722e8fc64dc0669de14c57a0418e6aa940b1303cc2e34",
+    "test_v26c_j16_closed_loop.py": "67f00fc6bc9899c94f6780a72371c869e7250b77680598c01ede4b2977783b0b"
+  },
+  "frozen_actor_sha256": {
+    "commit_verification.json": "551a9cfd8d727ba181bb8ffcb7611d002b49dc77e4a0c78599c436e2378f8821",
+    "history.json": "71c375ebad117d24df8ff5b2dc573f957cbf43d2b610f0ea43023a7cd9523c81",
+    "rl_module/actor_feature_manifest.json": "bb24bedca3f8572e370d92ff02640a3890171888215017cd2821d62245670653",
+    "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "rl_module/module_state.pkl": "4d084a2a7f0012bd711f39a987dbb7af30b04e265484128c45b0a92b612ab928",
+    "v26c_j15_aggregate_dataset.npz": "f4d0c09c78e812a78910626789043e42a6ee851e99b56e59595f4887d7faebe8",
+    "v26c_j15_fresh_refit_receipt.json": "b7b3e9c7db116af4e19d2807359914a03d7d989824c97393dc997994213de349"
+  },
+  "frozen_provenance_sha256": {
+    "j15_runs/j15r1_nominal_mean_shift_addendum_2026-08-27.json": "9c50cbfbe6e345dcd3625570d492c460da88009522e24822a7ca0951125c2cfc",
+    "j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_increment.npz": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/module_state.pkl": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+    "v26c_j9r1_closed_loop.py": "f58b0d14b077536ced24ec3063bd2154ed1e207b42532bddc76177f1e02e4a3c",
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461"
+  },
+  "frozen_argv_when_authorised": {
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "environment_for_the_matrix": "as the architect specifies at GO time; this record fixes the argv, not the environment",
+    "environment_for_this_readiness": "PYTHONDONTWRITEBYTECODE=1, as the architect required",
+    "selftest": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/test_v26c_j16_closed_loop.py"
+      ],
+      "expect": "exit 0, selftest PASS, checks == 473"
+    },
+    "preflight": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j16_closed_loop.py",
+        "--preflight"
+      ],
+      "expect": "exit 0, verdict GO, 0 blockers, inert, writes nothing"
+    },
+    "run": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j16_closed_loop.py",
+        "--run",
+        "--authorized-stage",
+        "V26C_J16_J15R1_CLOSED_LOOP_REQUALIFICATION",
+        "--out",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j16_runs/j16_closed_loop_v26c_2026-08-27_r1"
+      ],
+      "times_permitted_once_authorised": 1,
+      "requires": "a NEW architect GO record. This record grants none.",
+      "exit_code": "0 iff the aggregate verdict is PASS; a FAIL commits its evidence and exits 1",
+      "note": "PROBES OF THIS ARGV AFTER A COMPLETED RUN ARE FORBIDDEN."
+    }
+  },
+  "expected_outputs": {
+    "relative_leaf": "j16_runs/j16_closed_loop_v26c_2026-08-27_r1",
+    "per_cell": [
+      "j16_cell_<ID>_trace.json",
+      "j16_cell_<ID>_kinematics.npz",
+      "j16_cell_<ID>_penetration.npz",
+      "j16_cell_<ID>_sim_outputs/ (exactly 19 regular files)"
+    ],
+    "receipt": "v26c_j16_closed_loop_receipt.json",
+    "expected_file_count": 134,
+    "no_clobber": true,
+    "fail_closed": true,
+    "a_FAIL_still_commits": true
+  },
+  "verified_at_this_readiness": {
+    "selftest_checks": 473,
+    "environment": "PYTHONDONTWRITEBYTECODE=1",
+    "preflight": "GO, 0 blockers, no environment, no module load, no torch, writes nothing",
+    "namespace_closure": "zero unresolved globals in every module-level function",
+    "no_matrix_executed": true,
+    "leaf": "ABSENT",
+    "lock": "ABSENT",
+    "staging": "ABSENT"
+  },
+  "risks": [
+    "NOMINAL DRIFT: the J15R1 addendum measured nominal_mean_shift 0.11720377206802368 against J11's 0.026410309597849846, a factor 4.44. Cells A to D exercise exactly that region. Whether it costs behaviour there is UNKNOWN and is what this stage measures. No threshold is imported for it.",
+    "a supervised RMSE improvement of 53.7% on the corrective rows does not entail closed-loop recovery of E and F",
+    "no outcome is preregistered as expected: this matrix can equally show recovery, no change, or a regression in A-D"
+  ],
+  "forbidden_here": [
+    "fit",
+    "optimizer step",
+    "weight update",
+    "critic",
+    "PPO",
+    "promotion",
+    "deployability",
+    "editing or copying the actor",
+    "editing a log-std head",
+    "a second actor",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "behavioural fail-fast",
+    "an autonomous retry",
+    "a local penetration threshold",
+    "mutating any scientific or runtime env field; episode_start_offset_s is the ONLY one the matrix varies",
+    "writing any cell's outputs outside its own authorised output_dir",
+    "starting a Ray cluster",
+    "starting Ray workers",
+    "EnvRunners"
+  ],
+  "requires_to_run": "a NEW architect GO record, additive, pinning the three input hashes above. It will permit exactly ONE execution of the matrix.",
+  "closing_rule": "this phase closes with a dedicated user report, audited before any next step.",
+  "self_consistency": {
+    "contains_no_self_hash": true
+  }
+}

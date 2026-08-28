@@ -1,0 +1,71 @@
+{
+  "document_type": "PROPOSAL ONLY - NOT AN AMENDMENT - NOT AUTHORISATIVE",
+  "authorises_nothing": true,
+  "produced_under": "V26B-S1C-3-DIAG (read-only diagnosis)",
+  "date": "2026-08-24",
+  "warning": "this file pins nothing as authorised, enables no execution and is not part of the amendment chain. It becomes actionable only if the architect converts it into an amendment with an explicit token",
+
+  "why_not_another_fit": {
+    "evidence": "the S1C-2Z candidates moved the ankle command by up to 0.712 in action units and still flipped only 6 to 10 of the 64 hinge rows; the S1C-1 candidates left duty cycle and run structure identical to A2. Two objective families have now failed to recover the sign",
+    "gate_is_not_the_cause": "the P gate is a post-fit acceptance criterion and was never part of any loss, so it did not cause the sign failure; it only made the outcome unacceptable afterwards",
+    "unknown_that_matters": "the walking boundary between A2 (action drift 0.0657 / 0.0455, walks 500/500) and S1A (0.384 / 0.289, does not walk) has never been probed"
+  },
+
+  "proposed_single_test": {
+    "kind": "ONE deterministic nominal closed-loop rollout. NO new fit, NO new split, NO new loss",
+    "candidate": {
+      "id": "L20",
+      "path": "runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1C2Z_L20_35D_NONDEPLOYABLE",
+      "receipt_sha256": "03802eadd3fc6371a1f959116b44694d5736ced59ff056e6e4162aae36ce71a9",
+      "already_materialised": true,
+      "no_other_candidate": true
+    },
+    "why_L20": {
+      "isolates_one_axis": "knee action drift 0.0649 versus A2's 0.0657 (essentially unchanged); ankle drift 0.0815 versus 0.0455. The test moves almost only the ankle",
+      "most_advanced_towards_the_primary_objective": "T improvement on the ankle 21.6% versus A2's 13.8%; within-window slope energy 25.14 versus 61.21; pointwise ankle RMSE 0.20036 versus 0.22753",
+      "passes_the_july_style_criterion_set": "mean 0.0584/0.0809 <= 0.10, rms 0.0792/0.1280 <= 0.15, strata max 0.0925 <= 0.10, T 18.5/21.6 >= 10, psq 0.4267 <= 0.5, action drift 0.0649/0.0815 <= 0.10"
+    },
+    "offline_acceptance_precondition_REQUIRES_ARCHITECT_DECISION": {
+      "change": "demote max_abs from BINDING to INFORMATIONAL, exactly as July's P5 max_abs_dW1 was informational",
+      "unchanged": ["mean_abs <= 0.10", "rms <= 0.15", "per-stratum mean_abs <= 0.10", "T improvement >= 10% per joint", "parameter_shift_sq <= 0.5", "action drift <= 0.10 per joint"],
+      "status": "NOT applied by the worker. This is a threshold change and only the architect may authorise it",
+      "justification_on_record": "the F2R/T1R offline criteria are RMSE-type (P1 <= 0.10 per joint) with no binding per-row maximum; P5 records max_abs_dW1 as informational; the 13/07 selection was made by the closed-loop gate with the offline gate at ok:false"
+    },
+    "closed_loop_gates_unchanged": {
+      "completion": "500/500 with end_reason episode_time_limit",
+      "phase_timeout_stance": 0,
+      "phase_timeout_swing": 0,
+      "morphology_causal_contract_failure": "rows_positive 0, max 0, failure false, read per row",
+      "hs_cancelled_count": "max 0 and final 0",
+      "resync_count": "max <= 1 and final <= 1",
+      "valid_cycle_count": ">= 1",
+      "penetration": "max <= 0.020 m and no grf_penetration termination"
+    },
+    "execution_policy": "exactly one launch, no retry, no tuning, canonical rev3c/e/j command, deterministic mean, seed 123, nominal start; no sigma is chosen",
+    "outcome_policy": {
+      "fail": "quarantine, causal diagnosis, no relaunch, no promotion; the 'widen the trust region' direction is refuted and only option (C) remains",
+      "pass": "CLOSED_LOOP_ELIGIBLE_PENDING_ARCHITECT_AUDIT only; no promotion, no deployable status, no anchor construction"
+    },
+    "explicit_limitation": "even a PASS does NOT recover the push-off sign: L20 leaves 54 of 64 window rows with a positive ankle command, against S0D's 60. This test answers how far the actor can move and still walk, not whether plantarflexion can be recovered"
+  },
+
+  "what_this_test_does_not_settle": [
+    "the sign recovery itself, which requires movements above 0.25 on 42 of the 64 window rows",
+    "B3, which stays INDETERMINATE while the phase field is identically zero",
+    "sigma, which stays unresolved"
+  ],
+
+  "alternatives_if_the_architect_prefers_a_fit": {
+    "A_masked_preservation": "keep the current P thresholds outside the 64 target rows and give those rows an explicitly declared, separately preregistered bound. July-faithful in structure (July used different criteria per role) but introduces a new object",
+    "B_july_criterion_set": "drop max_abs to informational globally, keeping mean/rms/strata/T/D unchanged. The minimal change and literally the July criterion set; it is the precondition already embedded in this proposal",
+    "C_new_dagger_collection": "addresses only the residual ambiguity (recall 0.639 and the non-observable early window), not the primary blocker, and needs its own collection, fit and rollout tokens"
+  },
+
+  "measurements_supporting_this_proposal": {
+    "rows_needing_more_than_0.25_for_the_SIGN_alone": {"hinge_active_64": 42, "train_380": 229, "holdout_100": 72},
+    "rows_needing_more_than_0.25_to_MATCH_the_target": {"hinge_active_64": 50, "train_380": 201, "holdout_100": 56},
+    "min_required_movement_sign_only_hinge_rows": {"mean": 0.33802, "max": 0.95466},
+    "gap_ik_minus_s0d_hinge_rows_action_units": {"knee_mean": 0.55167, "ankle_mean": 0.43094, "ankle_max": 1.09054},
+    "all_units": "action units, the metric of the P gate; q_ankle = 0.7 * a, so q <= 0 is equivalent to a <= 0"
+  }
+}

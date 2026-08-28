@@ -1,0 +1,444 @@
+{
+  "protocol_id": "V26B-bridge-rev3",
+  "title": "V26 August 39D (sole init) -> causal deployable 35D student -> deterministic gate -> sigma sweep -> critic warmup (July recipe replicated under the v3 runtime)",
+  "date": "2026-08-24",
+  "status": "PREREGISTERED (rev3). V0 tooling + synthetic tests + no-clobber dry-run authorised and implemented; anchor COLLECTION, V1-V5, any rollout/fit/gate NOT executed and NOT authorised",
+  "sources": {
+    "july_recipe_reports": [
+      "reports/user/2026-06-25_transizione_ex_novo_warmstart_imitativo.md",
+      "reports/user/2026-07-09_warm_start_imitativo_exnovo.md",
+      "reports/user/2026-07-11_riadattamento_imitativo_target_domain.md",
+      "reports/user/2026-07-13_sblocco_actor_markov35_e_warmup_critic.md",
+      "reports/user/2026-07-13_actor_robust_deployable_critic_warmup.md",
+      "reports/user/2026-07-15_pilot50_ppo_bilanciato_validazione_robusta.md"
+    ],
+    "current_evidence": "reports/user/2026-08-23_f1_s1_protocollo_tooling_dryrun.md sections 13-14 (F0/F1/F2R/P0/T1/T1R) and the historical lineage analysis of 2026-08-24"
+  },
+  "runtime": {
+    "name": "v3_canonical",
+    "config": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "detector": "binary V25/V26 heel-qualified",
+    "fsm": "actor FSM v3 (resync + HS cancel)",
+    "morphology_corridor": {
+      "path_profile": "ab06_prosthetic_event_warped_mean_std_corridor.json",
+      "sha256": "33b1dd7cb0db40110a4f9c1b8c0dd49a498662211e6e132f0f3cefe8edc02a55",
+      "alpha": 0.6223
+    },
+    "rollout_eval_sha256": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba",
+    "guards_unchanged": "grf penetration penalty 0.020 m / termination 0.028 m, swing hard timeout 2.6 s, every reward/corridor/production parameter exactly as pinned; NO guard or threshold is changed by this protocol"
+  },
+  "actors": {
+    "init_and_teacher_network": {
+      "name": "V26_39D_august",
+      "role": "THE ONLY INIT and the only network knowledge source",
+      "module": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+      "actor_digest": "5bbc6cbd3c7e3ec37524b7b6b69ca017af48057cac5207cf755d3b2f72c2709e",
+      "module_state_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+      "width": 39,
+      "manifest39_sha256": "2837779ceb5953b18cf9be0e62836c8cc56d3fe871c48b869a5cedb6b0d81945",
+      "note": "June-equivalent imitation actor retrained natively under the new runtime (20/08); consumes 4 prescribed healthy imitation targets at indices 2:6 and the prescribed clock at 0:2; state-dependent log-std head (replaced at transplant)"
+    },
+    "ik_teacher": {
+      "name": "IK_prescribed",
+      "role": "supervision teacher for BOTH joints (knee + ankle) on non-anchor rows, as in July",
+      "definition": "u_IK(t) = encode_absolute_action(q_IK(t + 0.010 s + lookahead)), lookahead 0.0 s, per-joint absolute encoding knee q=0.75a-0.75 (bounds -1.5,0), ankle q=0.7a (bounds -0.7,0.7), clip [-1,1], float32 cast; source = the env's own base_kin (KinematicsInterpolator over models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot with the runtime 6 Hz filter), captured at env construction (0 steps) as in the F2R privileged cache",
+      "rationale": "the July bridge that produced JUL_H0 used exactly this teacher on both joints; it is on-support everywhere by construction (no network extrapolation)"
+    },
+    "controls_only_never_init_never_labels": {
+      "JUL_H0": {
+        "actor_digest": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+        "role": "July bridge product; same-instrument benchmark"
+      },
+      "T1_student": {
+        "actor_digest": "7f45a7abd2bcc310bd56fa8cf6dcc830f585d562a3f9f07637420278a98e3b37",
+        "role": "F2R T1 commissioning control"
+      },
+      "T1R_student": {
+        "actor_digest": "da4937c1b22daeb876866cff2290fd53276ff6dedc2d7457132648ad5c965a51",
+        "role": "F2R T1R corrective commissioning control"
+      },
+      "B0820_H0": {
+        "actor_digest": "ce46f729080b069274f6f69a504dfedc92440584f4e4eb6281bdcc153c3a193a",
+        "role": "negative control (hard-drop transplant without adaptation)"
+      }
+    }
+  },
+  "student_contract": {
+    "contract": "35D deployable MLP 35-256-256-2 (+2 constant log-std rows), tanh; manifest35_sha256 c6f8602816059b5c3508c626e5ce08d3ba922710f8b48c9557af9056f1155004",
+    "hard_constraints": [
+      "W1[:,0:2] == 0 (prescribed clock columns) after every optimiser step and at export",
+      "log-std rows zero, bias float32(ln sigma) constant",
+      "no prescribed clock/targets/time/step index in the actor input",
+      "export exactly the 10 original pi* keys, save/reload bit-exact, clock-invariance bit-identical"
+    ],
+    "sigma_constant_default": null,
+    "sigma_serialisation_placeholder": {
+      "value": 0.005,
+      "meaning": "module-format placeholder only; no gate reads it; the operational sigma is the V4 selection"
+    }
+  },
+  "seeds": {
+    "det": 123,
+    "collection": [
+      123,
+      124
+    ],
+    "held_out_promotion": 125,
+    "sealed": [
+      126,
+      127,
+      128
+    ],
+    "rules": "identical to F2R rev3: 125 never in any dataset/label/fit/aggregation/selection; 126-128 sealed until the final phase; sweep and DAgger use 123/124 only"
+  },
+  "anchors": {
+    "role": "preservation region of the V26 init, equivalent in role to the ~16000 July nominal anchors",
+    "coverage_target_mandatory_no_waiver": {
+      "min_bitwise_unique_rows": 16000,
+      "min_complete_500row_traces_per_sigma": 3,
+      "note": "the rev2 reduced-coverage waiver path is REMOVED by architect decision"
+    },
+    "targets": "ALWAYS the DETERMINISTIC MEAN action of the August V26 actor, computed offline on the visited obs39 (A_iso6clk route: env obs35 float32 + prescribed targets at 2:6 + prescribed clock at 0:2, numpy float64 forward of the mean head); NEVER the recorded stochastic action; on deterministic traces the mean must match the recorded raw action within 1e-5 (verified per trace)",
+    "collection_behaviour": {
+      "sigma_grid_fixed": [
+        0.0025,
+        0.005,
+        0.01
+      ],
+      "meaning": "exploration for STATE COVERAGE only, via content-addressed constant-sigma 39D modules derived from V26 (F1 recipe; mean network bit-identical to V26); this grid does NOT determine and does NOT bias the operational sigma decided in V4",
+      "route": "A_iso6clk validation adapter (f1_rollout_aiso --f1-adapter aiso6clk), runtime v3_canonical pinned, prescribed targets+clock inserted, projection asserted bit-exact every step"
+    },
+    "anchor_only_seeds_preregistered": {
+      "seeds": [
+        1000,
+        1001,
+        1002,
+        1003
+      ],
+      "rule": "used EXCLUSIVELY for anchor collection; seeds 123-128 remain excluded and immutable for their existing roles (123/124 DAgger-collection, 125 held-out promotion, 126-128 sealed); anchor seeds are forbidden in any DAgger/gate/holdout context and vice versa (enforced by tooling asserts)"
+    },
+    "expected_volume": {
+      "stochastic_traces": 36,
+      "composition": "3 exact starts x 4 anchor seeds x 3 sigmas",
+      "rows_per_complete_trace": 500,
+      "existing_det_anchor_rows": 1500,
+      "raw_expected_rows": 19500,
+      "unique_after_dedup_required": ">= 16000"
+    },
+    "fail_closed_filters": [
+      "trace identity: summary seed/action_selection/exact episode_start_offset_s/n_actor 35/steps; adapter sidecar mode aiso6clk with all_steps_asserted, steps_match_rollout and the insertion bound to the pinned 35D/39D manifests",
+      "digests: trace/summary/reset/sidecar SHA-256 recorded and receipt-bound; runtime config == a870cc38...; rollout_eval == 5433bcbc...; sigma-module mean == V26 mean (derivation report pinned to source digest 5bbc6cbd...)",
+      "no contract failure: morphology_causal_diagnostics.failed_closed false and zero causal failure events",
+      "finite rows only",
+      "bitwise dedup across ALL rows (row duplication forbidden)",
+      "incomplete traces (< 500 rows) never contribute rows silently: dropped, counted and reported"
+    ],
+    "stop_rule": "if unique rows < 16000 OR any sigma has < 3 complete traces after the filters -> STOP and architect decision; NO seed is added automatically",
+    "existing_det_anchors": {
+      "trace_sha256": {
+        "minus020": "05de8103802ac6923e2ddeaea1b57d791cbf6b0e806ee5e0dc37e809767a02a7",
+        "nominal": "3a66d1098a55a5c68229fca6a4090b06a33e5348a49e75f4f329c1a49d1cbe5c",
+        "plus020": "5375547a9211b1a5eea364798e24b74a5c22bd6e17772e2a67c3f80005dfb1a9"
+      },
+      "rows": 1500
+    }
+  },
+  "stages": {
+    "V0_tooling": {
+      "scope": "tooling + synthetic tests + no-clobber dry-run for the anchor-collection plan (v26b_anchors.py): planner (36 stochastic jobs + 3 sigma-module derivations), read-only preflight, fail-closed collector/validator with the coverage stop-rule, guarded collection CLI (refused without the architect's stage token); F0/F1/F2R libraries reused READ-ONLY and unmodified",
+      "forbidden": [
+        "training",
+        "rollout",
+        "env stepping beyond the 0-step cache capture already materialised",
+        "gate",
+        "refit"
+      ],
+      "exit": "architect audit"
+    },
+    "V1_init_transplant_39_to_35": {
+      "recipe": "July 25/06 design + 09/07 implementation + 13/07 deployable rule, applied to the August V26: actor-only feature-aligned weight transfer by feature NAME from the 39D manifest to the 35D manifest",
+      "steps": [
+        "W1_35[:, f] = W1_39[:, f] for every one of the 35 shared feature names",
+        "the 4 healthy-target columns (39D indices 2:6) are removed WITH mean-bias compensation: b1 += W1_39[:, removed] @ mean(removed targets over the 3 anchor traces) (July: plain drop discouraged)",
+        "prescribed clock columns (35D indices 0:2) ZEROED (deployable rule, 13/07)",
+        "hidden layers and mean head copied unchanged",
+        "state-dependent log-std head REPLACED by a constant head with sigma_serialisation_placeholder = 0.005 (rows zero, bias float32(ln 0.005)): a SERIALISATION PLACEHOLDER required by the module format, IRRELEVANT to the deterministic gate (V3 evaluates the mean only) and NOT a default or implicit operational choice - the operational sigma is decided exclusively by the V4 sweep",
+        "export 35D pure with the full invariant battery"
+      ],
+      "offline_checks_fail_closed": [
+        "save/reload bit-exact",
+        "clock invariance bit-identical",
+        "on the 3 anchor traces: mean of the transplanted 35D student vs recorded V26 action reported per joint (expected degraded: this is the B0820-like baseline point, kept as internal reference, not a gate)"
+      ],
+      "exit": "architect audit; no rollout in V1"
+    },
+    "V2_target_domain_adaptation": {
+      "recipe": "July 13/07 full recipe replicated: supervised adaptation of the FULL mean network, log-std frozen, critic absent",
+      "dataset_roles": {
+        "anchors_preservation": "the collected V26 anchor set that PASSED the mandatory coverage target (rev3); target = deterministic V26 mean on those states; bitwise dedup within role; row duplication forbidden",
+        "ik_teacher_rows": "u_IK (knee AND ankle) on: (a) the alternative-start prescribed rows reconstructed on the anchor grids; (b) every DAgger on-policy row (see below). No network-teacher label outside the anchor region (July lesson: the 39D teacher extrapolates off-support; the IK teacher is on-support by construction)",
+        "dagger_phase_aligned": "rounds on the CURRENT student's visited states (det seed 123 + stoch seeds 123/124), labels u_IK, with the mandatory PHASE-ALIGNMENT rule"
+      },
+      "phase_alignment_rule_fail_closed": "for every on-policy trace, labels are valid only up to the FIRST discrete FSM mismatch between the rollout and the prescribed cycle (state_name/valid_hs_count/valid_to_count comparison on the exact time grid); rows after the first mismatch are TRUNCATED from the dataset; the truncated fraction is reported per trace; a round whose aggregate out-of-phase fraction before truncation exceeds 0.80 is rejected entirely (July diagnosis: 76.3% misaligned labels destroyed the adaptation; truncation, never relabelling by index)",
+      "loss": "L = mean_j E_anchor[(m_j - a_V26_j)^2]/Var_anchor_j + beta * mean_j E_teacher[(m_j - uIK_j)^2]/Var_teacher_j + lambda_phi*L_aux(prescribed clock, training-time head only) + lambda_clip*relu(|m|-1)^2 + lambda_a*||theta - theta_V1||^2; per-joint variances fixed a priori from the training rows; group-balanced per-role means (never row-count weighted); beta = 1.0 a priori",
+      "budget_frozen": {
+        "epochs": 300,
+        "batch_size": 256,
+        "optimizer": "Adam",
+        "lr": 0.0001,
+        "seed": 2026,
+        "clip_weight": 1.0,
+        "lambda_phi": 0.1,
+        "lambda_anchor": 0.001,
+        "selection": "closed_loop_only",
+        "aux_head": "training_time_only"
+      },
+      "dagger_budget": "at most 3 rounds (July promoted round 2 and rejected round 3); round r+1 aggregates ONLY seed 123/124 rows of round r; every round ends with the deterministic gate V3 and an architect audit; no adaptive tuning on the gate",
+      "offline_criteria_fail_closed_before_any_rollout": {
+        "Q1_preservation_on_anchors_rmse_max_per_joint": 0.1,
+        "Q2_vs_uIK_rmse_max_per_joint_alt_start_rows": 0.15,
+        "Q2b_vs_uIK_rmse_max_per_joint_onpolicy_rows": 0.15,
+        "Q3_invariants": [
+          "10 keys",
+          "clock columns zero",
+          "log-std constant",
+          "save/reload bit-exact",
+          "clock invariance bit-identical"
+        ],
+        "Q4_reporting": "phase-truncation fractions, per-role row counts, dedup and cross-role collisions (reset rows: preservation wins, input digest + target delta reported), parameter shift informational",
+        "rule": "Q1, Q2, Q2b and Q3 all mandatory; any FAIL -> no export, no rollout"
+      },
+      "blocked_by": "ANCHOR COVERAGE (rev3): V2 refuses to build the dataset unless the collected anchors pass the mandatory coverage target (>= 16000 bitwise-unique rows, >= 3 complete traces per sigma) - no waiver exists"
+    },
+    "V3_deterministic_gate": {
+      "rollouts": "exactly 3 deterministic seed-123 gate-only rollouts on the exact starts above (enters_dataset false except when the DAgger round plan aggregates seed-123/124 rows for the NEXT round as in F2R T2 semantics; seed-125 jobs are never part of V3)",
+      "checks_frozen": {
+        "D1_horizon": "500/500 steps on ALL 3 starts, end_reason episode_time_limit, no phase timeout",
+        "D2_cycles": ">= 1 valid cycle per start and >= 2 on >= 2 starts",
+        "D3_v3_counters_all3": {
+          "hs_cancelled_count": 0,
+          "resync_count_max": 1,
+          "phase_timeout_stance_or_swing_rows": 0,
+          "morphology_causal_contract_failure": "failed_closed false and zero failure events"
+        },
+        "D4_kinematics": {
+          "knee_rmse_max_rad": 0.16,
+          "knee_pearson_min": 0.85,
+          "rule_knee": "2of3",
+          "ankle_min_window_phase_0.55_0.80_max_rad": -0.03,
+          "rule_ankle_min": "2of3",
+          "ankle_rmse_max_rad": 0.25,
+          "rule_ankle_rmse": "2of3",
+          "stance_fraction": [
+            0.5,
+            0.75
+          ],
+          "rule_stance": "2of3",
+          "knee_rom_min_rad": 0.6,
+          "rule_rom": "all3",
+          "corridor_coverage": {
+            "settled_min": 0.6,
+            "dropped_max": 0.4,
+            "rule": "all3"
+          }
+        },
+        "D5_torque_reserve": {
+          "reserve_norm_max_nm_per_start": 1000.0,
+          "action_clipped_steps": "0 on every start (actual clipping of the raw policy action must not occur; stricter than the F2R C4<=30 by architect decision rev2)",
+          "action_abs_max_recorded": "<= 1.0 implied by zero clipping; the raw max is recorded",
+          "rule": "all3"
+        },
+        "D6_penetration": {
+          "penetration_max_m": 0.02,
+          "no_grf_penetration_termination": true,
+          "rule": "all3",
+          "note": "guards themselves unchanged (20/28 mm); D6 uses the F2R C1/C2 thresholds"
+        }
+      },
+      "drift_estimator": "unwrapped_circular_difference (A6-unwrap amendment inherited) with period band [1.45, 1.70] s and drift <= 0.055 cycle/s where the online clock is evaluated",
+      "aggregation_rule": "per start; phase-aligned metrics = median over the valid cycles of that start; a start without valid cycles FAILS every phase-aligned metric",
+      "outcome": "PASS (all D1-D6) -> stage V4; FAIL -> at most the DAgger budget of V2 continues (aggregation of seeds 123/124 only), else STOP and architect decision",
+      "starts_exact": {
+        "minus020": 1.756870983805102,
+        "nominal": 1.956870983805102,
+        "plus020": 2.156870983805102,
+        "note": "episode_start_offset_s exact floats (nominal -0.20 / nominal / nominal +0.20), identical to F0/F1/F2R"
+      }
+    },
+    "V4_sigma_sweep": {
+      "variants_sigma": [
+        0.0025,
+        0.005,
+        0.01
+      ],
+      "derivation": "constant-sigma head swap ONLY on the V3-passing student (content-addressed, F1 sigma-variant recipe); the mean network is bit-identical across the three variants; 0.005 has NO privileged status: it is one candidate like the others",
+      "runs_per_sigma": "6 stochastic rollouts = 3 exact starts x seeds {123, 124}; seed 125 stays held-out (see below); 126-128 sealed",
+      "per_sigma_quality_battery_frozen": {
+        "note": "every candidate repeats the FULL battery, compared with the V3 deterministic baseline of the same student",
+        "robustness": {
+          "horizon_runs_min": "5/6 (500/500, episode_time_limit, no phase timeout)",
+          "cycles_min_1_per_run_in": "5/6",
+          "no_grf_penetration_termination": "6/6"
+        },
+        "v3_counters_every_run": {
+          "hs_cancelled_count": 0,
+          "resync_count_max": 1,
+          "phase_timeout_stance_or_swing_rows": 0,
+          "morphology_causal_contract_failure": 0
+        },
+        "kinematics_vs_V3_non_inferiority": {
+          "basis": "per-start median over the seed runs with valid cycles, compared with the V3 deterministic value of the same start",
+          "knee_rmse_max": "V3_start + 0.02 rad",
+          "knee_r_min": "V3_start - 0.03",
+          "ankle_rmse_max": "V3_start + 0.03 rad",
+          "ankle_min_window_absolute": "<= -0.03 rad in >= 2 of 3 starts (absolute requirement maintained)",
+          "stance_fraction": "within [0.50, 0.75] in >= 2 of 3 starts"
+        },
+        "torque_clipping_penetration": {
+          "action_clipped_steps": "0 in EVERY run (the counter measures actual clipping of the raw policy action)",
+          "action_abs_max": "<= 1.0 implied by zero clipping; recorded",
+          "penetration_max_m": 0.02,
+          "reserve_norm_max_nm_per_start": 1000.0
+        }
+      },
+      "selection_rule_frozen": {
+        "order": [
+          "(1) eliminate every sigma failing ANY element of the battery above (fail-closed)",
+          "(2) among survivors rank FIRST by robustness count (number of the 6 runs meeting horizon AND >= 1 cycle), higher is better",
+          "(3) if tied, rank by quality margin: the vector of per-start median (knee_rmse, -knee_r, ankle_rmse, penetration_max, reserve_max) averaged over starts; smaller is better, compared with preregistered equivalence margins",
+          "(4) LARGER sigma is chosen ONLY as the final tie-break when robustness counts are equal AND every quality metric differs by less than its equivalence margin"
+        ],
+        "equivalence_margins": {
+          "knee_rmse_rad": 0.01,
+          "knee_r": 0.02,
+          "ankle_rmse_rad": 0.02,
+          "penetration_m": 0.001,
+          "reserve_nm": 50.0
+        },
+        "never": "never 'largest passing' as a primary criterion; never a look at seed 125 or any gate recomputation for the selection; no sigma passes -> stage FAIL, STOP (no retry, no threshold change)"
+      },
+      "held_out_V125": "after selection, 3 stochastic seed-125 rollouts at the selected sigma as the held-out promotion gate (horizon 3/3, >= 1 cycle per start, no penetration termination, C1-C3); a FAIL blocks promotion to V5"
+    },
+    "V5_critic_warmup": {
+      "recipe": "July 13/07: PPO critic warmup with the ACTOR BIT-FROZEN (actor state digest identical before/after, verified), 1 iteration preregistered (extendable to at most 5 only by explicit architect decision before launch), at the selected sigma; export H0_V26B (rl_module_last) with the full invariant battery",
+      "exit": "STOP; any PPO fine-tuning of the actor is a SEPARATE protocol with its own gates (July evidence: H1 single-iteration and pilot50 both failed the physical gates from JUL_H0)"
+    }
+  },
+  "artefact_rules": {
+    "no_clobber": "every artefact content-addressed / exclusively reserved (O_EXCL) with atomic fill; transactional module export with per-final-path lock and native no-replace rename (F2R recipe)",
+    "receipts": "f2r.1-style receipts with the F0 contemporaneous closure; preflight scoping (archival integrity for every existing output, current-revision equality only for selected jobs)",
+    "immutable_inputs": [
+      "F0/F1/F2R directories",
+      "the 3 dirty user-owned files",
+      "production code, reward, corridor, guards",
+      "JUL_H0/T1/T1R/B0820 checkpoints (controls)"
+    ]
+  },
+  "explicitly_not_authorised_by_this_document": [
+    "any training",
+    "any rollout or env stepping",
+    "any gate computation",
+    "any cache build",
+    "any refit",
+    "any PPO"
+  ],
+  "success_criterion": "an H0_V26B 35D causal student that PASSES the full deterministic gate V3 (incl. 500/500 on all 3 starts, ankle min <= -0.03, penetration <= 20 mm with no termination and the four v3 counters clean), an operational sigma selected by the V4 robustness/quality non-inferiority rule, the V125 held-out gate, and a warmed critic - ready for a separately-gated PPO decision",
+  "revision": {
+    "rev": 3,
+    "date": "2026-08-24",
+    "supersedes": {
+      "rev": 2,
+      "sha256": {
+        "v26b_protocol.json": "404bcb1e7219fb99b2553c179aad40b6c88a535ee78704aa64e5e58eec255151",
+        "PROTOCOL_V26B.md": "94b4dba828498252f6e72e8131bcd43f07f6cbb8c977f1d1ae880402b023db36"
+      },
+      "rev1_sha256": {
+        "v26b_protocol.json": "a4789ce1f23b796f04dc793a91c781c0e5047efd443f9f0cdf9f0f137bac92c8",
+        "PROTOCOL_V26B.md": "0306886ae92fd51807d90ddc1899c0420d5d2ea261d9794ea9fd0520ea4a61ed"
+      }
+    },
+    "architect_decision": "rev2 approved conceptually; the reduced-coverage waiver is REJECTED: the anchor coverage target is mandatory (>= 16000 bitwise-unique rows, the July role); V0 tooling + synthetic tests + dry-run authorised NOW (no rollout, fit or real gate)"
+  },
+  "feature_contract_audit": {
+    "manifest39": {
+      "path": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/actor_feature_manifest.json",
+      "sha256": "2837779ceb5953b18cf9be0e62836c8cc56d3fe871c48b869a5cedb6b0d81945"
+    },
+    "manifest35": {
+      "path": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13/actor_feature_manifest.json",
+      "sha256": "c6f8602816059b5c3508c626e5ce08d3ba922710f8b48c9557af9056f1155004"
+    },
+    "mapping": "the 35 shared feature NAMES appear in both manifests in the SAME relative order; the 39D vector = 35D vector with the 4 prescribed healthy targets inserted as a block at indices 2:6 (verified: in39\\in35 = the 4 targets; in35\\in39 = empty)",
+    "removed_39d_indices_2_6_not_in_35d_vector": [
+      "healthy_knee_angle_imitation_target",
+      "healthy_knee_angle_imitation_target_vel",
+      "healthy_ankle_angle_imitation_target",
+      "healthy_ankle_angle_imitation_target_vel"
+    ],
+    "prescribed_clock_35d_indices_0_2": {
+      "names": [
+        "gait_phase_sin",
+        "gait_phase_cos"
+      ],
+      "semantics": "PRESENT in the 35D vector but dead under v3 (gait_clock_enable false: the env emits the constants (0, 1)); the student's W1 columns 0:2 are HARD-ZEROED after every optimiser step and at export, and the export is verified bit-invariant to perturbations of these entries -> physically in the vector, functionally NOT an input",
+      "distinct_from_targets": "the 4 targets are NOT zeroed: they are absent from the 35D vector altogether"
+    },
+    "causal_online_replacements_by_name": {
+      "prescribed clock (0:2) ->": {
+        "online_clock_triplet_35d_14_16": [
+          "online_left_gait_phase_sin",
+          "online_left_gait_phase_cos",
+          "online_left_cycle_duration_s"
+        ],
+        "semantics": "prosthetic-side ONLINE clock: (0, 1, 0) until the second accepted HS closes a valid cycle, then phase = clip((t - last_HS)/cycle_duration, 0, 1), saturating, no wrap",
+        "fsm_features_35d_17_24": [
+          "phase_fsm_wait_hs",
+          "phase_fsm_stance_after_hs",
+          "phase_fsm_swing_after_to",
+          "phase_expected_hs",
+          "phase_expected_to",
+          "phase_stance_elapsed_norm",
+          "phase_swing_elapsed_norm",
+          "phase_cycle_progress_credit"
+        ]
+      },
+      "prescribed healthy targets (39D 2:6) ->": {
+        "direct_replacement": "none: no online feature carries the healthy-side reference",
+        "internalisation_path": "the target function (phase-indexed joint reference) must be internalised by the mean network from: controller memory 35d 25-34 (pros_*_previous_endpoint, *_served_ref, *_served_ref_vel, *_served_ref_accel, *_sea_u), the FSM features 17-24, the online clock 14-16 and the contact/GRF block 10-13 (online_left_normal_grf_bw, in_contact, heel_strike, toe_off); this is precisely what the V2 target-domain adaptation trains"
+      }
+    }
+  },
+  "v0_tooling": {
+    "date": "2026-08-24",
+    "files": {
+      "v26b_anchors.py": "20e6db932ccda9a9015bf7dc7462759dde4d7c689f899873f883c7409d96dfac",
+      "test_v26b_anchors.py": "cdf90522c9733d68c624b78e78d6973388019766bb6f2ebffc07b73914c479f2"
+    },
+    "selftest": "SELFTEST PASS (256 checks): protocol binding fail-closed (weakened coverage/seeds/rev refused), seed governance (123-128 refused for anchors, 1000-1003 refused in dagger/gate/holdout/sealed, F2R rules untouched), planner (36 jobs, exact commands, no reserved-seed token), synthetic 36x500 happy path with targets == deterministic V26 mean bitwise (never the sampled action), bitwise dedup + conflicting-duplicate fail-closed, quality exclusions counted (incomplete/penetration/timeout/morphology), hard errors (receipt/pins/digests/seed/selection/mean-mismatch/adapter-mode), real read-only checks (preflight pins, V26 teacher digests, 3 det anchors 1500 rows mean<=1e-5, det-only coverage -> CoverageStop), collection guard refused without the stage token; sigma-module materialization smoke (isolated tempdir, real V26 source, no rollout): 3 modules derived, partial-failure lifecycle fail-fast without automatic retry, mirror-vs-F1 equivalence at sigma 0.005 bit-identical",
+    "reused_read_only": [
+      "f0_common",
+      "f1_common",
+      "f1_dataset",
+      "f1_obs_adapter",
+      "f1_sigma_variant",
+      "f2r_common",
+      "f2r_labeller (PrivilegedCache + TeacherLabeller T1 = V26 mean)"
+    ],
+    "collect_command_requires": "--collect --authorized-stage V26B-ANCHORS (architect GO; refused in V0)",
+    "v0_1_fix_record": {
+      "date": "2026-08-24",
+      "audit": "architect V0 audit: blocking bug in run_collection",
+      "superseded_files_sha256": {
+        "v26b_anchors.py": "e3bb4f7459e071e99ad1f042a626092306944fddd46002f402d0e759e50529a2",
+        "test_v26b_anchors.py": "b81ca082c5d4a7f2e9c927d9917af895cfbfe8dbba637efb160976402df3388d"
+      },
+      "bugs_fixed": [
+        "run_collection pre-created plan out_dir with mkdir before SV.derive_constant_sigma_module(materialize=True), but f1_sigma_variant refuses output_dir.exists() -> the FIRST module derivation always failed before any rollout. Fix: factored derive_sigma_modules() never pre-creates the dir (the derivation tool OWNS it); fail-fast, no automatic retry, diagnostic names the offending dir; re-invocation after a partial failure stops on the first existing module dir",
+        "found BY the new smoke test: f1_sigma_variant.ENTROPY_EXPECTED = -7.758758 is the sigma=0.005 value hard-coded at module level -> the F1 tool can never accept sigma 0.0025/0.01. F1 immutable. Fix: dispatch -- sigma 0.005 through the unmodified F1 tool; 0.0025/0.01 through _derive_constant_sigma_v26b, a faithful mirror using the same production primitives via the SV namespace (CAE.configure_constant_std, W load/save/compare, logstd_head_report, module_files_table) with the entropy expectation computed from sigma (same 1e-5 tolerance); binding invariant logstd_bias_exact unchanged; selftest proves bit-identical module_state vs the F1 tool at 0.005"
+      ],
+      "duplicate_warm_start_import": "not present: v26b_anchors.py has exactly one `import warm_start` (local to teacher_context); the mirror reuses SV.W",
+      "dry_run_manifest_note": "manifest/v26b_anchors_dry_run_20260824_112937.* pins the PRE-FIX v26b_anchors_sha256 and is now historical; per the no-clobber rule it is never rewritten. A fresh authorized dry-run (which recomputes all driver-input digests live) must precede any collection GO."
+    }
+  }
+}

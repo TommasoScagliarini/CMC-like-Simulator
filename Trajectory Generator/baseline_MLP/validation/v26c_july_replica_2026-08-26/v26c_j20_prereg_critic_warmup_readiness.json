@@ -1,0 +1,472 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION, MACHINE-READABLE",
+  "stage": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "date": "2026-08-27",
+  "status": "READINESS ONLY, revised after the architect review of 2026-08-27. Implemented and statically tested. The K1 probe builds a module and measures it through the REAL production transplant; it runs NO warm-up, NO training, NO rollout, NO PPO. NOT EXECUTED.",
+  "contains_no_self_hash": true,
+  "requires_architect_go_before_execution": true,
+  "objective": "establish, before any GO for the critic-only warm-up can be issued, that every input the warm-up would consume is present at its pinned bytes (K0) and that the module it would build behaves as claimed (K1): a live 84-wide critic, a byte-identical transplant of the ten J19A actor tensors, sigma exactly 0.005, and a freeze mechanism that demonstrably cuts the actor out of the gradient graph.",
+  "two_stages_not_one": {
+    "rule": "readiness and execution are separate GOs. This document preregisters BOTH, but authorises NEITHER.",
+    "K0_K1": "V26C_J20_CRITIC_WARMUP_READINESS - audit plus probe. Writes one leaf, j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1.",
+    "warmup": "V26C_J20_CRITIC_WARMUP - the single warm-up execution. NOT implemented here, NOT reachable from the readiness runner, and gated by its own separate architect GO.",
+    "why": "the architect's standing rule that a report and an audit close every phase before the next begins. Concatenating a probe and a warm-up in one execution would make the probe's verdict unauditable before the warm-up consumed it."
+  },
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> J8 -> J18 c13 -> J19A",
+    "j19c_is_qualification_not_a_new_actor": true,
+    "july_is_informative_only": "no July checkpoint, dataset, label or artefact is an operational input. July supplies the warm-up MECHANICS, transcribed and re-derived here from committed August evidence.",
+    "one_actor_35d": "there is one actor and it is 35-wide. No 25D variant, no widening, no contralateral feature."
+  },
+  "actor_under_warmup": {
+    "identity": "J19A, unchanged",
+    "leaf": "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1",
+    "module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "state_keys": 10,
+    "independent_parameter_tensors": 6,
+    "encoder_alias_tensors": 4,
+    "parameters_independent": 76036,
+    "it_is_read_never_edited_never_copied_into_a_promotable_place": true,
+    "b0820_39d_is_explicitly_NOT_the_lineage": "architect decision of 2026-08-27, point 1. The 2026-08-20 B0820 frozen-actor run is methodological precedent only: its actor is 39-wide and was never closed-loop qualified."
+  },
+  "entry_evidence_pinned": {
+    "rule": "the warm-up runs behind a closed-loop qualification that PASSED, and both receipts are re-hashed by the preflight",
+    "j19b_receipt_sha256": "789c57ca293ae7d5f578d4b3cae4e9aec599fa3edf4ce87239ad5fc8a7b1b509",
+    "j19b_verdict_required": "PASS, 6/6 behavioural and 6/6 telemetry-valid",
+    "j19c_receipt_sha256": "4224f0201eeccc8ccec911635b5bc18a82e38fb27eeb878457d004d28cb17ffc",
+    "j19c_commit_verification_sha256": "11096edec7e259a2fe3f6dd2691c26cee0ce0e82b96864bd85a52a00a9e6ef2f",
+    "j19c_verdict_required": "PASS, 3/3 behavioural and 3/3 telemetry-valid, 42/42 gates"
+  },
+  "warmup_mechanics_replicate_july": {
+    "authority": "architect decision of 2026-08-27, point 2",
+    "source_of_the_july_values": "the two contemporaneous July artefacts, validation/critic_warmup/2026-07-13_deployable_sigma0005_iter1/ and .../2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/, whose resolved configs and gate files record every value below",
+    "iterations": 1,
+    "train_batch_size": 4096,
+    "minibatch_size": 512,
+    "num_epochs": 10,
+    "lr": 0.0001,
+    "gamma": 0.99,
+    "lam": 0.9,
+    "clip_param": 0.2,
+    "kl_coeff": 0.2,
+    "kl_target": 0.01,
+    "vf_clip_param": 10.0,
+    "vf_loss_coeff": 1.0,
+    "num_env_runners": 13,
+    "ray_num_cpus": 14,
+    "exact_start_sampling": false,
+    "rollout_fragment_length": "auto, which follows from exact_start_sampling being false (train_ppo_mlp.py lines 1342-1347). This is what July used, and it also removes the divisibility requirement that 4096 cannot satisfy against 13 runners.",
+    "episode_start_offset_s": 1.956870983805102,
+    "episode_start_offset_choices_s": [],
+    "freeze_actor": true,
+    "freeze_logstd": true,
+    "clip_param_and_kl_coeff_are_inert_here": "with the actor detached the policy ratio is identically 1 and the KL is identically 0. Both values are pinned anyway, because they were pinned in July and an unpinned value is one more thing that can silently move."
+  },
+  "what_is_NOT_replicated_from_july": {
+    "rule": "the physical runtime is the CURRENT one, not July's. Only the warm-up mechanics come from July.",
+    "inherited_unchanged_from_the_pinned_august_runtime": [
+      "the physical runtime and the OpenSim/SEA model",
+      "FSM v3",
+      "the GRF detector and its profiles",
+      "the morphology corridor",
+      "the whole reward section, 125 keys, byte-identical",
+      "every current threshold, penetration included",
+      "the observation contract: 84 wide, of which the leading 35 are the actor's"
+    ],
+    "enforced_by": "the derivation tool refuses to touch the grf, supervision, logging and reward sections, and the preflight re-compares all four against the pinned source config"
+  },
+  "config_derivation": {
+    "decision": "the warm-up config is DERIVED, not written, by v26c_j20_derive_warmup_config.py from the runtime config the whole V26C chain already pins, using a closed map of 11 substitutions",
+    "source": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "source_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "source_lines": 242,
+    "target": "v26c_j20_warmup_cfg.yaml",
+    "target_sha256": "d8bcfd39f6015eaf7a41deda2edec201e9dbe89df6c425a67f3bf14bc5e4f525",
+    "substitutions": 11,
+    "source_lines_substituted": 14,
+    "source_lines_inherited_verbatim": 228,
+    "invariants_asserted_at_their_pinned_line": 15,
+    "training_exnovo_cfg_yaml_is_neither_read_nor_modified": true,
+    "why_a_tool": "keeping the runtime unchanged must be a measurement, not a claim. A hand-written config would make it a claim. This is the same discipline the architect approved for J19B (derived from J16) and J19C (derived from J19B).",
+    "the_eleven_substitutions": [
+      "S1 model.freeze_actor false -> true",
+      "S2 ppo.train_batch_size 4608 -> 4096",
+      "S3 ppo.num_epochs 1 -> 10",
+      "S4 ppo.lr 5.0e-07 -> 1.0e-04",
+      "S5 ppo.clip_param 0.05 -> 0.2",
+      "S6 ppo.kl_coeff 1.0 -> 0.2",
+      "S7 parallelism.num_env_runners 12 -> 13",
+      "S8 parallelism.ray_num_cpus 13 -> 14",
+      "S9 parallelism.exact_start_sampling true -> false",
+      "S10 simulation.iterations 55 -> 1",
+      "S11 simulation.episode_start_offset_choices_s three offsets -> empty list"
+    ],
+    "why_S9_and_S11_go_together": "with exact_start_sampling true the trainer REQUIRES num_epochs 1 and exactly three start offsets (_validate_start_sampling_args). July's warm-up used 10 epochs and one start, so the exact-start contract has to be off for the July mechanics to be expressible at all. Both were verified against the real validators, not inferred."
+  },
+  "manifest_overlay": {
+    "decision": "architect decision of 2026-08-27, point 3",
+    "blocker_it_resolves": "the J19A manifest carries no actor_feature_names, so warm_start._load_actor_feature_manifest raises ValueError at warm_start.py:163-168 and warm_start.resolve_source_actor_features auto-discovers that manifest from inside the module directory at warm_start.py:200-205. A transplant pointed at the J19A module directory fails before any tensor is copied.",
+    "scope_of_the_defect": "J19A's is the only one of the 85 actor_feature_manifest.json files in the repository that lacks the key",
+    "resolution": "a content-addressed overlay carrying the 35 names and explicit provenance. The J19A manifest is NOT corrected in place and no byte of the J19A leaf is touched.",
+    "overlay": "v26c_j20_actor_feature_manifest_overlay.json",
+    "overlay_sha256": "b0f9035413be0a56216e391cd27c4282c3cb708b7733a67ad32e506d281d39ca",
+    "names_join_sha256": "fb37bed7390b232b0874f5dd98aeb3e5448301ecbdd9d444101f69776f1d508f",
+    "provenance": "the 35 names are transcribed from 13 committed artefacts that all agree; the preflight re-reads every one of them and refuses any disagreement",
+    "how_the_leaf_manifest_is_bypassed": "the warm-up command passes the overlay explicitly with --warm-start-raw-source-feature-manifest, so auto-discovery never runs",
+    "the_overlay_is_DIRECTLY_CONSUMABLE": "actor_feature_names, actor_feature_count and actor_digest sit at the TOP level, because warm_start._load_actor_feature_manifest reads them from there. A first draft nested the list under a documentation key and was rejected at runtime with the same ValueError the overlay exists to avoid; the keys were hoisted for that measured reason. The other two keys are optional for warm_start and hard-checked when present, so including them turns the transplant into a fail-closed provenance check.",
+    "no_substitute_manifest_exists": "the J2, J8 and J15 manifests carry their own actor_digest, which warm_start hard-checks at warm_start.py:236-240. Pointing one of them at the J19A module would be refused, correctly, as a provenance mismatch.",
+    "source_config_is_deliberately_not_supplied": "the J19A run directory holds no training_cfg.resolved.yaml, because J19A was an offline supervised fit and not a training run. warm_start.resolve_source_config falls back to a path that does not exist, which is NOT an error: the transplant report records source_config_exists false. That is truthful, and inventing a config to fill the field would not be.",
+    "precedent": "v26c_j18_provenance_overlay_j8_2026-08-27.json, the same treatment the architect ordered for the stale J8 leaf manifest",
+    "it_also_declares_a_stale_status_field": "the J19A manifest says 'closed-loop A-F NOT run', which was true when J19A was committed and is false since J19B and J19C. Declared in the overlay, not corrected."
+  },
+  "training_health_telemetry": {
+    "decision": "architect decision of 2026-08-27, point 4",
+    "nature": "OBSERVATION ONLY, and contained. It adds no key to the environment info, changes no reward term, no dynamic, no threshold and no control flow, and no failure of its own can propagate into the training loop.",
+    "where_it_lives": "tb_logging.training_health_row plus RewardComponentsCallback._log_training_health, and train_ppo_mlp._training_health_metrics",
+    "published_to": [
+      "train_iterations.jsonl, under the row key 'training_health'",
+      "TensorBoard, as a top-level section 'training_health/'"
+    ],
+    "fields": [
+      "observed_rows",
+      "missing_telemetry_rows",
+      "phase_timeout_stance_rows",
+      "morphology_causal_contract_failure_rows",
+      "resync_event_rows",
+      "resync_count_max",
+      "hs_cancelled_count_max",
+      "timeout_side_disagreement_rows"
+    ],
+    "two_fields_beyond_the_five_requested": {
+      "observed_rows": "without a denominator, 'zero incidents' is not a health statement. Zero incidents over zero observed rows is silence, and this field is what tells the two apart.",
+      "timeout_side_disagreement_rows": "v26c_j1_collect RAISES when reward_terms and phase_fsm disagree about a timeout, and when a timeout carries a side that is neither stance nor swing. A sampling callback must never raise, so the same two anomalies are counted instead of thrown."
+    },
+    "sources": {
+      "phase_timeout_stance_rows": "reward_terms.phase_timeout_exceeded > 0 and reward_terms.phase_timeout_side == 1.0; the side code 1.0 = stance and 2.0 = swing is set in prosthetic_phase_fsm.py lines 1685-1689 and 1707-1711",
+      "morphology_causal_contract_failure_rows": "reward_terms.morphology_causal_failed_closed > 0",
+      "resync_event_rows": "phase_fsm.resync_event_this_step > 0",
+      "resync_count_max": "phase_fsm.resync_count, reduced with max",
+      "hs_cancelled_count_max": "phase_fsm.hs_cancelled_count, reduced with max"
+    },
+    "why_max_and_not_last": "under the v3 cancellation contract valid_hs_count can DECREASE, so a last-row reading would understate what happened. This is v26c_j1_collect._summarise's own rule, transcribed.",
+    "real_zero_versus_missing_telemetry": {
+      "rule": "a row whose telemetry is absent contributes observed_rows 0.0 and missing_telemetry_rows 1.0, and NO incident counter at all. A readable row contributes observed_rows 1.0, missing_telemetry_rows 0.0 and every counter.",
+      "consequence": "a counter reading 0 over an iteration means 'observed and did not happen', never 'never looked'. In the JSONL row a field that never arrived is null, never 0.0.",
+      "why": "a silent 0.0 would turn missing instrumentation into a clean bill of health - the exact failure mode v26c_j1_collect refuses by raising",
+      "tested": "see training_health_telemetry.tested: the suite must pass IN FULL, and its sha256 is pinned by the readiness runner. The real-zero cases specifically cover every required key individually made absent, NaN, infinite, non-numeric and None, plus the per-row and aggregate partition identities."
+    },
+    "equivalence_with_the_validated_aggregation": "the counting rule is cross-checked against committed traces AND their committed receipts: J12 cell F, the only trace in the chain carrying non-zero FSM events, plus J19C cells G and H. Not against a reimplementation.",
+    "it_is_not_a_gate": "no threshold is introduced. These values are recorded and reported; nothing terminates, blocks or rolls back on them.",
+    "observed_and_missing_partition": {
+      "rule": "observed_rows and missing_telemetry_rows PARTITION every row: exactly one of the two is 1.0 for any row, so per row they sum to 1 and over an iteration they sum to the number of rows the callback saw.",
+      "observed_rows_is_not_a_row_counter": true,
+      "what_observed_rows_counts": "rows whose required telemetry was present and finite, i.e. rows that could actually be read",
+      "zero_incidents_over_zero_observed_rows": "is silence, NOT health. A fully blind iteration reports observed_rows 0 and missing_telemetry_rows equal to the row count, so the reading cannot be mistaken for a clean bill.",
+      "corrected_on": "2026-08-27, architect review point A. The first implementation initialised observed_rows to 1.0 on every row, which made it a row counter and let an unreadable iteration report a healthy-looking zero.",
+      "tested": "per-row observed + missing == 1 on every case, aggregate observed + missing == the row count, and a 500-row fully blind iteration asserted to report observed_rows 0"
+    },
+    "containment": {
+      "rule": "the telemetry exists only to observe, so it must never be able to stop what it observes. Every failure surface is caught at its own boundary.",
+      "guarded_boundaries": [
+        "extraction",
+        "metrics_logger",
+        "tensorboard",
+        "jsonl"
+      ],
+      "extraction": "training_health_row raising is caught in _log_training_health; the step contributes nothing and sampling continues",
+      "metrics_logger": "each log_value call is guarded individually, so one hostile field does not suppress the other seven",
+      "tensorboard": "only training_health/ tags take the guarded path in log_result_scalars",
+      "jsonl": "_training_health_metrics degrades to all-None, never to zeros",
+      "non_health_tensorboard_failures_still_propagate": true,
+      "why_that_matters": "guarding every TensorBoard tag would silently change the failure behaviour of pre-existing metrics, which nobody asked for. The guard is surgical and the negative case is asserted by test.",
+      "diagnostic": "one stderr line per failure category per process, emitted from a path that is itself guarded so a diagnostic cannot reintroduce the failure it reports",
+      "corrected_on": "2026-08-27, architect review point B. The first implementation only DECLARED that it could not interrupt sampling.",
+      "tested": "hostile logger on every field and on one field, throwing extraction, hostile TensorBoard writer, hostile env_metrics, warn-once behaviour, and the negative case that a non-health TensorBoard failure still propagates"
+    },
+    "tested": "validation/test_training_health_telemetry.py, which must pass IN FULL. At this sealed revision that is 161 checks, and the suite's sha256 is pinned by the readiness runner, so the count here cannot disagree with the file without the preflight failing first.",
+    "test_suite_sha256_pinned_by_the_runner": "608cbe0ac927506553bee52b6a1eeb815d8d288f61a4a67f6410fbebc486206b",
+    "test_suite_checks_at_this_revision": 161
+  },
+  "K1_probe": {
+    "what_it_does": "constructs ONE module of the pinned class at the pinned geometry with inference_only=False, transplants the ten J19A actor tensors through the REAL production path - warm_start.transplant_actor_state driven by warm_start.resolve_source_actor_features against the explicit overlay - and measures 29 properties, P01 to P29",
+    "what_it_never_does": [
+      "call algo.train()",
+      "construct an optimizer",
+      "take an optimizer step",
+      "start Ray",
+      "construct an environment",
+      "step an environment",
+      "perform a rollout",
+      "write any byte of the J19A leaf",
+      "promote anything",
+      "import env_factory, rollout_eval or train_ppo_mlp"
+    ],
+    "the_one_place_it_touches_autograd": {
+      "what": "a single backward pass over one synthetic zero batch, to measure where gradients reach",
+      "no_optimizer_is_constructed_and_no_step_is_taken": true,
+      "why_it_is_needed": "freeze_actor is implemented by detaching the policy logits (asymmetric_rl_module.py lines 86-88 and 154). Whether the graph is really cut is a property of the built module, and asserting it without measuring it would be exactly the kind of unverified claim this pipeline refuses.",
+      "control_arm": "the same probe is run on an UNFROZEN module built identically. A probe that finds no actor gradient proves nothing unless it can show it would have found one.",
+      "safety": "every actor tensor is re-verified byte-identical to J19A's on disk AFTER the backward pass, and the whole J19A leaf is re-hashed against its seven pinned hashes"
+    },
+    "the_gait_clock_zeroing": {
+      "what_happens": "gait_clock_enable is false in the pinned runtime, so the transplant zeroes the target columns for gait_phase_sin and gait_phase_cos (warm_start.DISABLED_GAIT_CLOCK_FEATURES, applied at train_ppo_mlp.py:1784-1799)",
+      "why_it_changes_nothing": "columns 0 and 1 of the J19A pi.0.0.weight, and their pi_encoder.0.weight aliases, are ALREADY exactly zero at the bit level. The zeroing is therefore a no-op.",
+      "why_it_is_checked_anyway": "if it were not a no-op, the warm-up would perturb the actor before the first gradient, and the byte-identity gate would fail for a reason nobody had anticipated. Check P17 measures it in advance."
+    },
+    "byte_identity_method": "same dtype, same shape, same C-order bytes. Deliberately NOT numpy.array_equal, which is numeric and would call a float32 tensor equal to a float64 one and -0.0 equal to +0.0.",
+    "leaf": "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1",
+    "leaf_contents": [
+      "v26c_j20_probe_result.json",
+      "probe_full_module_state.pkl",
+      "probe_actor_transplant_report.json",
+      "probe_module_manifest.json",
+      "v26c_j20_critic_warmup_readiness_receipt.json",
+      "commit_verification.json"
+    ],
+    "probe_full_module_state_is_evidence_not_an_actor": "it carries the ten J19A actor tensors byte-identical plus six freshly-initialised critic tensors, no optimizer state, and was never trained. It is not a candidate, not a checkpoint and not promotable. It exists so that gate G7's semantics can be demonstrated before the warm-up rather than argued about after it.",
+    "fresh_critic_digest_is_recorded_but_never_pinned": "this stage claims no reproduction of any prior fresh-critic digest and invents no threshold on it",
+    "authoritative_path": {
+      "what": "warm_start.transplant_actor_state, the function train_ppo_mlp itself calls, driven by warm_start.resolve_source_actor_features against the explicit overlay",
+      "why_not_a_bare_load": "a bare load_state_dict(strict=False) exercises a path production does not take. It would prove nothing about the transplant's column algebra, its gait-clock zeroing, or its refusal to touch the critic.",
+      "source_checkpoint": "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+      "source_actor_feature_manifest": "v26c_j20_actor_feature_manifest_overlay.json, passed EXPLICITLY so auto-discovery never reaches the leaf manifest",
+      "mode": "drop, warm_start.DEFAULT_WARM_START_MODE",
+      "zero_target_features": "warm_start.DISABLED_GAIT_CLOCK_FEATURES",
+      "target_feature_contract": "taken from the LIVE environment's own recorded actor_feature_names in a committed J19C cell, NOT from the manifest that describes the source. Using the source manifest for both sides would make the contract agree with itself by construction and prove nothing.",
+      "target_geometry": "35D actor, 84D critic. No 25D actor, no widening, no contralateral feature.",
+      "corrected_on": "2026-08-27, architect review point C. The first probe only exercised load_state_dict(strict=False)."
+    },
+    "bare_load_is_secondary_only": {
+      "what_it_shows": "loading the actor-only export into a trainable module leaves the six critic tensors at their fresh initialisation, with NO exception and NO warning",
+      "why_it_is_kept": "the silent-fresh-critic behaviour is worth having on the record",
+      "is_not_the_authoritative_path": true
+    },
+    "the_preregistered_checks": [
+      "P01 the imported class is AsymmetricActorCriticTorchRLModule",
+      "P02 inference_only=False builds a 16-key state dict",
+      "P03 the six critic keys are present",
+      "P04 the critic shapes are exactly (256,84) (256,) (256,256) (256,) (1,256) (1,)",
+      "P05 the REAL resolver accepted the explicit overlay, resolution explicit_manifest",
+      "P06 the REAL resolver validated the actor digest against the source bytes",
+      "P07 the target contract comes from the live env record and equals the source contract, 35 wide",
+      "P08 the REAL transplant copied 33 features and zeroed ONLY the two gait-clock ones; no target-only feature, no source-only feature dropped",
+      "P09 the REAL transplant reports the source is actor-only, with no non-actor key",
+      "P10 the REAL transplant left the critic untouched, critic_init_mode fresh_target_untouched",
+      "P11 the critic is the TARGET's own fresh initialisation, not imported from the source: warm_start's own comparator is exact and the critic digest is unchanged",
+      "P12 the production load of the transplanted state is strict and complete",
+      "P13 all ten actor tensors are BYTE-identical: same dtype, same shape, same C-order bytes",
+      "P14 the canonical actor digest reproduces d4a13ff7...",
+      "P15 warm_start's own actor comparator calls the transplant exact, max_abs_diff 0.0",
+      "P16 the four encoder aliases remain byte-identical to their sources",
+      "P17 the gait-clock columns 0 and 1 are already exactly zero, so the zeroing is a provable no-op",
+      "P18 the controller-memory block 25:35 survives byte-identical AND alive, not zeroed",
+      "P19 the log-std rows 2:4 are byte-identical to J19A's",
+      "P20 the log-std is state-independent: rows 2:4 of pi.1.weight are exactly zero",
+      "P21 sigma = exp(pi.1.bias[2:4]) is 0.005 within 1e-09",
+      "P22 the freeze flags are live on the constructed module",
+      "P23 the frozen module gives the actor NO gradient",
+      "P24 the frozen module still gives all six critic tensors gradient",
+      "P25 the unfrozen control DOES receive actor gradient, so P23 is not vacuous",
+      "P26 the actor tensors survive the gradient probe byte-identical",
+      "P27 the full 16-tensor module hash differs from J19A's, as it must",
+      "P28 the J19A leaf is byte-unchanged across all seven files",
+      "P29 the bare-load diagnostic shows the silent fresh critic: missing keys are exactly the six critic ones"
+    ],
+    "properties_measured": 29
+  },
+  "preregistered_gates_for_the_single_warmup_execution": {
+    "authority": "architect decision of 2026-08-27, point 6",
+    "stage": "V26C_J20_CRITIC_WARMUP",
+    "aggregate_rule": "PASS if and only if every gate below passes. Any failure is FAIL_CLOSED: evidence is preserved and there is NO retry.",
+    "thresholds_invented_in_this_stage": 0,
+    "gates": [
+      {
+        "id": "G1",
+        "name": "exactly one logical iteration",
+        "criterion": "train_iterations.jsonl holds exactly one row and its iteration is 1"
+      },
+      {
+        "id": "G2",
+        "name": "the sampled lifetime delta is exactly the batch",
+        "criterion": "num_env_steps_sampled_lifetime is exactly 4096 after the single iteration, and the per-iteration delta is exactly 4096",
+        "why_it_is_written_this_way": "4096 is TIMESTEPS PER ITERATION, not a number of environments and not a cumulative total. The apparent growth seen in multi-iteration runs is num_env_steps_sampled_lifetime accumulating one batch per iteration; pinning the delta as well as the total makes the two impossible to confuse."
+      },
+      {
+        "id": "G3",
+        "name": "the critic metrics are finite",
+        "criterion": "vf_loss and the value-function explained variance are present and finite",
+        "explicitly_not_a_performance_gate": "NO threshold on explained variance or vf_loss is set. July set none either: its two warm-ups recorded 0.598 and 0.238 and both were passed. Inventing a bar here would repeat the J18 max-drift error - a number nobody calibrated, rejecting everything."
+      },
+      {
+        "id": "G4",
+        "name": "the mean KL is zero",
+        "criterion": "the reported mean KL is exactly 0.0, or numerically null within 1e-09",
+        "why": "with the actor detached the policy ratio is identically 1. A non-zero KL would mean the freeze did not hold."
+      },
+      {
+        "id": "G5",
+        "name": "the actor is bit-exact at every audit",
+        "criterion": "every actor_freeze_audit entry reports exact=true and max_abs_diff=0.0, before training and after the iteration, and the actor digest equals d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96 at every entry"
+      },
+      {
+        "id": "G6",
+        "name": "the log-std is bit-exact",
+        "criterion": "rows 2:4 of pi.1.weight and pi.1.bias are byte-identical to J19A's - same dtype, same shape, same C-order bytes - and sigma remains exactly 0.005",
+        "why_it_is_separate_from_G5": "freeze_actor detaches the whole logits tensor and therefore subsumes the log-std, but subsumption is an implementation property. The log-std is checked on its own so the guarantee does not depend on it."
+      },
+      {
+        "id": "G7",
+        "name": "the critic digest changed",
+        "criterion": "critic_state_audit's before_training and after_iteration digests differ",
+        "why": "a critic warm-up that left the critic untouched would have warmed nothing"
+      },
+      {
+        "id": "G8",
+        "name": "the full module file hash differs from J19A's, and the actor tensors do not",
+        "criterion": "the SHA-256 of the committed full module state MUST NOT equal 8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530, while all ten actor tensors inside it are byte-identical to J19A's",
+        "why": "the full module carries six critic tensors J19A does not have, so the FILE hash cannot match and requiring it to match would be a category error. The binding comparison is on the actor TENSORS.",
+        "already_demonstrated": "check P27 of the K1 probe demonstrates exactly this property before the warm-up runs"
+      },
+      {
+        "id": "G9",
+        "name": "the checkpoint is complete and the optimizer is restorable",
+        "criterion": "the run writes a full RLlib checkpoint containing learner_group/learner/state.pkl with an optimizer entry, and learner_group/learner/rl_module/default_policy/module_state.pkl with all 16 keys; a separate zero-iteration restore audit reloads it and reproduces both the actor digest and the critic digest exactly"
+      },
+      {
+        "id": "G10",
+        "name": "no retry, no crash, no timeout",
+        "criterion": "exit code 0, exactly one process, no supervisor restart, no watchdog hard-exit, no iteration or sampling timeout, and no autonomous retry whatever the outcome"
+      },
+      {
+        "id": "G11",
+        "name": "the training-health telemetry arrived",
+        "criterion": "the single iteration's training_health block is present with observed_rows equal to 4096 and missing_telemetry_rows equal to 0, and observed_rows + missing_telemetry_rows equal to 4096",
+        "explicitly_not_a_behavioural_gate": "the FSM and morphology counters are RECORDED, not bounded. This gate asserts only that the instrumentation reported, so a later reading of those counters is a measurement rather than a silence."
+      },
+      {
+        "id": "G12",
+        "name": "the J19A leaf is byte-unchanged",
+        "criterion": "all seven J19A leaf files re-hash to their pinned values after the run"
+      }
+    ]
+  },
+  "the_sealed_warmup_command": {
+    "rule": "one shot, one process, no supervisor, no retry. --worker-process is what makes main() fall through to run() instead of entering run_supervised()'s restart loop, so a crash is a failure and never a retry.",
+    "scientific_parameters_are_not_on_the_command_line": "they live in the derived, hashed config, so the invocation cannot silently disagree with the document that was preregistered",
+    "working_directory": "Trajectory Generator/baseline_MLP",
+    "tokens": [
+      "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+      "<BASELINE>/train_ppo_mlp.py",
+      "--worker-process",
+      "--config",
+      "<J20_DIR>/v26c_j20_warmup_cfg.yaml",
+      "--output-dir",
+      "<OUTPUT_DIR>",
+      "--warm-start-raw",
+      "--warm-start-raw-source",
+      "<J20_DIR>/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+      "--warm-start-raw-source-feature-manifest",
+      "<J20_DIR>/v26c_j20_actor_feature_manifest_overlay.json",
+      "--asymmetric-actor-critic",
+      "--freeze-actor",
+      "--freeze-logstd",
+      "--iterations",
+      "1",
+      "--checkpoint-every",
+      "1",
+      "--retain-iteration-checkpoints",
+      "--tensorboard",
+      "--no-progress",
+      "--no-update-history"
+    ],
+    "environment": "PYTHONDONTWRITEBYTECODE=1",
+    "the_runner_is_the_single_source_of_this_command": "v26c_j20_critic_warmup_readiness.sealed_command(); the test suite asserts the runner and this document agree token by token",
+    "placeholders": {
+      "<BASELINE>": "Trajectory Generator/baseline_MLP",
+      "<J20_DIR>": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26",
+      "<OUTPUT_DIR>": "an ABSOLUTE path to a FRESH directory; run() creates it with exist_ok=True and does NOT refuse a non-empty one, so reusing a directory would silently inherit its train_iterations.jsonl history"
+    },
+    "verified_against_the_real_parser": "the command was parsed by train_ppo_mlp.parse_args and passed all four validators - _validate_rl_module_args, _validate_warm_start_args, _validate_start_sampling_args and _validate_kl_guard_args - with no SystemExit. No training, no Ray and no environment were started to check it.",
+    "why_the_model_flags_are_repeated_on_the_command_line": "freeze_actor, freeze_logstd and asymmetric_actor_critic already come from the derived config, and argparse's set_defaults makes the YAML value survive when the flag is absent. They are repeated so the sealed command is self-evident: a reader should not have to open a YAML to see that this is a frozen-actor run.",
+    "what_worker_process_disables": "main() reads 'if not args.worker_process: raise SystemExit(run_supervised(args))'. With the flag, run_supervised is never entered: no restart loop, no subprocess respawn, no crash-retry and no supervisor_state.json. A crash is a failure, not a retry."
+  },
+  "execution_discipline": {
+    "single_execution": true,
+    "no_retry": "whatever the outcome",
+    "no_warmup_in_this_stage": true,
+    "no_ppo": true,
+    "no_ex_novo": true,
+    "no_rollout": true,
+    "no_collection": true,
+    "no_scientific_modification": true,
+    "no_sigma_change": true,
+    "preflight": "fail-closed; no torch, no ray, no environment, no rollout, no write",
+    "output": "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1, content-addressed, no-clobber, atomic, born invalid",
+    "born_invalid_marker": "TECHNICAL_INVALID is written FIRST into staging and removed LAST, only after post-commit verification succeeds",
+    "post_commit_verification": "every leaf-relative path is re-resolved from the COMMITTED receipt, re-hashed, and compared both to the receipt and to the staged bytes",
+    "go_must_pin": [
+      "v26c_j20_prereg_critic_warmup_readiness.json",
+      "v26c_j20_critic_warmup_readiness.py",
+      "test_v26c_j20_critic_warmup_readiness.py",
+      "v26c_j20_derive_warmup_config.py",
+      "v26c_j20_warmup_cfg.yaml",
+      "v26c_j20_actor_feature_manifest_overlay.json",
+      "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl"
+    ]
+  },
+  "invariants": {
+    "not_modified": [
+      "J0 through J19 runners and leaves - immutable evidence",
+      "the J19A leaf, byte for byte",
+      "training_exnovo_cfg.yaml",
+      "training_cfg.yaml",
+      "the C++ SEA plugin and the OpenSim model",
+      "FSM v3, the detector, the morphology corridor",
+      "the reward function's behaviour",
+      "the network architecture",
+      "sigma"
+    ],
+    "modified_additively_and_declared": [
+      "tb_logging.py - observation-only training-health telemetry",
+      "train_ppo_mlp.py - one helper and one row key publishing that telemetry"
+    ],
+    "why_those_two_are_not_invariant_violations": "the change is read-only instrumentation. It adds no environment key, alters no reward term, no dynamic, no threshold and no control flow, and its unit tests assert that the counting rule never writes into the info dict it reads.",
+    "dirty_worktree": "preserved untouched"
+  },
+  "deferred_todo": [
+    "the warm-up execution itself, V26C_J20_CRITIC_WARMUP, behind its own architect GO",
+    "the restore audit that gate G9 requires, as a separate zero-iteration run",
+    "policy_std always null, a cosmetic defect inherited from J12",
+    "the J8 leaf manifest remains stale, left unchanged by architect decision; consumers must read the provenance overlay",
+    "the J8 leaf has no commit_verification.json, like the J2 leaf",
+    "nominal_mean_shift declared and not measured in the J15R1 runner",
+    "ENV_MUTATION_POLICY in J19C remains a conservative inherited superset, byte-identical to J19B's",
+    "the J18, J19A, J19B and J19C readiness suites each retain one historically-false check after their GOs were issued, left unmodified by architect decision",
+    "LOTO, LOCO, B1R1, B1R2",
+    "the multi-model generalisation Epic"
+  ],
+  "what_this_stage_cannot_establish": {
+    "not_established": [
+      "that the warm-up will succeed",
+      "that the critic will fit anything useful - no explained-variance bar exists to fail",
+      "that the actor behaves the same under parallel Ray sampling as it did in the sequential closed-loop cells; J19B and J19C are sequential rollouts and this stage builds no environment at all",
+      "any generalisation beyond the nine cells of the combined J19B and J19C qualification",
+      "deployability of anything"
+    ],
+    "no_promotion": "nothing is promoted and nothing is called deployable by this stage"
+  },
+  "architect_review_2026_08_27": {
+    "verdict_before": "READY, provisional",
+    "verdict_after": "READY FOR ARCHITECT REVIEW / K1 NOT EXECUTED",
+    "A_observed_rows_semantics": "corrected: observed_rows and missing_telemetry_rows now partition the rows",
+    "B_observation_only_containment": "corrected: the telemetry's four failure boundaries are guarded, and the containment is tested rather than declared",
+    "C_real_warm_start_path": "corrected: K1 exercises warm_start.transplant_actor_state and the real resolver; the bare load is demoted to a secondary diagnostic",
+    "documentation_corrections": {
+      "telemetry_suite_count": "said 130 checks; the suite passes 161. Restated exactly and tied to the pinned suite hash so it cannot go stale silently.",
+      "probe_property_count": "said 18 properties; the sealed probe gate is P01-P29 = 29. Corrected.",
+      "gait_clock_check_id": "pointed at P19, which is the log-std byte-identity check. The gait-clock no-op is P17. Corrected here and in the overlay and the report.",
+      "none_of_these_changed_a_gate": true
+    }
+  }
+}

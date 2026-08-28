@@ -1,0 +1,196 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION, MACHINE-READABLE",
+  "stage": "V26C_J19B_J19A_CLOSED_LOOP_QUALIFICATION",
+  "date": "2026-08-27",
+  "status": "READINESS ONLY. Implemented and statically tested; NOT executed. No rollout, no fit, no PPO, no critic, no collection, no j19b_runs, no sealed seed, no GO.",
+  "contains_no_self_hash": true,
+  "requires_architect_go_before_execution": true,
+
+  "objective": "qualify the single actor committed by J19A against the binding closed-loop A-F protocol frozen in J16. Same qualification, new actor.",
+
+  "supersedes_an_earlier_draft_of_this_document": {
+    "what_the_first_draft_proposed": "a wrapper that imported J16 and REBOUND eight module globals at run time",
+    "why_it_was_withdrawn": "the architect audited it and it was wrong. The claim that exactly eight symbols differ and that run_matrix and preflight are reused by object identity is FALSE.",
+    "the_four_confirmed_defects": [
+      "verify_prereg would still read J16's PREREG and PIN_PREREG and validate the J16 schema, not this document",
+      "authorized_leaf builds the path from RELATIVE_LEAF_PARTS = ('j16_runs', ...); OUTPUT_ROOT_OVERRIDE is only a ROOT and cannot produce j19b_runs, and run_matrix explicitly REFUSES the override when stack is None",
+      "run_matrix reads manifest['actor_feature_names'] by direct subscript, a field the J19A manifest does not carry",
+      "RECEIPT_NAME, PREFLIGHT_SENTINEL, the receipt schema and several j16_* output names would all remain J16's"
+    ],
+    "status": "the draft was never sealed and never executed; it is replaced in place, not amended"
+  },
+
+  "derivation_instead_of_rebinding": {
+    "decision": "J19B is a MECHANICAL, AUDITABLE COPY of the J16 runner. J16 itself is byte-unchanged.",
+    "j16_runner": "v26c_j16_closed_loop.py",
+    "j16_runner_sha256": "6ac4585424cbce34957722e8fc64dc0669de14c57a0418e6aa940b1303cc2e34",
+    "how_the_copy_is_produced": {
+      "tool": "v26c_j19b_derive_from_j16.py",
+      "why_a_tool_and_not_a_hand_written_copy": "retyping 1737 lines of a safety-critical closed-loop path by hand is precisely the silent-divergence risk the mechanical-copy requirement exists to prevent: one mistyped constant would not announce itself. The transformation is therefore the auditable artefact, and it is a closed, pinned map.",
+      "declared_as_an_executor_decision_and_architect_approved": true,
+      "the_tool_is_not_part_of_the_execution_path": true,
+      "the_tool_writes_exactly_one_file_and_reads_J16_read_only": true
+    },
+    "textual_substitution_map": {
+      "entries": 17,
+      "hits": 238,
+      "classes": ["stage", "prereg", "output", "actor", "naming"]
+    },
+    "structural_replacements": [
+      {"kind": "naming", "what": "the module docstring, which named the J15R1 leaf, J11 as negative evidence, and the 'pass' commit-verification key"},
+      {"kind": "provenance", "what": "the leaf comment, which said 'Eight files, not six' and claimed J19A commits an aggregate dataset. The J19A leaf holds SEVEN files and J19A trains nothing, so it commits no dataset."},
+      {"kind": "provenance", "what": "the reported field multistart_disambiguation.training_data, which described J15R1's 25567-row training aggregate. Carried over unchanged it would have written a statement FALSE of the J19A actor into the J19B receipt; it now describes the J18 candidate-13 aggregate, four disjoint blocks totalling 4221 rows."},
+      {"kind": "provenance", "what": "PIN_J19A, the pinned leaf file set: seven J19A files replacing eight J15R1 files, plus the pinned feature-name sources and the J8 parent pin"},
+      {"kind": "provenance", "what": "the J15R1-lineage dead constants PIN_J11_FAILED_ACTOR, PIN_J14_DATASET, PIN_NOMINAL_DRIFT_ADDENDUM and NOMINAL_DRIFT_ADDENDUM, whose only consumer was J16's verify_actor. They are DROPPED rather than left dangling or repointed to something they do not describe."},
+      {"kind": "naming", "what": "the actor_before / actor_now prose in verify_scientific_equivalence"},
+      {"kind": "provenance", "what": "verify_prereg, rewritten for the J19B schema"},
+      {"kind": "provenance", "what": "verify_actor, rewritten for the J19A leaf schema"},
+      {"kind": "glue", "what": "the four lines of run_matrix that read the 35 feature names"}
+    ],
+    "structural_replacement_count": 9,
+    "structural_replacement_hits": 9,
+    "total_hits": 247,
+    "every_map_entry_matched_at_least_once": true,
+    "approved_by_the_architect": "the mechanical derivation is approved within the already authorised plan; it is not pending any further ruling",
+    "residual_j16_or_j15r1_identifiers_outside_the_replacement_blocks": "NONE, verified by the tool",
+    "deliberate_references_that_remain": "inside the replacement blocks only: the prose states what it was adapted from, and the J15R1 manifest is one of the three pinned sources that must agree on the feature names"
+  },
+
+  "scientific_path_is_unchanged": {
+    "bytecode_identical_to_J16": [
+      "base_env_config", "cell_env_config", "expected_reset_time", "unit_correction",
+      "evaluate_cell_gate", "cell_verdict", "penetration_report", "production_stack"
+    ],
+    "bytecode_identical_count": 8,
+    "run_cell": {
+      "instruction_stream_co_code_identical": true,
+      "differences_are_enumerated_and_naming_only": {
+        "referenced_names": ["J16Error -> J19BError", "J15R1_MODULE_DIR -> J19A_MODULE_DIR"],
+        "non_code_constants": ["'j16_cell_' -> 'j19b_cell_'", "'J16 cell ' -> 'J19B cell '"]
+      },
+      "no_object_identity_is_claimed": "the two modules hold distinct function objects; the claim is bytecode equality, which is what matters and what the tests verify"
+    },
+    "identical_by_value": ["MATRIX", "the gate tables", "SIGMA", "SIGMA_TOLERANCE", "ACTOR_WIDTH", "CLOCK_COLUMNS", "CONTROLLER_COLUMNS", "EXPECTED_STEPS", "NOISE_HOLD_STEPS", "seeds 123, 124, 125", "behavioural fail-fast false", "the penetration contract"],
+    "run_matrix": {
+      "verification_method": "sectional AST diff, not object identity",
+      "assertion": "net of the actor, provenance and naming glue, the A-F loop, the environment construction, the aggregation, the born-invalid marker and the post-commit verification remain equivalent"
+    }
+  },
+
+  "actor_under_test": {
+    "leaf": "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1",
+    "module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "parent": "J8",
+    "parent_module_state_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "leaf_file_count": 7,
+    "provenance": "the single reproduction of J18 candidate 13; reproduced bit-identically and offline-eligible 11/11"
+  },
+
+  "feature_names_resolution": {
+    "problem": "the J19A manifest deliberately carries NEITHER actor_feature_names NOR deployable; J16 read both from the J15R1 manifest",
+    "solution": "the 35 names are resolved from THREE independent PINNED sources that MUST agree, before any environment is constructed",
+    "sources": {
+      "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json": "bb24bedca3f8572e370d92ff02640a3890171888215017cd2821d62245670653",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62"
+    },
+    "measured_agreement": "the three sources carry identical 35-name orders; verified",
+    "the_j8_sidecar_caveat": {
+      "known_defect": "the J8 sidecar is byte-identical to J2's and misstates the module hash",
+      "used_for": "feature ORDER AND NAMES ONLY",
+      "never_used_as": "evidence of any module hash",
+      "why_it_is_acceptable_here": "its names agree with two independent pinned sources, one of which is the very manifest J16 itself consumed. One source alone would not be trusted.",
+      "declared_explicitly": true
+    },
+    "35D_semantics_preserved_by_J19A": {
+      "input_layer_shape": [256, 35],
+      "lineage": "the J19A manifest declares parent J8 9c5b1571...; J19A reproduces a J18 fit whose blocks were built on the same 35 columns",
+      "asserted_at_run_time": "the mask contract check requires the zero columns to be exactly the clock and every controller column to be live"
+    }
+  },
+
+  "the_six_cells": {
+    "source": "MATRIX, carried over from J16 unchanged and verified by value against it",
+    "cells": [
+      {"id": "A", "mode": "deterministic", "seed": 123, "offset_s": 1.956870983805102, "label": "nominal"},
+      {"id": "B", "mode": "deterministic", "seed": 123, "offset_s": 1.756870983805102, "label": "-0.20 s"},
+      {"id": "C", "mode": "deterministic", "seed": 123, "offset_s": 2.156870983805102, "label": "+0.20 s"},
+      {"id": "D", "mode": "stochastic_held", "seed": 123, "offset_s": 1.956870983805102, "label": "nominal sigma 0.005"},
+      {"id": "E", "mode": "stochastic_held", "seed": 124, "offset_s": 1.956870983805102, "label": "nominal sigma 0.005"},
+      {"id": "F", "mode": "stochastic_held", "seed": 125, "offset_s": 1.956870983805102, "label": "nominal sigma 0.005"}
+    ],
+    "steps_per_cell": 500,
+    "order": "A, B, C, D, E, F, sequential",
+    "behavioural_fail_fast": false,
+    "seeds_used": [123, 124, 125],
+    "sealed_seeds_126_127_128": "OUT OF PERIMETER. Not read, not generated, not used."
+  },
+
+  "penetration_contract": {
+    "authority": "v26c_penetration_contract.py, pinned; the runner writes down no threshold of its own",
+    "module_sha256": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "soft_diagnostic": "> 0.020 m, NEVER binding",
+    "july_legacy_diagnostic": ">= 0.025 m, comparative only, NEVER binding",
+    "hard_binding": "> 0.028 m is the SOLE blocking threshold; exactly 0.028 PASSES",
+    "unchanged_from_j16": true
+  },
+
+  "gates": {
+    "binding": [
+      "the per-cell A-F criteria carried over from J16 unchanged, whose ultimate sources are v26c_j1_collect.J1_GATE minus the 0.020 penetration bar, and v26c_j3_closed_loop.J3_KINEMATIC_GATE",
+      "the penetration hard band > 0.028 m, the sole binding penetration criterion",
+      "leaf and actor integrity, as verified by the adapted verify_actor",
+      "the agreement of the three pinned feature-name sources"
+    ],
+    "diagnostic_never_binding": [
+      "penetration > 0.020 m (soft)",
+      "penetration >= 0.025 m (July legacy comparison)"
+    ],
+    "aggregation": "carried over from J16 unchanged: PASS iff all six cells pass behaviourally AND all six are telemetry-valid",
+    "thresholds_invented_in_this_stage": 0
+  },
+
+  "execution_discipline": {
+    "single_execution": true,
+    "no_retry": "whatever the outcome",
+    "no_ppo": true, "no_collection": true, "no_fit": true, "no_critic": true,
+    "no_sigma_change": true,
+    "no_LOTO_LOCO_B1R1_B1R2": true,
+    "output": "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1, content-addressed, no-clobber, born-invalid marker written FIRST into staging and removed only as the LAST write after post-commit verification, under an exclusive lock",
+    "go_must_pin": [
+      "v26c_j19b_prereg_closed_loop_qualification.json",
+      "v26c_j19b_closed_loop.py",
+      "v26c_j19b_derive_from_j16.py",
+      "test_v26c_j19b_closed_loop.py",
+      "v26c_j16_closed_loop.py",
+      "v26c_penetration_contract.py"
+    ],
+    "j19a_leaf_artefacts_pinned_inside_the_runner": true
+  },
+
+  "what_this_stage_establishes": {
+    "is": "the BINDING verdict. Every offline gate so far has been a filter; this is the certificate.",
+    "cannot": "generalisation beyond the six frozen cells. LOTO, LOCO, B1R1, B1R2 and the multi-model Epic remain out of perimeter."
+  },
+
+  "deferred_todo": [
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "the multi-model generalisation Epic",
+    "the final held-out G-I phase on seeds 126, 127, 128, only if A-F passes",
+    "the declared-but-unmeasured nominal_mean_shift inside the J15R1 runner",
+    "the stale actor_feature_manifest.json sidecar in the J8 leaf, left unmodified by architectural decision",
+    "the J8 leaf carries no commit_verification.json, as the J2 leaf does not",
+    "policy_std is always null, a cosmetic defect inherited from J12",
+    "every phase closes with a user report, audited before the next begins"
+  ],
+
+  "invariants": {
+    "not_modified": ["v26c_j16_closed_loop.py and every historical runner", "the J19A leaf", "the J18 leaf", "J8", "J2", "J4", "J7", "J9R1", "J10R1", "production configuration", "FSM v3", "detector and morphology", "reward", "sigma", "SEA and the C++ plugin", "network architecture"],
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "dirty_worktree": "preserved untouched"
+  }
+}

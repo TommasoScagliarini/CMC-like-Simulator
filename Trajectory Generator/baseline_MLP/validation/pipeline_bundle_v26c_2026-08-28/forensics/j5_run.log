@@ -1,0 +1,112 @@
+2026-08-26 14:38:24,922	WARNING rl_module.py:463 -- DeprecationWarning: `RLModule(config=[RLModuleConfig object])` has been deprecated. Use `RLModule(observation_space=.., action_space=.., inference_only=.., model_config=.., catalog_class=..)` instead. This will raise an error in the future!
+
+
+****************************************************************
+[DEBUG] >>> SYSTEM ALERT: IL PLUGIN E' STATO CARICATO IN MEMORIA.
+[DEBUG] >>> INIZIO REGISTRAZIONE OGGETTI...
+[DEBUG] >>> SEA: registered.
+****************************************************************
+
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_gait_events_online.csv (0 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs
+Traceback (most recent call last):
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j5_revalidation.py", line 820, in <module>
+    sys.exit(main())
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j5_revalidation.py", line 813, in main
+    r = run(authorized_stage=a.authorized_stage,
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j5_revalidation.py", line 644, in run
+    obs, reward, terminated, truncated, info = env.step(raw)
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/reward_function.py", line 2580, in step
+    obs, env_reward, terminated, truncated, info = self.env.step(action)
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/gymnasium/core.py", line 636, in step
+    return self.env.step(self.action(action))
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/osim_trj_cmc_like.py", line 1853, in step
+    step_info = self.runner.step_until(
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/simulation_runner.py", line 426, in step_until
+    ) = self._compute_controls_for_window(state, controls, t)
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/simulation_runner.py", line 897, in _compute_controls_for_window
+    a_candidate, u_res_candidate = self._so.solve(
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/static_optimization.py", line 242, in solve
+    x, success = self._solve_slsqp(A, b)
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/static_optimization.py", line 700, in _solve_slsqp
+    result: OptimizeResult = minimize(
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_minimize.py", line 750, in minimize
+    res = _minimize_slsqp(fun, x0, args, jac, bounds,
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_slsqp_py.py", line 435, in _minimize_slsqp
+    fx = wrapped_fun(x)
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_optimize.py", line 304, in eval
+    x = _check_clip_x(x, bounds)
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_optimize.py", line 312, in _check_clip_x
+    warnings.warn("Values in x were outside bounds during a "
+RuntimeWarning: Values in x were outside bounds during a minimize step, clipping to bounds

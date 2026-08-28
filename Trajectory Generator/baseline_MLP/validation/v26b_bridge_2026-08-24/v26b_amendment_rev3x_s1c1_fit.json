@@ -1,0 +1,153 @@
+{
+  "amendment_id": "rev3x_s1c1_offline_fit",
+  "date": "2026-08-24",
+  "token": "V26B-S1C-1 (offline fit only)",
+  "kind": "ADDITIVE. Offline fit of exactly three preregistered candidates. No rollout, episode, collection, promotion, sigma or production change",
+  "authorised_after": "architect review of S1C-0 PASS; verdict REACHABLE accepted within its scope",
+  "parents_immutable": {
+    "rev3w": "92cf4aaf11dc0698054134c49efaaf34e16f5411579da6499ffae4e203dc2b47",
+    "rev3w_addendum_a": "7c4f39b9e0e2e2a579a189dffd35807ba71cada88c0e2b20c2a25c9f8214935b",
+    "rev3w_probe_receipt": "00e6141f4051117ef2425d144e062fd9cb61708a70e18e5d38b56864f67d8d2c",
+    "rev3w_probe_tool": "e776122e4e09517ae5d57594b353983deb14ee1100facc6dc94a3deb32394d40",
+    "rev3v": "889f1068a9ddb8db8241b62b569a85fbc6baf3d7673ae626c4df5e51902ed984",
+    "rev3t_fit_tool": "6c63bf8be54034148441cdb6dae004e14991dba400aa66ca239523b37fcb265a",
+    "rev3s": "89e8c227eecb2a80350307d6c0315e0f90e42b37ecae1d75fea30f9da2e067a0"
+  },
+  "init": {
+    "actor_digest": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+    "module_state_sha256": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597",
+    "exclusive": "S0D ONLY, reloaded fresh and digest-verified per candidate",
+    "forbidden": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "S1A",
+      "JUL_H0",
+      "R0a",
+      "R1",
+      "R2G",
+      "R2I",
+      "V1"
+    ]
+  },
+  "corpus": {
+    "unchanged_from_rev3s": true,
+    "task_rows": 380,
+    "anchor_rows": 380,
+    "steps": [
+      [
+        1,
+        190
+      ],
+      [
+        311,
+        500
+      ]
+    ],
+    "frozen_holdout": [
+      201,
+      300
+    ],
+    "embargo": [
+      [
+        191,
+        200
+      ],
+      [
+        301,
+        310
+      ]
+    ],
+    "no_new_collection": true
+  },
+  "objective": {
+    "form": "L = r * mean_anchor(row MSE vs u_S0D) + 1 * WEIGHTED_mean_task(row MSE vs u_IK) + 1.0 * clip + 1e-5 * July parametric anchor",
+    "r": 5,
+    "lambda_task": 1,
+    "task_weighting": "w_i = w on PUSH-OFF rows, 1 elsewhere; the task term is the WEIGHTED MEAN sum(w_i*mse_i)/sum(w_i) over the task rows present in the batch, so it stays a per-role mean and the meaning of r is preserved",
+    "push_off_definition_frozen": "rows whose decoded AB06 IK ankle target q = 0.7*u_IK[:,1] is NEGATIVE (plantarflexion). Count on the 380 training rows: 73 rows (19.2%)",
+    "group_balanced": "T1R mechanism: one deterministic shuffled union of the two 380-row role blocks; per-role means computed separately inside every batch; an absent role contributes exactly zero and such batches are counted",
+    "no_hard_blend": true
+  },
+  "candidates": [
+    {
+      "id": "W2",
+      "w": 2
+    },
+    {
+      "id": "W4",
+      "w": 4
+    },
+    {
+      "id": "W8",
+      "w": 8
+    }
+  ],
+  "numerics_frozen": {
+    "epochs": 300,
+    "batch_size": 256,
+    "optimizer": "Adam",
+    "lr": 0.0001,
+    "seed": 2026,
+    "deterministic_algorithms": true,
+    "clock_columns": "re-zeroed after every step",
+    "logstd": "restored bit-identical to the init",
+    "early_stopping": "none",
+    "retry": "forbidden",
+    "attempts_beyond_three": "forbidden"
+  },
+  "binding_offline_gates": {
+    "which": "the rev3s hierarchy I -> P -> T -> D, fail-closed with short circuit and discrete strata, thresholds UNCHANGED",
+    "evaluated_by": "v26b_s1b_protocol.offline_hierarchy (unmodified tool)",
+    "why_not_G1_G5": "the rev3v quality gates G1..G5 are defined on a CLOSED-LOOP trace (realised joint angles, FSM counters). No rollout is authorised here, so they CANNOT be evaluated in this stage and are not claimed",
+    "meaning_of_pass": "admitted to a future closed-loop gate under its own token; never walking, never promotion"
+  },
+  "G2_G4_offline_surrogates_non_binding": {
+    "rule": "reported for the architect's G2-G4 comparison, computed in COMMANDED-JOINT space on the frozen 500 S0D-visited rows: q_cmd = decode(policy action) versus the decoded IK target and versus the healthy contralateral signal",
+    "status": "SURROGATE ONLY. It is not the rev3v gate, it cannot substitute it, and it may never promote a candidate",
+    "baselines_recorded": "the same surrogates computed for S0D and for A2, so the comparison is like-for-like"
+  },
+  "preregistered_causal_diagnostic": {
+    "purpose": "decide whether the phase weight produces a command that is negative LONGER, not merely deeper",
+    "data": "the ORDERED frozen holdout rows, steps 201-300, never trained on by either role",
+    "metrics_frozen_before_execution": [
+      "duty cycle: fraction of held-out rows whose commanded decoded ankle target is negative",
+      "run lengths of consecutive negative-command rows: count, mean, max",
+      "minimum and mean of the commanded decoded ankle target",
+      "predicted served reference obtained by feeding the candidate's commanded actions, in temporal order, through the rev3w VALIDATED production replica (slew limiter + third-order jerk-limited model): min, fraction negative, final value"
+    ],
+    "references_computed_identically": [
+      "S0D",
+      "the AB06 IK target itself"
+    ],
+    "declared_limitation": "the held-out STATES are the ones S0D visited. Driving them with another actor's actions is an OPEN-LOOP COUNTERFACTUAL: it predicts what the reference path would do on those states, NOT what the candidate would visit in closed loop",
+    "B3_rule": "a rigorous B3 verdict is IMPOSSIBLE here because the phase field pros_ankle_angle_imitation_target_phase is identically zero on every v3 trace. The B3-specific part of this diagnostic is therefore marked INDETERMINATE and may NEVER promote a candidate or act as a gate",
+    "not_a_gate": "this diagnostic is descriptive; it is preregistered here, before any result is seen, and its thresholds are deliberately absent"
+  },
+  "materialisation": {
+    "path_template": "candidates/S1C1_<ID>_35D_NONDEPLOYABLE",
+    "student_dir_forbidden": true,
+    "atomic_no_clobber": true,
+    "mandatory_flags": {
+      "deployable": false,
+      "rollout_pending": true,
+      "sigma_unresolved": true,
+      "promotion_requires": "closed-loop nominal rollout under a separate token"
+    },
+    "failed_candidates": "materialised, marked quarantined:true and may_not_be_source:true"
+  },
+  "B3_blocker_unchanged": "the null phase field remains a SEPARATE open blocker for G5; no production or logging change is made now",
+  "prohibitions": [
+    "no rollout or episode",
+    "no collection",
+    "no promotion",
+    "no sigma",
+    "no production/env/reward/FSM/morphology/SEA/corridor change",
+    "no fourth attempt",
+    "no threshold adapted after seeing results",
+    "no candidate from A1..A6/S1A/A2"
+  ]
+}

@@ -1,0 +1,346 @@
+{
+  "amendment_id": "rev3s_s1b_anchored_bridge_protocol",
+  "date": "2026-08-24",
+  "token": "V26B-S1B-ANCHORED-PROTOCOL",
+  "stage_authorised": "PROTOCOL + TOOLING + SYNTHETIC TESTS + DRY-RUN ONLY. No fit, no rollout, no collection, no DAgger, no PPO/critic, no sigma sweep, no production change",
+  "kind": "ADDITIVE. S1A is definitively NOT_ELIGIBLE and is never used as init, source or anchor. rev3l..rev3r, S0D, S1A and every prior artifact remain immutable",
+  "classification": {
+    "what_this_is": "SUPERVISED ANCHORED BRIDGE (self-anchored trust-region refinement): the target labels are the already-frozen AB06 u_IK corpus and the anchor labels are the actor's OWN already-recorded actions on its OWN already-recorded nominal trace",
+    "what_this_is_NOT": "NOT DAgger. DAgger requires NEW on-policy collection plus teacher relabelling of the newly visited states. Neither happens here: no rollout is executed, no state is newly visited, no label is newly produced by any teacher",
+    "july_11_dagger_reference": "the 11/07 DAgger was a genuine DAgger (the teacher relabelled the states the actor visited); the 13/07 anchor part was NOT DAgger, it reused the source actor's own recorded actions - the same construction reused here"
+  },
+  "init_and_source": {
+    "init": "EXACTLY S0D 481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a (module_state cda6d893...), the only chain actor with closed-loop evidence (500/500 nominal, 2 cycles, 13.7 mm)",
+    "forbidden_inits": [
+      "S1A (8f3e0ce1..., NOT_ELIGIBLE 392/500, 0 cycles)",
+      "JUL_H0",
+      "R0a",
+      "R1",
+      "R2G",
+      "R2I",
+      "V1"
+    ],
+    "no_hard_replacement": "the whole 35D mean network is refit FROM S0D by gradient descent; no weight is copied, replaced, blended or surgically edited"
+  },
+  "source_equals_init_proof": {
+    "trace_job": "rollouts/s0d_nominal_det/S0D_35D__v3_canonical__nominal__det",
+    "rollout_receipt_sha256": "cbec1a671b7cdf2980881ec4ca33f69534e66d94cbbfa86c7b9cd9c1a39412b7",
+    "completion": "500/500 episode_time_limit (COMPLETE)",
+    "checkpoint_in_command": "student/S0D_35D_DISTILLED/rl_module == the pinned init (verified string-identical in the frozen command)",
+    "numpy_forward_vs_recorded_actions": {
+      "max_abs": 2.744041459057378e-07,
+      "rmse": 8.337046084473364e-08,
+      "meaning": "the recorded raw actions ARE this actor's deterministic mean on those states: source == init, the July 13/07 property (July's homologous figure was float32 rmse 1.19e-07)"
+    },
+    "limits_vs_13_07": {
+      "unique_anchor_content": "July's 16000 anchors were ONE 500-step episode tiled 32 times (np.tile, --nominal-repeat 32): its UNIQUE content was 500 rows, exactly what we have. The difference is anchor MASS, not information",
+      "mass_reproduced_by_weight_not_tiling": "rev3 forbids tiled splits (identical rows on both sides). The July anchor mass (16000 : 8712 = 1.837) is reproduced, where feasible, by an explicit weight ratio",
+      "missing_alt_starts": "July also had 8000 teacher rows on the -0.20/+0.20 s starts. We have NO alt-start S0D rollout: producing one is NEW COLLECTION and needs a separate token",
+      "missing_recovery_rows": "July had 712 phase-aligned stochastic recovery rows. We have none, and we cannot produce them: sigma is unresolved and no stochastic rollout is authorised",
+      "fundamental_non_equivalence": "July's 13/07 target was a teacher ALREADY consistent with the init (aggregate RMSE before = 0.019657, nominal shift RMS after = 0.004175): a refinement under consistency. Our target u_IK CONFLICTS with the init by mean 0.3758 (knee) / 0.3014 (ankle). S1B is therefore NOT the July stage; it is a bounded step under conflict"
+    }
+  },
+  "corpus_frozen_no_new_collection": {
+    "source": "the already-frozen S1/rev3l-rev3q corpus; NO new collection of any kind",
+    "task_rows": {
+      "rows": 380,
+      "steps": [
+        [
+          1,
+          190
+        ],
+        [
+          311,
+          500
+        ]
+      ],
+      "labels": "same-time AB06 u_IK (cache 3dd878d4...)"
+    },
+    "anchor_rows": {
+      "rows": 380,
+      "steps": [
+        [
+          1,
+          190
+        ],
+        [
+          311,
+          500
+        ]
+      ],
+      "labels": "S0D's OWN recorded raw actions on those same states (source==init)"
+    },
+    "frozen_holdout": {
+      "steps": [
+        201,
+        300
+      ],
+      "rows": 100,
+      "role": "out-of-sample target measurement; NEVER trained on by EITHER role"
+    },
+    "embargo": {
+      "steps": [
+        [
+          191,
+          200
+        ],
+        [
+          301,
+          310
+        ]
+      ],
+      "rows": 20,
+      "role": "excluded from both roles"
+    },
+    "leakage_rule": "both roles use EXACTLY the frozen 380-row training mask; the holdout stays unseen by both, so the target measurement remains genuinely out-of-sample",
+    "deviation_from_july_declared": "July's anchors covered the WHOLE nominal episode. Here they are restricted to the frozen training mask to keep the holdout clean. This is a CONSERVATIVE deviation and is declared, not hidden"
+  },
+  "structural_finding_blocker": {
+    "identical_inputs_two_labels": "anchor rows and task rows are the SAME 380 states. With identical inputs the per-row minimiser of lambda_a*(pi-u_S0D)^2 + lambda_t*(pi-u_IK)^2 is the convex combination pi* = u_S0D + (1/(1+r))*(u_IK - u_S0D), r = lambda_a/lambda_t",
+    "consequence": "on the training rows the two-role loss is ANALYTICALLY EQUIVALENT to single-role regression onto a blended label. The anchor role adds nothing the blend would not add THERE; it only acts off the training rows through generalisation",
+    "why_july_differed": "July's anchor states were states the teacher rows did NOT cover (different starts), so the two roles genuinely constrained different regions",
+    "honest_consequence": "S1B as specifiable TODAY is a TRUST-REGION INTERPOLATION between S0D and u_IK, not the July two-region construction",
+    "only_real_remedy": "anchor-only states that the task does not cover, i.e. S0D deterministic rollouts from the -0.20/+0.20 s starts (July's exact structure). That is NEW COLLECTION and requires a separate architect token (proposed name: V26B-S0D-ALTSTART-COLLECTION)"
+  },
+  "analytic_predictions_from_measured_gap": {
+    "measured_gap_on_the_500_trace_rows": {
+      "mean_abs": [
+        0.3758064782444853,
+        0.3014482607614482
+      ],
+      "rms": [
+        0.5035047,
+        0.3820137
+      ],
+      "max_abs": [
+        1.4318329691886902,
+        1.197912871837616
+      ],
+      "joints": [
+        "knee",
+        "ankle"
+      ]
+    },
+    "s0d_baseline_vs_uIK_on_frozen_holdout": [
+      0.6214394597731364,
+      0.4569210122991978
+    ],
+    "model": "drift = gap/(1+r); target improvement fraction on the training rows = 1/(1+r). The predictions are exact for the per-row minimiser and are recorded so the fit stage FALSIFIES or confirms them",
+    "feasible_band_derivation": "P3 (max drift <= 0.25) implies r >= 4.727 on the knee; T1 (improvement >= 10%) implies r <= 9. The feasible band is therefore r in [4.727, 9], narrow but NON-EMPTY, and it is disclosed a priori",
+    "july_reference_point_excluded_by_prediction": "July's mass ratio 1.837 would give a predicted max drift of 0.505 on the knee, twice the P3 bound. It is infeasible HERE precisely because our target conflicts with the anchors, whereas July's did not. Recorded, not used"
+  },
+  "candidate_budget_finite_frozen": {
+    "count": 6,
+    "open_search": false,
+    "seed": 2026,
+    "optimizer": "Adam",
+    "lr": 0.0001,
+    "batch_size": 256,
+    "loss": "lambda_a * mean_anchor(row MSE vs u_S0D) + lambda_t * mean_task(row MSE vs u_IK) + 1.0 * action-clip penalty + 1e-5 July parametric anchor towards theta_S0D",
+    "normalisation": "lambda_t := 1 and lambda_a := r; group-balanced per-role means (T1R mechanism), no target-variance normalisation, no aux head",
+    "determinism": "fixed seed, fixed epoch count, deterministic algorithms, clock columns re-zeroed, logstd restored bit-identical. Each candidate is bit-reproducible",
+    "candidates": [
+      {
+        "id": "A1",
+        "anchor_target_ratio_r": 3,
+        "epochs": 300,
+        "predicted_train_drift_mean_abs": [
+          0.093952,
+          0.075362
+        ],
+        "predicted_train_drift_rms": [
+          0.125876,
+          0.095503
+        ],
+        "predicted_train_drift_max_abs": [
+          0.357958,
+          0.299478
+        ],
+        "predicted_target_improvement_fraction_train": 0.25
+      },
+      {
+        "id": "A2",
+        "anchor_target_ratio_r": 5,
+        "epochs": 300,
+        "predicted_train_drift_mean_abs": [
+          0.062634,
+          0.050241
+        ],
+        "predicted_train_drift_rms": [
+          0.083917,
+          0.063669
+        ],
+        "predicted_train_drift_max_abs": [
+          0.238639,
+          0.199652
+        ],
+        "predicted_target_improvement_fraction_train": 0.166667
+      },
+      {
+        "id": "A3",
+        "anchor_target_ratio_r": 8,
+        "epochs": 300,
+        "predicted_train_drift_mean_abs": [
+          0.041756,
+          0.033494
+        ],
+        "predicted_train_drift_rms": [
+          0.055945,
+          0.042446
+        ],
+        "predicted_train_drift_max_abs": [
+          0.159093,
+          0.133101
+        ],
+        "predicted_target_improvement_fraction_train": 0.111111
+      },
+      {
+        "id": "A4",
+        "anchor_target_ratio_r": 12,
+        "epochs": 300,
+        "predicted_train_drift_mean_abs": [
+          0.028908,
+          0.023188
+        ],
+        "predicted_train_drift_rms": [
+          0.038731,
+          0.029386
+        ],
+        "predicted_train_drift_max_abs": [
+          0.110141,
+          0.092147
+        ],
+        "predicted_target_improvement_fraction_train": 0.076923
+      },
+      {
+        "id": "A5",
+        "anchor_target_ratio_r": 20,
+        "epochs": 300,
+        "predicted_train_drift_mean_abs": [
+          0.017896,
+          0.014355
+        ],
+        "predicted_train_drift_rms": [
+          0.023976,
+          0.018191
+        ],
+        "predicted_train_drift_max_abs": [
+          0.068183,
+          0.057043
+        ],
+        "predicted_target_improvement_fraction_train": 0.047619
+      },
+      {
+        "id": "A6",
+        "anchor_target_ratio_r": 8,
+        "epochs": 60,
+        "predicted_train_drift_mean_abs": [
+          0.041756,
+          0.033494
+        ],
+        "predicted_train_drift_rms": [
+          0.055945,
+          0.042446
+        ],
+        "predicted_train_drift_max_abs": [
+          0.159093,
+          0.133101
+        ],
+        "predicted_target_improvement_fraction_train": 0.111111,
+        "note": "same ratio as A3 with a fixed REDUCED step budget (trust region by construction, not early stopping): predictions are upper bounds, the fit is deliberately not converged"
+      }
+    ],
+    "no_tuning_rule": "this grid is the ENTIRE search. No candidate may be added, removed, re-weighted or re-run. If none survives, the protocol fails closed"
+  },
+  "offline_selection_hierarchy_fail_closed": {
+    "order": [
+      "I_integrity",
+      "P_preservation",
+      "T_target_improvement",
+      "D_drift"
+    ],
+    "short_circuit": "a candidate failing any level is discarded immediately and the later levels are recorded as not_evaluated",
+    "I_integrity": {
+      "source_equals_init_proof": true,
+      "ten_keys": true,
+      "clock_columns_zero": true,
+      "clock_invariance_bit_identical": true,
+      "logstd_bit_identical_to_init": true,
+      "save_reload_exact": true,
+      "T1_T2_scaling_max": 1e-05,
+      "no_critic": true
+    },
+    "P_preservation_on_anchors": {
+      "mean_abs_max_per_joint": 0.1,
+      "rms_max_per_joint": 0.15,
+      "max_abs_max_per_joint": 0.25,
+      "per_discrete_stratum_mean_abs_max": 0.1,
+      "strata": "FSM one-hot state, online contact, heel-strike and toe-off flags: every stratum present in the anchor rows is measured separately so no gait phase is silently sacrificed",
+      "rationale": "a-priori. July achieved a nominal shift RMS of 0.004175 and max 0.031594 under CONSISTENT roles; our bounds are deliberately ~12x looser because we ask a real behaviour change, while max <= 0.25 keeps every single row below the 0.376 structural gap so that no anchor row is converted into the IK target"
+    },
+    "T_target_improvement": {
+      "metric": "RMSE vs u_IK on the FROZEN holdout steps 201-300 (out-of-sample for both roles)",
+      "baseline_S0D": [
+        0.6214394597731364,
+        0.4569210122991978
+      ],
+      "min_relative_improvement_per_joint": 0.1,
+      "rationale": "a-priori round bound, declared as chosen and not derived; it is the smallest improvement that is not holdout noise at 100 rows and it caps the grid at r <= 9",
+      "explicit_non_claim": "improvement is NOT tracking: even the best feasible candidate is predicted to leave the holdout RMSE near 0.52-0.56, far from the 0.15 S1 criterion"
+    },
+    "D_drift": {
+      "parameter_shift_sq_max": 0.5,
+      "action_drift_mean_abs_max_per_joint_on_500_rows": 0.1,
+      "rationale": "S1A, which does NOT walk, had parameter shift 2.4398 and action drift 0.384/0.289. The trust region is set well inside the only measured failure point"
+    },
+    "no_walking_claim": "NO offline metric may declare or suggest walking. Offline selection only decides which candidates are ALLOWED to be tested closed loop"
+  },
+  "closed_loop_gate_preregistered_separate_token": {
+    "token": "V26B-S1B-NOMINAL-ROLLOUT (NOT granted here)",
+    "order": "candidates evaluated in the FROZEN order A6, A3, A2, A1, A4, A5 restricted to the offline survivors, most-preserving first; STOP at the first PASS or when the budget is exhausted",
+    "per_rollout": "exactly one launch per candidate, no retry, no tuning, canonical rev3c/e/j command, deterministic mean, seed 123, nominal start 1.956870983805102",
+    "binding_gates": {
+      "completion": "500/500 and episode_time_limit",
+      "phase_timeout_stance": 0,
+      "phase_timeout_swing": 0,
+      "morphology_causal_contract_failure": "rows_positive 0, max 0, failure false (per row)",
+      "hs_cancelled": "max 0 and final 0",
+      "resync": "max <= 1 and final <= 1",
+      "valid_cycle_count": ">= 1",
+      "penetration": "max <= 0.020 m and no grf_penetration termination"
+    },
+    "mandatory_diagnostics": [
+      "shape and Pearson correlation vs the prescribed targets",
+      "sign agreement and amplitude ratio",
+      "comparison with S0D (500/500, 2 cycles, 13.7 mm), with S1A (392/500, 0 cycles, 24.7 mm) and with the July homologs",
+      "invalid events, HS/TO, dropped_wait_hs, terminal_flushed",
+      "raw/applied actions, clipping, saturation",
+      "reserve, return",
+      "B3 only inside the phase window [0.55, 0.80], not_evaluable if the field is zero"
+    ],
+    "promotion_rule": "NO candidate and NO anchor corpus is promoted, published as deployable or reused as a source before a closed-loop PASS"
+  },
+  "sigma_rule": "sigma 0.005 stays UNRESOLVED and NON-OPERATIONAL. S1B rollouts use the deterministic mean and never set it. A sweep may only be preregistered later, on an actor that walks",
+  "comparison_with_S1A_failure": {
+    "S1A": "same init, same 380 task rows, NO anchor role: measured action drift 0.384/0.289, parameter shift 2.4398, offline G_task 0.134/0.122 PASS, closed loop 392/500 with ZERO valid cycles (one toe-off then 260 swing rows without a heel strike)",
+    "S1B": "same init, same rows, PLUS the anchor role: drift bounded by construction to gap/(1+r) <= 0.094 (r >= 3)",
+    "falsifiable_hypothesis": "does a bounded step of <= 0.10 preserve the walking cycle that a step of 0.384 destroyed? There is NO evidence either way for intermediate drift: this is exactly what S1B tests",
+    "honest_risk": "if walking is lost even at drift 0.04-0.06, the conclusion is that the IK direction is locally incompatible with the gait cycle and the IK line should close"
+  },
+  "iterative_roadmap_if_S1B_passes": "each iteration re-anchors on the NEW walking actor's OWN complete nominal trace (July ordering, iterated). Closing the 0.376 gap at <= 0.10 per step needs about 4 to 6 iterations, each with its own collection, fit and closed-loop token. This is disclosed so the cost is visible before the first step",
+  "prohibitions": [
+    "no fit in this stage",
+    "no rollout in this stage",
+    "no collection",
+    "no DAgger",
+    "no PPO/critic",
+    "no multistart",
+    "no sigma sweep",
+    "no morphology fit",
+    "no use of S1A as init/source/anchor",
+    "no modification of S0D, S1A, rev3r or any existing artifact",
+    "no production change",
+    "no output under student/",
+    "no threshold change once this amendment is frozen"
+  ]
+}

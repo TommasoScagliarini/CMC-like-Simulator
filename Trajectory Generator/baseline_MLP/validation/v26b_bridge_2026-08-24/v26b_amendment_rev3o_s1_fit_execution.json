@@ -1,0 +1,111 @@
+{
+  "amendment_id": "rev3o_s1_fit_execution",
+  "date": "2026-08-24",
+  "token": "V26B-S1-FIT (granted by the architect after independent Codex audit PASS of rev3n)",
+  "kind": "ADDITIVE; freezes the EXECUTION contract of the S1 offline stage. rev3l/rev3m/rev3n and every prior receipt/log/report/tooling remain immutable and unmodified",
+  "parents_immutable": {
+    "rev3l": "7545201df4e5aefb4fdccca9efc1425a9a4dde581a4c20269c0d3fd86aa794d5",
+    "rev3m": "8af3ad654e49e19f5a6d2dbcf128faf5ce424206a5def715d177f7fbda93e0c0",
+    "rev3n": "0677ad577336240b26cf6947e9e3d60d74632a35724f49b5f06bf4bc5aa377e3",
+    "rev3n_pregate_receipt": "923ffc5ca8fb4d3577d9894e90db151a92bad089d3669b38fb9553484e6f2634",
+    "rev3l_pregate_receipt_FAIL_preserved": "a437f1ef0d7762db5914d14be19b390ddc6ada9a126d9db2ef8f810d08a43389",
+    "rev3k": "8f34c95ee7c69029e0d3e8715f3e62fe9652533a03e0dd4b8fb7b38114377437"
+  },
+  "init": {
+    "module": "student/S0D_35D_DISTILLED/rl_module",
+    "actor_digest": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+    "module_state_sha256": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597",
+    "exclusive": "S0D ONLY; JUL_H0 / R0a / R1 / R2G / R2I are FORBIDDEN as init and as labels"
+  },
+  "task_training_set": {
+    "rows": 380,
+    "definition": "the S0D-visited rows of the pinned nominal trace, steps 1-190 and 311-500 ONLY",
+    "excluded_steps": [
+      [
+        191,
+        200
+      ],
+      [
+        201,
+        300
+      ],
+      [
+        301,
+        310
+      ]
+    ],
+    "excluded_reason": "blocked holdout 201-300 must stay strictly OUT-OF-SAMPLE; 191-200 and 301-310 are the embargo",
+    "labels": "u_IK AB06 same-time (lookahead 0) from the pinned nominal cache 3dd878d4d6d2930d730c1a67f39d6799f20221e7659a435c02d062bfd553d9b0",
+    "source_holdout_rev3m": "NEVER enters training (preservation measurement only)"
+  },
+  "numerics_frozen": {
+    "trainable": "full 35D mean network (6 tensors); logstd rows restored/frozen at the placeholder",
+    "epochs": 300,
+    "batch_size": 256,
+    "optimizer": "Adam",
+    "lr": 0.0001,
+    "seed": 2026,
+    "loss": "flat row-uniform MSE on the 2 outputs + 1.0 * action-clip penalty + 1e-5 * parameter anchor",
+    "anchor": "July 11/07 exact: mean over the 6 FULL tensors (explicit 0.5 head factors), towards theta_S0D in the scaled space",
+    "aux_heads": "none",
+    "early_stopping": "none",
+    "validation_model_selection": "none",
+    "scaling": "July physical scaling in the fit space, absorbed at export (T1/T2 <= 1e-5)",
+    "clock_columns": "hard-zeroed in W1 at init and after every optimizer step"
+  },
+  "gates": {
+    "prefit_T1": {
+      "max": 1e-05,
+      "meaning": "scaling function-preservation of the init before any step"
+    },
+    "G_task": {
+      "metric": "RMSE vs u_IK on the blocked holdout steps 201-300 ONLY (out-of-sample)",
+      "max_per_joint": 0.15,
+      "binding": true
+    },
+    "full_500_metrics": {
+      "binding": false,
+      "role": "diagnostic only"
+    },
+    "Q1_source_holdout_rev3m": {
+      "rows_expected": 4474,
+      "rows_before_exclusion": 4480,
+      "bitwise_shared_excluded": 6,
+      "labels": "S0D deterministic mean, same state",
+      "max_per_joint": 0.1,
+      "binding": true
+    },
+    "Q3_invariants": {
+      "ten_keys": true,
+      "clock_columns_zero": true,
+      "clock_invariance_bit_identical": true,
+      "logstd_frozen_placeholder": true,
+      "no_critic": true,
+      "save_reload_exact": true,
+      "binding": true
+    },
+    "T2_scaling_export_equivalence": {
+      "max": 1e-05,
+      "binding": true
+    },
+    "drift_vs_S0D_on_500_task_rows": {
+      "binding": false,
+      "role": "diagnostic only, expected ~0.38 (frozen structural gap)"
+    }
+  },
+  "failure_policy": "any binding gate FAIL -> write a diagnostic REJECTED artifact, publish NO checkpoint, change NO threshold/metric/label, STOP",
+  "success_policy": "atomic no-clobber export to student/S1_IK_AB06_35D/ + complete receipt (digests, split, per-joint metrics, essential loss curve, JUL_H0 and S0D contextual comparison)",
+  "prohibitions": [
+    "no rollout",
+    "no DAgger",
+    "no sigma sweep",
+    "no critic/PPO",
+    "no multistart",
+    "no morphology fit",
+    "no modification of production env/reward/FSM/SEA/C++",
+    "no modification of rev3l/rev3m/rev3n or any frozen receipt/log/report/tooling",
+    "no threshold/metric/label change",
+    "no retry after a FAIL"
+  ],
+  "next_stage": "a single deterministic nominal rollout of the S1 result requires a SEPARATE token, not granted here"
+}

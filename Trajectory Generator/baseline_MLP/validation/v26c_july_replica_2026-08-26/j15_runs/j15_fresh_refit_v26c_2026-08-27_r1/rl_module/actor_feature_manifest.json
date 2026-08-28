@@ -1,0 +1,199 @@
+{
+  "schema": "actor_feature_manifest.2",
+  "generated_by": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "generated_at_stage": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "is_a_copy_of_the_parent_manifest": false,
+  "why_not_a_copy": "the parent's manifest describes the parent: its module_state_sha256 is the parent's, its actor_label and status predate this fit, and its controller_state_mask declares the controller block masked, which this fit does not do.",
+  "actor_feature_count": 35,
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "actor_width": 35,
+  "action_dim": 2,
+  "module_state_sha256": "4d084a2a7f0012bd711f39a987dbb7af30b04e265484128c45b0a92b612ab928",
+  "module_state_sha256_is": "the SHA-256 of module_state.pkl BESIDE this manifest",
+  "actor_digest": "c3551341b9b017b40585ee1f50f8ee4ecaa7ec50722f37142badc2a44b6c8590",
+  "actor_digest_algorithm": "warm_start.actor_state_digest over the ten sorted actor keys",
+  "actor_digest_is_enforced_by": "warm_start.resolve_source_actor_features",
+  "source_actor_digest": "59d54240ac628dcbd1d0dbf34328145afa08a7028047a5923298782b79bf5188",
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> J15 fresh post-mismatch refit",
+    "derived_from": {
+      "stage": "V26C_J2_BASE",
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+      "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+    },
+    "source_module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "not_derived_from": {
+      "j11": "J11 is the actor that FAILED J12. It is a SIBLING of this fit, never its parent. Its module_state is pinned as negative evidence.",
+      "j8": "a sibling, not an ancestor",
+      "j4": "not an ancestor",
+      "july": "methodology and evidence only; no July checkpoint is an ancestor"
+    },
+    "two_distinct_ancestors_do_not_conflate_them": {
+      "weight_parent": {
+        "what": "the module whose weights this fit started from",
+        "stage": "V26C_J2_BASE",
+        "sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+      },
+      "observation_contract_ancestor": {
+        "what": "the 39-wide August V26 imitative actor that fixes the observation contract under which the J10R1 teacher cells were collected. It is NOT a weight ancestor and was never loaded by any of these stages.",
+        "sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd"
+      }
+    },
+    "parent_chain_caveats": {
+      "j2_leaf_has_no_commit_verification": true,
+      "j2_authors_no_actor_digest": true,
+      "integrity_rests_on": "the pinned SHA-256 of each J2 rl_module file"
+    },
+    "training_data": {
+      "aggregate_rows": 25567,
+      "blocks": [
+        {
+          "id": "j7_nominal",
+          "rows": 16000,
+          "unique": 500,
+          "repeat": 32
+        },
+        {
+          "id": "j7_recovery",
+          "rows": 713,
+          "unique": 713,
+          "repeat": 1
+        },
+        {
+          "id": "cell_B",
+          "rows": 4000,
+          "unique": 500,
+          "repeat": 8
+        },
+        {
+          "id": "cell_C",
+          "rows": 4000,
+          "unique": 500,
+          "repeat": 8
+        },
+        {
+          "id": "j14_increment",
+          "rows": 854,
+          "unique": 854,
+          "repeat": 1
+        }
+      ],
+      "aggregate_observations_sha256": "17023143a450ff5dd964b9cf9ae962f7737bb98c7757e206d72e8a58c2d99420",
+      "aggregate_actions_sha256": "f015f08a337c1f9748e1bd849b33d09ab48d5ad52c3ae8300ee5adda0791b083",
+      "j11_prefix_rows": 24713,
+      "j14_corrective_rows": 854
+    }
+  },
+  "clock_contract": {
+    "columns": [
+      0,
+      1
+    ],
+    "feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ],
+    "weights_are_exactly_zero": true,
+    "enforced": "hard-zeroed after every optimizer step and again at save",
+    "consequence": "the clock inputs cannot influence the action, whatever the environment records in those columns"
+  },
+  "controller_contract": {
+    "columns": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "feature_names": [
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "masked": false,
+    "state": "LIVE - these columns are trained and carry non-zero weight",
+    "column_l2_norms": {
+      "pros_knee_angle_previous_endpoint": 0.4676439166069031,
+      "pros_knee_angle_served_ref": 0.4722532033920288,
+      "pros_knee_angle_served_ref_vel": 0.08501724153757095,
+      "pros_knee_angle_served_ref_accel": 0.030413540080189705,
+      "pros_knee_angle_sea_u": 1.6455597877502441,
+      "pros_ankle_angle_previous_endpoint": 1.1718100309371948,
+      "pros_ankle_angle_served_ref": 1.0687446594238281,
+      "pros_ankle_angle_served_ref_vel": 0.13985562324523926,
+      "pros_ankle_angle_served_ref_accel": 0.02658499963581562,
+      "pros_ankle_angle_sea_u": 0.6521409749984741
+    },
+    "physical_scaling": "the July physical scales are absorbed into pi.0.0.weight at save time, so this module consumes RAW observations"
+  },
+  "logstd_contract": {
+    "rows": "[2:]",
+    "bit_identical_to_parent": true,
+    "mechanism": "PROJECTION, not exclusion: the tensors are in the optimizer and their log-std rows are overwritten with the parent's after every step. The committed values are bit-identical to the parent's; Adam's moment buffers for those entries are polluted and discarded."
+  },
+  "critic_contract": {
+    "present": false,
+    "meaning": "ABSENT, not preserved. A downstream stage instantiating this module gets a RANDOMLY INITIALISED critic. This stage constructs none.",
+    "sidecar_declares": "class_and_ctor_args.pkl is copied byte-identically from J2 and declares freeze_logstd false and freeze_actor false. Those are module-level flags for a consumer; this stage's freeze is offline and does not depend on them."
+  },
+  "input_convention": "RAW observations, unscaled, in the feature order above",
+  "deployable": false,
+  "status": "J15 offline refit PASS; closed-loop qualification PENDING; not promoted; not deployable",
+  "offline_gate_pass": true,
+  "closed_loop_qualification": "PENDING - not run by this stage",
+  "claims_not_made": [
+    "no claim of closed-loop viability",
+    "no claim that the J12 failure is fixed",
+    "no claim of generalisation beyond AB06 and the starts of this trial",
+    "no claim of deployability",
+    "no promotion of any kind"
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, FROZEN EXECUTION RECORD",
+  "revision": "rev3",
+  "supersedes": "v26c_j14_dagger_dataset_authorization_rev2.json",
+  "supersedes_sha256": "5ae9dc08b1a5dfee66db0305ce5d56d5d142ed51ac5482f2fee5efe583a9a2be",
+  "stage_proposed": "V26C_J14_POST_MISMATCH_DAGGER_DATASET",
+  "authorisation_status": "NOT_GRANTED_PENDING_ARCHITECT_AUDIT",
+  "execution_permitted_now": false,
+  "date": "2026-08-27",
+  "reason_for_revision": {
+    "trigger": "Codex audit of rev2: NO-GO on two real gaps in the HERMETICITY CLAIM. The science, the runner, the preregistration, the matrix, the cells, the seeds, the labelling rule, the truncation policy, the thresholds and every count are UNCHANGED. Only the test suite changed.",
+    "finding_1": {
+      "claim": "the suite imported v26c_j14_dagger_dataset BEFORE HermeticGuard existed, and snapshot() excluded __pycache__, so a .pyc written at import time was invisible to both the guard and the before/after comparison. The 'not one byte' claim therefore depended on PYTHONDONTWRITEBYTECODE being exported by whoever launched the suite - it was not self-contained.",
+      "verdict": "ACCEPTED - and demonstrated, not merely conceded: __pycache__/v26c_j14_dagger_dataset.cpython-310.pyc exists under the validation root with an mtime from an earlier run of this very suite.",
+      "correction": "sys.dont_write_bytecode = True is set by the SUITE ITSELF at line 22, BEFORE the runner import at line 23; snapshot() now applies NO exclusion of any kind."
+    },
+    "finding_2": {
+      "claim": "pathlib.Path.open routes through io.open, not builtins.open, so write-mode Path.open was not intercepted; the phrase 'write-mode open' was too broad.",
+      "verdict": "ACCEPTED, and the gap is wider than stated. On CPython 3.10 pathlib captures the ORIGINAL function at class-definition time (_NormalAccessor.open = io.open), so patching io.open alone STILL does not reach Path.open. Verified empirically on this interpreter.",
+      "correction": "HermeticGuard now patches io.open AND Path.open, restoring both on exit, with a separate probe for each."
+    }
+  },
+  "corrections_applied_to_the_test_only": [
+    "sys.dont_write_bytecode = True set before the runner import; a STATIC check asserts the line ordering, and a MEASURED check asserts the flag is live.",
+    "snapshot() excludes nothing; an AST check asserts its code contains no '__pycache__' literal and that its one and only filter is is_file(), and a MEASURED check proves a __pycache__ file is really captured.",
+    "the runner's own .pyc is asserted to be INSIDE the opening snapshot, so it must survive the suite byte-identical.",
+    "HermeticGuard intercepts and restores io.open and Path.open in addition to builtins.open, os.open, 11 Path methods, 8 os functions, 4 shutil functions and np.savez/np.savez_compressed.",
+    "two new probes: Path.open('w') aimed at the frozen rev0 record, and io.open('w') under the validation root - both blocked, with the rev0 record re-hashed afterwards.",
+    "a MEASURED check that builtins.open, io.open and Path.open are all the guarded objects while the suite runs, and that Path.open is genuinely replaced rather than aliased.",
+    "the dir_fd exemption is now stated NARROWLY: fd-relative calls are delegated unchecked, an AST check asserts this suite makes no direct fd-relative call, and the comment says explicitly that this is NOT a universal fd-relative guarantee."
+  ],
+  "scope_of_the_hermeticity_claim": {
+    "proved": "no write, unlink, rename, rmtree or lock reaches the real validation root from this suite; the root is byte-identical before and after, INCLUDING __pycache__, with PYTHONDONTWRITEBYTECODE absent from the environment.",
+    "delegated_unchecked": "calls carrying dir_fd=. This suite makes none directly (asserted by AST); the only code reaching that branch is shutil.rmtree's own descent, whose entry point is guarded.",
+    "not_claimed": "that fd-relative writes are intercepted in general, or that a write issued through a primitive outside the patched set would be caught."
+  },
+  "verification": {
+    "py_compile": "OK, with PYTHONPYCACHEPREFIX pointed outside the validation root",
+    "selftest_checks": 230,
+    "selftest_env": "PYTHONDONTWRITEBYTECODE ABSENT from the environment",
+    "selftest_invocation": "as a SCRIPT (python test_v26c_j14_dagger_dataset.py), which is the only supported invocation - see limits_of_the_claim below",
+    "preflight": "GO, 0 blockers, 21 pinned sources, leaves J12 FAIL / J10R1 PASS / J11 PASS",
+    "external_root_digest_files": 631,
+    "external_root_digest_includes_pycache": true,
+    "external_root_digest_stable_over_consecutive_runs": 3,
+    "added_removed_changed_per_run": "0 / 0 / 0",
+    "digest_history_disclosed": {
+      "630_files_before_rev3_existed": "a994bb45b6b2aa487b51a93b13db01cf227a8a2c5edf6097525c76e69b359cb5",
+      "then": "creating this rev3 record added the 631st file",
+      "then_2": "a verification command of my own IMPORTED the test AS A MODULE, which made the interpreter refresh __pycache__/test_v26c_j14_dagger_dataset.cpython-310.pyc before the module body could disable bytecode. Only that generated .pyc changed: all 24 pins and all 4 preserved superseded records re-verified exact.",
+      "now": "0c7fd340175318fcff6bc0d9133228c1f644011c9559654f7c5c555458185959, reproducible and stable across three consecutive script invocations."
+    },
+    "external_root_digest_excluding_this_record": "8863d50af54fbbded2f3c2c91992dee4a3139ab0e0f9986d77d356057c8431d0",
+    "external_root_digest_how_to_reproduce": "sha256 over 'relpath:sha256\\n' lines, sorted by relpath, for every regular file under the validation root INCLUDING __pycache__, with this record itself excluded. Self-exclusion is necessary: this record lives under the root it fingerprints, so any digest written inside it would invalidate itself on write.",
+    "external_root_digest_files_excluding_this_record": 630,
+    "what_hermeticity_actually_asserts": "not an absolute digest value, but INVARIANCE: the before-digest equals the after-digest across a suite run, with 0 files added, removed or changed. Verified on three consecutive script invocations."
+  },
+  "unchanged_from_rev2": {
+    "runner_sha256_identical": true,
+    "preregistration_in_use": "v26c_j14_prereg_dagger_dataset_rev1.json",
+    "science": "854 new rows (cell E 500 + cell F 354), repeat 1, NO truncation, first mismatch E=95 / F=90, 671 rows a J7-style truncation would have discarded, same-step teacher labels, clock projected to exact zero, per-row provenance, future aggregate 16713 + 8*(500+500) + 854 = 25567, seeds 126/127/128 SEALED and never read, hyperparameters identical to J11."
+  },
+  "frozen_inputs_sha256": {
+    "v26c_j14_prereg_dagger_dataset_rev1.json": "877cccc1bb93868a5f1050a7cf2cfc1f5776d18437e099996f059373a6cb36d5",
+    "v26c_j14_dagger_dataset.py": "fe7c4951c195224b8006655b831549b4b613cfd80a346b7174c58962263e2e0c",
+    "test_v26c_j14_dagger_dataset.py": "6245a9ccee244a4d24deb02117a168a57fd45999485ba496b6d1daca15e5e52a"
+  },
+  "frozen_sources_sha256": {
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/commit_verification.json": "59cd1563ad23713ef00ac5b2e95a334a088257af95c6727520fb895c61a8c61c",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/commit_verification.json": "1d24eed05dd04c187c014181c89a0611a648e5601cacff5e1ae0221adcfb8643",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_aggregate_dataset.npz": "a936c580c4db19383255d3d5f7346560e0fd99dc4b139ac202858e82cca13f42",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/commit_verification.json": "a5ef34e758c50437d28dfbf4413e5a18a2e3ad7ba9d6ec4fb164431b17fcb175",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_A_trace.json": "5e1b91999c2fc764a233b215e204ded00608894cc36a6dac8e6129b09d306e30",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_E_trace.json": "69f031c1ca69e0a4060d52e2d6c9d107987c91c4e63bb4a021e42b81398b3995",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_F_trace.json": "86f16eba23c82cc94404199bea5c482a590f3e4bc96238e4d405906a6afdeb3e",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/v26c_j12_closed_loop_receipt.json": "2b3e20362bb54ea545db3495d2a468d33138555cccf8bd20d3e5ecc3d75caf11",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "v26c_j12_closed_loop.py": "65d7b8619074c909753750f03aec751d38179c2226e50c87da62113ea5769fca",
+    "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+    "v26c_j7_markov_dataset.py": "b3cc2b88997ccb7c23964123d70ac3fb524adf4fdf3e8882d26ce20ff87d1461"
+  },
+  "preserved_superseded_records": {
+    "v26c_j14_prereg_dagger_dataset.json": "4c0720bad952f97c9cb5d68f3bd567f6cf9d9bb9b02508b42d8522268cba8717",
+    "v26c_j14_dagger_dataset_authorization.json": "22d374e549e736b91f4b332042c53fc05ba6be20d64022634ec2d4de77fcbd25",
+    "v26c_j14_dagger_dataset_authorization_rev1.json": "4341e58e32e2d43d779ae8ae1dbe562511c4b4459a94330ff76c1519c9b1f1b6",
+    "v26c_j14_dagger_dataset_authorization_rev2.json": "5ae9dc08b1a5dfee66db0305ce5d56d5d142ed51ac5482f2fee5efe583a9a2be"
+  },
+  "rev2_is_now_unusable_because": "its frozen_inputs_sha256 pins test_v26c_j14_dagger_dataset.py at 4833a559765c619773895d2aca2f2fde0e43a3d6082141fbe8e0c091d9802191, which no longer exists on disk. Acting on rev2 fails closed at the first hash check.",
+  "forbidden_here": [
+    "materialisation of the leaf",
+    "fit",
+    "rollout",
+    "critic warm-up",
+    "PPO",
+    "opening seeds 126, 127, 128",
+    "any change to J0-J13, production, FSM v3, morphology, reward, sigma, SEA/C++, architecture"
+  ],
+  "requires_to_materialize": "an explicit architect GO, recorded as a further additive record.",
+  "limits_of_the_claim": {
+    "supported_invocation": "python test_v26c_j14_dagger_dataset.py - run as __main__, for which CPython writes no .pyc at all.",
+    "known_limit": "if the suite is IMPORTED as a module instead, the interpreter compiles and writes its .pyc BEFORE the first line of the body executes. No in-process guard can prevent that, because the guard does not exist yet. Only PYTHONDONTWRITEBYTECODE in the environment, or not importing the suite as a module, prevents it. This is disclosed rather than papered over.",
+    "unaffected": "no pinned source, receipt, leaf or frozen record is touched in either case - only generated bytecode, which is now inside the guarded snapshot."
+  }
+}

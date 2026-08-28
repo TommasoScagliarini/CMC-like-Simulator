@@ -1,0 +1,80 @@
+{
+  "kind": "ARCHITECT GO — SINGLE EXECUTION, K1R1 NON-DEGENERATE GRADIENT AMENDMENT",
+  "stage": "V26C_J20_K1R1_NONDEGENERATE_GRADIENT_AMENDMENT",
+  "amends": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "date": "2026-08-27",
+  "approved_by": "Codex architect, after the K1R1 readiness revision of 2026-08-27 and a re-verification against the current filesystem",
+
+  "authorises_execution": true,
+  "authorises_warmup": false,
+  "authorises_training": false,
+  "authorises_rollout": false,
+  "authorises_ppo": false,
+  "authorises_k1_retry": false,
+  "authorises_rewriting_k1": false,
+
+  "execution_limit": 1,
+  "retry_authorised": false,
+
+  "scope": "Execute exactly once the K1R1 amendment: load the EXACT sixteen-tensor module state committed by the K1 leaf, push ONE backward over the preregistered deterministic non-degenerate 8x84 stimulus, measure the twelve amended checks A01-A12, compose the verdict with the immutable K1 evidence, and write only j20_runs/j20_k1r1_nondegenerate_gradient_v26c_2026-08-27_r1.",
+  "authorised_output": "j20_runs/j20_k1r1_nondegenerate_gradient_v26c_2026-08-27_r1",
+  "authorised_command": "/opt/anaconda3/envs/envCMC-rllib/bin/python v26c_j20_k1r1_gradient_amendment.py --probe --go-file v26c_j20_k1r1_architect_go.json",
+  "working_directory": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26",
+
+  "why_this_amendment_exists": "K1 returned FAIL_CLOSED 28/29. Its sole failure, P24, was caused by K1's own stimulus: an all-zero observation batch makes the first-layer weight gradient identically zero, because dL/dW = (dL/dy) x^T. The amendment measures that one quantity under a non-degenerate stimulus and composes it with K1's immutable twenty-eight passing checks.",
+
+  "the_k1_record_is_immutable": {
+    "rule": "the K1 leaf, its receipt, its commit verification, its result, its GO, its preregistration and its runner bytes are READ ONLY. This GO does not authorise editing, re-running or overwriting any of them.",
+    "k1_verdict_stays": "FAIL_CLOSED, 28 of 29, sole failure P24_frozen_module_still_gives_the_critic_gradient",
+    "the_k1_result_must_not_be_rewritten_to_PASS": true
+  },
+
+  "failure_handling": {
+    "any_failure": "preserve all evidence, leave the TECHNICAL_INVALID marker in place if post-commit verification fails, and do NOT retry",
+    "no_autonomous_retry": true
+  },
+
+  "actor_immutability_required": true,
+
+  "explicitly_not_authorised": [
+    "any retry of K1",
+    "any rewriting of the K1 result, receipt, commit verification or leaf",
+    "any retry of K1R1 itself, whatever the outcome",
+    "the critic-only warm-up, V26C_J20_CRITIC_WARMUP",
+    "the sealed warm-up command registered in the J20 preregistration",
+    "starting Ray",
+    "constructing or stepping an environment",
+    "any rollout or sampling",
+    "any call to algo.train()",
+    "constructing an optimizer or taking an optimizer step",
+    "PPO or ex-novo training",
+    "any fit, actor transplant or critic re-initialisation",
+    "checkpoint promotion",
+    "changes to FSM v3, detector, morphology corridor, reward, sigma, SEA, C++ plugin, network architecture or production configuration"
+  ],
+
+  "pin_semantics": {
+    "labels_not_paths": "the fourteen entries below are LABELS. Each is resolved to a filesystem path by the runner's closed GO_REQUIRED_PIN_TARGETS map, never by this document. A GO that could name its own paths could point a pin at a file other than the one the stage will read.",
+    "the_baseline_module_label_is_not_a_relative_path": "baseline_MLP/asymmetric_rl_module.py lives outside the stage directory and is resolved from an internal constant",
+    "validate_go_rejects": ["a missing pin", "an extra pin outside the closed map", "a stale hash", "a label whose file is absent"],
+    "coverage": "every input and every executable the stage semantically uses: its own three artefacts, all six immutable K1 leaf files, the K1 runner, preregistration and GO, the J19A module state, and the single production module it imports",
+    "no_report_is_pinned": "reports are narrative, not inputs to the computation, and are deliberately absent from this map"
+  },
+
+  "pinned_artefacts_sha256": {
+    "v26c_j20_k1r1_prereg_nondegenerate_gradient_amendment.json": "d770477cf31988d0f464b157a258b42fa16a1bd8de03c90d24dc8767fb9fbac5",
+    "v26c_j20_k1r1_gradient_amendment.py": "572e17e7c3e6599eb3c3a325b4f4b525ca71e8f13bcfc1c6a4d6dca22287adb9",
+    "test_v26c_j20_k1r1_gradient_amendment.py": "882328aa0fac322935d0f79cfc374e86ce152e8840c7e88f32e890f6220aa9f0",
+    "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/commit_verification.json": "06b60b92af40b852cdbff77551421189c2235f8b64165d972f7e4784e6eeb063",
+    "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/probe_actor_transplant_report.json": "73bb4c78f9e3910d552308250bf6dda29028bf6182a9760d0965db3c45ff0f80",
+    "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/probe_full_module_state.pkl": "b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2",
+    "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/probe_module_manifest.json": "eab14deedfe88449bac9ab37f5f56959d3213a3d0830ce7f22b71bb3aedfceaa",
+    "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/v26c_j20_critic_warmup_readiness_receipt.json": "8d2a4ba9a8e286194eb239665b0d1d71179cf52160b4bed93a4a99cddb18d128",
+    "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/v26c_j20_probe_result.json": "51b5f999f22fbd937b754159fc7a44f2fc3efa72463ea137154829b9d71d2452",
+    "v26c_j20_critic_warmup_readiness.py": "d33e0709ca4682ef857e07a85c7015d2d857aba2b04f454afb3bc1aa0c57858b",
+    "v26c_j20_prereg_critic_warmup_readiness.json": "f4ec06d77641a460e26df554f4c5c0f10ebceacb4534bbd0368773294706130c",
+    "v26c_j20_architect_go_k1.json": "aca75c7c12585b5b1ee50c52ebabf3030facf8c83e4ece668e70e421cd3f44f0",
+    "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "baseline_MLP/asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f"
+  }
+}

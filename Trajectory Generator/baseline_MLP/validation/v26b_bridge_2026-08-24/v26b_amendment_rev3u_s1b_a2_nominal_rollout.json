@@ -1,0 +1,141 @@
+{
+  "amendment_id": "rev3u_s1b_a2_nominal_rollout",
+  "date": "2026-08-24",
+  "token": "V26B-S1B-NOMINAL-ROLLOUT",
+  "kind": "ADDITIVE. Exactly ONE deterministic-mean nominal rollout of the single offline survivor A2. No other candidate, no retry, no sigma sampling, no multistart, no DAgger, no PPO, no morphology fit, no production change",
+  "purpose": "closed-loop gate for A2. A PASS marks it CLOSED_LOOP_ELIGIBLE_PENDING_ARCHITECT_AUDIT only; it is NOT a promotion and not a deployable status",
+  "architect_digest_transcription_discrepancy": {
+    "reported_aggregate": "039475cda88030e0af059b394974938f64a03b80490134295ca0ed486ae47e6 (63 chars)",
+    "verified_aggregate": "0539475cda88030e0af059b394974938f64a03b80490134295ca0ed486ae47e6 (64 chars, on disk)",
+    "reported_a2_receipt": "54011d327ca9c0acd4ed992b7026bf4a9455554c8b81414fb72dfab7861 (59 chars)",
+    "verified_a2_receipt": "5430115d327ca9c0acd4ed992b7026bf4a940555544c8b81414fb72dfab78616 (64 chars, on disk)",
+    "diagnosis": "both reported strings are shorter than 64 characters and are character-drop subsequences of the on-disk digests: a TRANSCRIPTION truncation in the authorisation message, not an artifact change. The A2 actor digest was quoted in full and matches exactly",
+    "resolution": "this amendment pins the VERIFIED on-disk digests and records the reported strings verbatim, so the audit trail shows both. Nothing was silently corrected"
+  },
+  "parents_immutable": {
+    "rev3t": "2002b68740b78435458a55a503e9161d1205c2acb0e9d6a3fd332466128bb8c2",
+    "rev3t_fit_tool": "6c63bf8be54034148441cdb6dae004e14991dba400aa66ca239523b37fcb265a",
+    "rev3t_fit_test": "258e2eda82b1709813830b641f6ce57c12ef413aa2139601815f98f03a4f6d1a",
+    "s1b_fit_aggregate": "0539475cda88030e0af059b394974938f64a03b80490134295ca0ed486ae47e6",
+    "a2_fit_receipt": "5430115d327ca9c0acd4ed992b7026bf4a940555544c8b81414fb72dfab78616",
+    "rev3s": "89e8c227eecb2a80350307d6c0315e0f90e42b37ecae1d75fea30f9da2e067a0",
+    "rev3r": "b20306919d884529bbabbb37b29da3d67a66a1bf1c2b7d2884b583f2a426556c",
+    "s0d_actor": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+    "s0d_rollout_receipt": "cbec1a671b7cdf2980881ec4ca33f69534e66d94cbbfa86c7b9cd9c1a39412b7",
+    "s1a_rollout_receipt": "43eeac0747b5b94904bf8c45dd4e8c4a392ff9fb269e0c89a3f03b27dd7ec72e"
+  },
+  "candidate_under_test": {
+    "id": "A2",
+    "anchor_target_ratio_r": 5,
+    "epochs": 300,
+    "module_dir": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1B_A2_35D_NONDEPLOYABLE/rl_module",
+    "actor_digest": "cde2c8e6356f833d9e1108b542286c2c9265f8f69bb4c0a894c36136c5d0916c",
+    "files_sha256": {
+      "actor_feature_manifest.json": "04af5c51d844cab073a7c98455d6a89e2126f9ce7cc4ce681c28ed8d1f456aa4",
+      "class_and_ctor_args.pkl": "c9a6722ff95642795bfe1146d0087a68b5861fd508cbe3692195b2d820d810a7",
+      "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "module_state.pkl": "57254b82b92b7cb5ea0d3b51805c3e8724a2fa9dd18c08c8b12353a1200d2908"
+    },
+    "flags": {
+      "deployable": false,
+      "rollout_pending": true,
+      "sigma_unresolved": true,
+      "quarantined": false
+    },
+    "immutability": "READ-ONLY: module, receipt and manifest digest-verified BEFORE and AFTER the run; flags never edited whatever the outcome",
+    "other_candidates": "A1, A3, A4, A5, A6 stay quarantined and are NOT rolled out"
+  },
+  "harness_equivalence": {
+    "rule": "the SAME frozen harness and config used for the S0D and S1A rollouts",
+    "rollout_eval.py": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba"
+    },
+    "v3_canonical_resolved_yaml": {
+      "path": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+      "sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db"
+    },
+    "morphology_corridor_profile": {
+      "path": "Trajectory Generator/baseline_MLP/morphology_profiles/ab06_prosthetic_event_warped_mean_std_corridor.json",
+      "sha256": "33b1dd7cb0db40110a4f9c1b8c0dd49a498662211e6e132f0f3cefe8edc02a55"
+    },
+    "command_resolved": [
+      "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "--checkpoint",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1B_A2_35D_NONDEPLOYABLE/rl_module",
+      "--no-auto-config",
+      "--config",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+      "--episode-start-offset-s",
+      "1.956870983805102",
+      "--action-selection",
+      "deterministic",
+      "--seed",
+      "123",
+      "--output-dir",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/rollouts/s1b_a2_nominal_det/S1B_A2_35D__v3_canonical__nominal__det",
+      "--record-outputs",
+      "--record-policy-trace",
+      "--no-progress",
+      "--run-timeout-s",
+      "7200",
+      "--stall-timeout-s",
+      "1500",
+      "--step-timeout-s",
+      "900",
+      "--startup-timeout-s",
+      "900"
+    ],
+    "equivalence_check": "the command must differ from the frozen S1A command ONLY in --checkpoint and --output-dir; verified fail-closed at execution"
+  },
+  "job_dir": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/rollouts/s1b_a2_nominal_det/S1B_A2_35D__v3_canonical__nominal__det",
+  "execution_policy": {
+    "exactly_one_launch": true,
+    "no_retry": true,
+    "no_tuning": true,
+    "action_selection": "deterministic mean; NO sigma sampling. 0.005 remains an UNRESOLVED placeholder and is NOT declared resolved by this stage"
+  },
+  "binding_gates": {
+    "completion": "500/500 steps AND end_reason episode_time_limit",
+    "phase_timeout_stance": 0,
+    "phase_timeout_swing": 0,
+    "morphology_causal_contract_failure": "rows_positive 0 AND max 0 AND failure false, read PER ROW from reward_terms.morphology_causal_failed_closed, never inferred from end_reason",
+    "hs_cancelled_count": "max over rows 0 AND final 0",
+    "resync_count": "max over rows <= 1 AND final <= 1",
+    "valid_cycle_count": ">= 1",
+    "penetration": "max <= 0.020 m and no grf_penetration termination",
+    "recording": "ALL v3 FSM counters, end_reason and cycles recorded verbatim, with no reinterpretation"
+  },
+  "mandatory_comparison_not_a_gate": {
+    "rule": "the A2-vs-S0D-vs-AB06-IK comparison on the RESULTING closed trace is diagnostic ONLY and may never change or relax a gate",
+    "offline_vs_closed_loop": "offline metrics were computed on the FROZEN S0D-visited rows (fit stage); the closed-loop metrics here are computed on A2's OWN newly visited states. The two are NOT comparable term by term and are reported in separate blocks",
+    "content": [
+      "sign, range, min, max and mean of the prosthetic knee and ankle",
+      "RMSE, Pearson correlation, sign agreement and amplitude ratio vs the prescribed targets",
+      "A2 recorded actions vs what S0D would output on the SAME visited states",
+      "A2 recorded actions vs AB06 u_IK at the same times on the visited trace",
+      "morphological quality useful to judge whether the biological direction improved",
+      "B3 only inside the phase window [0.55, 0.80], not_evaluable if the phase field is zero"
+    ]
+  },
+  "outcome_policy": {
+    "on_pass": "mark ONLY CLOSED_LOOP_ELIGIBLE_PENDING_ARCHITECT_AUDIT; no promotion, no deployable status, no anchor construction, STOP",
+    "on_fail": "quarantine the candidate, write a causal collaborative diagnosis, NO relaunch, NO tuning, STOP",
+    "either_way": "no write under student/, candidate flags unchanged, sigma NOT declared resolved"
+  },
+  "prohibitions": [
+    "no second rollout",
+    "no other candidate",
+    "no retry",
+    "no sigma sampling",
+    "no multistart",
+    "no DAgger",
+    "no PPO/critic",
+    "no morphology fit",
+    "no production change",
+    "no promotion",
+    "no output under student/",
+    "no modification of any existing amendment/tool/receipt/log/report/candidate"
+  ]
+}

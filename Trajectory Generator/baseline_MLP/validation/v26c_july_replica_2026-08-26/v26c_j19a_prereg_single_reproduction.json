@@ -1,0 +1,194 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION, MACHINE-READABLE",
+  "stage": "V26C_J19A_SINGLE_REPRODUCTION",
+  "date": "2026-08-27",
+  "status": "READINESS ONLY. Implemented and statically tested; NOT executed. No fit, no rollout, no environment, no critic, no PPO, no new collection, no candidate actor, no j19a_runs, no sealed seed, no valid architect GO.",
+  "contains_no_self_hash": true,
+  "requires_architect_go_before_execution": true,
+
+  "phase_separation": {
+    "decided_by": "architect, binding note of 2026-08-27",
+    "rule": "fit and rollout are NEVER chained in one execution; every phase closes with a report and an audit",
+    "J19A": "single refit of the selected candidate, reproducibility check, offline eligibility, commit of ONE actor into ONE leaf. This document.",
+    "J19B": "binding closed-loop A-F. DESCRIBED ONLY. Not executable, not started, not preregistered here. It will be preregistered and pinned ONLY after the architect audits the J19A leaf.",
+    "j19b_is_not_implemented_in_this_stage": true
+  },
+
+  "architect_decisions_encoded": [
+    {"id": "D1", "decision": "G1/G2 max-drift 0.005 remain DIAGNOSTIC, never binding"},
+    {"id": "D2", "decision": "G3/G4 no longer use 0.0014557. The binding ceiling is J8's own absolute empirical bias, computed at full precision on the same C/D blocks against the same parent J2. Criterion: not-worse-than-operational-J8, not derived from any sigma."},
+    {"id": "D3", "decision": "E-C/E-D remain binding at J8's exact RMSE values"},
+    {"id": "D4", "decision": "POST-485 is computed and recorded as a NON-BINDING diagnostic"},
+    {"id": "D5", "decision": "max-drift may remain the third ranking key as a DIAGNOSTIC tie-break among already-eligible candidates only; it is currently irrelevant because exactly one candidate is eligible"},
+    {"id": "D6", "decision": "reproducibility: best_epoch exactly 191; steps/batches/seed/config/dataset/provenance exact; the six frozen metrics compared with math.isclose(rel_tol=1e-06, abs_tol=1e-09). This is NUMERICAL tolerance, not a performance gate. On failure: fail-closed, no actor, no rollout."},
+    {"id": "D7", "decision": "closed-loop A-F (J19B) uses exclusively 20 mm soft diagnostic, 25 mm July diagnostic, > 28 mm sole hard binding (exactly 28 passes), and every other frozen criterion of the J9R1 matrix"}
+  ],
+
+  "selected_configuration": {
+    "source": "the J18 leaf, frozen; this stage selects nothing and re-ranks nothing",
+    "candidate_index": 13,
+    "preservation_weight_lambda": 30.0,
+    "on_policy_weight_beta": 1.0,
+    "learning_rate": 5e-05,
+    "w_A": 1.0, "w_B": 1.0, "w_C": 30.0, "w_D": 30.0,
+    "seed": 123,
+    "epochs": 200,
+    "batch_size": 128,
+    "batches_per_epoch": 33,
+    "optimizer_steps": 6600,
+    "expected_best_epoch": 191,
+    "no_grid": true,
+    "no_retry": true,
+    "no_early_stopping": true,
+    "sealed_seeds_126_127_128": "not read, not generated, not used"
+  },
+
+  "training_code_provenance": {
+    "rule": "J19A imports the FROZEN J18 runner and reuses its training path unmodified.",
+    "module": "v26c_j18_b_only_update.py",
+    "module_sha256": "d3949631ddd135c50bbd91eec26d9f77b70bdf41692a4500e01d0d01a34e992b",
+    "why_this_inverts_the_J18_hermeticity_rule": "J18 was required to import no prior-stage executable module, because its behaviour had to be fully determined by the seven artefacts its GO pinned. J19A's purpose is the opposite: to REPRODUCE a J18 result. Re-transcribing the training loop would make any mismatch ambiguous - a genuine irreproducibility and a transcription error would be indistinguishable. Importing the pinned original is therefore the requirement, not a violation.",
+    "declared_for_architect_ruling": true,
+    "the_import_is_pinned_by_hash_and_verified_before_use": true,
+    "no_prior_stage_module_is_modified": true
+  },
+
+  "frozen_reference_from_the_J18_leaf": {
+    "leaf": "j18_runs/j18_b_only_update_v26c_2026-08-27_r1",
+    "artefacts_sha256": {
+      "v26c_j18_candidate_metrics.json": "f4b8688dd8d4d0c4f330064dce4ac9ccd021e9529669a04e97ea615f226f36f3",
+      "v26c_j18_selection.json": "8ef47ef6343399dfded8ffe85ec109a6b420d0c804c32ba19d7b8906348aac30",
+      "v26c_j18_b_only_update_receipt.json": "600c3c45a49d39da93e4e6e890a479e923e51d456cf92c4faa245031929452db",
+      "history.json": "3eaba5128c1d0734a60127cddeb5f383d794fa59951a3c7cf2eb9e8dd4e46eee",
+      "commit_verification.json": "15bd6e5d3510ce7974d5df0a4669077a3d5995332e8d56cfd22447a3d44d3247"
+    },
+    "the_six_frozen_metrics": {
+      "note": "READ from the pinned leaf at run time, never hardcoded in the runner. Reproduced here for the audit.",
+      "MSE_A": 0.0005597009666432298,
+      "MSE_B": 0.00030691261600864986,
+      "rmse_C": 0.0030383822645046045,
+      "rmse_D": 0.0026441111267731902,
+      "max_abs_C": 0.046971050069934295,
+      "max_abs_D": 0.019819501669915418
+    },
+    "also_compared_exactly": {
+      "best_epoch": 191,
+      "optimizer_steps": 6600,
+      "batches_per_epoch": 33
+    }
+  },
+
+  "reproducibility_contract": {
+    "numeric_comparison": "math.isclose(fresh, frozen, rel_tol=1e-06, abs_tol=1e-09)",
+    "rel_tol": 1e-06,
+    "abs_tol": 1e-09,
+    "this_is_numerical_tolerance_not_a_performance_gate": true,
+    "a_BETTER_result_also_fails": "yes, by construction: this is a reproduction check, not a performance gate",
+
+    "exact_field_comparison": {
+      "rule": "every field below is compared for EXACT equality, recorded field by field in the result and in the receipt, and is fail-closed. It is NOT left to an implicit reliance on the preflight.",
+      "reference": "the frozen J18 leaf and the pinned J18 dataset manifest",
+      "fields": [
+        "protocol.seed", "protocol.epochs", "protocol.batch_size",
+        "protocol.batches_per_epoch", "protocol.optimizer_steps_per_candidate",
+        "candidate.candidate_index", "candidate.learning_rate",
+        "candidate.on_policy_weight_beta", "candidate.preservation_weight_lambda",
+        "candidate.w_A", "candidate.w_B", "candidate.w_C", "candidate.w_D",
+        "rows.A", "rows.B", "rows.C", "rows.D",
+        "observations_sha256.A", "observations_sha256.B", "observations_sha256.C", "observations_sha256.D",
+        "labels_sha256.A", "labels_sha256.B", "labels_sha256.C", "labels_sha256.D",
+        "parent_j8_module_sha256", "parent_j8_actor_digest", "parent_of_j8_module_sha256",
+        "provenance.j18_runner_sha256", "provenance.dataset_manifest_sha256",
+        "provenance.dataset_manifest_matches_j18_receipt",
+        "provenance.j18_leaf.* (five artefacts)"
+      ],
+      "also_exact": ["best_epoch", "optimizer_steps", "batches_per_epoch"]
+    },
+
+    "label_hash_policy": {
+      "blocks_whose_labels_are_read_from_a_file": "A, B and C - exact hash required, and that was already J18's contract",
+      "block_D_whose_labels_are_computed": "exact hash required in THIS reproduction",
+      "historical_distinction_preserved": "J18's contract was CROSS-PLATFORM and therefore bound block D's computed labels by a 1e-06 TOLERANCE rather than by hash, because a BLAS difference can move the last bits. J19A is a SAME-PLATFORM reproduction, so the exact hash is required and a mismatch means the computation changed, not that the platform did. The distinction is recorded as a note on the labels_sha256.D field itself.",
+      "j18_cross_platform_tolerance": 1e-06
+    },
+
+    "on_failure": "FAIL-CLOSED. No actor is written, no rollout is authorised, the leaf records the divergence field by field, and the phase returns to the architect. No retry, no tolerance widening."
+  },
+
+  "offline_eligibility": {
+    "applies_to": "the single reproduced actor",
+    "binding": [
+      {"id": "G5", "name": "on_policy_improvement_B", "relation": "<=", "threshold": 0.09546555953591015, "origin": "preregistered in J18 v1, unchanged"},
+      {"id": "G6", "name": "teacher_non_regression_A", "relation": "<=", "threshold": 0.004108013186414973, "origin": "preregistered in J18 v1, unchanged"},
+      {"id": "G3", "name": "preservation_bias_C", "relation": "<=", "threshold": 0.0008992143952043874, "origin": "MEASURED: J8's own absolute empirical bias vs J2 on block C, max over the two actions"},
+      {"id": "G4", "name": "preservation_bias_D", "relation": "<=", "threshold": 0.0007264156156278919, "origin": "MEASURED: J8's own absolute empirical bias vs J2 on block D, max over the two actions"},
+      {"id": "E-C", "name": "preservation_rmse_C", "relation": "<=", "threshold": 0.00447396874790294, "origin": "MEASURED: J8's own RMSE drift vs J2 on block C"},
+      {"id": "E-D", "name": "preservation_rmse_D", "relation": "<=", "threshold": 0.005262698258768814, "origin": "MEASURED: J8's own RMSE drift vs J2 on block D"},
+      {"id": "G7", "name": "logstd_frozen_and_state_independent", "relation": "==", "origin": "structural, unchanged"},
+      {"id": "G8", "name": "no_critic", "relation": "==", "origin": "structural, unchanged"},
+      {"id": "G9", "name": "clock_columns_zero", "relation": "==", "origin": "structural, unchanged"},
+      {"id": "G10", "name": "key_set_identical", "relation": "==", "origin": "structural, unchanged"},
+      {"id": "G11", "name": "finiteness", "relation": "==", "origin": "structural, unchanged; recursive over state, metrics and every reported diagnostic"}
+    ],
+    "diagnostic_only_never_binding": [
+      {"id": "G1", "name": "preservation_max_drift_C", "recorded_reference": 0.005},
+      {"id": "G2", "name": "preservation_max_drift_D", "recorded_reference": 0.005},
+      {"id": "POST_485", "name": "drift on the 485 post-mismatch rows of cell B", "why_diagnostic": "these rows are the TARGET REGION of the correction. A corrected actor is supposed to change there, so a large value is not per se bad and any association with closed-loop failure is confounded by design."}
+    ],
+    "the_J8_ceilings_are_recomputed_at_run_time": "the runner recomputes J8's bias and RMSE drift vs J2 on the same blocks and asserts they match the values above. They are derived, then checked, never merely trusted.",
+    "G11_coverage": {
+      "rule": "G11's recursive finiteness covers the actor state and the A-D block metrics, which are passed separately, PLUS one single explicit payload carrying EVERY other numeric family the result publishes. No published number sits outside it.",
+      "g11_payload_families": [
+        "candidate",
+        "training_diagnostics (best_epoch, best_objective, optimizer_steps, batches_per_epoch, scale_absorption, post_485_diagnostic, history)",
+        "j8_ceilings",
+        "raw_vs_scaled_equivalence",
+        "reproducibility",
+        "exact_fields"
+      ],
+      "why_one_explicit_payload": "reproducibility and the exact-field comparison are computed BEFORE eligibility, so both can be included. Passing only the training diagnostics would leave candidate, j8_ceilings, raw_vs_scaled_equivalence, reproducibility and exact_fields published but unchecked.",
+      "post_485_is_computed_BEFORE_the_gate": true,
+      "evaluate_eligibility_refuses_a_missing_family": "yes: it raises, naming the missing families, rather than silently gating less"
+    },
+    "publication_rule": {
+      "rule": "the result publishes ONLY sanitised values. The whole g11_payload is sanitised in one pass and each family is taken from the SAFE copy.",
+      "history_json": "built from the SANITISED history inside the safe payload, never from the raw training output",
+      "receipt": "carries only derived booleans, counters, lists of field names and hash strings; no raw float can reach it even in principle",
+      "sanitised_families": ["metrics", "the whole g11_payload (all six families)", "eligibility"]
+    },
+    "promotion_is_impossible_when_any_non_finite_value_is_found": {
+      "rule": "if sanitisation reports ANY finding anywhere in the published record, the actor is not promoted, whatever the gates said",
+      "the_record_is_still_written": "sanitised, with each finding's path and kind, so the evidence survives",
+      "no_NaN_ever_reaches_JSON": "encode_json uses allow_nan=False as the last barrier"
+    },
+    "on_failure": "FAIL-CLOSED. No actor is written and no rollout is authorised."
+  },
+
+  "actor_persistence": {
+    "count": 1,
+    "condition": "written ONLY after the reproducibility contract AND every binding eligibility criterion have passed",
+    "never_written_before_those_checks": true,
+    "leaf": "j19a_runs/j19a_single_reproduction_v26c_<date>_r1",
+    "content_addressed_no_clobber": true,
+    "born_invalid_marker": "TECHNICAL_INVALID written into staging FIRST, removed only as the LAST write after post-commit verification succeeds",
+    "post_commit_verification": "every leaf-relative path is re-resolved from the COMMITTED receipt, re-hashed, and compared both to the receipt and to the staged bytes",
+    "actor_manifest_must_be_truthful": "its own module_state_sha256, its own actor_digest, its own label; the stale J8 sidecar is never read as an identity source"
+  },
+
+  "invariants": {
+    "not_modified": ["J16 and every historical runner, which remain immutable evidence", "the J18 leaf and its runner", "J8", "J2", "J4", "J7", "J9R1", "J10R1", "production configuration", "FSM v3", "detector and morphology", "reward", "sigma", "SEA and the C++ plugin", "network architecture"],
+    "single_35D_actor": true,
+    "no_grid": true,
+    "no_retry": true,
+    "no_ppo": true,
+    "no_new_collection": true,
+    "no_rollout_in_this_stage": true,
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "dirty_worktree": "preserved untouched"
+  },
+
+  "what_this_stage_can_and_cannot_establish": {
+    "can": "that the selected J18 result reproduces exactly, and that the reproduced actor satisfies every binding offline criterion derived from the operational actor J8.",
+    "cannot": "anything about closed-loop behaviour. J17 measured that offline improvement does not certify closed-loop, and the J18 diagnosis measured the converse: the actor with the LOWEST drift of all, J4 at 0.00191, still incurred a 25 mm diagnostic breach. The binding verdict is J19B, which this stage does not perform and does not preauthorise."
+  }
+}

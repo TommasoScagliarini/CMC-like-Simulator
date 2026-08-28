@@ -1,0 +1,300 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j11_prereg_multistart_fit",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_proposed": "V26C_J11_MULTISTART_FIT",
+  "authorisation_status": "NOT_GRANTED at the time of writing - the architect authorises execution internally after reviewing this readiness bundle",
+  "date_utc": "2026-08-27",
+  "architect_decision": {
+    "operational_lineage": "August V26 imitation -> J2 35D -> a NEW fit, J11",
+    "july_status": "METHODOLOGY AND EVIDENCE ONLY. No July checkpoint, dataset, label or artefact is an operative parent, dataset or label source here.",
+    "fresh_start_from_j2": "the fit begins from j2_runs/j2_base_v26c_2026-08-26_r1/rl_module, module_state 0f182ea9..., NOT from J8, NOT from J4 and NOT from any July checkpoint",
+    "j8_is_a_sibling_not_an_ancestor": "J8 fitted the same J2 parent on the J7 rows alone. J11 starts again from J2 with the larger aggregate, so the two fits are siblings",
+    "one_actor": "a single 35-wide actor. No 25D actor, no widening, no contralateral feature.",
+    "taken_by": "the architect, explicitly",
+    "not_reopened": "this preregistration implements that decision and proposes no alternative"
+  },
+  "what_this_stage_is": "ONE offline supervised fit of the full mean network on a 24713-row aggregate materialised at execution time from three already-committed sources, followed by a binding offline gate and an atomic commit",
+  "what_this_stage_is_not": [
+    "not PPO and not training ex novo",
+    "not a critic and not a critic warm-up",
+    "not a rollout and not a closed-loop qualification",
+    "no environment is constructed, reset or stepped",
+    "not a promotion and not a deployability claim",
+    "the J8 student is neither a parent nor a label source"
+  ],
+  "parent": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+    "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "is_j2": true,
+    "is_j8": false,
+    "is_july": false,
+    "measured_state": {
+      "keys": 10,
+      "first_layer_input_width": 35,
+      "head_output_width": 4,
+      "clock_columns_0_1": "EXACTLY zero",
+      "controller_columns_25_34": "EXACTLY zero",
+      "logstd": "pi.1.weight[2:] exactly zero; pi.1.bias[2:] = -5.2983174324035645 (sigma 0.005)",
+      "note": "J2 is the DOUBLE-MASKED base: both the clock and the controller block start dead. This fit leaves the clock dead and brings the controller block to life."
+    },
+    "observation_contract_ancestor": {
+      "sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+      "what": "the 39-wide August V26 imitative actor under which the J10R1 teacher cells were collected. NOT a weight ancestor and never loaded here.",
+      "why_recorded": "the two hashes are easy to conflate; they are kept distinct throughout"
+    }
+  },
+  "aggregate_composition": {
+    "total_rows": 24713,
+    "materialised_at": "the single J11 execution, from already-committed sources; nothing is rebuilt",
+    "repeat_semantics": "np.tile: the whole unique block is concatenated `repeat` times, contiguously",
+    "why_tile_not_repeat": "MEASURED on the committed J7 dataset: rows [0:500] == [500:1000] == ... == [15500:16000] and the nominal block holds exactly 500 unique rows. np.repeat would place each row's copies consecutively and would produce a DIFFERENT dataset with the same shape.",
+    "blocks": [
+      {
+        "id": "j7_nominal",
+        "start": 0,
+        "stop": 16000,
+        "unique": 500,
+        "repeat": 32,
+        "tiled": true,
+        "source": "J7 leaf, states from the J3 student rollout, labels self-distilled from the J2 parent's means"
+      },
+      {
+        "id": "j7_recovery",
+        "start": 16000,
+        "stop": 16713,
+        "unique": 713,
+        "repeat": 1,
+        "tiled": false,
+        "source": "J7 leaf, labels from the J1 teacher, seeds 123/124/125"
+      },
+      {
+        "id": "cell_B",
+        "start": 16713,
+        "stop": 20713,
+        "unique": 500,
+        "repeat": 8,
+        "tiled": true,
+        "source": "J10R1 cell B, start -0.20 s, prescribed teacher labels"
+      },
+      {
+        "id": "cell_C",
+        "start": 20713,
+        "stop": 24713,
+        "unique": 500,
+        "repeat": 8,
+        "tiled": true,
+        "source": "J10R1 cell C, start +0.20 s, prescribed teacher labels"
+      }
+    ],
+    "order": "the whole J7 dataset, then cell B tiled eight times, then cell C tiled eight times"
+  },
+  "july_evidence_for_the_order": {
+    "measured_by": "an independent read-only audit of the July run artefacts",
+    "july_aggregate_rows": 24712,
+    "july_layout": "[nominal 500x32 = 16000] ++ [recovery 356x2 = 712] ++ [B 500x8 = 4000] ++ [C 500x8 = 4000]",
+    "july_source_lines": "target_domain_markov_adaptation.py:174-187 and :362-390, both np.tile",
+    "confirms": [
+      "the concatenation ORDER: nominal, recovery, then the off-nominal starts in order",
+      "np.tile semantics, not np.repeat",
+      "the repeat factor 8, applied to BOTH off-nominal starts"
+    ],
+    "the_one_difference": "August's recovery block is 713 UNIQUE rows taken once, from J7, instead of 356 unique taken twice. The aggregate is therefore 24713 and not 24712. This difference is inherited from the already-committed J7 stage and is not a choice made here.",
+    "repeat_factor_8_has_no_documented_rationale": "NOT FOUND in any July report, comment or config. The value survives only as data: recovery_dataset_repeat: 8 in the run report and the alt8 token in the run directory name. The CLI default was 1, so 8 was passed explicitly. This stage replicates an OBSERVED value and claims no documented justification for it.",
+    "july_is_not_operational": "no July artefact is a parent, a dataset or a label here"
+  },
+  "clock_policy": {
+    "columns": [
+      0,
+      1
+    ],
+    "feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ],
+    "measured_fact": "with the gait clock disabled the environment records the RAW pair (sin, cos) = (0, 1). Verified on both J10R1 cells: column 0 has the single unique value 0.0 and column 1 the single unique value 1.0, on all 500 rows.",
+    "j7_state": "already projected to EXACT zero",
+    "action": "the two columns are projected to EXACT zero before aggregation and before the fit, exactly as July and J7 did",
+    "expected_not_a_defect": "a raw cos of 1 is the documented disabled-clock encoding. It is NEVER a reason to reject a cell.",
+    "both_hashed": "the RAW and the PROJECTED content hashes are both recorded",
+    "weights": "the clock weight columns are hard-zeroed after every optimizer step and again at save, so the clock cannot influence the action whatever the environment records",
+    "july_precedent": "target_domain_imitation._zero_disabled_clock_columns, called before the fit, after every optimizer step and after loading the best state"
+  },
+  "hyperparameters": {
+    "seed": 123,
+    "epochs": 400,
+    "batch_size": 128,
+    "learning_rate": 5e-05,
+    "validation_fraction": 0.2,
+    "patience": 60,
+    "clip_weight": 1.0,
+    "logstd_weight": 0.0,
+    "anchor_weight": 0.01,
+    "trainable_first_layer_features": null
+  },
+  "split": {
+    "formula": "max(1, int(round(rows * validation_fraction)))",
+    "expected_n_val": 4943,
+    "expected_n_train": 19770,
+    "verified_not_assumed": "the runner recomputes the split and REFUSES to continue if it does not produce these counts",
+    "rounding_matters": "int(round(24713*0.2)) = 4943; a truncating int() would give 4942",
+    "generators": 1,
+    "order": [
+      "np.random.default_rng(123)",
+      "rng.permutation(rows)",
+      "validation = sorted(perm[:n_val])",
+      "training = perm[n_val:], ORDER PRESERVED",
+      "the SAME rng then produces every epoch shuffle"
+    ],
+    "why_training_order_is_preserved": "each epoch shuffle is rng.permutation(train_idx), which permutes POSITIONS; sorting the training half would change every epoch's batch sequence",
+    "repeated_rows_span_both_partitions": "every block is tiled, so the same unique row appears in BOTH partitions. Inherited from July and from J7, RECORDED AND NOT CORRECTED. The validation MSE is a training diagnostic, never a generalisation estimate."
+  },
+  "trainable_parameters": {
+    "exactly_six_direct_tensors": [
+      "pi.0.0.weight",
+      "pi.0.0.bias",
+      "pi.0.2.weight",
+      "pi.0.2.bias",
+      "pi.1.weight",
+      "pi.1.bias"
+    ],
+    "aliases_not_optimised": [
+      "pi_encoder.0.weight",
+      "pi_encoder.0.bias",
+      "pi_encoder.2.weight",
+      "pi_encoder.2.bias"
+    ],
+    "aliases_rebuilt_bit_identical": true,
+    "july_note": "in July the aliases were the SAME tensor objects, because pi is an nn.Sequential wrapping pi_encoder. Working from a plain numpy state there is no such sharing, so the aliases are rebuilt as exact copies and BIT-IDENTITY IS A BINDING GATE. The outcome is what July's sharing guaranteed structurally.",
+    "logstd_rows_frozen": "[2:] of pi.1.weight and pi.1.bias, restored from the J2 parent after EVERY optimizer step and asserted bit-identical at the end",
+    "critic": "ABSENT. No value-function tensor is read, written or constructed.",
+    "all_ten_keys_emitted": "the module state carries all ten actor keys. Dropping the aliases would break warm_start.transplant_actor_state, which requires them."
+  },
+  "binding_gate": {
+    "integrity": [
+      "keys, shapes and dtype equal to the J2 parent",
+      "every parameter finite",
+      "clock columns bit-zero in direct AND alias",
+      "aliases bit-identical to their direct tensors",
+      "logstd rows [2:] bit-identical to the J2 parent",
+      "no critic key",
+      "every pinned input unchanged after the fit",
+      "the aggregate reproduces its own recorded content hashes",
+      "the split produces the declared 4943/19770",
+      "the best state is reconstructible from the recorded history",
+      "every metric finite"
+    ],
+    "outcome": [
+      "aggregate RMSE after < before",
+      "the ORIGINAL 713 recovery rows: RMSE after < before",
+      "cell B UNIQUE 500 rows: RMSE after < before",
+      "cell C UNIQUE 500 rows: RMSE after < before",
+      "all ten controller column norms > 0"
+    ],
+    "no_invented_thresholds": "every binding numeric rule is a STRICT inequality against a MEASURED baseline. No margin, no tolerance and no absolute target is asserted.",
+    "diagnostics_not_binding": [
+      "nominal RMSE",
+      "nominal mean shift",
+      "clipping out-of-bounds rows",
+      "best validation MSE",
+      "epochs run",
+      "stopped early",
+      "the observed torch backend settings"
+    ]
+  },
+  "manifest_policy": {
+    "byte_identical_copy": false,
+    "regenerated": true,
+    "byte_identical_sidecars": [
+      "class_and_ctor_args.pkl",
+      "metadata.json"
+    ],
+    "why": "the parent's actor_feature_manifest.json describes the PARENT. Copying it verbatim, as J8 did, ships a module whose manifest names a different module.",
+    "j8_precedent_measured": {
+      "j8_manifest_sha256": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "identical_to_its_parent": true,
+      "false_fields": {
+        "module_state_sha256": "declares 0f182ea9... (the parent) while J8's own module is 9c5b1571...",
+        "controller_state_mask.active": "declares true while J8's controller columns are LIVE",
+        "actor_label": "J2_BASE35_JULY_FAITHFUL, which J8 is not",
+        "status": "'base-phase fit; never promoted; J3 not run', which predates J8",
+        "derived_from": "points past J8's real parent"
+      },
+      "why_it_was_never_caught": "no loader reads any of those fields. RLlib ignores the manifest entirely, and J3/J9R1 read only actor_feature_names."
+    },
+    "j4_precedent_followed": "J4 reused class_and_ctor_args.pkl and metadata.json verbatim and REGENERATED the manifest with its own module_state_sha256 and a truthful controller_state_mask. J11 follows J4, not J8.",
+    "actor_digest_added": "the regenerated manifest carries actor_digest, which warm_start.resolve_source_actor_features actively ENFORCES against the module state. J2, J4 and J8 all omit it, which is exactly the hole J8's stale manifest slipped through. The algorithm is transcribed from the pinned warm_start.py, never imported, because importing it pulls torch.",
+    "claims_the_manifest_does_not_make": [
+      "closed-loop viability",
+      "generalisation",
+      "deployability",
+      "promotion"
+    ]
+  },
+  "preflight": {
+    "inert": "no torch, no fit, no optimizer, no environment, no write",
+    "torch_free_contract": "the only `import torch` is inside run_fit. The preflight measures whether torch entered sys.modules and BLOCKS if it did.",
+    "sidecar_trap": "class_and_ctor_args.pkl requires asymmetric_rl_module and torch to unpickle. It is only HASHED and COPIED, never loaded.",
+    "reports": "the aggregate layout, the split, the preconditions, the parent, the manifest policy and what would be written"
+  },
+  "future_leaf": {
+    "relative_leaf": "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1",
+    "is_the_only_destination": true,
+    "must_not_exist_before": true,
+    "contents": [
+      "v26c_j11_aggregate_dataset.npz",
+      "v26c_j11_multistart_fit_receipt.json",
+      "history.json",
+      "commit_verification.json",
+      "rl_module/module_state.pkl",
+      "rl_module/actor_feature_manifest.json  [REGENERATED]",
+      "rl_module/class_and_ctor_args.pkl  [byte-identical to the parent]",
+      "rl_module/metadata.json  [byte-identical to the parent]"
+    ],
+    "write_protocol": "atomic commit, no-clobber, under an exclusive sibling lock taken with O_CREAT|O_EXCL: sibling staging, round-trip reload of the state, receipt, leaf re-check, rename, THEN post-commit verification",
+    "validity_is_conditional": "the committed leaf is VALID EVIDENCE if and only if commit_verification.json exists inside it and declares pass true. The leaf is born carrying a TECHNICAL_INVALID marker, committed by the rename itself and removed only after the verification passes.",
+    "j8_had_no_post_commit_verification": "J8 recorded its receipt's hash after the rename and compared it to nothing. J11 adopts the J10R1 protocol.",
+    "outcome_fail_still_commits": "a gate FAIL still commits the full evidence and exits non-zero",
+    "leaf_inventory_is_final_at_write_time": "the next stage will pin these files exactly; a stray file added later would fail its integrity gate and the manifest's own SHA cannot be corrected afterwards",
+    "no_autonomous_retry": true
+  },
+  "deferred_todo": {
+    "loto": "NOT integrated. Future TODO, not J11.",
+    "loco": "NOT integrated. Future TODO, not J11.",
+    "b1r1": "NOT integrated. Future TODO, not J11.",
+    "b1r2": "NOT integrated. Future TODO, not J11.",
+    "generalisation_dataset_epic": "OPEN. This stage still covers AB06 and three starts of the same trial; it demonstrates no generalisation.",
+    "closed_loop_qualification": "NOT part of this stage and NOT authorised by it. A PASS here is an offline result only.",
+    "critic_warm_up": "NOT part of this stage. It must build a fresh inference_only=False module and transplant the actor; it cannot go through RLModule.from_checkpoint, because class_and_ctor_args.pkl hard-codes inference_only=True."
+  },
+  "unchanged": [
+    "FSM",
+    "morphology corridor",
+    "reward",
+    "SEA",
+    "the C++ plugin",
+    "production configuration",
+    "every J0-J10R1 artefact and report"
+  ],
+  "cross_platform": "pathlib and os.rename only; no shell; explicit int64 split indices and explicit float32 casts, so Windows and macOS produce the same bytes",
+  "pinned_artefacts_sha256": {
+    "v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "v26c_j2_fit.py": "d2dc00e3e5ca5f03afba59e7bc3396bcb81ebcafeef5546204e96c02f5c895ed",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/commit_verification.json": "59cd1563ad23713ef00ac5b2e95a334a088257af95c6727520fb895c61a8c61c",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12"
+  },
+  "pinned_repo_artefacts_sha256": {
+    "Trajectory Generator/baseline_MLP/target_domain_markov_adaptation.py": "7518f1d4bdaa31505d8335934ce3478ebc03dc1cb1f31b508b5ec4a229cba7e0",
+    "Trajectory Generator/baseline_MLP/warm_start.py": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c",
+    "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f"
+  },
+  "pinned_sources_note": "target_domain_markov_adaptation.py is the July scaling authority and is read BY AST, never imported: importing it pulls torch and the preflight must stay torch-free. warm_start.py is pinned because the actor_digest algorithm is transcribed from it. asymmetric_rl_module.py is pinned because it fixes the alias structure and the critic shape."
+}

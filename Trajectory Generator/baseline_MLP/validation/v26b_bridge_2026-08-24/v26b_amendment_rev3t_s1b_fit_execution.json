@@ -1,0 +1,73 @@
+{
+  "amendment_id": "rev3t_s1b_fit_execution",
+  "date": "2026-08-24",
+  "token": "V26B-S1B-FIT",
+  "kind": "ADDITIVE. Authorises EXCLUSIVELY: tooling, tests, the offline fit of the six frozen rev3s candidates and their NONDEPLOYABLE materialisation. rev3s and every prior artifact remain immutable and unmodified",
+  "architect_decision": "independent audit of rev3s PASS (hashes, 63/63 self-test, clean dry-run, no S1B actor or rollout). S1B proceeds SINGLE-START as a controlled trust-region experiment",
+  "alt_start_branch_recorded_not_required": {
+    "executor_proposal": "S0D deterministic rollouts from the -0.20/+0.20 s starts to obtain anchor-only states",
+    "architect_correction_accepted": "that construction would INVERT the July roles: in July the alt-start rows carried the TEACHER/target labels and the NOMINAL trace carried the anchors. Adding alt-start ANCHORS is therefore not by itself a July-faithful replica",
+    "status": "recorded as a POSSIBLE FUTURE BRANCH, explicitly NOT a prerequisite of this stage; the user has deferred any multistart",
+    "consequence_for_this_stage": "the structural finding of rev3s stands unchanged: with anchors and task on identical rows the two-role optimum is the convex blend. S1B is a trust-region interpolation, executed as genuine two-role gradient descent, never as a hard blend"
+  },
+  "parents_immutable": {
+    "rev3s": "89e8c227eecb2a80350307d6c0315e0f90e42b37ecae1d75fea30f9da2e067a0",
+    "rev3s_tool": "9dbbabdd45c2233b416ccb8ccd81a7b84f5bb01b9423d6db9ec5dc78a75cc2be",
+    "rev3s_test": "4c8cda930e5e1afbb69a9ef1477bab82189701fc8fccfc158f6463b215138160",
+    "rev3s_dryrun_receipt": "3044f1ed0ac6b7fadd6badf0b9cdbfb168bb1e25879ca165ef5e842b4db8d155",
+    "rev3r": "b20306919d884529bbabbb37b29da3d67a66a1bf1c2b7d2884b583f2a426556c",
+    "rev3q": "74b23e6f5a202b260320718e43dd70f483dc898dc5805d91a28eeb52546bc667",
+    "s0d_actor": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+    "s0d_module_state": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597",
+    "s0d_rollout_receipt": "cbec1a671b7cdf2980881ec4ca33f69534e66d94cbbfa86c7b9cd9c1a39412b7"
+  },
+  "execution_contract": {
+    "candidates": "EXACTLY the six frozen rev3s candidates A1..A6; no addition, removal, re-weighting, re-run or retry",
+    "init": "every candidate starts FRESH from the exact pinned S0D module state, reloaded from disk and digest-verified per candidate; S1A is never init, source or anchor",
+    "trainable": "the full 35D mean network; logstd restored bit-identical; clock columns re-zeroed after every optimizer step",
+    "loss": "lambda_a * mean_anchor(row MSE vs u_S0D) + lambda_t * mean_task(row MSE vs u_IK) + 1.0 * action-clip penalty + 1e-5 * July parametric anchor towards theta_S0D, with lambda_t = 1 and lambda_a = r",
+    "role_mechanism": "T1R group-balanced: ONE deterministic shuffled union of the two role blocks; per-role means computed SEPARATELY inside every mini-batch so that batch concatenation and sampling can never alter the ratio r; a role absent from a batch contributes exactly zero and such batches are counted",
+    "no_hard_blend": "the blended-label shortcut is FORBIDDEN even though it is the analytic optimum: the contract prescribes genuine two-role gradient descent",
+    "numerics": {
+      "epochs": "300 for A1-A5, 60 for A6",
+      "batch_size": 256,
+      "optimizer": "Adam",
+      "lr": 0.0001,
+      "seed": 2026,
+      "deterministic_algorithms": true,
+      "early_stopping": "none",
+      "model_selection": "none"
+    },
+    "scaling": "July physical scaling in the fit space, absorbed at export; T1/T2 <= 1e-5"
+  },
+  "offline_hierarchy": "EXACTLY the rev3s hierarchy I -> P -> T -> D, fail-closed with short circuit and discrete strata, evaluated by the rev3s tool (unmodified). Full metrics, predicted-vs-observed values and deviations from the analytic model are recorded for audit",
+  "offline_pass_meaning": "ADMITTED TO THE CLOSED-LOOP GATE ONLY. No offline metric declares or suggests walking",
+  "materialisation": {
+    "path_template": "runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1B_<ID>_35D_NONDEPLOYABLE",
+    "student_dir_forbidden": true,
+    "atomic_no_clobber": true,
+    "mandatory_flags": {
+      "deployable": false,
+      "rollout_pending": true,
+      "sigma_unresolved": true,
+      "promotion_requires": "closed-loop nominal rollout under a separate token"
+    },
+    "failed_candidates": "materialised too, but marked quarantined:true and may_not_be_source:true; a candidate that fails the offline hierarchy can never be init, source or anchor of any later stage",
+    "no_promotion": "no actor is promoted; S0D remains the only actor of the chain with closed-loop evidence"
+  },
+  "prohibitions": [
+    "no rollout",
+    "no collection",
+    "no DAgger",
+    "no PPO/critic",
+    "no multistart",
+    "no sigma (0.005 stays an unresolved placeholder)",
+    "no morphology fit",
+    "no production change",
+    "no output under student/",
+    "no threshold or grid change",
+    "no modification of rev3s or of any existing amendment/tool/receipt/log/report/candidate",
+    "no retry"
+  ],
+  "next_stage_locked": "V26B-S1B-NOMINAL-ROLLOUT (not granted): survivors evaluated in the frozen order A6, A3, A2, A1, A4, A5, stop at the first PASS"
+}

@@ -1,0 +1,115 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j8_recovery_fit_authorization",
+  "kind": "ADDITIVE, IMMUTABLE, FORMAL EXECUTION AUTHORISATION",
+  "stage_authorised": "V26C-J8-RECOVERY-FIT",
+  "date_utc": "2026-08-26",
+  "authority": {
+    "granted_by": "THE USER, explicitly, with 'ok procedi'",
+    "architect_role": "gate owner and reviewer. The architect specified, reviewed and froze this stage; the architect is NOT the approver.",
+    "assistant_role": "operator. Executes exactly what this file freezes, once, and nothing else.",
+    "scope": "exactly ONE J8 fit attempt. This file authorises nothing else whatsoever."
+  },
+  "what_is_authorised": {
+    "attempts": 1,
+    "processes": 1,
+    "description": "one invocation of the frozen J8 runner, in the frozen environment, with the frozen argv, writing to the single frozen leaf",
+    "retry": "NONE. Whatever the outcome, there is no second attempt, no alternate leaf, no changed argument and no autonomous recovery."
+  },
+  "frozen_inputs_sha256": {
+    "v26c_j8_prereg_recovery_fit.json": "8f661320348f6b6f034bbbe7b2c04ca85efc10cac48375349261ce2dbcba737b",
+    "v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "test_v26c_j8_recovery_fit.py": "b1d98339023c9c3be883897891dbc76834868c9094cbc218c7a975cc5cd0009e"
+  },
+  "frozen_inputs_note": "a pure path -> sha256 map, relative to the V26C validation root. Any byte of difference invalidates this authorisation.",
+  "frozen_execution": {
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "script": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j8_recovery_fit.py",
+    "argv": [
+      "--fit",
+      "--authorized-stage",
+      "V26C-J8-RECOVERY-FIT",
+      "--out",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+      "--progress"
+    ],
+    "leaf": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+    "leaf_relative": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+    "is_the_only_destination": true,
+    "output_root_override": "MUST BE UNSET. The runner refuses the authorised fit while it is set; the override exists for synthetic isolated tests only and always marks a result non-authoritative.",
+    "no_other_flag": "no flag may be added, removed or altered"
+  },
+  "prerequisites_already_observed": {
+    "note": "observed independently before this authorisation was written; they are recorded as facts of that observation, not as promises",
+    "py_compile": "exit 0",
+    "j8_selftest": "PASS, 230 checks",
+    "fresh_process_preflight": "GO, no blockers, read_only true, torch_imported_by_preflight false",
+    "j8_leaf": "ABSENT",
+    "j8_lock": "ABSENT",
+    "j8_staging": "ABSENT",
+    "snapshot": "204 files hashed before and after the fresh preflight, byte-identical"
+  },
+  "immediately_before_execution": {
+    "recheck_the_three_frozen_hashes": "byte-for-byte, against frozen_inputs_sha256 above",
+    "rerun_the_fresh_preflight": "must still be GO, with no blockers",
+    "reconfirm_absence": "no J8 leaf, no lock, no staging directory",
+    "on_any_mismatch": "DO NOT EXECUTE. Stop and report."
+  },
+  "outcome_policy": {
+    "integrity_or_precondition_abort": {
+      "meaning": "a binding precondition or integrity invariant failed before the commit",
+      "expected_state": "NO leaf is created; nothing is written",
+      "action": "STOP and diagnose. No retry, no leaf, no second attempt."
+    },
+    "outcome_fail": {
+      "meaning": "the fit completed but a binding outcome failed - recovery RMSE did not decrease, or a controller column norm is not strictly positive",
+      "expected_state": "the leaf is committed atomically with verdict FAIL; the process exits 1",
+      "action": "PRESERVE the committed FAIL evidence exactly as written. STOP and diagnose. No retry."
+    },
+    "pass": {
+      "meaning": "every binding precondition, integrity invariant and outcome held",
+      "expected_state": "the leaf is committed with verdict PASS; the process exits 0",
+      "action": "PRESERVE the evidence and hand back to the architect for independent audit.",
+      "confers_nothing": "a PASS is an offline result and authorises NOTHING further"
+    }
+  },
+  "a_pass_does_not_authorise": [
+    "J9 or any subsequent stage",
+    "any rollout, deterministic or stochastic",
+    "any closed-loop evaluation",
+    "a critic warm-up",
+    "PPO of any kind",
+    "promotion of the fitted actor",
+    "deployment or any deployability claim",
+    "any change to FSM, morphology corridor, reward, SEA or the C++ plugin"
+  ],
+  "standing_invariants": {
+    "lineage": "July is METHODOLOGY ONLY. The operational lineage is the AUGUST V26 J2 parent (module_state 0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130) and the CURRENT J7 dataset (bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27, 16713 rows). No July artefact is a parent, dataset, label or output.",
+    "actor": "one 35D actor. NO standalone 25D artefact, NO widening, NO contralateral inputs.",
+    "backend": "torch deterministic-algorithms and thread count are NOT forced by J8. Their observed values are diagnostic and non-binding, recorded with forced_by_j8 false.",
+    "excluded_methods": [
+      "LOTO",
+      "LOCO",
+      "B1R1",
+      "B1R2"
+    ],
+    "multistart_training_data": "DEFERRED and absent. Not to be confused with the future multistart CLOSED-LOOP validation, which is a different and equally future thing.",
+    "unchanged": "no J0-J7 artefact, no July source, no report, no config and no production code is modified by this stage"
+  },
+  "this_authorisation_does_not": [
+    "modify the runner, the preregistration or the tests",
+    "modify any J0-J7 artefact, July source, report or configuration",
+    "grant a second attempt under any circumstance",
+    "permit a different leaf, interpreter, cwd or argv",
+    "confer deployability, promotion or a next stage"
+  ],
+  "outcome_of_this_file": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "closed_loop": false,
+    "single_execution": true,
+    "no_autonomous_retry": true
+  }
+}

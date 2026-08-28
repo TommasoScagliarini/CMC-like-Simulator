@@ -1,0 +1,161 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j9r1_closed_loop_authorization",
+  "kind": "ADDITIVE, IMMUTABLE, FORMAL EXECUTION AUTHORISATION",
+  "stage_authorised": "V26C_J9R1_CLOSED_LOOP",
+  "date_utc": "2026-08-27",
+  "this_record_executes_nothing": "THIS FILE RUNS NOTHING. It is a governance record. Execution happens only when the frozen command below is invoked separately, exactly once.",
+  "authority": {
+    "granted_by": "THE USER, explicitly, on 2026-08-27",
+    "user_authorisation_text_verbatim": "ok allora autorizzo a procedere. vorrei che arrivassi a training ready, utilizza claude e fagli usare subagenti paralleli per velocizzare il lavoro se lo ritieni utile",
+    "user_addition_verbatim": "alla fine di ogni fase scrivui un user report",
+    "architect_role": "gate owner and reviewer. Codex specified, reviewed and froze this stage and recorded an independent GO; the architect is NOT the approver.",
+    "assistant_role": "operator. Executes exactly what this file freezes, once, and nothing else.",
+    "supersedes": "the spent J9 authorisation ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597 is NOT reused; its 'ok procedi' is NOT carried over. This is a fresh, separate grant for a separate stage."
+  },
+  "scope_and_its_limits": {
+    "authorised_now": "ONE execution of the J9R1 closed-loop qualification matrix, and nothing else.",
+    "user_stated_destination": "the user's stated destination is TRAINING-READY. That is the direction of travel, not a blanket grant.",
+    "every_later_stage_is_still_gated": "reaching training-ready does NOT authorise any subsequent stage in advance. Each one remains subject to the architect's gate and to a fresh explicit user authorisation, exactly as J8, J9 and J9R1 each were.",
+    "ppo_is_not_authorised_to_start": "PPO is NOT authorised to start. Neither is a critic warm-up. Reaching a training-ready state is a PRECONDITION for them, never a permission to begin them.",
+    "a_j9r1_pass_does_not_authorise": [
+      "a critic warm-up",
+      "PPO of any kind",
+      "promotion of the J8 actor",
+      "deployment or any deployability claim",
+      "any subsequent stage",
+      "any change to FSM, morphology corridor, reward, SEA or the C++ plugin"
+    ]
+  },
+  "what_is_authorised": {
+    "attempts": 1,
+    "processes": 1,
+    "cells": 6,
+    "description": "one invocation of the frozen J9R1 runner, in the frozen environment, with the frozen argv, executing the six declared closed-loop cells and writing to the single frozen leaf",
+    "retry": "NONE. Whatever the outcome, there is no second attempt, no alternate leaf, no changed argument and no autonomous recovery.",
+    "parallel_subagents": "the user permits parallel subagents for READ-ONLY audit work. The rollout itself is SINGLE and is never duplicated, delegated or run concurrently."
+  },
+  "frozen_inputs_sha256": {
+    "v26c_j9r1_readiness.json": "e20b16c2d634130cdd9b2ab64f06799cfe699113dfbafc01e23c6161df3f0495",
+    "v26c_j9r1_recording_amendment.json": "cf84b4747a9fd1897bb77eeead692ea774213f5f4e110c7ebc8aaf88f66ce6fa",
+    "v26c_j9r1_closed_loop.py": "f58b0d14b077536ced24ec3063bd2154ed1e207b42532bddc76177f1e02e4a3c",
+    "test_v26c_j9r1_closed_loop.py": "6f5387808a84d77b90917e98b4fc7fcdd08cc815872b0a1ddaf1c36d7f4d89e5",
+    "v26c_j9_prereg_closed_loop.json": "e6a6888a473d5ef76b1f009037f7825995fd62b35cc51749dfe41ad7f718c44a",
+    "v26c_j9_closed_loop.py": "8b6c36db2fd9bd63bde41d9903d4e1eb1d1e312b8cbf790e9bf1ea5b4875ac67",
+    "test_v26c_j9_closed_loop.py": "c30a1ff40d1f3aeefdb1e02210ecf6e2a04d7749448a7592cba212e8b47d867f",
+    "v26c_j9_closed_loop_authorization.json": "ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597",
+    "v26c_j9_technical_failure_2026-08-26.json": "67c97df1b302cfa98a77c673410e67e56ea0dd34b2d380cf65c34f8916645a20"
+  },
+  "frozen_inputs_note": "a pure path -> sha256 map, relative to the V26C validation root. The J9 originals are pinned as IMMUTABLE EVIDENCE and are not modified by this stage. Any byte of difference invalidates this authorisation.",
+  "operational_actor": {
+    "leaf": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+    "module_state_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "is_the_only_actor": true,
+    "read_only": "loaded read-only, never copied, edited or re-derived. Its hash is verified before AND after the matrix by the runner itself.",
+    "measured_at_authorisation": {
+      "six_file_leaf_verified": true,
+      "sigma_from_frozen_logstd": 0.004999999670722372,
+      "clock_columns_exactly_zero": true,
+      "controller_columns_live": true
+    }
+  },
+  "frozen_execution": {
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "argv": [
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j9r1_closed_loop.py",
+      "--run",
+      "--authorized-stage",
+      "V26C_J9R1_CLOSED_LOOP",
+      "--out",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1"
+    ],
+    "argv_note": "argv[0] is the script path RELATIVE to the frozen cwd. Resolved against it, it is the absolute path below.",
+    "script_resolved_absolute": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j9r1_closed_loop.py",
+    "no_progress_flag": "NOT passed. Per-cell progress output is enabled and is surfaced to the user.",
+    "leaf": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1",
+    "leaf_relative": "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1",
+    "is_the_only_destination": true,
+    "output_root_override": "MUST BE UNSET. The authorised matrix refuses to run while it is set.",
+    "no_other_flag": "no flag may be added, removed or altered",
+    "capture": "stdout, stderr and the exit code are captured fail-closed to files. Capture is redirection only: it adds no flag, changes no argument and cannot cause a second attempt."
+  },
+  "immediately_before_execution": {
+    "recheck_the_frozen_hashes": "byte-for-byte against frozen_inputs_sha256 above",
+    "recheck_the_actor": "the J8 six-file leaf at its pinned hashes",
+    "rerun_the_preflight": "must be GO, with no blockers",
+    "reconfirm_absence": "no J9R1 leaf, no lock, no staging, no sentinel",
+    "on_any_mismatch": "DO NOT EXECUTE. Stop and report."
+  },
+  "matrix_policy": {
+    "cells": 6,
+    "order": "A, B, C, D, E, F, frozen",
+    "steps_per_cell": 500,
+    "behavioural_fail_fast": false,
+    "all_six_cells_continue_after_a_behavioural_fail": "a behavioural FAIL in any cell is PRESERVED and the remaining cells STILL RUN",
+    "only_a_technical_or_integrity_exception_stops_it": "and it fails closed, committing nothing",
+    "aggregate_pass_iff": "6/6 cells behavioural PASS AND 6/6 cells telemetry-valid"
+  },
+  "outcome_policy": {
+    "behavioural_fail": {
+      "expected_state": "the leaf IS COMMITTED atomically with the full per-cell evidence and verdict FAIL; the process exits non-zero",
+      "action": "PRESERVE the committed evidence. STOP and diagnose. No retry."
+    },
+    "technical_or_integrity_error": {
+      "expected_state": "NO leaf is committed; the staging and lock this run created are removed; content it did not create survives",
+      "action": "STOP and diagnose. No retry, no second attempt."
+    },
+    "pass": {
+      "expected_state": "the leaf is committed with verdict PASS; the process exits 0",
+      "action": "PRESERVE the evidence, write the user report, and hand back to the architect for independent audit",
+      "confers_nothing": "authorises no critic, no PPO, no promotion and no next stage"
+    }
+  },
+  "standing_invariants": {
+    "lineage": "AUGUST V26 operational lineage: the J8 actor, from the J2 parent and the current J7 dataset. July is METHODOLOGY AND EVIDENCE ONLY.",
+    "actor": "one 35D actor. NO standalone 25D artefact, NO widening, NO contralateral inputs. Clock columns 0:2 exactly zero; controller columns 25:35 live.",
+    "excluded": "critic, PPO and any fit or weight update are excluded entirely from this stage",
+    "penetration_bands": {
+      "soft_diagnostic_m": 0.020,
+      "soft_status": "DIAGNOSTIC, never a blocker",
+      "july_legacy_diagnostic_m": 0.025,
+      "july_legacy_status": "DIAGNOSTIC, never a blocker",
+      "hard_binding_m": 0.028,
+      "hard_status": "the SOLE binding penetration criterion: fail iff > 0.028, so exactly 0.028 PASSES"
+    },
+    "instrumentation": "recording is ENABLED, as in J1, J3, J5 and J6. This is the J9R1 correction and it is neutral with respect to the simulated result.",
+    "deferred_todo": [
+      "LOTO",
+      "LOCO",
+      "B1R1",
+      "B1R2",
+      "multistart TRAINING DATA - distinct from the multistart CLOSED-LOOP validation, which is cells B and C and is BINDING here",
+      "generalisation / Dataset Epic"
+    ],
+    "unchanged": "no J0-J9 artefact, no July source, no report, no production configuration, no FSM, morphology, reward, SEA or C++ code is modified by this stage"
+  },
+  "reporting_obligation": {
+    "user_requirement": "the user requires a user report at the end of every phase",
+    "target": "reports/user/2026-08-27_qualifica_closed_loop_j9r1.md",
+    "timing": "written only AFTER the run terminates. No premature final report while the matrix is still running."
+  },
+  "this_authorisation_does_not": [
+    "execute anything",
+    "modify the runner, the amendment, the readiness record or any test",
+    "modify any J0-J9 artefact, July source, report or configuration",
+    "grant a second attempt under any circumstance",
+    "permit a different leaf, interpreter, cwd or argv",
+    "authorise a critic warm-up or PPO",
+    "confer deployability, promotion or a next stage"
+  ],
+  "outcome_of_this_file": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "ppo_authorized_to_start": false,
+    "critic_authorized": false,
+    "closed_loop_executed": false,
+    "single_execution": true,
+    "no_autonomous_retry": true
+  }
+}

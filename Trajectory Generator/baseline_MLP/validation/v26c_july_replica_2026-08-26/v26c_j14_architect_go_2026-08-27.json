@@ -1,0 +1,154 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, ARCHITECT GO RECORD",
+  "record": "v26c_j14_architect_go_2026-08-27.json",
+  "stage_authorised": "V26C_J14_POST_MISMATCH_DAGGER_DATASET",
+  "execution_permitted_now": true,
+  "date": "2026-08-27",
+  "granted_by": "the architect (Codex), in the directive of 2026-08-27 that accepted and FROZE the rev3 bundle. This record does not grant itself: it transcribes a GO given elsewhere, and pins by exact hash the five artefacts the architect verified.",
+  "authorises": "ONE materialisation of the J14 post-mismatch DAgger dataset increment.",
+  "pinned_artifacts_sha256": {
+    "v26c_j14_dagger_dataset_authorization_rev3.json": "46bbaa262fa0aeea9b3b09608196556f68ac602bdc9b265df4e344d41159dc2f",
+    "v26c_j14_dagger_dataset.py": "fe7c4951c195224b8006655b831549b4b613cfd80a346b7174c58962263e2e0c",
+    "test_v26c_j14_dagger_dataset.py": "6245a9ccee244a4d24deb02117a168a57fd45999485ba496b6d1daca15e5e52a",
+    "v26c_j14_prereg_dagger_dataset_rev1.json": "877cccc1bb93868a5f1050a7cf2cfc1f5776d18437e099996f059373a6cb36d5",
+    "reports/user/2026-08-27_v26c_j14_readiness_rev3_bytecode_and_pathopen.md": "1f810974d53b28cd2f470e4fc48c9e6bbe04093be17ee57741d565cb3bc91bc9"
+  },
+  "accounting_correction": {
+    "raised_by": "the architect, in the same directive.",
+    "finding": "rev3 records a full-root external digest computed over a set that INCLUDES rev3 itself. A self-including digest cannot be reproduced after the record is written, because writing the value changes the file whose hash feeds the value.",
+    "not_reliable": [
+      "v26c_j14_dagger_dataset_authorization_rev3.json :: verification.digest_history_disclosed.630_files_before_rev3_existed - a snapshot of a root state that no longer exists",
+      "v26c_j14_dagger_dataset_authorization_rev3.json :: verification.digest_history_disclosed.now - self-including, therefore not reproducible",
+      "reports/user/2026-08-27_v26c_j14_readiness_rev3_bytecode_and_pathopen.md :: the rev3 SHA and the root digest quoted in an intermediate paragraph, both predating the final stabilisation"
+    ],
+    "explicitly_still_reliable": [
+      "every OTHER field of rev3: the two findings, the corrections applied, scope_of_the_hermeticity_claim, limits_of_the_claim, the 24 frozen pins, the 4 preserved superseded records, selftest_checks=230, the preflight verdict",
+      "rev3 :: verification.external_root_digest_excluding_this_record = 8863d50af54fbbded2f3c2c91992dee4a3139ab0e0f9986d77d356057c8431d0 over 630 files, which IS reproducible because it excludes rev3 itself",
+      "the whole substance of the readiness report: the two audit findings, the corrections, the disclosed limits, and the final SHA table",
+      "the runner, the test, the preregistration, the dataset science and every count"
+    ],
+    "scope": "an ACCOUNTING defect in how a digest was recorded. It is not a scientific defect, and touches neither the runner, nor the test, nor the dataset, nor any pinned source.",
+    "remedy": "this record publishes a digest whose scope EXCLUDES ONLY this file, so it stays reproducible after being written. No existing record or report is modified."
+  },
+  "pre_execution_digest": {
+    "value": "df99c06e89a2f6e8cc4f0f4c34bcfebb7f0dbb83478a446583f766e33fca8b12",
+    "file_count": 631,
+    "algorithm": "sha256 over the concatenation of '<relpath>:<sha256-of-file>\\n' lines, sorted byte-wise by relpath, one line per regular file",
+    "perimeter": "every regular file under the validation root Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/, recursively, INCLUDING __pycache__ and INCLUDING the not-yet-created j14_runs leaf if it existed",
+    "excluded": [
+      "v26c_j14_architect_go_2026-08-27.json"
+    ],
+    "why_excluded": "this record lives under the root it fingerprints; excluding exactly one file, itself, is the minimum needed to make the value reproducible.",
+    "measured": "immediately before materialisation, after the selftest and the preflight."
+  },
+  "frozen_argv": {
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "environment": "PYTHONDONTWRITEBYTECODE and PYTHONPYCACHEPREFIX must both be ABSENT - this is the exact supported invocation the architect verified.",
+    "selftest": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/test_v26c_j14_dagger_dataset.py"
+      ],
+      "expect": "exit 0, selftest PASS, checks == 230"
+    },
+    "preflight": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset.py",
+        "--preflight"
+      ],
+      "expect": "exit 0, verdict GO, 0 blockers, 21 pinned sources, writes nothing"
+    },
+    "materialisation": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset.py",
+        "--materialize",
+        "--authorized-stage",
+        "V26C_J14_POST_MISMATCH_DAGGER_DATASET",
+        "--out",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1"
+      ],
+      "expect": "exit 0, the leaf committed with exactly three files",
+      "times_permitted": 1
+    }
+  },
+  "leaf": {
+    "path": "j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1",
+    "expected_files": [
+      "v26c_j14_dagger_increment.npz",
+      "v26c_j14_dagger_dataset_receipt.json",
+      "commit_verification.json"
+    ]
+  },
+  "single_execution_policy": {
+    "materialisations_permitted": 1,
+    "autonomous_retry": "FORBIDDEN. If the run fails, the evidence is preserved and the stage stops for the architect. No second attempt without a further GO record.",
+    "logs": "stdout, stderr and the exit code are written ADDITIVELY OUTSIDE the leaf, no-clobber."
+  },
+  "expected_content": {
+    "rows": 854,
+    "cell_E_seed_124": 500,
+    "cell_F_seed_125": 354,
+    "post_mismatch_rows": {
+      "E": 406,
+      "F": 265,
+      "total": 671
+    },
+    "observations_shape": [
+      854,
+      35
+    ],
+    "actions_shape": [
+      854,
+      2
+    ],
+    "clock_columns_0_and_1": "exactly zero",
+    "seeds_present": [
+      124,
+      125
+    ],
+    "seeds_forbidden": [
+      126,
+      127,
+      128
+    ],
+    "per_row_provenance": true,
+    "repeat_factor": 1,
+    "truncation": "NONE"
+  },
+  "forbidden_under_this_go": [
+    "a fit",
+    "a rollout",
+    "an optimizer step",
+    "a weight update",
+    "a critic",
+    "PPO",
+    "J15",
+    "environment construction",
+    "importing torch",
+    "promotion",
+    "deployability",
+    "a second materialisation",
+    "an autonomous retry",
+    "reading seeds 126, 127 or 128",
+    "truncating the corrective rows",
+    "filtering by the mismatch flag",
+    "dedup",
+    "class balancing",
+    "a repeat factor",
+    "a second parent",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "changing production, FSM v3, the morphology corridor, the reward, sigma, the SEA or the C++ plugin",
+    "modifying rev0, rev1, rev2, rev3 or any existing report"
+  ],
+  "invariants_restated": {
+    "july": "informative reference only, never a lineage parent",
+    "actor": "a SINGLE 35D actor - no 25D actor, no widening, no contralateral features",
+    "lineage": "V26 August imitation -> J2 35D -> the current pipeline"
+  },
+  "on_completion": "write the final J14 execution user report and STOP for the architect's audit."
+}

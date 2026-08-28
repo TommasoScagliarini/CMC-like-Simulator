@@ -1,0 +1,71 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION ADDENDUM",
+  "stage": "V26C_J20_RESTORE_AUDIT",
+  "revision": "rev2",
+  "cites": {
+    "base": "v26c_j20_prereg_restore_audit.json",
+    "base_sha256": "1326944edcbe368319409705e6ff2aeafb62f3def4503f467736ba6780c7d9e6",
+    "rev1": "v26c_j20_prereg_restore_audit_rev1.json",
+    "rev1_sha256": "3fa1ae238cfe0c20865850951ee787cf528b1c17cc0ba6fe97a714d9e37c3ef1"
+  },
+  "base_and_rev1_status": "BOTH SEALED AND UNMODIFIED. This addendum rewrites neither. All three documents are pinned by the GO and re-hashed at preflight. Precedence is rev2 > rev1 > base.",
+  "contains_no_self_hash": true,
+  "scope": "This addendum touches ONE thing: the normalisation rules of rev1. Every gate, every threshold, every protocol clause and every prohibition of the base document and of rev1 stands unchanged.",
+
+  "the_contradiction_being_resolved": {
+    "where": "rev1, section 'normalisation', object 'rules'",
+    "rule_A": "'tensor_like_with_ndim_0_and_numeric_scalars': ('scalar', the exact Python value). A zero-dimensional float32 tensor holding 81.0 and a Python float 81.0 both normalise to ('scalar', 81.0).",
+    "rule_B": "'int_float_str_None': ('prim', type name, value)",
+    "why_they_conflict": "Adam's step is a Python float 81.0 in the checkpoint pickle and a zero-dimensional float32 tensor in the live optimizer. Rule A says both become ('scalar', 81.0). Rule B says the Python float becomes ('prim', 'float', 81.0). A reader implementing rule B before rule A produces a mismatch on all six step entries that is purely representational and has nothing to do with whether the restore worked.",
+    "measured_evidence": "with rule B applied first the comparison reports exactly six differences, all of the form optimizer.state.<i>.step, on a restore that is otherwise byte-identical. With rule A applied to Python numerics the comparison reports zero differences, and a single perturbed element of one moment tensor still reports exactly one difference. The check therefore loses no power.",
+    "resolution": "rule A governs. Rule B is narrowed to str and None."
+  },
+
+  "normalisation_rules_as_they_now_stand": {
+    "order_is_significant": "the branches are evaluated in this order and the order is part of the specification",
+    "1_bool": "('prim', 'bool', value). Evaluated FIRST, because bool is a subclass of int in Python and would otherwise be swallowed by the numeric branch.",
+    "2_None": "('prim', 'NoneType', None)",
+    "3_str": "('prim', 'str', value)",
+    "4_numeric_scalars": "('scalar', value) for Python int and float, for NumPy scalars, and for any zero-dimensional NumPy array or torch tensor. This is the branch that makes the checkpoint's Python float step and the live optimizer's 0-D tensor step compare equal, which is the entire reason this addendum exists.",
+    "5_tensor_like_with_ndim_ge_1": "('tensor', dtype string with any 'torch.' prefix stripped, shape tuple, sha256 of the C-order bytes). This is where byte identity of exp_avg and exp_avg_sq is enforced and it is untouched by this addendum.",
+    "6_list_and_tuple": "('seq', [normalised items]) - a tuple and a list with the same contents normalise equal, because betas survives the round trip as either",
+    "7_dict": "('map', sorted list of (normalised key, normalised value)) - integer keys stay integers",
+    "8_anything_else": "('opaque', type name), which can never equal a real value on the other side, so an unrecognised type fails closed"
+  },
+
+  "implementation_trap_recorded": {
+    "what": "numpy.ascontiguousarray promotes a zero-dimensional array to shape (1,).",
+    "consequence_if_missed": "reading ndim AFTER ascontiguousarray means the zero-dimensional branch is never reached, every scalar is hashed as a one-element tensor, and rule 4 silently does not apply.",
+    "requirement": "ndim MUST be read from the array before ascontiguousarray is called. This was observed in implementation, not theorised."
+  },
+
+  "type_preservation_in_param_groups": {
+    "concern": "rule 4 compares numerics by value, so it does not distinguish an int 0 from a float 0.0.",
+    "why_this_is_acceptable_here": "the param_groups keys whose TYPE carries meaning are the five booleans - amsgrad, capturable, decoupled_weight_decay, differentiable, maximize - and the two None-valued keys foreach and fused. Rules 1 and 2 keep every one of those in typed prim form, so a bool that turned into a number, or a None that turned into a value, is still caught. The remaining keys - lr, eps, weight_decay, betas and the params index list - are numeric and are compared by exact value with ==, which is the invariant that matters for them.",
+    "what_is_therefore_still_detected": [
+      "any change to lr, eps, weight_decay or betas",
+      "any change to the params index list, including its length or order",
+      "any of the five booleans flipping",
+      "foreach or fused ceasing to be None",
+      "any key appearing or disappearing on either side"
+    ]
+  },
+
+  "tests_this_addendum_requires": {
+    "T_step_representation": "normalise(81.0) must equal normalise(torch.tensor(81.0)), and both must equal normalise(numpy.float32(81.0)). This is the exact source-versus-live case and it must be asserted explicitly rather than inferred from an end-to-end run.",
+    "T_bool_is_not_a_number": "normalise(False) must NOT equal normalise(0), and normalise(True) must NOT equal normalise(1)",
+    "T_moment_corruption": "perturbing a single element of exp_avg or exp_avg_sq must produce exactly one difference, naming that index and that key",
+    "T_param_groups_corruption": "changing lr, changing weight_decay, flipping one boolean, dropping a key, and shortening the params list must each be detected",
+    "T_state_index_corruption": "removing one of the six Adam entries, or adding a seventh, must be detected",
+    "T_ndim_zero_not_promoted": "normalise of a 0-D tensor must yield a scalar, not a ('tensor', ..., (1,), ...) triple - the regression test for the ascontiguousarray trap"
+  },
+
+  "unchanged": [
+    "R1 through R13 exactly as the base document and rev1 define them",
+    "R9 remains the live, in-process, byte-exact comparison performed by the validation-only wrapper",
+    "R13 remains the hermetic second opinion, extended to byte identity of the moments",
+    "the wrapper contract: the original _reapply_optimizer_learning_rate is called first, the capture follows immediately, a mismatch raises and fails the production run",
+    "the fail-closed protocol, the no-clobber destination, the born-invalid marker, the single execution, the absence of any retry",
+    "success authorises no PPO, no ex-novo, no promotion and no training readiness"
+  ]
+}

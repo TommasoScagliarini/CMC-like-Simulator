@@ -1,0 +1,91 @@
+{
+  "amendment_id": "rev3d_dagger_round1_july_faithful",
+  "date": "2026-08-24",
+  "authorized_by": "architect (independent verification: SELFTEST 38/38, receipt ae04bcda..., trace 8e3aff54..., addendum 0884a25b..., report d4755b15...; authoritative corrected counters causal-fail=0, timeout stance=0, swing=0; diagnosis ACCEPTED)",
+  "kind": "ADDITIVE; authorises DAgger ROUND 1 (dataset build + offline refit + offline gate + export). NO rollout of the new actor in this stage; NO production change; NO frozen artefact mutated",
+  "parents_immutable": {
+    "chain": "rev3 (5e0b6a5c/7ef70cbf), rev3a (f74672ad), rev3b (52c87999), rev3c (723c8981)",
+    "r0a_rollout_receipt": {
+      "sha256": "ae04bcda13e5cc45fc9199f644920c399db1de4fd542adba19e614e5e0933a14",
+      "preserved": true
+    },
+    "r0a_rollout_audit_addendum": {
+      "sha256": "0884a25be8c919e89992d75cee81bdb4a5996f57a5194b19046dae32ac7da41b",
+      "authoritative_counters": "causal_fail 0, timeout stance 0, swing 0"
+    },
+    "r0a_rollout_trace": {
+      "sha256": "8e3aff5465f53f9d9ba5178fe709ffc4329e373f2dc1332d15d43a731ae454ce",
+      "rows": 493,
+      "end_reason": "joint_divergence:pros_knee_angle"
+    },
+    "diagnosis_report": {
+      "path": "reports/user/2026-08-24_v26b_r0a_rollout_ended_early_diagnosis.md",
+      "sha256": "d4755b15b10324f793efbf8d525d54e3d8dcd389013cc4fe5d6642edb4d87ae2"
+    },
+    "rollout_tooling": {
+      "v26b_r0a_rollout.py": "06eebb28efb3bd7ef854b5a1ac6e91ab389c03229ef2cf6158ce608f5bd26bc8",
+      "test_v26b_r0a_rollout.py": "ece259f8c831c803382da50b790a99c743e3e70fe3fe8332ca1e79960f3c93ad"
+    },
+    "r0a_init": {
+      "actor_digest": "8567071e1185d6719290255cb1cb2f062d235a929d39b5b4767d1b613ee38959",
+      "receipt": "ff92d2fc8e730d4a9ad61c3b0f4be64741b3988196d37040cb1841260e278040"
+    }
+  },
+  "supersession": {
+    "target": "ONLY the rev3c clause 'DAgger manifest/aggregation only if the rollout completes 500/500 episode_time_limit'",
+    "replacement": "for THIS FIRST deterministic nominal DAgger round the full early-ended prefix IS used (July 11 history: aggregate_dagger_traces applied NO truncation to deterministic rollouts and round 1 aggregated the 68-step BC-clone prefix verbatim); the discrete-mismatch truncation stays RESERVED for future recovery/stochastic traces and MUST use the nominal deterministic trace of the SAME actor as reference (July 13 semantics), never a different actor's trace",
+    "everything_else_in_rev3c": "unchanged"
+  },
+  "dataset_round1": {
+    "on_policy_rows": "all 493 pre-action rows of the R0a nominal det trace (actor_observation_vector_before), INCLUDING the last row: the joint_divergence guard fired AFTER that action was applied, so the pre-action observation is a legitimately visited state (historical flow used terminated prefixes the same way)",
+    "labels": "u_IK same-step on the FULL-pinned nominal cache grid (3dd878d4...), exact float lookup at each row's t_pre; the same rule for both roles",
+    "bc_rows": "the 500 BC mono-role rows of R0a (nominal det anchor states, u_IK labels) aggregated verbatim (July: aggregation with the original teacher dataset)",
+    "dedup": "bitwise fail-closed across the union: identical observations with identical labels are collapsed (count reported); identical observations with DIFFERENT labels are a hard error (label conflict); expected collision: the shared reset row",
+    "forbidden": "raw V26 action labels, alt-start rows, JUL_H0, T1, T1R, B0820 (tooling refuses any purpose outside {ik_nominal_det, ik_onpolicy_det})",
+    "no_truncation_reference": "NO V26-anchor reference is used for truncation (empirically it would leave 11 rows; see the diagnosis report)"
+  },
+  "july_protocol_citation": {
+    "command_flow": "target_domain_dagger.py::main: teacher gate_pass check (lines 85-87) -> aggregate_dagger_traces (imitation.py:603-731, labels teacher_actions[step-1]) -> imitation.adapt_actor",
+    "r2_budget_verbatim": {
+      "source": "Trajectory Generator/runs/training/target_domain_dagger_2026-07-11_r2/adaptation_report.json",
+      "samples": 839,
+      "training_samples": 671,
+      "validation_samples": 168,
+      "epochs_requested": 400,
+      "best_epoch": 372,
+      "patience": 60,
+      "batch_size": 64,
+      "learning_rate": 0.0003,
+      "seed": 123,
+      "validation_fraction": 0.2,
+      "clip_weight": 1.0,
+      "logstd_weight": 0.1,
+      "anchor_weight": 1e-05
+    },
+    "july_logstd": "SOFT-distilled (logstd_weight 0.1; max abs change 0.011 on r2), NOT frozen"
+  },
+  "preregistered_deviations_from_july": [
+    "fixed 300 epochs, NO early stopping / NO patience / NO validation-driven selection (chain-frozen budget; = the historical fixed_final_epoch mode requiring validation_fraction=0, patience=0); the deterministic 20% split is DIAGNOSTIC only",
+    "batch 256, lr 1e-4, seed 2026 (chain-frozen since R0; July r2 used 64 / 3e-4 / 123 - adopting them now would be new tuning)",
+    "log-std FROZEN constant placeholder (rows zero, bias float32(ln 0.005)) instead of July's soft distillation; THE SIGMA VALUE 0.005 REMAINS UNDECIDED AND IS NOT USED HERE (no gate reads it; the operational sigma is decided exclusively by the preregistered V4 sweep)",
+    "lambda_anchor 1e-3 towards theta_R0a (chain-frozen; July: 1e-05 towards its init)",
+    "training-time auxiliary phase head lambda_phi 0.1 (chain-frozen budget component; July had none)",
+    "init = R0a EXACTLY (round-1; July r2 initialised from r1b, its previous round)"
+  ],
+  "offline_gate_fail_closed": {
+    "rmse_vs_uIK_max_per_joint": 0.15,
+    "applied_to": "EACH role separately (bc_nominal rows; on_policy rows) AND the aggregate (all rows) - the unchanged rev3b threshold, extended per-role; gate computed on ALL rows (training-rows convention); the deterministic 20% holdout RMSE is reported as diagnostics with the split declared leakage-free (rows bitwise-unique after dedup, unlike July's tiled split)",
+    "primary_requirement": "correct the on-policy states WITHOUT losing the nominal BC",
+    "q3_invariants": [
+      "10 keys",
+      "clock columns zero",
+      "clock invariance bit-identical",
+      "log-std constant placeholder",
+      "save/reload bit-exact at export",
+      "new actor digest recorded"
+    ],
+    "on_fail": "no export, diagnosis, STOP",
+    "no_rollout": "the new actor is NOT rolled out in this stage"
+  },
+  "consumers": "the round-1 receipt pins the full chain (rev3..rev3d), the R0a init, the rollout trace/receipt/addendum, the nominal cache FULL digest, the dataset digests and the code digests; STOP for the Codex audit after the report"
+}

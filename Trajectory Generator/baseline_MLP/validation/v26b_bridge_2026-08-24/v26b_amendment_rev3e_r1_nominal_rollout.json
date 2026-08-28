@@ -1,0 +1,51 @@
+{
+  "amendment_id": "rev3e_r1_nominal_rollout",
+  "date": "2026-08-24",
+  "authorized_by": "architect (Codex audit rev3d PASS: SELFTEST 36/36; dataset NPZ bit-identical reconstruction, 992 rows; reload digest c7bcee1c...; gate recomputed aggregate [0.0908926353, 0.0494477814], BC [0.0800755195, 0.0394053916], on-policy [0.1007021586, 0.0578955110], Q3 PASS)",
+  "kind": "ADDITIVE; authorises EXACTLY ONE deterministic nominal seed-123 rollout of the V2_DAGGER_R1 actor; NO retry, NO stochastic rollout, NO operational sigma; no production/env/reward/FSM/morphology change; no frozen artefact mutated",
+  "parents_immutable": {
+    "chain": "rev3 (5e0b6a5c/7ef70cbf), rev3a (f74672ad), rev3b (52c87999), rev3c (723c8981), rev3d (7b995277103bb5cf01ed8cbf46098425747a371e573b35ec44627b37907a5adf)",
+    "r1_receipt": {
+      "path": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/student/V2_DAGGER_R1/v26b_dagger_r1_receipt.json",
+      "sha256": "f409e7880e5c8be3c17d81c00b1ddc48c4c4e6c25058b0b55e452aaebb346c42"
+    },
+    "r1_report": {
+      "path": "reports/user/2026-08-24_v26b_dagger_round1_offline_pass.md",
+      "sha256": "61b8caa0f23e787082643df94d35a83f1c35801ad98b9a308ecaf92d4a4eb4d9"
+    },
+    "r1_dataset": {
+      "npz": {
+        "path": "…/datasets/v26b_dataset_DAGGER_R1_20260824T153527.npz",
+        "sha256": "ce309b40e716342bc00a4fe6e8b835815c93419d36be310271f8f4e2ab7250de"
+      },
+      "receipt": {
+        "path": "…/datasets/v26b_dataset_DAGGER_R1_receipt_20260824T153527.json",
+        "sha256": "765c8a90646b005e3bb06a2daf36dfabdd2420a724d116ac6f402e0dd42aae56"
+      }
+    },
+    "r1_module": {
+      "actor_digest": "c7bcee1c1165625d0c574a709a9444a98ea95edea8fcddd5d81f59dfa2e3d31e",
+      "files_sha256": {
+        "actor_feature_manifest.json": "002ebd265fe58dac00dde88f0524465a21b5a20502c6c027c0231a1f9507f646",
+        "class_and_ctor_args.pkl": "c9a6722ff95642795bfe1146d0087a68b5861fd508cbe3692195b2d820d810a7",
+        "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+        "module_state.pkl": "12447f48b2458086462fd7dd3e8ca37ccd77db815599bf78cded4672a17f2cf7"
+      }
+    },
+    "tooling": {
+      "v26b_dagger_r1.py": "a742855be1f3a16a320104f613e6c5c63ccc1e1ae9e5c21c99d3663bfd6abafd",
+      "test_v26b_dagger_r1.py": "c783ac20c004ab6795d164327b93f81fc4f47c9a6e399c07b42b40d9b6f492c9",
+      "v26b_r0a_rollout.py": "06eebb28efb3bd7ef854b5a1ac6e91ab389c03229ef2cf6158ce608f5bd26bc8",
+      "test_v26b_r0a_rollout.py": "ece259f8c831c803382da50b790a99c743e3e70fe3fe8332ca1e79960f3c93ad"
+    }
+  },
+  "rollout_definition": {
+    "exactly_one_job": "deterministic nominal rollout of V2_DAGGER_R1 under the SAME runtime/config/protocol as the R0a rollout (rev3c command shape): rollout_eval.py 5433bcbc..., v3 canonical config a870cc38... explicit (--no-auto-config), FSM v3 canonical, event-anchored morphology corridor, production unchanged; --episode-start-offset-s 1.956870983805102, --action-selection deterministic, --seed 123, --record-outputs --record-policy-trace, timeout args",
+    "preflight": "actor digest and 35D manifest of the R1 module verified against the pins above BEFORE launch; full IK cache digests; whole rev3..rev3e lineage",
+    "no_clobber": "NEW job directory, exclusive creation; the rollout runs exactly once; no retry",
+    "postprocessing": "correct FROM THE START on the WHOLE trace (never inferred from end_reason or the last row): steps/completion/end_reason; knee/ankle q min/max/mean/RMSE vs prescribed + sign/shape; raw AND applied actions with clipping/saturation stats; penetration/reserve/return; valid cycles and valid/invalid HS/TO; phase_timeout_stance and phase_timeout_swing (rows/max); morphology_causal_contract_failure (rows/max/failure); resync_count and hs_cancelled_count (max over rows AND final); dropped_wait_hs/terminal_flushed where present",
+    "comparison": "explicit vs the R0a rollout (493/500, knee divergence, saturated final knee commands, clean counters) and, ONLY where a truly homologous metric exists, vs the July historical references; NO biological-quality conclusion from the offline gate alone",
+    "outcomes": "500/500 -> preserve everything and STOP for the Codex audit; early end -> preserve everything, diagnose, and DO NOT start another DAgger automatically. No PPO, no critic, no ex-novo training, no production change",
+    "sigma": "no operational sigma exists or is used; the log-std head remains the frozen serialisation placeholder (value 0.005 UNDECIDED, decided only by the preregistered V4 sweep)"
+  }
+}

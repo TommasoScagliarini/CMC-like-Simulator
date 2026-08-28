@@ -1,0 +1,362 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_proposed": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "authorisation_status": "NOT_GRANTED_PENDING_ARCHITECT_AUDIT",
+  "execution_permitted_now": false,
+  "date": "2026-08-27",
+  "written_by": "the executor, before any fit. This document commits to what the fit WILL do, so that the outcome cannot be reinterpreted afterwards.",
+  "problem": {
+    "what_failed": "J12 qualified the J11 actor closed-loop and FAILED 4/6. J13 diagnosed the cause: a swing that will not close. The actor's states in cells E and F drift outside the J11 training support - 41% and 55% of steps beyond 3 sigma, led by phase_swing_elapsed_norm with |z| about 22 and ZERO training rows past 0.1888.",
+    "what_J14_did": "materialised 854 corrective rows from the two failed J12 cells, teacher-labelled same-step, WITHOUT truncation, so the 671 post-mismatch rows - the only region where the failure lives - are present.",
+    "what_J15_does": "a FRESH supervised refit of the 35D actor from the J2 parent on the aggregate that now includes those 854 rows.",
+    "what_J15_does_not_do": "it does not qualify anything. Closed-loop behaviour is unknown until a later regression gate runs. This stage produces an actor, not a verdict about the walk."
+  },
+  "lineage": {
+    "operational": "V26 August imitation warm start -> J2 35D -> J15",
+    "parent": {
+      "path": "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+      "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "is_j2": true,
+      "is_j11": false,
+      "is_j8": false,
+      "is_july": false
+    },
+    "why_fresh_not_incremental": "J11 is the actor that FAILED J12. Refitting from J11 would compound whatever J11 learned that the closed loop rejected. The architect's binding choice is a single fresh parent, J2, exactly as J11 itself started from J2.",
+    "july_role": "methodology and evidence ONLY. No July artefact is a parent, a dataset, a label or a hyperparameter source here.",
+    "j11_role": "REFERENCE ONLY. Its receipt and module_state are pinned as evidence that this stage does NOT start from it.",
+    "parent_chain_caveats_declared": {
+      "j2_leaf_has_no_commit_verification": "the J2 leaf predates the fail-closed commit_verification convention that J10R1, J11, J12 and J14 carry. Its integrity therefore rests on the pinned SHA-256 of each rl_module file, not on a self-verifying leaf. This stage validates the FILES by hash and does NOT pretend to validate the J2 leaf the way it validates the others.",
+      "j2_authors_no_actor_digest": "J2's manifest carries no actor_digest, and its derived_actor_digest is computed pre-fit with a DIFFERENT algorithm from warm_start.actor_state_digest. The lineage therefore holds on the file hash 0f182ea9..., not on a digest handshake J2 authored. Recorded, not hidden.",
+      "root_of_the_weight_chain": "runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best, sha256 0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd, 39-wide. Its own config records resume_from: null - it has no parent. July is not in this chain.",
+      "observation_contract_ancestor_is_not_a_weight_ancestor": "the same 39-wide actor fixes the observation contract under which the J10R1 cells were collected. It is never loaded. Do not conflate the two roles."
+    }
+  },
+  "architecture": {
+    "actors": 1,
+    "actor_width": 35,
+    "action_dim": 2,
+    "no_separate_25d_actor": true,
+    "no_widening": true,
+    "no_contralateral_features": true,
+    "clock_columns": [
+      0,
+      1
+    ],
+    "clock_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ],
+    "clock_policy": "deliberately NULL. Observation columns 0 and 1 are exactly zero in the data, and the first-layer weight columns that read them are re-zeroed after EVERY optimizer step and once more before the state is saved.",
+    "trainable": "the ENTIRE mean network - the six tensors pi.0.0.{weight,bias}, pi.0.2.{weight,bias}, pi.1.{weight,bias} - exactly as J11.",
+    "logstd": "FROZEN. Mechanism, identical to J11: the log-std rows of pi.1.weight and pi.1.bias are copied back from the parent after every optimizer step, so the optimizer cannot move them. Verified bit-identical to the parent at the end.",
+    "critic": "NEVER CONSTRUCTED. No critic tensor is loaded, created, optimised or written. The committed state is asserted to contain no key matching 'critic' or starting 'vf'.",
+    "encoder": "the pi_encoder aliases are written as bit-identical copies of the corresponding pi tensors, exactly as J11 does.",
+    "critic_is_absent_not_preserved": "the committed state carries no vf/vf_encoder tensor at all. A downstream stage that instantiates AsymmetricActorCriticTorchRLModule from this checkpoint gets a RANDOMLY INITIALISED critic. 'Critic untouched' here means ABSENT, not preserved - stated so no later stage assumes a warm critic it never received.",
+    "sidecar_declares_no_module_level_freeze": "class_and_ctor_args.pkl is copied byte-identically from J2 and declares freeze_logstd: false and freeze_actor: false. Those are MODULE-level flags for a downstream consumer; this stage's freeze is entirely offline, by projection. A later PPO stage loading this checkpoint would get no module-level freeze. Recorded as a known property, not changed here: altering the sidecar would break its byte-identity with the parent.",
+    "no_encoder_shared_with_the_critic": "structurally impossible: pi_encoder takes 35 inputs, vf_encoder takes 84. The only sharing is intra-actor - pi.0.* and pi_encoder.* are the same tensors in the live module - which is exactly why the alias pairs must be rebuilt bit-identically and why that is a binding gate."
+  },
+  "dataset": {
+    "assembled_in_this_stage": true,
+    "arithmetic": "16713 + 8x500 + 8x500 + 854 = 25567",
+    "total_rows": 25567,
+    "verified_by_measurement_before_the_fit": true,
+    "blocks_in_order": [
+      {
+        "id": "j7_nominal",
+        "start": 0,
+        "stop": 16000,
+        "unique": 500,
+        "repeat": 32,
+        "tiled": true
+      },
+      {
+        "id": "j7_recovery",
+        "start": 16000,
+        "stop": 16713,
+        "unique": 713,
+        "repeat": 1,
+        "tiled": false
+      },
+      {
+        "id": "cell_B",
+        "start": 16713,
+        "stop": 20713,
+        "unique": 500,
+        "repeat": 8,
+        "tiled": true
+      },
+      {
+        "id": "cell_C",
+        "start": 20713,
+        "stop": 24713,
+        "unique": 500,
+        "repeat": 8,
+        "tiled": true
+      },
+      {
+        "id": "j14_increment",
+        "start": 24713,
+        "stop": 25567,
+        "unique": 854,
+        "repeat": 1,
+        "tiled": false
+      }
+    ],
+    "order_note": "the first four blocks are byte-for-byte the J11 aggregate in the same order. J14's 854 rows are APPENDED, so J11's row indices are unchanged and the two aggregates are directly comparable.",
+    "repeat_semantics": "np.tile: the whole unique block is concatenated `repeat` times, contiguously. NOT np.repeat.",
+    "new_rows_repeat": 1,
+    "forbidden_transformations": [
+      "dedup",
+      "class balancing",
+      "any filter or truncation on post_mismatch",
+      "any repeat factor on the new rows",
+      "shuffling the block order",
+      "normalisation not present in J11"
+    ],
+    "dtype": "float32 for observations and actions",
+    "shapes": {
+      "observations": [
+        25567,
+        35
+      ],
+      "actions": [
+        25567,
+        2
+      ]
+    },
+    "schema_check": "the J14 increment's actor_feature_names are asserted bit-identical to J7's and to the J2 parent's manifest. MEASURED: they are.",
+    "clock_check": "max|obs[:, 0]| and max|obs[:, 1]| must be EXACTLY 0.0 over all 25567 rows.",
+    "repeat_factor_8_has_no_documented_justification": "J11 already recorded this: the repeat factor 8 on the cells is NOT FOUND in any July report, comment or config. It is replicated as an OBSERVED value. J15 changes nothing and repeats the disclosure rather than letting it fade.",
+    "cell_spans_in_the_aggregate": {
+      "cell_E": [
+        24713,
+        25213
+      ],
+      "cell_F": [
+        25213,
+        25567
+      ],
+      "measured_not_assumed": "load_j14 refuses the increment if E and F are not those contiguous blocks, because the gate's slices depend on it"
+    }
+  },
+  "hyperparameters": {
+    "source": "NOT transcribed. J11 builds its dict as dict(J8.JULY_HP) from the frozen, hash-pinned J8 module; this stage reproduces that construction line for line. They are COPIES of the same frozen source, not the same Python object - so the check is run-time EQUALITY against the frozen dict and against J11's own copy, not object identity. No number is retyped here.",
+    "j8_module_sha256": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "values": {
+      "seed": 123,
+      "epochs": 400,
+      "batch_size": 128,
+      "learning_rate": 5e-05,
+      "validation_fraction": 0.2,
+      "patience": 60,
+      "clip_weight": 1.0,
+      "logstd_weight": 0.0,
+      "anchor_weight": 0.01,
+      "trainable_first_layer_features": null
+    },
+    "best_epsilon": 1e-09,
+    "optimizer": "torch.optim.Adam over exactly the six mean-network tensors, lr from JULY_HP. All other Adam arguments are torch defaults, as in J11 - no betas, eps, weight_decay or amsgrad is passed.",
+    "lr_schedule": "NONE. J11 has none; introducing one would be an invention.",
+    "gradient_clipping": "NONE. The 'clip_weight' term is a LOSS PENALTY on |mean| > 1, not gradient clipping - the two must not be confused.",
+    "loss": "mse_loss(means, Y) + 1.0*relu(|means|-1)^2.mean() + 0.0*mse(logstd, source_logstd) + 0.01*anchor_to_parent. Reduction 'mean' throughout, exactly as J11.",
+    "seed_order": [
+      "import torch",
+      "torch.manual_seed(123)",
+      "np.random.seed(123)",
+      "deterministic init from the parent (no RNG consulted)",
+      "the single np.random.default_rng(123) in build_split",
+      "the optimizer"
+    ],
+    "input_scaling": "training runs on obs/scales; the physical scales are ABSORBED into the first layer before saving, so the committed actor consumes RAW observations. Identical to J11.",
+    "logstd_freeze_mechanism_precisely": "PROJECTION, not exclusion - stated precisely because the difference is real. The full pi.1.weight and pi.1.bias tensors ARE in the optimizer, so Adam updates their log-std rows [2:] on every step; project() then OVERWRITES those rows with the parent's values after every step, at init, and after the best-state restore. The saved weights are therefore bit-identical to the parent's, which is gated. The honest caveat: Adam's moment buffers for those entries accumulate updates that are then discarded. Harmless to the committed weights, but it is projection, not true freezing, and J15 does not pretend otherwise.",
+    "multistart_means_data_not_restarts": "J11's name is about the DATA - the two J10R1 teacher cells collected from off-nominal gait start times, plus the nominal J7 block as the third start. There is exactly ONE optimization run from ONE initialisation. J15 is the same: one run, no seed sweep, no winner selection.",
+    "gaps_in_the_j11_record_that_j15_closes": [
+      "J11 passes only lr to Adam; betas, eps, weight_decay and amsgrad take torch defaults and are recorded NOWHERE. J15 records the optimizer's resolved param_group settings and the torch version in its receipt as DIAGNOSTICS. Nothing is changed - what was implicit becomes written down.",
+      "BEST_EPSILON = 1e-9 is the effective early-stopping min-delta but appears in no J11 prereg or receipt field. It is preregistered here, above, as best_epsilon.",
+      "J11 records actor_digest only in the manifest, not the receipt. J15 records it in both."
+    ]
+  },
+  "split": {
+    "rule": "max(1, int(round(rows * 0.2)))",
+    "rows": 25567,
+    "n_val": 5113,
+    "n_train": 20454,
+    "verified_not_assumed": true,
+    "measured_digest": "815d98776f7af32d0c413fc0b396023c81079cdb99a4824f618893fa859d9113",
+    "validation_sorted": true,
+    "training_order_preserved": true,
+    "one_generator": "np.random.default_rng(123), drawn once: the split first, then every epoch shuffle from the same Generator.",
+    "known_limitation_inherited": "every repeated block puts the SAME unique row in both partitions. validation_mse is therefore a TRAINING DIAGNOSTIC, never a generalisation estimate. Inherited from July, J7 and J11; recorded, not silently corrected."
+  },
+  "gate": {
+    "schema": "v26c_j15_gate.2",
+    "identical_to_j11": false,
+    "why_the_old_field_was_removed": "the previous field was called binding_identical_to_j11 and held SEVENTEEN names. Its name and its content contradicted each other. It is replaced by three unambiguous fields.",
+    "j11_binding_subset": [
+      "integrity_keys_and_shapes_match_parent",
+      "integrity_all_parameters_finite",
+      "integrity_clock_bit_zero",
+      "integrity_aliases_bit_identical",
+      "integrity_logstd_bit_identical_to_parent",
+      "integrity_no_critic_key",
+      "integrity_inputs_unchanged",
+      "integrity_aggregate_reproduces_content_hashes",
+      "integrity_split_counts_as_declared",
+      "integrity_best_state_reconstructible_from_history",
+      "integrity_all_metrics_finite",
+      "aggregate_rmse_decreases",
+      "recovery_rmse_decreases",
+      "cell_B_unique_rmse_decreases",
+      "cell_C_unique_rmse_decreases",
+      "controller_columns_nonzero"
+    ],
+    "j11_binding_subset_count": 16,
+    "j15_additional_binding": [
+      "j14_increment_rmse_decreases"
+    ],
+    "j15_additional_binding_count": 1,
+    "binding_count": 17,
+    "arithmetic": "16 preserved from J11 + 1 added by J15 = 17",
+    "j11_set_is_preserved_exactly": "no J11 binding check is dropped, renamed or reordered away. The runner asserts the subset relation at import time and verify_prereg refuses a preregistration that disagrees.",
+    "principle": "the 16-name J11 binding subset is preserved, name for name, and J15 adds one binding rule: j14_increment_rmse_decreases, which the approved J13 report already preregistered for the new corrective block. 16 + 1 = 17. This gate is NOT J11's gate and is not described as unchanged. Every binding numeric rule is a STRICT inequality against a measured baseline - no margin, no tolerance, no absolute target.",
+    "the_seventeenth_gate": {
+      "name": "j14_increment_rmse_decreases",
+      "rule": "RMSE after < RMSE before on rows [24713:25567] - the WHOLE 854-row block, cells E and F together",
+      "authority": "the approved J13 report preregistered 'RMSE dopo < prima su aggregato, recovery 713, B unique, C unique e sul nuovo blocco E'. When J13 was written, F was to be excluded - an error of the executor that the architect corrected. J14 now carries E AND F, so the same preregistered rule covers all 854 rows.",
+      "promoted_by": "the architect, 2026-08-27, as a binding correction before J15 is frozen",
+      "introduces_no_new_number": true,
+      "why_it_matters": "a refit that does not lower RMSE on the 854 rows it was built for has not done its job. This is now enforced, not merely observed.",
+      "not_split_per_cell": "the gate binds the block as a whole. E and F are reported separately as diagnostics; a per-cell gate would be a new rule."
+    },
+    "additional": [
+      {
+        "name": "j14_cell_E_rmse",
+        "binding": false,
+        "kind": "DIAGNOSTIC",
+        "measures": "RMSE on rows [24713:25213], cell E, seed 124, 500 rows",
+        "motivation": "per-cell visibility. The binding rule is on the 854-row block as a whole; splitting it per cell would be a new rule, reporting per cell is not."
+      },
+      {
+        "name": "j14_cell_F_rmse",
+        "binding": false,
+        "kind": "DIAGNOSTIC",
+        "measures": "RMSE on rows [25213:25567], cell F, seed 125, 354 rows",
+        "motivation": "as above"
+      },
+      {
+        "name": "j14_post_mismatch_rmse",
+        "binding": false,
+        "kind": "DIAGNOSTIC",
+        "measures": "RMSE on the 671 post-mismatch rows only, before vs after",
+        "motivation": "isolates the region J13 identified as causal from the 183 pre-mismatch rows a J7-style truncation would have kept."
+      },
+      {
+        "name": "j11_comparison",
+        "binding": false,
+        "kind": "DIAGNOSTIC",
+        "measures": "the same four J11 binding subsets, compared against the values J11 recorded",
+        "motivation": "shows whether adding 854 rows cost anything on the blocks J11 already fit. No direction is preregistered, so it cannot be a gate."
+      },
+      {
+        "name": "nominal_mean_shift",
+        "binding": false,
+        "kind": "DIAGNOSTIC",
+        "measures": "max |after - before| over the 16000 J7 nominal rows",
+        "motivation": "carried over from J11 for continuity, and it matters: July's own offline protocol used a 0.005 threshold on this quantity, and J11 measured 0.0264 - so under July's threshold J11 would NOT have passed. Recorded here so the same comparison is available for J15 without importing July's threshold as a gate, which would be an invention at this point in the pipeline."
+      },
+      {
+        "name": "j14_phase_invalid_fraction",
+        "binding": false,
+        "kind": "DIAGNOSTIC",
+        "measures": "671 / 854 = the fraction of new labels whose discrete FSM columns had already diverged from the same-actor nominal reference (J14's own post_mismatch flag)",
+        "motivation": "the approved J13 report lists the phase-invalid fraction of the new labels as a diagnostic. It stays one, and is never used to filter or weight a row."
+      }
+    ],
+    "explicitly_not_binding": [
+      "nominal_rmse",
+      "nominal_mean_shift",
+      "cells E and F separately",
+      "post_mismatch 671 and pre_mismatch 183",
+      "phase_invalid_fraction",
+      "comparisons with J11",
+      "best_validation_mse",
+      "clipping_out_of_bounds_rows",
+      "epochs_run",
+      "stopped_early",
+      "torch backend settings"
+    ],
+    "no_closed_loop_claim": "this gate is SUPERVISED ONLY. Passing it says nothing about the walk.",
+    "wording_rule": "no field of this gate describes the J15 gate as 'unchanged' or 'identical' to J11's. The only preservation claim is about the 16-name SUBSET, and it is stated as such."
+  },
+  "seeds": {
+    "used_by_this_stage": [],
+    "sealed_never_read": [
+      126,
+      127,
+      128
+    ],
+    "note": "this stage reads no seed of its own: it consumes committed datasets. The seeds inside those datasets are 124 and 125 in J14, and whatever J7/J10R1 already committed. 126, 127 and 128 remain the untouched final reserve."
+  },
+  "forbidden_here": [
+    "a rollout",
+    "an environment",
+    "a critic",
+    "critic warm-up",
+    "PPO",
+    "promotion",
+    "deployability",
+    "a closed-loop claim",
+    "reading seeds 126, 127 or 128",
+    "a second parent",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "dedup",
+    "class balancing",
+    "filtering by post_mismatch",
+    "a repeat factor on the new rows",
+    "an autonomous retry",
+    "an invented threshold",
+    "changing production, FSM v3, the morphology corridor, the reward, sigma, the SEA or the C++ plugin"
+  ],
+  "outputs": {
+    "relative_leaf": "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1",
+    "files": [
+      "v26c_j15_aggregate_dataset.npz",
+      "v26c_j15_fresh_refit_receipt.json",
+      "history.json",
+      "commit_verification.json",
+      "rl_module/module_state.pkl",
+      "rl_module/actor_feature_manifest.json",
+      "rl_module/class_and_ctor_args.pkl",
+      "rl_module/metadata.json"
+    ],
+    "no_clobber": true,
+    "fail_closed": true,
+    "born_invalid_leaf": "a TECHNICAL_INVALID marker is written into staging BEFORE the rename and removed only as the last write, after post-commit verification passes.",
+    "single_execution": "one fit only, permitted solely by a further architect GO record."
+  },
+  "risks_declared": [
+    "the corrective rows are 854 of 25567 - 3.3% of the aggregate, and 671 of them are the post-mismatch region. Whether that mass is enough to move closed-loop behaviour is UNKNOWN and is not tested by this stage.",
+    "the J14 labels are the open-loop prescribed teacher evaluated at the same step. J13 recorded this as an ASSUMPTION, not a proof: the teacher is a pure function of time, so it is defined everywhere, but whether it is the right target after the FSM has diverged is untested.",
+    "validation_mse remains contaminated by block repetition and cannot be read as generalisation.",
+    "passing this supervised gate does not predict the J12-style closed-loop outcome.",
+    "J11's nominal_mean_shift was 0.0264 against July's historical 0.005 offline threshold. That threshold is NOT applied here - importing it now would be inventing a gate - but the drift of the nominal block away from its self-anchor is real, is measured, and adding 854 rows may move it further. It is recorded as a diagnostic for the architect to weigh.",
+    "the fit is not bit-reproducible from the artefacts alone as long as the torch version and Adam's unpassed arguments differ between machines. J15 records both; it cannot retroactively fix J11's silence on them.",
+    "the critic is absent from the committed checkpoint. Any later PPO stage starts from a randomly initialised value function, which is a real cost that this supervised stage neither creates nor solves, but that must not come as a surprise."
+  ],
+  "todo_propagated": [
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "the regression/qualification gate A-F that must follow this refit",
+    "seeds 126, 127, 128 remain the sealed final reserve"
+  ],
+  "governance_rule_recorded": {
+    "rule": "EVERY phase closes with a dedicated user report in reports/user/, and the next phase does not begin until the architect has audited that report.",
+    "source": "binding user instruction of 2026-08-27",
+    "applies_from": "J15 onward, and retroactively acknowledged for J14",
+    "consequence_for_this_stage": "the J15 readiness report is the closing report of this phase. No fit begins before it is audited."
+  }
+}

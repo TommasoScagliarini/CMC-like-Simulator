@@ -1,0 +1,122 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j9r1_readiness",
+  "kind": "ADDITIVE, IMMUTABLE, READINESS / PIN BUNDLE",
+  "stage_proposed": "V26C_J9R1_CLOSED_LOOP",
+  "date_utc": "2026-08-26",
+  "this_record_is_not_an_authorisation": "THIS FILE AUTHORISES NOTHING AND EXECUTES NOTHING. It records that the J9R1 layer is complete and self-consistent, and it carries a CANDIDATE command. A fresh, explicit user authorisation is required before anything runs.",
+  "authorisation_status": "NOT_GRANTED",
+  "fresh_user_authorization_required": true,
+  "old_authorisation_not_reusable": {
+    "file": "v26c_j9_closed_loop_authorization.json",
+    "sha256": "ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597",
+    "why": "SPENT against the J9 technical failure, and it covers a different runner, a different stage token and a different leaf",
+    "user_text_not_carried_over": "the earlier 'ok procedi' authorised the J9 command and is NOT reused for J9R1"
+  },
+  "new_artefacts_sha256": {
+    "v26c_j9_technical_failure_2026-08-26.json": "67c97df1b302cfa98a77c673410e67e56ea0dd34b2d380cf65c34f8916645a20",
+    "j9_technical_failure_2026-08-26/j9_run.out": "adb7fd4c65fa24cf876101b92de73e779370970eaeceb13c3f1674ee4da7b5ef",
+    "j9_technical_failure_2026-08-26/j9_run.err": "51ffda559e29f6efdfbf7359e84a7297d1560625e8444be540040c81eb8eeb1a",
+    "j9_technical_failure_2026-08-26/j9_run.exit": "d01f9a6087a5da5cdae0bd0314d8ba9a4e8546b0f4cb2a5424bc09487e8c6d26",
+    "v26c_j9r1_recording_amendment.json": "cf84b4747a9fd1897bb77eeead692ea774213f5f4e110c7ebc8aaf88f66ce6fa",
+    "v26c_j9r1_closed_loop.py": "f58b0d14b077536ced24ec3063bd2154ed1e207b42532bddc76177f1e02e4a3c",
+    "test_v26c_j9r1_closed_loop.py": "6f5387808a84d77b90917e98b4fc7fcdd08cc815872b0a1ddaf1c36d7f4d89e5"
+  },
+  "j9_originals_unchanged": {
+    "claim": "the four J9 artefacts are byte-identical to the hashes the architect reviewed and to the pins recorded before the attempt. J9R1 supersedes J9 operationally and never by edit.",
+    "v26c_j9_prereg_closed_loop.json": "e6a6888a473d5ef76b1f009037f7825995fd62b35cc51749dfe41ad7f718c44a",
+    "v26c_j9_closed_loop.py": "8b6c36db2fd9bd63bde41d9903d4e1eb1d1e312b8cbf790e9bf1ea5b4875ac67",
+    "test_v26c_j9_closed_loop.py": "c30a1ff40d1f3aeefdb1e02210ecf6e2a04d7749448a7592cba212e8b47d867f",
+    "v26c_j9_closed_loop_authorization.json": "ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597",
+    "verified_now": true
+  },
+  "actor_before_and_after": {
+    "leaf": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+    "module_state_sha256_before_this_turn": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "module_state_sha256_after_this_turn": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "byte_identical": true,
+    "six_file_leaf_verified": true,
+    "note": "the actor was never loaded by an environment in this turn; it was read only for hashing and for the 35D mask and sigma contract"
+  },
+  "verification_performed": {
+    "py_compile": "exit 0 on v26c_j9r1_closed_loop.py, test_v26c_j9r1_closed_loop.py and both J9 originals",
+    "j9r1_selftest": "PASS, 360 checks, fully synthetic",
+    "j9_original_selftest_regression": "PASS, 288 checks, unchanged",
+    "j9r1_preflight": "GO, exit 0, no blockers",
+    "preflight_inertness": "heavy_modules_introduced_by_preflight = []; no torch, RLlib, OpenSim, env_factory or rollout_eval imported; no environment constructed, reset or stepped; nothing written",
+    "sentinel_proof": "the preflight sentinel root and its sim_outputs child did not exist before and did not exist after building the base config - measured, not assumed",
+    "snapshot": "222 files hashed before and after the fresh preflight, byte-identical",
+    "leaf_lock_staging": "j9r1_runs ABSENT, no lock, no staging, no sentinel anywhere",
+    "no_environment_built": "no production environment was constructed in this turn, by the preflight or by the tests",
+    "no_rollout": "neither J9 nor J9R1 was executed"
+  },
+  "scientific_equivalence_proof": {
+    "method": "the J9R1 runner hashes the ORIGINAL J9 runner, refuses it on mismatch, imports it, and compares every scientific constant field by field",
+    "fields_compared": 24,
+    "all_equal": true,
+    "compared": [
+      "MATRIX", "EXPECTED_STEPS", "SIGMA", "SIGMA_TOLERANCE", "NOISE_HOLD_STEPS",
+      "J9_COMMON_GATE", "J9_KINEMATIC_GATE", "DIAGNOSTIC_NOT_BINDING",
+      "RESET_TIME_TOLERANCE_S", "RESET_SEMANTICS", "PIN_CONTRACT", "ACTOR_WIDTH",
+      "CLOCK_COLUMNS", "CONTROLLER_COLUMNS", "FROZEN_OFFSETS", "OFFSET_NOMINAL",
+      "OFFSET_MINUS", "OFFSET_PLUS", "OFFSET_UNIT", "PIN_J8", "PIN_J2_PARENT",
+      "PIN_J7_DATASET", "PIN_RUNTIME_CONFIG_SHA", "penetration_bands"
+    ],
+    "intentionally_different": {
+      "STAGE": {"j9r1": "V26C_J9R1_CLOSED_LOOP", "j9": "V26C-J9-CLOSED-LOOP-QUALIFICATION"},
+      "RELATIVE_LEAF": {"j9r1": "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1", "j9": "j9_runs/j9_closed_loop_v26c_2026-08-26_r1"},
+      "RECEIPT_NAME": {"j9r1": "v26c_j9r1_closed_loop_receipt.json", "j9": "v26c_j9_closed_loop_receipt.json"}
+    },
+    "conclusion": "J9R1 is instrumentation-only. Every scientific constant is value-identical to the original J9 runner; only the stage identity and the recording configuration differ."
+  },
+  "the_correction_measured": {
+    "base_record_outputs": true,
+    "base_save_outputs_on_close": true,
+    "base_output_prefix_present": true,
+    "verified_fail_closed_before_any_env": "both in base_env_config and again at the run_matrix call site, so a recording-off base cannot reach an environment even if the builder were tampered with",
+    "per_cell_inheritance": "every cell inherits both flags and the single output_prefix; output_prefix is never mutated per cell",
+    "per_cell_mutation_set": "unchanged from J9: episode_start_offset_s and output_dir only",
+    "stable_key_guard": "stable_keys = set(base) - {episode_start_offset_s, output_dir}, all compared for exact equality, count reported. The J9 form required len(base) - 1 identical fields and would have failed every cell against a recording-enabled base.",
+    "layout": "j9_cell_<ID>_sim_outputs, consumed as the exact final path",
+    "runtime_observation_in_the_synthetic_matrix": "all six environments received record_outputs True and save_outputs_on_close True, and all six wrote their sim_outputs in close()"
+  },
+  "candidate_command": {
+    "status": "CANDIDATE ONLY - not authorised, not executed",
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "argv": [
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j9r1_closed_loop.py",
+      "--run",
+      "--authorized-stage",
+      "V26C_J9R1_CLOSED_LOOP",
+      "--out",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1"
+    ],
+    "script_resolved_absolute": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j9r1_closed_loop.py",
+    "leaf": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1",
+    "progress": "enabled; --no-progress is not passed",
+    "output_root_override": "MUST BE UNSET"
+  },
+  "if_authorised_the_policy_is": {
+    "attempts": 1,
+    "cells": 6,
+    "behavioural_fail_fast": false,
+    "behavioural_fail": "commits the leaf with the full evidence and exits non-zero",
+    "technical_or_integrity_error": "commits nothing; staging and lock removed; stop and diagnose",
+    "pass": "preserve and hand back for independent audit; authorises nothing further",
+    "no_autonomous_retry": true
+  },
+  "residual_technical_risk_carried_forward": {
+    "recording_cost": "recording buffers per-step samples for the whole episode and performs file I/O at close. It is neutral with respect to the simulated result but not free in RAM or wall-clock, and could in principle trip the per-step wall timeout.",
+    "mitigation": "this is the SAME recording mode used by J1, J3, J5 and J6. Each of those runs completed its full 500-step episode and wrote its sim_outputs without tripping any wall timeout - J3's leaf, for example, holds 19 sim_outputs files. That is measured precedent for ONE recorded episode per process, and it is evidence, NOT a guarantee for the six-cell matrix.",
+    "unmeasured": "six recorded episodes run sequentially in a single process is NOT covered by those precedents. Each cell builds and closes its own environment, so each recorder is rebuilt per cell, but cumulative memory and wall-clock across the six have never been measured. No claim is made that the matrix will complete.",
+    "if_it_fires": "a TECHNICAL failure, fail-closed, committing nothing - never a behavioural result"
+  },
+  "outcome_of_this_file": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "closed_loop_executed": false,
+    "authorisation_granted": false
+  }
+}

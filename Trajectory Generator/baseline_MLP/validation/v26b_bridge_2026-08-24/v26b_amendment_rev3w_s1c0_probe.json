@@ -1,0 +1,91 @@
+{
+  "amendment_id": "rev3w_s1c0_feasibility_probe",
+  "date": "2026-08-24",
+  "token": "V26B-S1C-FEASIBILITY-PROBE",
+  "kind": "ADDITIVE. Offline read-only reachability probe ONLY. No episode, fit, collection, promotion or production change. rev3l..rev3v and every artifact remain immutable",
+  "parents_immutable": {
+    "rev3v": "889f1068a9ddb8db8241b62b569a85fbc6baf3d7673ae626c4df5e51902ed984",
+    "rev3v_tool": "0a3987d8f7630c28917ba4a062d56dc2657ce60e65092691522f28822742b53c",
+    "rev3v_test": "aed01c03f73940f11e095e0491bdc5cf9d0909c064118619ccf55a7956d649b0",
+    "rev3v_audit_receipt": "98d69eadd2ca7e91ad389ae12ec623b494a13df06137043072263c0b40990b76",
+    "rev3u": "a3b17a883fb43006f7a3d49b9a1a1e77334f0974e959241af3a496f62259a011",
+    "s0d_rollout_receipt": "cbec1a671b7cdf2980881ec4ca33f69534e66d94cbbfa86c7b9cd9c1a39412b7",
+    "a2_rollout_receipt": "3dd5637bc864e99340bba91118d6fcd035cf37d3d5789fd650e977ee84891a17"
+  },
+  "RECONSTRUCTED_PRODUCTION_CHAIN": {
+    "source_files": {
+      "env": {
+        "path": "Trajectory Generator/osim_trj_cmc_like.py",
+        "sha256": "26458424c44f18fa1dda20b830fa5e7e825c583cc5d10e6d019cb3bd9a0c6d24"
+      },
+      "env_factory": {
+        "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+        "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559"
+      },
+      "rollout_eval": {
+        "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "sha256": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba"
+      },
+      "resolved_config": {
+        "path": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+        "sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db"
+      }
+    },
+    "operator_order_exact": [
+      "1. env_factory.FlattenClipAction.action (env_factory.py:135-137): reshape to (policy_knots,2) and CLIP to the action-space bounds [-1,+1]. The env validates but never clips (finding F1)",
+      "2. osim_trj_cmc_like.CMCEnv.step (:1830-1844) -> _action_to_segment",
+      "3. absolute decode (_action_to_segment, action_mode=='absolute'): values[:,j] = low + 0.5*(a+1)*(high-low) with absolute_bounds_rad default (:215-220) knee (-1.5,0.0), ankle (-0.7,+0.7). For the ankle this is EXACTLY q = 0.7*a; for the knee q = 0.75*a - 0.75",
+      "4. TARGET SLEW LIMITER _limit_target_slew (:2678+, applied at :1870-1874) with anchor = self._last_policy_endpoint (target-to-target, explicitly NOT the filtered output, comment :1866-1869). Per policy step dt = segment_duration = 0.01 s, so the ankle endpoint may move at most 2.0*0.01 = 0.02 rad per step",
+      "5. segment_values = vstack((continuity_anchor, limited_values)) where continuity_anchor = kin.get(t) i.e. the CURRENTLY SERVED (filtered) position; derivatives via np.gradient with the first row forced to the anchor derivative",
+      "6. ProstheticSegmentKinematics.set_segment -> since pros_ref_model == 'butterworth3_jerk_limited' it dispatches to _set_third_order_segment (:610-612)",
+      "7. _set_third_order_segment (:700-830): q_command = values[-1] (the slew-limited knot; policy_knots = 1 so it is THE knot). Loop over n = ceil(0.01/control_dt) = 10 fine steps of dt = 0.001 s: raw_jerk = wc^3*(q_command-qf) - 2*wc^2*vf - 2*wc*af; jerk clipped to +-jerk_limit; acceleration bounded by the intersection of +-accel_limit, the jerk-rate band and the velocity-feasibility band; velocity clipped to +-vel_limit; q_next = qf + vf*dt + 0.5*af*dt^2 + jerk*dt^3/6",
+      "8. the served spline BPoly.from_derivatives(t_fine, [q,v,a]) is what feeds pros_ankle_angle_served_ref",
+      "9. SEA + joint: the realised pros_ankle_angle tracks the served reference (measured mean |error| < 0.01 rad on both frozen traces)"
+    ],
+    "CORRECTION_TO_THE_EARLIER_DESCRIPTION": "the chain is NOT '6 Hz second-order + 2 rad/s'. The frozen v3 config selects pros_ref_model = butterworth3_jerk_limited with pros_ref_cutoff_hz = 4.0 (NOT 6.0). The second-order 6 Hz model exists in the code but is NOT the active path. The rev3v report's '6 Hz' wording is therefore superseded on this point",
+    "frozen_ankle_parameters": {
+      "absolute_bounds_rad": [
+        -0.7,
+        0.7
+      ],
+      "target_slew_rate_limit_rad_s": 2.0,
+      "segment_duration_s": 0.01,
+      "policy_knots": 1,
+      "control_dt_s": 0.001,
+      "fine_steps_per_policy_step": 10,
+      "ref_model": "butterworth3_jerk_limited",
+      "cutoff_hz": 4.0,
+      "wc_rad_s": 25.132741228718345,
+      "ref_velocity_limit_rad_s": 3.5,
+      "ref_acceleration_limit_rad_s2": 55.0,
+      "ref_jerk_limit_rad_s3": 2750.0,
+      "config_lines": "training_cfg.resolved.yaml lines 34,37,47,50,52-59"
+    }
+  },
+  "PROBE_METHOD": {
+    "scope": "strictly offline and read-only on the frozen artifacts; no episode is executed and no production file is touched",
+    "step_1_model": "verbatim re-implementation of operators 3,4,7 above in numpy",
+    "step_2_validation": "replay the RECORDED actions of the frozen S0D and A2 traces through the model and compare with the RECORDED pros_ankle_angle_served_ref. The model is accepted only if the post-burn-in max abs error is <= 1e-3 rad; the correct time alignment is DETERMINED by the comparison, not assumed",
+    "step_3_envelope": "from initial states reconstructed by the validated replay, drive the model with the most favourable ADMISSIBLE command (action = -1, i.e. q_raw = -0.7, subject to the same slew limiter) and record the minimum served reference reachable within several horizons and the number of steps to cross -0.03",
+    "step_4_scenarios": "the envelope is computed from many initial states sampled along the trace, so the answer does not depend on one phase",
+    "decision_rule": {
+      "UNREACHABLE_a": "declared only if the reference path cannot reach -0.03 for ANY admissible command at ANY horizon (mathematical unreachability)",
+      "UNREACHABLE_b": "declared if it is reachable in the limit but NOT within the B3 window horizon from the worst sampled initial state",
+      "REACHABLE": "declared only if the worst sampled initial state reaches <= -0.03 within the B3 window horizon",
+      "INDETERMINATE": "declared if the model fails validation, or if the evidence does not separate the cases",
+      "window_definition": "B3 window = 0.25 of the gait cycle, measured from the frozen trace (online_left_cycle_duration_s), expressed in policy steps"
+    },
+    "explicitly_out_of_scope": "the probe answers REFERENCE-PATH reachability only. It does NOT claim that a command sequence achieving it is compatible with keeping the gait, nor that any policy can be trained to emit it. Those are separate questions",
+    "B3_field_caveat": "independently of reachability, the phase field pros_ankle_angle_imitation_target_phase is identically zero on every v3 trace of this chain, so B3 itself is currently NOT EVALUABLE on recorded traces. This is case (c) and is reported separately from (a) and (b)"
+  },
+  "prohibitions": [
+    "no episode",
+    "no fit",
+    "no collection",
+    "no promotion",
+    "no production/env/reward/FSM/morphology/SEA/corridor change",
+    "no S1C-1 unless this probe returns REACHABLE",
+    "no threshold change"
+  ],
+  "outcome": "the verdict REACHABLE / UNREACHABLE / INDETERMINATE is produced by the probe receipt, not asserted here"
+}

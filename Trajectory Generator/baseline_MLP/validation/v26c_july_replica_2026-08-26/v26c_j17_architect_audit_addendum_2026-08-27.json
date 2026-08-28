@@ -1,0 +1,641 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, ARCHITECT-AUDIT ADDENDUM",
+  "stage": "V26C_J17_CAUSAL_DIAGNOSIS",
+  "date": "2026-08-27",
+  "purpose": "close, additively, the gaps the architect's audit found in the J17 preregistration's execution. It MODIFIES NOTHING: the five J17 artefacts are pinned byte-identical.",
+  "contains_no_execution": {
+    "fit": false,
+    "rollout": false,
+    "environment": false,
+    "critic": false,
+    "ppo": false,
+    "new_collection": false,
+    "sealed_seeds_read": 0
+  },
+  "pinned_j17_artefacts_sha256": {
+    "v26c_j17_prereg_causal_diagnosis.json": "1e765477660e0f0c7d80b91cd677889b974394b1c4dd12b85cfa24bcb991fba4",
+    "v26c_j17_architect_go_2026-08-27.json": "ac5e063750f8284824acebd6815def09561a940200b3e30e3b9ae441155478ca",
+    "v26c_j17_diagnostic_measurements.json": "5c5f309a5cde39a6233d52afe65d90be17a999879ea8acbecb64f53429434e5c",
+    "v26c_j17_reconciliation_and_corrections.json": "d165b86732ce78000355f64b220382e6723edccbfc0a65f0e4032189b9ad2d56",
+    "reports/user/2026-08-27_v26c_j17_diagnosi_causale_regressione_j16.md": "80562064f2b274014bf42794824b67b04e0c34f3367b2a63f59385cc0495df8a"
+  },
+  "those_files_were_not_modified": true,
+  "architect_decision_recorded_not_relitigated": {
+    "authority": "Codex, architect and gate owner. The executor records this decision; it is not the executor's to reopen.",
+    "best_closed_loop_actor_today": {
+      "actor": "J8",
+      "result": "5/6"
+    },
+    "j11": "4/6",
+    "j15r1": "0/6",
+    "future_operational_parent": "J8, with a CONSTRAINED, INCREMENTAL, B-ONLY update",
+    "j11_and_j14": "diagnostic evidence only; NOT an operational parent",
+    "july": "no July checkpoint or dataset enters the lineage",
+    "executor_corroboration": {
+      "source": "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/v26c_j9r1_closed_loop_receipt.json",
+      "sha256": "c201b666f68451e4646fbaae3f149e9afaf873b5c94f99c95fc4286faaeda4f4",
+      "recorded": {
+        "stage": "V26C_J9R1_CLOSED_LOOP",
+        "verdict": "FAIL",
+        "cells_behavioural_pass": 5,
+        "cells_telemetry_valid": 6,
+        "cells_total": 6,
+        "per_cell": {
+          "A": "PASS",
+          "B": "FAIL",
+          "C": "PASS",
+          "D": "PASS",
+          "E": "PASS",
+          "F": "PASS"
+        }
+      },
+      "note": "the 5/6 figure verifies against the committed J9R1 receipt, and the single failing cell is B - which is exactly what a B-only update targets. Recorded as corroboration of the architect's premise, not as a re-decision."
+    }
+  },
+  "gap_1_T3_complete": {
+    "what_was_missing": "the preregistration promised RMSE, MAE, max absolute and signed mean shift, per action, in normalised AND physical units, with sample count and effective weighting, over every preregistered block. The J17 measurement artefact reported a subset.",
+    "quantity": "the offline action delta J15R1 minus J11, both actors applied to the SAME frozen inputs: the committed J15R1 aggregate, 25567 rows",
+    "units": {
+      "normalised": "u in [-1, 1]",
+      "physical": "u * max_delta_rad, max_delta_rad = 0.35 rad, from the pinned runtime config; action_mode = 'absolute'"
+    },
+    "forward_validated_against_runtime_max_abs_diff": 1.583e-07,
+    "blocks": {
+      "nominal_anchor_A_D_region": {
+        "sample_count_rows_in_aggregate": 500,
+        "unique_rows": 500,
+        "repeat_factor": 32,
+        "effective_rows": 16000,
+        "share_of_aggregate_pct": 1.9556,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.017394654739439082,
+              "mae": 0.012705135077343303,
+              "max_abs": 0.12446895529800908,
+              "signed_mean_shift": 0.001979362993968344
+            },
+            "physical_rad": {
+              "rmse": 0.006088129158803678,
+              "mae": 0.004446797277070156,
+              "max_abs": 0.043564134354303174,
+              "signed_mean_shift": 0.0006927770478889204
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.010140063538447057,
+              "mae": 0.006647395141199141,
+              "max_abs": 0.10173049622731556,
+              "signed_mean_shift": 0.001344533177517739
+            },
+            "physical_rad": {
+              "rmse": 0.0035490222384564696,
+              "mae": 0.002326588299419699,
+              "max_abs": 0.03560567367956044,
+              "signed_mean_shift": 0.0004705866121312086
+            }
+          }
+        }
+      },
+      "j7_nominal_full_tiled": {
+        "sample_count_rows_in_aggregate": 16000,
+        "unique_rows": 500,
+        "repeat_factor": 32,
+        "effective_rows": 16000,
+        "share_of_aggregate_pct": 62.5807,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.017394654739439082,
+              "mae": 0.012705135077343301,
+              "max_abs": 0.12446895529800908,
+              "signed_mean_shift": 0.0019793629939683444
+            },
+            "physical_rad": {
+              "rmse": 0.006088129158803678,
+              "mae": 0.004446797277070155,
+              "max_abs": 0.043564134354303174,
+              "signed_mean_shift": 0.0006927770478889205
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.010140063538447057,
+              "mae": 0.006647395141199142,
+              "max_abs": 0.10173049622731556,
+              "signed_mean_shift": 0.001344533177517739
+            },
+            "physical_rad": {
+              "rmse": 0.0035490222384564696,
+              "mae": 0.0023265882994196996,
+              "max_abs": 0.03560567367956044,
+              "signed_mean_shift": 0.0004705866121312086
+            }
+          }
+        }
+      },
+      "j7_recovery": {
+        "sample_count_rows_in_aggregate": 713,
+        "unique_rows": 713,
+        "repeat_factor": 1,
+        "effective_rows": 713,
+        "share_of_aggregate_pct": 2.7888,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.01831119415352223,
+              "mae": 0.013927496948659811,
+              "max_abs": 0.14419009621453183,
+              "signed_mean_shift": 0.0037572610824686686
+            },
+            "physical_rad": {
+              "rmse": 0.0064089179537327795,
+              "mae": 0.004874623932030934,
+              "max_abs": 0.050466533675086134,
+              "signed_mean_shift": 0.001315041378864034
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.010367097027154213,
+              "mae": 0.007146890269199281,
+              "max_abs": 0.11569392947155915,
+              "signed_mean_shift": 0.001877646541567398
+            },
+            "physical_rad": {
+              "rmse": 0.0036284839595039746,
+              "mae": 0.0025014115942197483,
+              "max_abs": 0.0404928753150457,
+              "signed_mean_shift": 0.0006571762895485893
+            }
+          }
+        }
+      },
+      "cell_B_unique": {
+        "sample_count_rows_in_aggregate": 500,
+        "unique_rows": 500,
+        "repeat_factor": 8,
+        "effective_rows": 4000,
+        "share_of_aggregate_pct": 1.9556,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.018121571257324085,
+              "mae": 0.012918172149683941,
+              "max_abs": 0.08909425794415837,
+              "signed_mean_shift": -0.003803802679681375
+            },
+            "physical_rad": {
+              "rmse": 0.006342549940063429,
+              "mae": 0.004521360252389379,
+              "max_abs": 0.031182990280455427,
+              "signed_mean_shift": -0.0013313309378884812
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.009377587317356488,
+              "mae": 0.006370739285344272,
+              "max_abs": 0.047955251184562536,
+              "signed_mean_shift": -0.0006051809821106162
+            },
+            "physical_rad": {
+              "rmse": 0.0032821555610747706,
+              "mae": 0.002229758749870495,
+              "max_abs": 0.016784337914596888,
+              "signed_mean_shift": -0.00021181334373871567
+            }
+          }
+        }
+      },
+      "cell_C_unique": {
+        "sample_count_rows_in_aggregate": 500,
+        "unique_rows": 500,
+        "repeat_factor": 8,
+        "effective_rows": 4000,
+        "share_of_aggregate_pct": 1.9556,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.020427726310924474,
+              "mae": 0.015191246403793516,
+              "max_abs": 0.08907201420656113,
+              "signed_mean_shift": -0.00393808967823339
+            },
+            "physical_rad": {
+              "rmse": 0.007149704208823565,
+              "mae": 0.005316936241327731,
+              "max_abs": 0.031175204972296394,
+              "signed_mean_shift": -0.0013783313873816864
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.012632438549319993,
+              "mae": 0.00846454378298509,
+              "max_abs": 0.06280604399112752,
+              "signed_mean_shift": -0.001043144541349634
+            },
+            "physical_rad": {
+              "rmse": 0.004421353492261997,
+              "mae": 0.002962590324044781,
+              "max_abs": 0.02198211539689463,
+              "signed_mean_shift": -0.00036510058947237183
+            }
+          }
+        }
+      },
+      "j14_recovery_854": {
+        "sample_count_rows_in_aggregate": 854,
+        "unique_rows": 854,
+        "repeat_factor": 1,
+        "effective_rows": 854,
+        "share_of_aggregate_pct": 3.3402,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.5360053640382664,
+              "mae": 0.3558221300671187,
+              "max_abs": 1.4996003488283818,
+              "signed_mean_shift": 0.2906973790739668
+            },
+            "physical_rad": {
+              "rmse": 0.1876018774133932,
+              "mae": 0.12453774552349155,
+              "max_abs": 0.5248601220899336,
+              "signed_mean_shift": 0.10174408267588837
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.16799526108829743,
+              "mae": 0.11149219238330921,
+              "max_abs": 0.5901757565169861,
+              "signed_mean_shift": -0.0229238216971143
+            },
+            "physical_rad": {
+              "rmse": 0.0587983413809041,
+              "mae": 0.03902226733415822,
+              "max_abs": 0.20656151478094512,
+              "signed_mean_shift": -0.008023337593990005
+            }
+          }
+        }
+      },
+      "j14_post_mismatch_671": {
+        "sample_count_rows_in_aggregate": 671,
+        "unique_rows": 671,
+        "repeat_factor": 1,
+        "effective_rows": 671,
+        "share_of_aggregate_pct": 2.6245,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.6027925225727728,
+              "mae": 0.4331484227152292,
+              "max_abs": 1.4996003488283818,
+              "signed_mean_shift": 0.3506258406298043
+            },
+            "physical_rad": {
+              "rmse": 0.21097738290047047,
+              "mae": 0.15160194795033022,
+              "max_abs": 0.5248601220899336,
+              "signed_mean_shift": 0.12271904422043149
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.18857747493878885,
+              "mae": 0.13537651610088072,
+              "max_abs": 0.5901757565169861,
+              "signed_mean_shift": -0.03435675754606825
+            },
+            "physical_rad": {
+              "rmse": 0.06600211622857609,
+              "mae": 0.04738178063530825,
+              "max_abs": 0.20656151478094512,
+              "signed_mean_shift": -0.012024865141123886
+            }
+          }
+        }
+      },
+      "j14_pre_mismatch_183": {
+        "sample_count_rows_in_aggregate": 183,
+        "unique_rows": 183,
+        "repeat_factor": 1,
+        "effective_rows": 183,
+        "share_of_aggregate_pct": 0.7158,
+        "actions": {
+          "knee": {
+            "normalised": {
+              "rmse": 0.09179220359595892,
+              "mae": 0.07229239035738041,
+              "max_abs": 0.22883981008400078,
+              "signed_mean_shift": 0.07095968670256288
+            },
+            "physical_rad": {
+              "rmse": 0.032127271258585624,
+              "mae": 0.025302336625083143,
+              "max_abs": 0.08009393352940027,
+              "signed_mean_shift": 0.024835890345897005
+            }
+          },
+          "ankle": {
+            "normalised": {
+              "rmse": 0.03622891973993643,
+              "mae": 0.02391633875221365,
+              "max_abs": 0.1563303715331712,
+              "signed_mean_shift": 0.018996943082383477
+            },
+            "physical_rad": {
+              "rmse": 0.01268012190897775,
+              "mae": 0.008370718563274777,
+              "max_abs": 0.05471563003660992,
+              "signed_mean_shift": 0.006648930078834217
+            }
+          }
+        }
+      }
+    }
+  },
+  "gap_2_T5_distance_to_the_whole_training_aggregate": {
+    "what_was_missing": "the J17 artefact reported the distance of the J16 states from the ANCHORS only. The distance from the ENTIRE J15R1 training aggregate was not reported.",
+    "definition": {
+      "subspace": "the 33 non-clock observation columns, indices 2..34",
+      "why_the_clock_is_excluded": "columns 0 and 1 carry EXACTLY zero weight in the first layer of both actors, and are recorded raw in the traces while the datasets carry them projected to zero. Including them would add a constant offset of exactly 1.0 with no behavioural meaning.",
+      "scaling": "per-feature standard deviation computed over the ENTIRE J15R1 aggregate (25567 rows); features with zero standard deviation are mapped to 1.0",
+      "metric": "Euclidean L2 in that standardised space",
+      "reduction": "for each visited state, the MINIMUM over the reference set",
+      "reference_sets": {
+        "anchors": "1500 rows: nominal 500 + cell B unique 500 + cell C unique 500",
+        "full_aggregate": "3060 distinct rows out of 25567"
+      }
+    },
+    "per_cell": {
+      "J12": {
+        "A": {
+          "n_states": 500,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.1485941337177911,
+            "median": 0.42891838415645245,
+            "p95": 1.2655735092869365,
+            "max": 2.7812061218142965,
+            "frac_beyond_3sigma": 0.0
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 0.47494863197749726,
+            "p95": 1.3674953250763435
+          }
+        },
+        "B": {
+          "n_states": 500,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.1291609252606447,
+            "median": 0.4661367682074401,
+            "p95": 1.1535003657142098,
+            "max": 1.7134252176704645,
+            "frac_beyond_3sigma": 0.0
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 0.47347151825014777,
+            "p95": 1.1783014158343594
+          }
+        },
+        "C": {
+          "n_states": 500,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.15408248288981755,
+            "median": 0.4189440019280268,
+            "p95": 1.170411230845386,
+            "max": 1.7549775285339448,
+            "frac_beyond_3sigma": 0.0
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 0.42729951546075173,
+            "p95": 1.1791359228635405
+          }
+        },
+        "D": {
+          "n_states": 500,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.16968372940681226,
+            "median": 0.4500772577389364,
+            "p95": 0.88613571598144,
+            "max": 1.7236387093414434,
+            "frac_beyond_3sigma": 0.0
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 0.45601735657887144,
+            "p95": 0.9278781728813209
+          }
+        },
+        "E": {
+          "n_states": 500,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0.0,
+            "frac_beyond_3sigma": 0.0
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 1.9465547688006768,
+            "p95": 9.830827821085089
+          }
+        },
+        "F": {
+          "n_states": 354,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0.0,
+            "frac_beyond_3sigma": 0.0
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 4.473694905150423,
+            "p95": 12.256406442773274
+          }
+        }
+      },
+      "J16": {
+        "A": {
+          "n_states": 206,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.3826319338840407,
+            "median": 2.4931193149640505,
+            "p95": 4.10010552148204,
+            "max": 5.083988078430931,
+            "frac_beyond_3sigma": 0.4077669902912621
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 2.5158707239861595,
+            "p95": 5.283421455154276
+          }
+        },
+        "B": {
+          "n_states": 392,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.3571756566651041,
+            "median": 2.8391614443172575,
+            "p95": 5.131360381722711,
+            "max": 7.0853589485794775,
+            "frac_beyond_3sigma": 0.4719387755102041
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 2.906595649890932,
+            "p95": 5.5381392982779
+          }
+        },
+        "C": {
+          "n_states": 61,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 1.4365115210385455,
+            "median": 3.0835180261039077,
+            "p95": 5.449505996705025,
+            "max": 6.901906406479094,
+            "frac_beyond_3sigma": 0.5409836065573771
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 3.1159603492357966,
+            "p95": 6.182350119407932
+          }
+        },
+        "D": {
+          "n_states": 500,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.21273562307200183,
+            "median": 1.1011021775215322,
+            "p95": 3.9005941506733643,
+            "max": 4.909361546071122,
+            "frac_beyond_3sigma": 0.166
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 1.1186452243267997,
+            "p95": 3.9802421491730327
+          }
+        },
+        "E": {
+          "n_states": 209,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.4084356205131379,
+            "median": 2.615403869778989,
+            "p95": 4.320562719362503,
+            "max": 4.931921305239034,
+            "frac_beyond_3sigma": 0.4019138755980861
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 2.7293762050274513,
+            "p95": 5.223728680340042
+          }
+        },
+        "F": {
+          "n_states": 209,
+          "to_full_aggregate": {
+            "min": 0.0,
+            "p5": 0.3481130847389492,
+            "median": 2.5129636092700363,
+            "p95": 4.4161678132691256,
+            "max": 5.000300109430132,
+            "frac_beyond_3sigma": 0.39712918660287083
+          },
+          "to_anchors_only": {
+            "min": 0.0,
+            "median": 2.6908610302890894,
+            "p95": 5.346004993740308
+          }
+        }
+      }
+    },
+    "headline": {
+      "fraction_of_visited_states_beyond_3_sigma_from_the_WHOLE_training_set": {
+        "J11_in_J12": {
+          "A": 0.0,
+          "B": 0.0,
+          "C": 0.0,
+          "D": 0.0,
+          "E": 0.0,
+          "F": 0.0
+        },
+        "J15R1_in_J16": {
+          "A": 40.8,
+          "B": 47.2,
+          "C": 54.1,
+          "D": 16.6,
+          "E": 40.2,
+          "F": 39.7
+        },
+        "units": "percent"
+      },
+      "median_distance_ratio_J16_over_J12": {
+        "A": 5.81,
+        "B": 6.09,
+        "C": 7.36,
+        "D": 2.45,
+        "E": "undefined",
+        "F": "undefined"
+      },
+      "why_E_and_F_are_undefined": "J12's cells E and F have median distance EXACTLY 0.000 to the full aggregate, because those very states ARE the J14 block of the aggregate. The ratio is a division by zero, not a large number; it is reported as undefined rather than inflated.",
+      "reading_EVIDENCE": "J11 never leaves 3 sigma of its own training set, in any of the six cells. J15R1 spends between 16.6% and 54.1% of each episode beyond it.",
+      "reading_INFERENCE": "the support drift is massive, but it is NOT the origin of the divergence, which appears at step 1 on a bit-identical observation. It is a consequence that then amplifies."
+    },
+    "temporal_ordering_declared": {
+      "recording_semantics_verified": {
+        "knee_rad_and_ankle_rad": "PRE-step state, at instant time_before[i]; bit-identical to observation[i][2] and observation[i][4]",
+        "raw_action": "acts over [time_before[i], time_after[i]]",
+        "penetration_m": "POST-step value, at instant time_after[i] == time_before[i+1]",
+        "env_step": "0.01 s; no sub-step series exists for any of these quantities"
+      },
+      "order": [
+        "1. ACTION differs at step 1 on a BIT-IDENTICAL observation - causally first BY CONSTRUCTION, since it cannot have been caused by a state difference",
+        "2. KINEMATICS differ at steps 2-3 (>1e-6 rad), the earliest instant the recording can express",
+        "3. PENETRATION crosses the soft 0.020 bar at steps 11, 27, 28 or 47 by cell"
+      ],
+      "declared_limit": "between 2 and 3 the gap is PARTIALLY MASKED: in A, B, D, E and F penetration is identically 0.0 in BOTH runs for the first 10-14 steps because the foot is airborne, and a difference in a quantity that is zero in both runs is not measurable. In cell C, where the foot is loaded at reset, the kinematic and penetration differences appear at the SAME physical instant and CANNOT be ordered."
+    }
+  },
+  "gap_3_dagger_formulation_corrected": {
+    "what_the_executor_wrote": "the J17 report described the fresh refit as 'a departure from the DAgger premise that states come from the policy being improved'.",
+    "why_that_was_too_broad": "retraining from scratch on an accumulated aggregate does NOT universally violate DAgger. DAgger aggregates datasets across iterations and re-fitting the aggregate from a fixed initialisation is a legitimate variant of the algorithm. The executor's phrasing generalised beyond the evidence.",
+    "the_admitted_conclusion": "the failure observed here is SPECIFIC TO THIS IMPLEMENTATION, and is the conjunction of four measured facts: (a) the corrective states were collected from J11; (b) the fit was initialised from J2, a different actor; (c) 3.34% of the rows carried 84.81% of the initial squared-error mass, and the aggregate's total mass was 6.58x J11's; (d) the anchors were FUNCTIONALLY UNPROTECTED - self-distilled from the initialisation, so contributing 5.6e-10 of gradient at step 0, with the only restraint a parameter-space L2 penalty of weight 0.01 and no output-space anchor constraint.",
+    "what_is_NOT_claimed": [
+      "that fresh aggregate refitting is wrong in general",
+      "that DAgger requires an incremental update",
+      "that any single one of (a)-(d) alone would have produced this outcome"
+    ],
+    "supersedes": "this formulation supersedes the wording in the J17 report section 3.9 and 7. That report is left byte-identical; the correction lives here."
+  },
+  "invariants_verified": {
+    "j18_or_j18_runs": "ABSENT",
+    "j17_runs": "ABSENT",
+    "g_i_runs_ppo_runs_critic_runs": "ABSENT",
+    "locks_or_staging": "NONE",
+    "pre_existing_actors_datasets_configs_modified": "NONE",
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "dirty_worktree": "preserved untouched; the three user-modified tracked files are unchanged",
+    "subagents": "none used in this addendum; the two used earlier in J17 were read-only and are already reconciled in the J17 report"
+  }
+}

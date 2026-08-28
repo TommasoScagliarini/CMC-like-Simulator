@@ -1,0 +1,3242 @@
+{
+  "schema": "v26c_j19b_closed_loop_receipt.1",
+  "stage": "V26C_J19B_J19A_CLOSED_LOOP_QUALIFICATION",
+  "verdict": "PASS",
+  "aggregate_pass": true,
+  "cells_behavioural_pass": 6,
+  "cells_telemetry_valid": 6,
+  "cells_total": 6,
+  "aggregate_rule": "PASS iff 6/6 behavioural PASS AND 6/6 telemetry-valid",
+  "stack": {
+    "name": "production",
+    "operational": true,
+    "injected": false,
+    "note": "the production torch/RLlib/OpenSim stack"
+  },
+  "preregistration": {
+    "file": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j19b_prereg_closed_loop_qualification.json",
+    "sha256": "31c2705a8c9501969ddc39a37db43c3a419187febcd5cc830ff3cbfce57347b8",
+    "stage": "V26C_J19B_J19A_CLOSED_LOOP_QUALIFICATION",
+    "schema": "J19B",
+    "gates_are_j9r1s": true
+  },
+  "actor_before": {
+    "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1",
+    "module": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+    "artefacts_sha256": {
+      "commit_verification.json": "4d526dc119a10983e0186257132fbff58569d90ab0d1a793e0afae5ba2f32c61",
+      "history.json": "0a00cb6be58945d525201f76aa425ad713addbd4946d108e02cf4bc2c4111af0",
+      "rl_module/actor_feature_manifest.json": "2c01067e9a569354cc4099537a3a556ab50d55aa8baa1d2127324dafeee27c54",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/module_state.pkl": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+      "v26c_j19a_result.json": "8982b2fc40e514bed903af0c33e0a4ab3737ebf849a44a232912a816002dc254",
+      "v26c_j19a_single_reproduction_receipt.json": "235a117fc849bbe137dfd7ea29621390a6d1aa71aa9f9b4d95ca0e7a5dd50dad"
+    },
+    "file_count": 7,
+    "leaf_validity": {
+      "commit_verification_ok": true,
+      "technical_invalid_marker": false,
+      "no_stale_lock_or_staging": true,
+      "rule": "a J19A leaf is valid evidence only while its own commit_verification.json declares ok true"
+    },
+    "manifest": {
+      "module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+      "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+      "describes_this_module": true,
+      "differs_from_parent": true
+    },
+    "mask_contract": {
+      "width": 35,
+      "clock_columns": [
+        0,
+        1
+      ],
+      "controller_columns": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "layers": {
+        "pi.0.0.weight": {
+          "zero_columns": [
+            0,
+            1
+          ],
+          "controller_norms": {
+            "25": 0.11833923310041428,
+            "26": 0.09176032990217209,
+            "27": 0.023392517119646072,
+            "28": 0.003342591691762209,
+            "29": 0.1739269196987152,
+            "30": 0.13385088741779327,
+            "31": 0.15006206929683685,
+            "32": 0.032569870352745056,
+            "33": 0.004628915339708328,
+            "34": 0.1633780300617218
+          }
+        },
+        "pi_encoder.0.weight": {
+          "zero_columns": [
+            0,
+            1
+          ],
+          "controller_norms": {
+            "25": 0.11833923310041428,
+            "26": 0.09176032990217209,
+            "27": 0.023392517119646072,
+            "28": 0.003342591691762209,
+            "29": 0.1739269196987152,
+            "30": 0.13385088741779327,
+            "31": 0.15006206929683685,
+            "32": 0.032569870352745056,
+            "33": 0.004628915339708328,
+            "34": 0.1633780300617218
+          }
+        }
+      }
+    },
+    "sigma": {
+      "value": 0.005,
+      "from_actor": [
+        0.004999999670722372,
+        0.004999999670722372
+      ],
+      "tolerance": 1e-06,
+      "logstd_head_edited": false
+    },
+    "lineage": {
+      "j19a_verdict": "PASS",
+      "actors_persisted": 1,
+      "rollout_performed": false,
+      "reproducibility_ok": true,
+      "exact_fields_ok": true,
+      "eligibility_ok": true,
+      "parent_j8_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82"
+    },
+    "feature_names": {
+      "actor_feature_names": [
+        "gait_phase_sin",
+        "gait_phase_cos",
+        "pros_knee_angle",
+        "pros_knee_angle_vel",
+        "pros_ankle_angle",
+        "pros_ankle_angle_vel",
+        "SEA_Knee_motor_angle",
+        "SEA_Knee_motor_speed",
+        "SEA_Ankle_motor_angle",
+        "SEA_Ankle_motor_speed",
+        "online_left_normal_grf_bw",
+        "online_left_in_contact",
+        "online_left_heel_strike",
+        "online_left_toe_off",
+        "online_left_gait_phase_sin",
+        "online_left_gait_phase_cos",
+        "online_left_cycle_duration_s",
+        "phase_fsm_wait_hs",
+        "phase_fsm_stance_after_hs",
+        "phase_fsm_swing_after_to",
+        "phase_expected_hs",
+        "phase_expected_to",
+        "phase_stance_elapsed_norm",
+        "phase_swing_elapsed_norm",
+        "phase_cycle_progress_credit",
+        "pros_knee_angle_previous_endpoint",
+        "pros_knee_angle_served_ref",
+        "pros_knee_angle_served_ref_vel",
+        "pros_knee_angle_served_ref_accel",
+        "pros_knee_angle_sea_u",
+        "pros_ankle_angle_previous_endpoint",
+        "pros_ankle_angle_served_ref",
+        "pros_ankle_angle_served_ref_vel",
+        "pros_ankle_angle_served_ref_accel",
+        "pros_ankle_angle_sea_u"
+      ],
+      "sources": {
+        "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+        "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json": "bb24bedca3f8572e370d92ff02640a3890171888215017cd2821d62245670653",
+        "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62"
+      },
+      "sources_agree": true,
+      "count": 35,
+      "j8_sidecar_used_for": "feature ORDER AND NAMES ONLY",
+      "j8_sidecar_is_known_stale": true,
+      "j8_sidecar_not_used_as_module_hash_evidence": true
+    }
+  },
+  "actor_after": {
+    "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1",
+    "module": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+    "artefacts_sha256": {
+      "commit_verification.json": "4d526dc119a10983e0186257132fbff58569d90ab0d1a793e0afae5ba2f32c61",
+      "history.json": "0a00cb6be58945d525201f76aa425ad713addbd4946d108e02cf4bc2c4111af0",
+      "rl_module/actor_feature_manifest.json": "2c01067e9a569354cc4099537a3a556ab50d55aa8baa1d2127324dafeee27c54",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/module_state.pkl": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+      "v26c_j19a_result.json": "8982b2fc40e514bed903af0c33e0a4ab3737ebf849a44a232912a816002dc254",
+      "v26c_j19a_single_reproduction_receipt.json": "235a117fc849bbe137dfd7ea29621390a6d1aa71aa9f9b4d95ca0e7a5dd50dad"
+    },
+    "file_count": 7,
+    "leaf_validity": {
+      "commit_verification_ok": true,
+      "technical_invalid_marker": false,
+      "no_stale_lock_or_staging": true,
+      "rule": "a J19A leaf is valid evidence only while its own commit_verification.json declares ok true"
+    },
+    "manifest": {
+      "module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+      "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+      "describes_this_module": true,
+      "differs_from_parent": true
+    },
+    "mask_contract": {
+      "width": 35,
+      "clock_columns": [
+        0,
+        1
+      ],
+      "controller_columns": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "layers": {
+        "pi.0.0.weight": {
+          "zero_columns": [
+            0,
+            1
+          ],
+          "controller_norms": {
+            "25": 0.11833923310041428,
+            "26": 0.09176032990217209,
+            "27": 0.023392517119646072,
+            "28": 0.003342591691762209,
+            "29": 0.1739269196987152,
+            "30": 0.13385088741779327,
+            "31": 0.15006206929683685,
+            "32": 0.032569870352745056,
+            "33": 0.004628915339708328,
+            "34": 0.1633780300617218
+          }
+        },
+        "pi_encoder.0.weight": {
+          "zero_columns": [
+            0,
+            1
+          ],
+          "controller_norms": {
+            "25": 0.11833923310041428,
+            "26": 0.09176032990217209,
+            "27": 0.023392517119646072,
+            "28": 0.003342591691762209,
+            "29": 0.1739269196987152,
+            "30": 0.13385088741779327,
+            "31": 0.15006206929683685,
+            "32": 0.032569870352745056,
+            "33": 0.004628915339708328,
+            "34": 0.1633780300617218
+          }
+        }
+      }
+    },
+    "sigma": {
+      "value": 0.005,
+      "from_actor": [
+        0.004999999670722372,
+        0.004999999670722372
+      ],
+      "tolerance": 1e-06,
+      "logstd_head_edited": false
+    },
+    "lineage": {
+      "j19a_verdict": "PASS",
+      "actors_persisted": 1,
+      "rollout_performed": false,
+      "reproducibility_ok": true,
+      "exact_fields_ok": true,
+      "eligibility_ok": true,
+      "parent_j8_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82"
+    },
+    "feature_names": {
+      "actor_feature_names": [
+        "gait_phase_sin",
+        "gait_phase_cos",
+        "pros_knee_angle",
+        "pros_knee_angle_vel",
+        "pros_ankle_angle",
+        "pros_ankle_angle_vel",
+        "SEA_Knee_motor_angle",
+        "SEA_Knee_motor_speed",
+        "SEA_Ankle_motor_angle",
+        "SEA_Ankle_motor_speed",
+        "online_left_normal_grf_bw",
+        "online_left_in_contact",
+        "online_left_heel_strike",
+        "online_left_toe_off",
+        "online_left_gait_phase_sin",
+        "online_left_gait_phase_cos",
+        "online_left_cycle_duration_s",
+        "phase_fsm_wait_hs",
+        "phase_fsm_stance_after_hs",
+        "phase_fsm_swing_after_to",
+        "phase_expected_hs",
+        "phase_expected_to",
+        "phase_stance_elapsed_norm",
+        "phase_swing_elapsed_norm",
+        "phase_cycle_progress_credit",
+        "pros_knee_angle_previous_endpoint",
+        "pros_knee_angle_served_ref",
+        "pros_knee_angle_served_ref_vel",
+        "pros_knee_angle_served_ref_accel",
+        "pros_knee_angle_sea_u",
+        "pros_ankle_angle_previous_endpoint",
+        "pros_ankle_angle_served_ref",
+        "pros_ankle_angle_served_ref_vel",
+        "pros_ankle_angle_served_ref_accel",
+        "pros_ankle_angle_sea_u"
+      ],
+      "sources": {
+        "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+        "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json": "bb24bedca3f8572e370d92ff02640a3890171888215017cd2821d62245670653",
+        "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62"
+      },
+      "sources_agree": true,
+      "count": 35,
+      "j8_sidecar_used_for": "feature ORDER AND NAMES ONLY",
+      "j8_sidecar_is_known_stale": true,
+      "j8_sidecar_not_used_as_module_hash_evidence": true
+    }
+  },
+  "actor_unchanged": true,
+  "offset_unit_correction": {
+    "statement": "the multistart offsets are SECONDS of episode start time, not radians.",
+    "primary_evidence": {
+      "nominal": "the pinned runtime config, episode_start_offset_s = 1.956870983805102",
+      "minus": "validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_minus020/training_cfg.resolved.yaml -> episode_start_offset_s = 1.756870983805102 = nominal - 0.20",
+      "plus": "validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_plus020/training_cfg.resolved.yaml -> episode_start_offset_s = 2.156870983805102 = nominal + 0.20",
+      "july_report": "reports/user/2026-07-13_sblocco_actor_markov35_e_warmup_critic.md reports the starts as '-0.20 s' and '+0.20 s' and states the tests cover three starts of the SAME trial"
+    },
+    "earlier_prose_error": "several FROZEN earlier V26C records say 'rad' where the primary artefacts say seconds: v26c_j3_amendment_recovery_only.json, v26c_j6_amendment_recovery_probe.json, v26c_j6_amendment_recovery_probe_rev2.json, v26c_j7_prereg_markov_dataset.json, v26c_j8_prereg_recovery_fit.json and v26c_j4_recovery.py.",
+    "no_numeric_artefact_affected": "NO numeric artefact was affected. Those strings are prose describing a DEFERRAL; no offset value was ever computed, stored or applied from them, and every V26C rollout so far used the nominal offset from the pinned config. The error is descriptive only.",
+    "remediation": "those records are IMMUTABLE and are NOT edited. This block is the additive correction and stands as the authority on the unit.",
+    "source": "v26c_j9_prereg_closed_loop.json (pinned, unedited)",
+    "source_sha256": "e6a6888a473d5ef76b1f009037f7825995fd62b35cc51749dfe41ad7f718c44a",
+    "unit": "seconds",
+    "frozen_offsets_s": [
+      1.956870983805102,
+      1.756870983805102,
+      2.156870983805102
+    ],
+    "nominal_s": 1.956870983805102,
+    "delta_minus_s": -0.19999999999999996,
+    "delta_plus_s": 0.19999999999999996,
+    "earlier_records_edited": false
+  },
+  "scientific_equivalence_to_j9r1": {
+    "source_module": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j9r1_closed_loop.py",
+    "source_sha256": "f58b0d14b077536ced24ec3063bd2154ed1e207b42532bddc76177f1e02e4a3c",
+    "compared_fields": {
+      "COMMON_GATE": {
+        "steps_required": 500,
+        "end_reason": "episode_time_limit",
+        "valid_cycles_min": 2,
+        "phase_timeout_stance_max": 0,
+        "phase_timeout_swing_max": 0,
+        "morphology_causal_contract_failure_max": 0,
+        "hs_cancelled_count_max": 0,
+        "resync_count_max": 1
+      },
+      "KINEMATIC_GATE": {
+        "ankle_min_rad_max": -0.03,
+        "ankle_amplitude_min_rad": 0.3,
+        "knee_amplitude_min_rad": 0.6,
+        "knee_strictly_flexed": true,
+        "knee_bounds_rad": [
+          -1.5,
+          0.0
+        ],
+        "ankle_bounds_rad": [
+          -0.7,
+          0.7
+        ]
+      },
+      "SIGMA": 0.005,
+      "SIGMA_TOLERANCE": 1e-06,
+      "NOISE_HOLD_STEPS": 1,
+      "EXPECTED_STEPS": 500,
+      "RESET_TIME_TOLERANCE_S": 1e-09,
+      "CLOCK_COLUMNS": [
+        0,
+        1
+      ],
+      "CONTROLLER_COLUMNS": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "ACTOR_WIDTH": 35,
+      "FROZEN_OFFSETS": [
+        1.956870983805102,
+        1.756870983805102,
+        2.156870983805102
+      ]
+    },
+    "matrix": [
+      {
+        "id": "A",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 1.956870983805102
+      },
+      {
+        "id": "B",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 1.756870983805102
+      },
+      {
+        "id": "C",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 2.156870983805102
+      },
+      {
+        "id": "D",
+        "mode": "stochastic_held",
+        "seed": 123,
+        "offset_s": 1.956870983805102
+      },
+      {
+        "id": "E",
+        "mode": "stochastic_held",
+        "seed": 124,
+        "offset_s": 1.956870983805102
+      },
+      {
+        "id": "F",
+        "mode": "stochastic_held",
+        "seed": 125,
+        "offset_s": 1.956870983805102
+      }
+    ],
+    "what_changed": "the ACTOR under test, and nothing else",
+    "actor_before": "J15R1 (j15_runs/j15_fresh_refit_v26c_2026-08-27_r1), which FAILED this same matrix 0/6 in J16",
+    "actor_now": "J19A (j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1)",
+    "thresholds_invented_here": 0,
+    "ultimate_sources": {
+      "common": "v26c_j1_collect.J1_GATE minus max_penetration_m_max",
+      "kinematic": "v26c_j3_closed_loop.J3_KINEMATIC_GATE, unchanged",
+      "penetration": "v26c_penetration_contract, the 0.028 band as the sole binding bar"
+    }
+  },
+  "runtime": {
+    "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "env_config_sha256": "77acd85e8dd0f969dec526e224fa537c76cf7cbb023d4bff4b9e0baf5bcde98c",
+    "builder": "v26c_j1_collect.build_full_env_config + verify_env_config",
+    "base_offset_s": 1.956870983805102,
+    "environments": "one at a time, sequential, closed cleanly and fail-closed",
+    "rllib_checkpoint_loader": true,
+    "ray_cluster_started": false,
+    "ray_workers_started": false,
+    "env_runners": false,
+    "ray_import_note": "the RLlib checkpoint loader imports ray and torch at RUN time; importing them is not starting a cluster, a worker or an EnvRunner. The preflight imports neither.",
+    "sim_outputs_required": true
+  },
+  "recording_instrumentation": {
+    "record_outputs": true,
+    "save_outputs_on_close": true,
+    "output_prefix": "j1_teacher_episode",
+    "base_output_root": "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1",
+    "base_output_root_is": "the committed leaf; each cell's sim_outputs sits inside it",
+    "verified_fail_closed_before_any_env": true,
+    "inherited_by_every_cell": true,
+    "corrects": "the J9 defect recorded in v26c_j9_technical_failure_2026-08-26.json, inherited already corrected from J9R1",
+    "supersedes_operationally_not_by_edit": {
+      "v26c_j9_prereg_closed_loop.json": "e6a6888a473d5ef76b1f009037f7825995fd62b35cc51749dfe41ad7f718c44a",
+      "v26c_j9_closed_loop.py": "8b6c36db2fd9bd63bde41d9903d4e1eb1d1e312b8cbf790e9bf1ea5b4875ac67",
+      "test_v26c_j9_closed_loop.py": "c30a1ff40d1f3aeefdb1e02210ecf6e2a04d7749448a7592cba212e8b47d867f",
+      "v26c_j9_closed_loop_authorization.json": "ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597",
+      "v26c_j9_technical_failure_2026-08-26.json": "67c97df1b302cfa98a77c673410e67e56ea0dd34b2d380cf65c34f8916645a20",
+      "note": "pinned, never edited"
+    }
+  },
+  "env_mutation_policy": {
+    "scientific_or_runtime_fields_mutable": [
+      "episode_start_offset_s"
+    ],
+    "why": "the matrix is a sweep over the three preregistered start offsets; nothing else about the environment is allowed to differ between cells",
+    "instrumentation_fields_mutable": [
+      "output_dir"
+    ],
+    "output_dir_is_not_a_scientific_field": "output_dir names where this cell's 19 sim_outputs are written. It carries no scientific or runtime meaning, changes no dynamics and enters no gate; it is per-cell instrumentation, authorised so each cell records into its own directory.",
+    "everything_else": "IMMUTABLE - proved by the stable-key equality guard in cell_env_config, which compares every other key against the verified base"
+  },
+  "penetration_authority": {
+    "contract": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_penetration_contract_2026-08-26.json",
+    "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "module_sha256": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "bands_m": {
+      "soft_diagnostic": 0.02,
+      "july_legacy": 0.025,
+      "hard_binding": 0.028
+    },
+    "semantics": {
+      "above_soft_iff": "> 0.020 (diagnostic)",
+      "july_legacy_breach_iff": ">= 0.025 (diagnostic)",
+      "binding_pass_iff": "<= 0.028, so exactly 0.028 PASSES",
+      "binding_fail_iff": "> 0.028"
+    },
+    "local_thresholds_in_this_module": 0
+  },
+  "gate_specification": {
+    "binding_common": {
+      "steps_required": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycles_min": 2,
+      "phase_timeout_stance_max": 0,
+      "phase_timeout_swing_max": 0,
+      "morphology_causal_contract_failure_max": 0,
+      "hs_cancelled_count_max": 0,
+      "resync_count_max": 1
+    },
+    "binding_kinematic": {
+      "ankle_min_rad_max": -0.03,
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [
+        -1.5,
+        0.0
+      ],
+      "ankle_bounds_rad": [
+        -0.7,
+        0.7
+      ]
+    },
+    "binding_penetration": "the contract's 0.028 band, sole binding penetration criterion",
+    "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, -0.0099 FAILS, exactly -0.03 PASSES",
+    "telemetry_integrity": "SEPARATE fail-closed technical invariant, never behavioural",
+    "diagnostics_not_binding": [
+      "action_clipped_steps",
+      "episode_return",
+      "realized_noise_rms",
+      "policy_std"
+    ],
+    "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged for the kinematic quality, and the penetration contract's 0.028 band as the SOLE binding penetration bar"
+  },
+  "matrix_policy": {
+    "cells": 6,
+    "steps_per_cell": 500,
+    "order": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+    ],
+    "behavioural_fail_fast": false,
+    "rule": "a behavioural FAIL is preserved and the remaining cells still run; only a technical or integrity exception stops the matrix, fail-closed",
+    "aggregate_pass_iff": "6/6 behavioural PASS and 6/6 telemetry-valid"
+  },
+  "reset_time_check": {
+    "tolerance_s": 1e-09,
+    "justification": "episode_start_offset_s is an offset RELATIVE TO cfg.t_start, never an absolute OpenSim time. The expected reset time is computed with the production semantics, so the comparison is an exact arithmetic identity and 1e-9 s is a cross-platform float-representation allowance, not a behavioural tolerance. It is checked IMMEDIATELY after reset, never from a post-step record.",
+    "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+    "offset_is_relative_to_t_start": true,
+    "compared_against": "cfg.t_start + offset, clamped to max_start",
+    "never_compared_against_the_offset_itself": true,
+    "checked_immediately_after_reset": true,
+    "recorded_fields": [
+      "cfg_t_start_s",
+      "cfg_t_end_s",
+      "episode_duration_s",
+      "requested_unclamped_time_s",
+      "max_start_s",
+      "expected_reset_time_s",
+      "actual_reset_time_s",
+      "reset_time_error_s",
+      "clamped"
+    ],
+    "checked_not_assumed": true
+  },
+  "multistart_disambiguation": {
+    "training_data": "PRESENT, and this is the difference from J9R1. The actor under test descends from J8 and was fitted on the J18 candidate-13 aggregate: four DISJOINT blocks totalling 4221 rows - the J10R1 cell-B teacher trajectory (500), the J8 on-policy pre-mismatch prefix (14), the closed-loop preservation anchors from cells A, C, D, E and F (2497), and the deduplicated J7 support (1210). J9R1's actor had none of that.",
+    "which_multistart_data": "the AUGUST J10R1 cells, collected with the prescribed teacher on the V26 lineage. NOT the two July teacher datasets, which remain DEFERRED and are never an operational input to any stage in this chain.",
+    "closed_loop_validation": "cells B and C, and they are BINDING here",
+    "they_are_different": "multistart TRAINING DATA and multistart CLOSED-LOOP validation are separate things and must never be conflated. This stage validates in closed loop an actor that was trained on multistart rows; it does not train on anything.",
+    "corrected_from_j9r1": "J9R1 recorded that the multistart training data was absent, which was true of the J8 actor it tested. Carrying that sentence forward unchanged would have asserted something FALSE about the J19A actor."
+  },
+  "cells": [
+    {
+      "id": "A",
+      "mode": "deterministic",
+      "seed": 123,
+      "label": "nominal",
+      "episode_start_offset_s": 1.956870983805102,
+      "offset_unit": "seconds",
+      "env_mutation": {
+        "mutated_keys": [
+          "output_dir"
+        ],
+        "allowed_superset": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "mutated_is_subset_of_allowed": true,
+        "stable_keys_count": 51,
+        "stable_keys_all_identical": true,
+        "stable_key_definition": "every base key except episode_start_offset_s and output_dir, compared for exact equality",
+        "episode_start_offset_s": 1.956870983805102,
+        "base_offset_s": 1.956870983805102,
+        "delta_s": 0.0,
+        "unit": "seconds",
+        "every_other_field_identical": true,
+        "base_verified_by_j1_before_mutation": true,
+        "recording_inherited_from_base": true,
+        "second_j1_verify_on_mutated_config": false,
+        "why_no_second_verify": "J1.verify_env_config pins the nominal offset, including in its runtime literal cross-check, so B and C would fail it technically. The base is verified in full BEFORE the mutation and every other field is proved identical to it afterwards."
+      },
+      "env_config_sha256": "3718619e452c372542ff5c36813edfc7e3a3ac58afb07f5f2056f0352dc96a7e",
+      "reset_check": {
+        "cfg_t_start_s": 11.99,
+        "cfg_t_end_s": 21.0,
+        "episode_duration_s": 5.0,
+        "episode_start_offset_s": 1.956870983805102,
+        "requested_unclamped_time_s": 13.946870983805102,
+        "max_start_s": 16.0,
+        "expected_reset_time_s": 13.946870983805102,
+        "clamped": false,
+        "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+        "actual_reset_time_s": 13.946870983805102,
+        "reset_time_error_s": 0.0,
+        "tolerance_s": 1e-09,
+        "checked_immediately_after_reset": true,
+        "compared_against": "cfg.t_start + offset, clamped to max_start - NOT the offset itself",
+        "duration_sources": {
+          "live_env_cfg_episode_duration": 5.0,
+          "declared_env_config_episode_duration": 5.0,
+          "normative": "live_env_cfg_episode_duration",
+          "cross_check_tolerance_s": 1e-12,
+          "agree": true,
+          "why_live_is_normative": "the clamp is computed by the environment from its OWN env_cfg; reading our config instead would prove nothing about what the environment actually did"
+        },
+        "sources": {
+          "t_start": "live base.cfg.t_start",
+          "t_end": "live base.cfg.t_end",
+          "episode_duration": "live base.env_cfg.episode_duration",
+          "all_guarded_fail_closed": true
+        }
+      },
+      "runtime_contract": {
+        "actor_feature_names": [
+          "gait_phase_sin",
+          "gait_phase_cos",
+          "pros_knee_angle",
+          "pros_knee_angle_vel",
+          "pros_ankle_angle",
+          "pros_ankle_angle_vel",
+          "SEA_Knee_motor_angle",
+          "SEA_Knee_motor_speed",
+          "SEA_Ankle_motor_angle",
+          "SEA_Ankle_motor_speed",
+          "online_left_normal_grf_bw",
+          "online_left_in_contact",
+          "online_left_heel_strike",
+          "online_left_toe_off",
+          "online_left_gait_phase_sin",
+          "online_left_gait_phase_cos",
+          "online_left_cycle_duration_s",
+          "phase_fsm_wait_hs",
+          "phase_fsm_stance_after_hs",
+          "phase_fsm_swing_after_to",
+          "phase_expected_hs",
+          "phase_expected_to",
+          "phase_stance_elapsed_norm",
+          "phase_swing_elapsed_norm",
+          "phase_cycle_progress_credit",
+          "pros_knee_angle_previous_endpoint",
+          "pros_knee_angle_served_ref",
+          "pros_knee_angle_served_ref_vel",
+          "pros_knee_angle_served_ref_accel",
+          "pros_knee_angle_sea_u",
+          "pros_ankle_angle_previous_endpoint",
+          "pros_ankle_angle_served_ref",
+          "pros_ankle_angle_served_ref_vel",
+          "pros_ankle_angle_served_ref_accel",
+          "pros_ankle_angle_sea_u"
+        ],
+        "actor_feature_count": 35,
+        "observation_feature_count": 84,
+        "n_actor": 35,
+        "expected_steps": 500,
+        "manifest_matches_pinned_j2": true,
+        "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+      },
+      "module_load_check": {
+        "class": "AsymmetricActorCriticTorchRLModule",
+        "expected_class": "AsymmetricActorCriticTorchRLModule",
+        "state_keys": 10,
+        "weights_match_pinned_module_state": true,
+        "why_checked": "ray's checkpoint loader swallows a ModuleNotFoundError and returns a weightless base RLModule without raising; an unchecked stage would roll out an empty network in silence"
+      },
+      "action_semantics": {
+        "mode": "deterministic",
+        "path": "inference_action_dist.to_deterministic().sample()",
+        "stepped_with": "raw_action",
+        "clipping_is_diagnostic": true,
+        "rollout_eval_parity_steps": 500,
+        "max_abs_action_minus_mean": 0.0,
+        "noise_hold_steps": null,
+        "sigma": null
+      },
+      "summary": {
+        "steps": 500,
+        "end_reason": "episode_time_limit",
+        "max_penetration_m": 0.02442140287670189,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "hs_cancelled_count": 0,
+        "resync_count": 0,
+        "action_clipped_steps": 0,
+        "fsm_behaviour_versions": [
+          "v3"
+        ],
+        "event_sources": [
+          "binary_active_v26"
+        ],
+        "episode_return": 42.25599440921209,
+        "realized_noise_rms": [
+          0.0,
+          0.0
+        ],
+        "action_noise_sigma": [
+          0.0,
+          0.0
+        ],
+        "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+      },
+      "telemetry": {
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "resync_count": 0,
+        "hs_cancelled_count": 0,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "steps": 500,
+        "end_reason": "episode_time_limit"
+      },
+      "wait_hs": {
+        "feature": "phase_fsm_wait_hs",
+        "resolved_by": "name, from the LIVE RUNTIME actor feature names",
+        "index": 17,
+        "rows": 0,
+        "fraction_of_steps": 0.0,
+        "binding": false,
+        "why_not_binding": "this stage reuses J9R1's criteria exactly and invents none. WAIT_HS is surfaced because J9R1 cell B failed with the FSM held in WAIT_HS for every step and zero cycles, so the count is the fastest read on whether that failure mode recurred - but attaching a threshold to it would be a NEW gate, and a new gate would have to be preregistered, not smuggled in here."
+      },
+      "kinematics": {
+        "steps": 500,
+        "knee_min_rad": -0.996281087398529,
+        "knee_max_rad": -0.16898544132709503,
+        "ankle_min_rad": -0.11189442127943039,
+        "ankle_max_rad": 0.40381699800491333
+      },
+      "penetration": {
+        "max_penetration_m": 0.02442140287670189,
+        "band": "above_soft_below_july_legacy",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": false,
+          "july_legacy_historical_pass": true,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 105,
+          "at_or_above_july_legacy": 0,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.21,
+          "at_or_above_july_legacy": 0.0,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009481353018804494,
+        "argmax_index_1based": 199,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        },
+        "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+        "evaluated_by": "v26c_penetration_contract.evaluate_series",
+        "soft_and_july_are_diagnostic": true,
+        "sole_binding": "above_hard_binding"
+      },
+      "gate": {
+        "criteria": {
+          "common": {
+            "steps_required": 500,
+            "end_reason": "episode_time_limit",
+            "valid_cycles_min": 2,
+            "phase_timeout_stance_max": 0,
+            "phase_timeout_swing_max": 0,
+            "morphology_causal_contract_failure_max": 0,
+            "hs_cancelled_count_max": 0,
+            "resync_count_max": 1
+          },
+          "kinematic_quality": {
+            "ankle_min_rad_max": -0.03,
+            "ankle_amplitude_min_rad": 0.3,
+            "knee_amplitude_min_rad": 0.6,
+            "knee_strictly_flexed": true,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ]
+          },
+          "penetration": "the contract's 0.028 binding band, the SOLE binding penetration criterion"
+        },
+        "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged for the kinematic quality, and the penetration contract's 0.028 band as the SOLE binding penetration bar",
+        "kinematic_quality": {
+          "ankle_min": {
+            "observed_rad": -0.11189442127943039,
+            "threshold_rad": -0.03,
+            "pass": true
+          },
+          "ankle_amplitude": {
+            "observed_rad": 0.5157114192843437,
+            "threshold_rad": 0.3,
+            "pass": true
+          },
+          "knee_amplitude": {
+            "observed_rad": 0.827295646071434,
+            "threshold_rad": 0.6,
+            "pass": true
+          },
+          "knee_strictly_flexed": {
+            "fraction_negative": 1.0,
+            "max_rad": -0.16898544132709503,
+            "pass": true
+          },
+          "within_bounds": {
+            "knee_outside": 0,
+            "ankle_outside": 0,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ],
+            "pass": true
+          }
+        },
+        "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, -0.0099 FAILS, exactly -0.03 PASSES",
+        "checks": {
+          "steps": true,
+          "end_reason": true,
+          "valid_cycles": true,
+          "phase_timeout_stance": true,
+          "phase_timeout_swing": true,
+          "morphology_causal_contract_failure": true,
+          "hs_cancelled_count": true,
+          "resync_count": true,
+          "penetration_hard_binding": true,
+          "kinematic_ankle_min": true,
+          "kinematic_ankle_amplitude": true,
+          "kinematic_knee_amplitude": true,
+          "kinematic_knee_strictly_flexed": true,
+          "kinematic_within_bounds": true
+        },
+        "failed": [],
+        "pass": true,
+        "telemetry_integrity_evaluated_separately": true
+      },
+      "telemetry_integrity": {
+        "kind": "TELEMETRY INTEGRITY INVARIANT",
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "valid_cycle_count": 2,
+        "checks": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_within_one": true
+        },
+        "pass": true,
+        "qualification_technically_valid": true,
+        "invariant": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_max": 1,
+          "kind": "TELEMETRY INTEGRITY INVARIANT",
+          "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+          "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+        },
+        "is_behavioural_gate": false,
+        "is_promotion_threshold": false
+      },
+      "verdict": "PASS",
+      "behavioural_pass": true,
+      "telemetry_valid": true,
+      "diagnostics_not_binding": {
+        "action_clipped_steps": 0,
+        "episode_return": 42.25599440921209,
+        "realized_noise_rms": [
+          0.0,
+          0.0
+        ],
+        "policy_std": null
+      },
+      "env_closed": true,
+      "sim_outputs": "j19b_cell_A_sim_outputs",
+      "sim_outputs_regular_file_count": 19,
+      "sim_outputs_expected_count": 19,
+      "sim_outputs_count_is_exact": true,
+      "sim_outputs_file_names": [
+        "j1_teacher_episode_activations.sto",
+        "j1_teacher_episode_gait_events.csv",
+        "j1_teacher_episode_gait_events_online.csv",
+        "j1_teacher_episode_kinematics.sto",
+        "j1_teacher_episode_kinematics_reference.sto",
+        "j1_teacher_episode_muscle_forces.sto",
+        "j1_teacher_episode_online_grf.sto",
+        "j1_teacher_episode_power.sto",
+        "j1_teacher_episode_recruitment.sto",
+        "j1_teacher_episode_reserve_controls.sto",
+        "j1_teacher_episode_reserve_torques.sto",
+        "j1_teacher_episode_sea_controls.sto",
+        "j1_teacher_episode_sea_derivatives.sto",
+        "j1_teacher_episode_sea_diagnostics.sto",
+        "j1_teacher_episode_sea_states.sto",
+        "j1_teacher_episode_sea_torques.sto",
+        "j1_teacher_episode_so_torque_diagnostics.sto",
+        "j1_teacher_episode_states.sto",
+        "j1_teacher_episode_tau_bio.sto"
+      ],
+      "paths_are_leaf_relative": true,
+      "artefacts": {
+        "trace": "j19b_cell_A_trace.json",
+        "kinematics": "j19b_cell_A_kinematics.npz",
+        "penetration": "j19b_cell_A_penetration.npz"
+      },
+      "outputs_sha256": {
+        "j19b_cell_A_trace.json": "42c8c147442b1fea279577fa110f4a185a89534fa795e02d5ab3e8e0e815642f",
+        "j19b_cell_A_kinematics.npz": "84b648bef6f5d8d128219adbbfbb29fdcabbe6bcc06387fb3e51a3bd36a9dcf6",
+        "j19b_cell_A_penetration.npz": "f33a8991c1236686907f17d4a1c928638b7481e69ac3af4c7c7931ff633b5a88"
+      },
+      "sim_outputs_sha256": {
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_activations.sto": "a0214961c67314cb0c8863bd6665b1b34b6a4f3a3168f23b84e6794a7c824a30",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_gait_events_online.csv": "5f8c5964934c00b062b0fed54334607dafc18864d2ebb641dc3ed15daf00433e",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_kinematics.sto": "bbd27dbc73356f18f071f40528c7775bcc3f7b0fd6b893803bcf036c427dcef3",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "f365469320ef220ec11effc87e75a53919aed7af537b147da8e442cf236272c7",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_muscle_forces.sto": "4ea4a5d566ecdb4e7cf63e2c4b0e5a5b1ba69d814c123388190912e53cd31110",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_online_grf.sto": "05e85cd7cb959254126edbedcce8109df398067ba77acec77b4bc12b8f2fe26a",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_power.sto": "0d3e07a7524226eaebd98a8e6146e57368853e2700e432b87a5639f67e3b10cc",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_recruitment.sto": "29416055960b8b907dd22c77119ed9b26e5b66d8d048bed300b78779f4f6e2fa",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_reserve_controls.sto": "1e31a5e44f7e381bbf55e45d5e91e666f13002332b78065ed030682a5cc9aa30",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_reserve_torques.sto": "b81121a8b524e7022a4ead1728902f48d7cdd15e1c492609c57edfbbcacd7eda",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_controls.sto": "623ccf87cf4b765c0ff4169a706fea37424cecbafc739f7409bfda58ead4ae16",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "43508fbb1bf34f7ba08098b04fbb232d147a85c8eeb098dec2e80303110c6696",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "058f269c96e2b7ec5fd66eae7dbc942d5d8e62d1f50bc6723233e071a41ced62",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_states.sto": "723425907cf50129ce8252930b4bcb540cc1c40774623e3ad96be033011291ff",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_torques.sto": "9e60c231236d177a10c0cbe0186a97bbebb669a0383ccf8cce66e1370fa3e0f3",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "8ec4e4372729728af55111ddf144dd33203034cd7444462070bce8a7233d8ebc",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_states.sto": "3cf5f927599805ecd132f16fe9b91e656a53baa2df3e7d08f225cb09544386be",
+        "j19b_cell_A_sim_outputs/j1_teacher_episode_tau_bio.sto": "04acfd2a5ea48ab2a341f63409e6ed3b2581edd7f6b20923891c88185f038c74"
+      },
+      "content_hashes": {
+        "knee_rad": "c26cd23fa7b64c60248da394381466daec6908d32feb0848f503870e44500b98",
+        "ankle_rad": "1611e20b1a014b5b9f87849e22e55905815e0baacc42901f97bf0cbd04591c71",
+        "penetration_m": "c3e724b3ec190a30bf95fb91a5da91c23cc6623bc6a921f2b96acc9a10f940e9"
+      }
+    },
+    {
+      "id": "B",
+      "mode": "deterministic",
+      "seed": 123,
+      "label": "-0.20 s",
+      "episode_start_offset_s": 1.756870983805102,
+      "offset_unit": "seconds",
+      "env_mutation": {
+        "mutated_keys": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "allowed_superset": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "mutated_is_subset_of_allowed": true,
+        "stable_keys_count": 51,
+        "stable_keys_all_identical": true,
+        "stable_key_definition": "every base key except episode_start_offset_s and output_dir, compared for exact equality",
+        "episode_start_offset_s": 1.756870983805102,
+        "base_offset_s": 1.956870983805102,
+        "delta_s": -0.19999999999999996,
+        "unit": "seconds",
+        "every_other_field_identical": true,
+        "base_verified_by_j1_before_mutation": true,
+        "recording_inherited_from_base": true,
+        "second_j1_verify_on_mutated_config": false,
+        "why_no_second_verify": "J1.verify_env_config pins the nominal offset, including in its runtime literal cross-check, so B and C would fail it technically. The base is verified in full BEFORE the mutation and every other field is proved identical to it afterwards."
+      },
+      "env_config_sha256": "b2fab2d48fd91417611d176a84fd778a4d6b676dc5bdbb010d5a70004cbb245a",
+      "reset_check": {
+        "cfg_t_start_s": 11.99,
+        "cfg_t_end_s": 21.0,
+        "episode_duration_s": 5.0,
+        "episode_start_offset_s": 1.756870983805102,
+        "requested_unclamped_time_s": 13.746870983805103,
+        "max_start_s": 16.0,
+        "expected_reset_time_s": 13.746870983805103,
+        "clamped": false,
+        "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+        "actual_reset_time_s": 13.746870983805103,
+        "reset_time_error_s": 0.0,
+        "tolerance_s": 1e-09,
+        "checked_immediately_after_reset": true,
+        "compared_against": "cfg.t_start + offset, clamped to max_start - NOT the offset itself",
+        "duration_sources": {
+          "live_env_cfg_episode_duration": 5.0,
+          "declared_env_config_episode_duration": 5.0,
+          "normative": "live_env_cfg_episode_duration",
+          "cross_check_tolerance_s": 1e-12,
+          "agree": true,
+          "why_live_is_normative": "the clamp is computed by the environment from its OWN env_cfg; reading our config instead would prove nothing about what the environment actually did"
+        },
+        "sources": {
+          "t_start": "live base.cfg.t_start",
+          "t_end": "live base.cfg.t_end",
+          "episode_duration": "live base.env_cfg.episode_duration",
+          "all_guarded_fail_closed": true
+        }
+      },
+      "runtime_contract": {
+        "actor_feature_names": [
+          "gait_phase_sin",
+          "gait_phase_cos",
+          "pros_knee_angle",
+          "pros_knee_angle_vel",
+          "pros_ankle_angle",
+          "pros_ankle_angle_vel",
+          "SEA_Knee_motor_angle",
+          "SEA_Knee_motor_speed",
+          "SEA_Ankle_motor_angle",
+          "SEA_Ankle_motor_speed",
+          "online_left_normal_grf_bw",
+          "online_left_in_contact",
+          "online_left_heel_strike",
+          "online_left_toe_off",
+          "online_left_gait_phase_sin",
+          "online_left_gait_phase_cos",
+          "online_left_cycle_duration_s",
+          "phase_fsm_wait_hs",
+          "phase_fsm_stance_after_hs",
+          "phase_fsm_swing_after_to",
+          "phase_expected_hs",
+          "phase_expected_to",
+          "phase_stance_elapsed_norm",
+          "phase_swing_elapsed_norm",
+          "phase_cycle_progress_credit",
+          "pros_knee_angle_previous_endpoint",
+          "pros_knee_angle_served_ref",
+          "pros_knee_angle_served_ref_vel",
+          "pros_knee_angle_served_ref_accel",
+          "pros_knee_angle_sea_u",
+          "pros_ankle_angle_previous_endpoint",
+          "pros_ankle_angle_served_ref",
+          "pros_ankle_angle_served_ref_vel",
+          "pros_ankle_angle_served_ref_accel",
+          "pros_ankle_angle_sea_u"
+        ],
+        "actor_feature_count": 35,
+        "observation_feature_count": 84,
+        "n_actor": 35,
+        "expected_steps": 500,
+        "manifest_matches_pinned_j2": true,
+        "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+      },
+      "module_load_check": {
+        "class": "AsymmetricActorCriticTorchRLModule",
+        "expected_class": "AsymmetricActorCriticTorchRLModule",
+        "state_keys": 10,
+        "weights_match_pinned_module_state": true,
+        "why_checked": "ray's checkpoint loader swallows a ModuleNotFoundError and returns a weightless base RLModule without raising; an unchecked stage would roll out an empty network in silence"
+      },
+      "action_semantics": {
+        "mode": "deterministic",
+        "path": "inference_action_dist.to_deterministic().sample()",
+        "stepped_with": "raw_action",
+        "clipping_is_diagnostic": true,
+        "rollout_eval_parity_steps": 500,
+        "max_abs_action_minus_mean": 0.0,
+        "noise_hold_steps": null,
+        "sigma": null
+      },
+      "summary": {
+        "steps": 500,
+        "end_reason": "episode_time_limit",
+        "max_penetration_m": 0.023472629968460532,
+        "valid_cycle_count": 3,
+        "valid_hs_count": 4,
+        "valid_to_count": 3,
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "hs_cancelled_count": 0,
+        "resync_count": 0,
+        "action_clipped_steps": 0,
+        "fsm_behaviour_versions": [
+          "v3"
+        ],
+        "event_sources": [
+          "binary_active_v26"
+        ],
+        "episode_return": 64.53944590731813,
+        "realized_noise_rms": [
+          0.0,
+          0.0
+        ],
+        "action_noise_sigma": [
+          0.0,
+          0.0
+        ],
+        "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+      },
+      "telemetry": {
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "resync_count": 0,
+        "hs_cancelled_count": 0,
+        "valid_cycle_count": 3,
+        "valid_hs_count": 4,
+        "valid_to_count": 3,
+        "steps": 500,
+        "end_reason": "episode_time_limit"
+      },
+      "wait_hs": {
+        "feature": "phase_fsm_wait_hs",
+        "resolved_by": "name, from the LIVE RUNTIME actor feature names",
+        "index": 17,
+        "rows": 20,
+        "fraction_of_steps": 0.04,
+        "binding": false,
+        "why_not_binding": "this stage reuses J9R1's criteria exactly and invents none. WAIT_HS is surfaced because J9R1 cell B failed with the FSM held in WAIT_HS for every step and zero cycles, so the count is the fastest read on whether that failure mode recurred - but attaching a threshold to it would be a NEW gate, and a new gate would have to be preregistered, not smuggled in here."
+      },
+      "kinematics": {
+        "steps": 500,
+        "knee_min_rad": -0.968501627445221,
+        "knee_max_rad": -0.17089307308197021,
+        "ankle_min_rad": -0.11842834204435349,
+        "ankle_max_rad": 0.3991643488407135
+      },
+      "penetration": {
+        "max_penetration_m": 0.023472629968460532,
+        "band": "above_soft_below_july_legacy",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": false,
+          "july_legacy_historical_pass": true,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 98,
+          "at_or_above_july_legacy": 0,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.196,
+          "at_or_above_july_legacy": 0.0,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009719001869307391,
+        "argmax_index_1based": 396,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        },
+        "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+        "evaluated_by": "v26c_penetration_contract.evaluate_series",
+        "soft_and_july_are_diagnostic": true,
+        "sole_binding": "above_hard_binding"
+      },
+      "gate": {
+        "criteria": {
+          "common": {
+            "steps_required": 500,
+            "end_reason": "episode_time_limit",
+            "valid_cycles_min": 2,
+            "phase_timeout_stance_max": 0,
+            "phase_timeout_swing_max": 0,
+            "morphology_causal_contract_failure_max": 0,
+            "hs_cancelled_count_max": 0,
+            "resync_count_max": 1
+          },
+          "kinematic_quality": {
+            "ankle_min_rad_max": -0.03,
+            "ankle_amplitude_min_rad": 0.3,
+            "knee_amplitude_min_rad": 0.6,
+            "knee_strictly_flexed": true,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ]
+          },
+          "penetration": "the contract's 0.028 binding band, the SOLE binding penetration criterion"
+        },
+        "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged for the kinematic quality, and the penetration contract's 0.028 band as the SOLE binding penetration bar",
+        "kinematic_quality": {
+          "ankle_min": {
+            "observed_rad": -0.11842834204435349,
+            "threshold_rad": -0.03,
+            "pass": true
+          },
+          "ankle_amplitude": {
+            "observed_rad": 0.517592690885067,
+            "threshold_rad": 0.3,
+            "pass": true
+          },
+          "knee_amplitude": {
+            "observed_rad": 0.7976085543632507,
+            "threshold_rad": 0.6,
+            "pass": true
+          },
+          "knee_strictly_flexed": {
+            "fraction_negative": 1.0,
+            "max_rad": -0.17089307308197021,
+            "pass": true
+          },
+          "within_bounds": {
+            "knee_outside": 0,
+            "ankle_outside": 0,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ],
+            "pass": true
+          }
+        },
+        "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, -0.0099 FAILS, exactly -0.03 PASSES",
+        "checks": {
+          "steps": true,
+          "end_reason": true,
+          "valid_cycles": true,
+          "phase_timeout_stance": true,
+          "phase_timeout_swing": true,
+          "morphology_causal_contract_failure": true,
+          "hs_cancelled_count": true,
+          "resync_count": true,
+          "penetration_hard_binding": true,
+          "kinematic_ankle_min": true,
+          "kinematic_ankle_amplitude": true,
+          "kinematic_knee_amplitude": true,
+          "kinematic_knee_strictly_flexed": true,
+          "kinematic_within_bounds": true
+        },
+        "failed": [],
+        "pass": true,
+        "telemetry_integrity_evaluated_separately": true
+      },
+      "telemetry_integrity": {
+        "kind": "TELEMETRY INTEGRITY INVARIANT",
+        "valid_hs_count": 4,
+        "valid_to_count": 3,
+        "valid_cycle_count": 3,
+        "checks": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_within_one": true
+        },
+        "pass": true,
+        "qualification_technically_valid": true,
+        "invariant": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_max": 1,
+          "kind": "TELEMETRY INTEGRITY INVARIANT",
+          "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+          "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+        },
+        "is_behavioural_gate": false,
+        "is_promotion_threshold": false
+      },
+      "verdict": "PASS",
+      "behavioural_pass": true,
+      "telemetry_valid": true,
+      "diagnostics_not_binding": {
+        "action_clipped_steps": 0,
+        "episode_return": 64.53944590731813,
+        "realized_noise_rms": [
+          0.0,
+          0.0
+        ],
+        "policy_std": null
+      },
+      "env_closed": true,
+      "sim_outputs": "j19b_cell_B_sim_outputs",
+      "sim_outputs_regular_file_count": 19,
+      "sim_outputs_expected_count": 19,
+      "sim_outputs_count_is_exact": true,
+      "sim_outputs_file_names": [
+        "j1_teacher_episode_activations.sto",
+        "j1_teacher_episode_gait_events.csv",
+        "j1_teacher_episode_gait_events_online.csv",
+        "j1_teacher_episode_kinematics.sto",
+        "j1_teacher_episode_kinematics_reference.sto",
+        "j1_teacher_episode_muscle_forces.sto",
+        "j1_teacher_episode_online_grf.sto",
+        "j1_teacher_episode_power.sto",
+        "j1_teacher_episode_recruitment.sto",
+        "j1_teacher_episode_reserve_controls.sto",
+        "j1_teacher_episode_reserve_torques.sto",
+        "j1_teacher_episode_sea_controls.sto",
+        "j1_teacher_episode_sea_derivatives.sto",
+        "j1_teacher_episode_sea_diagnostics.sto",
+        "j1_teacher_episode_sea_states.sto",
+        "j1_teacher_episode_sea_torques.sto",
+        "j1_teacher_episode_so_torque_diagnostics.sto",
+        "j1_teacher_episode_states.sto",
+        "j1_teacher_episode_tau_bio.sto"
+      ],
+      "paths_are_leaf_relative": true,
+      "artefacts": {
+        "trace": "j19b_cell_B_trace.json",
+        "kinematics": "j19b_cell_B_kinematics.npz",
+        "penetration": "j19b_cell_B_penetration.npz"
+      },
+      "outputs_sha256": {
+        "j19b_cell_B_trace.json": "51992719be57713db9b8c48341772e71b74f50b2576801e7fd9f367b1fd2dd20",
+        "j19b_cell_B_kinematics.npz": "1d2c40e58039064e4933b050d93e58529cf830b781d8a423879bb955e88893fd",
+        "j19b_cell_B_penetration.npz": "bc8be794401f6c92be9b4b245da1a17b5019cd3e7256d9ba437c1e113f3b59b3"
+      },
+      "sim_outputs_sha256": {
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_activations.sto": "6b707e8882bd27d9d7ec8a3ed272ef90e34f47932472ae5a935e8385d8f6a8b2",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_gait_events_online.csv": "79028fd791d374bf77ec8f76d30d4e9055467506082f2c8f6707518572f9cfe4",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_kinematics.sto": "eaada92a5bc52fe35c175fa3eead84570b299456620af3b8a38c264c45f7cb10",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "e74d5da5c5c3fd1ab1fd79a495d250b715807ada5e3f1db7a0edb8534a268966",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_muscle_forces.sto": "53941a0c160eb5ffe9cd66566cf745bb323649587391773ec646aa0dfc77aba7",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_online_grf.sto": "263a4f5afce3af8e98bf9ecbac352119c7bddff08413e4b0fd9f32e7fcd2ab8d",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_power.sto": "329e08936b63cf39fa1479c6d11023c7df42cd6c69eb04e5597b00e6996d28a6",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_recruitment.sto": "0a7d2d8b6a8222814cc40398f4c0cb70f7929fc48e10aff18cd02f6c8ed2456f",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_reserve_controls.sto": "fe9e240a09e350763634ca358e6c84f0f518c77b08cfdd3b6fc0337d43da6e81",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_reserve_torques.sto": "03592463455e77e4d6ecae446e61fc9fe28fe08e799766a40e85f21d289cb0b5",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_controls.sto": "c6fdde09b64a25fc4882a3cee26abedccb141aef8d9b1066a49da0747a88dcdd",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "6ed00fb9ace715853d69d0de14c6140eb5faaadbb15655a4cf70301bb563e4e4",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "0a4f70488fd4fbe839d7c065fed1179a50182926b0a5a34e86228d87db2efb88",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_states.sto": "07435e57fd9a003f9067200ed6399c541e91a236e19f4033304eee9dfeb19ec5",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_torques.sto": "9cb12a22949b6cf5a0ded9aaf7237421ed087b3896fcd37b18e16eacdf352ffe",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "88a29b03d24597860a165280f52f40e6b1a9822905ef29642d30ea5e9eb932ee",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_states.sto": "e605fb4822e139b0d9001578042ebb203f7d29cd4991c6881b9348fdcbc85f58",
+        "j19b_cell_B_sim_outputs/j1_teacher_episode_tau_bio.sto": "f3adf44aea68f6cc96e8e0c50bdb962795c4786ccd8bde32d104120207934e8d"
+      },
+      "content_hashes": {
+        "knee_rad": "deafd896083b5181e19c6bc1f8e138195372fb8e69a93d572695e548c33f6a0b",
+        "ankle_rad": "f51670965464ee346a91f9d6f7c0db1077482f01180959752507f9340434ddee",
+        "penetration_m": "28c1c64b658133c10a23ab23cd17da1bd61295c5d6ea8807930d9bc523536486"
+      }
+    },
+    {
+      "id": "C",
+      "mode": "deterministic",
+      "seed": 123,
+      "label": "+0.20 s",
+      "episode_start_offset_s": 2.156870983805102,
+      "offset_unit": "seconds",
+      "env_mutation": {
+        "mutated_keys": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "allowed_superset": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "mutated_is_subset_of_allowed": true,
+        "stable_keys_count": 51,
+        "stable_keys_all_identical": true,
+        "stable_key_definition": "every base key except episode_start_offset_s and output_dir, compared for exact equality",
+        "episode_start_offset_s": 2.156870983805102,
+        "base_offset_s": 1.956870983805102,
+        "delta_s": 0.19999999999999996,
+        "unit": "seconds",
+        "every_other_field_identical": true,
+        "base_verified_by_j1_before_mutation": true,
+        "recording_inherited_from_base": true,
+        "second_j1_verify_on_mutated_config": false,
+        "why_no_second_verify": "J1.verify_env_config pins the nominal offset, including in its runtime literal cross-check, so B and C would fail it technically. The base is verified in full BEFORE the mutation and every other field is proved identical to it afterwards."
+      },
+      "env_config_sha256": "d3f65d298dfd7e33fd35a3e7d0d8e93ae3705fba5f4ea28c7d385200dd6e228b",
+      "reset_check": {
+        "cfg_t_start_s": 11.99,
+        "cfg_t_end_s": 21.0,
+        "episode_duration_s": 5.0,
+        "episode_start_offset_s": 2.156870983805102,
+        "requested_unclamped_time_s": 14.146870983805101,
+        "max_start_s": 16.0,
+        "expected_reset_time_s": 14.146870983805101,
+        "clamped": false,
+        "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+        "actual_reset_time_s": 14.146870983805101,
+        "reset_time_error_s": 0.0,
+        "tolerance_s": 1e-09,
+        "checked_immediately_after_reset": true,
+        "compared_against": "cfg.t_start + offset, clamped to max_start - NOT the offset itself",
+        "duration_sources": {
+          "live_env_cfg_episode_duration": 5.0,
+          "declared_env_config_episode_duration": 5.0,
+          "normative": "live_env_cfg_episode_duration",
+          "cross_check_tolerance_s": 1e-12,
+          "agree": true,
+          "why_live_is_normative": "the clamp is computed by the environment from its OWN env_cfg; reading our config instead would prove nothing about what the environment actually did"
+        },
+        "sources": {
+          "t_start": "live base.cfg.t_start",
+          "t_end": "live base.cfg.t_end",
+          "episode_duration": "live base.env_cfg.episode_duration",
+          "all_guarded_fail_closed": true
+        }
+      },
+      "runtime_contract": {
+        "actor_feature_names": [
+          "gait_phase_sin",
+          "gait_phase_cos",
+          "pros_knee_angle",
+          "pros_knee_angle_vel",
+          "pros_ankle_angle",
+          "pros_ankle_angle_vel",
+          "SEA_Knee_motor_angle",
+          "SEA_Knee_motor_speed",
+          "SEA_Ankle_motor_angle",
+          "SEA_Ankle_motor_speed",
+          "online_left_normal_grf_bw",
+          "online_left_in_contact",
+          "online_left_heel_strike",
+          "online_left_toe_off",
+          "online_left_gait_phase_sin",
+          "online_left_gait_phase_cos",
+          "online_left_cycle_duration_s",
+          "phase_fsm_wait_hs",
+          "phase_fsm_stance_after_hs",
+          "phase_fsm_swing_after_to",
+          "phase_expected_hs",
+          "phase_expected_to",
+          "phase_stance_elapsed_norm",
+          "phase_swing_elapsed_norm",
+          "phase_cycle_progress_credit",
+          "pros_knee_angle_previous_endpoint",
+          "pros_knee_angle_served_ref",
+          "pros_knee_angle_served_ref_vel",
+          "pros_knee_angle_served_ref_accel",
+          "pros_knee_angle_sea_u",
+          "pros_ankle_angle_previous_endpoint",
+          "pros_ankle_angle_served_ref",
+          "pros_ankle_angle_served_ref_vel",
+          "pros_ankle_angle_served_ref_accel",
+          "pros_ankle_angle_sea_u"
+        ],
+        "actor_feature_count": 35,
+        "observation_feature_count": 84,
+        "n_actor": 35,
+        "expected_steps": 500,
+        "manifest_matches_pinned_j2": true,
+        "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+      },
+      "module_load_check": {
+        "class": "AsymmetricActorCriticTorchRLModule",
+        "expected_class": "AsymmetricActorCriticTorchRLModule",
+        "state_keys": 10,
+        "weights_match_pinned_module_state": true,
+        "why_checked": "ray's checkpoint loader swallows a ModuleNotFoundError and returns a weightless base RLModule without raising; an unchecked stage would roll out an empty network in silence"
+      },
+      "action_semantics": {
+        "mode": "deterministic",
+        "path": "inference_action_dist.to_deterministic().sample()",
+        "stepped_with": "raw_action",
+        "clipping_is_diagnostic": true,
+        "rollout_eval_parity_steps": 500,
+        "max_abs_action_minus_mean": 0.0,
+        "noise_hold_steps": null,
+        "sigma": null
+      },
+      "summary": {
+        "steps": 500,
+        "end_reason": "episode_time_limit",
+        "max_penetration_m": 0.022554834542696293,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "hs_cancelled_count": 0,
+        "resync_count": 0,
+        "action_clipped_steps": 0,
+        "fsm_behaviour_versions": [
+          "v3"
+        ],
+        "event_sources": [
+          "binary_active_v26"
+        ],
+        "episode_return": 47.027100084143974,
+        "realized_noise_rms": [
+          0.0,
+          0.0
+        ],
+        "action_noise_sigma": [
+          0.0,
+          0.0
+        ],
+        "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+      },
+      "telemetry": {
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "resync_count": 0,
+        "hs_cancelled_count": 0,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "steps": 500,
+        "end_reason": "episode_time_limit"
+      },
+      "wait_hs": {
+        "feature": "phase_fsm_wait_hs",
+        "resolved_by": "name, from the LIVE RUNTIME actor feature names",
+        "index": 17,
+        "rows": 0,
+        "fraction_of_steps": 0.0,
+        "binding": false,
+        "why_not_binding": "this stage reuses J9R1's criteria exactly and invents none. WAIT_HS is surfaced because J9R1 cell B failed with the FSM held in WAIT_HS for every step and zero cycles, so the count is the fastest read on whether that failure mode recurred - but attaching a threshold to it would be a NEW gate, and a new gate would have to be preregistered, not smuggled in here."
+      },
+      "kinematics": {
+        "steps": 500,
+        "knee_min_rad": -0.9849034547805786,
+        "knee_max_rad": -0.12963467836380005,
+        "ankle_min_rad": -0.1108853667974472,
+        "ankle_max_rad": 0.4198436737060547
+      },
+      "penetration": {
+        "max_penetration_m": 0.022554834542696293,
+        "band": "above_soft_below_july_legacy",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": false,
+          "july_legacy_historical_pass": true,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 90,
+          "at_or_above_july_legacy": 0,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.18,
+          "at_or_above_july_legacy": 0.0,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009744553706904292,
+        "argmax_index_1based": 356,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        },
+        "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+        "evaluated_by": "v26c_penetration_contract.evaluate_series",
+        "soft_and_july_are_diagnostic": true,
+        "sole_binding": "above_hard_binding"
+      },
+      "gate": {
+        "criteria": {
+          "common": {
+            "steps_required": 500,
+            "end_reason": "episode_time_limit",
+            "valid_cycles_min": 2,
+            "phase_timeout_stance_max": 0,
+            "phase_timeout_swing_max": 0,
+            "morphology_causal_contract_failure_max": 0,
+            "hs_cancelled_count_max": 0,
+            "resync_count_max": 1
+          },
+          "kinematic_quality": {
+            "ankle_min_rad_max": -0.03,
+            "ankle_amplitude_min_rad": 0.3,
+            "knee_amplitude_min_rad": 0.6,
+            "knee_strictly_flexed": true,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ]
+          },
+          "penetration": "the contract's 0.028 binding band, the SOLE binding penetration criterion"
+        },
+        "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged for the kinematic quality, and the penetration contract's 0.028 band as the SOLE binding penetration bar",
+        "kinematic_quality": {
+          "ankle_min": {
+            "observed_rad": -0.1108853667974472,
+            "threshold_rad": -0.03,
+            "pass": true
+          },
+          "ankle_amplitude": {
+            "observed_rad": 0.5307290405035019,
+            "threshold_rad": 0.3,
+            "pass": true
+          },
+          "knee_amplitude": {
+            "observed_rad": 0.8552687764167786,
+            "threshold_rad": 0.6,
+            "pass": true
+          },
+          "knee_strictly_flexed": {
+            "fraction_negative": 1.0,
+            "max_rad": -0.12963467836380005,
+            "pass": true
+          },
+          "within_bounds": {
+            "knee_outside": 0,
+            "ankle_outside": 0,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ],
+            "pass": true
+          }
+        },
+        "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, -0.0099 FAILS, exactly -0.03 PASSES",
+        "checks": {
+          "steps": true,
+          "end_reason": true,
+          "valid_cycles": true,
+          "phase_timeout_stance": true,
+          "phase_timeout_swing": true,
+          "morphology_causal_contract_failure": true,
+          "hs_cancelled_count": true,
+          "resync_count": true,
+          "penetration_hard_binding": true,
+          "kinematic_ankle_min": true,
+          "kinematic_ankle_amplitude": true,
+          "kinematic_knee_amplitude": true,
+          "kinematic_knee_strictly_flexed": true,
+          "kinematic_within_bounds": true
+        },
+        "failed": [],
+        "pass": true,
+        "telemetry_integrity_evaluated_separately": true
+      },
+      "telemetry_integrity": {
+        "kind": "TELEMETRY INTEGRITY INVARIANT",
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "valid_cycle_count": 2,
+        "checks": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_within_one": true
+        },
+        "pass": true,
+        "qualification_technically_valid": true,
+        "invariant": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_max": 1,
+          "kind": "TELEMETRY INTEGRITY INVARIANT",
+          "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+          "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+        },
+        "is_behavioural_gate": false,
+        "is_promotion_threshold": false
+      },
+      "verdict": "PASS",
+      "behavioural_pass": true,
+      "telemetry_valid": true,
+      "diagnostics_not_binding": {
+        "action_clipped_steps": 0,
+        "episode_return": 47.027100084143974,
+        "realized_noise_rms": [
+          0.0,
+          0.0
+        ],
+        "policy_std": null
+      },
+      "env_closed": true,
+      "sim_outputs": "j19b_cell_C_sim_outputs",
+      "sim_outputs_regular_file_count": 19,
+      "sim_outputs_expected_count": 19,
+      "sim_outputs_count_is_exact": true,
+      "sim_outputs_file_names": [
+        "j1_teacher_episode_activations.sto",
+        "j1_teacher_episode_gait_events.csv",
+        "j1_teacher_episode_gait_events_online.csv",
+        "j1_teacher_episode_kinematics.sto",
+        "j1_teacher_episode_kinematics_reference.sto",
+        "j1_teacher_episode_muscle_forces.sto",
+        "j1_teacher_episode_online_grf.sto",
+        "j1_teacher_episode_power.sto",
+        "j1_teacher_episode_recruitment.sto",
+        "j1_teacher_episode_reserve_controls.sto",
+        "j1_teacher_episode_reserve_torques.sto",
+        "j1_teacher_episode_sea_controls.sto",
+        "j1_teacher_episode_sea_derivatives.sto",
+        "j1_teacher_episode_sea_diagnostics.sto",
+        "j1_teacher_episode_sea_states.sto",
+        "j1_teacher_episode_sea_torques.sto",
+        "j1_teacher_episode_so_torque_diagnostics.sto",
+        "j1_teacher_episode_states.sto",
+        "j1_teacher_episode_tau_bio.sto"
+      ],
+      "paths_are_leaf_relative": true,
+      "artefacts": {
+        "trace": "j19b_cell_C_trace.json",
+        "kinematics": "j19b_cell_C_kinematics.npz",
+        "penetration": "j19b_cell_C_penetration.npz"
+      },
+      "outputs_sha256": {
+        "j19b_cell_C_trace.json": "60cbb338d24c8bd86fb2def0e44f86e1dcf9a7e1bfafab5cada3d66491d5fc12",
+        "j19b_cell_C_kinematics.npz": "4691b3f627d1c7b4c1198a2d0c6c18aabfb67e22dd2edf7ad62d8d51013688b5",
+        "j19b_cell_C_penetration.npz": "9824b2a060d3d3e3a694739cc7cb7de99f35eb7affc2b2d60056d117f83edde4"
+      },
+      "sim_outputs_sha256": {
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_activations.sto": "e67976b8d0ee3110418a4569da02a994b597461aabd5a7da84ea35665b9b850f",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_gait_events_online.csv": "acb434b7b7bb5e4639e86f8eb36e7796d2202b4a2d6c4543e4c6123bc01ec166",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_kinematics.sto": "314101ac137b751172e360b75e1f0135fe481b3e778bc52f1bcf8f4cf02fe062",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "2dc6c775f3ee86dca8da05f1749ee1197a9cdf7c4b99d5b18c381388453278c5",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_muscle_forces.sto": "131ac09b1e496d5ae56dd35ab691f78dd0275baa742a9160f6b192abbf0a9246",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_online_grf.sto": "e7657eb9d2f2de16dcfa57689aff23d7f70c18a676896ec2d34a854b7c4537d4",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_power.sto": "d685d8ac4d3f7f00a182226f12b7c8f7da4e60249ed743d6df5444b9bae6a8ff",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_recruitment.sto": "cd3932a5549036c3095647381c072a66ee9f100ecf79c5c7d4b5a3c6e073a38d",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_reserve_controls.sto": "83a774c1a6c758ca461aff03f98a5a701559b1f8eb0cfa74a9234b1e0e68eb40",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_reserve_torques.sto": "0ffbd268fb9062b1d0a9e139ce5717ca47878600e13c9cc07c549047a11b049e",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_controls.sto": "d3bb767ab98b839c635e2dc705d9404a46a104a1673c6493f66bda296f2e8100",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "8263a38bc9e8589177085b1f53fa59d9d108350a822c24139186cabd6830a06a",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "c93e7efbf073fd226e7d7418b5cc5bc54a315a0cd971c97749090e88c9212fe5",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_states.sto": "3b0fc66cb5bd3bb43a4f0998b9fb49b08e73760499be7f4eddf1b00166ba8322",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_torques.sto": "eb795cd6db5d57f5f3944423e8b3d85b64e906f6f927e6788f4795af951e80cc",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "abb0fce0cbdcca4f35ce8880014e3b249482e7a751e37ce99755c129534e96d7",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_states.sto": "981c6d361b1989f9cb0dfb8168d3c49f32cfe6ef4dc2c0e3c87150bbecaca798",
+        "j19b_cell_C_sim_outputs/j1_teacher_episode_tau_bio.sto": "7e20875c8964d18a620ddbfe9f9ab881b5e2026dcccd691d10e8ffa605a9abe0"
+      },
+      "content_hashes": {
+        "knee_rad": "4bb517984e0b1bcb64f8975fec7a413ba1981feb83f16f35971ff59cebdbb0fe",
+        "ankle_rad": "aa9594d1ab038c2bf2855432895bfb8ed7c6466fd0f5e74afbf4f6259a3ab2c2",
+        "penetration_m": "3825ceb1d0d36296dc47f685cbd632766dfff11fe73677b53d594f37f196c26e"
+      }
+    },
+    {
+      "id": "D",
+      "mode": "stochastic_held",
+      "seed": 123,
+      "label": "nominal sigma 0.005",
+      "episode_start_offset_s": 1.956870983805102,
+      "offset_unit": "seconds",
+      "env_mutation": {
+        "mutated_keys": [
+          "output_dir"
+        ],
+        "allowed_superset": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "mutated_is_subset_of_allowed": true,
+        "stable_keys_count": 51,
+        "stable_keys_all_identical": true,
+        "stable_key_definition": "every base key except episode_start_offset_s and output_dir, compared for exact equality",
+        "episode_start_offset_s": 1.956870983805102,
+        "base_offset_s": 1.956870983805102,
+        "delta_s": 0.0,
+        "unit": "seconds",
+        "every_other_field_identical": true,
+        "base_verified_by_j1_before_mutation": true,
+        "recording_inherited_from_base": true,
+        "second_j1_verify_on_mutated_config": false,
+        "why_no_second_verify": "J1.verify_env_config pins the nominal offset, including in its runtime literal cross-check, so B and C would fail it technically. The base is verified in full BEFORE the mutation and every other field is proved identical to it afterwards."
+      },
+      "env_config_sha256": "6ed4b87031b2db4c73cb883895f19c578cfab989abb0a029721a75dd034b60ee",
+      "reset_check": {
+        "cfg_t_start_s": 11.99,
+        "cfg_t_end_s": 21.0,
+        "episode_duration_s": 5.0,
+        "episode_start_offset_s": 1.956870983805102,
+        "requested_unclamped_time_s": 13.946870983805102,
+        "max_start_s": 16.0,
+        "expected_reset_time_s": 13.946870983805102,
+        "clamped": false,
+        "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+        "actual_reset_time_s": 13.946870983805102,
+        "reset_time_error_s": 0.0,
+        "tolerance_s": 1e-09,
+        "checked_immediately_after_reset": true,
+        "compared_against": "cfg.t_start + offset, clamped to max_start - NOT the offset itself",
+        "duration_sources": {
+          "live_env_cfg_episode_duration": 5.0,
+          "declared_env_config_episode_duration": 5.0,
+          "normative": "live_env_cfg_episode_duration",
+          "cross_check_tolerance_s": 1e-12,
+          "agree": true,
+          "why_live_is_normative": "the clamp is computed by the environment from its OWN env_cfg; reading our config instead would prove nothing about what the environment actually did"
+        },
+        "sources": {
+          "t_start": "live base.cfg.t_start",
+          "t_end": "live base.cfg.t_end",
+          "episode_duration": "live base.env_cfg.episode_duration",
+          "all_guarded_fail_closed": true
+        }
+      },
+      "runtime_contract": {
+        "actor_feature_names": [
+          "gait_phase_sin",
+          "gait_phase_cos",
+          "pros_knee_angle",
+          "pros_knee_angle_vel",
+          "pros_ankle_angle",
+          "pros_ankle_angle_vel",
+          "SEA_Knee_motor_angle",
+          "SEA_Knee_motor_speed",
+          "SEA_Ankle_motor_angle",
+          "SEA_Ankle_motor_speed",
+          "online_left_normal_grf_bw",
+          "online_left_in_contact",
+          "online_left_heel_strike",
+          "online_left_toe_off",
+          "online_left_gait_phase_sin",
+          "online_left_gait_phase_cos",
+          "online_left_cycle_duration_s",
+          "phase_fsm_wait_hs",
+          "phase_fsm_stance_after_hs",
+          "phase_fsm_swing_after_to",
+          "phase_expected_hs",
+          "phase_expected_to",
+          "phase_stance_elapsed_norm",
+          "phase_swing_elapsed_norm",
+          "phase_cycle_progress_credit",
+          "pros_knee_angle_previous_endpoint",
+          "pros_knee_angle_served_ref",
+          "pros_knee_angle_served_ref_vel",
+          "pros_knee_angle_served_ref_accel",
+          "pros_knee_angle_sea_u",
+          "pros_ankle_angle_previous_endpoint",
+          "pros_ankle_angle_served_ref",
+          "pros_ankle_angle_served_ref_vel",
+          "pros_ankle_angle_served_ref_accel",
+          "pros_ankle_angle_sea_u"
+        ],
+        "actor_feature_count": 35,
+        "observation_feature_count": 84,
+        "n_actor": 35,
+        "expected_steps": 500,
+        "manifest_matches_pinned_j2": true,
+        "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+      },
+      "module_load_check": {
+        "class": "AsymmetricActorCriticTorchRLModule",
+        "expected_class": "AsymmetricActorCriticTorchRLModule",
+        "state_keys": 10,
+        "weights_match_pinned_module_state": true,
+        "why_checked": "ray's checkpoint loader swallows a ModuleNotFoundError and returns a weightless base RLModule without raising; an unchecked stage would roll out an empty network in silence"
+      },
+      "action_semantics": {
+        "mode": "stochastic_held",
+        "path": "rollout_eval._held_stochastic_action",
+        "stepped_with": "raw_action",
+        "clipping_is_diagnostic": true,
+        "rollout_eval_parity_steps": 500,
+        "max_abs_action_minus_mean": null,
+        "noise_hold_steps": 1,
+        "sigma": 0.005
+      },
+      "summary": {
+        "steps": 500,
+        "end_reason": "episode_time_limit",
+        "max_penetration_m": 0.024681825128941546,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "hs_cancelled_count": 0,
+        "resync_count": 0,
+        "action_clipped_steps": 0,
+        "fsm_behaviour_versions": [
+          "v3"
+        ],
+        "event_sources": [
+          "binary_active_v26"
+        ],
+        "episode_return": 42.192596767332844,
+        "realized_noise_rms": [
+          0.005157839549743273,
+          0.0048869686211723525
+        ],
+        "action_noise_sigma": [
+          0.0,
+          0.0
+        ],
+        "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+      },
+      "telemetry": {
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "resync_count": 0,
+        "hs_cancelled_count": 0,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "steps": 500,
+        "end_reason": "episode_time_limit"
+      },
+      "wait_hs": {
+        "feature": "phase_fsm_wait_hs",
+        "resolved_by": "name, from the LIVE RUNTIME actor feature names",
+        "index": 17,
+        "rows": 0,
+        "fraction_of_steps": 0.0,
+        "binding": false,
+        "why_not_binding": "this stage reuses J9R1's criteria exactly and invents none. WAIT_HS is surfaced because J9R1 cell B failed with the FSM held in WAIT_HS for every step and zero cycles, so the count is the fastest read on whether that failure mode recurred - but attaching a threshold to it would be a NEW gate, and a new gate would have to be preregistered, not smuggled in here."
+      },
+      "kinematics": {
+        "steps": 500,
+        "knee_min_rad": -0.9960219264030457,
+        "knee_max_rad": -0.16811496019363403,
+        "ankle_min_rad": -0.11405223608016968,
+        "ankle_max_rad": 0.40427517890930176
+      },
+      "penetration": {
+        "max_penetration_m": 0.024681825128941546,
+        "band": "above_soft_below_july_legacy",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": false,
+          "july_legacy_historical_pass": true,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 101,
+          "at_or_above_july_legacy": 0,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.202,
+          "at_or_above_july_legacy": 0.0,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009442235386237056,
+        "argmax_index_1based": 200,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        },
+        "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+        "evaluated_by": "v26c_penetration_contract.evaluate_series",
+        "soft_and_july_are_diagnostic": true,
+        "sole_binding": "above_hard_binding"
+      },
+      "gate": {
+        "criteria": {
+          "common": {
+            "steps_required": 500,
+            "end_reason": "episode_time_limit",
+            "valid_cycles_min": 2,
+            "phase_timeout_stance_max": 0,
+            "phase_timeout_swing_max": 0,
+            "morphology_causal_contract_failure_max": 0,
+            "hs_cancelled_count_max": 0,
+            "resync_count_max": 1
+          },
+          "kinematic_quality": {
+            "ankle_min_rad_max": -0.03,
+            "ankle_amplitude_min_rad": 0.3,
+            "knee_amplitude_min_rad": 0.6,
+            "knee_strictly_flexed": true,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ]
+          },
+          "penetration": "the contract's 0.028 binding band, the SOLE binding penetration criterion"
+        },
+        "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged for the kinematic quality, and the penetration contract's 0.028 band as the SOLE binding penetration bar",
+        "kinematic_quality": {
+          "ankle_min": {
+            "observed_rad": -0.11405223608016968,
+            "threshold_rad": -0.03,
+            "pass": true
+          },
+          "ankle_amplitude": {
+            "observed_rad": 0.5183274149894714,
+            "threshold_rad": 0.3,
+            "pass": true
+          },
+          "knee_amplitude": {
+            "observed_rad": 0.8279069662094116,
+            "threshold_rad": 0.6,
+            "pass": true
+          },
+          "knee_strictly_flexed": {
+            "fraction_negative": 1.0,
+            "max_rad": -0.16811496019363403,
+            "pass": true
+          },
+          "within_bounds": {
+            "knee_outside": 0,
+            "ankle_outside": 0,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ],
+            "pass": true
+          }
+        },
+        "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, -0.0099 FAILS, exactly -0.03 PASSES",
+        "checks": {
+          "steps": true,
+          "end_reason": true,
+          "valid_cycles": true,
+          "phase_timeout_stance": true,
+          "phase_timeout_swing": true,
+          "morphology_causal_contract_failure": true,
+          "hs_cancelled_count": true,
+          "resync_count": true,
+          "penetration_hard_binding": true,
+          "kinematic_ankle_min": true,
+          "kinematic_ankle_amplitude": true,
+          "kinematic_knee_amplitude": true,
+          "kinematic_knee_strictly_flexed": true,
+          "kinematic_within_bounds": true
+        },
+        "failed": [],
+        "pass": true,
+        "telemetry_integrity_evaluated_separately": true
+      },
+      "telemetry_integrity": {
+        "kind": "TELEMETRY INTEGRITY INVARIANT",
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "valid_cycle_count": 2,
+        "checks": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_within_one": true
+        },
+        "pass": true,
+        "qualification_technically_valid": true,
+        "invariant": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_max": 1,
+          "kind": "TELEMETRY INTEGRITY INVARIANT",
+          "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+          "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+        },
+        "is_behavioural_gate": false,
+        "is_promotion_threshold": false
+      },
+      "verdict": "PASS",
+      "behavioural_pass": true,
+      "telemetry_valid": true,
+      "diagnostics_not_binding": {
+        "action_clipped_steps": 0,
+        "episode_return": 42.192596767332844,
+        "realized_noise_rms": [
+          0.005157839549743273,
+          0.0048869686211723525
+        ],
+        "policy_std": null
+      },
+      "env_closed": true,
+      "sim_outputs": "j19b_cell_D_sim_outputs",
+      "sim_outputs_regular_file_count": 19,
+      "sim_outputs_expected_count": 19,
+      "sim_outputs_count_is_exact": true,
+      "sim_outputs_file_names": [
+        "j1_teacher_episode_activations.sto",
+        "j1_teacher_episode_gait_events.csv",
+        "j1_teacher_episode_gait_events_online.csv",
+        "j1_teacher_episode_kinematics.sto",
+        "j1_teacher_episode_kinematics_reference.sto",
+        "j1_teacher_episode_muscle_forces.sto",
+        "j1_teacher_episode_online_grf.sto",
+        "j1_teacher_episode_power.sto",
+        "j1_teacher_episode_recruitment.sto",
+        "j1_teacher_episode_reserve_controls.sto",
+        "j1_teacher_episode_reserve_torques.sto",
+        "j1_teacher_episode_sea_controls.sto",
+        "j1_teacher_episode_sea_derivatives.sto",
+        "j1_teacher_episode_sea_diagnostics.sto",
+        "j1_teacher_episode_sea_states.sto",
+        "j1_teacher_episode_sea_torques.sto",
+        "j1_teacher_episode_so_torque_diagnostics.sto",
+        "j1_teacher_episode_states.sto",
+        "j1_teacher_episode_tau_bio.sto"
+      ],
+      "paths_are_leaf_relative": true,
+      "artefacts": {
+        "trace": "j19b_cell_D_trace.json",
+        "kinematics": "j19b_cell_D_kinematics.npz",
+        "penetration": "j19b_cell_D_penetration.npz"
+      },
+      "outputs_sha256": {
+        "j19b_cell_D_trace.json": "c00bb5e1194b74597a228b459f75656b0e4bb7a9e8f8ad8fe6ec9ccad90ce437",
+        "j19b_cell_D_kinematics.npz": "5464f764a3c7eb23e0d0585ff321c6ab1bc6640e735895d05fd110483a43236f",
+        "j19b_cell_D_penetration.npz": "900bafb593270c20dfc1368166a5c8264abc5fd54d7e066a41cb333bb12e12e1"
+      },
+      "sim_outputs_sha256": {
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_activations.sto": "c0887b20fa27cf68caa1ab9f32cec1921dee3b1fd550683c062cefa62eb4187c",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_gait_events_online.csv": "92a3ee38ffefc4826613d849d4faf38bf1cad97d8da3da912ac749e41358c2b0",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_kinematics.sto": "88856cdcbd6a17a143bbdf8da4d58664b91094ead79564047008332c88dd96a6",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "1b3ba9c9084d83afa79e087641b52922a5395c70ebef2a9755c697e2437e47f9",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_muscle_forces.sto": "a91ecfcee5afbe175220daac560e7e1a2f805bcdbaf3e8a41a72cfd977695e17",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_online_grf.sto": "14cf286fe1699b8d5510547ef8cbec7aadc50df4a224a8d9e6d4b3c39a3e2c90",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_power.sto": "8c7902980e59ef0b7b6c7b8c602b49d6e9eba2822f107a2896cd55423fc58df7",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_recruitment.sto": "0dbf72a56e4492078e9361b6fbe0109b63250115a597fb849b25ac8e336336bd",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_reserve_controls.sto": "346fa71ad351ce5dc54c66cb84a7c66fd064ed93d8b065315dad284931d6b188",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_reserve_torques.sto": "b10c53aca8a08036d51988232d73a609d5a1f78ab37e8bc095f37b6aec054d9a",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_controls.sto": "1f1c51c9d8ae10742404ebaadf148a5c7088b89373cec44aa81afb3cd10ade89",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "823bdb1135fd4a920ba4d6b4165010e9f7fdf584367765626dbcd6136ed6a014",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "9d967cd38985b857310f8ee75ba09ad6b7834cbfd8c8568b020604faae401a4d",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_states.sto": "354bd6b474a87af72d74bdd371445c2ec3d2d68211f63018390db200e900e52f",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_torques.sto": "04a9244907212cea61536823346f13e0c823bdf6dc587f0c0829bb21b779881c",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "14987c60768c7b14cce32044360372be51985d1d964ac4edb58d907c9bc78d9c",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_states.sto": "a4bbca26c8a114811cbe6a4129091b6283167707eb86cbf63f8db453a5dabe29",
+        "j19b_cell_D_sim_outputs/j1_teacher_episode_tau_bio.sto": "9a4018ec84f33320849f4e79d3e4af1c87ef6bb87f9de6ee19063cc3742cbbec"
+      },
+      "content_hashes": {
+        "knee_rad": "bf481663ade46a40f805d1de3e71b2ff66cde49f9f799990e9600e442ad8599a",
+        "ankle_rad": "af56ea99fa47cc660c3f9f0b9fe097c5141d4a02100f240a6b052873617fa2c0",
+        "penetration_m": "8bc70d76f24eaab3d57a0a71a8418b5edff6e58852d301c5d2a202252ec88369"
+      }
+    },
+    {
+      "id": "E",
+      "mode": "stochastic_held",
+      "seed": 124,
+      "label": "nominal sigma 0.005",
+      "episode_start_offset_s": 1.956870983805102,
+      "offset_unit": "seconds",
+      "env_mutation": {
+        "mutated_keys": [
+          "output_dir"
+        ],
+        "allowed_superset": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "mutated_is_subset_of_allowed": true,
+        "stable_keys_count": 51,
+        "stable_keys_all_identical": true,
+        "stable_key_definition": "every base key except episode_start_offset_s and output_dir, compared for exact equality",
+        "episode_start_offset_s": 1.956870983805102,
+        "base_offset_s": 1.956870983805102,
+        "delta_s": 0.0,
+        "unit": "seconds",
+        "every_other_field_identical": true,
+        "base_verified_by_j1_before_mutation": true,
+        "recording_inherited_from_base": true,
+        "second_j1_verify_on_mutated_config": false,
+        "why_no_second_verify": "J1.verify_env_config pins the nominal offset, including in its runtime literal cross-check, so B and C would fail it technically. The base is verified in full BEFORE the mutation and every other field is proved identical to it afterwards."
+      },
+      "env_config_sha256": "6f2a2f7913ba0bf55e1e7ddca57b43c74025583d21cf354bd125fcf6f8ec96ad",
+      "reset_check": {
+        "cfg_t_start_s": 11.99,
+        "cfg_t_end_s": 21.0,
+        "episode_duration_s": 5.0,
+        "episode_start_offset_s": 1.956870983805102,
+        "requested_unclamped_time_s": 13.946870983805102,
+        "max_start_s": 16.0,
+        "expected_reset_time_s": 13.946870983805102,
+        "clamped": false,
+        "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+        "actual_reset_time_s": 13.946870983805102,
+        "reset_time_error_s": 0.0,
+        "tolerance_s": 1e-09,
+        "checked_immediately_after_reset": true,
+        "compared_against": "cfg.t_start + offset, clamped to max_start - NOT the offset itself",
+        "duration_sources": {
+          "live_env_cfg_episode_duration": 5.0,
+          "declared_env_config_episode_duration": 5.0,
+          "normative": "live_env_cfg_episode_duration",
+          "cross_check_tolerance_s": 1e-12,
+          "agree": true,
+          "why_live_is_normative": "the clamp is computed by the environment from its OWN env_cfg; reading our config instead would prove nothing about what the environment actually did"
+        },
+        "sources": {
+          "t_start": "live base.cfg.t_start",
+          "t_end": "live base.cfg.t_end",
+          "episode_duration": "live base.env_cfg.episode_duration",
+          "all_guarded_fail_closed": true
+        }
+      },
+      "runtime_contract": {
+        "actor_feature_names": [
+          "gait_phase_sin",
+          "gait_phase_cos",
+          "pros_knee_angle",
+          "pros_knee_angle_vel",
+          "pros_ankle_angle",
+          "pros_ankle_angle_vel",
+          "SEA_Knee_motor_angle",
+          "SEA_Knee_motor_speed",
+          "SEA_Ankle_motor_angle",
+          "SEA_Ankle_motor_speed",
+          "online_left_normal_grf_bw",
+          "online_left_in_contact",
+          "online_left_heel_strike",
+          "online_left_toe_off",
+          "online_left_gait_phase_sin",
+          "online_left_gait_phase_cos",
+          "online_left_cycle_duration_s",
+          "phase_fsm_wait_hs",
+          "phase_fsm_stance_after_hs",
+          "phase_fsm_swing_after_to",
+          "phase_expected_hs",
+          "phase_expected_to",
+          "phase_stance_elapsed_norm",
+          "phase_swing_elapsed_norm",
+          "phase_cycle_progress_credit",
+          "pros_knee_angle_previous_endpoint",
+          "pros_knee_angle_served_ref",
+          "pros_knee_angle_served_ref_vel",
+          "pros_knee_angle_served_ref_accel",
+          "pros_knee_angle_sea_u",
+          "pros_ankle_angle_previous_endpoint",
+          "pros_ankle_angle_served_ref",
+          "pros_ankle_angle_served_ref_vel",
+          "pros_ankle_angle_served_ref_accel",
+          "pros_ankle_angle_sea_u"
+        ],
+        "actor_feature_count": 35,
+        "observation_feature_count": 84,
+        "n_actor": 35,
+        "expected_steps": 500,
+        "manifest_matches_pinned_j2": true,
+        "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+      },
+      "module_load_check": {
+        "class": "AsymmetricActorCriticTorchRLModule",
+        "expected_class": "AsymmetricActorCriticTorchRLModule",
+        "state_keys": 10,
+        "weights_match_pinned_module_state": true,
+        "why_checked": "ray's checkpoint loader swallows a ModuleNotFoundError and returns a weightless base RLModule without raising; an unchecked stage would roll out an empty network in silence"
+      },
+      "action_semantics": {
+        "mode": "stochastic_held",
+        "path": "rollout_eval._held_stochastic_action",
+        "stepped_with": "raw_action",
+        "clipping_is_diagnostic": true,
+        "rollout_eval_parity_steps": 500,
+        "max_abs_action_minus_mean": null,
+        "noise_hold_steps": 1,
+        "sigma": 0.005
+      },
+      "summary": {
+        "steps": 500,
+        "end_reason": "episode_time_limit",
+        "max_penetration_m": 0.02445683512352716,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "hs_cancelled_count": 0,
+        "resync_count": 0,
+        "action_clipped_steps": 0,
+        "fsm_behaviour_versions": [
+          "v3"
+        ],
+        "event_sources": [
+          "binary_active_v26"
+        ],
+        "episode_return": 42.15821327829056,
+        "realized_noise_rms": [
+          0.004660444387489252,
+          0.004980850499167844
+        ],
+        "action_noise_sigma": [
+          0.0,
+          0.0
+        ],
+        "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+      },
+      "telemetry": {
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "resync_count": 0,
+        "hs_cancelled_count": 0,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "steps": 500,
+        "end_reason": "episode_time_limit"
+      },
+      "wait_hs": {
+        "feature": "phase_fsm_wait_hs",
+        "resolved_by": "name, from the LIVE RUNTIME actor feature names",
+        "index": 17,
+        "rows": 0,
+        "fraction_of_steps": 0.0,
+        "binding": false,
+        "why_not_binding": "this stage reuses J9R1's criteria exactly and invents none. WAIT_HS is surfaced because J9R1 cell B failed with the FSM held in WAIT_HS for every step and zero cycles, so the count is the fastest read on whether that failure mode recurred - but attaching a threshold to it would be a NEW gate, and a new gate would have to be preregistered, not smuggled in here."
+      },
+      "kinematics": {
+        "steps": 500,
+        "knee_min_rad": -0.9933419227600098,
+        "knee_max_rad": -0.16251324117183685,
+        "ankle_min_rad": -0.11114121228456497,
+        "ankle_max_rad": 0.40762391686439514
+      },
+      "penetration": {
+        "max_penetration_m": 0.02445683512352716,
+        "band": "above_soft_below_july_legacy",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": false,
+          "july_legacy_historical_pass": true,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 100,
+          "at_or_above_july_legacy": 0,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.2,
+          "at_or_above_july_legacy": 0.0,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009476652778498724,
+        "argmax_index_1based": 199,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        },
+        "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+        "evaluated_by": "v26c_penetration_contract.evaluate_series",
+        "soft_and_july_are_diagnostic": true,
+        "sole_binding": "above_hard_binding"
+      },
+      "gate": {
+        "criteria": {
+          "common": {
+            "steps_required": 500,
+            "end_reason": "episode_time_limit",
+            "valid_cycles_min": 2,
+            "phase_timeout_stance_max": 0,
+            "phase_timeout_swing_max": 0,
+            "morphology_causal_contract_failure_max": 0,
+            "hs_cancelled_count_max": 0,
+            "resync_count_max": 1
+          },
+          "kinematic_quality": {
+            "ankle_min_rad_max": -0.03,
+            "ankle_amplitude_min_rad": 0.3,
+            "knee_amplitude_min_rad": 0.6,
+            "knee_strictly_flexed": true,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ]
+          },
+          "penetration": "the contract's 0.028 binding band, the SOLE binding penetration criterion"
+        },
+        "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged for the kinematic quality, and the penetration contract's 0.028 band as the SOLE binding penetration bar",
+        "kinematic_quality": {
+          "ankle_min": {
+            "observed_rad": -0.11114121228456497,
+            "threshold_rad": -0.03,
+            "pass": true
+          },
+          "ankle_amplitude": {
+            "observed_rad": 0.5187651291489601,
+            "threshold_rad": 0.3,
+            "pass": true
+          },
+          "knee_amplitude": {
+            "observed_rad": 0.8308286815881729,
+            "threshold_rad": 0.6,
+            "pass": true
+          },
+          "knee_strictly_flexed": {
+            "fraction_negative": 1.0,
+            "max_rad": -0.16251324117183685,
+            "pass": true
+          },
+          "within_bounds": {
+            "knee_outside": 0,
+            "ankle_outside": 0,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ],
+            "pass": true
+          }
+        },
+        "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, -0.0099 FAILS, exactly -0.03 PASSES",
+        "checks": {
+          "steps": true,
+          "end_reason": true,
+          "valid_cycles": true,
+          "phase_timeout_stance": true,
+          "phase_timeout_swing": true,
+          "morphology_causal_contract_failure": true,
+          "hs_cancelled_count": true,
+          "resync_count": true,
+          "penetration_hard_binding": true,
+          "kinematic_ankle_min": true,
+          "kinematic_ankle_amplitude": true,
+          "kinematic_knee_amplitude": true,
+          "kinematic_knee_strictly_flexed": true,
+          "kinematic_within_bounds": true
+        },
+        "failed": [],
+        "pass": true,
+        "telemetry_integrity_evaluated_separately": true
+      },
+      "telemetry_integrity": {
+        "kind": "TELEMETRY INTEGRITY INVARIANT",
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "valid_cycle_count": 2,
+        "checks": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_within_one": true
+        },
+        "pass": true,
+        "qualification_technically_valid": true,
+        "invariant": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_max": 1,
+          "kind": "TELEMETRY INTEGRITY INVARIANT",
+          "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+          "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+        },
+        "is_behavioural_gate": false,
+        "is_promotion_threshold": false
+      },
+      "verdict": "PASS",
+      "behavioural_pass": true,
+      "telemetry_valid": true,
+      "diagnostics_not_binding": {
+        "action_clipped_steps": 0,
+        "episode_return": 42.15821327829056,
+        "realized_noise_rms": [
+          0.004660444387489252,
+          0.004980850499167844
+        ],
+        "policy_std": null
+      },
+      "env_closed": true,
+      "sim_outputs": "j19b_cell_E_sim_outputs",
+      "sim_outputs_regular_file_count": 19,
+      "sim_outputs_expected_count": 19,
+      "sim_outputs_count_is_exact": true,
+      "sim_outputs_file_names": [
+        "j1_teacher_episode_activations.sto",
+        "j1_teacher_episode_gait_events.csv",
+        "j1_teacher_episode_gait_events_online.csv",
+        "j1_teacher_episode_kinematics.sto",
+        "j1_teacher_episode_kinematics_reference.sto",
+        "j1_teacher_episode_muscle_forces.sto",
+        "j1_teacher_episode_online_grf.sto",
+        "j1_teacher_episode_power.sto",
+        "j1_teacher_episode_recruitment.sto",
+        "j1_teacher_episode_reserve_controls.sto",
+        "j1_teacher_episode_reserve_torques.sto",
+        "j1_teacher_episode_sea_controls.sto",
+        "j1_teacher_episode_sea_derivatives.sto",
+        "j1_teacher_episode_sea_diagnostics.sto",
+        "j1_teacher_episode_sea_states.sto",
+        "j1_teacher_episode_sea_torques.sto",
+        "j1_teacher_episode_so_torque_diagnostics.sto",
+        "j1_teacher_episode_states.sto",
+        "j1_teacher_episode_tau_bio.sto"
+      ],
+      "paths_are_leaf_relative": true,
+      "artefacts": {
+        "trace": "j19b_cell_E_trace.json",
+        "kinematics": "j19b_cell_E_kinematics.npz",
+        "penetration": "j19b_cell_E_penetration.npz"
+      },
+      "outputs_sha256": {
+        "j19b_cell_E_trace.json": "75801f7c27bf29632ffcf0153fbdbc77a9a1abdc3a4893b4b7d9222089999294",
+        "j19b_cell_E_kinematics.npz": "ef41d1a61f0b9daadefa588a0f035ddc47d8735af90a6d251470aa98dea2b8ac",
+        "j19b_cell_E_penetration.npz": "43b692d23b7de3641670d2e263624c9a8e26c79b86dd6ded94dc30d20696cb94"
+      },
+      "sim_outputs_sha256": {
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_activations.sto": "f8336b7038eaa6824fe1a4033f623eca69e38b2b2ee96b0d6923798eecb1ed47",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_gait_events_online.csv": "43eaa4fdb7851a99697d44f1bcf3e99f1e521df0de5bd90a3efe0cb7c370a902",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_kinematics.sto": "9ae912f2963f515eb09fe3b4ec1486a899b77a8b2470f23f258ca5631fae1e29",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "d23aac5f0f3b913e61b27486fb0d33dbac1741ec9773a974edd7f46cba89b8db",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_muscle_forces.sto": "809470b69c5235c0b5287d2afc157400ce86b7e5967d432a282fe991fe703ced",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_online_grf.sto": "2d58656cfe5581e8a2ebda753f545a27fc0bb25f348586ce5f0cc97143344eb4",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_power.sto": "b28761e4012694ee9d4b136def925f71cf0fc58f685f0884106655c4e400dd75",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_recruitment.sto": "16e14b45a3ac581427fba82034e11763b6a4e40fbcba75e6e5660dea04182419",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_reserve_controls.sto": "a26eada5980e3f36c05f668af37461732c9f20f6684782c5fa1c03de4675b1db",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_reserve_torques.sto": "92bb71149c5ab9455c143c49429a3c80ef07512064329dc9b253eac554d156a4",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_controls.sto": "80d6e70d2a893dbba3970832c0721063d0184963225c9a2e996c1102d22f230e",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "3f3fc0559fc501bd4ce954463293a79b8d58f42e2be73710e448f1b50fdf0dc4",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "94863fa60c8c0c2c1d6b78dbeec93bc3720df53631434868f25de94a6a1bf3e8",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_states.sto": "669bba705f543a9a3d46b1e61ca1fff5bdfd99846859998c28f1aa8705b33c05",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_torques.sto": "4af5a05c1e16054928c4f3c3953c5a2f1a0f6217d45be66c8c2887d690266ee9",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "1c49c7635c796241effcd64221072b81009adef7daabbcc1511ba16ac80a3e92",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_states.sto": "755cc79739475eaf5ffd9d22a4d57df398082e299147995f840a2b4589f9d91f",
+        "j19b_cell_E_sim_outputs/j1_teacher_episode_tau_bio.sto": "d33f199d0067ad0ffe7557cadd9a1ad662f07ec721ade528c993dfb7441a6adc"
+      },
+      "content_hashes": {
+        "knee_rad": "2cb290cbfcc12e92ff52886905df97b132421dcd659f89b07cb14dc967f3407d",
+        "ankle_rad": "1744976cd082f208df97f3fc81e641c085cc7b4b60077ed76563702037d096ea",
+        "penetration_m": "d3c29eb166f88a3ebfb03b738b2cd1963fa7695d487091fc2a80d22cd72330cb"
+      }
+    },
+    {
+      "id": "F",
+      "mode": "stochastic_held",
+      "seed": 125,
+      "label": "nominal sigma 0.005",
+      "episode_start_offset_s": 1.956870983805102,
+      "offset_unit": "seconds",
+      "env_mutation": {
+        "mutated_keys": [
+          "output_dir"
+        ],
+        "allowed_superset": [
+          "episode_start_offset_s",
+          "output_dir"
+        ],
+        "mutated_is_subset_of_allowed": true,
+        "stable_keys_count": 51,
+        "stable_keys_all_identical": true,
+        "stable_key_definition": "every base key except episode_start_offset_s and output_dir, compared for exact equality",
+        "episode_start_offset_s": 1.956870983805102,
+        "base_offset_s": 1.956870983805102,
+        "delta_s": 0.0,
+        "unit": "seconds",
+        "every_other_field_identical": true,
+        "base_verified_by_j1_before_mutation": true,
+        "recording_inherited_from_base": true,
+        "second_j1_verify_on_mutated_config": false,
+        "why_no_second_verify": "J1.verify_env_config pins the nominal offset, including in its runtime literal cross-check, so B and C would fail it technically. The base is verified in full BEFORE the mutation and every other field is proved identical to it afterwards."
+      },
+      "env_config_sha256": "8a9bd17125a0470036896649798f8d34da0b7b055974c6eb36c5b322698debc9",
+      "reset_check": {
+        "cfg_t_start_s": 11.99,
+        "cfg_t_end_s": 21.0,
+        "episode_duration_s": 5.0,
+        "episode_start_offset_s": 1.956870983805102,
+        "requested_unclamped_time_s": 13.946870983805102,
+        "max_start_s": 16.0,
+        "expected_reset_time_s": 13.946870983805102,
+        "clamped": false,
+        "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+        "actual_reset_time_s": 13.946870983805102,
+        "reset_time_error_s": 0.0,
+        "tolerance_s": 1e-09,
+        "checked_immediately_after_reset": true,
+        "compared_against": "cfg.t_start + offset, clamped to max_start - NOT the offset itself",
+        "duration_sources": {
+          "live_env_cfg_episode_duration": 5.0,
+          "declared_env_config_episode_duration": 5.0,
+          "normative": "live_env_cfg_episode_duration",
+          "cross_check_tolerance_s": 1e-12,
+          "agree": true,
+          "why_live_is_normative": "the clamp is computed by the environment from its OWN env_cfg; reading our config instead would prove nothing about what the environment actually did"
+        },
+        "sources": {
+          "t_start": "live base.cfg.t_start",
+          "t_end": "live base.cfg.t_end",
+          "episode_duration": "live base.env_cfg.episode_duration",
+          "all_guarded_fail_closed": true
+        }
+      },
+      "runtime_contract": {
+        "actor_feature_names": [
+          "gait_phase_sin",
+          "gait_phase_cos",
+          "pros_knee_angle",
+          "pros_knee_angle_vel",
+          "pros_ankle_angle",
+          "pros_ankle_angle_vel",
+          "SEA_Knee_motor_angle",
+          "SEA_Knee_motor_speed",
+          "SEA_Ankle_motor_angle",
+          "SEA_Ankle_motor_speed",
+          "online_left_normal_grf_bw",
+          "online_left_in_contact",
+          "online_left_heel_strike",
+          "online_left_toe_off",
+          "online_left_gait_phase_sin",
+          "online_left_gait_phase_cos",
+          "online_left_cycle_duration_s",
+          "phase_fsm_wait_hs",
+          "phase_fsm_stance_after_hs",
+          "phase_fsm_swing_after_to",
+          "phase_expected_hs",
+          "phase_expected_to",
+          "phase_stance_elapsed_norm",
+          "phase_swing_elapsed_norm",
+          "phase_cycle_progress_credit",
+          "pros_knee_angle_previous_endpoint",
+          "pros_knee_angle_served_ref",
+          "pros_knee_angle_served_ref_vel",
+          "pros_knee_angle_served_ref_accel",
+          "pros_knee_angle_sea_u",
+          "pros_ankle_angle_previous_endpoint",
+          "pros_ankle_angle_served_ref",
+          "pros_ankle_angle_served_ref_vel",
+          "pros_ankle_angle_served_ref_accel",
+          "pros_ankle_angle_sea_u"
+        ],
+        "actor_feature_count": 35,
+        "observation_feature_count": 84,
+        "n_actor": 35,
+        "expected_steps": 500,
+        "manifest_matches_pinned_j2": true,
+        "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+      },
+      "module_load_check": {
+        "class": "AsymmetricActorCriticTorchRLModule",
+        "expected_class": "AsymmetricActorCriticTorchRLModule",
+        "state_keys": 10,
+        "weights_match_pinned_module_state": true,
+        "why_checked": "ray's checkpoint loader swallows a ModuleNotFoundError and returns a weightless base RLModule without raising; an unchecked stage would roll out an empty network in silence"
+      },
+      "action_semantics": {
+        "mode": "stochastic_held",
+        "path": "rollout_eval._held_stochastic_action",
+        "stepped_with": "raw_action",
+        "clipping_is_diagnostic": true,
+        "rollout_eval_parity_steps": 500,
+        "max_abs_action_minus_mean": null,
+        "noise_hold_steps": 1,
+        "sigma": 0.005
+      },
+      "summary": {
+        "steps": 500,
+        "end_reason": "episode_time_limit",
+        "max_penetration_m": 0.025615055309162808,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "hs_cancelled_count": 0,
+        "resync_count": 0,
+        "action_clipped_steps": 0,
+        "fsm_behaviour_versions": [
+          "v3"
+        ],
+        "event_sources": [
+          "binary_active_v26"
+        ],
+        "episode_return": 42.13430233138713,
+        "realized_noise_rms": [
+          0.0049044531106823015,
+          0.004895689555640642
+        ],
+        "action_noise_sigma": [
+          0.0,
+          0.0
+        ],
+        "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+      },
+      "telemetry": {
+        "phase_timeout_stance": 0,
+        "phase_timeout_swing": 0,
+        "morphology_causal_contract_failure": 0,
+        "resync_count": 0,
+        "hs_cancelled_count": 0,
+        "valid_cycle_count": 2,
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "steps": 500,
+        "end_reason": "episode_time_limit"
+      },
+      "wait_hs": {
+        "feature": "phase_fsm_wait_hs",
+        "resolved_by": "name, from the LIVE RUNTIME actor feature names",
+        "index": 17,
+        "rows": 0,
+        "fraction_of_steps": 0.0,
+        "binding": false,
+        "why_not_binding": "this stage reuses J9R1's criteria exactly and invents none. WAIT_HS is surfaced because J9R1 cell B failed with the FSM held in WAIT_HS for every step and zero cycles, so the count is the fastest read on whether that failure mode recurred - but attaching a threshold to it would be a NEW gate, and a new gate would have to be preregistered, not smuggled in here."
+      },
+      "kinematics": {
+        "steps": 500,
+        "knee_min_rad": -0.9973585605621338,
+        "knee_max_rad": -0.16173610091209412,
+        "ankle_min_rad": -0.11101293563842773,
+        "ankle_max_rad": 0.40584632754325867
+      },
+      "penetration": {
+        "max_penetration_m": 0.025615055309162808,
+        "band": "july_legacy_breach_within_hard",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": true,
+          "july_legacy_historical_pass": false,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 100,
+          "at_or_above_july_legacy": 4,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.2,
+          "at_or_above_july_legacy": 0.008,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.00954185019602615,
+        "argmax_index_1based": 200,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        },
+        "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+        "evaluated_by": "v26c_penetration_contract.evaluate_series",
+        "soft_and_july_are_diagnostic": true,
+        "sole_binding": "above_hard_binding"
+      },
+      "gate": {
+        "criteria": {
+          "common": {
+            "steps_required": 500,
+            "end_reason": "episode_time_limit",
+            "valid_cycles_min": 2,
+            "phase_timeout_stance_max": 0,
+            "phase_timeout_swing_max": 0,
+            "morphology_causal_contract_failure_max": 0,
+            "hs_cancelled_count_max": 0,
+            "resync_count_max": 1
+          },
+          "kinematic_quality": {
+            "ankle_min_rad_max": -0.03,
+            "ankle_amplitude_min_rad": 0.3,
+            "knee_amplitude_min_rad": 0.6,
+            "knee_strictly_flexed": true,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ]
+          },
+          "penetration": "the contract's 0.028 binding band, the SOLE binding penetration criterion"
+        },
+        "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged for the kinematic quality, and the penetration contract's 0.028 band as the SOLE binding penetration bar",
+        "kinematic_quality": {
+          "ankle_min": {
+            "observed_rad": -0.11101293563842773,
+            "threshold_rad": -0.03,
+            "pass": true
+          },
+          "ankle_amplitude": {
+            "observed_rad": 0.5168592631816864,
+            "threshold_rad": 0.3,
+            "pass": true
+          },
+          "knee_amplitude": {
+            "observed_rad": 0.8356224596500397,
+            "threshold_rad": 0.6,
+            "pass": true
+          },
+          "knee_strictly_flexed": {
+            "fraction_negative": 1.0,
+            "max_rad": -0.16173610091209412,
+            "pass": true
+          },
+          "within_bounds": {
+            "knee_outside": 0,
+            "ankle_outside": 0,
+            "knee_bounds_rad": [
+              -1.5,
+              0.0
+            ],
+            "ankle_bounds_rad": [
+              -0.7,
+              0.7
+            ],
+            "pass": true
+          }
+        },
+        "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, -0.0099 FAILS, exactly -0.03 PASSES",
+        "checks": {
+          "steps": true,
+          "end_reason": true,
+          "valid_cycles": true,
+          "phase_timeout_stance": true,
+          "phase_timeout_swing": true,
+          "morphology_causal_contract_failure": true,
+          "hs_cancelled_count": true,
+          "resync_count": true,
+          "penetration_hard_binding": true,
+          "kinematic_ankle_min": true,
+          "kinematic_ankle_amplitude": true,
+          "kinematic_knee_amplitude": true,
+          "kinematic_knee_strictly_flexed": true,
+          "kinematic_within_bounds": true
+        },
+        "failed": [],
+        "pass": true,
+        "telemetry_integrity_evaluated_separately": true
+      },
+      "telemetry_integrity": {
+        "kind": "TELEMETRY INTEGRITY INVARIANT",
+        "valid_hs_count": 3,
+        "valid_to_count": 3,
+        "valid_cycle_count": 2,
+        "checks": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_within_one": true
+        },
+        "pass": true,
+        "qualification_technically_valid": true,
+        "invariant": {
+          "hs_at_least_cycles": true,
+          "to_at_least_cycles": true,
+          "hs_to_difference_max": 1,
+          "kind": "TELEMETRY INTEGRITY INVARIANT",
+          "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+          "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+        },
+        "is_behavioural_gate": false,
+        "is_promotion_threshold": false
+      },
+      "verdict": "PASS",
+      "behavioural_pass": true,
+      "telemetry_valid": true,
+      "diagnostics_not_binding": {
+        "action_clipped_steps": 0,
+        "episode_return": 42.13430233138713,
+        "realized_noise_rms": [
+          0.0049044531106823015,
+          0.004895689555640642
+        ],
+        "policy_std": null
+      },
+      "env_closed": true,
+      "sim_outputs": "j19b_cell_F_sim_outputs",
+      "sim_outputs_regular_file_count": 19,
+      "sim_outputs_expected_count": 19,
+      "sim_outputs_count_is_exact": true,
+      "sim_outputs_file_names": [
+        "j1_teacher_episode_activations.sto",
+        "j1_teacher_episode_gait_events.csv",
+        "j1_teacher_episode_gait_events_online.csv",
+        "j1_teacher_episode_kinematics.sto",
+        "j1_teacher_episode_kinematics_reference.sto",
+        "j1_teacher_episode_muscle_forces.sto",
+        "j1_teacher_episode_online_grf.sto",
+        "j1_teacher_episode_power.sto",
+        "j1_teacher_episode_recruitment.sto",
+        "j1_teacher_episode_reserve_controls.sto",
+        "j1_teacher_episode_reserve_torques.sto",
+        "j1_teacher_episode_sea_controls.sto",
+        "j1_teacher_episode_sea_derivatives.sto",
+        "j1_teacher_episode_sea_diagnostics.sto",
+        "j1_teacher_episode_sea_states.sto",
+        "j1_teacher_episode_sea_torques.sto",
+        "j1_teacher_episode_so_torque_diagnostics.sto",
+        "j1_teacher_episode_states.sto",
+        "j1_teacher_episode_tau_bio.sto"
+      ],
+      "paths_are_leaf_relative": true,
+      "artefacts": {
+        "trace": "j19b_cell_F_trace.json",
+        "kinematics": "j19b_cell_F_kinematics.npz",
+        "penetration": "j19b_cell_F_penetration.npz"
+      },
+      "outputs_sha256": {
+        "j19b_cell_F_trace.json": "c8de604d739960b44b7fb81b84b2730f51cf79a2d995b922ea1eaf0189b9d1bb",
+        "j19b_cell_F_kinematics.npz": "f85148b8d7294d99a0ffb83eaabdfc82038c80392d3eac4d8c5757ba3f3d2c5a",
+        "j19b_cell_F_penetration.npz": "d3e5fab31ced631f6dae4678d4e4209f3d7fd32c5082dcda49fafff0f9d59d2a"
+      },
+      "sim_outputs_sha256": {
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_activations.sto": "9dd9f4891633d3e215f510f70183f34395ace8cfbb017b3c6a4f34a2200ad015",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_gait_events_online.csv": "c37d179e5b5ff4a9c5fa9cfcab44332a2aeaaba4c7f439c79db99fc7831aef3e",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_kinematics.sto": "9478b8827c57e33c8a9b525e50fc58cdb795a6abaf79691cafd334663add88cf",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "9cee21808aa72478b41d6ad318094b390e90355b12cb60c7f955a519ef7b8724",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_muscle_forces.sto": "da105154130e8a46c186903eb2815c7f2597ffc16fe9618cc036922f5849bb70",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_online_grf.sto": "e13ea8d9996b9f3b31e9f7bf681766eae8463ed60873b82fd447b04612c05c4f",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_power.sto": "1fb6153f040a557c8361c6394b05e385594929258c0fc71a726fb5c1a09e8d42",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_recruitment.sto": "910ab1fba79c3fec09922c607fc2cc4a79ab24835c1c353c960d59d1590a97a0",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_reserve_controls.sto": "47fb9b1c5e8a347501fc23666b3bdf6acc3a3abec7f6c547370a53d99260b51f",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_reserve_torques.sto": "df347c10fb5cfeb6369f68f5ad79ccd7eec81937cc204cbafe28cd623ede75cb",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_controls.sto": "ce236fee681fe40fb410d226f80a9b13d368b27374d922eadb0e0fe7419b7567",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "4b044c3204c992517d4b1cdbeb1f4ae659595146358af74a181f64cb3a0b5424",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "0a0fcbb3c641b0ebfc9471d5c61d67efcd2004c2f8639d79f843f489af36ad97",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_states.sto": "014372f85f65947b91baa5c49affef1a68c95f4434cdfefceb4d73196b778321",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_torques.sto": "8128438dc1b2e4862f39545ece6bed674e9216e5ca17106afe724e0c24e9db0a",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "7ae14c4ba009bf8e78a87184416c72900016e4a73a6149b11940f9ed1f89aa52",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_states.sto": "90d74d0d412ad8998888bb5b17c0a985cb68abf485958c4d87cf8f57d1d2f509",
+        "j19b_cell_F_sim_outputs/j1_teacher_episode_tau_bio.sto": "ce2e4667676aa49bf0991bf529af44dc2006939dd33dda2a941a0564e6fc1780"
+      },
+      "content_hashes": {
+        "knee_rad": "ac4aab75f64f12d3ae6578428ead4295282a8704470e818c3347efd0bad4208b",
+        "ankle_rad": "ebc3c7a62b693fff607da977711825ba0bf252aaf65fd5805f786db9a30fbfeb",
+        "penetration_m": "463013953b5b87ab24741b251f43ce0ba8a0ae59fcefc39cb762cc1630367f64"
+      }
+    }
+  ],
+  "inert": {
+    "fit_executed": false,
+    "critic_touched": false,
+    "ppo_updates": 0,
+    "actor_edited": false,
+    "actor_copied": false,
+    "logstd_head_edited": false,
+    "rllib_checkpoint_loader": true,
+    "ray_cluster_started": false,
+    "ray_workers_started": false,
+    "env_runners": false
+  },
+  "outcome": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "single_execution": true,
+    "no_autonomous_retry": true,
+    "note": "a closed-loop PASS here authorises nothing further"
+  },
+  "forbidden_here": [
+    "fit",
+    "optimizer step",
+    "weight update",
+    "critic",
+    "PPO",
+    "promotion",
+    "deployability",
+    "editing or copying the actor",
+    "editing a log-std head",
+    "a second actor",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "behavioural fail-fast",
+    "an autonomous retry",
+    "a local penetration threshold",
+    "mutating any scientific or runtime env field; episode_start_offset_s is the ONLY one the matrix varies",
+    "writing any cell's outputs outside its own authorised output_dir",
+    "starting a Ray cluster",
+    "starting Ray workers",
+    "EnvRunners"
+  ],
+  "committed_files_sha256": {
+    "j19b_cell_A_kinematics.npz": "84b648bef6f5d8d128219adbbfbb29fdcabbe6bcc06387fb3e51a3bd36a9dcf6",
+    "j19b_cell_A_penetration.npz": "f33a8991c1236686907f17d4a1c928638b7481e69ac3af4c7c7931ff633b5a88",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_activations.sto": "a0214961c67314cb0c8863bd6665b1b34b6a4f3a3168f23b84e6794a7c824a30",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_gait_events_online.csv": "5f8c5964934c00b062b0fed54334607dafc18864d2ebb641dc3ed15daf00433e",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_kinematics.sto": "bbd27dbc73356f18f071f40528c7775bcc3f7b0fd6b893803bcf036c427dcef3",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "f365469320ef220ec11effc87e75a53919aed7af537b147da8e442cf236272c7",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_muscle_forces.sto": "4ea4a5d566ecdb4e7cf63e2c4b0e5a5b1ba69d814c123388190912e53cd31110",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_online_grf.sto": "05e85cd7cb959254126edbedcce8109df398067ba77acec77b4bc12b8f2fe26a",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_power.sto": "0d3e07a7524226eaebd98a8e6146e57368853e2700e432b87a5639f67e3b10cc",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_recruitment.sto": "29416055960b8b907dd22c77119ed9b26e5b66d8d048bed300b78779f4f6e2fa",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_reserve_controls.sto": "1e31a5e44f7e381bbf55e45d5e91e666f13002332b78065ed030682a5cc9aa30",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_reserve_torques.sto": "b81121a8b524e7022a4ead1728902f48d7cdd15e1c492609c57edfbbcacd7eda",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_controls.sto": "623ccf87cf4b765c0ff4169a706fea37424cecbafc739f7409bfda58ead4ae16",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "43508fbb1bf34f7ba08098b04fbb232d147a85c8eeb098dec2e80303110c6696",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "058f269c96e2b7ec5fd66eae7dbc942d5d8e62d1f50bc6723233e071a41ced62",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_states.sto": "723425907cf50129ce8252930b4bcb540cc1c40774623e3ad96be033011291ff",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_sea_torques.sto": "9e60c231236d177a10c0cbe0186a97bbebb669a0383ccf8cce66e1370fa3e0f3",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "8ec4e4372729728af55111ddf144dd33203034cd7444462070bce8a7233d8ebc",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_states.sto": "3cf5f927599805ecd132f16fe9b91e656a53baa2df3e7d08f225cb09544386be",
+    "j19b_cell_A_sim_outputs/j1_teacher_episode_tau_bio.sto": "04acfd2a5ea48ab2a341f63409e6ed3b2581edd7f6b20923891c88185f038c74",
+    "j19b_cell_A_trace.json": "42c8c147442b1fea279577fa110f4a185a89534fa795e02d5ab3e8e0e815642f",
+    "j19b_cell_B_kinematics.npz": "1d2c40e58039064e4933b050d93e58529cf830b781d8a423879bb955e88893fd",
+    "j19b_cell_B_penetration.npz": "bc8be794401f6c92be9b4b245da1a17b5019cd3e7256d9ba437c1e113f3b59b3",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_activations.sto": "6b707e8882bd27d9d7ec8a3ed272ef90e34f47932472ae5a935e8385d8f6a8b2",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_gait_events_online.csv": "79028fd791d374bf77ec8f76d30d4e9055467506082f2c8f6707518572f9cfe4",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_kinematics.sto": "eaada92a5bc52fe35c175fa3eead84570b299456620af3b8a38c264c45f7cb10",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "e74d5da5c5c3fd1ab1fd79a495d250b715807ada5e3f1db7a0edb8534a268966",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_muscle_forces.sto": "53941a0c160eb5ffe9cd66566cf745bb323649587391773ec646aa0dfc77aba7",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_online_grf.sto": "263a4f5afce3af8e98bf9ecbac352119c7bddff08413e4b0fd9f32e7fcd2ab8d",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_power.sto": "329e08936b63cf39fa1479c6d11023c7df42cd6c69eb04e5597b00e6996d28a6",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_recruitment.sto": "0a7d2d8b6a8222814cc40398f4c0cb70f7929fc48e10aff18cd02f6c8ed2456f",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_reserve_controls.sto": "fe9e240a09e350763634ca358e6c84f0f518c77b08cfdd3b6fc0337d43da6e81",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_reserve_torques.sto": "03592463455e77e4d6ecae446e61fc9fe28fe08e799766a40e85f21d289cb0b5",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_controls.sto": "c6fdde09b64a25fc4882a3cee26abedccb141aef8d9b1066a49da0747a88dcdd",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "6ed00fb9ace715853d69d0de14c6140eb5faaadbb15655a4cf70301bb563e4e4",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "0a4f70488fd4fbe839d7c065fed1179a50182926b0a5a34e86228d87db2efb88",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_states.sto": "07435e57fd9a003f9067200ed6399c541e91a236e19f4033304eee9dfeb19ec5",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_sea_torques.sto": "9cb12a22949b6cf5a0ded9aaf7237421ed087b3896fcd37b18e16eacdf352ffe",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "88a29b03d24597860a165280f52f40e6b1a9822905ef29642d30ea5e9eb932ee",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_states.sto": "e605fb4822e139b0d9001578042ebb203f7d29cd4991c6881b9348fdcbc85f58",
+    "j19b_cell_B_sim_outputs/j1_teacher_episode_tau_bio.sto": "f3adf44aea68f6cc96e8e0c50bdb962795c4786ccd8bde32d104120207934e8d",
+    "j19b_cell_B_trace.json": "51992719be57713db9b8c48341772e71b74f50b2576801e7fd9f367b1fd2dd20",
+    "j19b_cell_C_kinematics.npz": "4691b3f627d1c7b4c1198a2d0c6c18aabfb67e22dd2edf7ad62d8d51013688b5",
+    "j19b_cell_C_penetration.npz": "9824b2a060d3d3e3a694739cc7cb7de99f35eb7affc2b2d60056d117f83edde4",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_activations.sto": "e67976b8d0ee3110418a4569da02a994b597461aabd5a7da84ea35665b9b850f",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_gait_events_online.csv": "acb434b7b7bb5e4639e86f8eb36e7796d2202b4a2d6c4543e4c6123bc01ec166",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_kinematics.sto": "314101ac137b751172e360b75e1f0135fe481b3e778bc52f1bcf8f4cf02fe062",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "2dc6c775f3ee86dca8da05f1749ee1197a9cdf7c4b99d5b18c381388453278c5",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_muscle_forces.sto": "131ac09b1e496d5ae56dd35ab691f78dd0275baa742a9160f6b192abbf0a9246",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_online_grf.sto": "e7657eb9d2f2de16dcfa57689aff23d7f70c18a676896ec2d34a854b7c4537d4",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_power.sto": "d685d8ac4d3f7f00a182226f12b7c8f7da4e60249ed743d6df5444b9bae6a8ff",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_recruitment.sto": "cd3932a5549036c3095647381c072a66ee9f100ecf79c5c7d4b5a3c6e073a38d",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_reserve_controls.sto": "83a774c1a6c758ca461aff03f98a5a701559b1f8eb0cfa74a9234b1e0e68eb40",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_reserve_torques.sto": "0ffbd268fb9062b1d0a9e139ce5717ca47878600e13c9cc07c549047a11b049e",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_controls.sto": "d3bb767ab98b839c635e2dc705d9404a46a104a1673c6493f66bda296f2e8100",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "8263a38bc9e8589177085b1f53fa59d9d108350a822c24139186cabd6830a06a",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "c93e7efbf073fd226e7d7418b5cc5bc54a315a0cd971c97749090e88c9212fe5",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_states.sto": "3b0fc66cb5bd3bb43a4f0998b9fb49b08e73760499be7f4eddf1b00166ba8322",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_sea_torques.sto": "eb795cd6db5d57f5f3944423e8b3d85b64e906f6f927e6788f4795af951e80cc",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "abb0fce0cbdcca4f35ce8880014e3b249482e7a751e37ce99755c129534e96d7",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_states.sto": "981c6d361b1989f9cb0dfb8168d3c49f32cfe6ef4dc2c0e3c87150bbecaca798",
+    "j19b_cell_C_sim_outputs/j1_teacher_episode_tau_bio.sto": "7e20875c8964d18a620ddbfe9f9ab881b5e2026dcccd691d10e8ffa605a9abe0",
+    "j19b_cell_C_trace.json": "60cbb338d24c8bd86fb2def0e44f86e1dcf9a7e1bfafab5cada3d66491d5fc12",
+    "j19b_cell_D_kinematics.npz": "5464f764a3c7eb23e0d0585ff321c6ab1bc6640e735895d05fd110483a43236f",
+    "j19b_cell_D_penetration.npz": "900bafb593270c20dfc1368166a5c8264abc5fd54d7e066a41cb333bb12e12e1",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_activations.sto": "c0887b20fa27cf68caa1ab9f32cec1921dee3b1fd550683c062cefa62eb4187c",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_gait_events_online.csv": "92a3ee38ffefc4826613d849d4faf38bf1cad97d8da3da912ac749e41358c2b0",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_kinematics.sto": "88856cdcbd6a17a143bbdf8da4d58664b91094ead79564047008332c88dd96a6",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "1b3ba9c9084d83afa79e087641b52922a5395c70ebef2a9755c697e2437e47f9",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_muscle_forces.sto": "a91ecfcee5afbe175220daac560e7e1a2f805bcdbaf3e8a41a72cfd977695e17",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_online_grf.sto": "14cf286fe1699b8d5510547ef8cbec7aadc50df4a224a8d9e6d4b3c39a3e2c90",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_power.sto": "8c7902980e59ef0b7b6c7b8c602b49d6e9eba2822f107a2896cd55423fc58df7",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_recruitment.sto": "0dbf72a56e4492078e9361b6fbe0109b63250115a597fb849b25ac8e336336bd",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_reserve_controls.sto": "346fa71ad351ce5dc54c66cb84a7c66fd064ed93d8b065315dad284931d6b188",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_reserve_torques.sto": "b10c53aca8a08036d51988232d73a609d5a1f78ab37e8bc095f37b6aec054d9a",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_controls.sto": "1f1c51c9d8ae10742404ebaadf148a5c7088b89373cec44aa81afb3cd10ade89",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "823bdb1135fd4a920ba4d6b4165010e9f7fdf584367765626dbcd6136ed6a014",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "9d967cd38985b857310f8ee75ba09ad6b7834cbfd8c8568b020604faae401a4d",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_states.sto": "354bd6b474a87af72d74bdd371445c2ec3d2d68211f63018390db200e900e52f",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_sea_torques.sto": "04a9244907212cea61536823346f13e0c823bdf6dc587f0c0829bb21b779881c",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "14987c60768c7b14cce32044360372be51985d1d964ac4edb58d907c9bc78d9c",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_states.sto": "a4bbca26c8a114811cbe6a4129091b6283167707eb86cbf63f8db453a5dabe29",
+    "j19b_cell_D_sim_outputs/j1_teacher_episode_tau_bio.sto": "9a4018ec84f33320849f4e79d3e4af1c87ef6bb87f9de6ee19063cc3742cbbec",
+    "j19b_cell_D_trace.json": "c00bb5e1194b74597a228b459f75656b0e4bb7a9e8f8ad8fe6ec9ccad90ce437",
+    "j19b_cell_E_kinematics.npz": "ef41d1a61f0b9daadefa588a0f035ddc47d8735af90a6d251470aa98dea2b8ac",
+    "j19b_cell_E_penetration.npz": "43b692d23b7de3641670d2e263624c9a8e26c79b86dd6ded94dc30d20696cb94",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_activations.sto": "f8336b7038eaa6824fe1a4033f623eca69e38b2b2ee96b0d6923798eecb1ed47",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_gait_events_online.csv": "43eaa4fdb7851a99697d44f1bcf3e99f1e521df0de5bd90a3efe0cb7c370a902",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_kinematics.sto": "9ae912f2963f515eb09fe3b4ec1486a899b77a8b2470f23f258ca5631fae1e29",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "d23aac5f0f3b913e61b27486fb0d33dbac1741ec9773a974edd7f46cba89b8db",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_muscle_forces.sto": "809470b69c5235c0b5287d2afc157400ce86b7e5967d432a282fe991fe703ced",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_online_grf.sto": "2d58656cfe5581e8a2ebda753f545a27fc0bb25f348586ce5f0cc97143344eb4",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_power.sto": "b28761e4012694ee9d4b136def925f71cf0fc58f685f0884106655c4e400dd75",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_recruitment.sto": "16e14b45a3ac581427fba82034e11763b6a4e40fbcba75e6e5660dea04182419",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_reserve_controls.sto": "a26eada5980e3f36c05f668af37461732c9f20f6684782c5fa1c03de4675b1db",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_reserve_torques.sto": "92bb71149c5ab9455c143c49429a3c80ef07512064329dc9b253eac554d156a4",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_controls.sto": "80d6e70d2a893dbba3970832c0721063d0184963225c9a2e996c1102d22f230e",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "3f3fc0559fc501bd4ce954463293a79b8d58f42e2be73710e448f1b50fdf0dc4",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "94863fa60c8c0c2c1d6b78dbeec93bc3720df53631434868f25de94a6a1bf3e8",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_states.sto": "669bba705f543a9a3d46b1e61ca1fff5bdfd99846859998c28f1aa8705b33c05",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_sea_torques.sto": "4af5a05c1e16054928c4f3c3953c5a2f1a0f6217d45be66c8c2887d690266ee9",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "1c49c7635c796241effcd64221072b81009adef7daabbcc1511ba16ac80a3e92",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_states.sto": "755cc79739475eaf5ffd9d22a4d57df398082e299147995f840a2b4589f9d91f",
+    "j19b_cell_E_sim_outputs/j1_teacher_episode_tau_bio.sto": "d33f199d0067ad0ffe7557cadd9a1ad662f07ec721ade528c993dfb7441a6adc",
+    "j19b_cell_E_trace.json": "75801f7c27bf29632ffcf0153fbdbc77a9a1abdc3a4893b4b7d9222089999294",
+    "j19b_cell_F_kinematics.npz": "f85148b8d7294d99a0ffb83eaabdfc82038c80392d3eac4d8c5757ba3f3d2c5a",
+    "j19b_cell_F_penetration.npz": "d3e5fab31ced631f6dae4678d4e4209f3d7fd32c5082dcda49fafff0f9d59d2a",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_activations.sto": "9dd9f4891633d3e215f510f70183f34395ace8cfbb017b3c6a4f34a2200ad015",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_gait_events_online.csv": "c37d179e5b5ff4a9c5fa9cfcab44332a2aeaaba4c7f439c79db99fc7831aef3e",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_kinematics.sto": "9478b8827c57e33c8a9b525e50fc58cdb795a6abaf79691cafd334663add88cf",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_kinematics_reference.sto": "9cee21808aa72478b41d6ad318094b390e90355b12cb60c7f955a519ef7b8724",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_muscle_forces.sto": "da105154130e8a46c186903eb2815c7f2597ffc16fe9618cc036922f5849bb70",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_online_grf.sto": "e13ea8d9996b9f3b31e9f7bf681766eae8463ed60873b82fd447b04612c05c4f",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_power.sto": "1fb6153f040a557c8361c6394b05e385594929258c0fc71a726fb5c1a09e8d42",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_recruitment.sto": "910ab1fba79c3fec09922c607fc2cc4a79ab24835c1c353c960d59d1590a97a0",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_reserve_controls.sto": "47fb9b1c5e8a347501fc23666b3bdf6acc3a3abec7f6c547370a53d99260b51f",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_reserve_torques.sto": "df347c10fb5cfeb6369f68f5ad79ccd7eec81937cc204cbafe28cd623ede75cb",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_controls.sto": "ce236fee681fe40fb410d226f80a9b13d368b27374d922eadb0e0fe7419b7567",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_derivatives.sto": "4b044c3204c992517d4b1cdbeb1f4ae659595146358af74a181f64cb3a0b5424",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "0a0fcbb3c641b0ebfc9471d5c61d67efcd2004c2f8639d79f843f489af36ad97",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_states.sto": "014372f85f65947b91baa5c49affef1a68c95f4434cdfefceb4d73196b778321",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_sea_torques.sto": "8128438dc1b2e4862f39545ece6bed674e9216e5ca17106afe724e0c24e9db0a",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "7ae14c4ba009bf8e78a87184416c72900016e4a73a6149b11940f9ed1f89aa52",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_states.sto": "90d74d0d412ad8998888bb5b17c0a985cb68abf485958c4d87cf8f57d1d2f509",
+    "j19b_cell_F_sim_outputs/j1_teacher_episode_tau_bio.sto": "ce2e4667676aa49bf0991bf529af44dc2006939dd33dda2a941a0564e6fc1780",
+    "j19b_cell_F_trace.json": "c8de604d739960b44b7fb81b84b2730f51cf79a2d995b922ea1eaf0189b9d1bb"
+  },
+  "commit_verification": {
+    "file": "commit_verification.json",
+    "state_when_this_receipt_was_written": "PENDING",
+    "validity_rule": "this leaf is VALID EVIDENCE if and only if commit_verification.json exists beside this receipt and declares pass true",
+    "marker_on_failure": "TECHNICAL_INVALID",
+    "j9r1_had_none": "J9R1 recorded its receipt hash after the rename and compared it to nothing; this stage verifies the commit"
+  }
+}

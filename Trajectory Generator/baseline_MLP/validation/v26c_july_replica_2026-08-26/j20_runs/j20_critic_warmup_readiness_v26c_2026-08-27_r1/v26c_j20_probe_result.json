@@ -1,0 +1,344 @@
+{
+  "actor_comparison": {
+    "actual_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "exact": true,
+    "expected_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "max_abs_diff": 0.0
+  },
+  "authoritative_path": {
+    "mode": "drop",
+    "source_actor_feature_manifest": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_actor_feature_manifest_overlay.json",
+    "source_checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+    "what": "warm_start.transplant_actor_state, the function train_ppo_mlp calls, driven by warm_start.resolve_source_actor_features against the explicit overlay",
+    "why_not_a_bare_load": "a bare load_state_dict exercises a path production does not take. It would prove nothing about the column algebra, the gait-clock zeroing, or the transplant's refusal to touch the critic.",
+    "zero_target_features": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ]
+  },
+  "bare_load_secondary_diagnostic": {
+    "is_not_the_authoritative_path": true,
+    "missing_keys": [
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "unexpected_keys": [],
+    "what_it_shows": "loading the actor-only export into a trainable module leaves the six critic tensors at their fresh initialisation, with NO exception and NO warning. Recorded because it is worth knowing; it is NOT the path the warm-up takes."
+  },
+  "byte_identity": {
+    "encoder_aliases": {
+      "pi_encoder.0.bias": true,
+      "pi_encoder.0.weight": true,
+      "pi_encoder.2.bias": true,
+      "pi_encoder.2.weight": true
+    },
+    "method": "same dtype, same shape, same C-order bytes. Deliberately NOT numpy.array_equal, which is numeric and would call a float32 tensor equal to a float64 one and -0.0 equal to +0.0.",
+    "per_key": {
+      "pi.0.0.bias": true,
+      "pi.0.0.weight": true,
+      "pi.0.2.bias": true,
+      "pi.0.2.weight": true,
+      "pi.1.bias": true,
+      "pi.1.weight": true,
+      "pi_encoder.0.bias": true,
+      "pi_encoder.0.weight": true,
+      "pi_encoder.2.bias": true,
+      "pi_encoder.2.weight": true
+    }
+  },
+  "checks": {
+    "P01_module_class_is_the_pinned_one": true,
+    "P02_inference_only_false_builds_sixteen_keys": true,
+    "P03_critic_keys_present": true,
+    "P04_critic_shapes_exact": true,
+    "P05_real_resolver_accepted_the_explicit_overlay": true,
+    "P06_real_resolver_validated_the_actor_digest": true,
+    "P07_target_contract_comes_from_the_live_env_and_matches_the_source": true,
+    "P08_real_transplant_copied_the_controller_block_and_zeroed_only_the_clock": true,
+    "P09_real_transplant_reports_the_source_is_actor_only": true,
+    "P10_real_transplant_left_the_critic_untouched": true,
+    "P11_critic_is_the_TARGET_init_not_imported_from_the_source": true,
+    "P12_production_load_is_strict_and_complete": true,
+    "P13_all_ten_actor_tensors_byte_identical": true,
+    "P14_actor_digest_reproduces_j19a": true,
+    "P15_warm_start_own_comparator_calls_the_actor_exact": true,
+    "P16_encoder_aliases_still_byte_identical": true,
+    "P17_clock_columns_are_already_exactly_zero": true,
+    "P18_controller_memory_25_35_survives_alive": true,
+    "P19_logstd_rows_are_byte_identical": true,
+    "P20_logstd_is_state_independent": true,
+    "P21_sigma_is_exactly_the_qualified_value": true,
+    "P22_freeze_flags_live_on_the_module": true,
+    "P23_frozen_module_gives_the_actor_no_gradient": true,
+    "P24_frozen_module_still_gives_the_critic_gradient": false,
+    "P25_control_proves_the_probe_can_see_an_unfrozen_actor": true,
+    "P26_actor_bytes_survive_the_gradient_probe": true,
+    "P27_full_module_hash_differs_from_j19a": true,
+    "P28_j19a_leaf_is_byte_unchanged": true,
+    "P29_bare_load_diagnostic_shows_the_silent_fresh_critic": true
+  },
+  "checks_passed": 28,
+  "checks_total": 29,
+  "controller_memory_columns": {
+    "alive_not_zeroed": true,
+    "byte_identical_to_source": true,
+    "columns": [
+      25,
+      35
+    ],
+    "why_it_matters": "the controller-memory block is the part of the actor contract the July lineage did not have. If the transplant zeroed it along with the clock columns, the warm-up would sample from a different policy than the one J19B and J19C qualified."
+  },
+  "critic_comparison": {
+    "actual_digest": "5ce4ef41d5677623de42081adc23b6f4168d3a0141d222f0ec64c683203e1096",
+    "exact": true,
+    "expected_digest": "5ce4ef41d5677623de42081adc23b6f4168d3a0141d222f0ec64c683203e1096",
+    "keys": [
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "max_abs_diff": 0.0,
+    "meaning": "the critic after the transplant IS the target's own fresh initialisation. The source carries no critic, and none was invented for it."
+  },
+  "feature_contract": {
+    "identical": true,
+    "no_widening_no_25d_no_contralateral_feature": true,
+    "source_width": 35,
+    "target_names_provenance": "the LIVE environment's own recorded contract from a committed J19C cell, not the manifest that describes the source",
+    "target_names_source": "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1/j19c_cell_G_kinematics.npz",
+    "target_width": 35
+  },
+  "fresh_critic_digest": "5ce4ef41d5677623de42081adc23b6f4168d3a0141d222f0ec64c683203e1096",
+  "fresh_critic_digest_is_diagnostic_only": "recorded, never pinned: this stage does not claim to reproduce any prior fresh-critic digest and invents no threshold on it",
+  "full_module_state": {
+    "hashes_differ": true,
+    "it_is_not_an_actor_and_is_not_promoted": true,
+    "j19a_module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "sha256": "b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2",
+    "why_they_must_differ": "the full module carries six critic tensors J19A does not have, so the FILE hash cannot match. The binding comparison is on the actor tensors, and those are byte-identical."
+  },
+  "gait_clock_columns": {
+    "already_exactly_zero_bitwise": true,
+    "checked_on": [
+      "pi.0.0.weight",
+      "pi_encoder.0.weight"
+    ],
+    "columns": [
+      0,
+      1
+    ],
+    "features": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ],
+    "why_it_matters": "gait_clock_enable is false in the pinned runtime, so the transplant zeroes these target columns. They are already zero, so the zeroing is a provable no-op and cannot perturb the actor before the first gradient."
+  },
+  "gradient_reach": {
+    "frozen": {
+      "actor_bytes_unchanged_after_backward": true,
+      "actor_parameters_receiving_gradient": [],
+      "critic_parameters_receiving_gradient": [
+        "vf.bias",
+        "vf.weight",
+        "vf_encoder.0.bias",
+        "vf_encoder.2.bias",
+        "vf_encoder.2.weight"
+      ],
+      "no_optimizer_step_was_taken": true,
+      "no_optimizer_was_constructed": true
+    },
+    "unfrozen_control": {
+      "actor_bytes_unchanged_after_backward": true,
+      "actor_parameters_receiving_gradient": [
+        "pi.1.bias",
+        "pi.1.weight",
+        "pi_encoder.0.bias",
+        "pi_encoder.2.bias",
+        "pi_encoder.2.weight"
+      ],
+      "critic_parameters_receiving_gradient": [
+        "vf.bias",
+        "vf.weight",
+        "vf_encoder.0.bias",
+        "vf_encoder.2.bias",
+        "vf_encoder.2.weight"
+      ],
+      "no_optimizer_step_was_taken": true,
+      "no_optimizer_was_constructed": true
+    },
+    "why_a_control": "a probe that finds no actor gradient proves nothing unless it can show it would have found one"
+  },
+  "inert": {
+    "actor_edited": false,
+    "algo_train_called": false,
+    "environment_constructed": false,
+    "environment_stepped": false,
+    "optimizer_constructed": false,
+    "optimizer_step_taken": false,
+    "ppo_updates": 0,
+    "ray_cluster_started": false,
+    "rollout_performed": false,
+    "warmup_executed": false
+  },
+  "j19a_leaf_after": {
+    "commit_verification.json": "4d526dc119a10983e0186257132fbff58569d90ab0d1a793e0afae5ba2f32c61",
+    "history.json": "0a00cb6be58945d525201f76aa425ad713addbd4946d108e02cf4bc2c4111af0",
+    "rl_module/actor_feature_manifest.json": "2c01067e9a569354cc4099537a3a556ab50d55aa8baa1d2127324dafeee27c54",
+    "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "rl_module/module_state.pkl": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "v26c_j19a_result.json": "8982b2fc40e514bed903af0c33e0a4ab3737ebf849a44a232912a816002dc254",
+    "v26c_j19a_single_reproduction_receipt.json": "235a117fc849bbe137dfd7ea29621390a6d1aa71aa9f9b4d95ca0e7a5dd50dad"
+  },
+  "j19a_leaf_unchanged": true,
+  "kind": "K1 PROBE RESULT",
+  "module": {
+    "actor_parameters_independent": 76036,
+    "class": "AsymmetricActorCriticTorchRLModule",
+    "critic_keys": [
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "critic_parameters": 87809,
+    "critic_shapes": {
+      "vf.bias": [
+        1
+      ],
+      "vf.weight": [
+        1,
+        256
+      ],
+      "vf_encoder.0.bias": [
+        256
+      ],
+      "vf_encoder.0.weight": [
+        256,
+        84
+      ],
+      "vf_encoder.2.bias": [
+        256
+      ],
+      "vf_encoder.2.weight": [
+        256,
+        256
+      ]
+    },
+    "state_keys_built": [
+      "pi.0.0.bias",
+      "pi.0.0.weight",
+      "pi.0.2.bias",
+      "pi.0.2.weight",
+      "pi.1.bias",
+      "pi.1.weight",
+      "pi_encoder.0.bias",
+      "pi_encoder.0.weight",
+      "pi_encoder.2.bias",
+      "pi_encoder.2.weight",
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "state_keys_built_count": 16
+  },
+  "next_stage_authorized": false,
+  "promotion": "NONE",
+  "resolver_report": {
+    "declared_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_actor_feature_manifest_overlay.json",
+    "resolution": "explicit_manifest",
+    "validated_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96"
+  },
+  "sigma": {
+    "expected": 0.005,
+    "logstd_rows_byte_identical": true,
+    "logstd_weight_abs_max": 0.0,
+    "state_independent": true,
+    "tolerance": 1e-09,
+    "value": [
+      0.004999999670722372,
+      0.004999999670722372
+    ]
+  },
+  "stage": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "transplant_report": {
+    "copied_features": [
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "critic_init_mode": "fresh_target_untouched",
+    "removed_feature_mode": "drop",
+    "shared_features_zeroed": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ],
+    "source_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "source_checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+    "source_config": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/training_cfg.resolved.yaml",
+    "source_config_exists": false,
+    "source_non_actor_keys": [],
+    "source_only_features_dropped": [],
+    "source_state_is_actor_only": true,
+    "target_actor_digest_after": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "target_non_actor_keys_preserved": [
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "target_non_actor_state_unchanged": true,
+    "target_only_features_zeroed": [],
+    "warm_start_name": "asym100_GRFpenalty-lowered",
+    "zero_target_feature_reason": "target signal intentionally unavailable; prevent constant-input bias",
+    "zeroed_target_features": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ]
+  },
+  "verdict": "FAIL_CLOSED"
+}

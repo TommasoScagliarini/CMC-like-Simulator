@@ -1,0 +1,121 @@
+{
+  "amendment_id": "rev4d_trace_repeat_single_variable",
+  "date": "2026-08-24",
+  "token": "V26B-REV4D-REPEAT",
+  "kind": "ADDITIVE and IMMUTABLE. One single-variable experiment. rev4b, rev4c, their addenda, receipts and reports are NOT mutated",
+
+  "ARCHITECTURAL_FRAMING_BINDING": {
+    "single_variable": "REV4D differs from REV4B in EXACTLY ONE dimension: trace_repeat 4 -> 1. Prefix length, negative-ankle coverage, labelling, init, anchor, aggregation operator and every July hyperparameter are byte-identical to rev4b",
+    "reference_arm": "REV4B (prefix 392, repeat 4, share 75.8221%, 65 distinct negative indices, survival 42). REV4D holds the prefix and the coverage and changes only the weight",
+    "what_it_deconfounds": "rev4c lowered the on-policy share by CUTTING the prefix from 392 to 68, which moved the share AND the negative-ankle coverage together (65 -> 9 distinct indices, 5 windows -> 1). REV4D lowers the share while holding coverage at the maximum available from the S1A trace, so the two axes separate",
+    "what_it_is_NOT": [
+      "NOT a replication of any July round: no July configuration used prefix 392 with repeat 1",
+      "NOT a promotion of any kind",
+      "NOT a sigma decision: the logstd placeholder is carried unchanged and is never interpreted as a choice of sigma"
+    ],
+    "declared_residual_confound": "trace_repeat controls the on-policy weight AND the duplicate leakage across the validation split, which adapt_actor draws as a seeded random permutation over the aggregate (target_domain_imitation.py:846-852). With repeat 4 the probability that a unique on-policy row has copies on both sides is 0.5895 for the rev4b aggregate; with repeat 1 it is exactly 0. The two are not separable inside that parameter. Therefore the primary gate is CLOSED-LOOP survival and offline validation MSE is diagnostic only, never a promotion criterion"
+  },
+
+  "lineage_exclusive": {
+    "chain": "V26 August imitation 39D -> causal student 35D",
+    "init_anchor_collection": "EXCLUSIVELY the S1A actor 8f3e0ce17eff7c741dcf72de6d0fec0c372f9dbc7a9b3119d41c155ec8603e35, which is the sole init, the anchor parameter and the frozen collection policy. Its frozen rollout is reused; NO new collection",
+    "july_artifacts": "BENCHMARK AND PROTOCOL REFERENCE ONLY. July modules, datasets and traces are NEVER init and NEVER labels",
+    "parents_immutable": {
+      "rev4c_amendment": "b25b0fe4f89a9ea4a7ac6b6b9ca8b5d2d393e4535a2a0944edd5386dd62790bb",
+      "rev4c_addendum_a_corrections": "377fd4e0ff68fc9135f769d8ce2f23935ec9977e185feaa92624360e1942d9ad",
+      "rev4c_fit_receipt": "c3fef01223dd8aa5ebcc9c5208407bc78dec0bdac7e2d63197e8fa319a4b4f4a",
+      "rev4c_rollout_receipt": "188574622251931577d85fa5b1fe6ec7a6fa433b396aeb10f4a1dabd9f698a50",
+      "rev4c_report": "0b9a7bb1f8ecb4f47b91238cbbf94df9b3d318cd0e2d62b47dae283cdb73589a",
+      "july_audit_report": "fad42d991ee40fd317a4f746fd759cdbb51ed937814115ea1704b79932f5e45b",
+      "rev4b_amendment": "883ffc9a0217fa6fefcabf820b382717b8ad2e8f7ccd5814461b0bb4218f0f93",
+      "rev4b_addendum_a": "74f7c50a83877a2005708e95ee911992f301bbe3799f41c823f807dbbb847ce1"
+    }
+  },
+
+  "frozen_corpus": {
+    "teacher_corpus_rows": 500,
+    "teacher_corpus": "the BC-IK corpus: obs35 visited by S0D on the frozen nominal trace, labels u_IK AB06 SAME-STEP from the pinned cache 3dd878d4...",
+    "on_policy_prefix_rows": 392,
+    "on_policy_prefix": "the FULL frozen S1A nominal rollout, steps 1..392 contiguous, labels = same-step u_IK at teacher_index = step - 1",
+    "trace_repeat": 1,
+    "interpolation_steps": 0,
+    "aggregate_rows": 892,
+    "on_policy_share": 0.4394618834080717,
+    "on_policy_share_exact_fraction": "392/892",
+    "negative_coverage_expected": {"distinct_negative_time_indices": 65, "windows": [[6, 14], [112, 132], [174, 179], [267, 290], [330, 334]]},
+    "operation": "concat(teacher, tile(prefix, 1)); no dedup, no truncation",
+    "forbidden_data": "no S0D-actor, L20, A2, W2/W4/W8, L05/L10, A1-A6, rev4b or rev4c data; no July module, dataset or trace as init or label"
+  },
+
+  "frozen_hyperparameters": {
+    "epochs": 400, "batch_size": 64, "learning_rate": 0.0003, "validation_fraction": 0.20, "patience": 60,
+    "clip_weight": 1.0, "logstd_weight": 0.1, "anchor_weight": 1e-05, "seed": 123,
+    "interpolation_steps": 0, "gradient_clipping": "none",
+    "logstd_note": "the logstd placeholder is carried byte-identical from the init and restored after every optimizer step. logstd_weight 0.1 is a LOSS WEIGHT and is NOT a choice of sigma",
+    "sigma": "UNRESOLVED and never chosen",
+    "reused_from": "v26b_rev4b_dagger.fit_july and the J_* constants, unmodified; rev4d redefines no July hyperparameter"
+  },
+
+  "blocking_preflight_no_write": [
+    "steps 1..392 contiguous",
+    "obs35 exact: each row equals its recorded actor_observation_vector_before, width 35, all finite",
+    "labels finite and same-step at teacher_index = step - 1",
+    "time alignment exact: max |t_S1A - t_corpus| == 0 over the 392 rows",
+    "no collision carrying a CONFLICTING label",
+    "corpus formula exact: 500 + 392*1 == 892",
+    "on-policy share exact: 392/892",
+    "negative coverage exact: 65 distinct negative time indices over 5 windows",
+    "on any failure: NO-GO and STOP, no fit"
+  ],
+
+  "blocking_offline_gates": [
+    "integrity invariants: 10 keys, clock columns zero, clock invariance bit-identical, logstd byte-identical to the S1A init, save/reload exact, no critic",
+    "function preservation T1 and T2 <= 1e-5",
+    "fit convergence: adapted aggregate RMSE strictly lower than the initial one",
+    "on any failure: STOP, no rollout"
+  ],
+
+  "reported_without_invented_thresholds": [
+    "RMSE, Pearson and amplitude ratio per joint on the corpus 500, on the full 392-row prefix and on ALL 97 negative-ankle rows of the corpus",
+    "negative-window sign coverage",
+    "max_abs vs the S0D actor: INFORMATIONAL only",
+    "healthy contralateral symmetry: DIAGNOSTIC only",
+    "validation MSE and early-stopping epoch: DIAGNOSTIC only, never a promotion criterion"
+  ],
+
+  "closed_loop_stage": {
+    "trigger": "only if every binding offline gate passes",
+    "execution": "exactly ONE deterministic nominal rollout, 500-step horizon, same frozen v3 harness, no retry",
+    "recorded": ["survival steps", "phase_timeout stance and swing", "morphology_causal_contract_failure per row",
+                  "resync_count", "hs_cancelled_count", "grf penetration", "events and valid cycles",
+                  "raw action clipping", "ankle and knee q with sign and amplitude"]
+  },
+
+  "CRITERIA": {
+    "primary_gate": {
+      "measure": "survival in steps",
+      "rule": "STRICTLY GREATER THAN 116",
+      "rationale": "116 is the best result already obtained by the repeat-4 / interpolation-0 family (rev4c). Exceeding it is the only evidence that changing the repeat operator adds something beyond what rev4c already showed",
+      "reference_points": {"rev4b_repeat4_prefix392": 42, "rev4c_repeat4_prefix68": 116, "S1A_init": 392,
+                            "july_r1_benchmark": 45, "july_r2_benchmark": 356, "july_r3_benchmark": 221}
+    },
+    "interpretation_grid": {
+      "above_116": "at a moderate share the coverage helps: the rev4c reading was confounded",
+      "about_116": "the share is the lever and the coverage is inert: the rev4c conclusion survives deconfounding",
+      "about_42": "neither share nor coverage but the tiling operator at full prefix is harmful"
+    },
+    "promotion_requires_ALL_of": ["500/500 completion", "zero critical counters", ">= 2 valid cycles",
+                                   "penetration within the current gate", "the kinematic quality gates"],
+    "no_automatic_promotion": "even if every criterion passes, the candidate is NOT promoted; the architect decides after the audit"
+  },
+
+  "tooling_requirements": {
+    "parameterised_labels": "actor labels must be parameterised in KEYS and in PROSE. The seven-gate meaning string inherited from the frozen S1B tool must be rewritten with this actor's label at write time; the frozen tool is not modified",
+    "no_foreign_offline_reference_block": "forbidden outright at any depth",
+    "regression_tests": "must prove the key scan, the new prose scan and the rewritten meaning string"
+  },
+
+  "prohibitions": ["no PPO", "no further DAgger round", "no sigma test or choice", "no other candidate", "no retry",
+                    "no new collection", "no promotion", "no production/env/reward/FSM/morphology/SEA/C++ change",
+                    "no mutation of rev4b or rev4c artifacts", "no July artifact as init or label"]
+}

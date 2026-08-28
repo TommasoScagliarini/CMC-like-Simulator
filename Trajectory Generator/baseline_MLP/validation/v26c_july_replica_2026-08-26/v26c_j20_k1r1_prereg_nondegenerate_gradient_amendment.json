@@ -1,0 +1,300 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION, MACHINE-READABLE",
+  "stage": "V26C_J20_K1R1_NONDEGENERATE_GRADIENT_AMENDMENT",
+  "amends": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "date": "2026-08-27",
+  "status": "READINESS ONLY, revised after the architect review of 2026-08-27. Implemented and statically tested; NOT EXECUTED. No warm-up, no PPO, no rollout, no Ray, no environment, no optimizer.",
+  "contains_no_self_hash": true,
+  "requires_architect_go_before_execution": true,
+  "objective": "measure the ONE quantity the K1 probe could not observe - the gradient of vf_encoder.0.weight - under a stimulus that is not degenerate, and compose that single measurement with K1's immutable twenty-eight passing checks.",
+  "the_defect_this_amends": {
+    "what_k1_returned": "FAIL_CLOSED, 28 of 29",
+    "sole_failed_check": "P24_frozen_module_still_gives_the_critic_gradient",
+    "cause": "K1's own stimulus, not the pipeline. K1 fed an all-zero 8x84 observation batch. For a linear layer y = W x + b the first-layer weight gradient is dL/dW = (dL/dy) x^T, which is IDENTICALLY ZERO when x = 0, whatever the freeze does. The bias gradient is unaffected because dL/db = dL/dy.",
+    "why_the_diagnosis_is_not_a_guess": "K1's own record shows the predicted pattern and only that pattern: in BOTH arms exactly and only the first-layer WEIGHT is missing from the receives-gradient list, both first-layer BIASES are present, and both second-layer weights are present because their input is tanh(W0*0 + b0) = tanh(b0), which is not zero. The control arm is UNFROZEN and shows the same gap, so no freeze-related explanation can account for it.",
+    "what_k1_did_establish": "the freeze works and the proof is not vacuous: five actor parameters that demonstrably receive gradient when unfrozen receive none when frozen, and five of the six critic tensors receive gradient while the actor is cut out.",
+    "what_k1_did_NOT_establish": "that vf_encoder.0.weight would receive gradient under a non-degenerate stimulus. That follows from the closed form of the derivative, but it was NOT measured, and this amendment exists to measure it."
+  },
+  "what_this_amendment_must_not_do": {
+    "no_retry_of_k1": "K1 ran once under a GO that forbade retry. This stage does not re-run it.",
+    "no_overwrite": "the K1 leaf, its receipt, its commit verification, its result, its GO, its preregistration and its runner bytes are untouched.",
+    "no_rewriting_the_verdict": "the K1 result stays FAIL_CLOSED 28/29 on disk, permanently. That is what happened; an amendment that edited the record would be a forgery.",
+    "no_new_transplant": "no actor is transplanted again.",
+    "no_fresh_critic": "no critic is re-initialised. The amendment loads the EXACT sixteen-tensor module state K1 committed, so it measures the same module K1 measured and not a look-alike.",
+    "no_weakening_of_P24": "the amended check is STRICTLY STRONGER than K1's: finite AND strictly positive gradient norm on all six critic tensors, plus no actor gradient at all."
+  },
+  "the_module_under_test": {
+    "source": "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/probe_full_module_state.pkl",
+    "sha256": "b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2",
+    "tensors": 16,
+    "loaded_with": "load_state_dict(strict=True) into a freshly constructed AsymmetricActorCriticTorchRLModule, followed by an explicit byte-identity comparison of all sixteen tensors against the saved pickle",
+    "geometry": {
+      "n_actor": 35,
+      "n_full": 84,
+      "inference_only": false,
+      "freeze_actor": true,
+      "freeze_logstd": true,
+      "fcnet_hiddens": [
+        256,
+        256
+      ],
+      "fcnet_activation": "tanh"
+    },
+    "why_strict_true": "the saved state is complete, so a strict load proves nothing was silently defaulted",
+    "the_construction_weights_are_irrelevant": "every one of the sixteen tensors is overwritten by the saved state. The construction exists only to obtain a module object of the right class and shape.",
+    "why_strict_true_is_not_enough": "strict=True proves no key was missing or unexpected. It does NOT prove the VALUES that landed are the ones on disk: a silent dtype promotion, or a copy that lost a signed zero, would pass a strict load. All sixteen tensors are therefore compared key set first, then dtype, shape and C-order bytes, and the per-key map and count are recorded in the result and the receipt.",
+    "freeze_contract_is_verified_live": "the constructed module is interrogated after the load: _freeze_actor, _freeze_logstd, inference_only, _n_actor, _n_full, _action_dim and the presence of both vf and vf_encoder. Requesting a flag in a constructor call is not the same as the flag being live on the object that will be differentiated, and A04 binds on the latter."
+  },
+  "authorised_differences_from_k1_closed_whitelist": {
+    "rule": "W1 and W2 are the ONLY SCIENTIFIC differences in the gradient computation. Anything else in the computation would make this a different experiment rather than the same experiment with a usable stimulus.",
+    "W1_stimulus": {
+      "k1": "an all-zero 8x84 float32 batch",
+      "k1r1": "a deterministic algebraic 8x84 float32 matrix",
+      "construction": "value[p-1][q-1] = sign * ((p*37 + q*53 + p*q) mod 191 + 1) / 192.0, with p and q 1-based and sign = -1 when (p+q) is odd",
+      "no_rng_no_seed": "pure integer arithmetic followed by one exact division. The matrix is a property of the source file and of nothing else - not of a seed, not of a platform's float accumulation.",
+      "pinned_digest_float32_c_order": "4f643e9cf7d46fb95044cf87ad09342ba56c2e22ca7cda4b72bd57e2a537fb35",
+      "pinned_min": -0.9947916865348816,
+      "pinned_max": 0.9947916865348816,
+      "pinned_abs_min": 0.0052083334885537624,
+      "required_properties": [
+        "shape exactly 8 x 84, dtype float32",
+        "every element strictly non-zero",
+        "every element within [-1, 1]",
+        "all eight rows distinct",
+        "no column constant",
+        "the derived digest equals the pinned digest",
+        "it is not the degenerate zero batch",
+        "the observed minimum equals the pinned minimum",
+        "the observed maximum equals the pinned maximum",
+        "the observed absolute minimum equals the pinned absolute minimum"
+      ],
+      "properties_are_re_derived_at_run_time": "the stage measures all eleven and refuses to proceed if any fails. A construction that stopped satisfying one would be caught rather than silently producing a weaker experiment than the one preregistered.",
+      "measured_at_readiness": {
+        "elements_nonzero": true,
+        "rows_distinct": 8,
+        "minimum_distinct_values_per_column": 8,
+        "minimum_distinct_values_per_row": 84,
+        "positive_elements": 336,
+        "negative_elements": 336
+      },
+      "pinned_range_is_binding_at_run_time": "the pinned minimum, maximum and absolute minimum are checked inside stimulus_report, so stimulus['ok'] fails if any of the three differs. They are not left to an external test.",
+      "property_count": 11
+    },
+    "W2_row_weights": {
+      "k1": "the value term summed with unit weights",
+      "k1r1": [
+        1.0,
+        2.0,
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0
+      ],
+      "why": "eight distinct positive weights, so the eight rows cannot cancel one another symmetrically in the first-layer weight gradient - the very quantity K1 could not observe",
+      "deterministic": true
+    },
+    "these_are_the_only_SCIENTIFIC_differences": "same class, same geometry, same freeze flags, same forward path (_forward_train logits plus compute_values), same single backward, same byte-identity re-verification afterwards",
+    "the_EVIDENTIARY_PATH_differs_intentionally": "K1 built a module and transplanted an actor into it. K1R1 reconstructs a module and loads the complete post-K1 sixteen-tensor state BYTE FOR BYTE instead of re-running the transplant, because re-running the transplant would re-measure evidence K1 already produced under a GO. This stage is therefore NOT operationally identical to K1, and must not be presented as such. It is identical in what is MEASURED, and every tensor the gradient is computed from is proven byte-identical to the one K1 committed."
+  },
+  "entry_conditions_that_must_hold_before_it_can_run": {
+    "rule": "the amendment refuses to run against anything but the exact evidence it was written for. Composing with a different experiment would be meaningless.",
+    "k1_verdict_required": "FAIL_CLOSED",
+    "k1_checks_required": "28 of 29",
+    "k1_sole_failed_check_required": "P24_frozen_module_still_gives_the_critic_gradient",
+    "k1_other_twenty_eight_must_all_be_true": true,
+    "k1_commit_verification_must_be_ok": true,
+    "k1_technical_invalid_marker_must_be_absent": true,
+    "k1_inert_flags_must_all_be_false": [
+      "algo_train_called",
+      "optimizer_constructed",
+      "optimizer_step_taken",
+      "ray_cluster_started",
+      "environment_constructed",
+      "environment_stepped",
+      "rollout_performed",
+      "warmup_executed"
+    ],
+    "pinned_k1_leaf_sha256": {
+      "commit_verification.json": "06b60b92af40b852cdbff77551421189c2235f8b64165d972f7e4784e6eeb063",
+      "probe_actor_transplant_report.json": "73bb4c78f9e3910d552308250bf6dda29028bf6182a9760d0965db3c45ff0f80",
+      "probe_full_module_state.pkl": "b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2",
+      "probe_module_manifest.json": "eab14deedfe88449bac9ab37f5f56959d3213a3d0830ce7f22b71bb3aedfceaa",
+      "v26c_j20_critic_warmup_readiness_receipt.json": "8d2a4ba9a8e286194eb239665b0d1d71179cf52160b4bed93a4a99cddb18d128",
+      "v26c_j20_probe_result.json": "51b5f999f22fbd937b754159fc7a44f2fc3efa72463ea137154829b9d71d2452"
+    },
+    "pinned_k1_runner_sha256": "d33e0709ca4682ef857e07a85c7015d2d857aba2b04f454afb3bc1aa0c57858b",
+    "pinned_k1_prereg_sha256": "f4ec06d77641a460e26df554f4c5c0f10ebceacb4534bbd0368773294706130c",
+    "pinned_k1_go_sha256": "aca75c7c12585b5b1ee50c52ebabf3030facf8c83e4ece668e70e421cd3f44f0",
+    "pinned_j19a_module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "pinned_j19a_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "pinned_production_code_sha256": {
+      "asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f"
+    },
+    "no_other_production_code_is_executed": "the amendment imports gymnasium, torch, numpy and asymmetric_rl_module only. It does not import warm_start, env_factory, rollout_eval or train_ppo_mlp; the canonical actor digest is transcribed locally and asserted against J19A's known value.",
+    "the_k1_record_is_verified_THREE_times": {
+      "before_the_measurement": "verify_original() at preflight and again at the start of the probe",
+      "after_the_backward_before_any_write": "verify_original() is repeated and its six hashes are compared to the first pass AND to the pinned values",
+      "after_the_commit": "all six K1 files are re-hashed a third time inside the post-commit verification; a mismatch appends a problem, which leaves the TECHNICAL_INVALID marker in place and the leaf born invalid forever",
+      "why_three": "verifying only at the start would leave the interval in which this stage actually runs unobserved, and that interval is precisely where an accident could touch the evidence being composed with",
+      "k1_leaf_unchanged_is_DERIVED_never_declared": "the flag is the conjunction of the independent re-hashes; it is never written as a constant true"
+    }
+  },
+  "the_twelve_amended_checks": [
+    "A01 the original K1 record is exactly FAIL_CLOSED 28 of 29 with P24 as its sole failure",
+    "A02 the stimulus satisfies every preregistered property",
+    "A03 the stimulus matches the pinned float32 C-order digest",
+    "A04 the module was loaded EXACTLY from the K1 leaf and the freeze contract is live: sixteen tensors, no missing key, no unexpected key, the same key set, all sixteen byte-identical to the saved pickle, and the constructed module reports _freeze_actor True, _freeze_logstd True, inference_only False, n_actor 35, n_full 84, action_dim 2 and both value-tower children present",
+    "A05 the loss is finite",
+    "A06 all six unique critic tensors have a finite, strictly positive gradient norm",
+    "A07 vf_encoder.0.weight specifically has a finite, strictly positive gradient norm - the quantity K1 could not observe",
+    "A08 no actor parameter received any gradient",
+    "A09 the log-std rows are unchanged",
+    "A10 all sixteen module tensors are byte-identical before and after the backward",
+    "A11 the ten actor tensors are still byte-identical to J19A's",
+    "A12 the canonical actor digest still reproduces d4a13ff7..."
+  ],
+  "composite_gate": {
+    "rule": "PASS 29/29 if and only if the immutable K1 record is exactly FAIL_CLOSED 28/29 with P24 as its sole failure, its other twenty-eight checks are intact, and the amended P24 passes here.",
+    "amended_P24_definition": "A06 and A07 and A08 all true: all six critic tensors carry finite strictly positive gradient, vf_encoder.0.weight included, and no actor parameter carries any",
+    "the_twenty_eight_are_READ_not_re_measured": "they are evidence produced once, under a GO. Re-running them would replace evidence rather than add to it.",
+    "the_k1_result_is_NOT_rewritten": true,
+    "the_k1_leaf_still_reads_fail_closed": true,
+    "if_the_amended_P24_fails": "the composite is FAIL_CLOSED, the evidence is preserved, and there is NO retry",
+    "thresholds_invented_in_this_stage": 0,
+    "why_strictly_positive_and_not_merely_present": "a gradient tensor of exact zeros is present. K1's failure was precisely a present-but-zero gradient, so requiring presence would re-admit the defect this stage exists to close.",
+    "fails_closed_on_either_verification": "the composite requires the K1 record to verify BOTH before and after the measurement, and the two hash sets to agree with each other and with the pinned values"
+  },
+  "execution_discipline": {
+    "single_execution": true,
+    "no_retry": "whatever the outcome",
+    "no_warmup": true,
+    "no_ppo": true,
+    "no_ex_novo": true,
+    "no_rollout": true,
+    "no_environment": true,
+    "no_ray": true,
+    "no_optimizer": "none is constructed and no step is taken",
+    "no_sampling": true,
+    "no_checkpoint_promotion": true,
+    "structurally_forbidden_calls": [
+      "train",
+      "build_algo",
+      "PPOConfig",
+      "init",
+      "make_cmc_env",
+      "make_env",
+      "save_to_path",
+      "restore_from_path",
+      "from_checkpoint",
+      "sync_weights",
+      "reset",
+      "sample",
+      "step",
+      "transplant_actor_state"
+    ],
+    "structurally_forbidden_imports": [
+      "torch.optim",
+      "env_factory",
+      "rollout_eval",
+      "train_ppo_mlp",
+      "ray.tune"
+    ],
+    "enforced_by": "the test suite walks this runner's own AST, so the absence is asserted rather than promised",
+    "preflight": "fail-closed; no torch, no ray, no environment, no write",
+    "output": "j20_runs/j20_k1r1_nondegenerate_gradient_v26c_2026-08-27_r1, content-addressed, no-clobber, atomic, born invalid",
+    "born_invalid_marker": "TECHNICAL_INVALID is written FIRST into staging and removed LAST, only after post-commit verification succeeds",
+    "post_commit_verification": "every leaf-relative path is re-resolved from the COMMITTED receipt, re-hashed, and compared both to the receipt and to the staged bytes",
+    "leaf_contents": [
+      "v26c_j20_k1r1_result.json",
+      "k1r1_stimulus.npy",
+      "k1r1_stimulus_manifest.json",
+      "v26c_j20_k1r1_gradient_amendment_receipt.json",
+      "commit_verification.json"
+    ],
+    "go_must_pin": [
+      "baseline_MLP/asymmetric_rl_module.py",
+      "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl",
+      "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/commit_verification.json",
+      "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/probe_actor_transplant_report.json",
+      "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/probe_full_module_state.pkl",
+      "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/probe_module_manifest.json",
+      "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/v26c_j20_critic_warmup_readiness_receipt.json",
+      "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/v26c_j20_probe_result.json",
+      "test_v26c_j20_k1r1_gradient_amendment.py",
+      "v26c_j20_architect_go_k1.json",
+      "v26c_j20_critic_warmup_readiness.py",
+      "v26c_j20_k1r1_gradient_amendment.py",
+      "v26c_j20_k1r1_prereg_nondegenerate_gradient_amendment.json",
+      "v26c_j20_prereg_critic_warmup_readiness.json"
+    ],
+    "go_must_not_set": [
+      "authorises_warmup",
+      "authorises_training",
+      "authorises_rollout",
+      "authorises_ppo",
+      "authorises_k1_retry",
+      "authorises_rewriting_k1"
+    ],
+    "go_pin_count": 14,
+    "go_pins_are_labels_not_paths": "the GO payload carries labels and hashes only. Each label is resolved to a path by the runner's closed GO_REQUIRED_PIN_TARGETS map, never by the payload: a GO that could name its own paths could point a pin at a file that is not the one this stage will actually read, which would make the pin decorative. The label for asymmetric_rl_module.py is not even a path relative to this directory, and is resolved from an internal constant.",
+    "go_pins_cover_every_input_and_executable": "this stage's own three artefacts, all six immutable K1 leaf files, the K1 runner, preregistration and GO, the J19A module state, and the single production module the stage imports",
+    "validate_go_rejects": [
+      "a missing pin",
+      "an extra pin outside the closed map",
+      "a stale hash",
+      "a label whose file is absent"
+    ]
+  },
+  "invariants": {
+    "not_modified": [
+      "the K1 leaf, its GO, its runner, its preregistration and its report",
+      "J19A, J19B, J19C and every earlier leaf and runner",
+      "training_exnovo_cfg.yaml and training_cfg.yaml",
+      "tb_logging.py and train_ppo_mlp.py",
+      "the C++ SEA plugin and the OpenSim model",
+      "FSM v3, the detector, the morphology corridor",
+      "the reward function",
+      "the network architecture",
+      "sigma",
+      "every directory under Trajectory Generator/runs"
+    ],
+    "added": [
+      "this preregistration",
+      "v26c_j20_k1r1_gradient_amendment.py",
+      "test_v26c_j20_k1r1_gradient_amendment.py"
+    ],
+    "dirty_worktree": "preserved untouched"
+  },
+  "what_this_stage_cannot_establish": {
+    "not_established": [
+      "anything about the warm-up's outcome",
+      "anything about the actor's behaviour under parallel Ray sampling; this stage builds no environment",
+      "any generalisation beyond the nine cells of the combined J19B and J19C qualification",
+      "deployability of anything"
+    ],
+    "no_promotion": "nothing is promoted and nothing is called deployable by this stage",
+    "the_warmup_remains_unauthorised": "V26C_J20_CRITIC_WARMUP requires its own separate architect GO, which this document does not grant and this stage cannot reach"
+  },
+  "deferred_todo": [
+    "the critic-only warm-up execution, V26C_J20_CRITIC_WARMUP, behind its own architect GO",
+    "the restore audit that gate G9 of the J20 preregistration requires",
+    "policy_std always null, a cosmetic defect inherited from J12",
+    "the J8 leaf manifest remains stale, left unchanged by architect decision",
+    "the J8 leaf has no commit_verification.json, like the J2 leaf",
+    "nominal_mean_shift declared and not measured in the J15R1 runner",
+    "ENV_MUTATION_POLICY in J19C remains a conservative inherited superset",
+    "the J18, J19A, J19B, J19C and J20 readiness suites each retain their historical checks unmodified after their GOs were issued",
+    "LOTO, LOCO, B1R1, B1R2",
+    "the multi-model generalisation Epic"
+  ],
+  "architect_review_k1r1_2026_08_27": {
+    "1_go_pins_complete": "the GO now pins 14 labels through a closed label->path map resolved by the runner, covering every input and executable this stage semantically uses.",
+    "2_exact_load": "A04 now requires the same key set, sixteen tensors, and byte identity of every loaded tensor against the saved pickle, not merely strict=True.",
+    "3_live_freeze_contract": "A04 also binds on the freeze flags and geometry being live on the constructed module.",
+    "4_binding_stimulus_range": "the pinned minimum, maximum and absolute minimum are runtime checks inside stimulus_report; stimulus['ok'] fails if any differs.",
+    "5_k1_immutability_three_times": "verified before the measurement, after the backward before any write, and again after the commit.",
+    "6_precise_language": "'exactly two things differ' replaced: W1 and W2 are the only SCIENTIFIC differences; the evidentiary path differs intentionally and is no longer presented as identical."
+  }
+}

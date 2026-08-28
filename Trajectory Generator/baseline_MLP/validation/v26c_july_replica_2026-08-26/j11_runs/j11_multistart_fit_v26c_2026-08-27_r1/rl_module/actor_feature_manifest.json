@@ -1,0 +1,175 @@
+{
+  "schema": "actor_feature_manifest.2",
+  "generated_by": "V26C_J11_MULTISTART_FIT",
+  "generated_at_stage": "V26C_J11_MULTISTART_FIT",
+  "is_a_copy_of_the_parent_manifest": false,
+  "why_not_a_copy": "the parent's manifest describes the parent: its module_state_sha256 is the parent's, its actor_label and status predate this fit, and its controller_state_mask declares the controller block masked, which this fit does not do. A copied manifest would misdescribe this module on every one of those fields.",
+  "actor_feature_count": 35,
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "actor_width": 35,
+  "action_dim": 2,
+  "module_state_sha256": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+  "module_state_sha256_is": "the SHA-256 of module_state.pkl BESIDE this manifest",
+  "actor_digest": "f3c8fcb1b2ed28ed5fcb96440af8b5b9805e030125667fae3759a5c1447f1633",
+  "actor_digest_algorithm": "warm_start.actor_state_digest over the ten sorted actor keys",
+  "actor_digest_is_enforced_by": "warm_start.resolve_source_actor_features",
+  "source_actor_digest": "59d54240ac628dcbd1d0dbf34328145afa08a7028047a5923298782b79bf5188",
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> J11 multistart offline fit",
+    "derived_from": {
+      "stage": "V26C_J2_BASE",
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+      "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+    },
+    "source_module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "two_distinct_ancestors_do_not_conflate_them": {
+      "weight_parent": {
+        "what": "the module whose weights this fit started from",
+        "stage": "V26C_J2_BASE",
+        "sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+      },
+      "observation_contract_ancestor": {
+        "what": "the 39-wide August V26 imitative actor that fixes the observation contract under which the J10R1 teacher cells were collected. It is NOT a weight ancestor and was never loaded by any of these stages.",
+        "sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd"
+      }
+    },
+    "not_derived_from": {
+      "j8": "the J8 recovery fit is a SIBLING of this one, not an ancestor",
+      "j4": "not an ancestor",
+      "july": "July is methodology and evidence only; no July checkpoint is an ancestor of this module"
+    },
+    "training_data": {
+      "aggregate_rows": 24713,
+      "blocks": [
+        {
+          "id": "j7_nominal",
+          "rows": 16000,
+          "unique": 500,
+          "repeat": 32
+        },
+        {
+          "id": "j7_recovery",
+          "rows": 713,
+          "unique": 713,
+          "repeat": 1
+        },
+        {
+          "id": "cell_B",
+          "rows": 4000,
+          "unique": 500,
+          "repeat": 8
+        },
+        {
+          "id": "cell_C",
+          "rows": 4000,
+          "unique": 500,
+          "repeat": 8
+        }
+      ],
+      "aggregate_observations_sha256": "d3d777467b53cc243abd93f3d7dfd49c307b37b8c0db0f7c26dced7ef8e4c19e",
+      "aggregate_actions_sha256": "437185ec36830ebc300d29f4b3cd49b43065459228427c0dbe1b0b1fad7242cc"
+    }
+  },
+  "clock_contract": {
+    "columns": [
+      0,
+      1
+    ],
+    "feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ],
+    "weights_are_exactly_zero": true,
+    "enforced": "hard-zeroed after every optimizer step and again at save",
+    "consequence": "the clock inputs cannot influence the action, whatever the environment records in those columns"
+  },
+  "controller_contract": {
+    "columns": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "feature_names": [
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "masked": false,
+    "state": "LIVE - these columns are trained and carry non-zero weight",
+    "column_l2_norms": {
+      "pros_knee_angle_previous_endpoint": 0.4508409798145294,
+      "pros_knee_angle_served_ref": 0.17285360395908356,
+      "pros_knee_angle_served_ref_vel": 0.044509127736091614,
+      "pros_knee_angle_served_ref_accel": 0.008436682634055614,
+      "pros_knee_angle_sea_u": 0.5431403517723083,
+      "pros_ankle_angle_previous_endpoint": 0.6870914101600647,
+      "pros_ankle_angle_served_ref": 0.3415326774120331,
+      "pros_ankle_angle_served_ref_vel": 0.07131034135818481,
+      "pros_ankle_angle_served_ref_accel": 0.010061168111860752,
+      "pros_ankle_angle_sea_u": 0.2782135009765625
+    },
+    "physical_scaling": "the July physical scales are absorbed into pi.0.0.weight at save time, so this module consumes RAW observations"
+  },
+  "input_convention": "RAW observations, unscaled, in the feature order above",
+  "deployable": false,
+  "status": "J11 offline fit PASS; closed-loop qualification PENDING; not promoted; not deployable",
+  "offline_gate_pass": true,
+  "closed_loop_qualification": "PENDING - not run by this stage",
+  "critic": "ABSENT - this module carries no value-function tensor and this stage constructs none",
+  "claims_not_made": [
+    "no claim of closed-loop viability",
+    "no claim of generalisation beyond AB06 and the three starts of this trial",
+    "no claim of deployability",
+    "no promotion of any kind"
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "pin_id": "july_imitative_protocol_reconstruction",
+  "date": "2026-08-25",
+  "kind": "ADDITIVE and IMMUTABLE. A reconstruction of the HISTORICAL July imitative protocol from the production sources and the July reports, pinned by content. July is METHOD ONLY: no July checkpoint, dataset, label or anchor is ever used",
+
+  "production_sources": {
+    "target_domain_imitation.py": {
+      "sha256": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3",
+      "adapt_actor_at_line": 942,
+      "loss_and_step_block_lines": [1135, 1159],
+      "loss_and_step_block_sha256": "b75c3e2d7bc18255aff8a44be2b731d4a12edd7cd6dcbcfec7038761ba4acb52"
+    },
+    "target_domain_dagger.py": {"role": "the July CLI whose argparse defaults fix the hyperparameters"},
+    "target_domain_markov_adaptation.py": {"role": "the 13/07 Markov stage; not used by the base phase"}
+  },
+
+  "hyperparameters_from_the_july_cli_defaults": {
+    "epochs": 400, "batch_size": 64, "learning_rate": 0.0003, "validation_fraction": 0.20,
+    "patience": 60, "clip_weight": 1.0, "logstd_weight": 0.1, "anchor_weight": 1e-05, "seed": 123,
+    "gradient_clipping": "none", "ppo_updates": 0
+  },
+
+  "loss_transcribed_from_production": {
+    "mean_loss": "functional.mse_loss(means, targets[batch])   -- flat, unweighted MSE",
+    "clip_loss": "torch.relu(torch.abs(means) - 1.0).square().mean()",
+    "logstd_loss": "functional.mse_loss(logits[:, action_dim:], source_logstd[batch])",
+    "anchor_loss": "torch.stack([(p - anchor[name]).square().mean() for name, p in module.pi.named_parameters() if p.requires_grad]).mean()",
+    "total": "mean_loss + clip_weight*clip_loss + logstd_weight*logstd_loss + anchor_weight*anchor_loss"
+  },
+
+  "per_step_order_transcribed_from_production": [
+    "optimizer.zero_grad(set_to_none=True)",
+    "loss.backward()",
+    "optimizer.step()",
+    "restore_logstd_head()",
+    "_zero_disabled_clock_columns(module, feature_names)",
+    "_zero_first_layer_columns(module, hard_zero_feature_indices)"
+  ],
+
+  "early_stopping_transcribed_from_production": {
+    "rule": "val_mse < best_validation_mse - 1e-9 updates best, best_epoch and a deepcopy of pi.state_dict, and resets the stale counter; otherwise the stale counter increments",
+    "break": "stale_epochs >= patience",
+    "restore": "module.pi.load_state_dict(best_state) after the loop"
+  },
+
+  "production_capabilities_that_match_this_branch": {
+    "hard_zero_first_layer_features": "production already projects arbitrary first-layer columns to exact zero after every step. This is exactly the masking mechanism the base phase needs, and it is NOT an invention of this branch",
+    "freeze_logstd_head": "production already supports hard-freezing the log-std head",
+    "training_indices_validation_indices": "production already accepts an EXPLICIT split, which is what leave-one-trajectory-out requires",
+    "selection_mode_fixed_final_epoch": "production already supports training a fixed number of epochs with no validation, which is what the final all-data fit requires"
+  },
+
+  "why_this_branch_reimplements_the_fit_in_the_sandbox": {
+    "reason": "production adapt_actor loads its input with RLModule.from_checkpoint, the RLlib checkpoint format. Every artifact of this project is exported in the warm_start rl_module format instead, and all eight previous fits of this bridge used the in-sandbox fit for that reason",
+    "mitigation": "the sandbox loss and per-step order are pinned against the production block above and verified by a differential test, term by term, on random inputs"
+  },
+
+  "declared_deviations_from_the_july_protocol": {
+    "logstd_weight": {
+      "july": 0.1,
+      "here": 0.1,
+      "note": "kept for fidelity. With a constant-sigma head whose log-std weight rows are zero, the log-std output does not depend on the trunk, so this term contributes exactly zero gradient to every trainable weight that survives the step, and the head is restored after every step anyway. The receipt verifies the head is byte-identical after the fit"
+    },
+    "validation_split": {
+      "july": "seeded random permutation over the aggregate (validation_fraction 0.20)",
+      "here": "EXPLICIT leave-one-trajectory-out, never random",
+      "why": "the July random split leaks temporal neighbours; production already supports explicit indices"
+    },
+    "hard_zero_columns": {
+      "july_base": "not used in the 11/07 DAgger path",
+      "here": "the ten controller columns and the two clock columns, zeroed after every step",
+      "why": "the base phase of this branch masks the controller channel by design"
+    },
+    "deterministic_algorithms": {
+      "july": "torch.use_deterministic_algorithms(True) only in fixed_final_epoch mode",
+      "here": "always",
+      "why": "stricter, and consistent with the in-sandbox fit used by every previous stage of this bridge"
+    },
+    "final_fit": {
+      "july": "one fit with early stopping",
+      "here": "three leave-one-trajectory-out folds for epoch selection, then one final fit on all rows for the median best epoch with no validation",
+      "why": "preregistered by the architect before any fit"
+    }
+  },
+
+  "july_reports_consulted": [
+    "reports/user/2026-07-11_riadattamento_imitativo_target_domain.md",
+    "reports/user/2026-07-13_actor_robust_deployable_critic_warmup.md",
+    "reports/user/2026-07-13_sblocco_actor_markov35_e_warmup_critic.md",
+    "reports/user/2026-07-13_ablation_memoria_controller_actor.md",
+    "validation/controller_memory_ablation/2026-07-13_markov35_final_gate.json"
+  ]
+}

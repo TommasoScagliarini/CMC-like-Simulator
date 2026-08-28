@@ -1,0 +1,120 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j5_amendment_revalidation",
+  "kind": "ADDITIVE, IMMUTABLE",
+  "stage_authorised": "V26C-J5-REVALIDATION",
+  "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer, not approver.",
+  "date_utc": "2026-08-26",
+  "does_not_rewrite": {
+    "statement": "This amendment is ADDITIVE and stands BESIDE the J4 recovery-only amendment. It rewrites nothing: v26c_j3_amendment_recovery_only.json keeps its own text, its own hash and its own scope.",
+    "j4_amendment_file": "v26c_j3_amendment_recovery_only.json",
+    "j4_amendment_sha256": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+    "j1_verdict_unchanged": "FAIL",
+    "j3_verdict_unchanged": "FAIL",
+    "j4_verdict_unchanged": "PASS (TECHNICAL/OFFLINE - POST-CRASH FINALIZED)"
+  },
+  "authorises": {
+    "scope": "ONE fresh deterministic closed-loop REVALIDATION of the J4 recovery product",
+    "permitted": [
+      "ONE deterministic closed-loop rollout of the pinned J4 recovery actor under the pinned v3 runtime",
+      "writing a fresh J5 trace, kinematics, sim_outputs and receipt in a new no-clobber leaf"
+    ],
+    "forbidden": [
+      "retry of J3, J4 or J5",
+      "any further fit, optimizer step, DAgger round or progressive recovery iteration",
+      "sigma or exploration noise of any kind",
+      "critic training or PPO updates",
+      "ex-novo training",
+      "promotion of any artefact",
+      "LOTO", "LOCO", "B1R1", "B1R2",
+      "a standalone 25D actor",
+      "widening the actor beyond 35D",
+      "contralateral features",
+      "using July artefacts as operational parents, datasets or labels",
+      "modifying any content-addressed J0-J4 artefact or script"
+    ],
+    "promotion_policy": "a J5 PASS confers NO promotion, NO deployability and NO authorisation of any next stage. Those remain separate, explicitly authorised decisions."
+  },
+  "pinned_artefacts_sha256": {
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/j4_fit_original.log": "88e9312626d23ce49685576e263df1b93c0f4f8d077415cc1d0bdaadb188dbcf",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/v26c_j4_recovery_receipt.json": "887f2b94e5a22a9c8013497164db090c2e910804730c5f3aa9c4f4d5f308c354",
+    "v26c_j4_recovery.py": "24dceef98242cc9e02f63d0442e8361bae32994c0829859b1747f0e7091a6841",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+    "v26c_j3_amendment_recovery_only.json": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+    "v26c_j1_amendment_soft_fail.json": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3"
+  },
+  "operational_actor": {
+    "checkpoint": "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module",
+    "module_state_sha256": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+    "width": 35,
+    "full_observation_width": 84,
+    "statement": "the J4 recovery checkpoint is the ONLY actor J5 may roll out. It is the same single 35D student, not a new one, and it is not widened.",
+    "hard_zero_columns": [0, 1],
+    "trainable_controller_columns": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34],
+    "controller_columns_must_be_nonzero": true,
+    "why_the_mask_differs_from_j3": "the base stages J2/J3 hard-zeroed the clock AND the controller memory. The recovery stage lifted the ten controller-memory columns, as attested by the J4 receipt, so at J5 only the clock stays hard-zero. The actor width is unchanged.",
+    "contralateral_features": "REMAIN ABSENT"
+  },
+  "runtime": {
+    "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "builder": "v26c_j1_collect.build_full_env_config, unchanged",
+    "fsm_behaviour_version": "v3",
+    "event_source": "binary_active_v26",
+    "seed": 123,
+    "steps": 500,
+    "action_selection": "deterministic mean; no sigma, no exploration noise",
+    "stepped_with": "the RAW deterministic action; the clipped action stays a diagnostic mirror"
+  },
+  "gates": {
+    "statement": "EXACTLY the J3 gates, inherited verbatim. No threshold is added, moved, relaxed or reinterpreted.",
+    "common": {
+      "steps_required": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycles_min": 2,
+      "phase_timeout_stance_max": 0,
+      "phase_timeout_swing_max": 0,
+      "morphology_causal_contract_failure_max": 0,
+      "hs_cancelled_count_max": 0,
+      "resync_count_max": 1,
+      "max_penetration_m_max": 0.020
+    },
+    "kinematic_quality": {
+      "ankle_min_rad_max": -0.03,
+      "ankle_amplitude_min_rad": 0.30,
+      "knee_amplitude_min_rad": 0.60,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [-1.5, 0.0],
+      "ankle_bounds_rad": [-0.7, 0.7]
+    },
+    "telemetry_integrity": "the same HS/TO self-consistency invariant, recorded separately and never a behavioural threshold",
+    "diagnostics_not_binding": ["action_clipped_steps"],
+    "hard_guard_m": 0.028,
+    "soft_diagnostic_m": 0.020
+  },
+  "comparisons_required": {
+    "against": ["J3 base rollout", "J1 prescribed teacher"],
+    "quantities": ["max_penetration_m", "steps_above_0.020_m"],
+    "rule": "REPORTED as evidence only. A comparison never becomes a gate, never reinterprets a threshold and never excuses a FAIL.",
+    "j3_max_penetration_m": 0.02704966381076714,
+    "j3_steps_above_soft": 106,
+    "j1_max_penetration_m": 0.02294380435912411,
+    "j1_steps_above_soft": 97
+  },
+  "outcome_policy": {
+    "pass_condition": "every J3 gate passes AND the telemetry integrity invariant holds",
+    "on_pass": {"deployable": false, "promotion": "NONE", "next_stage_authorized": false},
+    "on_fail": {"artefacts_preserved": true, "quarantined": true, "retry": "FORBIDDEN"},
+    "automatic_promotion": "NONE, under any outcome"
+  },
+  "immutability": "this file is content-addressed by the artefacts it pins. Any change to a pinned artefact invalidates it. It is never edited in place, and it never edits the J4 amendment."
+}

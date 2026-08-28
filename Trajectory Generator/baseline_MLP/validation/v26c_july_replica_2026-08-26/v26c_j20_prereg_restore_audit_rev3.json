@@ -1,0 +1,116 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION ADDENDUM",
+  "stage": "V26C_J20_RESTORE_AUDIT",
+  "revision": "rev3",
+  "cites": {
+    "base": "v26c_j20_prereg_restore_audit.json",
+    "base_sha256": "1326944edcbe368319409705e6ff2aeafb62f3def4503f467736ba6780c7d9e6",
+    "rev1": "v26c_j20_prereg_restore_audit_rev1.json",
+    "rev1_sha256": "3fa1ae238cfe0c20865850951ee787cf528b1c17cc0ba6fe97a714d9e37c3ef1",
+    "rev2": "v26c_j20_prereg_restore_audit_rev2.json",
+    "rev2_sha256": "59e2e5e04d167eaafd8283800d277ca8415fac8d57a880818a082dbdbb838cf7"
+  },
+  "predecessor_status": "BASE, REV1 AND REV2 ARE SEALED AND UNMODIFIED. This addendum rewrites none of them. All four documents are pinned by the GO and re-hashed at preflight.",
+  "precedence": "rev3 > rev2 > rev1 > base",
+  "contains_no_self_hash": true,
+  "additive": "This addendum corrects four statements and tightens two contracts. It adds no gate: the count stays 13.",
+
+  "correction_1_token_counting": {
+    "what_rev1_got_wrong": "rev1's note_on_counting says the twenty-token count refers to the train_ppo_mlp argv the wrapper delegates. That is inaccurate by two.",
+    "what_rev1_got_right": "the operative clause immediately above it - 'the twenty tokens minus interpreter and script' - is correct and is what the runner implements.",
+    "the_three_counts_that_govern": {
+      "derived_command_tokens": 20,
+      "delegated_trainer_argv": 18,
+      "full_child_argv": 25
+    },
+    "how_they_relate": "the derived command is 20 tokens, of which token 0 is the interpreter and token 1 the script; removing those two leaves the 18 the wrapper delegates. The full child argv is those 18 plus the interpreter, the wrapper path, --audit-source-state and its value, --audit-evidence and its value, and the '--' separator: 18 + 7 = 25.",
+    "requirement": "the runner must record all three counts and must refuse to run if the derived command is not exactly 20 tokens."
+  },
+
+  "correction_2_wrapper_wording": {
+    "what_was_wrong": "the wrapper's docstring claimed it 'writes no file under baseline_MLP'. That is false: the validation leaf of this stage physically lives under baseline_MLP/validation/, and the wrapper writes the audit evidence into it.",
+    "the_accurate_claim": "the wrapper modifies NO PRODUCTION FILE. It rebinds one attribute of the imported train_ppo_mlp module in memory, in its own process only, and that rebinding dies with the process. The only file it writes is live_optimizer_audit.json inside this stage's own validation leaf.",
+    "applies_to": ["the wrapper docstring", "test A15 of test_v26c_j20_restore_audit.py"],
+    "why_it_matters": "an audit that overstates its own containment is exactly the kind of claim this pipeline exists to refuse. The narrower true statement is worth more than the wider false one."
+  },
+
+  "correction_3_go_status": {
+    "what_was_too_loose": "validate_go refused only the literals DRAFT and PROPOSED. A GO with no status field, or with a status of 'ok', 'final' or any other arbitrary string, would have passed that check.",
+    "the_rule_now": "a GO is valid only when status is EXACTLY the string 'APPROVED'. A missing status, a null status, a non-string status and any other string are all refused.",
+    "unchanged": "authorises_execution must still be exactly true, the stage must match, and every forbidden authorisation flag must be absent or false."
+  },
+
+  "correction_4_declared_side_effects": {
+    "the_config_is_not_changed": "v26c_j20_warmup_critic_only_cfg.yaml is used exactly as the warm-up used it. No key is touched by this stage.",
+    "what_the_config_asks_for": {
+      "num_env_runners": 13,
+      "ray_num_cpus": 14
+    },
+    "what_that_means_here": "building the Algorithm constructs those EnvRunners, and constructing an EnvRunner constructs its OpenSim environment. RLlib may perform an initial reset of an environment during setup in order to read its spaces.",
+    "what_does_NOT_happen": "zero algo.train calls, zero sampling, zero rollouts. The iteration loop range is empty by construction because iteration_start is derived as restored_logical_iteration + 1 = 2 while the target is 1.",
+    "how_it_is_proven_rather_than_asserted": "gates R1, R2 and R10: no iteration row, an empty history, and none of the artefacts a training step would have left behind.",
+    "why_the_runner_count_is_not_lowered": "setting num_env_runners to 0 would change the object under audit. The checkpoint was written by a 13-runner configuration and restore_from_path restores EnvRunner state; auditing it under a different parallelism would be auditing something else. The cost is declared instead of avoided."
+  },
+
+  "tightened_R9": {
+    "supersedes": "the R9 verdict predicate of rev1, which required only exact true, difference_count 0, no problems, one learner, one optimizer name, the after_restore stage marker and an after_restore entry in optimizer_lr_audit",
+    "why": "rev1 promised evidence - whole-tree digests, an explicit param_groups comparison, the top-level keys and index sets of both sides - that its own verdict predicate never actually required. A count of zero differences can be reported by a payload that computed nothing.",
+    "the_predicate_now_requires_all_of": [
+      "the evidence file exists and its kind is exactly 'LIVE OPTIMIZER RESTORE AUDIT'",
+      "stage_marker is exactly 'after_restore'",
+      "source_state_sha256 equals 51d97ef016aea2086201b55db807f3273b76784bbafdea6cc9e5c7fea90294be, the pinned learner state of the audited checkpoint",
+      "exact is exactly true",
+      "differences is an empty LIST - not merely a difference_count of zero",
+      "difference_count is 0",
+      "problems is empty",
+      "normalised_digest_source and normalised_digest_live are both present and equal, and normalised_digests_match is true",
+      "param_groups.exact is true, param_groups.differences is an empty list, and param_groups.digests_match is true",
+      "top_level_keys_source and top_level_keys_live are both exactly ['param_groups', 'state']",
+      "state_indices_source and state_indices_live are both exactly [6, 7, 8, 9, 10, 11]",
+      "learner_count is 1 and exactly one optimizer was captured",
+      "the single optimizer is named 'default_optimizer'",
+      "summary.optimizer_lr_audit holds an entry whose stage is 'after_restore'"
+    ],
+    "on_the_optimizer_name": "'default_optimizer' is not a new assumption. The warm-up under audit already recorded it in its committed train_iterations.jsonl, under optimizer_learning_rates as {'optimizer_name': 'default_optimizer', 'optimizer_type': 'Adam', 'learning_rate': 0.0001}. The expectation is read off existing evidence, not invented here.",
+    "unchanged_from_rev1": [
+      "the original _reapply_optimizer_learning_rate is called FIRST and its return value is handed back untouched",
+      "the capture happens immediately afterwards, through the production traversal",
+      "a mismatch RAISES, which makes run() record stop_reason 'error' and main() exit 1, so the production run fails",
+      "the evidence is written before the raise, so a failure preserves its own explanation"
+    ]
+  },
+
+  "evidence_contract": {
+    "file": "live_optimizer_audit.json, written by the wrapper into this stage's leaf",
+    "canonical": "UTF-8 JSON, sorted keys, indent 2, allow_nan false",
+    "required_fields": [
+      "kind, stage_marker, exact, differences, difference_count, problems",
+      "learner_count, optimizer_names, optimizer_types, expected_optimizer_name",
+      "source_state_pkl, source_state_sha256",
+      "normalised_digest_source, normalised_digest_live, normalised_digests_match",
+      "param_groups: exact, differences, difference_count, digest_source, digest_live, digests_match",
+      "top_level_keys_source, top_level_keys_live",
+      "state_indices_source, state_indices_live",
+      "expected_state_indices, expected_param_count, param_group_sizes_live",
+      "moment_digests_source, moment_digests_live",
+      "method"
+    ],
+    "whole_tree_digest_definition": "sha256 of the UTF-8 repr of the normalised tree. The normalised form contains only tuples, lists, strings, bools, None and numbers, and Python's float repr is the shortest round-tripping form, so the digest is deterministic. Two trees with the same digest are the same tree."
+  },
+
+  "unchanged": [
+    "all thirteen gates R1-R13; the count stays 13",
+    "R1-R8 and R10-R13 exactly as the base document and rev1 define them",
+    "the normalisation rules as rev2 settled them, including the ascontiguousarray 0-D trap",
+    "the four command operations, with the config left untouched",
+    "the fail-closed protocol, the no-clobber destination, the born-invalid marker, the single execution, the absence of any retry",
+    "success authorises no PPO, no ex-novo, no promotion, no training readiness and no next stage"
+  ],
+
+  "prohibitions_restated": [
+    "no real execution of this stage until the architect issues an operational GO with status exactly APPROVED",
+    "no retry, whatever the outcome",
+    "no rewriting of the base document, rev1 or rev2",
+    "no modification of any production file"
+  ]
+}

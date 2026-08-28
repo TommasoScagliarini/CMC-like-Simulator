@@ -1,0 +1,152 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION AMENDMENT",
+  "stage": "V26C_J20_RESTORE_AUDIT",
+  "revision": "rev1",
+  "amends": "v26c_j20_prereg_restore_audit.json",
+  "amends_sha256": "1326944edcbe368319409705e6ff2aeafb62f3def4503f467736ba6780c7d9e6",
+  "base_document_status": "SEALED AND UNMODIFIED. This amendment does not rewrite it. Both documents are pinned by the GO and both are re-hashed at preflight; where they disagree, this amendment governs.",
+  "contains_no_self_hash": true,
+
+  "why_this_amendment_exists": {
+    "finding": "R9 as written in the base preregistration is insufficient.",
+    "reason_1": "It loads the pickled optimizer state into a SEPARATE torch Adam built by the runner. That proves the file is loadable. It does not prove that the moments are present in the LIVE optimizer that the real algo.restore_from_path created inside the learner.",
+    "reason_2": "It compares shapes and the step counter only. It does not compare the bytes of exp_avg and exp_avg_sq, nor the param_groups.",
+    "consequence": "A restore that silently produced a fresh optimizer with correctly shaped but numerically wrong moments would have passed R9. That is the same class of silent failure as the inference_only export leaving a fresh critic, which is the defect this whole line of work exists to rule out.",
+    "resolution": "R9 is replaced by a LIVE, in-process, byte-exact comparison. The hermetic check is kept, extended to byte identity, and demoted to an independent second opinion under a new gate R13."
+  },
+
+  "gate_count": {
+    "base_document_said": 12,
+    "now": 13,
+    "change": "R9 is redefined and R13 is added. R1-R8 and R10-R12 are unchanged from the base document."
+  },
+
+  "R9_superseded": {
+    "label": "R9_live_optimizer_is_byte_exact_after_restore",
+    "supersedes": "R9_optimizer_really_restorable of the base document, in full",
+    "where_it_runs": "inside the production child process, at the exact instant after algo.restore_from_path(resume_path) returns",
+    "how_the_instant_is_reached": "train_ppo_mlp.py:1741-1748 calls _reapply_optimizer_learning_rate(algo, args.lr) on the line immediately after the restore, and appends its result to optimizer_lr_audit under stage 'after_restore'. A validation-only wrapper replaces that module attribute in the child process, calls the ORIGINAL first, and captures the live optimizer immediately afterwards.",
+    "capture_path": "train_ppo_mlp._learner_call_results(algo, capture) -> algo.learner_group.foreach_learner(capture); capture(learner) iterates learner.get_optimizers_for_module('default_policy'). This is the same traversal the production code itself uses, not a reimplementation of it.",
+    "what_is_compared": "the live optimizer.state_dict() against checkpoint_last/learner_group/learner/state.pkl -> optimizer['default_policy_default_optimizer']['state'], recursively and exactly",
+    "comparison_covers": [
+      "the set of top-level keys: exactly {'param_groups', 'state'} on both sides",
+      "every param_groups entry: every key, every primitive value, and the params index list",
+      "the set of state keys: exactly the six integers 6, 7, 8, 9, 10, 11 on both sides",
+      "for every one of those six entries: every key, and the BYTES of exp_avg and exp_avg_sq",
+      "the step counter of every entry"
+    ],
+    "on_mismatch": "the wrapper raises. run() catches it into stop_reason 'error' and ok false, main() then raises SystemExit(1), so the child returncode is 1 and the production run is a FAILURE. The audit cannot pass by silently recording a discrepancy.",
+    "verdict_predicate": "the live audit evidence file exists, reports exact true, reports zero differences, names exactly one learner and exactly one optimizer, and summary.optimizer_lr_audit holds an entry whose stage is 'after_restore'"
+  },
+
+  "normalisation": {
+    "why_it_is_needed": "the source is a pickle of NumPy arrays and Python scalars; the live optimizer holds torch tensors. Comparing the raw objects would fail on representation rather than on content, so both sides are mapped to one canonical form and only then compared with ==.",
+    "measured_source_types": {
+      "state[i]['exp_avg']": "numpy.ndarray float32",
+      "state[i]['exp_avg_sq']": "numpy.ndarray float32",
+      "state[i]['step']": "Python float, value 81.0",
+      "state keys": "Python int",
+      "param_groups[0]['betas']": "Python tuple (0.9, 0.999)",
+      "param_groups[0]['params']": "Python list of the twelve ints 0..11",
+      "param_groups[0] other keys": "amsgrad, capturable, decoupled_weight_decay, differentiable, maximize as bool; eps and lr as float; weight_decay as int; foreach and fused as None"
+    },
+    "rules": {
+      "tensor_like_with_ndim_ge_1": "('tensor', dtype string with any 'torch.' prefix stripped, shape tuple, sha256 of the C-order bytes). This is where byte identity of exp_avg and exp_avg_sq is enforced.",
+      "tensor_like_with_ndim_0_and_numeric_scalars": "('scalar', the exact Python value). A zero-dimensional float32 tensor holding 81.0 and a Python float 81.0 both normalise to ('scalar', 81.0). No tolerance is applied; the comparison is ==.",
+      "bool": "('prim', 'bool', value) - checked BEFORE int, because bool is a subclass of int",
+      "int_float_str_None": "('prim', type name, value)",
+      "list_and_tuple": "('seq', [normalised items]) - a tuple and a list with the same contents normalise equal, which is required because betas survives the round trip as either",
+      "dict": "('map', sorted list of (normalised key, normalised value)) - integer keys stay integers",
+      "anything_else": "('opaque', type name) - and an opaque value on either side is itself recorded as a difference, so an unrecognised type fails closed rather than passing silently"
+    },
+    "declared_consequence_of_calling_the_original_first": "the architect requires the original _reapply_optimizer_learning_rate to run before the capture. It sets param_groups lr to args.lr. Both the checkpoint and this stage use lr 1e-4, so the write is numerically a no-op; had they differed, the lr comparison would fail and the gate would correctly report it. This is declared rather than concealed."
+  },
+
+  "R13_added": {
+    "label": "R13_hermetic_second_opinion_with_byte_identity",
+    "role": "independent verification, out of process, with no Ray, no environment and no production wrapper",
+    "what_it_does": "the runner builds one AsymmetricActorCriticTorchRLModule at the pinned geometry, loads the sixteen-key module_state with strict=True, rebuilds a torch Adam over the twelve parameters in named_parameters() order, converts the pickled optimizer state to tensors and calls load_state_dict",
+    "extended_beyond_the_base_document": "it now also requires that exp_avg and exp_avg_sq of all six entries be BYTE-identical to the source arrays, not merely shape-compatible",
+    "what_it_additionally_establishes": "that named_parameters() indices 0..5 are exactly the six actor tensors and indices 6..11 are exactly the six critic tensors, which upgrades 'six Adam entries at indices [6..11]' from a positional claim to an identified one",
+    "independence": "it must agree with R9. R9 measures the live optimizer inside production; R13 measures the file from outside. Two disagreeing methods fail the stage."
+  },
+
+  "the_command_amended": {
+    "base_document_declared": "three operations on sealed_command(): substitute the config, remove the five warm-start tokens, append --resume-from",
+    "fourth_operation_added": {
+      "what": "substitute the script token",
+      "from": "train_ppo_mlp.py",
+      "to": "v26c_j20_restore_audit_child.py",
+      "why": "the live capture of R9 has to exist inside the child process before run() reaches the restore. There is no way to install it from outside the process."
+    },
+    "token_count_expected": 20,
+    "wrapper_own_arguments": "the wrapper consumes its own arguments before a literal '--' separator and passes everything after it to train_ppo_mlp unchanged: --audit-source-state <path to the source learner state.pkl> --audit-evidence <path to the evidence file> -- <the twenty tokens minus interpreter and script>",
+    "note_on_counting": "the twenty-token count refers to the train_ppo_mlp argv the wrapper delegates. The full child argv is longer by the wrapper's own arguments and the separator, and both forms are recorded in the receipt."
+  },
+
+  "the_wrapper": {
+    "file": "v26c_j20_restore_audit_child.py",
+    "validation_only": true,
+    "modifies_no_production_file": "it rebinds one attribute of the imported train_ppo_mlp module inside this child process only. No file under baseline_MLP is written, and the constraint 'no production modification if avoidable' is satisfied because there is no way to observe the live optimizer from outside the process.",
+    "it_does_not_emulate": "after installing the wrap it sets sys.argv and calls train_ppo_mlp.main(), which reaches run() and algo.restore_from_path. It never reimplements the restore, never constructs its own Algorithm and never bypasses parse_args.",
+    "the_wrap_contract": [
+      "the original function is called FIRST and its return value is returned unchanged to production",
+      "the capture happens immediately after the original returns and before control goes back to run()",
+      "the wrap is installed exactly once and asserts that the attribute it replaces is the original function",
+      "on any mismatch it raises; it never downgrades a mismatch to a warning",
+      "if the wrapped function is never called, no evidence file is written and R9 fails closed"
+    ],
+    "evidence_file": {
+      "name": "live_optimizer_audit.json",
+      "written_by": "the wrapper, inside the audit leaf",
+      "canonical": "UTF-8 JSON, sorted keys, indent 2, allow_nan false",
+      "contents": [
+        "exact: the single boolean verdict",
+        "differences: the full list, empty on success",
+        "learner_count and optimizer_names",
+        "the normalised digest of both sides",
+        "per-index sha256 of exp_avg and exp_avg_sq on both sides, for the six entries",
+        "the param_groups comparison",
+        "the stage marker 'after_restore' and the lr that was reapplied"
+      ]
+    }
+  },
+
+  "expected_artefacts_in_the_audit_leaf": [
+    "TECHNICAL_INVALID, replaced by RESTORE_AUDIT_PASSED only on success",
+    "live_optimizer_audit.json",
+    "summary.json",
+    "training_cfg.resolved.yaml",
+    "child_stdout_stderr.txt",
+    "faulthandler.log",
+    "watchdog_state.json",
+    "tensorboard/ and rllib/",
+    "v26c_j20_restore_audit_result.json",
+    "v26c_j20_restore_audit_receipt.json",
+    "commit_verification.json"
+  ],
+  "note_on_R10": "R10 of the base document lists what must NOT exist. live_optimizer_audit.json is an EXPECTED artefact and is not in that forbidden set; the forbidden set is unchanged.",
+
+  "unchanged_from_the_base_document": [
+    "R1 zero new iterations",
+    "R2 empty history",
+    "R3 restored training and logical iteration both 1",
+    "R4 iteration_start 2 and next_iteration 2",
+    "R5 the restore path was taken",
+    "R6 restored actor digest, live, from production code",
+    "R7 restored critic digest, live, from production code",
+    "R8 hermetic full module restore including the log-std slice and sigma",
+    "R10 nothing was trained",
+    "R11 sources unchanged",
+    "R12 single clean process",
+    "the fail-closed protocol, the no-clobber destination, the born-invalid marker, the single execution and the absence of any retry",
+    "the verdicts, and the fact that success still authorises no PPO, no ex-novo, no promotion and no training readiness"
+  ],
+
+  "prohibitions_restated": [
+    "no real execution of this stage until the architect issues an operational GO",
+    "no retry, whatever the outcome",
+    "no rewriting of the base preregistration, of the warm-up leaf, or of any J0-J19C artefact",
+    "no modification of any production file on disk"
+  ]
+}

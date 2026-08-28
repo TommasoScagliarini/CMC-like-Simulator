@@ -1,0 +1,156 @@
+{
+  "amendment_id": "rev3q_s1a_monorole_bc_intermediate",
+  "date": "2026-08-24",
+  "token": "V26B-S1A-BC-FIT",
+  "kind": "ADDITIVE. Materialises the rev3o mono-role computation as a NON-DEPLOYABLE intermediate candidate under a corrected publication rule. rev3l/rev3m/rev3n/rev3o/rev3p, their REJECTED artifacts, receipts, logs, reports and tooling remain immutable and are never modified",
+  "architect_decision": "GO after the read-only documentary review: (i) the mono-role actor is ONLY an intermediate candidate, never deployable; (ii) a separate deterministic nominal rollout is the PRECONDITION of any July-style source==init preservation stage",
+  "documentary_basis": {
+    "july_11_mono_role_bc": "reports/user/2026-07-11_riadattamento_imitativo_target_domain.md - 'Strategia 3: behavior cloning actor-only': 500 samples 400/100, loss = action-mean MSE + out-of-[-1,1] penalty + source log-std distillation + SMALL ANCHOR LOSS to the initial weights + early stopping + clock zeroing. NO preservation DATA role; the anchor is a parametric regulariser. RMSE 0.973332 -> 0.011002, actor 347af228...; closed loop of that clone: 68/500, 1/0/0, grf_penetration ('covariate shift del behavior cloning')",
+    "july_13_second_stage": "reports/user/2026-07-13_sblocco_actor_markov35_e_warmup_critic.md - dataset 16000 own nominal anchors + 712 recovery + 8000 alt-start teacher = 24712; logstd bit-identical; no PPO/critic; RMSE 0.019657 -> 0.008144; nominal shift RMS 0.004175; 3/3 det starts 500 steps, 3/3 stochastic seeds at sigma 0.005; REFINEMENT REJECTED: better offline (0.002948) but start -0.20 ended at 221 steps / 25.090 mm -> 'minimising the offline metric further is NOT monotone with dynamic robustness'",
+    "source_equals_init_proof": "reports/user/2026-08-24_v26b_r0a_rollout_ended_early_diagnosis.md (c): same --checkpoint for anchors and init, float32 identity rmse 1.19e-07; the July offline gate of the selected run was ok:false (selection by CLOSED-LOOP gate); July split was 20% permuted over TILED rows with no dedup (leaky)",
+    "chain_offline_pass_closed_loop_fail": "R0a offline PASS -> 493/500 joint_divergence; R1 -> 242/500; R2I (better holdout) -> 197/500; July BC RMSE 0.011 -> 68/500. S0D remains the only 35D actor with 500/500 (2 cycles, 13.7 mm)",
+    "conflict_proofs": "reports/user/2026-08-24_v26b_r0_feasibility_diagnostic.md (mono-role each PASS, joint impossible) and the rev3p REJECTED artifact (beta=1: both gates fail; preservation not fit even in-sample)"
+  },
+  "parents_immutable": {
+    "rev3l": "7545201df4e5aefb4fdccca9efc1425a9a4dde581a4c20269c0d3fd86aa794d5",
+    "rev3m": "8af3ad654e49e19f5a6d2dbcf128faf5ce424206a5def715d177f7fbda93e0c0",
+    "rev3n": "0677ad577336240b26cf6947e9e3d60d74632a35724f49b5f06bf4bc5aa377e3",
+    "rev3n_pregate_receipt": "923ffc5ca8fb4d3577d9894e90db151a92bad089d3669b38fb9553484e6f2634",
+    "rev3o": "abe463c3d64b4b91a0d5ef83517159bcc6fc417d029be4dd51db9c92a0dfc978",
+    "rev3o_tool": "a6d7163ef8089ca9efb5b8b31fe92d2132efa357b1c69d814f6d9531ea845916",
+    "rev3o_REJECTED": "a559bd691eb5934f32a820e46e13660f010f0b54e445c82d4f13e485154d558a",
+    "rev3p": "617440544a6193646b1e5f8e5d3e4d91f56f36e93b9accfe6fbfd5ebbf3d21e6",
+    "rev3p_tool": "22f0e3554023ef03c8c82674d48200000508d9aa197e0d2b2176d02138c75f23",
+    "rev3p_REJECTED": "d5f7b80709ae3fd315cf145d69f750d7601786a490626759159013418bb5d8d0",
+    "rev3k": "8f34c95ee7c69029e0d3e8715f3e62fe9652533a03e0dd4b8fb7b38114377437"
+  },
+  "init": {
+    "module": "student/S0D_35D_DISTILLED/rl_module",
+    "actor_digest": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+    "module_state_sha256": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597",
+    "enforcement": "POSITIVE digest pin; JUL_H0/R0a/R1/R2G/R2I forbidden as init and as labels"
+  },
+  "computation": {
+    "identical_to_rev3o": true,
+    "task_rows": 380,
+    "task_steps": [
+      [
+        1,
+        190
+      ],
+      [
+        311,
+        500
+      ]
+    ],
+    "excluded_steps": [
+      [
+        191,
+        200
+      ],
+      [
+        201,
+        300
+      ],
+      [
+        301,
+        310
+      ]
+    ],
+    "labels": "same-time AB06 u_IK from the pinned nominal cache 3dd878d4d6d2930d730c1a67f39d6799f20221e7659a435c02d062bfd553d9b0",
+    "numerics": {
+      "epochs": 300,
+      "batch_size": 256,
+      "optimizer": "Adam",
+      "lr": 0.0001,
+      "seed": 2026,
+      "loss": "flat row-uniform 2-output MSE vs u_IK + 1.0 action-clip penalty + 1e-5 parametric anchor",
+      "anchor_semantics": "July-11-faithful PARAMETRIC REGULARISER towards theta_S0D (mean over the 6 FULL tensors, 0.5 head factors); explicitly NOT a preservation mechanism - rev3p measured it inert (weighted 3.64e-09 vs loss 5.5e-02)",
+      "deterministic_algorithms": true,
+      "clock_columns": "re-zeroed after every step",
+      "logstd": "restored/frozen, bit-identical to the init",
+      "early_stopping": "none",
+      "model_selection": "none",
+      "retry": "forbidden",
+      "tuning": "forbidden"
+    },
+    "implementation_rule": "the fit MUST call the unmodified rev3o fit function so the reproduction is exact by construction"
+  },
+  "P0_reproducibility_gate_fail_closed": {
+    "G_task": [
+      0.13421327340983133,
+      0.12155383791334523
+    ],
+    "Q1_diagnostic": [
+      0.49825443853542484,
+      0.3461596068119536
+    ],
+    "T1_maxabs": 7.398672874359136e-08,
+    "T2_maxabs": 9.561586078454809e-08,
+    "candidate_actor_digest": "8f3e0ce17eff7c741dcf72de6d0fec0c372f9dbc7a9b3119d41c155ec8603e35",
+    "comparison": "BIT-EXACT equality required on all five items before any materialisation; any deviation -> STOP, no publication, REJECTED artifact",
+    "provenance": "all five values are recorded inside the immutable rev3o REJECTED artifact a559bd69...; verified equal to the architect's pins before execution"
+  },
+  "materialisation_gates": {
+    "binding": {
+      "G_task": {
+        "metric": "RMSE vs u_IK on the OUT-OF-SAMPLE blocked holdout steps 201-300",
+        "max_per_joint": 0.15
+      },
+      "Q3_invariants": true,
+      "T1_T2": {
+        "max": 1e-05
+      },
+      "lineage_fail_closed": true,
+      "P0": true
+    },
+    "non_binding_diagnostic": {
+      "Q1_source_holdout_rev3m": {
+        "max_per_joint_reference": 0.1,
+        "binding": false,
+        "rationale": "July's first BC had no preservation DATA role; preserving raw S0D outputs against conflicting u_IK in the same optimisation is proven impossible (R0 feasibility diagnostic + rev3p)"
+      },
+      "others": [
+        "full-500 metrics",
+        "in-sample task RMSE",
+        "drift vs S0D on the 500 task rows",
+        "parameter shift",
+        "anchor magnitude"
+      ]
+    }
+  },
+  "publication": {
+    "path": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1A_IK_AB06_35D_NONDEPLOYABLE",
+    "student_dir_forbidden": "the S1A candidate must NEVER be written under student/",
+    "atomic_no_clobber": true,
+    "mandatory_flags_in_manifest_and_receipt": {
+      "deployable": false,
+      "rollout_pending": true,
+      "sigma_unresolved": true,
+      "promotion_requires": "closed-loop nominal rollout under a separate token"
+    },
+    "forbidden": "any deployable marking or alias, including the historical contract string used by the deployable modules of the chain",
+    "status": "INTERMEDIATE CANDIDATE. S0D (481dd0d2..., 500/500 nominal under v3) remains the ONLY actor of the chain with closed-loop evidence"
+  },
+  "honest_extrapolation_statement": "the requested behaviour change is ~0.38 (knee mean drift measured in rev3o) whereas the closest July analogue (13/07) moved the actor by a nominal shift RMS of 0.004175. No documented July stage ever moved a walking actor by this magnitude, and every actor of this chain trained towards u_IK has failed closed loop (493/242/197). S1A is therefore an EXPERIMENT, and its offline gates are not evidence of closed-loop viability",
+  "next_stage_locked": {
+    "token": "V26B-S1A-NOMINAL-ROLLOUT (NOT granted here)",
+    "role": "single deterministic nominal rollout with the canonical rev3c/e/j command; it does not retro-invalidate this materialisation but is the ENTRY GATE to any July-style source==init preservation stage, because the 13/07 anchor construction requires the actor's OWN complete nominal trace (the documented blocker of R0a)"
+  },
+  "sigma_question": "UNRESOLVED: 0.005 is only the serialisation placeholder of the log-std head; no gate reads it; July selected sigma per stage (0.05 -> 0.03 -> 0.003 -> 0.005) and the 11/07 BC distilled the source log-std instead of imposing a constant",
+  "split_policy": "the frozen blocked holdout 201-300 + embargo 10 is kept; July's 400/100 random split and the 13/07 20%-over-tiled split are NOT retrofitted (leaky: identical tiled rows on both sides, no dedup; and July's offline gate was not the selection criterion). Consequence: our offline numbers are NOT comparable with July's 0.008144 - contextual only",
+  "prohibitions": [
+    "no rollout",
+    "no DAgger",
+    "no PPO/critic",
+    "no multistart",
+    "no sigma sweep",
+    "no morphology fit",
+    "no modification of env/reward/FSM/SEA/C++/production",
+    "no modification of any existing amendment/tool/receipt/log/report",
+    "no threshold/metric/label change",
+    "no retry",
+    "no tuning",
+    "no publication under student/"
+  ]
+}

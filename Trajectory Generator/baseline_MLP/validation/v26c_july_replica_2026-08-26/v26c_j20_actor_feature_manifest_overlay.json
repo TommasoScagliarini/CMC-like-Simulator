@@ -1,0 +1,163 @@
+{
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "actor_feature_count": 35,
+  "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+
+  "kind": "CONTENT-ADDRESSED PROVENANCE OVERLAY, DIRECTLY CONSUMABLE",
+  "stage": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "date": "2026-08-27",
+  "contains_no_self_hash": true,
+  "authorised_by": "architect directive of 2026-08-27, point 3: the J19A manifest stays byte-identical; the correction lives in an overlay, never in place",
+
+  "why_the_three_consumable_keys_are_at_the_TOP_level": {
+    "rule": "warm_start._load_actor_feature_manifest reads actor_feature_names, actor_feature_count and actor_digest from the TOP level of the document (warm_start.py:155-180). A list nested under a documentation key is not consumable, however well documented.",
+    "measured_not_assumed": "a first draft of this overlay kept the list under a 'correction' key and was rejected at runtime with ValueError: actor feature manifest must contain a non-empty actor_feature_names list. The three keys were hoisted for that reason.",
+    "the_other_two_keys_are_deliberate": "actor_feature_count and actor_digest are OPTIONAL for warm_start, and both are hard-checked when present. Including them turns the transplant into a fail-closed provenance check: a manifest paired with the wrong module is refused instead of silently accepted.",
+    "everything_below_is_documentation": "warm_start ignores unknown keys, so the provenance travels with the artefact it describes rather than in a separate file that could drift away from it"
+  },
+
+  "overlays": {
+    "path": "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json",
+    "sha256": "2c01067e9a569354cc4099537a3a556ab50d55aa8baa1d2127324dafeee27c54",
+    "it_is_read_never_edited": true,
+    "no_byte_of_the_j19a_leaf_is_modified_by_this_overlay": true,
+    "precedent": "the same treatment the architect ordered for the stale J8 leaf manifest in v26c_j18_provenance_overlay_j8_2026-08-27.json: declare, do not correct"
+  },
+
+  "module_under_overlay": {
+    "path": "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl",
+    "sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "actor_digest_semantics": "warm_start.actor_state_digest over the ten WARM_START_ACTOR_KEYS, sorted; sha256 of key utf-8 bytes then the tensor digest (ascii dtype, repr of the int shape tuple, C-order bytes)",
+    "state_keys": 10,
+    "independent_parameter_tensors": 6,
+    "encoder_alias_tensors": 4,
+    "parameters_independent": 76036,
+    "parameters_counting_aliases": 151044,
+    "observation_width": 35
+  },
+
+  "why_this_overlay_is_needed": {
+    "defect": "the J19A manifest carries no actor_feature_names key",
+    "consequence": "warm_start._load_actor_feature_manifest raises ValueError at warm_start.py:163-168, and warm_start.resolve_source_actor_features auto-discovers that same manifest from inside the module directory at warm_start.py:200-205. A warm-start transplant pointed at the J19A module directory therefore fails before any tensor is copied.",
+    "measured": "reproduced at runtime, with and without the explicit manifest flag: both paths raise the identical ValueError",
+    "scope_of_the_defect": "J19A's manifest is the only one of the 85 actor_feature_manifest.json files in the repository that lacks the key",
+    "why_not_fix_in_place": "the J19A leaf is committed evidence under a verified post-commit receipt. Editing any byte of it would invalidate the receipt, the commit verification and every downstream pin, including the J19B and J19C entry evidence.",
+    "why_not_borrow_another_manifest": "the J2, J8 and J15 manifests carry their own actor_digest, which warm_start hard-checks at warm_start.py:236-240. Pointing one of them at the J19A module would be refused - correctly - as a provenance mismatch."
+  },
+
+  "the_feature_list": {
+    "count": 35,
+    "order_is_significant": true,
+    "order_semantics": "index i of the list is column i of the actor observation slice, which is the leading 35 columns of the 84-wide production observation",
+    "names_join_sha256": "fb37bed7390b232b0874f5dd98aeb3e5448301ecbdd9d444101f69776f1d508f",
+    "names_join_semantics": "sha256 of the 35 names joined by a single newline, utf-8, no trailing newline"
+  },
+
+  "provenance_of_the_names": {
+    "rule": "the names are NOT authored here. They are transcribed from committed artefacts, and the readiness preflight re-reads every source listed below and refuses any disagreement.",
+    "independent_sources": 13,
+    "all_sources_agree": true,
+    "sources": [
+      "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_A_kinematics.npz#actor_feature_names",
+      "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_B_kinematics.npz#actor_feature_names",
+      "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_C_kinematics.npz#actor_feature_names",
+      "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_D_kinematics.npz#actor_feature_names",
+      "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_E_kinematics.npz#actor_feature_names",
+      "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_F_kinematics.npz#actor_feature_names",
+      "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1/j19c_cell_G_kinematics.npz#actor_feature_names",
+      "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1/j19c_cell_H_kinematics.npz#actor_feature_names",
+      "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1/j19c_cell_I_kinematics.npz#actor_feature_names",
+      "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json#actor_feature_names",
+      "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json#actor_feature_names",
+      "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json#actor_feature_names",
+      "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1/v26c_j19c_heldout_g_i_receipt.json#actor_before.feature_names"
+    ],
+    "note_on_the_j8_and_j2_manifests": "the J8 leaf manifest is byte-identical to J2's and is stale about its own module hash, which the architect ruled must not be corrected. Its actor_feature_names list is nevertheless one of the thirteen agreeing sources, and it is the feature list, not the module hash, that this overlay transcribes.",
+    "runtime_corroboration": "the J19C receipt records runtime_contract.actor_feature_count = 35 and runtime_contract.observation_feature_count = 84 in every one of the three cells, and the runtime contract check reads the names off the LIVE environment, not off any manifest"
+  },
+
+  "the_gait_clock_columns": {
+    "what_happens": "with gait_clock_enable false in the pinned runtime, the transplant is asked to zero the target columns for gait_phase_sin and gait_phase_cos (warm_start.DISABLED_GAIT_CLOCK_FEATURES, applied at train_ppo_mlp.py:1784-1799)",
+    "why_it_changes_nothing_here": "columns 0 and 1 of the J19A pi.0.0.weight are ALREADY exactly zero at the bit level, and so are their pi_encoder.0.weight aliases. The forced zeroing is therefore a provable no-op and cannot perturb the transplanted actor.",
+    "measured_not_assumed": "verified directly on the J19A bytes: the two columns compare byte-equal to a zero array of the same dtype and shape",
+    "corroborated_by": "the J19A manifest's own clock_columns_exactly_zero field, and by the same assertion in J18, J19A, J19B and J19C",
+    "the_readiness_probe_checks_it_again": "check P17 of the K1 probe"
+  },
+
+  "fields_of_the_underlying_manifest_confirmed_truthful": {
+    "module_state_sha256": "matches the actual bytes of the module it sits beside",
+    "actor_digest": "recomputed from the module bytes and equal",
+    "observation_width": "35, and the loaded pi_encoder.0.weight is (256, 35)",
+    "input_convention": "RAW observations, unscaled",
+    "clock_columns_exactly_zero": "true, and re-measured by this stage"
+  },
+
+  "fields_of_the_underlying_manifest_declared_STALE": [
+    {
+      "field": "status",
+      "manifest_says": "reproduced and offline-eligible; closed-loop A-F NOT run",
+      "why_it_is_stale": "true when J19A was committed, false since. J19B ran the closed-loop A-F qualification and returned PASS on 6/6 cells; J19C ran the held-out G/H/I qualification and returned PASS on 3/3 cells, 42/42 gates.",
+      "current_truth": "reproduced, offline-eligible, closed-loop qualified 6/6 in J19B and 3/3 in J19C",
+      "evidence": {
+        "j19b_receipt_sha256": "789c57ca293ae7d5f578d4b3cae4e9aec599fa3edf4ce87239ad5fc8a7b1b509",
+        "j19b_commit_verification_sha256": "0ded736553a55eba6ac600340750d40aa82f7ebf4689bcdd4717dc3636907776",
+        "j19c_receipt_sha256": "4224f0201eeccc8ccec911635b5bc18a82e38fb27eeb878457d004d28cb17ffc",
+        "j19c_commit_verification_sha256": "11096edec7e259a2fe3f6dd2691c26cee0ce0e82b96864bd85a52a00a9e6ef2f"
+      },
+      "action_taken": "declared here, NOT corrected in place"
+    }
+  ],
+
+  "what_this_overlay_does_not_do": {
+    "does_not_confer_deployability": true,
+    "deployable_key_deliberately_absent": "the J8 and J2 manifests carry a deployable key; this overlay does not, because no stage of this chain has demonstrated deployability and J19C records promotion NONE",
+    "does_not_authorise_execution": true,
+    "does_not_promote_anything": true,
+    "does_not_widen_the_actor": "the actor stays 35D. There is no 25D variant, no widening and no contralateral feature.",
+    "does_not_modify_the_j19a_leaf": true,
+    "does_not_modify_training_exnovo_cfg_yaml": true
+  },
+
+  "how_a_consumer_must_use_it": {
+    "rule": "a consumer that needs actor_feature_names for the J19A module must read this overlay and must not fall back to the leaf manifest",
+    "j20_mechanism": "the preregistered warm-up command passes this file's path explicitly, so warm_start never auto-discovers the leaf manifest from inside the module directory",
+    "cli_flag": "--warm-start-raw-source-feature-manifest",
+    "source_config_is_deliberately_not_supplied": "the J19A run directory holds no training_cfg.resolved.yaml, because J19A was an offline supervised fit and not a training run. The transplant records source_config_exists false, which is truthful; inventing a config to fill the field would not be."
+  }
+}

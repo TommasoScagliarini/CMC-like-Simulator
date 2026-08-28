@@ -1,0 +1,849 @@
+{
+  "schema": "v26c_j15_fresh_refit_receipt.1",
+  "stage": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "verdict": "PASS",
+  "authoritative": true,
+  "injected_fit_double": false,
+  "date": "2026-08-27",
+  "preregistration": {
+    "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j15_prereg_fresh_refit.json",
+    "sha256": "49c748b3a20925a0c270768aa6fddcd3adee474eb1de1cfaa885f849719d1ad2",
+    "stage_proposed": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+    "authorisation_status": "NOT_GRANTED_PENDING_ARCHITECT_AUDIT",
+    "hyperparameters_match_frozen_july_hp": true,
+    "gate_j11_binding_subset_count": 16,
+    "gate_j15_additional_binding": [
+      "j14_increment_rmse_decreases"
+    ],
+    "gate_binding_count": 17,
+    "gate_identical_to_j11": false,
+    "deferred_todo": [
+      "LOTO",
+      "LOCO",
+      "B1R1",
+      "B1R2",
+      "the regression/qualification gate A-F that must follow this refit",
+      "seeds 126, 127, 128 remain the sealed final reserve"
+    ]
+  },
+  "modules": {
+    "v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "v26c_j11_multistart_fit.py": "2b4ac9f496f7a412d40fec0eb5a0d9b69ee22ac634b8e7ed020ca5480cf26242",
+    "warm_start.py": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c"
+  },
+  "sources": {
+    "count": 23,
+    "pinned_sources_sha256": {
+      "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/commit_verification.json": "1d24eed05dd04c187c014181c89a0611a648e5601cacff5e1ae0221adcfb8643",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/module_state.pkl": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/commit_verification.json": "24ef5e2cbab291037c05906f592e60f04da64df614c50189303ccdec7ac3bd97",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_dataset_receipt.json": "e7262bf9d96e57fda6b3ecee18c58eb4f29ee48f71ff71bc5eba07a3d6abd79b",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_increment.npz": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j11_multistart_fit.py": "2b4ac9f496f7a412d40fec0eb5a0d9b69ee22ac634b8e7ed020ca5480cf26242",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_architect_go_2026-08-27.json": "483b8d558eb8e2245d645384b62d59e9931a1f9270eaed2c715c8a0bea998e3d",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset.py": "fe7c4951c195224b8006655b831549b4b613cfd80a346b7174c58962263e2e0c",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset_authorization_rev3.json": "46bbaa262fa0aeea9b3b09608196556f68ac602bdc9b265df4e344d41159dc2f",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_prereg_dagger_dataset_rev1.json": "877cccc1bb93868a5f1050a7cf2cfc1f5776d18437e099996f059373a6cb36d5",
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+      "Trajectory Generator/baseline_MLP/warm_start.py": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c"
+    },
+    "j10r1_commit_verification_sha256": "59cd1563ad23713ef00ac5b2e95a334a088257af95c6727520fb895c61a8c61c",
+    "rule": "every byte this stage reads is pinned; the first mismatch stops the stage"
+  },
+  "hyperparameters": {
+    "equal_to_j11": true,
+    "equal_to_frozen_j8_source": true,
+    "same_python_object_as_j11": false,
+    "why_not_the_same_object": "J11 itself takes a copy - dict(J8.JULY_HP) - and this stage reproduces that construction line for line",
+    "values": {
+      "seed": 123,
+      "epochs": 400,
+      "batch_size": 128,
+      "learning_rate": 5e-05,
+      "validation_fraction": 0.2,
+      "patience": 60,
+      "clip_weight": 1.0,
+      "logstd_weight": 0.0,
+      "anchor_weight": 0.01,
+      "trainable_first_layer_features": null
+    },
+    "best_epsilon": 1e-09,
+    "keys": [
+      "anchor_weight",
+      "batch_size",
+      "clip_weight",
+      "epochs",
+      "learning_rate",
+      "logstd_weight",
+      "patience",
+      "seed",
+      "trainable_first_layer_features",
+      "validation_fraction"
+    ],
+    "j8_module_sha256": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "j11_module_sha256": "2b4ac9f496f7a412d40fec0eb5a0d9b69ee22ac634b8e7ed020ca5480cf26242",
+    "transcribed": false,
+    "how_this_is_known": "run-time equality against the frozen, hash-pinned J8 dict and against J11's own copy - no number is retyped in this stage"
+  },
+  "aggregate": {
+    "content_hashes": {
+      "observations": "17023143a450ff5dd964b9cf9ae962f7737bb98c7757e206d72e8a58c2d99420",
+      "actions": "f015f08a337c1f9748e1bd849b33d09ab48d5ad52c3ae8300ee5adda0791b083"
+    },
+    "rows": 25567,
+    "blocks": [
+      {
+        "id": "j7_nominal",
+        "start": 0,
+        "stop": 16000,
+        "rows": 16000,
+        "unique": 500,
+        "repeat": 32,
+        "tiled": true,
+        "unique_block_slice": [
+          0,
+          500
+        ],
+        "distinct_rows_measured": 500,
+        "observations_sha256": "e0a037f823cdbdd01d149c37eccc7f54bef530e77a8c990105ac0513003b879b",
+        "actions_sha256": "34f58062cd7bde0bf17a5a57a6824f72842b10d97fe528930459d56303df1c31"
+      },
+      {
+        "id": "j7_recovery",
+        "start": 16000,
+        "stop": 16713,
+        "rows": 713,
+        "unique": 713,
+        "repeat": 1,
+        "tiled": false,
+        "unique_block_slice": [
+          16000,
+          16713
+        ],
+        "distinct_rows_measured": 711,
+        "observations_sha256": "8bf99c741239d4bd1095ebe3fccf261550a6f9670870d5a58aab4c3983bd7b77",
+        "actions_sha256": "a98edbf8ebb749796a9bc4d67bd8432e64123ddc790e6a24a98ea4b47450bb32"
+      },
+      {
+        "id": "cell_B",
+        "start": 16713,
+        "stop": 20713,
+        "rows": 4000,
+        "unique": 500,
+        "repeat": 8,
+        "tiled": true,
+        "unique_block_slice": [
+          16713,
+          17213
+        ],
+        "distinct_rows_measured": 500,
+        "observations_sha256": "f53b1418a209debc74f91819a39e6f31c2a6223e8f6e5e7c0679550f1681fa30",
+        "actions_sha256": "a2ebe9f40ce7ef3bd372b2193b76f8cfd7513c1e3d72bf27708add9e7bb6cc03"
+      },
+      {
+        "id": "cell_C",
+        "start": 20713,
+        "stop": 24713,
+        "rows": 4000,
+        "unique": 500,
+        "repeat": 8,
+        "tiled": true,
+        "unique_block_slice": [
+          20713,
+          21213
+        ],
+        "distinct_rows_measured": 500,
+        "observations_sha256": "92a9ba2c7c89b9e4c373b705132591a54cca1264dee862c82b54193a0a66bf1d",
+        "actions_sha256": "a93f003bbdb51f5c99f66ed28fa3a1166eaea76e475410ee447a052803e64daa"
+      },
+      {
+        "id": "j14_increment",
+        "start": 24713,
+        "stop": 25567,
+        "rows": 854,
+        "unique": 854,
+        "repeat": 1,
+        "tiled": false,
+        "unique_block_slice": [
+          24713,
+          25567
+        ],
+        "distinct_rows_measured": 852,
+        "observations_sha256": "5455089d956b5bff473af84ef122433f474cea2c2bc7e4e0ca462d82c8026c1a",
+        "actions_sha256": "24fd23ac68ce6d547bf1d5ac39a1a8ed7f4deafb1d5f33833320c55ac022cedb"
+      }
+    ],
+    "repeat_semantics": "np.tile: the whole unique block is concatenated `repeat` times, contiguously",
+    "j11_prefix": {
+      "rows": 24713,
+      "content_hashes": {
+        "observations": "d3d777467b53cc243abd93f3d7dfd49c307b37b8c0db0f7c26dced7ef8e4c19e",
+        "actions": "437185ec36830ebc300d29f4b3cd49b43065459228427c0dbe1b0b1fad7242cc"
+      },
+      "meaning": "rows [0:24713] are the J11 aggregate, in J11's order. The 854 new rows are APPENDED, so J11's indices are unchanged."
+    },
+    "sources": {
+      "j7": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz",
+        "sha256": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+        "receipt_sha256": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+        "rows": 16713,
+        "content_hashes": {
+          "observations": "a59fb89b43a372162661ec8cf131b5abbf1e9ce32b16f98518af9010a4cf587a",
+          "actions": "6e920c2f890dbdc2cfacf6a2c6842b34c6f33e24499d0d8716bd6347624bde4f"
+        },
+        "clock_already_zero": true
+      },
+      "cell_B": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz",
+        "sha256": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+        "rows": 500,
+        "repeat": 8,
+        "raw_clock": {
+          "col_0_unique": [
+            0.0
+          ],
+          "col_1_unique": [
+            1.0
+          ]
+        },
+        "content_hashes": {
+          "observations_raw": "d2c4df6f13e4a0bd5a2408d178098982a3fd300f4a8eed1a69328f88f182154e",
+          "observations_projected": "1b8aca37aa600e148ad1e1b06ab309731986c797be44872806d5bd2c09365087",
+          "actions": "32ee1a1cc4e1d28dc3c476e2d23e63f533c359d8208fc397a731dc0062b66595"
+        },
+        "unique_rows": 500
+      },
+      "cell_C": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz",
+        "sha256": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+        "rows": 500,
+        "repeat": 8,
+        "raw_clock": {
+          "col_0_unique": [
+            0.0
+          ],
+          "col_1_unique": [
+            1.0
+          ]
+        },
+        "content_hashes": {
+          "observations_raw": "9262e1f8a3422c3397a643ce2280ca213fad49bc562bbe3ee944c354b93afc18",
+          "observations_projected": "09284b6ceba0acd692cb2b4694e937f8466f9fd29e6f343b4dd7dfb92a247af3",
+          "actions": "a44be68b0f0c02984f6e03303cd7db3bea00a40565384bf523f276c017f90c85"
+        },
+        "unique_rows": 500
+      },
+      "j14": {
+        "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_increment.npz",
+        "sha256": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+        "receipt_sha256": "e7262bf9d96e57fda6b3ecee18c58eb4f29ee48f71ff71bc5eba07a3d6abd79b",
+        "rows": 854,
+        "repeat": 1,
+        "per_cell": {
+          "E": 500,
+          "F": 354
+        },
+        "seeds": [
+          124,
+          125
+        ],
+        "post_mismatch_rows": 671,
+        "pre_mismatch_rows": 183,
+        "content_hashes": {
+          "observations": "5455089d956b5bff473af84ef122433f474cea2c2bc7e4e0ca462d82c8026c1a",
+          "actions": "24fd23ac68ce6d547bf1d5ac39a1a8ed7f4deafb1d5f33833320c55ac022cedb"
+        },
+        "unique_rows": 852,
+        "clock_already_zero": true,
+        "not_truncated": true
+      }
+    },
+    "j10r1_provenance": {
+      "receipt_sha256": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+      "commit_verification_pass": true,
+      "technical_invalid_marker": false,
+      "verdict": "PASS",
+      "dataset_hashes_agree_with_the_j10r1_receipt": true,
+      "binding_hash_honoured": "the J10R1 receipt declared each teacher_dataset SHA binding for this stage; both are verified here before consumption"
+    },
+    "arithmetic": {
+      "expression": "16713 + 8x500 + 8x500 + 1x854 = 25567",
+      "j7_rows": 16713,
+      "cell_B": 500,
+      "cell_C": 500,
+      "cell_repeat": 8,
+      "new_rows": 854,
+      "new_repeat": 1,
+      "total": 25567,
+      "verified_by_measurement": true
+    },
+    "clock_projection": {
+      "columns": [
+        0,
+        1
+      ],
+      "feature_names": [
+        "gait_phase_sin",
+        "gait_phase_cos"
+      ],
+      "j7_state": "already exactly zero before this stage",
+      "j14_state": "already exactly zero; J14 projected it at materialisation",
+      "cells_raw_state": "(sin, cos) = (0, 1), which is what the environment records with the gait clock disabled. The cells on disk are NOT zeroed; the projection happens here, exactly as in J11.",
+      "action": "projected to EXACT zero before aggregation and before the fit",
+      "expected_not_a_defect": "a raw cos of 1 is the documented disabled-clock encoding and is never a reason to reject a cell",
+      "raw_and_projected_both_hashed": true
+    },
+    "binding_subsets": {
+      "aggregate": [
+        0,
+        25567
+      ],
+      "j7_recovery_original": [
+        16000,
+        16713
+      ],
+      "cell_B_unique": [
+        16713,
+        17213
+      ],
+      "cell_C_unique": [
+        20713,
+        21213
+      ],
+      "j14_increment": [
+        24713,
+        25567
+      ]
+    },
+    "diagnostic_subsets": {
+      "j14_cell_E": [
+        24713,
+        25213
+      ],
+      "j14_cell_F": [
+        25213,
+        25567
+      ],
+      "j11_prefix": [
+        0,
+        24713
+      ],
+      "j7_nominal": [
+        0,
+        16000
+      ]
+    }
+  },
+  "split": {
+    "n_val": 5113,
+    "n_train": 20454,
+    "declared_n_val": 5113,
+    "declared_n_train": 20454,
+    "digest": "815d98776f7af32d0c413fc0b396023c81079cdb99a4824f618893fa859d9113",
+    "val_membership_sha256": "d6a793b8d5b96877f5bf2c72086ca849735f06064914314cf6f8262b5300fee7",
+    "train_membership_sha256": "1bb293a42c2271243ae10801238a1e8fb1ea3a4c77f064a0722af6ffc4291d18",
+    "validation_sorted": true,
+    "training_order_preserved": true,
+    "known_limitation": "repeated blocks put the same unique row in both partitions; validation_mse is a training diagnostic only"
+  },
+  "preconditions": {
+    "controller_columns_bit_zero": {
+      "all_bit_zero": true,
+      "columns": {
+        "pros_knee_angle_previous_endpoint": {
+          "index": 25,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_knee_angle_served_ref": {
+          "index": 26,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_knee_angle_served_ref_vel": {
+          "index": 27,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_knee_angle_served_ref_accel": {
+          "index": 28,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_knee_angle_sea_u": {
+          "index": 29,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_ankle_angle_previous_endpoint": {
+          "index": 30,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_ankle_angle_served_ref": {
+          "index": 31,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_ankle_angle_served_ref_vel": {
+          "index": 32,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_ankle_angle_served_ref_accel": {
+          "index": 33,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        },
+        "pros_ankle_angle_sea_u": {
+          "index": 34,
+          "norm": 0.0,
+          "max_abs": 0.0,
+          "bit_zero": true
+        }
+      },
+      "binding": true,
+      "why": "the inverse-scale absorption is only valid on a parent whose scaled columns start at exactly zero"
+    },
+    "raw_vs_scaled_equivalence": {
+      "max_abs_diff": 0.0,
+      "bit_identical": true,
+      "kernel": "numpy float32",
+      "tolerance": "NONE - exactly 0.0 is required",
+      "measured_not_assumed": true,
+      "scaled_columns": [
+        27,
+        28,
+        32,
+        33
+      ],
+      "scaled_columns_inside_bit_zero_block": true,
+      "justifies": "absorbing the scale into pi.0.0.weight at save time: at initialisation the raw-input and scaled-input representations of the parent coincide exactly, so the absorption changes no behaviour it should not",
+      "torch_max_abs_diff": 0.0,
+      "torch_bit_identical": true,
+      "kernels_checked": [
+        "numpy float32",
+        "torch"
+      ]
+    }
+  },
+  "scales_verified": {
+    "pros_knee_angle_previous_endpoint": 1.0,
+    "pros_knee_angle_served_ref": 1.0,
+    "pros_knee_angle_served_ref_vel": 4.0,
+    "pros_knee_angle_served_ref_accel": 60.0,
+    "pros_knee_angle_sea_u": 1.0,
+    "pros_ankle_angle_previous_endpoint": 1.0,
+    "pros_ankle_angle_served_ref": 1.0,
+    "pros_ankle_angle_served_ref_vel": 3.5,
+    "pros_ankle_angle_served_ref_accel": 55.0,
+    "pros_ankle_angle_sea_u": 1.0
+  },
+  "training": {
+    "trainable_parameters": [
+      "pi.0.0.weight",
+      "pi.0.0.bias",
+      "pi.0.2.weight",
+      "pi.0.2.bias",
+      "pi.1.weight",
+      "pi.1.bias"
+    ],
+    "aliases_not_optimised": [
+      "pi_encoder.0.weight",
+      "pi_encoder.0.bias",
+      "pi_encoder.2.weight",
+      "pi_encoder.2.bias"
+    ],
+    "logstd_rows_frozen": "[2:]",
+    "logstd_freeze_mechanism": "projection after every step, not requires_grad and not optimizer exclusion",
+    "critic": "never constructed",
+    "epochs_run": 400,
+    "best_epoch": 397,
+    "best_validation_mse": 0.0015050660585984588,
+    "stopped_early": false,
+    "seed_order": [
+      "import torch",
+      "torch.manual_seed",
+      "np.random.seed",
+      "deterministic init from parent (no RNG)",
+      "np.default_rng in build_split",
+      "optimizer"
+    ],
+    "numpy_legacy_seed": {
+      "call": "np.random.seed",
+      "value": 123,
+      "count": 1,
+      "is_a_generator": false,
+      "position": "after torch.manual_seed, before the Generator"
+    },
+    "torch_backend_observed": {
+      "are_deterministic_algorithms_enabled": false,
+      "get_num_threads": 5,
+      "forced_by_j11": false,
+      "binding": false,
+      "why_not_forced": "the July run recorded neither setting and the code snapshot closest to it contains neither call; forcing them would be an invention",
+      "observed_at": "fit time; the preflight is torch-free and cannot observe them",
+      "torch_version": "2.10.0",
+      "adam_resolved_arguments": [
+        {
+          "lr": 5e-05,
+          "betas": [
+            0.9,
+            0.999
+          ],
+          "eps": 1e-08,
+          "weight_decay": 0,
+          "amsgrad": false,
+          "maximize": false,
+          "foreach": null,
+          "capturable": false,
+          "differentiable": false,
+          "fused": null,
+          "decoupled_weight_decay": false
+        }
+      ]
+    },
+    "optimizer_steps_derived": 64000,
+    "optimizer_steps_is_derived_not_measured": true
+  },
+  "gate": {
+    "schema": "v26c_j15_gate.2",
+    "binding": {
+      "integrity_keys_and_shapes_match_parent": true,
+      "integrity_all_parameters_finite": true,
+      "integrity_clock_bit_zero": true,
+      "integrity_aliases_bit_identical": true,
+      "integrity_logstd_bit_identical_to_parent": true,
+      "integrity_no_critic_key": true,
+      "integrity_inputs_unchanged": true,
+      "integrity_aggregate_reproduces_content_hashes": true,
+      "integrity_split_counts_as_declared": true,
+      "integrity_best_state_reconstructible_from_history": true,
+      "integrity_all_metrics_finite": true,
+      "aggregate_rmse_decreases": true,
+      "recovery_rmse_decreases": true,
+      "cell_B_unique_rmse_decreases": true,
+      "cell_C_unique_rmse_decreases": true,
+      "j14_increment_rmse_decreases": true,
+      "controller_columns_nonzero": true
+    },
+    "failed": [],
+    "pass": true,
+    "identical_to_j11": false,
+    "relation_to_j11": {
+      "j11_binding_subset": [
+        "integrity_keys_and_shapes_match_parent",
+        "integrity_all_parameters_finite",
+        "integrity_clock_bit_zero",
+        "integrity_aliases_bit_identical",
+        "integrity_logstd_bit_identical_to_parent",
+        "integrity_no_critic_key",
+        "integrity_inputs_unchanged",
+        "integrity_aggregate_reproduces_content_hashes",
+        "integrity_split_counts_as_declared",
+        "integrity_best_state_reconstructible_from_history",
+        "integrity_all_metrics_finite",
+        "aggregate_rmse_decreases",
+        "recovery_rmse_decreases",
+        "cell_B_unique_rmse_decreases",
+        "cell_C_unique_rmse_decreases",
+        "controller_columns_nonzero"
+      ],
+      "j11_binding_subset_count": 16,
+      "j11_set_preserved_exactly": true,
+      "names_j15_dropped_or_renamed_from_j11": [],
+      "j15_additional_binding": [
+        "j14_increment_rmse_decreases"
+      ],
+      "j15_additional_binding_count": 1,
+      "binding_count": 17,
+      "statement": "the 16-name J11 binding subset is preserved, name for name, and J15 adds one binding rule: j14_increment_rmse_decreases. 16 + 1 = 17. This gate is NOT identical to J11's and does not claim to be."
+    },
+    "integrity": {
+      "keys_and_shapes_match_parent": true,
+      "all_parameters_finite": true,
+      "clock_bit_zero": true,
+      "aliases_bit_identical": true,
+      "logstd_bit_identical_to_parent": true,
+      "no_critic_key": true,
+      "inputs_unchanged": true,
+      "aggregate_reproduces_content_hashes": true,
+      "split_counts_as_declared": true,
+      "best_state_reconstructible_from_history": true,
+      "all_metrics_finite": true
+    },
+    "rmse": {
+      "aggregate": {
+        "rows": 25567,
+        "slice": [
+          0,
+          25567
+        ],
+        "before": 0.07786176306762756,
+        "after": 0.03930891898806053,
+        "decreased": true,
+        "binding": true,
+        "rule": "strictly lower after than before; no margin is invented"
+      },
+      "j7_recovery_original": {
+        "rows": 713,
+        "slice": [
+          16000,
+          16713
+        ],
+        "before": 0.08836082901204119,
+        "after": 0.08112132906013392,
+        "decreased": true,
+        "binding": true,
+        "rule": "strictly lower after than before; no margin is invented"
+      },
+      "cell_B_unique": {
+        "rows": 500,
+        "slice": [
+          16713,
+          17213
+        ],
+        "before": 0.06390678507238459,
+        "after": 0.01737227647425053,
+        "decreased": true,
+        "binding": true,
+        "rule": "strictly lower after than before; no margin is invented"
+      },
+      "cell_C_unique": {
+        "rows": 500,
+        "slice": [
+          20713,
+          21213
+        ],
+        "before": 0.020248002247977015,
+        "after": 0.019969816091808642,
+        "decreased": true,
+        "binding": true,
+        "rule": "strictly lower after than before; no margin is invented"
+      },
+      "j14_increment": {
+        "rows": 854,
+        "slice": [
+          24713,
+          25567
+        ],
+        "before": 0.39233834148572344,
+        "after": 0.18155497401634038,
+        "decreased": true,
+        "binding": true,
+        "rule": "strictly lower after than before; no margin is invented"
+      }
+    },
+    "controller_column_norms": {
+      "pros_knee_angle_previous_endpoint": 0.4676439166069031,
+      "pros_knee_angle_served_ref": 0.4722532033920288,
+      "pros_knee_angle_served_ref_vel": 0.08501724153757095,
+      "pros_knee_angle_served_ref_accel": 0.030413540080189705,
+      "pros_knee_angle_sea_u": 1.6455597877502441,
+      "pros_ankle_angle_previous_endpoint": 1.1718100309371948,
+      "pros_ankle_angle_served_ref": 1.0687446594238281,
+      "pros_ankle_angle_served_ref_vel": 0.13985562324523926,
+      "pros_ankle_angle_served_ref_accel": 0.02658499963581562,
+      "pros_ankle_angle_sea_u": 0.6521409749984741
+    },
+    "no_invented_thresholds": "every binding numeric rule is a STRICT inequality against a measured baseline: 'after < before' on FIVE RMSE subsets - aggregate, j7_recovery_original, cell_B_unique, cell_C_unique and the WHOLE 854-row J14 block - and 'norm > 0' on ten controller columns. No margin, no tolerance and no absolute target is asserted anywhere, and the fifth introduces no number that the first four did not already use. Only the J14 block AS A WHOLE binds: cells E and F separately, the post-mismatch 671 and pre-mismatch 183 splits, the phase-invalid fraction and every comparison with J11 remain DIAGNOSTIC and bind nothing.",
+    "supervised_only": "this gate says nothing about closed-loop behaviour"
+  },
+  "diagnostics": {
+    "nominal_rmse": {
+      "before": 6.85139021447424e-08,
+      "after": 0.015535843869846907,
+      "binding": false,
+      "why_not": "the nominal block is the self-anchor; it is expected to move and no direction is preregistered for it"
+    },
+    "j14_cell_E_rmse": {
+      "cell": "E",
+      "seed": 124,
+      "rows": 500,
+      "slice": [
+        24713,
+        25213
+      ],
+      "before": 0.35459078633421404,
+      "after": 0.19081006475283066,
+      "binding": false,
+      "why_not": "E and F are kept SEPARATE for visibility, but the binding rule is on the 854-row block as a whole. Splitting the gate per cell would be a new rule; reporting per cell is not."
+    },
+    "j14_cell_F_rmse": {
+      "cell": "F",
+      "seed": 125,
+      "rows": 354,
+      "slice": [
+        25213,
+        25567
+      ],
+      "before": 0.4401732218412572,
+      "after": 0.1676144160233592,
+      "binding": false,
+      "why_not": "as above - visibility, not a gate"
+    },
+    "j14_phase_invalid_fraction": {
+      "value": 0.7857142857142857,
+      "rows_flagged": 671,
+      "rows_total": 854,
+      "binding": false,
+      "what_it_measures": "the fraction of the new labels whose discrete FSM columns had already diverged from the same-actor nominal reference, i.e. J14's own post_mismatch flag. It is REPORTED, never used to filter or weight a row.",
+      "why_not": "the approved J13 report lists the phase-invalid fraction of the new labels as a DIAGNOSTIC. It stays one."
+    },
+    "j14_post_mismatch_rmse": {
+      "rows": 671,
+      "before": 0.4363344964570437,
+      "after": 0.19901529495083156,
+      "binding": false,
+      "motivation": "isolates the 671 rows J13 identified as causal from the 183 pre-mismatch rows a J7-style truncation would have kept"
+    },
+    "j14_pre_mismatch_rmse": {
+      "rows": 183,
+      "before": 0.14229724524636608,
+      "after": 0.09272352522958648,
+      "binding": false,
+      "motivation": "the counterpart of the above; a truncating stage would have had only these"
+    },
+    "j11_prefix_rmse": {
+      "rows": 24713,
+      "before": 0.030865186197168406,
+      "after": 0.02143647165917836,
+      "binding": false,
+      "motivation": "what adding 854 rows cost on the exact rows J11 already fit. No direction is preregistered, so it cannot be a gate."
+    },
+    "clipping_out_of_bounds_rows": {
+      "value": 0,
+      "binding": false,
+      "why_not": "the clip term is a loss weight, not a gate; the environment clips"
+    },
+    "best_validation_mse": {
+      "value": 0.0015050660585984588,
+      "binding": false,
+      "why_not": "every repeated block puts the same unique row in BOTH partitions. Inherited from July, J7 and J11: a training diagnostic, never a generalisation estimate."
+    },
+    "epochs_run": {
+      "value": 400,
+      "binding": false
+    },
+    "stopped_early": {
+      "value": false,
+      "binding": false
+    },
+    "torch_backend_observed": {
+      "are_deterministic_algorithms_enabled": false,
+      "get_num_threads": 5,
+      "forced_by_j11": false,
+      "binding": false,
+      "why_not_forced": "the July run recorded neither setting and the code snapshot closest to it contains neither call; forcing them would be an invention",
+      "observed_at": "fit time; the preflight is torch-free and cannot observe them",
+      "torch_version": "2.10.0",
+      "adam_resolved_arguments": [
+        {
+          "lr": 5e-05,
+          "betas": [
+            0.9,
+            0.999
+          ],
+          "eps": 1e-08,
+          "weight_decay": 0,
+          "amsgrad": false,
+          "maximize": false,
+          "foreach": null,
+          "capturable": false,
+          "differentiable": false,
+          "fused": null,
+          "decoupled_weight_decay": false
+        }
+      ]
+    }
+  },
+  "actor_digest": "c3551341b9b017b40585ee1f50f8ee4ecaa7ec50722f37142badc2a44b6c8590",
+  "source_actor_digest": "59d54240ac628dcbd1d0dbf34328145afa08a7028047a5923298782b79bf5188",
+  "actor_digest_recorded_here_and_in_the_manifest": true,
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> J15",
+    "parent": {
+      "stage": "V26C_J2_BASE",
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+      "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+    },
+    "not_j11": {
+      "why": "J11 is the actor that FAILED J12; this is a FRESH fit",
+      "j11_module_state_sha256": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+      "j11_was_loaded": false
+    },
+    "july_role": "methodology and evidence only"
+  },
+  "committed_files_sha256": {
+    "history.json": "71c375ebad117d24df8ff5b2dc573f957cbf43d2b610f0ea43023a7cd9523c81",
+    "rl_module/actor_feature_manifest.json": "bb24bedca3f8572e370d92ff02640a3890171888215017cd2821d62245670653",
+    "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "rl_module/module_state.pkl": "4d084a2a7f0012bd711f39a987dbb7af30b04e265484128c45b0a92b612ab928",
+    "v26c_j15_aggregate_dataset.npz": "f4d0c09c78e812a78910626789043e42a6ee851e99b56e59595f4887d7faebe8"
+  },
+  "commit_verification": {
+    "file": "commit_verification.json",
+    "written": "after the rename, against the committed leaf"
+  },
+  "inert": {
+    "rollout": false,
+    "environment_constructed": false,
+    "critic_touched": false,
+    "ppo_updates": 0,
+    "promotion": "NONE",
+    "sealed_seeds_read": 0
+  },
+  "outcome": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "closed_loop_authorized": false,
+    "fit_authorized": false,
+    "closed_loop_claim": "NONE - this stage is supervised only"
+  },
+  "forbidden_here": [
+    "a rollout",
+    "an environment",
+    "a critic",
+    "critic warm-up",
+    "PPO",
+    "promotion",
+    "deployability",
+    "a closed-loop claim",
+    "an optimizer over anything but the six direct tensors",
+    "reading seeds 126, 127 or 128",
+    "a second parent",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "dedup",
+    "class balancing",
+    "filtering by post_mismatch",
+    "a repeat factor on the new rows",
+    "an autonomous retry",
+    "an invented threshold",
+    "changing production, FSM v3, the morphology corridor, the reward, sigma, the SEA or the C++ plugin"
+  ]
+}

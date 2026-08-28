@@ -1,0 +1,87 @@
+{
+  "schema": "v26c_amendment.1",
+  "amendment": "J1-SOFT-FAIL-AUTHORISATION",
+  "status": "ADDITIVE AND IMMUTABLE. It amends nothing in place: the original J1 receipt, trace and dataset are left byte-identical and are pinned below by SHA-256.",
+  "date": "2026-08-26",
+  "authorised_by": "user, explicitly, after the independent architect audit of the J1 outcome",
+
+  "amends_run": {
+    "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j1_runs/j1_nominal_v26c_2026-08-26_r1",
+    "stage": "V26C-J1-TEACHER-COLLECT",
+    "pinned_artefacts_sha256": {
+      "teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+      "teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+      "v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd"
+    },
+    "immutability": "these three files MUST remain byte-identical. Any J2 tooling verifies them before use and refuses to run on a mismatch."
+  },
+
+  "the_soft_fail": {
+    "failing_criterion": "max_penetration_m",
+    "observed_m": 0.02294380435912411,
+    "soft_threshold_m": 0.020,
+    "hard_termination_m": 0.028,
+    "exceeds_soft_by_mm": 2.944,
+    "margin_below_hard_mm": 5.056,
+    "rows_above_soft": 97,
+    "rows_total": 500,
+    "fraction_above_soft": 0.194,
+    "contiguous_intervals": 4,
+    "peak_step": 376,
+    "peak_phase": "STANCE_AFTER_HS, mid-stance, stance_contact_fraction 0.92, mean load 0.44 BW",
+    "statement": "the run exceeds the SOFT threshold 0.020 m and remains BELOW the HARD termination 0.028 m at all times"
+  },
+
+  "all_other_criteria": {
+    "steps": "500 / 500",
+    "end_reason": "episode_time_limit",
+    "valid_cycles": "2 (>= 2)",
+    "phase_timeout_stance": 0,
+    "phase_timeout_swing": 0,
+    "morphology_causal_contract_failure": 0,
+    "hs_cancelled_count": 0,
+    "resync_count": 0,
+    "verdict": "eight of the nine J1 criteria PASS; only max_penetration_m fails"
+  },
+
+  "audit_evidence": {
+    "identical_to_july_bit_for_bit": "the same 0.02294380435912411 was recorded by the July teacher; the difference is exactly 0.0",
+    "v26_parent_actor_rollout_max_penetration_m": 0.014796762,
+    "v26_parent_actor_rows_above_soft": 0,
+    "reading": "the prescribed teacher penetrates more than the V26 actor does, and identically to July. This is a property of the prescribed teacher, not a regression of the teacher, of the runtime or of the V26 parent.",
+    "july_teacher_gate_used_the_hard_guard": "target_domain_imitation.py composes the teacher gate as full_episode, at_least_one_valid_cycle (>=1) and penetration_below_hard_guard; it compared against the HARD guard, not against the penalty onset",
+    "current_runtime_semantics": "in the pinned config 0.020 is grf_penetration_penalty_threshold_m, the reward penalty onset; 0.028 is grf_penetration_termination_m, the safety limit"
+  },
+
+  "user_authorisation": {
+    "granted": "the J1 dataset may be used EXCLUSIVELY as the input of J2, the supervised base fit",
+    "scope_is_exclusive": true,
+    "not_granted": [
+      "no promotion of any actor",
+      "no ex-novo training",
+      "no J3 closed-loop qualification is waived",
+      "no rollout, no DAgger, no Markov phase",
+      "no use of the dataset for any purpose other than J2"
+    ]
+  },
+
+  "unchanged_by_this_amendment": {
+    "env_thresholds": {"grf_penetration_penalty_threshold_m": 0.020,
+                       "grf_penetration_termination_m": 0.028,
+                       "status": "UNCHANGED"},
+    "j3_actor_gate": {"max_penetration_m_max": 0.020,
+                      "status": "UNCHANGED - J3 still requires <= 0.020 m"},
+    "j1_gate_definition": "UNCHANGED. The J1 receipt keeps its FAIL verdict; this amendment authorises the USE of the data, it does not re-score the run.",
+    "kinematic_quality_gate": "UNCHANGED, binds J3 only",
+    "protocol_parent_runtime": "UNCHANGED",
+    "future_todo_non_operational": ["LOTO (B1)", "LOCO (B1R1)", "B1R2", "B1R2-A", "B1R2-B"]
+  },
+
+  "gating_of_what_comes_next": {
+    "j2_allowed": "yes, on this dataset only",
+    "j3_required_before_anything_else": "YES. No promotion and no ex-novo step is permitted without J3, whose penetration criterion remains <= 0.020 m.",
+    "explicit": "a J2 result, however good, confers no promotion. J3 is the gate."
+  },
+
+  "note_on_the_verdict": "the J1 receipt records verdict FAIL and that record stands. This amendment does not overturn it, does not relax any threshold and does not re-run anything. It records a user decision about the USE of an artefact whose defect is measured, bounded and understood."
+}

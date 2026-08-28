@@ -1,0 +1,225 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j10_prereg_multistart_teacher",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_proposed": "V26C_J10_MULTISTART_TEACHER",
+  "authorisation_status": "NOT_GRANTED at the time of writing - the architect authorises execution internally after review",
+  "date_utc": "2026-08-27",
+  "architect_decision": {
+    "decision": "apply the July MULTISTART METHODOLOGY exclusively to the August V26 lineage",
+    "taken_by": "the architect, explicitly",
+    "not_reopened": "this preregistration implements that decision. It proposes no alternative architecture and reconsiders no part of the choice.",
+    "july_status": "METHODOLOGY ONLY. No July checkpoint, dataset, label or artefact is an operative parent, input or output of this stage."
+  },
+  "why_this_stage_exists": {
+    "measured_gap": "the J9R1 closed-loop qualification FAILED on cell B, the -0.20 s start: 0 valid cycles, 0 heel strikes, FSM stuck in WAIT_HS for 500/500 steps. The measured cause is a support gap: the J7 training set contains ZERO rows in the WAIT_HS state - the FSM one-hot takes only (0,1,0) STANCE_AFTER_HS on 12486 rows and (0,0,1) SWING_AFTER_TO on 4227 rows across all 16713 rows, and (1,0,0) WAIT_HS appears 0 times.",
+    "evidence": "reports/user/2026-08-27_qualifica_closed_loop_j9r1.md and j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/v26c_j9r1_closed_loop_receipt.json",
+    "what_this_stage_does_about_it": "collects prescribed-teacher rollouts at the two non-nominal starts, so that a LATER and SEPARATELY AUTHORISED fit can be given the states the actor has never seen. This stage collects only; it fits nothing."
+  },
+  "what_this_stage_is": "exactly TWO prescribed-teacher rollouts of 500 steps each, at the two non-nominal episode start offsets, collected with the J1 semantics and gated per cell.",
+  "what_this_stage_is_not": [
+    "a fit, an adaptation or any weight update",
+    "a student rollout - the J8 student is NEVER used, neither as a policy nor as a label source",
+    "a critic warm-up",
+    "a PPO run of any kind",
+    "a closed-loop qualification",
+    "a promotion, a deployability claim or an authorisation of any next stage"
+  ],
+  "operational_parent": {
+    "path": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+    "module_state_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+    "is_the_only_parent": true,
+    "role": "the August V26 imitative actor. It defines the OBSERVATION CONTRACT - actor width, feature names and mask. It is NOT the action source.",
+    "same_parent_as_j1": "this is byte-identical to the parent v26c_j1_collect.py pins at line 66, so J10 collects from the same operative actor as the nominal J1 collection",
+    "forbidden_markers": ["controller_memory_ablation", "target_domain_", "2026-07-", "markov35", "zero_iter_port"],
+    "j8_student_excluded": "the J8 student actor is NEVER loaded, never queried and never used to produce a label. Its use as a label source is explicitly forbidden here."
+  },
+  "label_source": {
+    "source": "target_domain_imitation.prescribed_teacher_action, reused READ-ONLY",
+    "what_it_is": "the PRESCRIBED teacher - a reference/inverse-kinematics action, not a policy sample. No checkpoint is queried for the action.",
+    "lookahead_s": 0.0,
+    "sigma": [0.0, 0.0],
+    "noise_hold_steps": 1,
+    "executed_equals_teacher": "with sigma exactly zero the executed action equals the teacher action; the noise vector is recorded and is exactly zero",
+    "no_other_label_source_permitted": true,
+    "forbidden_call_sites": ["build_target_env_config", "_teacher.main(", ".main("]
+  },
+  "matrix": {
+    "cells": 2,
+    "order_is_frozen": "B then C, in that order",
+    "steps_per_cell": 500,
+    "seed": 123,
+    "offset_unit": "SECONDS of episode start time, relative to cfg.t_start",
+    "cell_list": [
+      {"id": "B", "episode_start_offset_s": 1.756870983805102, "label": "-0.20 s"},
+      {"id": "C", "episode_start_offset_s": 2.156870983805102, "label": "+0.20 s"}
+    ],
+    "nominal_not_collected": "the nominal start is NOT re-collected: it already exists as the J1 leaf and is unchanged",
+    "behavioural_fail_fast": false,
+    "fail_fast_rule": "a behavioural FAIL in one cell is PRESERVED and the other cell still runs. Only a technical or integrity exception stops the collection, fail-closed."
+  },
+  "runtime": {
+    "pinned_config": "runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "builder": "v26c_j1_collect.build_full_env_config and verify_env_config, REUSED UNMODIFIED",
+    "fsm": "v3, unmodified",
+    "production_untouched": "FSM, morphology corridor, reward, SEA and the C++ plugin are not touched",
+    "env_mutation": {
+      "rule": "the base env config is built and verified in full BEFORE any mutation. Then ONLY episode_start_offset_s and the per-cell output_dir may differ.",
+      "proof": "the set of differing keys must be a SUBSET of {episode_start_offset_s, output_dir}; every other key is compared for exact equality against the verified base and the count of stable keys is recorded",
+      "no_second_j1_verify_on_mutated_config": "J1.verify_env_config pins the nominal offset including in its runtime literal cross-check, so a non-nominal cell would fail it for a purely technical reason. The base is verified before the mutation instead."
+    },
+    "recording": {
+      "record_outputs": true,
+      "save_outputs_on_close": true,
+      "why": "the J9 technical failure was caused by building the base with output_dir=None, which disables recording. J10 builds the base with a REAL output root and verifies both flags fail-closed before any environment exists.",
+      "expected_sim_outputs_per_cell": 19
+    },
+    "no_rllib_needed": "the action source is the prescribed teacher, so no RLModule is loaded and no policy is queried. No Ray cluster, no Ray worker and no EnvRunner is started.",
+    "environments": "ONE at a time, sequential, closed FAIL-CLOSED after each cell"
+  },
+  "reset_check": {
+    "offset_is_relative_to_t_start": true,
+    "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+    "expected_values": {
+      "B": "11.99 + 1.756870983805102 = 13.746870983805102",
+      "C": "11.99 + 2.156870983805102 = 14.146870983805102"
+    },
+    "tolerance_s": 1e-09,
+    "tolerance_justification": "the comparison is an exact arithmetic identity; 1e-9 s is a cross-platform float-representation allowance, not a behavioural tolerance",
+    "checked_immediately_after_reset": true,
+    "never_compared_against_the_offset_itself": true,
+    "recorded_fields": ["cfg_t_start_s", "cfg_t_end_s", "episode_duration_s", "requested_unclamped_time_s", "max_start_s", "expected_reset_time_s", "actual_reset_time_s", "reset_time_error_s", "clamped"]
+  },
+  "per_cell_saved_artefacts": {
+    "teacher_dataset.npz": {
+      "observations": "the RAW 35-wide actor observation at each step, float32, shape [500, 35]",
+      "actions": "the PRESCRIBED TEACHER action, float32, shape [500, 2]",
+      "executed_actions": "what was actually stepped, float32, shape [500, 2]",
+      "action_noises": "the applied noise vector, float32, shape [500, 2], exactly zero at sigma 0",
+      "times": "the pre-step simulation time, float64, shape [500]",
+      "actor_feature_names": "the 35 feature names, in order"
+    },
+    "trace.json": "the full per-step trace, including reward_terms, phase_fsm and the raw actor observation",
+    "kinematics.npz": "knee_rad and ankle_rad per step plus the feature names",
+    "penetration.npz": "penetration_m per step",
+    "sim_outputs/": "the production simulation outputs, 19 files per cell"
+  },
+  "per_cell_binding_gate": {
+    "applies_to": "BOTH cells, independently",
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "valid_cycles_min": 2,
+    "phase_timeout_stance_max": 0,
+    "phase_timeout_swing_max": 0,
+    "morphology_causal_contract_failure_max": 0,
+    "hs_cancelled_count_max": 0,
+    "resync_count_max": 1,
+    "action_clipped_steps_max": 0,
+    "action_clipping_is_binding_here": "unlike J1, where clipping was diagnostic, J10 requires ZERO action clipping: a clipped prescribed-teacher action would mean the recorded label is not the label that was executed",
+    "kinematic_quality": {
+      "source": "v26c_j3_closed_loop.J3_KINEMATIC_GATE, IDENTICAL to J9R1, unchanged",
+      "ankle_min_rad_max": -0.03,
+      "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, exactly -0.03 PASSES",
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [-1.5, 0.0],
+      "ankle_bounds_rad": [-0.7, 0.7]
+    },
+    "penetration": {
+      "authority": "v26c_penetration_contract_2026-08-26.json, the single authority",
+      "soft_diagnostic_m": 0.02,
+      "soft_status": "DIAGNOSTIC, never a blocker",
+      "july_legacy_diagnostic_m": 0.025,
+      "july_legacy_status": "DIAGNOSTIC, never a blocker",
+      "hard_binding_m": 0.028,
+      "hard_status": "the SOLE binding penetration criterion: fail iff > 0.028, so exactly 0.028 PASSES",
+      "no_local_threshold": "no penetration threshold is written down in the runner"
+    }
+  },
+  "coverage_gate": {
+    "scope": "the COLLECTION AS A WHOLE, not per cell",
+    "criterion": "the union of the two cells' observation rows must contain AT LEAST ONE row with phase_fsm_wait_hs == 1",
+    "why": "that is the exact gap measured in J7, where phase_fsm_wait_hs is constant zero across all 16713 rows. A collection that does not contain the missing state would not close the gap it exists to close.",
+    "feature_resolution": "phase_fsm_wait_hs is resolved BY NAME from the parent's actor feature manifest, never by a hard-coded index",
+    "no_invented_thresholds": "there is NO minimum count, NO required fraction and NO per-cell requirement. The criterion is at least one row, and nothing more is asserted.",
+    "binding": true,
+    "recorded": "the per-cell and total count of WAIT_HS rows is reported as evidence alongside the boolean"
+  },
+  "diagnostics_not_binding": [
+    "episode_return",
+    "realized_noise_rms",
+    "max_reserve_norm_nm",
+    "mean_reserve_norm_nm",
+    "slew_limited_steps"
+  ],
+  "diagnostics_exclusion_note": "valid_cycle_count is NOT listed here: valid_cycles is a BINDING check, and listing its measure among the non-binding diagnostics would be self-contradictory. action_clipped_steps is likewise NOT listed: clipping is binding in this stage. This corrects the ambiguity observed in the J9R1 receipt.",
+  "telemetry_integrity": {
+    "status": "a SEPARATE fail-closed TECHNICAL invariant, never a behavioural criterion",
+    "source": "v26c_j3_closed_loop.telemetry_integrity, reused unmodified",
+    "on_failure": "the cell's qualification is technically INVALID - a statement about the evidence, never about the gait"
+  },
+  "aggregate": {
+    "pass_iff": "2/2 cells behavioural PASS, 2/2 telemetry-valid, AND the coverage gate satisfied",
+    "confers_nothing": "an aggregate PASS produces a dataset. It authorises no fit, no critic, no PPO, no promotion and no next stage."
+  },
+  "future_leaf": {
+    "relative_leaf": "j10_runs/j10_multistart_teacher_v26c_2026-08-27_r1",
+    "is_the_only_destination": true,
+    "must_not_exist_before": true,
+    "does_not_exist_yet": "this preregistration turn creates nothing",
+    "write_protocol": "atomic commit, no-clobber under an exclusive sibling lock: lock taken with O_CREAT|O_EXCL, sibling staging directory, verification, re-check of the leaf, then rename",
+    "provenance_rule": "every path recorded in the receipt is LEAF-RELATIVE and therefore valid after the commit. No receipt field may contain a staging path. This corrects the defect observed in the J9R1 receipt, whose sim_outputs strings point at the renamed staging directory.",
+    "outcome_fail_still_commits": "a behavioural or coverage FAIL still commits the full evidence and exits non-zero; a technical or integrity error commits nothing",
+    "cleanup_on_failure": "recursive removal of the exact staging directory this run created, unlink of its own lock, and at most a NON-RECURSIVE rmdir of the parent if this run created it and it is empty",
+    "no_autonomous_retry": true
+  },
+  "preflight": {
+    "inert": "no torch, no RLlib, no OpenSim import; no environment constructed, reset or stepped; no output written",
+    "sentinel": "the base is built against an INERT sentinel output root whose existence is measured before and after and which must never be created",
+    "reports": "the planned matrix, the parent, the label source, the gates, the coverage criterion and the reset expectations"
+  },
+  "outcome_policy": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "fit_authorized": false,
+    "critic_authorized": false,
+    "ppo_authorized_to_start": false,
+    "single_execution": true,
+    "no_autonomous_retry": "on failure the evidence is preserved and the run stops"
+  },
+  "deferred_todo": {
+    "loto": "NOT integrated. Future TODO, not J10.",
+    "loco": "NOT integrated. Future TODO, not J10.",
+    "b1r1": "NOT integrated. Future TODO, not J10.",
+    "b1r2": "NOT integrated. Future TODO, not J10.",
+    "generalisation_dataset_epic": "OPEN. This stage still covers AB06 and three starts of the same trial; it demonstrates no generalisation to other subjects, trials or speeds.",
+    "the_fit_that_uses_this_data": "NOT part of this stage. Combining these rows with J7 and refitting is a SEPARATE stage requiring its own preregistration and its own authorisation."
+  },
+  "unchanged": {
+    "j0_to_j9r1": "no existing artefact, runner, test, receipt, trace or run leaf from J0 through J9R1 is modified",
+    "production": "FSM, morphology corridor, reward, SEA, the C++ plugin and every production configuration are untouched",
+    "scope": "everything this stage adds lives inside Trajectory Generator"
+  },
+  "cross_platform": "pathlib and os.rename only; no shell, no os-specific path handling; macOS arm64 and Windows x86",
+  "pinned_artefacts_sha256": {
+    "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+    "v26c_penetration_contract.py": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "v26c_j9r1_closed_loop.py": "f58b0d14b077536ced24ec3063bd2154ed1e207b42532bddc76177f1e02e4a3c",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/v26c_j9r1_closed_loop_receipt.json": "c201b666f68451e4646fbaae3f149e9afaf873b5c94f99c95fc4286faaeda4f4",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27"
+  },
+  "pinned_repo_artefacts_sha256": {
+    "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best/module_state.pkl": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+    "Trajectory Generator/osim_trj_cmc_like.py": "26458424c44f18fa1dda20b830fa5e7e825c583cc5d10e6d019cb3bd9a0c6d24",
+    "Trajectory Generator/baseline_MLP/env_factory.py": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+    "Trajectory Generator/baseline_MLP/exploration_noise.py": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f",
+    "Trajectory Generator/baseline_MLP/target_domain_imitation.py": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3"
+  },
+  "pinned_runtime_sources_note": "target_domain_imitation.py is pinned because prescribed_teacher_action is the LABEL SOURCE; a change to it would change every label this stage produces. osim_trj_cmc_like.py is pinned because it also authenticates the transcribed reset semantics."
+}

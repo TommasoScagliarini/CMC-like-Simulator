@@ -1,0 +1,542 @@
+{
+  "schema": "v26c_j4_recovery.1",
+  "stage": "V26C-J4-RECOVERY",
+  "verdict": "PASS",
+  "verdict_kind": "TECHNICAL/OFFLINE - POST-CRASH FINALIZED",
+  "verdict_meaning": "the single J4 execution completed training, restored the best state, passed every pre-write verification and wrote its six payloads. It then aborted while assembling this receipt. The receipt was reconstructed from those preserved payloads WITHOUT any further training. It asserts NOTHING about gait, penetration or deployability.",
+  "closed_loop_qualified": false,
+  "post_crash_finalisation": {
+    "original_exit_code": 1,
+    "original_exception": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'slice'",
+    "original_failure_site": "v26c_j4_recovery.py::fit, receipt assembly: \"split\": {\"rows\": int(rows), ...} - `rows` had been shadowed by the log-std verification loop variable, so it held a slice instead of the aggregate row count",
+    "training_executions": 1,
+    "retry": false,
+    "failing_runner_sha256": "dbf46cd559a1e6da6bf0ceb8ef29874db2fc311a91697b8c0e389958d67ae75d",
+    "finalizer_sha256": "24dceef98242cc9e02f63d0442e8361bae32994c0829859b1747f0e7091a6841",
+    "payload_sha256_before": {
+      "rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+      "recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+      "history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87"
+    },
+    "payloads_rewritten": false,
+    "files_written": [
+      "v26c_j4_recovery_receipt.json",
+      "j4_fit_original.log"
+    ],
+    "original_log_sha256": "88e9312626d23ce49685576e263df1b93c0f4f8d077415cc1d0bdaadb188dbcf",
+    "training_invoked_during_finalisation": false,
+    "optimizer_constructed_during_finalisation": false,
+    "payload_sha256_after": {
+      "rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+      "recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+      "history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87"
+    },
+    "payload_sha256_unchanged": true
+  },
+  "authorisation": {
+    "authorised_by": "THE USER, explicitly. The architect is reviewer, not approver.",
+    "amendment": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j3_amendment_recovery_only.json",
+    "amendment_sha256": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+    "scope": "RECOVERY ONLY - ONE J4 fit",
+    "execution_requires": "--authorized-stage V26C-J4-RECOVERY --out-dir <fresh leaf>",
+    "physical_rollout_authorised": false,
+    "progressive_rounds_authorised": false,
+    "j5_authorised": false,
+    "revalidation_required_before_any_claim": true,
+    "soft_fail_accepted_by_user": {
+      "statement": "the J1/J3 penetration soft fail (above 20 mm, below the 28 mm hard guard) is accepted by the user so the recovery-only stage can proceed. The old nominal gate is NOT reintroduced as a blocker here.",
+      "hard_guard_m": 0.028,
+      "steps_above_hard_guard_j3": 0
+    },
+    "multistart_derogation": {
+      "omitted": true,
+      "what": "the two extra teacher datasets at start offsets -0.20 and +0.20 rad, which July repeated 8x for 8000 of its 24712 rows",
+      "why": "DEFERRED BY USER DECISION. This is the SINGLE explicit derogation from the selected July composition and is declared, not silent",
+      "july_additional_training_samples": 8000
+    }
+  },
+  "lineage_preserved": {
+    "j3_verdict_preserved": "FAIL",
+    "j3_failed": [
+      "max_penetration_m"
+    ],
+    "j3_max_penetration_m": 0.02704966381076714,
+    "j1_verdict_preserved": "FAIL",
+    "statement": "the J1 and J3 FAIL verdicts STAND. This stage neither re-scores nor retroactively promotes them, whatever it produces."
+  },
+  "inputs_sha256": {
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_kinematics.npz": "402040d7cc794a26213ece8abd04a6e945fa46050f20d4ecc402bf78df0b97fc",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+    "v26c_j1_amendment_soft_fail.json": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9"
+  },
+  "amendment_sha256": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+  "amendment_manifest_entries": 12,
+  "j2_parent": {
+    "module": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+    "sha256": {
+      "history.json": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777",
+      "rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e"
+    },
+    "zero_columns_by_layer": {
+      "pi.0.0.weight": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "pi_encoder.0.weight": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ]
+    },
+    "role": "warm start; the SAME single 35D student, not a new actor"
+  },
+  "actor_contract": {
+    "width": 35,
+    "hard_zero_columns_this_stage": [
+      0,
+      1
+    ],
+    "trainable_controller_columns": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "trainable_controller_features": [
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "feature_scales": {
+      "pros_knee_angle_previous_endpoint": 1.0,
+      "pros_knee_angle_served_ref": 1.0,
+      "pros_knee_angle_served_ref_vel": 4.0,
+      "pros_knee_angle_served_ref_accel": 60.0,
+      "pros_knee_angle_sea_u": 1.0,
+      "pros_ankle_angle_previous_endpoint": 1.0,
+      "pros_ankle_angle_served_ref": 1.0,
+      "pros_ankle_angle_served_ref_vel": 3.5,
+      "pros_ankle_angle_served_ref_accel": 55.0,
+      "pros_ankle_angle_sea_u": 1.0
+    },
+    "widening": "NONE - the actor stays 35D",
+    "standalone_25d": "NONE",
+    "contralateral_features": "ABSENT - controller memory is the prosthesis' own deployable internal state, not a contralateral signal",
+    "scale_absorption": "baseline_MLP/target_domain_imitation.py::adapt_actor - training runs on obs/scale, then first_layer_weight[:, index].div_(scale) folds the scale into the first layer so the deployed module consumes RAW inputs",
+    "clock_rule": "baseline_MLP/target_domain_imitation.py::_zero_disabled_clock_columns with warm_start.DISABLED_GAIT_CLOCK_FEATURES = ('gait_phase_sin', 'gait_phase_cos'), re-applied after EVERY optimiser step and once more before saving"
+  },
+  "dataset": {
+    "schema": {
+      "observations": [
+        16024,
+        35
+      ],
+      "actions": [
+        16024,
+        2
+      ],
+      "times": [
+        16024
+      ],
+      "actor_feature_names": 35,
+      "dtype": "float32 / float32 / float64"
+    },
+    "nominal_states": 500,
+    "nominal_repeat": 32,
+    "nominal_training_samples": 16000,
+    "nominal_label_source": "SELF-DISTILLED: the pinned J2 student's own mean actions",
+    "nominal_label_rms": 0.44819560647010803,
+    "recovery_steps": 12,
+    "recovery_repeat": 2,
+    "recovery_training_samples": 24,
+    "aggregate_samples": 16024,
+    "recovery_fraction_of_aggregate": 0.0014977533699450823,
+    "multistart_derogation": {
+      "omitted": true,
+      "what": "the two extra teacher datasets at start offsets -0.20 and +0.20 rad, which July repeated 8x for 8000 of its 24712 rows",
+      "why": "DEFERRED BY USER DECISION. This is the SINGLE explicit derogation from the selected July composition and is declared, not silent",
+      "july_additional_training_samples": 8000
+    },
+    "corpus_condition": {
+      "rule": "non-empty AND time-aligned, after July-strict truncation",
+      "minimum_length_gate": null,
+      "note": "July's retained prefixes (119, 118, 119) are DESCRIPTIVE and are never used as a threshold; the candidate this stage can produce is quarantined by construction"
+    },
+    "label_rule": "recovery labels are teacher_actions[step - 1], the SAME fixed-start episode step; nominal labels are the student's own means",
+    "time_alignment_verified": {
+      "tolerance_s": 1e-09,
+      "rows_checked": 12,
+      "sources": [
+        "trace time_before",
+        "dataset times"
+      ]
+    },
+    "trace_filter": {
+      "original_steps": 500,
+      "retained_steps": 12,
+      "first_discrete_mismatch_step": 13,
+      "mismatching_columns": [
+        {
+          "index": 11,
+          "feature": "online_left_in_contact",
+          "nominal": 0.0,
+          "recovery": 1.0
+        }
+      ],
+      "rule": "July-strict; never relaxed",
+      "source": "baseline_MLP/target_domain_noise_adaptation.py::truncate_before_discrete_mismatch, enabled by target_domain_markov_adaptation.py --stop-before-discrete-mismatch (default True)"
+    },
+    "discrete_agreement_diagnostics": {
+      "compared_steps": 500,
+      "steps_agreeing_on_all_discrete_columns": 462,
+      "longest_contiguous_agreeing_run": {
+        "steps": 101,
+        "from": 14,
+        "to": 114
+      },
+      "per_column": {
+        "online_left_in_contact": {
+          "first_mismatch_step": 13,
+          "mismatching_steps": 22
+        },
+        "online_left_heel_strike": {
+          "first_mismatch_step": 321,
+          "mismatching_steps": 2
+        },
+        "online_left_toe_off": {
+          "first_mismatch_step": 125,
+          "mismatching_steps": 6
+        },
+        "phase_fsm_wait_hs": {
+          "first_mismatch_step": null,
+          "mismatching_steps": 0
+        },
+        "phase_fsm_stance_after_hs": {
+          "first_mismatch_step": 125,
+          "mismatching_steps": 13
+        },
+        "phase_fsm_swing_after_to": {
+          "first_mismatch_step": 125,
+          "mismatching_steps": 13
+        },
+        "phase_expected_hs": {
+          "first_mismatch_step": 125,
+          "mismatching_steps": 13
+        },
+        "phase_expected_to": {
+          "first_mismatch_step": 125,
+          "mismatching_steps": 13
+        }
+      },
+      "status": "DIAGNOSTIC, NOT A RELAXATION: the July-strict prefix is the only corpus the fit may use. These numbers exist so the architect can decide, not so the runner can widen the corpus on its own."
+    },
+    "leakage_guard": {
+      "clock_columns": [
+        0,
+        1
+      ],
+      "clock_raw_abs_max_before_projection": 1.0,
+      "clock_projected_to_exact_zero_in_data": true,
+      "clock_masked_in_weights_every_step": true,
+      "note": "the runtime leaves the disabled clock as a constant (sin 0.0, cos 1.0), so the raw data alone is not zero; both routes are closed",
+      "controller_columns_left_intact": [
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "controller_abs_max_by_feature": {
+        "pros_knee_angle_previous_endpoint": 1.0165235996246338,
+        "pros_knee_angle_served_ref": 1.0031261444091797,
+        "pros_knee_angle_served_ref_vel": 2.7508351802825928,
+        "pros_knee_angle_served_ref_accel": 39.790462493896484,
+        "pros_knee_angle_sea_u": 0.7413817644119263,
+        "pros_ankle_angle_previous_endpoint": 0.4001844823360443,
+        "pros_ankle_angle_served_ref": 0.3960023820400238,
+        "pros_ankle_angle_served_ref_vel": 2.1509125232696533,
+        "pros_ankle_angle_served_ref_accel": 33.639869689941406,
+        "pros_ankle_angle_sea_u": 0.13198605179786682
+      }
+    },
+    "trainable_controller_features": [
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "aggregation_source": "baseline_MLP/target_domain_markov_adaptation.py::build_markov_recovery_dataset - the SELF-DISTILLED nominal block (states from the nominal trace, labels from _actor_means of the source actor) is tiled nominal_repeat times and placed FIRST, then the recovery block (visited states, teacher_actions[:len]) is tiled recovery_repeat times; weighting is by REPETITION, never by sample weights. This is the composition used here",
+    "july_composition_for_comparison": {
+      "nominal_steps": 500,
+      "nominal_repeat": 32,
+      "nominal_training_samples": 16000,
+      "recovery_steps": 356,
+      "recovery_repeat": 2,
+      "recovery_training_samples": 712,
+      "additional_recovery_datasets": 2,
+      "recovery_dataset_repeat": 8,
+      "additional_training_samples": 8000,
+      "aggregate_samples": 24712,
+      "retained_prefixes": [
+        119,
+        118,
+        119
+      ],
+      "first_mismatch_steps": [
+        120,
+        119,
+        120
+      ],
+      "recovery_fraction_of_aggregate": 0.028811913240530916
+    }
+  },
+  "dataset_sha256": "c196410c8538a11aa5b996256460031309126a9e0fbc03b779e20ae53a6b311d",
+  "hyperparameters": {
+    "seed": 123,
+    "epochs": 400,
+    "batch_size": 128,
+    "learning_rate": 5e-05,
+    "validation_fraction": 0.2,
+    "patience": 60,
+    "clip_weight": 1.0,
+    "logstd_weight": 0.0,
+    "anchor_weight": 0.01,
+    "freeze_logstd_head": true,
+    "train_full_actor": true,
+    "scale_markov_inputs": true
+  },
+  "hyperparameter_source": "runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13/run_summary.json::adaptation.hyperparameters (the SELECTED July run)",
+  "july_sources": {
+    "aggregation": "baseline_MLP/target_domain_markov_adaptation.py::build_markov_recovery_dataset - the SELF-DISTILLED nominal block (states from the nominal trace, labels from _actor_means of the source actor) is tiled nominal_repeat times and placed FIRST, then the recovery block (visited states, teacher_actions[:len]) is tiled recovery_repeat times; weighting is by REPETITION, never by sample weights. This is the composition used here",
+    "aggregation_not_used": "baseline_MLP/target_domain_imitation.py::aggregate_dagger_traces - the EARLIER 11 July composition, whose anchor block is the TEACHER dataset at 1x. It is NOT the composition used here and the two are never mixed",
+    "nominal_self_distillation": "baseline_MLP/target_domain_markov_adaptation.py::_actor_means -> target_domain_noise_adaptation.py::_forward, evaluated on float32 observations and float32 weights, returning logits[:, :2] as float",
+    "truncation": "baseline_MLP/target_domain_noise_adaptation.py::truncate_before_discrete_mismatch, enabled by target_domain_markov_adaptation.py --stop-before-discrete-mismatch (default True)",
+    "discrete_features": "baseline_MLP/target_domain_noise_adaptation.py::_discrete_feature_indices - names ending in _in_contact/_heel_strike/_toe_off/_saturated or starting with phase_fsm_/phase_expected_",
+    "trainable_columns": "baseline_MLP/target_domain_markov_adaptation.py::MARKOV_CONTROLLER_FEATURE_SUFFIXES and markov_feature_names - exactly the 10 deployable controller features, excluding _sea_u_abs and _sea_u_saturated",
+    "feature_scales": "baseline_MLP/target_domain_markov_adaptation.py::MARKOV_CONTROLLER_FEATURE_SCALES",
+    "scale_absorption": "baseline_MLP/target_domain_imitation.py::adapt_actor - training runs on obs/scale, then first_layer_weight[:, index].div_(scale) folds the scale into the first layer so the deployed module consumes RAW inputs",
+    "clock_hard_zero": "baseline_MLP/target_domain_imitation.py::_zero_disabled_clock_columns with warm_start.DISABLED_GAIT_CLOCK_FEATURES = ('gait_phase_sin', 'gait_phase_cos'), re-applied after EVERY optimiser step and once more before saving",
+    "hyperparameters": "runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13/run_summary.json::adaptation.hyperparameters (the SELECTED July run)",
+    "iteration_growth": "runs/training/target_domain_dagger_2026-07-11_r1|r2|r3 - the usable visited corpus grew 68 -> 113 -> 469 samples across iterations"
+  },
+  "composition": {
+    "nominal_repeat": 32,
+    "recovery_repeat": 2,
+    "overrides_refused": true
+  },
+  "multistart_derogation": {
+    "omitted": true,
+    "what": "the two extra teacher datasets at start offsets -0.20 and +0.20 rad, which July repeated 8x for 8000 of its 24712 rows",
+    "why": "DEFERRED BY USER DECISION. This is the SINGLE explicit derogation from the selected July composition and is declared, not silent",
+    "july_additional_training_samples": 8000
+  },
+  "corpus_condition": {
+    "rule": "non-empty AND time-aligned, after July-strict truncation",
+    "minimum_length_gate": null,
+    "note": "July's retained prefixes (119, 118, 119) are DESCRIPTIVE and are never used as a threshold; the candidate this stage can produce is quarantined by construction"
+  },
+  "split": {
+    "rows": 16024,
+    "training": 12819,
+    "validation": 3205,
+    "rule": "ONE default_rng(123); the split is drawn first and the SAME generator shuffles every epoch",
+    "reconstructed": true
+  },
+  "selection": {
+    "best_epoch": 9,
+    "epochs_run": 69,
+    "best_validation_mse": 1.3680861457032734e-06,
+    "stale_epochs_at_stop": 60,
+    "patience": 60,
+    "epoch_budget": 400,
+    "patience_fired": true,
+    "stopped_by": "patience",
+    "rule": "first epoch improving by more than 1e-9; stop after 60 stale epochs; best state restored",
+    "reconstructed_from": "history.json, replayed; no training was run",
+    "reconstructed_validation_mse": 1.3680852362085716e-06,
+    "restored_best_state_verified": true
+  },
+  "metrics": {
+    "initial_rmse": 0.001064282373543184,
+    "adapted_rmse": 0.0010733642108932645
+  },
+  "pre_write_verification": {
+    "reconstructed_from_payloads": true,
+    "nominal_self_distillation": {
+      "rmse_before": 0.0,
+      "rmse_after": 0.0002776682012687945
+    },
+    "nominal_shift_vs_parent": {
+      "rms": 0.0002776682012687945,
+      "max_abs": 0.0017085075378417969,
+      "per_action_rms": [
+        0.00030502851735095076,
+        0.0002472991378763304
+      ],
+      "july_reference": {
+        "rms": 0.004175083023500488,
+        "max_abs": 0.03159449528902769,
+        "run": "target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13",
+        "status": "REFERENCE ONLY, never a gate"
+      }
+    },
+    "recovery_vs_teacher": {
+      "rmse_before": 0.027500254739313064,
+      "rmse_after": 0.026792278307060945,
+      "improved": true,
+      "requirement": "rmse_after < rmse_before, enforced before the receipt is written. A direction, not a magnitude"
+    },
+    "controller_column_norms": {
+      "pros_knee_angle_previous_endpoint": 0.000622039835434407,
+      "pros_knee_angle_served_ref": 0.0007745183538645506,
+      "pros_knee_angle_served_ref_vel": 0.00014757257304154336,
+      "pros_knee_angle_served_ref_accel": 4.2681243940023705e-05,
+      "pros_knee_angle_sea_u": 0.0008348111878149211,
+      "pros_ankle_angle_previous_endpoint": 0.0033659925684332848,
+      "pros_ankle_angle_served_ref": 0.0006681074155494571,
+      "pros_ankle_angle_served_ref_vel": 0.0003177331236656755,
+      "pros_ankle_angle_served_ref_accel": 7.328071660595015e-05,
+      "pros_ankle_angle_sea_u": 0.0031069142278283834
+    },
+    "controller_columns_all_positive": true,
+    "zero_columns_after_fit": [
+      0,
+      1
+    ],
+    "clock_bit_zero_in_both_aliases": {
+      "pi.0.0.weight": [
+        0,
+        1
+      ],
+      "pi_encoder.0.weight": [
+        0,
+        1
+      ]
+    },
+    "aliases_bit_identical": true,
+    "logstd_head_bit_identical_to_parent": true,
+    "all_parameters_finite": true,
+    "all_metrics_finite": true,
+    "restored_best_state": {
+      "recorded_best_validation_mse": 1.3680861457032734e-06,
+      "reconstructed_validation_mse": 1.3680852362085716e-06,
+      "absolute_difference": 9.094947017729282e-13,
+      "relative_difference": 6.647934449371949e-07,
+      "rtol": 1e-05,
+      "atol": 1e-12,
+      "tolerance_rationale": "float32 accumulation over the validation rows plus the first-layer scale absorption; rtol 1e-5 is ~84x the float32 epsilon of 1.19e-7, atol 1e-12 guards a near-zero MSE",
+      "validation_rows": 3205,
+      "restored_best_state_verified": true
+    }
+  },
+  "critic_trained": false,
+  "ppo_updates": 0,
+  "deployable": false,
+  "promotion": "NONE",
+  "next_stage_authorized": false,
+  "revalidation": {
+    "required": true,
+    "executed": false,
+    "authorised": false,
+    "note": "no closed-loop claim may be made from this receipt"
+  },
+  "not_authorised_by_this_receipt": [
+    "closed-loop rollout",
+    "revalidation",
+    "J5",
+    "progressive recovery rounds",
+    "deployment",
+    "promotion",
+    "critic",
+    "PPO",
+    "ex-novo",
+    "retry"
+  ],
+  "forbidden_here": [
+    "retry of J3",
+    "sigma",
+    "critic",
+    "PPO update",
+    "ex-novo",
+    "promotion",
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "standalone 25D",
+    "widening",
+    "contralateral features",
+    "July artefacts as operational inputs"
+  ],
+  "generated_at_utc": "2026-08-26T10:51:38Z",
+  "outputs_sha256": {
+    "rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+    "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+    "recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+    "history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87",
+    "j4_fit_original.log": "88e9312626d23ce49685576e263df1b93c0f4f8d077415cc1d0bdaadb188dbcf"
+  },
+  "outputs_sha256_excludes": {
+    "file": "v26c_j4_recovery_receipt.json",
+    "why": "a receipt cannot hash itself; its own digest is taken by the reviewer"
+  }
+}

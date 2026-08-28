@@ -1,0 +1,47 @@
+{
+  "amendment_id": "rev3l_s1_ik_ab06_prereg",
+  "date": "2026-08-24",
+  "authorized_by": "architect: S0D approved as STABLE 35D BASE (receipt cbec1a67..., module cda6d893..., actor 481dd0d2...); token V26B-S1-PREREG-READONLY (prereg + tooling/tests + read-only pre-gate ONLY; fit/export/rollout NOT authorised, each needs its own future token)",
+  "kind": "ADDITIVE, immutable",
+  "parents_immutable": {
+    "s0d_base": {
+      "rollout_receipt": "cbec1a671b7cdf2980881ec4ca33f69534e66d94cbbfa86c7b9cd9c1a39412b7",
+      "fit_receipt": "1b2dbab43bd945ca8afb1c9651c8de969e30813a539c99623e06ff116ed9e859",
+      "module_state": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597",
+      "actor_digest": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a"
+    },
+    "rev3k": "8f34c95ee7c69029e0d3e8715f3e62fe9652533a03e0dd4b8fb7b38114377437",
+    "b3_semantics_supplement": "9e57271a0eea28a782927cda2399b812a6ddedb8811808eea90a637a61b9318b",
+    "nominal_ik_cache_ab06": {
+      "digest_full": "3dd878d4d6d2930d730c1a67f39d6799f20221e7659a435c02d062bfd553d9b0",
+      "provenance": "ik_actions_from_base_kin (KinematicsInterpolator on the AB06 prescribed kinematics of the pinned v3 config: model AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi; lookahead 0.0, segment 0.01, bounds knee [-1.5,0] ankle [-0.7,0.7])"
+    }
+  },
+  "july_protocol_reconstructed_byte_cited": {
+    "16k_anchor_construction": "16000 = ONE deterministic 500-step episode of the source==init actor x np.tile 32 verbatim copies (markov_dataset_report.json: nominal_steps 500, nominal_repeat 32; target_domain_markov_adaptation.py:174-200); labels = the actor's OWN recorded raw actions (float32 identity vs init forward, rmse 1.19e-07); NOT 16000 unique rows",
+    "byte_provability_declaration": "a byte-provable 16k-unique-row preservation set does NOT exist and never existed in July; the MINIMAL July-equivalent substitute WITHOUT invention: the 500 unique S0D nominal-rollout rows (trace cbec1a67-pinned) with preservation enforced by the July-11 mechanism (explicit PARAMETER anchor to theta_S0D + pre/post function tests) instead of physical tiling (forbidden by the chain since rev3f)",
+    "scaling": "July physical scaling of the 10 Markov features, absorbed at export (target_domain_imitation.py:1049, :1203-1207); T1/T2 tests <= 1e-5",
+    "loss": "flat 2-output MSE (mse_loss, :1136); action-clip penalty relu(|m|-1)^2*mean weight 1.0 (:1137)",
+    "weights_anchor": "anchor_weight * mean over the 6 FULL pi tensors of mean-squared deltas, logstd restored/frozen (:1141-1146 == blob bdbf99c1:789-794); July-11 BC/DAgger weight 1e-5",
+    "budget_july_13": "400 epochs / batch 128 / lr 5e-5 / seed 123 / val 0.2 / patience 60 (adaptation_report.json) - the CHAIN keeps its frozen numerics instead (rev3b/i precedent)"
+  },
+  "s1_stage_definition_prereg_only": {
+    "init": "EXCLUSIVELY S0D (481dd0d2...); final actor always causal/deployable 35D",
+    "task": "IK AB06 nominal: u_IK(t_pre) from the FULL-pinned nominal cache, same-absolute-time labels on the 500 S0D-visited rows (all exactly on the nominal grid, verified)",
+    "structural_fact_frozen": "|u_S0D_own - u_IK| on those rows: knee mean 0.3758 (p90 0.9162, max 1.4318), ankle mean 0.3014 (max 1.1979) - the adaptation intrinsically moves the behaviour away from S0D by ~0.38; preservation is via the July-11 PARAMETER anchor + pre/post numeric tests, NOT via a conflicting data role (R0 lesson)",
+    "preservation_mechanism": "explicit parameter anchor towards theta_S0D (July semantics, weight 1e-5) + MANDATORY pre/post numeric tests: T1/T2 scaling preservation <= 1e-5; pre/post RMSE of the fitted actor vs S0D's OWN recorded actions on the 500 rows REPORTED and gated",
+    "fit_future_token": "V26B-S1-FIT (not granted); full mean network; frozen chain numerics 300 fixed/b256/lr1e-4/seed2026; flat MSE; clip 1.0; NO aux; July scaling; logstd placeholder",
+    "prohibitions": "NO DAgger alt-start/recovery in this stage, NO multistart, NO fixed sigma or sweep, NO critic/PPO/morphology fit; production env/reward/FSM/SEA/C++ untouched",
+    "split": "single-trajectory blocked windows with embargo (the chain's R0a-era leakage-free pattern): holdout steps 201-300, embargo 10 steps each side excluded from both",
+    "offline_gates_preregistered_reused": {
+      "task_rmse_vs_uIK_max_per_joint": 0.15,
+      "source": "rev3b R0a gate",
+      "preservation_drift_vs_S0D_own_max_per_joint": 0.1,
+      "source_p": "T1R P1 preservation threshold (chain-preregistered)",
+      "note": "the two gates are in structural tension (gap 0.38): whether both can hold is exactly what the offline stage measures; a FAIL is a valid informative outcome, thresholds are not relaxed",
+      "plus": "Q3, save/reload, T1/T2 <= 1e-5"
+    },
+    "mandatory_comparison": "offline metrics compared against JUL_H0 (July final: aggregate RMSE 0.008144 on ITS dataset; closed-loop 500/500) and S0D (fit holdout 0.0811/0.0793; rollout 500/500) - context, not gates",
+    "future_rollout": "ONE nominal deterministic rollout, separate token, exact rev3c/e/j command; primary gate 500/500 episode_time_limit; B3 phase-window only with the corrected semantics (field-zero versus missing-cycle distinguished)"
+  }
+}

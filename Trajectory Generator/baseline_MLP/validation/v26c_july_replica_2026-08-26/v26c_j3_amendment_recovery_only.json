@@ -1,0 +1,179 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j3_amendment_recovery_only",
+  "kind": "ADDITIVE, IMMUTABLE",
+  "stage_amended": "V26C-J3-CLOSED-LOOP",
+  "authorised_by": "THE USER, explicitly. The architect is reviewer, not approver of this change.",
+  "date_utc": "2026-08-26",
+  "user_decisions_recorded": {
+    "recovery_only_authorised": true,
+    "soft_fail_accepted": {
+      "statement": "the J1 and J3 penetration soft fail (above 20 mm, below the 28 mm hard guard) is ACCEPTED by the user in order to proceed with the recovery-only stage. The old nominal gate is NOT reintroduced as a blocker on this stage.",
+      "j1_max_penetration_m": 0.02294380435912411,
+      "j3_max_penetration_m": 0.02704966381076714,
+      "hard_guard_m": 0.028,
+      "steps_above_hard_guard": 0
+    },
+    "multistart_deferred": {
+      "statement": "the SINGLE explicit derogation from the selected July composition: the two extra teacher datasets collected at start offsets of -0.20 and +0.20 rad (8000 of July's 24712 rows) are NOT reproduced. Multistart is DEFERRED by user decision.",
+      "july_additional_recovery_datasets": 2,
+      "july_recovery_dataset_repeat": 8,
+      "july_additional_training_samples": 8000,
+      "consequence": "the V26C aggregate reproduces July's nominal and recovery blocks but not its multistart block"
+    },
+    "scope_now": "ONE J4 recovery-only fit. Progressive recovery rounds and any J5 stage are NOT authorised automatically and require a separate decision."
+  },
+  "does_not_overwrite": {
+    "statement": "This amendment is ADDITIVE. It does not modify, re-score, reinterpret or supersede the J3 receipt. The J3 verdict REMAINS FAIL.",
+    "j3_verdict": "FAIL",
+    "j3_failed_gates": ["max_penetration_m"],
+    "j3_deployable": false,
+    "j3_promotion": "NONE",
+    "j3_next_stage_authorized": false,
+    "j3_quarantine_applies": true,
+    "j1_verdict_unchanged": "FAIL",
+    "j1_amendment_unchanged": "v26c_j1_amendment_soft_fail.json"
+  },
+  "pinned_artefacts_sha256": {
+    "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_kinematics.npz": "402040d7cc794a26213ece8abd04a6e945fa46050f20d4ecc402bf78df0b97fc",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+    "v26c_j1_amendment_soft_fail.json": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e"
+  },
+  "measured_evidence": {
+    "j3_max_penetration_m": 0.02704966381076714,
+    "j1_teacher_max_penetration_m": 0.02294380435912411,
+    "soft_threshold_m": 0.020,
+    "hard_guard_m": 0.028,
+    "steps_above_soft_j3": 106,
+    "steps_above_hard_j3": 0,
+    "margin_to_hard_guard_m": 0.00095,
+    "inherited_excess_over_soft_m": 0.002944,
+    "student_added_over_teacher_m": 0.004106,
+    "closed_loop_action_rmse": 0.08796461037430645,
+    "j2_offline_adapted_rmse": 0.01385871,
+    "note": "the imitation target itself measures 22.94 mm, above the 20.0 mm soft threshold; an exact reproduction of the teacher would also exceed it"
+  },
+  "thresholds_unchanged": {
+    "grf_penetration_soft_diagnostic_m": 0.020,
+    "grf_penetration_hard_guard_m": 0.028,
+    "statement": "0.020 m remains the SOFT DIAGNOSTIC threshold and 0.028 m the HARD guard. Neither is relaxed, moved or reinterpreted by this amendment. The kinematic gates and the common gate stay exactly as preregistered."
+  },
+  "kinematic_gates_preserved": {
+    "status": "ALL PASS at J3 and must remain PASS at any revalidation",
+    "ankle_min_rad_observed": -0.10713271051645279,
+    "ankle_amplitude_rad_observed": 0.5164516940712929,
+    "knee_amplitude_rad_observed": 0.8486072868108749,
+    "knee_strictly_flexed_observed": true,
+    "out_of_bounds_samples": 0
+  },
+  "authorises": {
+    "scope": "RECOVERY ONLY",
+    "permitted": [
+      "building a recovery DATASET from the states actually visited in the pinned J3 trace",
+      "RELABELLING those states with the time-aligned prescribed teacher actions from the pinned J1 dataset",
+      "ONE recovery FIT of the same single 35D student, warm-started from the pinned J2 module",
+      "a future FRESH deterministic revalidation rollout of the recovery product, under the same pinned v3 runtime and the same preregistered gates"
+    ],
+    "forbidden": [
+      "retry of the current J3 rollout",
+      "sigma / exploration noise of any kind",
+      "critic training or PPO updates",
+      "ex-novo training",
+      "promotion of any artefact",
+      "LOTO", "LOCO", "B1R1", "B1R2",
+      "a standalone 25D actor",
+      "widening the actor beyond 35D",
+      "contralateral features",
+      "using July artefacts as operational parents, datasets or labels"
+    ]
+  },
+  "actor_contract": {
+    "width": 35,
+    "single_student": "the same 35D student derived from the August V26 imitation parent; no second actor is created",
+    "parent_for_recovery": "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+    "base_stage_masking": {
+      "applies_to": ["V26C-J2-BASE-FIT", "V26C-J3-CLOSED-LOOP"],
+      "hard_zero_columns": [0, 1, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]
+    },
+    "recovery_stage_masking": {
+      "applies_to": ["V26C-J4-RECOVERY"],
+      "hard_zero_columns": [0, 1],
+      "trainable_controller_memory_columns": [25, 26, 27, 28, 29, 30, 31, 32, 33, 34],
+      "rationale": "binding architectural correction: in the July-faithful recovery stage the actor stays 35D and is NOT widened, but the ten deployable controller-memory columns become trainable exactly as in the selected 13 July path, with their physical scaling absorbed into the first layer. Only the clock columns remain hard-zero.",
+      "july_evidence": {
+        "run": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13",
+        "adaptation_report_hyperparameters.first_layer_feature_scales": "the ten controller-memory scales are declared and applied",
+        "run_summary.adaptation.disabled_clock_column_norms": {"gait_phase_sin": 0.0, "gait_phase_cos": 0.0},
+        "run_summary.learned_column_norms": "all ten controller-memory columns are NON-zero after the fit",
+        "source": "baseline_MLP/target_domain_markov_adaptation.py MARKOV_CONTROLLER_FEATURE_SUFFIXES / MARKOV_CONTROLLER_FEATURE_SCALES and baseline_MLP/target_domain_imitation.py adapt_actor"
+      },
+      "contralateral_features": "REMAIN ABSENT. Controller memory is the prosthesis' own deployable internal state and must not be confused with contralateral observation."
+    }
+  },
+  "recovery_alignment_rule": {
+    "rule": "each recovery trace is truncated at its FIRST discrete mismatch against the nominal teacher trace; rows at and after that step are NOT labelled",
+    "source": "baseline_MLP/target_domain_noise_adaptation.py truncate_before_discrete_mismatch, enabled by target_domain_markov_adaptation.py --stop-before-discrete-mismatch (default True): 'Discard each stochastic recovery trace from its first contact/FSM mismatch, after which fixed-step teacher labels are phase-invalid.'",
+    "discrete_features": ["*_in_contact", "*_heel_strike", "*_toe_off", "*_saturated", "phase_fsm_*", "phase_expected_*"],
+    "must_not_be_relaxed": true,
+    "fail_closed_condition": "the LITERAL July condition: truncation at the first discrete mismatch, plus a recovery corpus that is NON-EMPTY and time-aligned. There is no minimum-length gate in the July code and none is introduced here.",
+    "july_retained_prefixes": {
+      "values": [119, 118, 119],
+      "status": "DESCRIPTIVE ONLY - the lengths that happened to be retained in that run. NOT a threshold, NOT a gate, and never to be used as one."
+    },
+    "july_first_mismatch_steps": [120, 119, 120],
+    "short_prefix_policy": "a strictly aligned prefix of any non-zero length may produce a QUARANTINED candidate. Its quality is judged solely by the subsequent closed-loop revalidation, never by the length of the prefix that produced it.",
+    "measured_on_j3": {
+      "first_discrete_mismatch_step": 13,
+      "mismatching_column": "online_left_in_contact (index 11)",
+      "teacher_value": 0.0,
+      "student_value": 1.0,
+      "retained_prefix_steps": 12,
+      "independent_diagnostics_not_a_relaxation": {
+        "steps_agreeing_on_all_discrete_columns": 462,
+        "longest_contiguous_agreeing_run": {"steps": 101, "from": 14, "to": 114},
+        "contact_onset_steps_teacher": [14, 170, 326, 466, 481],
+        "contact_onset_steps_student": [13, 169, 323, 466, 481]
+      }
+    }
+  },
+  "composition": {
+    "rule": "the composition of the SELECTED final July Markov run is used COHERENTLY: it is never mixed with the 11 July DAgger 1x/1x composition",
+    "source_run": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13",
+    "nominal_anchors": {
+      "states": "the 500 nominal teacher states of the pinned J1 collection",
+      "labels": "SELF-DISTILLED - the pinned J2 student's own mean actions on those states, as July anchors its nominal block",
+      "repeat": 32,
+      "samples": 16000
+    },
+    "recovery": {
+      "states": "the aligned prefix of the pinned J3 trace",
+      "labels": "the time-aligned prescribed teacher actions",
+      "steps": 12,
+      "repeat": 2,
+      "samples": 24
+    },
+    "multistart": "OMITTED - the single explicit derogation, deferred by user decision",
+    "aggregate_samples": 16024
+  },
+  "progressive_recovery_iterations": {
+    "mechanism": "each iteration fits on the currently aligned prefix, then a FRESH deterministic rollout is run and the aligned prefix is recomputed; a longer prefix yields a larger recovery corpus for the next iteration",
+    "july_evidence": "target_domain_dagger_2026-07-11_r1 -> r2 -> r3 grew the usable visited corpus 68 -> 113 -> 469 samples across iterations",
+    "authorisation": "the MECHANISM is authorised to be implemented and tested. NO physical rollout of any iteration is authorised by this amendment.",
+    "scope_boundary": "ONE J4 recovery-only fit is the operation approved now. Progressive rounds and any J5 stage are NOT authorised automatically."
+  },
+  "revalidation": {
+    "requirement": "any recovery product must be revalidated by a FRESH deterministic closed-loop rollout under the same pinned runtime config a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db and the same preregistered gates",
+    "may_not_reuse": "the pinned J3 rollout, which stays FAIL and quarantined",
+    "authorised_now": false
+  },
+  "immutability": "this file is content-addressed by the artefacts it pins. Any change to a pinned artefact invalidates it. It is never edited in place."
+}

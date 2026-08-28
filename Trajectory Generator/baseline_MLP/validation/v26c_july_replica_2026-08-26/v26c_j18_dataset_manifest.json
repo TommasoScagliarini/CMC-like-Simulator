@@ -1,0 +1,326 @@
+{
+  "kind": "IMMUTABLE DATASET MANIFEST",
+  "stage": "V26C_J18_J8_B_ONLY_CONSTRAINED_UPDATE",
+  "date": "2026-08-27",
+  "purpose": "fully determines the four disjoint loss blocks of the J18 constrained update from immutable inputs. The runner rebuilds these blocks in --preflight-only mode and refuses to proceed unless every binding hash below is reproduced.",
+  "no_actor_was_trained_or_written_to_produce_this_file": true,
+  "contains_no_self_hash": true,
+
+  "composition_authority": {
+    "decided_by": "architect, binding architectural note of 2026-08-27",
+    "decision": "GLOBAL DISJUNCTION with SEMANTIC PRIORITY A > B > C > D",
+    "prior_executor_proposal_superseded": "the executor had proposed precedence B > A > C > D on scarcity grounds. The architect ruled A > B > C > D on semantic grounds. The architect's order is what this manifest implements. The measured consequence of the change is that the single shared row is assigned to A, so B holds 14 rows rather than 15 and A holds the full 500.",
+    "original_requirement": "the earlier requirement was to ACCOUNT FOR overlaps; on the strength of the measurements below the architect converted it into global disjunction.",
+    "conflict_rule": "where targets conflict on a shared observation, the higher-priority correction prevails, and the conflict must be measured and documented. Measured result: there are ZERO target conflicts. See target_conflict_measurement."
+  },
+
+  "parent_actor": {
+    "id": "J8",
+    "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/module_state.pkl",
+    "actual_byte_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "recomputed_actor_digest": "6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207",
+    "identity_source": "THE BYTES AT THE PATH ABOVE. The leaf sidecar actor_feature_manifest.json is stale and is never used as an identity source; see v26c_j18_provenance_overlay_j8_2026-08-27.json.",
+    "sibling_artefacts_pinned_for_change_detection_only": {
+      "rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "history.json": "150315058a03f5c8e0c1ec851c68125f2036e7b6c9d0ae6024713098f21822a5",
+      "v26c_j8_recovery_fit_receipt.json": "13adc58b81ea372edef43a3d57f62b5f971e6be87c5242a8a0e234e993de6995"
+    }
+  },
+
+  "inputs_sha256": {
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/j9_cell_A_trace.json": "60f5f299e7f491562cb57e0c07b436368eb5a0b22e4e9ff9d3fb95c6dafa7b30",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/j9_cell_B_trace.json": "cbb59127ecc6eda28364e83da5c663b0ed20fd68f0386b4e980c775a026808f3",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/j9_cell_C_trace.json": "3ed91ce92354ebaf6a29d7a04e9c924f439297bf5a49ca6e2fd8223f00cbc4d3",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/j9_cell_D_trace.json": "6a21eaa7dc08b85d239851c8d393b2d4eaabf7a30e807f029a4f3d27ca2057ac",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/j9_cell_E_trace.json": "ea41ecd4745126f5abea156d0375e1f1baa20dc78ff45992d50f4166aacdb5a4",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/j9_cell_F_trace.json": "54c6afff9a9ca99cdebe45397f98b61275be6e33581f94e6923367458898e39d",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/v26c_j9r1_closed_loop_receipt.json": "c201b666f68451e4646fbaae3f149e9afaf873b5c94f99c95fc4286faaeda4f4",
+    "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27"
+  },
+
+  "target_cell_B_verification": {
+    "j9_B_observations_shape": [500, 35],
+    "j9_B_actions_shape": [500, 2],
+    "j10_B_observations_shape": [500, 35],
+    "j10_B_actions_shape": [500, 2],
+    "dtypes": {"observations": "float32", "actions": "float32", "times": "float64"},
+    "times_bit_identical": true,
+    "max_abs_time_difference": 0.0,
+    "t_first": 13.746870983805103,
+    "t_last": 18.736870983804284,
+    "j10_actions_equal_executed_actions": true,
+    "j10_action_noise_exactly_zero": true,
+    "j9_B_raw_action_equals_policy_mean": true
+  },
+
+  "on_policy_prefix_derivation": {
+    "rule": "the prefix is the maximal contiguous run of leading indices at which the J9-B and J10-B observations agree on EVERY discrete feature. The first index at which any discrete feature disagrees ends the prefix. Nothing is hardcoded; the runner derives this and asserts the values below.",
+    "discrete_feature_operator": "v26c_j14_dagger_dataset.discrete_feature_indices, reused unmodified",
+    "discrete_feature_indices": [11, 12, 13, 17, 18, 19, 20, 21],
+    "discrete_feature_names": [
+      "online_left_in_contact", "online_left_heel_strike", "online_left_toe_off",
+      "phase_fsm_wait_hs", "phase_fsm_stance_after_hs", "phase_fsm_swing_after_to",
+      "phase_expected_hs", "phase_expected_to"
+    ],
+    "first_mismatch_index": 15,
+    "first_mismatch_step_number": 16,
+    "first_mismatch_column_index": 11,
+    "first_mismatch_column_name": "online_left_in_contact",
+    "first_mismatch_values": {"j9": 0.0, "j10": 1.0},
+    "prefix_length_before_disjunction": 15,
+    "prefix_is_contiguous": true,
+    "rows_excluded_post_mismatch": 485,
+    "total_mismatching_rows_in_the_episode": 485,
+    "expected_prefix_length_asserted_by_runner": 15,
+    "note_on_the_prefix_interior": "within the 15-row prefix the DISCRETE features agree by construction, but the CONTINUOUS features already diverge: pros_knee_angle_served_ref_accel by 50.35 (3.638 sigma), pros_ankle_angle_served_ref_accel by 15.31 (1.550 sigma), pros_knee_angle_vel by 3.12 (2.062 sigma). The prefix is a discrete-phase agreement region, NOT a region of state identity. Stated so the block is not over-claimed."
+  },
+
+  "overlap_matrix_before_disjunction": {
+    "basis": "bit-identical 35-float32 observation vectors, over the RAW blocks before any deduplication",
+    "raw_rows": {"A": 500, "B": 15, "C": 2500, "D": 1210},
+    "raw_distinct_observations": {"A": 500, "B": 15, "C": 2497, "D": 1210},
+    "internal_duplicates": {"A": 0, "B": 0, "C": 3, "D": 0},
+    "pairwise_intersection": {
+      "A_B": 1, "A_C": 0, "A_D": 0,
+      "B_C": 0, "B_D": 0, "C_D": 0
+    },
+    "matrix_rendered": [
+      "        A     B     C     D",
+      "  A   500     1     0     0",
+      "  B     1    15     0     0",
+      "  C     0     0  2497     0",
+      "  D     0     0     0  1210",
+      "  diagonal = distinct observations within the block; off-diagonal = intersection size"
+    ],
+    "total_overlapping_row_instances": 4,
+    "note": "the J7 nominal support was checked directly against the cell A observations and does NOT intersect it: 0 rows in common. The suspicion that block D reproduced block C's nominal region is REFUTED by measurement."
+  },
+
+  "target_conflict_measurement": {
+    "rule_applied": "where a shared observation carries different targets, the higher-priority block prevails and the conflict is measured and documented",
+    "measured_result": "ZERO conflicts. Every overlapping observation carries a bit-identical target in both blocks.",
+    "conflicts": [
+      {
+        "overlap": "A intersect B",
+        "rows": 1,
+        "which": "A[0] and B[0]",
+        "target_in_A": [0.20619573, -0.00133646],
+        "target_in_B": [0.20619573, -0.00133646],
+        "max_abs_target_difference": 0.0,
+        "conflicting_rows": 0,
+        "why_identical": "both blocks label index 0 with the J10 action at index 0. It is the SAME training example, not one state with two targets.",
+        "cause_of_the_overlap": "at step 0 the state is the reset state, and the teacher rollout and the on-policy rollout start from the same reset, so the observation is bit-identical.",
+        "resolution": "assigned to A by priority; B drops it and holds 14 rows."
+      },
+      {
+        "overlap": "C internal duplicate",
+        "rows": 4,
+        "which": "C indices [0, 1000, 1500, 2000], i.e. step 0 of cells A, D, E and F",
+        "target_common": [0.74620132, -0.00803327],
+        "max_abs_target_difference": 0.0,
+        "conflicting_rows": 0,
+        "why_identical": "the target is J8's own deterministic output on that state, so four copies of one state carry one target.",
+        "cause_of_the_overlap": "cells A, D, E and F all use offset_s = 1.956870983805102 and therefore share the identical reset state. Cell C uses offset_s = 2.156870983805102 and does not collide.",
+        "resolution": "the occurrence in cell A is kept; the copies in cells D, E and F are dropped. C holds 2497 rows."
+      }
+    ],
+    "consequence": "because every conflict magnitude is exactly 0.0, the priority rule discards no target information whatsoever. What changes is only the WEIGHT of the affected states: the shared reset state moves from being counted twice across A and B to once in A, and the nominal reset state moves from 4x to 1x inside C."
+  },
+
+  "block_composition": {
+    "loss_form": "L(theta) = w_A * MSE_A(theta) + w_B * MSE_B(theta) + w_C * MSE_C(theta) + w_D * MSE_D(theta). Each MSE is the mean squared error over that block's own rows and over the two action dimensions, so every block is averaged WITHIN ITSELF and then carries an EXPLICIT weight. No block's row count leaks into another block's influence.",
+    "correction_is_in_output_action_space": "yes. All four blocks constrain the network's OUTPUT on named states. Blocks C and D are output-space preservation anchors, not a parameter-space penalty. This is the direct answer to the J17 finding that J15R1 carried only a parameter-space anchor at weight 0.01 and no output-space constraint at all.",
+    "disjunction_rule": {
+      "statement": "blocks are built in the fixed priority order A, B, C, D. An observation already claimed by a higher-priority block, or already present earlier within the same block, is dropped. First occurrence in priority order wins.",
+      "priority_order": ["A", "B", "C", "D"],
+      "within_C_cell_order": ["A", "C", "D", "E", "F"],
+      "verified_pairwise_disjoint_after": true,
+      "verified_no_internal_duplicates_after": true,
+      "union_row_count": 4221,
+      "union_distinct_observations": 4221,
+      "union_distinct_equals_row_count": true
+    },
+    "counts_before_and_after": {
+      "A": {"before": 500, "after": 500, "removed": 0},
+      "B": {"before": 15, "after": 14, "removed": 1},
+      "C": {"before": 2500, "after": 2497, "removed": 3},
+      "D": {"before": 1210, "after": 1210, "removed": 0},
+      "total": {"before": 4225, "after": 4221, "removed": 4},
+      "C_rows_per_cell_before": {"A": 500, "C": 500, "D": 500, "E": 500, "F": 500},
+      "C_rows_per_cell_after": {"A": 500, "C": 500, "D": 499, "E": 499, "F": 499}
+    },
+
+    "blocks": [
+      {
+        "id": "A",
+        "priority": 1,
+        "role": "primary target",
+        "description": "the complete J10-B teacher trajectory",
+        "observations_source": "j10r1_cell_B_teacher_dataset.npz :: observations",
+        "labels_source": "j10r1_cell_B_teacher_dataset.npz :: actions",
+        "rows_before": 500,
+        "rows": 500,
+        "observations_sha256": "e0ea74283b5bb6df6b32e66838a93196a13a05d0e2dbc9f6c383afe767d895f8",
+        "labels_sha256": "6ab430411cf360a38d761a3424aefad61fa544e1bc953ff92d0972479798903e",
+        "labels_read_from_file_not_recomputed": true
+      },
+      {
+        "id": "B",
+        "priority": 2,
+        "role": "on-policy target",
+        "description": "the J8 pre-mismatch on-policy prefix of the J9-B trajectory, labelled with the J10 action at the SAME index and time, excluding exact observations already claimed by A",
+        "observations_source": "j9_cell_B_trace.json :: actor_observation_vector_before, rows [0:15) minus row 0",
+        "labels_source": "j10r1_cell_B_teacher_dataset.npz :: actions, same indices",
+        "rows_before": 15,
+        "rows": 14,
+        "row_indices_used": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        "observations_sha256": "1026def28bcebf7315662eb9d060939bf80f1dac01b1a1cb1e6341df76a436c9",
+        "labels_sha256": "edb6a94e50c70410c4340a340076047d70eb60e33cc8b916c53ed072f343b98d",
+        "post_mismatch_rows_included": 0,
+        "labels_read_from_file_not_recomputed": true
+      },
+      {
+        "id": "C",
+        "priority": 3,
+        "role": "preservation anchor",
+        "description": "the five closed-loop cells J8 passes, labelled with J8's own recorded mean output, internally deduplicated and excluding observations already claimed by A or B",
+        "observations_source": "j9_cell_{A,C,D,E,F}_trace.json :: actor_observation_vector_before",
+        "labels_source": "j9_cell_{A,C,D,E,F}_trace.json :: policy_mean",
+        "cells": ["A", "C", "D", "E", "F"],
+        "rows_before": 2500,
+        "rows": 2497,
+        "observations_sha256": "77741a2a02028de26faa53b55d7aa7dcffd7493c05f750a9289209907daf38b7",
+        "labels_sha256": "886bd24074305688a5efa41e944b6edc9f58c059ef2801280fd1f561ef3ae332",
+        "labels_read_from_file_not_recomputed": true,
+        "why_labels_are_read_and_not_recomputed": "the recorded policy_mean IS J8's mean output, is stored in an immutable artefact, and needs no matrix multiplication to reproduce. Reading it makes this block's hash exactly reproducible on any platform, which a recomputation could not guarantee.",
+        "cell_B_is_excluded_by_construction": "yes. Cell B is the cell J8 FAILS and is the target of the correction, not an anchor."
+      },
+      {
+        "id": "D",
+        "priority": 4,
+        "role": "preservation support",
+        "description": "the deduplicated J7 support, nominal and recovery, labelled with J8's mean output, excluding observations already claimed by A, B or C",
+        "observations_source": "v26c_j7_markov_recovery_dataset.npz :: observations, deduplicated",
+        "labels_source": "computed: J8 mean forward on those observations",
+        "j7_total_rows": 16713,
+        "j7_nominal_rows": 16000,
+        "j7_nominal_unique": 500,
+        "j7_nominal_tile_factor": 32,
+        "j7_recovery_rows": 713,
+        "j7_recovery_unique": 711,
+        "j7_union_unique": 1210,
+        "nominal_recovery_overlap_rows": 1,
+        "rows_before": 1210,
+        "rows": 1210,
+        "observations_sha256": "3026c78d23e94e37b587c309e2b1c6b07f43327d956c03b0c4972dc581a17a9b",
+        "labels_sha256": "f6992753280dbb357ad47fb5cecd9c76e2b9fc12594215342af68fb8ce98b444",
+        "labels_read_from_file_not_recomputed": false,
+        "label_computation_contract": {
+          "procedure": "float64 numpy forward through pi.0.0 -> tanh -> pi.0.2 -> tanh -> pi.1, first two output columns, then cast to float32",
+          "why_computed": "J7 predates J8, so no recorded J8 output exists for this support. It must be computed.",
+          "binding_check_is_a_TOLERANCE_not_a_hash": true,
+          "tolerance": 1e-06,
+          "rationale": "BLAS implementations may differ in the last bits across platforms, so a bit-hash of a computed matrix product is not a portable binding contract. The labels_sha256 above is INFORMATIONAL and platform-stamped; the BINDING check is max absolute deviation <= 1e-06 against a recomputation.",
+          "platform_stamp": "macOS-26.5.2-arm64-arm-64bit, python 3.10.20, numpy 2.2.6"
+        }
+      }
+    ],
+
+    "totals": {
+      "rows": 4221,
+      "rows_by_block": {"A": 500, "B": 14, "C": 2497, "D": 1210},
+      "row_arithmetic": "500 + 14 + 2497 + 1210 = 4221",
+      "correction_rows": 514,
+      "preservation_rows": 3707,
+      "note_on_shares": "no aggregate percentage is stated. Each block is averaged WITHIN ITSELF and carries an explicit weight, so a row-count share does not determine its influence on the loss. Quoting one would invite exactly the double-counting confusion corrected in J17."
+    }
+  },
+
+  "baseline_at_candidate_equals_parent": {
+    "meaning": "the value of each block's MSE when the candidate IS J8, i.e. before any update. Every threshold in the preregistration is derived from these numbers.",
+    "MSE_A": 0.004108013186414973,
+    "RMSE_A": 0.06409378,
+    "MSE_B": 0.1909311190718203,
+    "RMSE_B": 0.43695666,
+    "MSE_C": 1.29e-15,
+    "MSE_D": 1.318e-16,
+    "B_over_A_ratio": 46.48,
+    "max_abs_drift_at_baseline": {"C": 1.435e-07, "D": 2.971e-08},
+    "why_C_and_D_are_not_exactly_zero": "block C's labels are the RECORDED float32 policy_mean while the evaluation forward runs in float64, so the residual 1.29e-15 is float32 quantisation noise, not drift. Block D's labels come from the same float64 forward, so its residual is pure float64 rounding. Neither is a behavioural difference.",
+    "per_action_normalised_and_physical": {
+      "action_scale_rad": 0.35,
+      "A": {
+        "n": 500,
+        "knee": {"RMSE": 0.084307, "MAE": 0.030861, "max_abs": 0.575914, "signed_mean_shift": -0.020973, "RMSE_rad": 0.029507, "signed_mean_shift_rad": -0.007341},
+        "ankle": {"RMSE": 0.033292, "MAE": 0.018273, "max_abs": 0.221774, "signed_mean_shift": 0.004254, "RMSE_rad": 0.011652, "signed_mean_shift_rad": 0.001489}
+      },
+      "B": {
+        "n": 14,
+        "knee": {"RMSE": 0.601829, "MAE": 0.489729, "max_abs": 1.006425, "signed_mean_shift": -0.483844, "RMSE_rad": 0.210640, "signed_mean_shift_rad": -0.169345},
+        "ankle": {"RMSE": 0.140229, "MAE": 0.134169, "max_abs": 0.221883, "signed_mean_shift": 0.134169, "RMSE_rad": 0.049080, "signed_mean_shift_rad": 0.046959}
+      },
+      "excluded_485_post_mismatch_rows_diagnostic_only": {
+        "knee": {"RMSE": 0.964429, "MAE": 0.878391, "max_abs": 1.435908, "signed_mean_shift": -0.866174},
+        "ankle": {"RMSE": 0.227935, "MAE": 0.183728, "max_abs": 0.559774, "signed_mean_shift": -0.004032},
+        "status": "NOT part of any block. Reported so the size of what is deliberately excluded is on the record."
+      }
+    },
+    "reading": "the on-policy block B starts 46.48x worse than the teacher block A. J8's error on the states it actually visits is far larger than its error on the states the teacher visits, which is the entire reason this phase exists."
+  },
+
+  "measured_scales_used_to_derive_thresholds": {
+    "tolerated_perturbation": {
+      "what": "the maximum additive action perturbation actually applied in each stochastic cell that J8 PASSED",
+      "cell_D_max_abs_noise": 0.016491,
+      "cell_E_max_abs_noise": 0.014557,
+      "cell_F_max_abs_noise": 0.016350,
+      "smallest_among_passing_cells": 0.014557,
+      "smallest_among_passing_cells_cell": "E",
+      "smallest_among_passing_cells_rad": 0.005095,
+      "why_this_is_evidence": "J8 completed and passed cells D, E and F while an additive perturbation of this magnitude was applied to its action at every step. A permanent drift strictly smaller than this is therefore below a perturbation size J8 has already been shown to absorb. This is a measured tolerance, not an assumed one.",
+      "limit_of_this_evidence": "the perturbation was zero-mean and step-varying, whereas a weight drift is systematic and persistent. The two are not equivalent, so this bound is used only to fix an ORDER OF MAGNITUDE, and the real verdict remains the closed-loop requalification of a later phase."
+    },
+    "natural_command_variation": {
+      "what": "the step-to-step change in J8's own commanded action across all six cells",
+      "knee_p50": 0.011918, "knee_p95": 0.043163, "knee_max": 0.201135,
+      "ankle_p50": 0.007493, "ankle_p95": 0.038970, "ankle_max": 0.101985,
+      "why_this_is_evidence": "a drift smaller than the median one-step motion of the command is smaller than the signal the downstream system already tracks."
+    },
+    "output_distribution_on_the_J7_support": {
+      "knee": {"mean": 0.468096, "std": 0.325404, "min": -0.337117, "max": 0.810966},
+      "ankle": {"mean": 0.184735, "std": 0.203981, "min": -0.207759, "max": 0.615140}
+    }
+  },
+
+  "invariants": {
+    "single_35D_actor": true,
+    "no_separate_25D_actor": true,
+    "no_widening": true,
+    "no_contralateral_feature": true,
+    "observation_width": 35,
+    "clock_columns": [0, 1],
+    "clock_columns_exactly_zero_in_parent": true,
+    "critic_keys_present_in_parent": 0,
+    "parent_key_set": [
+      "pi.0.0.weight", "pi.0.0.bias", "pi.0.2.weight", "pi.0.2.bias",
+      "pi.1.weight", "pi.1.bias",
+      "pi_encoder.0.weight", "pi_encoder.0.bias",
+      "pi_encoder.2.weight", "pi_encoder.2.bias"
+    ],
+    "head_layout": {
+      "pi.1.weight_shape": [4, 256],
+      "pi.1.bias_shape": [4],
+      "rows_0_to_2": "the two action means",
+      "rows_2_to_4": "the two log-stds",
+      "there_is_no_separate_logstd_key": true,
+      "logstd_weight_rows_max_abs": 0.0,
+      "logstd_weight_rows_are_zero_meaning": "the log-std does not depend on the observation; it is a constant carried by the bias alone",
+      "logstd_bias_rows": [-5.2983174324035645, -5.2983174324035645]
+    },
+    "parent_sigma": [0.004999999670722372, 0.004999999670722372],
+    "sealed_seeds_126_127_128_referenced": false
+  }
+}

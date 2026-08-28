@@ -1,0 +1,130 @@
+{
+  "amendment_id": "a0a1_25d_intermediate_contract",
+  "date": "2026-08-25",
+  "kind": "ADDITIVE and IMMUTABLE. Formal protocol for stages A0 and A1 plus the versioned 25D intermediate observation contract. No previous amendment, receipt or report is modified",
+  "tokens": {"A0": "V26B-A0-TRANSPLANT-25D", "A1a": "V26B-A1A-TEACHER-COLLECTION-25D", "A1": "V26B-A1-IK-IMITATION"},
+  "execution_status": "NOTHING EXECUTED. This stage delivered protocol, contract, tooling, synthetic tests and preflight only. No fit, training, rollout or collection was performed",
+
+  "lineage_exclusive": {
+    "parent_A0": "EXCLUSIVELY the August V26 imitation actor, 39D, actor_digest 5bbc6cbd3c7e3ec37524b7b6b69ca017af48057cac5207cf755d3b2f72c2709e, module runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+    "forbidden_as_init_anchor_or_data": ["S0D_35D_DISTILLED", "S1A_*", "S1B_*", "S1C1_*", "S1C2Z_*", "REV4B", "REV4C", "REV4D", "REV4E", "V2_*"],
+    "their_only_admitted_use": "DIAGNOSTIC EVIDENCE, read-only, for calibration tables and audit",
+    "july": "METHOD ONLY. No July checkpoint, dataset, label or anchor is used at any stage",
+    "no_contralateral_no_clock": "the actor never receives contralateral features and never receives the gait clock; the two clock columns stay present in the vector and are zeroed in the first layer"
+  },
+
+  "intermediate_contract_25d": {
+    "file": "v26b_contract_25d_v1.yaml",
+    "sha256": "b7292a73a9d342dd61773ab5bc85d66b1532bc2a0d76fd4d1dad37758fa67fae",
+    "version": "25D v1",
+    "parent_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "derivation": "the v3 canonical resolved config with EXACTLY ONE line changed: include_controller_state_observation true -> false. Verified line by line: same line count, one differing line (line 63)",
+    "unchanged": "physics, FSM v3, morphology corridor, contact model, reward, target slew limiter, reference governor and every safety guard are byte-identical to the parent config",
+    "effect": "the ten controller-state features move to the privileged critic suffix; the actor is 25D and the full observation stays 84 = 25 actor + 59 critic",
+    "scope": "stages A0 and A1 only. Stage A2 restores the 35D contract"
+  },
+
+  "A0_transplant": {
+    "operation": "39D -> 25D init transplant, mirroring the frozen August V1 recipe extended from a 4-column to a 14-column removal",
+    "removed_39d_indices": [2, 3, 4, 5, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38],
+    "removed_composition": "4 healthy imitation targets (privileged and anti-ex-novo, removed outright) + 10 controller-state Markov features (moved to the critic suffix)",
+    "recipe": [
+      "name-aligned column transfer, bit-identical for every kept column",
+      "mean-bias compensation: b1_25 = float32(float64(b1_39) + float64(W1_39[:, removed]) @ mean_removed), accumulated in float64",
+      "the two prescribed-clock columns zeroed",
+      "hidden layer and mean head copied bit-identically",
+      "log-std head replaced by the serialisation placeholder"
+    ],
+    "mean_source": "float64 means over the 3 pinned deterministic anchor traces, 1500 rows: healthy targets from the privileged cache (identical source to the frozen V1 recipe), controller-state from the obs35 of the SAME traces and rows",
+    "gates": ["parent actor digest equal to the pin", "kept columns bit-identical", "clock columns zero", "hidden layer and mean head unchanged", "structural validation at width 25", "no-clobber on the output directory"],
+    "preflight_result": {"verdict": "GO", "new_actor_digest": "d2c0e8758747a522fce2825e2a28fed939bdebd6fb2f2421fb5950dc481b1a83", "bias_delta_l2": 1.626305, "bias_max_abs_change": 0.327662}
+  },
+
+  "A1a_prerequisite": {
+    "token": "V26B-A1A-TEACHER-COLLECTION-25D",
+    "status": "BLOCKING and NOT YET AUTHORISED",
+    "what": "a prescribed-teacher nominal rollout under the 25D contract, producing teacher_dataset.npz and teacher_summary.json through the production entry point target_domain_imitation.collect_teacher_dataset",
+    "why": "the existing 500-row corpus is S0D-visited. S0D is diagnostic evidence and is forbidden as data of this branch, so A1 has no admissible dataset until A1a exists",
+    "gate": "the production teacher gate_pass must be true"
+  },
+
+  "A1_fit": {
+    "parent": "the A0 25D transplant, and nothing else",
+    "dataset": "the A1a teacher pairs (25D actor observation -> prescribed action). No on-policy row, no DAgger, no interpolation",
+    "split": {
+      "policy": "FAIL-CLOSED, never random: by trajectory when two or more trajectories exist, otherwise contiguous blocked temporal with a symmetric embargo",
+      "folds": 5, "embargo_steps": 10, "validation_fraction": 0.20,
+      "rationale": "consecutive steps of one trajectory are strongly dependent; a random split leaks the neighbours of every held-out row into training and inflates the offline score"
+    },
+    "invariants": ["log-std byte-identical to the A0 init", "clock columns zero", "no critic training", "no PPO update", "save/reload exact"],
+    "offline_gates_binding": ["integrity invariants including width 25", "fit convergence: aggregate RMSE strictly lower than the initial one"],
+    "ik_metrics_reported_without_invented_threshold": ["aggregate RMSE", "per-joint RMSE and max absolute error"]
+  },
+
+  "A1_declared_closed_loop_gates": {
+    "note": "declared and frozen here; the rollout itself is a later, separately authorised stage",
+    "completion": {"steps": 500, "end_reason": "episode_time_limit"},
+    "valid_cycle_count_min": 2,
+    "critical_counters_zero": ["phase_timeout_stance", "phase_timeout_swing", "morphology_causal_contract_failure", "hs_cancelled_count"],
+    "resync_count_max": 1,
+    "penetration_max_m": 0.020,
+    "kinematic_quality": {
+      "ankle_min_rad": -0.03,
+      "ankle_amplitude_min_rad": 0.30,
+      "knee_amplitude_min_rad": 0.60,
+      "knee_strictly_flexed": true,
+      "within_bounds": true
+    },
+    "reference_used_to_motivate": {
+      "source": "the frozen AB06 prosthetic IK labels over the 500-row corpus, read diagnostically",
+      "knee": {"min": -1.0165, "max": -0.1640, "amplitude": 0.8525},
+      "ankle": {"min": -0.1552, "max": 0.4002, "amplitude": 0.5553, "negative_row_fraction": 0.1940}
+    },
+    "motivation": {
+      "ankle_min_rad": "the prosthetic ankle must genuinely plantarflex, not merely approach zero. -0.03 rad is 19.3% of the reference plantarflexion depth 0.1552 rad. A minimum of -0.0099 rad DOES NOT SATISFY IT: -0.0099 > -0.03, and it is only 33% of the threshold in magnitude",
+      "ankle_amplitude_min_rad": "54.0% of the reference ankle amplitude, enough to exclude a joint that merely oscillates around a fixed offset",
+      "knee_amplitude_min_rad": "70.4% of the reference knee amplitude; a walking knee sweeps most of the reference range, a collapsed knee does not",
+      "penetration": "the CURRENT v3 soft guard, unchanged. No guard is relaxed anywhere"
+    },
+    "calibration_on_existing_actors_diagnostic_only": {
+      "S0D": "ankle min +0.0153 -> fails the plantarflexion gate",
+      "S1A": "ankle min -0.4231, knee amplitude 0.6135 -> would pass both amplitude gates",
+      "REV4E": "ankle min -0.0440 passes, knee amplitude 0.2968 -> fails the knee amplitude gate",
+      "purpose": "shows the thresholds discriminate and are not trivially satisfiable; none of these actors is data or parent of this branch"
+    }
+  },
+
+  "A2_declared": {
+    "operation": "restore the 35D contract by adding the ten controller-state first-layer columns INITIALISED TO ZERO; every other weight unchanged",
+    "gate": "the deterministic rollout of the expanded 35D actor must reproduce the A1 rollout BIT-FOR-BIT: same steps, same cycles, same trace. A single differing bit is a failure, never rounded away",
+    "before_any_adaptation": "no adaptation of any kind may start until that bit-for-bit gate passes"
+  },
+
+  "A3_declared": {
+    "dataset_shape": "the documented July relative masses as the initial preregistration, adapted to the real counts of this lineage: nominal anchors labelled with the ACTOR'S OWN MEANS, same-actor stochastic recoveries truncated at the first discrete mismatch against that actor's own nominal trace, and multistart teacher data",
+    "july_reference_masses": {"nominal_anchors": 0.647, "phase_aligned_recoveries": 0.029, "alternative_start_teacher": 0.324},
+    "no_july_data": "the masses are a design reference; every row comes from this lineage",
+    "interpolation": "NONE in this round",
+    "multistart_collection": "the plus/minus 0.20 s collection is authorised ONLY after A1 and A2 have passed their respective gates"
+  },
+
+  "sigma_open_todo": {
+    "status": "OPEN - sigma 0.005 is NOT assumed",
+    "rule": "before any stochastic recovery is collected for A3, the exploration scale of the A1 actor must be MEASURED by comparing the empirical per-joint action noise RMS of stochastic rollouts against the nominal rollout of the same actor",
+    "precedent": "on 2026-07-13 traces labelled sigma003 carried an empirical noise of about 0.03 and were discarded; the corrected trace measured 0.005103 and 0.004554",
+    "consequence": "a mismatch between the serialised placeholder and the measured noise invalidates the recovery dataset before it is built"
+  },
+
+  "tooling": {
+    "v26b_a0_transplant25.py": "bce45d030f93db94de385e93720b5a1a695ff57ce53f1df2235bfdf1ffa8d593",
+    "v26b_a1_ik_imitation.py": "155b0f28c7be04839c2b7e69e62ac08a87268c8f7a656766883c8a284800c845",
+    "test_v26b_a0a1_25d.py": "5739ac5560aae0c44272253d02937b7774b26fd9774d20df2b49eed0c90ac8a2",
+    "cross_platform": "pathlib only, no shell invocation, no os-specific path handling; Windows x86 and macOS arm64 alike",
+    "production_untouched": "no file under Trajectory Generator outside this validation directory is modified; no C++ and no SEA change"
+  },
+
+  "prohibitions": ["no fit", "no training", "no rollout", "no collection", "no candidate materialised",
+                    "no PPO", "no sigma decision", "no interpolation", "no contralateral feature", "no gait clock in the actor",
+                    "no change to FSM v3, morphology corridor, contact model, reward, limiter, governor or any safety guard",
+                    "no July artifact as init, anchor, dataset or label", "no S0D/S1A/REV4* as init, anchor or data"]
+}

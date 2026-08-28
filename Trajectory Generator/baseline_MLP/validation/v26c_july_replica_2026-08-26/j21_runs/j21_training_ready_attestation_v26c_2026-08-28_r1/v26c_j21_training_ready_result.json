@@ -1,0 +1,735 @@
+{
+  "accepted_diagnostics": {
+    "cells_above_hard_28mm": [],
+    "cells_above_soft_20mm": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I"
+    ],
+    "cells_at_or_above_july_25mm": [
+      "F",
+      "H"
+    ],
+    "soft_and_july_are_diagnostic_only": true,
+    "sole_binding_threshold_m": 0.028
+  },
+  "attested_at": "2026-08-28T05:48:51.056781+00:00",
+  "deployable": false,
+  "environment_constructed": false,
+  "ex_novo_authorized": false,
+  "field_scopes": {
+    "deployable": "always false, in every outcome, for every object.",
+    "environment_constructed": "J21 ITSELF constructs no environment. Prior stages did: J19B, J19C and R3 all constructed environments, and R3 declared it openly.",
+    "ray_started": "J21 itself starts no Ray. Prior stages did.",
+    "rollout": "J21 itself rolls out nothing. J19B and J19C did.",
+    "sampling": "J21 itself samples nothing. Prior stages did.",
+    "training_iterations_run": "the same scope, as an integer count. NOT the J20 critic warm-up's one iteration.",
+    "training_started": "downstream post-J20 actor-updating PPO or ex-novo pilot training, and the execution of J21 itself. NOT the J20 critic warm-up."
+  },
+  "findings": {
+    "T10_r3_live_optimizer_is_exact_under_rev7": {
+      "accepted_equivalence_paths": [
+        "param_groups[0].amsgrad",
+        "param_groups[0].betas[0]",
+        "param_groups[0].betas[1]",
+        "param_groups[0].capturable",
+        "param_groups[0].decoupled_weight_decay",
+        "param_groups[0].differentiable",
+        "param_groups[0].eps",
+        "param_groups[0].maximize"
+      ],
+      "canonical_differences": 0,
+      "canonical_digest": "2d0a041b2b8c60fc3c68d47cb9fd4eb72cc6b5d6ce12fd93b89cff223cc142a6",
+      "conversion": {
+        "call_site_verified": true,
+        "ray_version": "2.55.1",
+        "torch_version": "2.10.0"
+      },
+      "exact": true,
+      "learning_rate_observation": {
+        "canonical_dtype": "float32",
+        "canonical_live_lr_before_reapply": "('t', 'float32', (), '0f2f3591427956b004ca17393783192e0f81858c06bb5496aa2cea004f1ee863')",
+        "canonical_source_lr": "('t', 'float32', (), '0f2f3591427956b004ca17393783192e0f81858c06bb5496aa2cea004f1ee863')",
+        "gated": true,
+        "live_lr_before_reapply": 9.999999747378752e-05,
+        "live_lr_before_reapply_type": "float",
+        "matches": true,
+        "note": "the comparison of param_groups lr inside the main tree is between the checkpoint and the value the stage reapplied, because rev1 requires the original to run first. This field records the restored value BEFORE that overwrite, and rev7 requires it to match: it is the only witness of the restored learning rate.",
+        "production_reports_seen": 1,
+        "reapplied_learning_rate": 0.0001,
+        "source_lr_raw": "0.0001",
+        "source_lr_type": "float"
+      },
+      "raw_differences_reproduce_r2_eight": true
+    },
+    "T11_warmup_leaf_is_byte_immutable": {
+      "g9_closure_source": "the R3 receipt, never this leaf",
+      "leaf": "j20_runs/j20_critic_warmup_v26c_2026-08-27_r1",
+      "marker": "RESTORE_AUDIT_PENDING",
+      "marker_present": true
+    },
+    "T12_checkpoint_files_are_pinned_and_present": {
+      "directory": "j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/checkpoint_last",
+      "files": 24,
+      "learner_state_sha256": "51d97ef016aea2086201b55db807f3273b76784bbafdea6cc9e5c7fea90294be",
+      "logical_iteration": 1,
+      "module_state_sha256": "57720e2e3fa8a1fd412ba028e2452dead681d57ea1357be1c9f44f152b3cd168"
+    },
+    "T13_runtime_config_and_source_are_pinned": {
+      "additional_labels": 45,
+      "deep_leaf_verification": [
+        {
+          "files": 132,
+          "leaf": "j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1",
+          "ok": true
+        },
+        {
+          "files": 66,
+          "leaf": "j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1",
+          "ok": true
+        }
+      ],
+      "pins_checked": 139,
+      "pins_matching": 139,
+      "r3_go_labels": 92
+    },
+    "T14_j21_itself_constructs_no_runtime_and_trains_nothing": {
+      "constructs_environment": false,
+      "constructs_runtime": false,
+      "forbidden_calls_found": [],
+      "forbidden_imports_found": [],
+      "imports": [
+        "__future__",
+        "argparse",
+        "ast",
+        "datetime",
+        "hashlib",
+        "json",
+        "pathlib",
+        "sys"
+      ],
+      "launches_subprocess": false,
+      "problems": [],
+      "standard_library_only": true,
+      "starts_ray": false,
+      "trains": false
+    },
+    "T15_no_upstream_checkpoint_readiness_or_launch": {
+      "compatible_and_distinct": {
+        "it_is_required_not_merely_tolerated": "a J19A that had NOT promoted its actor would fail this gate: the actor inside the checkpoint would then have no eligibility behind it.",
+        "j19a_actor_promoted": true,
+        "scope": "STAGE-LOCAL ACTOR PROMOTION",
+        "stage": "V26C_J19A_SINGLE_REPRODUCTION",
+        "what_it_means": "an actor passed J19A's eleven binding offline eligibility criteria and was persisted",
+        "why_it_does_not_conflict": "TRAINING_INPUT_ONLY is a CHECKPOINT-level status for the J20 warm-up checkpoint, which did not exist when J19A ran. Different object, different claim."
+      },
+      "gated": [
+        "no upstream stage promoted THIS J20 checkpoint to TRAINING_INPUT_ONLY",
+        "no upstream stage claimed CHECKPOINT training readiness",
+        "no upstream stage authorised a downstream PPO/ex-novo continuation or a next stage"
+      ],
+      "measured_no_training_continuation": {
+        "j19b": {
+          "no_continuation_note": "a closed-loop PASS here authorises nothing further",
+          "ppo_updates": 0
+        },
+        "j19c": {
+          "no_continuation_note": "a closed-loop PASS here authorises nothing further",
+          "ppo_updates": 0
+        },
+        "k1r1": {
+          "algo_train_called": false,
+          "ppo_updates": 0,
+          "warmup_executed": false
+        },
+        "r3_explicit_denials": [
+          "PPO",
+          "an ex-novo run",
+          "any promotion",
+          "training readiness",
+          "any subsequent stage"
+        ],
+        "r3_receipt": {
+          "ppo_ex_novo": false
+        },
+        "r3_result": {
+          "ppo_ex_novo": false
+        },
+        "warmup_receipt": {
+          "ppo_ex_novo": false
+        },
+        "warmup_result": {
+          "ppo_ex_novo": false
+        }
+      },
+      "no_upstream_checkpoint_promotion": {
+        "j19b": {
+          "deployable": false,
+          "next_stage_authorized": false,
+          "promotion": "NONE"
+        },
+        "j19c": {
+          "deployable": false,
+          "next_stage_authorized": false,
+          "promotion": "NONE"
+        },
+        "k1r1": {
+          "next_stage_authorized": false,
+          "promotion": "NONE"
+        },
+        "r3_receipt": {
+          "next_stage_authorized": false,
+          "promotion": "NONE",
+          "training_ready": false
+        },
+        "r3_result": {
+          "next_stage_authorized": false,
+          "promotion": "NONE",
+          "training_ready": false
+        },
+        "warmup_receipt": {
+          "next_stage_authorized": false,
+          "promotion": "NONE",
+          "training_ready": false
+        },
+        "warmup_result": {
+          "next_stage_authorized": false,
+          "promotion": "NONE",
+          "training_ready": false
+        }
+      },
+      "what_j21_may_NOT_claim": "that it is the first training_ready in the project's history. That is unverifiable here and is not asserted anywhere.",
+      "what_j21_may_claim": "J21 is the first CURRENT V26C checkpoint-level TRAINING_INPUT_ONLY attestation after J20."
+    },
+    "T16_worker_sync_proved_by_the_transplant_report": {
+      "env_runner_actor_digests_all_expected": true,
+      "env_runner_actor_digests_count": 14,
+      "env_runner_actors_exact": true,
+      "env_runner_count_checked": 14,
+      "learner_actor": {
+        "actual_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "exact": true,
+        "expected_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "max_abs_diff": 0.0
+      },
+      "saved_initial_actor": {
+        "actual_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "exact": true,
+        "expected_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "max_abs_diff": 0.0
+      },
+      "weights_seq_no_is_not_the_proof": "rev1 demotes it. It is recorded because it corroborates a single publication, and it gates nothing.",
+      "weights_seq_no_supporting_telemetry": 1.0,
+      "weights_synced_before_first_sample": true
+    },
+    "T17_august_lineage_measured_byte_for_byte": {
+      "chain": "August V26 imitation -> J2 35D -> J8 -> J18 c13 -> J19A -> J19B / J19C -> J20 critic-only warm-up -> J20 R3 restore audit",
+      "links": {
+        "august_to_j2": {
+          "child": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+          "parent": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+          "width": "39 -> 35"
+        },
+        "j18_j8_to_j19a": {
+          "child_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+          "child_module": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+          "parent": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+          "parent_actor_digest": "6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207"
+        },
+        "j19a_to_warmup": {
+          "source_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+          "target_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96"
+        },
+        "j2_to_j8": {
+          "child": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+          "parent": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+        },
+        "j8_to_j18": {
+          "note": "J18 persisted zero actors; its selection was fail-closed. It contributes the constrained update protocol, not an actor.",
+          "parent": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+          "parent_actor_digest": "6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207"
+        }
+      },
+      "measured_not_declared": true
+    },
+    "T18_leaf_file_sets_and_committed_maps_are_exact": {
+      "j19a": {
+        "exact": true,
+        "extra": [],
+        "files": 7,
+        "missing": []
+      },
+      "j19b": {
+        "committed_map_entries": 132,
+        "exact": true,
+        "extra": [],
+        "files": 134,
+        "missing": []
+      },
+      "j19c": {
+        "committed_map_entries": 66,
+        "exact": true,
+        "extra": [],
+        "files": 68,
+        "missing": []
+      },
+      "r3": {
+        "exact": true,
+        "extra": [],
+        "files": 11,
+        "missing": []
+      }
+    },
+    "T1_lineage_is_august_operational_july_informational": {
+      "j19a_parent_leaf": "j18_runs/j18_b_only_update_v26c_2026-08-27_r1",
+      "j8_does_not_replicate_from_july": [
+        "July's dataset",
+        "July's parent",
+        "July's actor",
+        "July's output"
+      ],
+      "j8_operational_lineage": "the August V26 J2 parent and the current J7 dataset, 16713 rows",
+      "july_allowed_as_disclosed_informational_sources": [
+        "July-derived methodological constants, such as the hyperparameter provenance the J2 receipt cites",
+        "July-derived physical scaling code and the documented seeding and split protocol",
+        "the 25 mm July legacy reference band, diagnostic and never binding",
+        "stage and directory LABELS containing the word July, including the containing directory v26c_july_replica_2026-08-26 and the JULY_FAITHFUL label of J8, whose actual parent bytes are August V26"
+      ],
+      "july_forbidden_as_operational_parent_or_training_input": [
+        "checkpoint",
+        "actor weights",
+        "dataset",
+        "trace",
+        "labels"
+      ],
+      "july_role": "INFORMATIONAL ONLY",
+      "label_is_not_lineage": "J8 carries a July-faithful label and an August V26 parent. What decides is the parent bytes, which T17 measures.",
+      "operational_lineage": "August V26 imitation -> J2 35D -> J8 -> J18 c13 -> J19A -> J19B / J19C -> J20 critic-only warm-up -> J20 R3 restore audit",
+      "student": "one single native 35D actor",
+      "student_observation_width": 35
+    },
+    "T2_j19a_reproducibility_and_offline_eligibility": {
+      "binding_all_passed": true,
+      "binding_criteria": {
+        "E-C": 0.0030383822645046045,
+        "E-D": 0.0026441111267731902,
+        "G10": 1.0,
+        "G11": 1.0,
+        "G3": 0.00038898359698216967,
+        "G4": 0.0003996794210334038,
+        "G5": 0.00030691261600864986,
+        "G6": 0.0005597009666432298,
+        "G7": 1.0,
+        "G8": 0.0,
+        "G9": 0.0
+      },
+      "diagnostic_only_recorded_not_gated": {
+        "G1": 0.046971050069934295,
+        "G2": 0.019819501669915418
+      },
+      "exact_fields": 36,
+      "rollout_performed": false,
+      "verdict": "PASS"
+    },
+    "T3_j19b_six_of_six": {
+      "actor_unchanged": true,
+      "cells": {
+        "A": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        },
+        "B": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        },
+        "C": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        },
+        "D": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        },
+        "E": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        },
+        "F": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        }
+      },
+      "verdict": "PASS"
+    },
+    "T4_j19c_three_of_three_heldout": {
+      "actor_unchanged": true,
+      "cells": {
+        "G": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        },
+        "H": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        },
+        "I": {
+          "behavioural_pass": true,
+          "telemetry_valid": true,
+          "verdict": "PASS"
+        }
+      },
+      "verdict": "PASS"
+    },
+    "T5_penetration_contract_and_no_hard_breach": {
+      "accepted_diagnostics": {
+        "cells_above_hard_28mm": [],
+        "cells_above_soft_20mm": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I"
+        ],
+        "cells_at_or_above_july_25mm": [
+          "F",
+          "H"
+        ],
+        "soft_and_july_are_diagnostic_only": true,
+        "sole_binding_threshold_m": 0.028
+      },
+      "bands_m": {
+        "hard_binding": 0.028,
+        "july_legacy": 0.025,
+        "soft_diagnostic": 0.02
+      },
+      "cells": {
+        "A": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 105,
+          "at_or_above_july_legacy": 0,
+          "band": "above_soft_below_july_legacy",
+          "binding_pass": true,
+          "max_penetration_m": 0.02442140287670189,
+          "samples": 500
+        },
+        "B": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 98,
+          "at_or_above_july_legacy": 0,
+          "band": "above_soft_below_july_legacy",
+          "binding_pass": true,
+          "max_penetration_m": 0.023472629968460532,
+          "samples": 500
+        },
+        "C": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 90,
+          "at_or_above_july_legacy": 0,
+          "band": "above_soft_below_july_legacy",
+          "binding_pass": true,
+          "max_penetration_m": 0.022554834542696293,
+          "samples": 500
+        },
+        "D": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 101,
+          "at_or_above_july_legacy": 0,
+          "band": "above_soft_below_july_legacy",
+          "binding_pass": true,
+          "max_penetration_m": 0.024681825128941546,
+          "samples": 500
+        },
+        "E": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 100,
+          "at_or_above_july_legacy": 0,
+          "band": "above_soft_below_july_legacy",
+          "binding_pass": true,
+          "max_penetration_m": 0.02445683512352716,
+          "samples": 500
+        },
+        "F": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 100,
+          "at_or_above_july_legacy": 4,
+          "band": "july_legacy_breach_within_hard",
+          "binding_pass": true,
+          "max_penetration_m": 0.025615055309162808,
+          "samples": 500
+        },
+        "G": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 106,
+          "at_or_above_july_legacy": 0,
+          "band": "above_soft_below_july_legacy",
+          "binding_pass": true,
+          "max_penetration_m": 0.024417393735478,
+          "samples": 500
+        },
+        "H": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 102,
+          "at_or_above_july_legacy": 4,
+          "band": "july_legacy_breach_within_hard",
+          "binding_pass": true,
+          "max_penetration_m": 0.025684338426320914,
+          "samples": 500
+        },
+        "I": {
+          "above_hard_binding": 0,
+          "above_soft_diagnostic": 100,
+          "at_or_above_july_legacy": 0,
+          "band": "above_soft_below_july_legacy",
+          "binding_pass": true,
+          "max_penetration_m": 0.024762677044730928,
+          "samples": 500
+        }
+      },
+      "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+      "no_hard_breach": true
+    },
+    "T6_fsm_v3_and_morphology_counters_are_zero": {
+      "all_zero": true,
+      "cells": {
+        "A": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "B": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "C": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "D": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "E": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "F": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "G": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "H": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        },
+        "I": {
+          "hs_cancelled_count": 0,
+          "morphology_causal_contract_failure": 0,
+          "phase_timeout_stance": 0,
+          "phase_timeout_swing": 0,
+          "resync_count": 0
+        }
+      },
+      "warmup_training_health": {
+        "hs_cancelled_count_max": 0.0,
+        "missing_telemetry_rows": 0.0,
+        "morphology_causal_contract_failure_rows": 0.0,
+        "observed_rows": 4096.0,
+        "phase_timeout_stance_rows": 0.0,
+        "resync_count_max": 0.0,
+        "resync_event_rows": 0.0,
+        "timeout_side_disagreement_rows": 0.0
+      }
+    },
+    "T7_k1r1_nondegenerate_gradient": {
+      "checks": "12/12",
+      "verdict": "PASS"
+    },
+    "T8_j20_critic_warmup_twelve_of_twelve": {
+      "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+      "checkpoint": {
+        "learner_module_key_count": 16,
+        "only_the_critic_has_adam_moments": true,
+        "optimizer_adam_state_indices": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "optimizer_param_group_size": 12
+      },
+      "critic_changed": true,
+      "critic_digest_after": "2fa9c124e7b49b679df6db35f6cd4577a70e543541feaa3e6b32bac7afa0a410",
+      "critic_digest_before": "5ce4ef41d5677623de42081adc23b6f4168d3a0141d222f0ec64c683203e1096",
+      "gates": "12/12",
+      "logstd_byte_identical": true,
+      "sampled_steps": 4096.0,
+      "sigma": [
+        0.004999999670722372,
+        0.004999999670722372
+      ],
+      "verdict": "AWAITING_RESTORE_AUDIT",
+      "worker_sync_binding_proof_is": "T16, from the transplant report",
+      "worker_weights_seq_no_supporting_telemetry_only": 1.0
+    },
+    "T9_r3_restore_audit_thirteen_of_thirteen": {
+      "g9_closed": true,
+      "gates": "13/13",
+      "live_restore_completed": true,
+      "verdict": "RESTORE_AUDIT_PASS"
+    }
+  },
+  "gate_problems": {
+    "T10_r3_live_optimizer_is_exact_under_rev7": [],
+    "T11_warmup_leaf_is_byte_immutable": [],
+    "T12_checkpoint_files_are_pinned_and_present": [],
+    "T13_runtime_config_and_source_are_pinned": [],
+    "T14_j21_itself_constructs_no_runtime_and_trains_nothing": [],
+    "T15_no_upstream_checkpoint_readiness_or_launch": [],
+    "T16_worker_sync_proved_by_the_transplant_report": [],
+    "T17_august_lineage_measured_byte_for_byte": [],
+    "T18_leaf_file_sets_and_committed_maps_are_exact": [],
+    "T1_lineage_is_august_operational_july_informational": [],
+    "T2_j19a_reproducibility_and_offline_eligibility": [],
+    "T3_j19b_six_of_six": [],
+    "T4_j19c_three_of_three_heldout": [],
+    "T5_penetration_contract_and_no_hard_breach": [],
+    "T6_fsm_v3_and_morphology_counters_are_zero": [],
+    "T7_k1r1_nondegenerate_gradient": [],
+    "T8_j20_critic_warmup_twelve_of_twelve": [],
+    "T9_r3_restore_audit_thirteen_of_thirteen": []
+  },
+  "gates": {
+    "T10_r3_live_optimizer_is_exact_under_rev7": true,
+    "T11_warmup_leaf_is_byte_immutable": true,
+    "T12_checkpoint_files_are_pinned_and_present": true,
+    "T13_runtime_config_and_source_are_pinned": true,
+    "T14_j21_itself_constructs_no_runtime_and_trains_nothing": true,
+    "T15_no_upstream_checkpoint_readiness_or_launch": true,
+    "T16_worker_sync_proved_by_the_transplant_report": true,
+    "T17_august_lineage_measured_byte_for_byte": true,
+    "T18_leaf_file_sets_and_committed_maps_are_exact": true,
+    "T1_lineage_is_august_operational_july_informational": true,
+    "T2_j19a_reproducibility_and_offline_eligibility": true,
+    "T3_j19b_six_of_six": true,
+    "T4_j19c_three_of_three_heldout": true,
+    "T5_penetration_contract_and_no_hard_breach": true,
+    "T6_fsm_v3_and_morphology_counters_are_zero": true,
+    "T7_k1r1_nondegenerate_gradient": true,
+    "T8_j20_critic_warmup_twelve_of_twelve": true,
+    "T9_r3_restore_audit_thirteen_of_thirteen": true
+  },
+  "gates_failed": [],
+  "gates_passed": 18,
+  "gates_total": 18,
+  "kind": "TRAINING READY ATTESTATION RESULT",
+  "launch_authorized": false,
+  "lineage": {
+    "july": "informational only; never an operational input",
+    "operational": "August V26 imitation -> J2 35D -> J8 -> J18 c13 -> J19A -> J19B / J19C -> J20 critic-only warm-up -> J20 R3 restore audit"
+  },
+  "next_stage_authorized": false,
+  "ppo_authorized": false,
+  "preregistration": {
+    "base": "v26c_j21_prereg_training_ready_attestation.json",
+    "base_sha256": "df178ffae521aaf46837258ce2036789c6f8ae9f6b4cfb27b4cd11b85d06da79",
+    "precedence": [
+      "rev1",
+      "base"
+    ],
+    "rev1": "v26c_j21_prereg_training_ready_attestation_rev1.json",
+    "rev1_sha256": "9fa87c120de56d4ef0ae063ce3a4126b94a37ca629fe30710387958d9bcdfdfa"
+  },
+  "promotion": "TRAINING_INPUT_ONLY",
+  "ray_started": false,
+  "readiness_scope": {
+    "asserts": "this checkpoint is a sound, audited INPUT for a future conservative PPO pilot: it restores exactly through the real production path, it carries the qualified J19A actor bit-exact, and every closed gate above holds.",
+    "does_not_assert": [
+      "that any pilot configuration is correct, safe or sealed",
+      "that any launch command is correct or approved",
+      "that pilot hyperparameters, iteration count, stopping rule, safety monitors or rollback plan exist",
+      "that the resulting policy is deployable or fit for a subject",
+      "anything about July as an operational baseline"
+    ],
+    "identified_by": {
+      "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+      "critic_digest": "2fa9c124e7b49b679df6db35f6cd4577a70e543541feaa3e6b32bac7afa0a410",
+      "learner_state_sha256": "51d97ef016aea2086201b55db807f3273b76784bbafdea6cc9e5c7fea90294be",
+      "module_state_sha256": "57720e2e3fa8a1fd412ba028e2452dead681d57ea1357be1c9f44f152b3cd168"
+    },
+    "object": "j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/checkpoint_last",
+    "pilot_protocol_note": "NO pilot configuration file and NO pilot launch command exist, are pinned or are approved. This stage attests CHECKPOINT readiness, not PILOT readiness, and deliberately invents neither.",
+    "pilot_protocol_sealed": false,
+    "why_it_is_still_meaningful": "the assertion is a closed list of properties of a hash-identified artefact, each measured from committed evidence. A future pilot still needs its own preregistration, GO and user authorisation; what it will not need is to re-litigate this checkpoint."
+  },
+  "rollout": false,
+  "sampling": false,
+  "stage": "V26C_J21_TRAINING_READY_ATTESTATION",
+  "training_history_facts": {
+    "checkpoint_logical_iteration": 1,
+    "critic_warmup_iterations_completed": 1,
+    "downstream_actor_training_started": false,
+    "j21_execution_training_iterations": 0,
+    "next_logical_iteration": 2,
+    "note": "these are integers and are recorded because saying 'nothing was trained' would be false. One critic-only iteration of 4096 sampled steps did happen.",
+    "what_the_warmup_trained": "the critic only. The actor and the log-std stayed bit-exact, which gates G5 and G6 of the warm-up measured."
+  },
+  "training_iterations_run": 0,
+  "training_ready": true,
+  "training_started": false,
+  "verdict": "TRAINING_READY_ATTESTED",
+  "warmup_leaf_marker": "RESTORE_AUDIT_PENDING, byte-immutable; G9 closure is read from the R3 receipt",
+  "what_this_still_does_not_authorise": [
+    "launching a training run of any kind",
+    "PPO",
+    "an ex-novo run",
+    "a pilot",
+    "any deployment",
+    "any subsequent stage"
+  ]
+}

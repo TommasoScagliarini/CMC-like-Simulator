@@ -1,0 +1,9 @@
+# V26B — Supplemento S0D-1 (correzione di conformità Codex): metriche start/cella per PROVENANCE
+
+**Data:** 2026-08-24 · rev3k immutato (correzione di conformità, non architetturale). **Il receipt `v26b_s0d_pregate_receipt_20260824_170731.json` (`1a5c6b54…`) è SUPERSEDED SOLO per le metriche start/cella**; lo split (train 14 834 / holdout 4 480, held jobs, digest indici) è **identico e resta valido** (verificato: blocco `split` byte-uguale nei due receipt).
+
+**Bug corretto** (`v26b_s0d.py::pre_gate`): le maschere per cella/start usavano `(start, σ)` della PRIMA occorrenza della riga; per 9+ righe holdout multi-provenienza la cella attribuita non corrispondeva alla held-out trace che ne causava l'inclusione. **Regola corretta**: cella = membership della provenance nella specifica held-out job della cella (una riga condivisa fra più held-out contribuisce legittimamente a più celle); start = unione delle provenance delle 3 held-out job dello start; aggregato = holdout unico invariato.
+
+**Test aggiunti (SELFTEST 45/45)**: ogni maschera di cella == provenance dichiarata; ogni riga holdout coperta da ≥1 cella causante; somma righe-celle = holdout + membership multiple (4 500 = 4 480 + 20); righe multi-cella == righe condivise fra held-out; dimostrato che esistono righe la cui cella first-occurrence NON è una held-out includente (quindi le maschere non possono derivare dai metadata first-occurrence); start = unione; aggregato invariato.
+
+**Nuovo receipt (no-clobber)**: `v26b_s0d_pregate_receipt_20260824_171225.json` → **`ee2379d1ea98f79287a0476e354605d93d4964da2c158f1def5992c290572c36`**. **Esito PASS invariato**: aggregato 0.0919/0.0945; start 1 494/1 488/1 498 righe (0.0892–0.0984); peggior cella minus020×σ0.0025 = 0.1023 ≤ 0.15. Tooling post-fix: `v26b_s0d.py` `b9c2f275d1c50268…`, `test_v26b_s0d.py` `697c544b842544da…`. Nessun fit/export/rollout; token `V26B-S0D-FIT` non concesso.

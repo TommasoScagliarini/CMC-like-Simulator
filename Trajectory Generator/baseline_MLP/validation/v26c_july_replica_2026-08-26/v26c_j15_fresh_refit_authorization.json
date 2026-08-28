@@ -1,0 +1,360 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, FROZEN EXECUTION RECORD",
+  "revision": "rev3",
+  "supersedes": "rev2, which still carried two strings asserting that the J15 gate was J11's unchanged. None of rev0-rev2 was ever audited or handed over.",
+  "supersedes_sha256": "13633b466fd78cbac7b8c957721c853dfe1d3eca16e8bcc17388b537d97f53fd",
+  "stage_proposed": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "authorisation_status": "NOT_GRANTED_PENDING_ARCHITECT_AUDIT",
+  "execution_permitted_now": false,
+  "date": "2026-08-27",
+  "stale_semantics_corrected": {
+    "raised_by": "the architect, audit of 2026-08-27, BEFORE any fit",
+    "why_it_mattered": "every one of these would have been written into the receipt of a real run and would have made the committed evidence say something false.",
+    "corrections": [
+      "audit() returned binding_identical_to_j11 = true and build_receipt replicated it. FALSE: J15 has 17 gates, J11 16. Replaced by identical_to_j11 = false plus relation_to_j11, which names the exact preserved 16-name J11 subset and the single extra.",
+      "no_invented_thresholds spoke of FOUR binding subsets and said 'The J14 subsets are DIAGNOSTIC and bind nothing'. Corrected: FIVE binding RMSE subsets; only the WHOLE 854-row J14 block binds; cells E and F separately, post-mismatch 671, pre-mismatch 183, the phase-invalid fraction and every J11 comparison remain diagnostic.",
+      "stale docstrings and comments ('J11's binding gate, unchanged', 'the four binding subsets', 'J11, unchanged' as a rule source) and the test message 'passes all 16'.",
+      "the preregistration field binding_identical_to_j11 held SEVENTEEN names - its name and its content contradicted each other. Replaced by j11_binding_subset (16), j15_additional_binding (1) and binding_count (17); verify_prereg now REFUSES a preregistration that still carries the ambiguous field.",
+      "the readiness report used closed intervals, implying the wrong cardinality. Now half-open everywhere.",
+      "the report said 642 files and the summary said 643. Re-measured with a reproducible inventory and explained rather than silently changed."
+    ]
+  },
+  "gate_relation": {
+    "identical_to_j11": false,
+    "j11_binding_subset": [
+      "integrity_keys_and_shapes_match_parent",
+      "integrity_all_parameters_finite",
+      "integrity_clock_bit_zero",
+      "integrity_aliases_bit_identical",
+      "integrity_logstd_bit_identical_to_parent",
+      "integrity_no_critic_key",
+      "integrity_inputs_unchanged",
+      "integrity_aggregate_reproduces_content_hashes",
+      "integrity_split_counts_as_declared",
+      "integrity_best_state_reconstructible_from_history",
+      "integrity_all_metrics_finite",
+      "aggregate_rmse_decreases",
+      "recovery_rmse_decreases",
+      "cell_B_unique_rmse_decreases",
+      "cell_C_unique_rmse_decreases",
+      "controller_columns_nonzero"
+    ],
+    "j11_binding_subset_count": 16,
+    "j15_additional_binding": [
+      "j14_increment_rmse_decreases"
+    ],
+    "j15_additional_binding_count": 1,
+    "binding_count": 17,
+    "arithmetic": "16 preserved from J11 + 1 added by J15 = 17",
+    "j11_set_preserved_exactly": true,
+    "binding_rmse_subsets": 5,
+    "only_the_whole_j14_block_binds": true,
+    "diagnostic_only": [
+      "cells E and F separately",
+      "post-mismatch 671",
+      "pre-mismatch 183",
+      "phase-invalid fraction 671/854",
+      "j11_prefix_rmse",
+      "nominal_rmse",
+      "nominal_mean_shift",
+      "best_validation_mse",
+      "clipping_out_of_bounds_rows",
+      "epochs_run",
+      "stopped_early",
+      "torch_backend_observed"
+    ],
+    "statement": "the 16-name J11 binding subset is preserved, and J15 adds one binding rule"
+  },
+  "half_open_slices": {
+    "aggregate": "[0, 25567)",
+    "j7_recovery_original": "[16000, 16713)",
+    "cell_B_unique": "[16713, 17213)",
+    "cell_C_unique": "[20713, 21213)",
+    "j14_increment_BINDING": "[24713, 25567)",
+    "j14_cell_E_diagnostic": "[24713, 25213)",
+    "j14_cell_F_diagnostic": "[25213, 25567)",
+    "convention": "half-open throughout: the upper bound is EXCLUDED, so the cardinality is stop - start. 25567 - 24713 = 854."
+  },
+  "governance_rule_recorded": {
+    "rule": "EVERY phase closes with a dedicated user report in reports/user/, and the next phase does not begin until the architect has audited that report.",
+    "source": "binding user instruction of 2026-08-27",
+    "applies_from": "J15 onward",
+    "also_standing": "probes of a frozen argv after a successful run are FORBIDDEN"
+  },
+  "frozen_inputs_sha256": {
+    "v26c_j15_prereg_fresh_refit.json": "49c748b3a20925a0c270768aa6fddcd3adee474eb1de1cfaa885f849719d1ad2",
+    "v26c_j15_fresh_refit.py": "7b0073c8832e1af64a243cf9bff70662fb786f84691d3a5eab451e230192507a",
+    "test_v26c_j15_fresh_refit.py": "5bdeaf8d72b3619c5bca0b99b9bfa1da1644804fe043ba32936e95d920fd1176"
+  },
+  "frozen_sources_sha256": {
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j11_multistart_fit.py": "2b4ac9f496f7a412d40fec0eb5a0d9b69ee22ac634b8e7ed020ca5480cf26242",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "Trajectory Generator/baseline_MLP/warm_start.py": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c",
+    "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_increment.npz": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_dataset_receipt.json": "e7262bf9d96e57fda6b3ecee18c58eb4f29ee48f71ff71bc5eba07a3d6abd79b",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/commit_verification.json": "24ef5e2cbab291037c05906f592e60f04da64df614c50189303ccdec7ac3bd97",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/commit_verification.json": "1d24eed05dd04c187c014181c89a0611a648e5601cacff5e1ae0221adcfb8643",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/module_state.pkl": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_prereg_dagger_dataset_rev1.json": "877cccc1bb93868a5f1050a7cf2cfc1f5776d18437e099996f059373a6cb36d5",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset.py": "fe7c4951c195224b8006655b831549b4b613cfd80a346b7174c58962263e2e0c",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_dagger_dataset_authorization_rev3.json": "46bbaa262fa0aeea9b3b09608196556f68ac602bdc9b265df4e344d41159dc2f",
+    "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_architect_go_2026-08-27.json": "483b8d558eb8e2245d645384b62d59e9931a1f9270eaed2c715c8a0bea998e3d"
+  },
+  "frozen_argv_when_authorised": {
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "environment": "PYTHONDONTWRITEBYTECODE and PYTHONPYCACHEPREFIX both ABSENT",
+    "selftest": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/test_v26c_j15_fresh_refit.py"
+      ],
+      "expect": "exit 0, selftest PASS, checks == 208"
+    },
+    "preflight": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j15_fresh_refit.py",
+        "--preflight"
+      ],
+      "expect": "exit 0, verdict GO, 0 blockers, 23 pinned sources, writes nothing"
+    },
+    "fit": {
+      "argv": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j15_fresh_refit.py",
+        "--fit",
+        "--authorized-stage",
+        "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+        "--out",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j15_runs/j15_fresh_refit_v26c_2026-08-27_r1"
+      ],
+      "times_permitted_once_authorised": 1,
+      "note": "PROBES OF THIS ARGV AFTER A SUCCESSFUL RUN ARE FORBIDDEN."
+    }
+  },
+  "expected_outputs": {
+    "relative_leaf": "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1",
+    "files": [
+      "v26c_j15_aggregate_dataset.npz",
+      "v26c_j15_fresh_refit_receipt.json",
+      "history.json",
+      "commit_verification.json",
+      "rl_module/module_state.pkl",
+      "rl_module/actor_feature_manifest.json",
+      "rl_module/class_and_ctor_args.pkl",
+      "rl_module/metadata.json"
+    ],
+    "count": 8
+  },
+  "readiness_inventory": {
+    "definition": "every REGULAR file under the validation root, recursively, with NO exclusion of any kind - __pycache__ included",
+    "total_files_excluding_this_record": 642,
+    "composition": {
+      "__pycache__": 50,
+      "inside_committed_leaves": 503,
+      "j15_files_of_this_phase": 3,
+      "earlier_phase_runners_tests_and_records": 86
+    },
+    "digest_excluding_this_record": "9a5a309d0c3e1ba2b711990a80d34759f85643fecab2d9fc79d85d74b0f3798d",
+    "why_self_excluded": "this record lives under the root it fingerprints; excluding exactly one file, itself, is the minimum needed to keep the value reproducible",
+    "earlier_discrepancy_explained": "an earlier draft of the readiness report said 642 and the summary said 643. Both were correct at their moment: 642 was measured when this phase had three files, 643 after the frozen execution record became the fourth. The delta was temporal, not a counting error.",
+    "hermeticity": "0 added, 0 removed, 0 changed across two consecutive suite runs"
+  },
+  "verified_at_readiness": {
+    "selftest_checks": 208,
+    "preflight": "GO, 0 blockers, 23 pinned sources, torch-free",
+    "aggregate_rows": 25567,
+    "split": [
+      5113,
+      20454
+    ],
+    "blocks": [
+      "j7_nominal",
+      "j7_recovery",
+      "cell_B",
+      "cell_C",
+      "j14_increment"
+    ],
+    "no_j15_runs_no_lock_no_staging_no_sentinel": true
+  },
+  "gate": {
+    "binding": [
+      {
+        "name": "integrity_keys_and_shapes_match_parent",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_all_parameters_finite",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_clock_bit_zero",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_aliases_bit_identical",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_logstd_bit_identical_to_parent",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_no_critic_key",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_inputs_unchanged",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_aggregate_reproduces_content_hashes",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_split_counts_as_declared",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_best_state_reconstructible_from_history",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "integrity_all_metrics_finite",
+        "rule": "boolean must be true",
+        "source": "preserved from J11"
+      },
+      {
+        "name": "aggregate_rmse_decreases",
+        "rule": "RMSE after < RMSE before, rows [0:25567]",
+        "source": "preserved from J11",
+        "margin": "none"
+      },
+      {
+        "name": "recovery_rmse_decreases",
+        "rule": "RMSE after < before, rows [16000:16713]",
+        "source": "preserved from J11",
+        "margin": "none"
+      },
+      {
+        "name": "cell_B_unique_rmse_decreases",
+        "rule": "RMSE after < before, 500 unique rows",
+        "source": "preserved from J11",
+        "margin": "none"
+      },
+      {
+        "name": "cell_C_unique_rmse_decreases",
+        "rule": "RMSE after < before, 500 unique rows",
+        "source": "preserved from J11",
+        "margin": "none"
+      },
+      {
+        "name": "j14_increment_rmse_decreases",
+        "rule": "RMSE after < RMSE before, rows [24713:25567] - the WHOLE 854-row corrective block, cells E and F together",
+        "source": "the approved J13 report, which preregistered 'RMSE dopo < prima su aggregato, recovery 713, B unique, C unique e sul nuovo blocco E'. J14 carries E AND F, so the same preregistered rule covers all 854 rows. Promoted from diagnostic to BINDING by the architect on 2026-08-27.",
+        "margin": "none",
+        "not_a_new_threshold": "it is the same strict inequality against a measured baseline as the other four. No number is introduced."
+      },
+      {
+        "name": "controller_columns_nonzero",
+        "rule": "all ten column L2 norms > 0",
+        "source": "preserved from J11",
+        "margin": "none"
+      }
+    ],
+    "binding_count": 17,
+    "identical_to_j11": false,
+    "relation_to_j11": "the 16-name J11 binding subset is preserved, name for name, and J15 adds one binding rule: j14_increment_rmse_decreases. 16 + 1 = 17. The 17th is not an invention - it is the rule the approved J13 report already preregistered for the new corrective block, and it introduces no numeric threshold.",
+    "diagnostics_not_binding": [
+      "nominal_rmse",
+      "nominal_mean_shift",
+      "j14_cell_E_rmse",
+      "j14_cell_F_rmse",
+      "j14_post_mismatch_rmse",
+      "j14_pre_mismatch_rmse",
+      "j14_phase_invalid_fraction",
+      "j11_prefix_rmse",
+      "clipping_out_of_bounds_rows",
+      "best_validation_mse",
+      "epochs_run",
+      "stopped_early",
+      "torch_backend_observed"
+    ],
+    "what_stays_diagnostic_and_why": {
+      "cells_E_and_F_separately": "kept SEPARATE for visibility, but the gate binds the 854-row block as a whole. A per-cell gate would be a new rule; per-cell reporting is not.",
+      "post_mismatch_671_and_pre_mismatch_183": "reported, never used to filter, weight or truncate a row",
+      "phase_invalid_fraction": "listed as a diagnostic by the approved J13 report; it stays one",
+      "comparisons_with_j11": "j11_prefix_rmse has no preregistered direction, so it cannot be a gate"
+    },
+    "supervised_only": "passing this gate says NOTHING about closed-loop behaviour. The J12-style regression gate is a separate, later stage.",
+    "no_invented_thresholds": "every one of the FIVE binding RMSE rules is a strict inequality against a measured baseline, and the fifth introduces no number the first four did not already use. No absolute target appears anywhere."
+  },
+  "forbidden_here": [
+    "a rollout",
+    "an environment",
+    "a critic",
+    "critic warm-up",
+    "PPO",
+    "promotion",
+    "deployability",
+    "a closed-loop claim",
+    "an optimizer over anything but the six direct tensors",
+    "reading seeds 126, 127 or 128",
+    "a second parent",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "dedup",
+    "class balancing",
+    "filtering by post_mismatch",
+    "a repeat factor on the new rows",
+    "an autonomous retry",
+    "an invented threshold",
+    "changing production, FSM v3, the morphology corridor, the reward, sigma, the SEA or the C++ plugin"
+  ],
+  "requires_to_fit": "an explicit architect GO record, recorded additively, pinning these three input hashes. This record permits nothing.",
+  "revision_history": [
+    "rev0 - first draft",
+    "rev1 - the 17th binding gate",
+    "rev2 - stale gate semantics in audit/receipt/prereg",
+    "rev3 - the two remaining 'unchanged' claims, plus a STRUCTURAL test rule"
+  ],
+  "stale_wording_corrected_in_rev3": {
+    "raised_by": "the architect, audit of rev2, 2026-08-27, BEFORE any fit",
+    "findings": [
+      "v26c_j15_fresh_refit.py, gate_matrix docstring: 'The gate, declared before it runs. Binding rules are J11's, unchanged.' - precisely the wrong semantics, since the J15 gate is J11's 16 plus one.",
+      "v26c_j15_prereg_fresh_refit.json, gate.principle: it opened with J11's binding gate being unchanged and name for name, PLUS the new rule - ambiguous in the same way."
+    ],
+    "corrections": [
+      "gate_matrix's docstring now states: the 16-name J11 binding subset is PRESERVED, and J15 adds ONE binding rule, j14_increment_rmse_decreases.",
+      "gate.principle now opens 'the 16-name J11 binding subset is preserved, name for name, and J15 adds one binding rule'. It never calls the J15 gate unchanged, and the prereg records the wording_rule it holds itself to.",
+      "audit()'s docstring and its relation statement, and gate_matrix's relation_to_j11, rewritten in the same unambiguous shape.",
+      "per-rule source labels changed from 'J11, preserved unchanged' to 'preserved from J11', so no gate string pairs J11 with that word at all.",
+      "validate_out's docstring now says 'the path rule J11 uses' instead of the ambiguous form."
+    ],
+    "executor_error_acknowledged": "the previous summary claimed there were no stale strings. That claim was wider than what the test actually checked: the test held a list of four phrases the executor had chosen himself. The literal regression anchor is kept, but the real fix is the structural rule.",
+    "structural_rule_added": "no string anywhere in the runner OR the preregistration may ASSERT that the J15 gate, or its binding rules as a set, are J11's unchanged. Four regexes match the CLAIM rather than the word, so a negation such as 'this gate is NOT ... unchanged' is correctly left alone. The test proves the rule bites on both strings the audits actually found, and proves it does NOT fire on a negation, before trusting it. The docstrings of audit, build_receipt, gate_matrix and verify_prereg are checked individually."
+  }
+}

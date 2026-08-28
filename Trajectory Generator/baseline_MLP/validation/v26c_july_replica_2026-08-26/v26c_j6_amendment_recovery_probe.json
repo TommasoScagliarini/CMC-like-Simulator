@@ -1,0 +1,162 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j6_amendment_recovery_probe",
+  "kind": "ADDITIVE, IMMUTABLE",
+  "stage_authorised": "V26C-J6-RECOVERY-PROBE",
+  "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer, not approver.",
+  "date_utc": "2026-08-26",
+  "why_this_stage_exists": {
+    "measured_problem": "the J4 recovery corpus is 12 aligned rows against July's 356. A second progressive iteration adds nothing: the J5-r2 trace truncates at exactly the same step 13, on the same column online_left_in_contact.",
+    "measured_cause": "the alignment reference was wrong. J4 compared the J1 TEACHER trace with a STUDENT trace, so the very first contact-onset difference (teacher step 14, student step 13) truncated everything. July compared a STUDENT nominal trace with STUDENT perturbed traces.",
+    "july_evidence": "markov_dataset_report.json of target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13 records nominal_trace = .../2026-07-13_markov35_zero_column_deterministic/rollout_policy_trace.json, a deterministic STUDENT rollout, and three recovery traces from stochastic sigma-0.005 student rollouts (seeds 123, 124, ...).",
+    "measured_confirmation": "J3 student vs J5-r2 student retains 500/500 rows with no discrete mismatch at all, while J1 teacher vs either student retains 12."
+  },
+  "scope": {
+    "what_this_stage_does": "collects THREE stochastic recovery traces from the pinned J2 actor and audits, offline, the aligned prefix of each against the J3 deterministic base-student trace",
+    "what_this_stage_does_not_do": [
+      "it does not build the Markov recovery dataset",
+      "it does not fit, adapt or train anything",
+      "it does not touch the critic and runs no PPO",
+      "it does not promote anything and authorises no next stage",
+      "it does not modify J0-J5, their receipts, traces or modules, the penetration contract, or production"
+    ]
+  },
+  "operational_parent": {
+    "checkpoint": "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+    "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "statement": "the J2 base student is the ONLY operational parent. It is the same single 35D student derived from the August V26 imitation parent.",
+    "j4_and_j5_are_evidence_only": "the J4 recovery module and the J5 rollouts are EVIDENCE. They are never a parent, never weights, never labels and never a dataset for this stage.",
+    "width": 35,
+    "full_observation_width": 84,
+    "hard_zero_columns_at_this_stage": [
+      0,
+      1,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "why": "the probe rolls out the BASE student exactly as J3 did, so its controller-memory columns are still masked. Lifting them is the business of a later recovery fit, not of this collection.",
+    "not_the_j4_module": "the J4 recovery module state is 14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa and is explicitly NOT used here. This stage rolls out the J2 base module 0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130."
+  },
+  "sigma": {
+    "value": 0.005,
+    "status": "HYPOTHESIS UNDER TEST, NOT A SELECTED VALUE",
+    "note": "0.005 is July's exploration sigma. Whether it is the right magnitude here is exactly what this probe measures; nothing in this amendment selects it.",
+    "no_module_copy_required": {
+      "finding": "the pinned J2 module ALREADY carries sigma = 0.005 in its frozen log-std head: pi.1.weight[2:] is exactly zero and pi.1.bias[2:] = -5.2983174324035645, so exp(bias) = 0.005 to within 3.3e-10.",
+      "consequence": "no derived module, no edited log-std head, no copy. The parent is used bit-for-bit as it is, which makes the 'mean actor bit-exact / non-logstd tensors bit-exact / save-reload exact' obligations trivially satisfied and verifiable by identity.",
+      "if_this_ever_fails": "the stage refuses to run rather than editing the head."
+    },
+    "noise": {
+      "process": "held standard normal, hold = 1 step",
+      "seeds": [
+        123,
+        124,
+        125
+      ],
+      "application": "the action is the policy mean plus sigma times the held standard normal, exactly the stochastic_held semantics of rollout_eval"
+    }
+  },
+  "alignment_and_labels": {
+    "nominal_trace_for_alignment_and_self_anchor": {
+      "file": "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json",
+      "sha256": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+      "why": "it is the deterministic base-student rollout, the exact analogue of July's markov35_zero_column_deterministic nominal trace. The J1 teacher trace is NOT the alignment reference."
+    },
+    "truncation_rule": {
+      "rule": "each recovery trace is truncated at its FIRST discrete mismatch against the J3 nominal trace",
+      "source": "baseline_MLP/target_domain_noise_adaptation.py::truncate_before_discrete_mismatch, enabled by target_domain_markov_adaptation.py --stop-before-discrete-mismatch (default True)",
+      "discrete_features": [
+        "*_in_contact",
+        "*_heel_strike",
+        "*_toe_off",
+        "*_saturated",
+        "phase_fsm_*",
+        "phase_expected_*"
+      ],
+      "must_not_be_relaxed": true,
+      "no_minimum_length_gate": "there is NO numeric gate on prefix length. July's retained prefixes of 119, 118 and 119 are DESCRIPTIVE reference only and are never a threshold."
+    },
+    "future_labels": {
+      "recovery_labels": "the J1 teacher actions at the SAME fixed-start episode step",
+      "teacher_dataset": "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz",
+      "teacher_dataset_sha256": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+      "status": "DECLARED FOR A LATER STAGE. This stage collects and audits; it builds no dataset."
+    },
+    "future_dataset_shape": {
+      "nominal_observations": "the J3 trace observations",
+      "nominal_labels": "SELF-DISTILLED from the J2 source actor",
+      "recovery_states": "the aligned prefixes of the three J6 traces",
+      "recovery_labels": "time-aligned J1 teacher actions",
+      "multistart_block": "OMITTED / DEFERRED - the two teacher datasets at start offsets -0.20 and +0.20 rad, 8000 rows in July, remain deferred by user decision",
+      "status": "SPECIFICATION ONLY - not built by this stage"
+    }
+  },
+  "runtime": {
+    "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "builder": "v26c_j1_collect.build_full_env_config, unchanged",
+    "detector": "current V26 binary detector, unchanged",
+    "fsm_behaviour_version": "v3",
+    "event_source": "binary_active_v26",
+    "morphology_corridor": "current, unchanged",
+    "reward_sea_and_guards": "unchanged",
+    "start": "nominal, the same episode start offset as J1/J3/J5",
+    "steps": 500
+  },
+  "penetration": {
+    "contract": "v26c_penetration_contract_2026-08-26.json",
+    "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "soft_diagnostic_m": 0.02,
+    "july_legacy_diagnostic_m": 0.025,
+    "hard_binding_m": 0.028,
+    "semantics": "exactly the contract helper: above soft iff > 0.020, July legacy breach iff >= 0.025, binding pass iff <= 0.028 and FAIL iff > 0.028",
+    "evaluated_by": "v26c_penetration_contract.evaluate_series, never by a local re-implementation"
+  },
+  "forbidden": [
+    "using J4 or J5 as a parent, as weights, as labels or as a dataset",
+    "editing the log-std head or deriving any module",
+    "any fit, optimizer step, adaptation or training",
+    "critic warm-up or PPO",
+    "ex-novo training",
+    "promotion of any artefact",
+    "a standalone 25D actor",
+    "widening the actor beyond 35D",
+    "contralateral features",
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "using a July artefact as an operational parent, dataset or label",
+    "modifying J0-J5, their receipts/traces/modules, the penetration contract or production",
+    "inventing a numeric gate on prefix length"
+  ],
+  "outcome_policy": {
+    "this_stage_produces": "three recovery traces plus an offline prefix audit",
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "on_failure": "artefacts preserved and quarantined; no autonomous retry"
+  },
+  "pinned_artefacts_sha256": {
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/history.json": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd"
+  },
+  "immutability": "this file is content-addressed by the artefacts it pins. Any change to a pinned artefact invalidates it. It is never edited in place."
+}

@@ -1,0 +1,501 @@
+{
+  "schema": "v26c_j6_recovery_probe.1",
+  "stage": "V26C-J6-RECOVERY-PROBE",
+  "verdict": "PASS",
+  "verdict_kind": "STOCHASTIC RECOVERY PROBE - COLLECTION ONLY",
+  "seed": 124,
+  "stack": {
+    "name": "production",
+    "operational": true,
+    "injected": false
+  },
+  "authorisation": {
+    "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer.",
+    "amendment": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j6_amendment_recovery_probe_rev2.json",
+    "amendment_sha256": "cea7b9ac310eebeab3b528ec7bc6f142b59564fc76427686f51627b5c1968d19",
+    "amendment_manifest_entries": 12,
+    "scope": "three stochastic recovery traces plus an offline prefix audit",
+    "execution_requires": "--authorized-stage V26C-J6-RECOVERY-PROBE --seed <123|124|125>",
+    "planned_leaves": {
+      "123": {
+        "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j6_runs/j6_recovery_probe_v26c_2026-08-26_seed123",
+        "exists": true
+      },
+      "124": {
+        "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j6_runs/j6_recovery_probe_v26c_2026-08-26_seed124",
+        "exists": false
+      },
+      "125": {
+        "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j6_runs/j6_recovery_probe_v26c_2026-08-26_seed125",
+        "exists": false
+      }
+    }
+  },
+  "parent": {
+    "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1",
+    "module": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs/j2_base_v26c_2026-08-26_r1/rl_module",
+    "artefacts_sha256": {
+      "history.json": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777",
+      "rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e"
+    },
+    "module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "role": "the ONLY operational parent of this probe",
+    "j4_module_state_sha256_refused": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa"
+  },
+  "sigma": {
+    "sigma": 0.005,
+    "status": "HYPOTHESIS UNDER TEST, NOT A SELECTED VALUE",
+    "logstd_bias": [
+      -5.2983174324035645,
+      -5.2983174324035645
+    ],
+    "sigma_from_parent": [
+      0.004999999670722372,
+      0.004999999670722372
+    ],
+    "max_abs_deviation": 3.2927762773360403e-10,
+    "tolerance": 1e-06,
+    "module_copy_required": false,
+    "logstd_head_edited": false,
+    "mean_actor_bit_exact": true,
+    "non_logstd_tensors_bit_exact": true,
+    "save_reload_exact": true,
+    "why_trivially_satisfied": "the parent module is used bit-for-bit, with no copy and no edit, so every bit-exactness obligation holds by identity",
+    "noise_hold_steps": 1
+  },
+  "alignment_reference": {
+    "nominal_trace": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json",
+    "nominal_rows": 500,
+    "pins_sha256": {
+      "j3_trace": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+      "j3_receipt": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+      "j1_teacher_dataset": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+      "j1_teacher_trace": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3"
+    },
+    "why_j3_not_j1": "J3 is the deterministic base-student rollout, the analogue of July's markov35_zero_column_deterministic nominal trace. The J1 teacher trace is NOT the alignment reference; it is kept only for the LATER label step.",
+    "measured_justification": {
+      "j1_teacher_vs_student_retained": 12,
+      "j3_student_vs_student_retained": 500,
+      "note": "measured read-only before this stage was written"
+    }
+  },
+  "actor_contract": {
+    "width": 35,
+    "full_observation_width": 84,
+    "hard_zero_columns": [
+      0,
+      1,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "input_layers_verified": {
+      "pi.0.0.weight": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "pi_encoder.0.weight": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ]
+    },
+    "actor_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos",
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "widening": "NONE",
+    "standalone_25d": "NONE",
+    "contralateral_features": "ABSENT"
+  },
+  "runtime_contract": {
+    "actor_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos",
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "actor_feature_count": 35,
+    "observation_feature_count": 84,
+    "n_actor": 35,
+    "expected_steps": 500,
+    "manifest_matches_pinned_j2": true,
+    "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+  },
+  "runtime_identity": {
+    "fsm_behaviour_version": "v3",
+    "event_source": "binary_active_v26",
+    "observed_versions": [
+      "v3"
+    ],
+    "observed_event_sources": [
+      "binary_active_v26"
+    ]
+  },
+  "inputs_sha256": {
+    "pinned_runtime_config": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "env_config": "353cc7d7344bd2646f8adeded34742e9a5b505d0991c5e24ff922bf95cf76e92",
+    "parent_artefacts": {
+      "history.json": "b5b4641c0170aac5af615b623746e2c56bd6d1ecafd3cd5657ff63ee9917c777",
+      "rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "v26c_j2_fit_receipt.json": "dd997dc9d465184de6e25a3488c9752799fb60feca304ac876f35dfbdcd9871e"
+    },
+    "nominal_trace": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "amendment": "cea7b9ac310eebeab3b528ec7bc6f142b59564fc76427686f51627b5c1968d19",
+    "penetration_contract": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461"
+  },
+  "summary": {
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "max_penetration_m": 0.026953982764678284,
+    "valid_cycle_count": 2,
+    "valid_hs_count": 3,
+    "valid_to_count": 3,
+    "phase_timeout_stance": 0,
+    "phase_timeout_swing": 0,
+    "morphology_causal_contract_failure": 0,
+    "hs_cancelled_count": 0,
+    "resync_count": 0,
+    "action_clipped_steps": 0,
+    "fsm_behaviour_versions": [
+      "v3"
+    ],
+    "event_sources": [
+      "binary_active_v26"
+    ],
+    "episode_return": 41.00774486951079,
+    "realized_noise_rms": [
+      0.004660444387489252,
+      0.004980850499167844
+    ],
+    "action_noise_sigma": [
+      0.0,
+      0.0
+    ],
+    "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+  },
+  "gate": {
+    "criteria": {
+      "steps_required": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycles_min": 2,
+      "phase_timeout_stance_max": 0,
+      "phase_timeout_swing_max": 0,
+      "morphology_causal_contract_failure_max": 0,
+      "hs_cancelled_count_max": 0,
+      "resync_count_max": 1,
+      "max_penetration_m_max_binding": 0.028
+    },
+    "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion; the penetration criterion is the penetration contract's sole hard binding band",
+    "measures": {
+      "steps": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycle_count": 2,
+      "valid_hs_count": 3,
+      "valid_to_count": 3,
+      "phase_timeout_stance": 0,
+      "phase_timeout_swing": 0,
+      "morphology_causal_contract_failure": 0,
+      "hs_cancelled_count": 0,
+      "resync_count": 0,
+      "max_penetration_m": 0.026953982764678284,
+      "action_clipped_steps": 0
+    },
+    "checks": {
+      "steps": true,
+      "end_reason": true,
+      "valid_cycles": true,
+      "phase_timeout_stance": true,
+      "phase_timeout_swing": true,
+      "morphology_causal_contract_failure": true,
+      "hs_cancelled_count": true,
+      "resync_count": true,
+      "penetration_hard_binding": true
+    },
+    "failed": [],
+    "pass": true,
+    "penetration_bands": {
+      "soft_diagnostic_above": true,
+      "july_legacy_breach": true,
+      "hard_binding_pass": true,
+      "note": "> 0.020 and >= 0.025 are DIAGNOSTIC and never fail this gate; only > 0.028 does"
+    },
+    "diagnostics_not_binding": {
+      "action_clipped_steps": 0
+    }
+  },
+  "gate_failed": [],
+  "penetration_under_contract": {
+    "max_penetration_m": 0.026953982764678284,
+    "band": "july_legacy_breach_within_hard",
+    "flags": {
+      "above_soft_diagnostic": true,
+      "july_legacy_breach": true,
+      "july_legacy_historical_pass": false,
+      "above_hard_binding": false
+    },
+    "binding_pass": true,
+    "binding_verdict": "PASS",
+    "thresholds_m": {
+      "soft_diagnostic": 0.02,
+      "july_legacy": 0.025,
+      "hard_binding": 0.028
+    },
+    "semantics": {
+      "above_soft_iff": "> 0.020",
+      "july_legacy_breach_iff": ">= 0.025",
+      "july_legacy_historical_pass_iff": "< 0.025",
+      "binding_pass_iff": "<= 0.028",
+      "binding_fail_iff": "> 0.028"
+    },
+    "samples": 500,
+    "counts": {
+      "above_soft_diagnostic": 102,
+      "at_or_above_july_legacy": 7,
+      "above_hard_binding": 0
+    },
+    "fractions": {
+      "above_soft_diagnostic": 0.204,
+      "at_or_above_july_legacy": 0.014,
+      "above_hard_binding": 0.0
+    },
+    "mean_penetration_m": 0.009671557024278138,
+    "argmax_index_1based": 199,
+    "counting_conventions": {
+      "above_soft_diagnostic": "strictly > 0.020",
+      "at_or_above_july_legacy": ">= 0.025",
+      "above_hard_binding": "strictly > 0.028"
+    }
+  },
+  "prefix_against_j3_nominal": {
+    "original_steps": 500,
+    "retained_steps": 273,
+    "first_discrete_mismatch_step": 274,
+    "mismatching_columns": [
+      {
+        "index": 13,
+        "feature": "online_left_toe_off",
+        "nominal": 1.0,
+        "recovery": 0.0
+      },
+      {
+        "index": 18,
+        "feature": "phase_fsm_stance_after_hs",
+        "nominal": 0.0,
+        "recovery": 1.0
+      },
+      {
+        "index": 19,
+        "feature": "phase_fsm_swing_after_to",
+        "nominal": 1.0,
+        "recovery": 0.0
+      },
+      {
+        "index": 20,
+        "feature": "phase_expected_hs",
+        "nominal": 1.0,
+        "recovery": 0.0
+      },
+      {
+        "index": 21,
+        "feature": "phase_expected_to",
+        "nominal": 0.0,
+        "recovery": 1.0
+      }
+    ],
+    "rule": "July-strict; never relaxed; no minimum-length gate",
+    "july_function_parity": {
+      "verified": true,
+      "function": "target_domain_noise_adaptation.truncate_before_discrete_mismatch",
+      "retained_steps": 273
+    }
+  },
+  "july_retained_prefixes_descriptive_only": [
+    119,
+    118,
+    119
+  ],
+  "no_prefix_length_gate": true,
+  "exploration": {
+    "sigma": 0.005,
+    "status": "HYPOTHESIS UNDER TEST, NOT A SELECTED VALUE",
+    "hold_steps": 1,
+    "seed": 124,
+    "realized_noise_rms": [
+      0.004660444387489252,
+      0.004980850499167844
+    ],
+    "logstd_head_edited": false,
+    "module_copy_required": false,
+    "action_path": "rollout_eval._held_stochastic_action (forward_exploration + the policy's effective std)",
+    "effective_std_used": true,
+    "inference_exploration_parity_steps": 500,
+    "declared_sigma_vector_unused_for_action": [
+      0.005,
+      0.005
+    ]
+  },
+  "sim_outputs": {
+    "count": 19,
+    "required": true
+  },
+  "builds_no_dataset": true,
+  "fits_nothing": true,
+  "critic_trained": false,
+  "ppo_updates": 0,
+  "deployable": false,
+  "promotion": "NONE",
+  "next_stage_authorized": false,
+  "quarantine": {
+    "applies": false,
+    "artefacts_preserved": true,
+    "retry": "FORBIDDEN without an explicit new authorisation"
+  },
+  "forbidden_here": [
+    "J4 or J5 as parent/weights/labels/dataset",
+    "log-std head editing",
+    "module derivation",
+    "fit",
+    "optimizer step",
+    "adaptation",
+    "training",
+    "critic warm-up",
+    "PPO",
+    "ex-novo",
+    "promotion",
+    "standalone 25D",
+    "widening",
+    "contralateral features",
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "July artefacts as operational parent/dataset/label",
+    "a numeric gate on prefix length"
+  ],
+  "generated_at_utc": "2026-08-26T15:58:51Z",
+  "outputs_sha256": {
+    "j6_penetration.npz": "19dff986e90aae27622e23904316091e4eb85bc9b0754a61696479ca0fc4c87e",
+    "j6_trace.json": "729128a8236f7189284e57267e964dd9e478e75d895c3b88287a537f75f67dab",
+    "sim_outputs/j1_teacher_episode_activations.sto": "a43a25eefc7852c25a0a7a6282cc366254b6ec12357c3a1f23be24244145c002",
+    "sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "sim_outputs/j1_teacher_episode_gait_events_online.csv": "d6d0d650399d97394a49094ee7f6bbb2838d9ea5b873da9f54c5cd30f5eb030e",
+    "sim_outputs/j1_teacher_episode_kinematics.sto": "490342f6a8d2d8f00c6a11edc745b5e10746fd197f02cf5da33baa3dea8d4fab",
+    "sim_outputs/j1_teacher_episode_kinematics_reference.sto": "9f6550beb315db884e1a8dae73dc1319a46c9e26c35b6b96a6c04d2d52052761",
+    "sim_outputs/j1_teacher_episode_muscle_forces.sto": "c3e1dee3ffd020978c4ee4b49d23a78d3319c69095b09e423014f3c47caddba1",
+    "sim_outputs/j1_teacher_episode_online_grf.sto": "8f35c5955746c14f1e059761bf4b4d3e321ae514490d5161e436d0a823b896d5",
+    "sim_outputs/j1_teacher_episode_power.sto": "a5fd8ef7c26dc1df30d1e0bc8ff714b98bbd0ea370f1edacd900612e2860f465",
+    "sim_outputs/j1_teacher_episode_recruitment.sto": "2c011a3f5a18bd53d1eed3190839e5b2ea21ab6ada09f721357b54fef4cf1def",
+    "sim_outputs/j1_teacher_episode_reserve_controls.sto": "f84e9af2920392c4a634ba5be2f90695e49533fa3e9b34c86719aa0f32b0ff8f",
+    "sim_outputs/j1_teacher_episode_reserve_torques.sto": "be83fa7a1190f9bd4692a0834a15f5ad8f7a6596bca13336d33c0b63576a4f55",
+    "sim_outputs/j1_teacher_episode_sea_controls.sto": "90e4aba7dfa887a8ece35c785e9a752cb0ef23798a942d5dd0a66cad88f89907",
+    "sim_outputs/j1_teacher_episode_sea_derivatives.sto": "33931d2df8a54d5a61674cb1a81573431b55817c423922023ec028eda6c0c7ae",
+    "sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "1bd7ff7124e1a7074c80ba9fbbb14ad2d7e1aca6b7755c93f11b934a79e8912a",
+    "sim_outputs/j1_teacher_episode_sea_states.sto": "7ec431dc6eed711b1dadf4efe5c32935da8478cb94def766ca146b6421a82f91",
+    "sim_outputs/j1_teacher_episode_sea_torques.sto": "943760dfdac9c210120f7c71f2120e046c095ed330c8657dceba9e39106dc8d1",
+    "sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "fe3f481194b84e4d3eec17c13a54fcc7ab2ea3de1d2805f0957a838eed269e75",
+    "sim_outputs/j1_teacher_episode_states.sto": "8f53d63e34190f3621a3be0e23a5525366a6405aa0679dbb91925d101dc1cc7d",
+    "sim_outputs/j1_teacher_episode_tau_bio.sto": "bc4d24395e2bfaf830325309b7082dd7955da86c5b3fac0521ae21b9c934842e"
+  },
+  "outputs_sha256_excludes": {
+    "file": "v26c_j6_recovery_probe_receipt.json",
+    "why": "a receipt cannot hash itself"
+  }
+}

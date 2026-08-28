@@ -1,0 +1,225 @@
+{
+  "schema": "v26b_amendment.1",
+  "amendment": "B1R2B-LR",
+  "stage_token": "V26B-B1R2B-LR",
+  "status": "PRE-REGISTERED BEFORE EXECUTION. Immutable and additive. Nothing here may be edited after the first execution; a correction must be a new additive addendum.",
+  "authorized_by": "architect, 2026-08-25, as a ONE-VARIABLE SCREENING only",
+  "derived_from": {
+    "amendment": "v26b_amendment_b1r2a_budget.json",
+    "sha256": "b64888a6eeaf0fbad98b2168a343f1e2caf5a4a1a380935345470e18980fc09d",
+    "addendum": "v26b_addendum_b1r2a_baseline_and_clip.json",
+    "sha256_addendum": "3d24928de06b3a842c4089d782f8e0ddb3ceaac731f98f23d768b6251e2c6f9a",
+    "relationship": "B1R2-B is B1R2-A with EXACTLY ONE field changed: the learning rate. Every other configuration value is asserted programmatically to be identical to the B1R2-A executor's."
+  },
+  "role": "SCREENING. This arm can falsify one hypothesis; it cannot establish a limit of the observation contract, and the protocol forbids that conclusion. See stop_go.forbidden_conclusions.",
+  "hypothesis": {
+    "single_variable": "learning rate",
+    "statement": "Head-swing and cycle1-swing rows overlap in the effective 23D support and each branch is internally consistent (median |delta target| 0.0 within head, 0.04486663639545441 within cycle1) while conflicting across (0.1670604795217514). No exact collision exists: the minimum pair distance is 0.030914171900546916 and the B1R2 rev1 audit found zero pairs within 1e-3. A sharper function could therefore in principle separate the branches. A finer optimisation step may allow the model to reach such a function from the same B0 init, instead of oscillating in a wide basin - consistent with the 44% epoch-to-epoch spread of the B1R2-A pooled curve and with per-fold argmins scattered between 367 and 1189.",
+    "what_is_NOT_tested_here": [
+      "no reweighting, resampling or per-segment loss",
+      "no change of budget, patience, selection rule or fold design",
+      "no architecture, capacity, observation-contract or masking change",
+      "no dataset scope change: the three V26 anchors and all 1500 rows stay",
+      "no controller/contralateral/gait-clock feature reintroduction",
+      "no FSM v3, morphology, contact, reward, C++ or SEA change",
+      "no gradient clipping, which remains absent"
+    ]
+  },
+  "experiment_matrix": [
+    {
+      "arm": "B",
+      "binding": true,
+      "learning_rate": 0.0001,
+      "learning_rate_baseline_arm_A": 0.0003,
+      "epochs_max": 1200,
+      "optimizer": "Adam",
+      "batch": 64,
+      "seed": 123,
+      "patience": 60,
+      "improvement_eps": 1e-09,
+      "loss": "flat MSE + clip-loss 1.0 + logstd 0.1 + anchor 1e-5",
+      "gradient_clipping": "none",
+      "init": "B0 35D masked, byte-identical",
+      "everything_else": "asserted equal to the B1R2-A executor by programmatic check, not by prose"
+    }
+  ],
+  "matrix_rows": 1,
+  "learning_rate_injection": {
+    "mechanism": "v26b_b_exec.fit_masked gained a keyword-only optional parameter `lr` whose default is None, resolved to the pinned J_LR. Omitting it reproduces the previous behaviour byte for byte.",
+    "pinned_constant_untouched": "J_LR remains 3e-4; the constant is not edited and the existing suites that assert it still pass",
+    "only_injectable_hyperparameter": "every other hyperparameter stays module-level and cannot be reached by a caller",
+    "equivalence_proof": "The executor test calls v26b_b_exec.fit_masked TWICE on the SAME fold - fold 6, the 11-row minus020 tail - for 4 EPOCHS each: once omitting `lr`, once passing lr=J_LR explicitly. It requires the two recorded validation curves to be identical value for value over those 4 epochs. That demonstrates the injection changed nothing except making the value settable.",
+    "what_the_proof_is_NOT": "It is NOT a comparison against the fold curve recorded by B1R2-A, and no such comparison is performed or claimed. An earlier draft of this field asserted a bit-identical match against B1R2-A's recorded curve; that overstated the test and is corrected here before execution.",
+    "contrast_run": "The test also runs the same fold for 4 EPOCHS at lr=1e-4 and requires the trajectory to differ from the default run over those 4 epochs, and the state after the FIRST recorded epoch to sit closer to B0 than the default run's, as a smaller step must.",
+    "wider_regression_evidence": "Separately, the six test suites that existed before the injection (673 checks in total) all pass unchanged, and the pinned constant J_LR is still asserted to be 3e-4 by three of them."
+  },
+  "parent": {
+    "actor": "B0_35D_MASKED, from the August V26 imitation",
+    "module_state_sha256": "aa7ea0fa1bbef8bb6ef2a33ee8ebe5defeeb4959148a589b81ff994cf291171f",
+    "actor_digest": "b2429a8217f99ed7ab4e61620480f797d4617c7713b857624e85c095bed57c55",
+    "role": "the ONLY parent; every fold and the final fit start byte-identical from it",
+    "july_status": "methodological reference only; no July checkpoint, label, cache or metric is used as a target"
+  },
+  "student": {
+    "width": 35,
+    "hard_masked_input_columns": "0:2 (clock) and 25:35 (controller/Markov)",
+    "effective_support": "23D, columns 2..24",
+    "first_layer_columns": "zeroed, frozen, restored to zero after every optimizer step",
+    "logstd_head": "hard-frozen, byte-identical to B0",
+    "critic": "never loaded, never touched",
+    "no_25d_actor": true
+  },
+  "validation_design": {
+    "folds": 11,
+    "semantics": "8 structurally complete cycles + 3 tails",
+    "embargo_rows": 20,
+    "coverage": "every one of the 1313 non-WAIT rows is held out EXACTLY ONCE",
+    "wait_policy": "the 187 WAIT rows are NEVER held out; reconstruction-only, explicitly not a generalisation measurement",
+    "all_rows_binding": "all 1500 rows remain binding in the final gates, unchanged",
+    "dataset_scope": "the three pinned V26 anchors, 1500 rows, unchanged; nominal-only was measured and rejected as non-causal"
+  },
+  "epoch_selection_rule": {
+    "identical_to_arm_A": true,
+    "no_future_reading": "e* is a function of the pooled VALIDATION curve alone; the final all-1500 fit never enters the selection; gates apply only after e* is fixed",
+    "pooled": "row-weighted mean of the 11 fold curves, which equals the out-of-fold MSE over all 1313 non-WAIT rows",
+    "e_star": "first epoch attaining the pooled minimum; stale counter resets only on strict improvement greater than 1e-9; the curve is stopped after 60 consecutive stale epochs",
+    "evaluation": "every fold evaluated at the SAME e*, never at its own best",
+    "final_fit": "restart byte-identical from B0 on all 1500 rows for exactly e* epochs, fixed_final_epoch, no validation"
+  },
+  "integrity_control_NOT_a_falsifier": {
+    "why": "This quantity is computed from the dataset alone - raw observations and teacher labels - and contains no model output. It is invariant to the learning rate and to every optimisation hyperparameter. A criterion that cannot move under the intervention cannot falsify anything; listing it as a falsifier was a logical error, now corrected.",
+    "role": "integrity and sanity control. If it changes, the run is INVALIDATED regardless of the gates, because the data pipeline has broken - dataset, caches, labels, ordering or row construction.",
+    "definition": "pairs of head-swing x cycle1-swing rows, FSM signature SWING/credit-0.5, euclidean distance in the RAW effective 23D, excluding same-trajectory pairs within embargo 20",
+    "pinned_values": {
+      "head_swing_rows": 188,
+      "cycle1_swing_rows": 262,
+      "pairs_total": 49256,
+      "pairs_closer_than_0_15": 92,
+      "median_abs_target_delta_at_lt_0_15": 0.1670604795217514,
+      "median_abs_target_delta_all_pairs": 0.4387725368142128,
+      "min_pair_distance": 0.030914171900546916,
+      "cycle1_within_pairs_lt_0_15": 46,
+      "cycle1_within_median_abs_target_delta": 0.04486663639545441,
+      "head_within_pairs_lt_0_15": 54,
+      "head_within_median_abs_target_delta": 0.0
+    },
+    "asserted": "exactly, in floating point equality, by the executor test before any fit may start"
+  },
+  "falsifiers": {
+    "readable_only_if": "the FULL-CURVE convergence diagnostic below reports converged == true. If the pooled curve is still descending at the budget edge, the falsifiers DO NOT APPLY and the outcome is 'inconclusive screening, insufficient advancement'.",
+    "list": [
+      {
+        "id": "F1",
+        "statement": "folds 7 and 9 (the two head cycles) remain above 0.05 heldout RMSE at their OWN best epoch over 1200 epochs",
+        "meaning": "the structural failure survives a finer optimisation"
+      },
+      {
+        "id": "F2",
+        "statement": "the pooled RMSE at e* does not fall below 0.04120",
+        "meaning": "the arm does not beat the single-epoch oracle of arm A, so any gain is not a better basin"
+      }
+    ]
+  },
+  "full_curve_convergence_diagnostic": {
+    "correction": "An earlier draft of this protocol treated the exhaustion of the SELECTION rule's patience as evidence of convergence. That was a logical error and is corrected here before any hash or execution.",
+    "why_the_earlier_form_was_wrong": "Exhausting the July scan means the rule stopped LOOKING, not that the curve settled. Arm A is the proof: its selection scan stopped at epoch 297, yet the global minimum of its full 1200-epoch pooled curve was at epoch 1171 and was LOWER (MSE 0.001697248, RMSE 0.0411977, against 0.002309152 / 0.0480536 at the selected e*=237). The two quantities are different and must never be conflated.",
+    "definition": "The FULL pooled curve is CONVERGED at this budget if and only if its GLOBAL minimum falls at or before epoch 1140 AND no epoch among the following 60 improves on it by more than 1e-9. An argmin later than 1140 means NOT CONVERGED at the budget.",
+    "argmin_max_for_convergence": 1140,
+    "stable_epochs_required": 60,
+    "improvement_eps": 1e-09,
+    "does_not_change_selection": "The binding selection of e* is UNCHANGED and remains July's patience-60 rule applied to the pooled curve. This diagnostic is purely interpretive and can never move e*, a gate or the verdict.",
+    "retrospective_on_arm_A": "Under this definition arm A itself was NOT converged at its budget: its full-curve argmin was 1171 > 1140. This is recorded so arm A's own NO-GO is not over-read either.",
+    "also_recorded": [
+      "pooled MSE at epochs 100, 200, 400, 600, 800, 1000, 1200 compared with the same epochs of arm A",
+      "the training-loss trajectory, to separate 'slower' from 'stalled'",
+      "the epoch-to-epoch spread of the pooled curve around e*, compared with arm A's 44%",
+      "the selection scan's stopping epoch, reported separately and never as convergence"
+    ]
+  },
+  "gates": {
+    "source": "imported from v26b_b1r1_exec; never restated by hand; not relaxed",
+    "binding": [
+      {
+        "gate": "integrity_invariants",
+        "requirement": "10 keys, width 35, columns 0:2 and 25:35 exactly zero, no masked update, logstd byte-identical to B0, critic never loaded"
+      },
+      {
+        "gate": "functional_equivalence_25",
+        "requirement": "bit-exact"
+      },
+      {
+        "gate": "every_fold_improves_over_b0",
+        "requirement": "11 of 11"
+      },
+      {
+        "gate": "fold_heldout_rmse",
+        "threshold": 0.05,
+        "applies_to": "each of the 11 folds"
+      },
+      {
+        "gate": "pooled_validation_rmse",
+        "threshold": 0.03,
+        "definition": "sqrt(pooled(e*)), the out-of-fold aggregate RMSE over all 1313 non-WAIT rows"
+      },
+      {
+        "gate": "final_aggregate_rmse",
+        "threshold": 0.02,
+        "applies_to": "all 1500 rows"
+      },
+      {
+        "gate": "final_per_joint_rmse",
+        "threshold": 0.03,
+        "applies_to": "all 1500 rows"
+      },
+      {
+        "gate": "final_per_joint_max_abs",
+        "threshold": 0.15,
+        "applies_to": "all 1500 rows"
+      },
+      {
+        "gate": "wait_reconstruction",
+        "thresholds": [
+          0.02,
+          0.03,
+          0.15
+        ],
+        "note": "explicitly NON-generalisation; reconstruction only"
+      }
+    ]
+  },
+  "stop_go": {
+    "GO": "promote a candidate ONLY if ALL binding gates pass AND the integrity control matches exactly. Promotion writes candidates/B1R2B_BASE35_LR1E4/.",
+    "NO_GO": "if ANY binding gate fails: STOP offline. No candidate, no rollout, no collection, no DAgger, no autonomous arm C. Report exactly which gates, folds and regions fail.",
+    "INVALIDATED": "if the integrity control does not match its pinned values, the run is invalid and its verdict must not be interpreted at all",
+    "forbidden_conclusions": [
+      "A NO-GO in this arm does NOT establish a limit of the observation contract. With the learning rate reduced threefold and the budget FIXED at 1200 epochs, arm B covers less optimisation distance than arm A, so a NO-GO is confounded between 'the sharpness hypothesis is false' and 'the optimisation simply did not arrive'. The two are indistinguishable from the verdict alone and the contract conclusion is forbidden whatever the outcome.",
+      "A non-converged curve must be reported as 'inconclusive screening, insufficient advancement', never as an informative NO-GO.",
+      "No comparison against July's 6.63e-05 validation MSE, which came from a random split of a 32x-repeated dataset and is not a generalisation measurement.",
+      "Do NOT describe the exhaustion of the selection rule's patience as an interior minimum or as convergence. Arm A exhausted its scan at epoch 297 while its full-curve global minimum was at 1171 and was lower."
+    ],
+    "if_not_converged": "the only legitimate follow-up is an arm with an adequate budget, TO BE AUTHORISED EXPLICITLY; it may not be started autonomously. 'Not converged' is decided by full_curve_convergence_diagnostic, never by the selection rule's patience.",
+    "no_post_hoc": "no threshold, hyperparameter or rule may be changed after seeing any number. A failure is recorded as a failure.",
+    "single_execution": "one execution only; no retry; artefacts preserved on failure"
+  },
+  "prohibited_in_this_stage": [
+    "rollout",
+    "teacher collection",
+    "DAgger",
+    "Markov phase",
+    "PPO",
+    "gradient clipping",
+    "any change to fit_masked semantics beyond the optional lr whose default preserves behaviour",
+    "any promotion without a full gate pass",
+    "any autonomous follow-up arm"
+  ],
+  "immutability_to_verify": {
+    "B0_module_state": "aa7ea0fa1bbef8bb6ef2a33ee8ebe5defeeb4959148a589b81ff994cf291171f",
+    "B1_receipt": "e7328ac2eb49787e905ef0919f06c540bdd2ce4ec30d290e711f8b0af42f53b1",
+    "B1_module_state": "778ff748bd33ca658b62aae1b091be7b702242e9faabb8e0192daf7453e80a5b",
+    "B1R1_receipt": "6a604ada500f6f51594500f596ba7a7797cd1350a110b9d0fe1807ee4d2cadbb",
+    "B1R1_module_state": "9ffcdceb7f90f12cbcca0c151f8b667e3003ba4f48a124e630582d76cf0bd980",
+    "B1R2_receipt_pre_revision": "ebf0c8e88762c3bb826754753def2d1980ff0c43cfdbd2108062221cf1cb114f",
+    "B1R2_receipt_rev1": "d0f1e5155d8273651f6055ca9a47601ad5f265720db2d8aca295dabefc84ff4c",
+    "B1R2A_receipt": "a4ebd8d6f023c8749212fe5c24c7fae36675ef2335c3b7a097981494b9262f4e"
+  }
+}

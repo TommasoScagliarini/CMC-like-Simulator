@@ -1,0 +1,49 @@
+{
+  "addendum_id": "a0a1_25d_superseded_before_execution",
+  "date": "2026-08-25",
+  "kind": "ADDITIVE and IMMUTABLE. Quarantine notice. NOTHING is deleted, overwritten or modified: every A0/A1 file stays on disk byte-identical",
+  "status": "SUPERSEDED_BEFORE_EXECUTION",
+
+  "what_is_superseded": {
+    "amendment": {"file": "v26b_amendment_a0a1_25d.json", "sha256": "9dfe122925b060a708fd992768f3ed1737f37a631a3c71e0b13710b2d0764124"},
+    "contract": {"file": "v26b_contract_25d_v1.yaml", "sha256": "b7292a73a9d342dd61773ab5bc85d66b1532bc2a0d76fd4d1dad37758fa67fae"},
+    "tooling": {"v26b_a0_transplant25.py": "bce45d030f93db94de385e93720b5a1a695ff57ce53f1df2235bfdf1ffa8d593",
+                 "v26b_a1_ik_imitation.py": "155b0f28c7be04839c2b7e69e62ac08a87268c8f7a656766883c8a284800c845",
+                 "test_v26b_a0a1_25d.py": "5739ac5560aae0c44272253d02937b7774b26fd9774d20df2b49eed0c90ac8a2"},
+    "preflight_receipt": {"file": "runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/diagnostics/a0a1/v26b_a0a1_preflight_receipt.json",
+                           "sha256": "4d1bec0f43008cf3768b4af8c663476864fafb08269179f08b77e605366bd745"},
+    "report": {"file": "reports/user/2026-08-25_v26b_a0a1_protocollo_contratto25d_preflight.md",
+                "sha256": "61609639ee8ed25ae57d3bc0e7696426d30bace460684e67069289a4ff852820"}
+  },
+
+  "execution_state_at_supersession": {
+    "fit": "NEVER RUN", "training": "NEVER RUN", "rollout": "NEVER RUN", "collection": "NEVER RUN",
+    "candidate_materialised": "NONE",
+    "artifacts_on_disk": "protocol, contract yaml, tooling, tests and one preflight receipt only",
+    "consequence": "the supersession costs no experiment and invalidates no result"
+  },
+
+  "why_superseded": {
+    "architect_decision": "the final student is 35D from creation; a separate 25D checkpoint and a separate 25D observation contract are abandoned",
+    "replacement": "a single 35D contract in which the ten controller/Markov features remain in the vector and in the manifest but are HARD-MASKED at the input, with the corresponding first-layer columns zero, frozen and restored to zero after every optimizer step",
+    "what_this_resolves": [
+      "no second runtime observation contract, so no second set of runtime pins (this closes the open TODO-11 raised by the superseded branch)",
+      "no separate A2 contract-switch stage: removing the mask is bit-exact by construction because the columns are already zero",
+      "functional equivalence with the 25D subspace becomes a DEMONSTRABLE property instead of an architectural assumption",
+      "one manifest, one feature list, one export format across the whole branch"
+    ]
+  },
+
+  "what_carries_over_unchanged": {
+    "parent": "EXCLUSIVELY the August V26 imitation actor 39D, digest 5bbc6cbd3c7e3ec37524b7b6b69ca017af48057cac5207cf755d3b2f72c2709e",
+    "forbidden_as_parent_or_data": ["S0D_35D_DISTILLED", "S1A_*", "S1B_*", "S1C1_*", "S1C2Z_*", "REV4B", "REV4C", "REV4D", "REV4E", "V2_*"],
+    "july": "METHOD ONLY, never a checkpoint, dataset, label or anchor",
+    "preregistered_closed_loop_gates": "carried over verbatim: 500/500 with episode_time_limit, >= 2 valid cycles, phase_timeout stance and swing zero, morphology causal contract failure zero, hs_cancelled zero, resync <= 1, penetration <= 0.020 m, ankle q_min <= -0.03 rad, ankle amplitude >= 0.30 rad, knee amplitude >= 0.60 rad, knee strictly flexed, within bounds",
+    "ankle_threshold_note": "q_min <= -0.03 rad is NOT satisfied by -0.0099: -0.0099 > -0.03",
+    "split_policy": "fail-closed, never random: by trajectory when two or more exist, otherwise blocked temporal with a symmetric embargo",
+    "sigma": "OPEN. 0.005 is NOT assumed and must be measured on the base actor before any stochastic recovery",
+    "no_contralateral_no_clock": "unchanged"
+  },
+
+  "quarantine_rule": "the superseded files remain readable as design evidence. They must NEVER be executed, imported by the new branch, or used to produce any artifact. The new branch imports none of them"
+}

@@ -1,0 +1,318 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j12_prereg_closed_loop_qualification",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_proposed": "V26C_J12_CLOSED_LOOP_QUALIFICATION",
+  "authorisation_status": "NOT_GRANTED at the time of writing - the architect authorises execution internally after reviewing this readiness bundle",
+  "date_utc": "2026-08-27",
+  "architect_decision": {
+    "what": "adapt the hardened J9R1 runner to the J11 actor, and to that actor ONLY",
+    "operational_lineage": "August V26 imitation -> J2 35D -> J11 -> this qualification",
+    "july_status": "METHODOLOGY AND EVIDENCE ONLY; no July checkpoint, dataset or label is an input",
+    "forbidden_parents": [
+      "J8",
+      "J4",
+      "any July checkpoint"
+    ],
+    "taken_by": "the architect, explicitly",
+    "not_reopened": "this preregistration implements that decision and proposes no alternative"
+  },
+  "what_this_stage_is": "six declared cells, one matrix, one leaf: three DETERMINISTIC starts and three STOCHASTIC_HELD repeats at the nominal start, 500 steps each, run sequentially A to F",
+  "what_this_stage_is_not": [
+    "not a fit and not an optimizer step",
+    "not a critic and not PPO",
+    "not a promotion and not a deployability claim",
+    "not a retry of J9R1: the ACTOR is different",
+    "no new threshold of any kind"
+  ],
+  "actor": {
+    "stage": "V26C_J11_MULTISTART_FIT",
+    "leaf": "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1",
+    "module": "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module",
+    "module_state_sha256": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+    "actor_digest": "f3c8fcb1b2ed28ed5fcb96440af8b5b9805e030125667fae3759a5c1447f1633",
+    "is_the_only_actor": true,
+    "is_j8": false,
+    "is_j4": false,
+    "is_july": false,
+    "width": 35,
+    "widening": false,
+    "contralateral_features": false,
+    "standalone_25d": false,
+    "clock_columns": [
+      0,
+      1
+    ],
+    "clock_state": "EXACTLY zero in every 35-wide input layer, direct and alias",
+    "controller_columns": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "controller_state": "LIVE, every column norm > 0",
+    "sigma": 0.005,
+    "sigma_tolerance": 1e-06,
+    "sigma_source": "the actor's OWN frozen log-std head: pi.1.weight[2:] is exactly zero and pi.1.bias[2:] = -5.2983174324035645, so exp gives 0.005. This stage REFUSES to edit a log-std head and never injects a sigma constant into the action.",
+    "leaf_validity_precondition": "the J11 leaf is consumed ONLY if its own commit_verification.json declares pass true, it carries no TECHNICAL_INVALID marker, and no stale lock or staging directory survives beside it. An unverified leaf is not evidence and its actor is not loadable here.",
+    "manifest_must_describe_itself": "the J11 manifest must name the module_state.pkl beside it and carry the matching actor_digest. J8 shipped a manifest naming its PARENT's module; that defect must not be inherited by trusting it here."
+  },
+  "matrix": {
+    "cells_count": 6,
+    "steps_per_cell": 500,
+    "order_is_frozen": "A, B, C, D, E, F, sequential",
+    "sigma": 0.005,
+    "noise_hold_steps": 1,
+    "behavioural_fail_fast": false,
+    "fail_fast_rule": "a behavioural FAIL in one cell is PRESERVED and every later cell still runs. Only a TECHNICAL or INTEGRITY exception stops the matrix, and then nothing is committed.",
+    "cells": [
+      {
+        "id": "A",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 1.956870983805102,
+        "label": "nominal"
+      },
+      {
+        "id": "B",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 1.756870983805102,
+        "label": "-0.20 s"
+      },
+      {
+        "id": "C",
+        "mode": "deterministic",
+        "seed": 123,
+        "offset_s": 2.156870983805102,
+        "label": "+0.20 s"
+      },
+      {
+        "id": "D",
+        "mode": "stochastic_held",
+        "seed": 123,
+        "offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "E",
+        "mode": "stochastic_held",
+        "seed": 124,
+        "offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "F",
+        "mode": "stochastic_held",
+        "seed": 125,
+        "offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      }
+    ],
+    "identical_to_j9r1": "this matrix is value-identical to the frozen v26c_j9r1_closed_loop.MATRIX, cell for cell, in id, mode, seed and offset. verify_scientific_equivalence proves it field by field before any environment is constructed.",
+    "offset_unit": "SECONDS of episode start time, RELATIVE to cfg.t_start",
+    "offsets_are_the_config_choices": "the three offsets are exactly the episode_start_offset_choices_s of the pinned resolved training config"
+  },
+  "action_semantics": {
+    "deterministic": "module.forward_inference, then the deterministic action, cross-checked bit-for-bit against rollout_eval's own deterministic path every step",
+    "stochastic_held": "rollout_eval._held_stochastic_action: action = mean + std * unit, where std is exp(logits) read off the LIVE head and unit is exploration_noise.HeldStandardNormal(default_rng(seed), shape, 1). No sigma constant is ever multiplied into the action.",
+    "per_step_assertions": [
+      "the effective std equals 0.005 within 1e-6",
+      "applied_noise equals std * unit exactly",
+      "forward_exploration and forward_inference agree on mean and std"
+    ],
+    "clipping": "DIAGNOSTIC, never binding, exactly as in J9R1"
+  },
+  "gates": {
+    "source": "v26c_j1_collect.J1_GATE for every non-penetration criterion, v26c_j3_closed_loop.J3_KINEMATIC_GATE unchanged, and the penetration contract's 0.028 band as the SOLE binding penetration bar",
+    "thresholds_invented_here": 0,
+    "proven_by": "verify_scientific_equivalence compares every constant field by field against the FROZEN v26c_j9r1_closed_loop module, and re-derives the common gate from J1_GATE and the kinematic gate from J3_KINEMATIC_GATE at source",
+    "common": {
+      "steps_required": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycles_min": 2,
+      "phase_timeout_stance_max": 0,
+      "phase_timeout_swing_max": 0,
+      "morphology_causal_contract_failure_max": 0,
+      "hs_cancelled_count_max": 0,
+      "resync_count_max": 1
+    },
+    "penetration_bar_removed_from_the_common_gate": "J1_GATE's max_penetration_m_max of 0.020 is DROPPED, exactly as J9R1 drops it: the sole binding penetration criterion is the contract's 0.028 band",
+    "kinematic": {
+      "ankle_min_rad_max": -0.03,
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [
+        -1.5,
+        0.0
+      ],
+      "ankle_bounds_rad": [
+        -0.7,
+        0.7
+      ]
+    },
+    "kinematic_semantics": {
+      "ankle_min": "ankle_min <= -0.03 rad; more negative PASSES, exactly -0.03 PASSES",
+      "ankle_amplitude": "max - min >= 0.30 rad",
+      "knee_amplitude": "max - min >= 0.60 rad",
+      "knee_strictly_flexed": "every knee sample strictly < 0.0; exactly 0.0 FAILS",
+      "within_bounds": "knee in [-1.5, 0.0] and ankle in [-0.7, 0.7], inclusive on both ends"
+    },
+    "telemetry_integrity": {
+      "status": "a SEPARATE fail-closed TECHNICAL invariant, never a behavioural criterion",
+      "invariants": [
+        "valid_hs_count >= valid_cycle_count",
+        "valid_to_count >= valid_cycle_count",
+        "abs(valid_hs_count - valid_to_count) <= 1"
+      ],
+      "on_failure": "the cell is technically INVALID - a statement about the evidence, never the gait"
+    },
+    "aggregate_rule": "PASS iff 6/6 behavioural PASS AND 6/6 telemetry-valid"
+  },
+  "penetration": {
+    "authority": "v26c_penetration_contract.evaluate_series, the ONLY penetration authority",
+    "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "soft_diagnostic": {
+      "value_m": 0.02,
+      "above_iff": "> 0.020",
+      "binding": false
+    },
+    "july_legacy": {
+      "value_m": 0.025,
+      "breach_iff": ">= 0.025",
+      "binding": false
+    },
+    "hard_binding": {
+      "value_m": 0.028,
+      "pass_iff": "<= 0.028",
+      "fail_iff": "> 0.028",
+      "binding": true,
+      "at_exactly_0.028": "PASS - the bound is inclusive"
+    },
+    "no_other_threshold": "no penetration threshold is written down in the runner itself",
+    "all_three_bands_reported_per_cell": true
+  },
+  "per_cell_visibility": [
+    "phase_timeout_stance",
+    "phase_timeout_swing",
+    "morphology_causal_contract_failure",
+    "resync_count",
+    "hs_cancelled_count",
+    "valid_cycle_count",
+    "valid_hs_count",
+    "valid_to_count",
+    "steps",
+    "end_reason",
+    "wait_hs rows and fraction",
+    "knee and ankle min/max",
+    "the three penetration bands with counts and fractions",
+    "the full gate checks and what failed",
+    "telemetry integrity",
+    "the cell verdict"
+  ],
+  "wait_hs": {
+    "feature": "phase_fsm_wait_hs",
+    "resolved_by": "name, from the LIVE RUNTIME actor feature names, never a hard-coded index",
+    "binding": false,
+    "why_surfaced": "J9R1 cell B failed with the FSM held in WAIT_HS for every step and zero valid cycles. J10R1 collected the missing rows and J11 fitted on them. Counting WAIT_HS per cell is the fastest read on whether that failure mode recurred.",
+    "why_not_binding": "this stage reuses J9R1's criteria exactly and invents none. Attaching a threshold to WAIT_HS would be a NEW gate, and a new gate must be preregistered as such, not smuggled in under an adaptation."
+  },
+  "diagnostics_not_binding": [
+    "action_clipped_steps",
+    "episode_return",
+    "realized_noise_rms",
+    "policy_std",
+    "wait_hs rows"
+  ],
+  "diagnostics_exclusion_note": "valid_cycle_count is DELIBERATELY absent from this list: it is a BINDING check, and listing its measure among the non-binding diagnostics would be self-contradictory. J9R1 listed it; that is corrected here without touching any threshold.",
+  "reset_check": {
+    "offset_is_relative_to_t_start": true,
+    "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+    "tolerance_s": 1e-09,
+    "tolerance_justification": "the comparison is an exact arithmetic identity; 1e-9 s is a cross-platform float-representation allowance, not a behavioural tolerance",
+    "checked_immediately_after_reset": true,
+    "t_start_and_t_end_read_live": "cfg.t_start and cfg.t_end come from the model setup XML and are read from the LIVE environment, never hard-coded"
+  },
+  "recording": {
+    "record_outputs": true,
+    "save_outputs_on_close": true,
+    "expected_sim_outputs_per_cell": 19,
+    "count_is_exact_not_a_lower_bound": "J9R1 accepted any non-empty directory; 18 would mean a writer failed silently and 20 that something else wrote there. J10R1 hardened this and J12 inherits it.",
+    "verified_fail_closed_before_any_env": true
+  },
+  "future_leaf": {
+    "relative_leaf": "j12_runs/j12_closed_loop_v26c_2026-08-27_r1",
+    "is_the_only_destination": true,
+    "must_not_exist_before": true,
+    "write_protocol": "atomic commit, no-clobber, under an exclusive sibling lock taken with O_CREAT|O_EXCL: sibling staging, receipt, leaf re-check, rename, THEN post-commit verification",
+    "validity_is_conditional": "the committed leaf is VALID EVIDENCE if and only if commit_verification.json exists inside it and declares pass true. The leaf is born carrying a TECHNICAL_INVALID marker, committed by the rename itself and removed only after the verification passes.",
+    "j9r1_had_no_post_commit_verification": "J9R1 recorded its receipt hash after the rename and compared it to nothing; J12 adopts the J10R1/J11 protocol",
+    "paths_are_leaf_relative": "J9R1 recorded a REPO-relative STAGING path for sim_outputs, which ceased to exist at the commit. Corrected here.",
+    "outcome_fail_still_commits": "a behavioural FAIL still commits the full evidence and exits nonzero",
+    "no_autonomous_retry": true
+  },
+  "preflight": {
+    "inert": "no torch, no ray, no OpenSim; no environment constructed, reset or stepped; no write",
+    "proved_not_asserted": "heavy modules are measured in sys.modules before and after, and any module introduced by the preflight is a BLOCKER; the sentinel output root's existence is measured before and after and must never be created",
+    "sentinel": "_j12_preflight_sentinel_never_created"
+  },
+  "unchanged": [
+    "FSM",
+    "morphology corridor",
+    "reward",
+    "SEA",
+    "the C++ plugin",
+    "production configuration",
+    "every J0-J11 artefact and report"
+  ],
+  "deferred_todo": {
+    "loto": "NOT integrated. Future TODO, not J12.",
+    "loco": "NOT integrated. Future TODO, not J12.",
+    "b1r1": "NOT integrated. Future TODO, not J12.",
+    "b1r2": "NOT integrated. Future TODO, not J12.",
+    "generalisation_dataset_epic": "OPEN. This stage still covers AB06 and three starts of the same trial; it demonstrates no generalisation.",
+    "critic_warm_up": "NOT part of this stage and NOT authorised by it. It must build a fresh inference_only=False module and transplant the actor; it cannot go through RLModule.from_checkpoint, because class_and_ctor_args.pkl fixes inference_only=True.",
+    "ppo": "NOT authorised. A closed-loop PASS is a precondition, never a permission."
+  },
+  "pinned_artefacts_sha256": {
+    "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+    "v26c_j9r1_closed_loop.py": "f58b0d14b077536ced24ec3063bd2154ed1e207b42532bddc76177f1e02e4a3c",
+    "v26c_penetration_contract.py": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/commit_verification.json": "1d24eed05dd04c187c014181c89a0611a648e5601cacff5e1ae0221adcfb8643",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/history.json": "bbfcc0c64e8d8c9019d8bb8a7bfd485228c707b7b3229649cce1d946dcc96d14",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_aggregate_dataset.npz": "a936c580c4db19383255d3d5f7346560e0fd99dc4b139ac202858e82cca13f42",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json": "9cc0276c22c9cd41d75a12ad1e09e6ce1931cf8a27eafc3ab0741cd5937f6b28",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/module_state.pkl": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73"
+  },
+  "pinned_repo_artefacts_sha256": {
+    "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "Trajectory Generator/osim_trj_cmc_like.py": "26458424c44f18fa1dda20b830fa5e7e825c583cc5d10e6d019cb3bd9a0c6d24",
+    "Trajectory Generator/baseline_MLP/rollout_eval.py": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba",
+    "Trajectory Generator/baseline_MLP/env_factory.py": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+    "Trajectory Generator/baseline_MLP/exploration_noise.py": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f",
+    "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f"
+  },
+  "pinned_runtime_sources_note": "rollout_eval.py authenticates BOTH action paths - the deterministic parity reference and _held_stochastic_action. exploration_noise.py authenticates the held-noise sequence for seeds 123, 124 and 125, so a change there would silently change cells D, E and F. osim_trj_cmc_like.py authenticates the transcribed reset semantics. env_factory.py builds the environment. The resolved config carries the three offsets and the runtime literals. asymmetric_rl_module.py is pinned because it DEFINES the class that class_and_ctor_args.pkl names and that the checkpoint loader deserialises. J9R1 never pinned it; a change there would change the network that is rolled out.",
+  "module_load_contract": {
+    "loader": "ray RLModule.from_checkpoint, via v26c_j3_closed_loop.production_stack",
+    "silent_failure_mode": "ray's checkpoint loader catches EVERY exception while unpickling class_and_ctor_args.pkl and falls back to a bare RLModule with no weights, returning it WITHOUT raising. A stage that does not check would roll out an empty network in complete silence.",
+    "measured_not_assumed": [
+      "the loaded module's class name equals AsymmetricActorCriticTorchRLModule",
+      "get_state() is non-empty and holds exactly the ten actor keys",
+      "every loaded tensor is bit-identical to the pinned module_state.pkl"
+    ],
+    "found_by": "an independent read-only audit of this readiness bundle"
+  }
+}

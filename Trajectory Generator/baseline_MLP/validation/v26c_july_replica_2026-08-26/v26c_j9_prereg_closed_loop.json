@@ -1,0 +1,362 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j9_prereg_closed_loop",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_authorised": "V26C-J9-CLOSED-LOOP-QUALIFICATION",
+  "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer, not approver. This preregistration authorises NOTHING: the matrix requires an explicit stage token and an explicit --out.",
+  "date_utc": "2026-08-26",
+  "what_this_stage_is": "the closed-loop qualification of the J8 actor: exactly six declared rollout cells, three deterministic starts and three stochastic seeds, each 500 steps, each gated independently, aggregated once.",
+  "what_this_stage_is_not": [
+    "a fit, an adaptation or any weight update",
+    "a critic warm-up",
+    "a PPO run of any kind",
+    "a promotion, a deployability claim or an authorisation of any next stage",
+    "a LOTO, LOCO, B1R1 or B1R2 study"
+  ],
+  "operational_actor": {
+    "leaf": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+    "is_the_only_actor": true,
+    "never_edited": "the actor is loaded read-only. It is never copied, edited, re-derived, re-fitted or projected. Its hash is checked before AND after the matrix.",
+    "exact_leaf_contents": {
+      "history.json": "150315058a03f5c8e0c1ec851c68125f2036e7b6c9d0ae6024713098f21822a5",
+      "rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+      "v26c_j8_recovery_fit_receipt.json": "13adc58b81ea372edef43a3d57f62b5f971e6be87c5242a8a0e234e993de6995"
+    },
+    "no_other_file": "the leaf holds exactly these six files; any extra or missing file is a fail-closed refusal"
+  },
+  "lineage": {
+    "source": "proven by the J8 receipt, not asserted here",
+    "parent": "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module, module_state 0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "dataset": "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz, bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27, 16713 rows",
+    "august_v26_operational": true,
+    "july_role": "METHODOLOGY AND EVIDENCE ONLY. No July weights, data or labels enter this stage.",
+    "verification": "the J8 receipt is read and its recorded parent and dataset hashes are compared against these values"
+  },
+  "actor_contract": {
+    "width": 35,
+    "single_actor": "one 35D actor. No standalone 25D artefact, no widening, no contralateral input.",
+    "clock_columns": [
+      0,
+      1
+    ],
+    "clock_requirement": "EXACTLY 0.0 in every 35-wide input layer",
+    "controller_columns": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "controller_requirement": "LIVE: every one of the ten must have a strictly positive norm. This is the J8 fit's outcome and the mask flip relative to J1/J2/J3, where columns 25:35 were still zero.",
+    "measured_in_j8": "zero columns are exactly [0, 1]; all ten controller columns are non-zero",
+    "sigma": {
+      "value": 0.005,
+      "source": "the J8 actor's own FROZEN log-std head: pi.1.weight[2:] is exactly zero and pi.1.bias[2:] is [-5.2983174324035645, -5.2983174324035645], so exp gives 0.004999999670722372 on both channels",
+      "never_edited": "this stage never edits, copies or derives a log-std head. If the actor did not already carry sigma 0.005 the stage refuses."
+    }
+  },
+  "runtime": {
+    "pinned_config": "runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "builder": "the hardened J1 builder, v26c_j1_collect.build_full_env_config and verify_env_config, reused unmodified",
+    "fsm": "v3, unmodified",
+    "production_untouched": "FSM, morphology corridor, reward, SEA and the C++ plugin are not touched",
+    "environments": "ONE at a time, sequential, and closed FAIL-CLOSED after each cell: with no primary exception a failed close raises a J9Error CHAINED to the original cause, and the matrix fails technically without committing. When a primary exception is already in flight it is never masked, but close is still attempted. The success-path handler catches Exception, NOT BaseException: KeyboardInterrupt and SystemExit are the operator stopping the run, not a technical failure of the environment, so they propagate unrewritten - while the outer cleanup catches BaseException and still removes the staging directory and the lock, so an interrupt is fail-closed too.",
+    "sim_outputs": "production sim_outputs are required for every cell",
+    "ray_cluster_started": false,
+    "ray_workers_started": false,
+    "env_runners": false,
+    "rllib_checkpoint_loader": true,
+    "ray_import_note": "the RLlib checkpoint loader imports ray and torch at RUN time; importing them is not starting a cluster, a worker or an EnvRunner. The preflight imports neither."
+  },
+  "penetration_authority": {
+    "contract": "v26c_penetration_contract_2026-08-26.json",
+    "contract_sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "module": "v26c_penetration_contract.py",
+    "bands": {
+      "soft_diagnostic_m": 0.02,
+      "july_legacy_diagnostic_m": 0.025,
+      "hard_binding_m": 0.028
+    },
+    "semantics": {
+      "above_soft_iff": "> 0.020, DIAGNOSTIC, never a blocker",
+      "july_legacy_breach_iff": ">= 0.025, DIAGNOSTIC, never a blocker",
+      "binding_fail_iff": "> 0.028",
+      "binding_pass_iff": "<= 0.028, so exactly 0.028 PASSES"
+    },
+    "sole_binding": "the 0.028 band is the ONLY binding penetration criterion. No local threshold is written anywhere in the runner.",
+    "note": "the pinned environment also terminates at grf_penetration_termination_m 0.028, so the binding band is enforced by the physics as well as by the gate"
+  },
+  "matrix": {
+    "cells": 6,
+    "steps_per_cell": 500,
+    "declared_in_advance": true,
+    "executed_as_one_matrix": true,
+    "behavioural_fail_fast": false,
+    "fail_fast_rule": "a behavioural FAIL in any cell is PRESERVED and the remaining cells still run. Only a technical or integrity exception stops the matrix, and it fails closed.",
+    "offset_unit": "SECONDS of episode start time",
+    "cell_list": [
+      {
+        "id": "A",
+        "mode": "deterministic",
+        "seed": 123,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal"
+      },
+      {
+        "id": "B",
+        "mode": "deterministic",
+        "seed": 123,
+        "episode_start_offset_s": 1.756870983805102,
+        "label": "-0.20 s"
+      },
+      {
+        "id": "C",
+        "mode": "deterministic",
+        "seed": 123,
+        "episode_start_offset_s": 2.156870983805102,
+        "label": "+0.20 s"
+      },
+      {
+        "id": "D",
+        "mode": "stochastic_held",
+        "seed": 123,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "E",
+        "mode": "stochastic_held",
+        "seed": 124,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "F",
+        "mode": "stochastic_held",
+        "seed": 125,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      }
+    ],
+    "noise_hold_steps": 1,
+    "order_is_frozen": "A, B, C, D, E, F, in that order"
+  },
+  "offset_unit_correction": {
+    "statement": "the multistart offsets are SECONDS of episode start time, not radians.",
+    "primary_evidence": {
+      "nominal": "the pinned runtime config, episode_start_offset_s = 1.956870983805102",
+      "minus": "validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_minus020/training_cfg.resolved.yaml -> episode_start_offset_s = 1.756870983805102 = nominal - 0.20",
+      "plus": "validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_plus020/training_cfg.resolved.yaml -> episode_start_offset_s = 2.156870983805102 = nominal + 0.20",
+      "july_report": "reports/user/2026-07-13_sblocco_actor_markov35_e_warmup_critic.md reports the starts as '-0.20 s' and '+0.20 s' and states the tests cover three starts of the SAME trial"
+    },
+    "earlier_prose_error": "several FROZEN earlier V26C records say 'rad' where the primary artefacts say seconds: v26c_j3_amendment_recovery_only.json, v26c_j6_amendment_recovery_probe.json, v26c_j6_amendment_recovery_probe_rev2.json, v26c_j7_prereg_markov_dataset.json, v26c_j8_prereg_recovery_fit.json and v26c_j4_recovery.py.",
+    "no_numeric_artefact_affected": "NO numeric artefact was affected. Those strings are prose describing a DEFERRAL; no offset value was ever computed, stored or applied from them, and every V26C rollout so far used the nominal offset from the pinned config. The error is descriptive only.",
+    "remediation": "those records are IMMUTABLE and are NOT edited. This block is the additive correction and stands as the authority on the unit."
+  },
+  "action_semantics": {
+    "deterministic": {
+      "source": "v26c_j3_closed_loop.deterministic_action, reused unmodified",
+      "path": "module.forward_inference -> get_inference_action_dist_cls().from_logits(...).to_deterministic().sample(); flat Box fallback is the Gaussian mean",
+      "parity": "the deterministic sample must equal the policy mean EXACTLY, and must match rollout_eval._policy_action_with_diagnostics bit for bit at every step",
+      "stepped_with": "the RAW action. The clipped action is a DIAGNOSTIC mirror and is never passed to the environment."
+    },
+    "stochastic_held": {
+      "source": "rollout_eval._held_stochastic_action, the production helper, exactly as J6 uses it",
+      "noise": "exploration_noise.HeldStandardNormal(np.random.default_rng(cell seed), action_shape, hold_steps=1)",
+      "parity": "forward_exploration and forward_inference must agree on the mean AND the std at every step, and the policy's effective std must be sigma 0.005",
+      "identity": "applied_noise must equal std * unit_noise bit-exactly",
+      "stepped_with": "the RAW action. The clipped action is a DIAGNOSTIC mirror."
+    }
+  },
+  "env_mutation_policy": {
+    "rule": "the base env config is built and verified FIRST through the hardened J1 builder. Then ONLY episode_start_offset_s may take one of the three frozen values. Every other field must remain identical.",
+    "proof": "the set of differing keys must be a SUBSET of {episode_start_offset_s, output_dir}. Cells A/D/E/F normally differ only in output_dir, because their offset already equals the base one; cells B and C differ in both. Any other differing key, any added key beyond output_dir and any removed key is a fail-closed refusal.",
+    "reset_time_check": {
+      "offset_is_relative_to_t_start": true,
+      "not_absolute_opensim_time": "episode_start_offset_s is NOT an absolute OpenSim time and is never compared against base.t directly",
+      "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+      "worked_example": "cfg.t_start = 11.99 and the nominal offset 1.956870983805102 give an expected reset time of 13.946870983805102, which is exactly the time_before of J1's first recorded step",
+      "checked_immediately_after_reset": true,
+      "not_from_a_post_step_record": true,
+      "tolerance_s": 1e-09,
+      "tolerance_justification": "the comparison is an exact arithmetic identity, so 1e-9 s is a cross-platform float-representation allowance, not a behavioural tolerance",
+      "recorded_fields": [
+        "cfg_t_start_s",
+        "cfg_t_end_s",
+        "episode_duration_s",
+        "requested_unclamped_time_s",
+        "max_start_s",
+        "expected_reset_time_s",
+        "actual_reset_time_s",
+        "reset_time_error_s",
+        "clamped"
+      ],
+      "clamp_respected": "the clamp to max_start is reproduced and reported per cell",
+      "input_sources": {
+        "t_start": "live base.cfg.t_start",
+        "t_end": "live base.cfg.t_end",
+        "episode_duration": "live base.env_cfg.episode_duration - NORMATIVE",
+        "cross_check": "the live episode_duration is compared against env_config['episode_duration'] with tolerance 1e-12; a divergence is a fail-closed J9Error, because the environment would not be running the episode length this stage configured",
+        "why_live_is_normative": "the clamp is computed by the environment from its OWN env_cfg. Reading our config instead would prove nothing about what the environment actually did.",
+        "guards": "a missing base.cfg, a missing cfg.t_start or cfg.t_end, a missing base.env_cfg.episode_duration, or a non-finite value are each an explicit fail-closed J9Error, never an AttributeError and never a guess"
+      }
+    },
+    "expected_per_cell": {
+      "A": [
+        "output_dir"
+      ],
+      "B": [
+        "episode_start_offset_s",
+        "output_dir"
+      ],
+      "C": [
+        "episode_start_offset_s",
+        "output_dir"
+      ],
+      "D": [
+        "output_dir"
+      ],
+      "E": [
+        "output_dir"
+      ],
+      "F": [
+        "output_dir"
+      ]
+    },
+    "no_second_j1_verify_on_mutated_config": "J1.verify_env_config pins episode_start_offset_s to the pinned config's own value, including in its RUNTIME LITERAL CROSS-CHECK, so cells B and C would fail it for a purely technical reason. The contract is: the base is built AND verified in full by J1 BEFORE any mutation; a shallow copy then changes only the two allowed keys; and every other field is proved equal to the already-verified base. The verifier is never re-run on the mutated config."
+  },
+  "per_cell_binding_gate": {
+    "applies_to": "ALL six cells, independently",
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "valid_cycles_min": 2,
+    "phase_timeout_stance_max": 0,
+    "phase_timeout_swing_max": 0,
+    "morphology_causal_contract_failure_max": 0,
+    "hs_cancelled_count_max": 0,
+    "resync_count_max": 1,
+    "penetration": "binding pass under the current contract, i.e. max penetration <= 0.028",
+    "kinematic_quality": {
+      "source": "v26c_j3_closed_loop.J3_KINEMATIC_GATE, UNCHANGED",
+      "ankle_min_rad_max": -0.03,
+      "ankle_min_direction": "the ankle minimum must be AT OR BELOW -0.03 rad, i.e. ankle_min <= -0.03. More negative PASSES; -0.0099 FAILS; exactly -0.03 PASSES.",
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [
+        -1.5,
+        0.0
+      ],
+      "ankle_bounds_rad": [
+        -0.7,
+        0.7
+      ]
+    }
+  },
+  "telemetry_integrity": {
+    "status": "a SEPARATE fail-closed TECHNICAL invariant, never a behavioural criterion and never a promotion threshold",
+    "source": "v26c_j3_closed_loop.telemetry_integrity, reused unmodified",
+    "asks": "is the recorded event evidence self-consistent (HS and TO counts at least the cycle count)?",
+    "on_failure": "the cell's qualification is technically INVALID - a statement about the evidence, never about the gait"
+  },
+  "diagnostics_not_binding": [
+    "action clipping counts",
+    "episode return",
+    "penetration > 0.020 flags and counts",
+    "penetration >= 0.025 flags and counts",
+    "valid cycle count above the minimum",
+    "realised noise RMS",
+    "policy std"
+  ],
+  "aggregate": {
+    "pass_iff": "6/6 cells behavioural PASS AND 6/6 cells telemetry-valid",
+    "any_other_outcome": "FAIL or INVALID, preserved as evidence",
+    "confers_nothing": "an aggregate PASS is an offline closed-loop result. It authorises no promotion, no deployment, no critic warm-up, no PPO and no next stage."
+  },
+  "multistart_disambiguation": {
+    "training_data": "the two July teacher datasets of 8000 rows remain DEFERRED and absent from J7/J8. This stage does not reintroduce them.",
+    "closed_loop_validation": "the multistart CLOSED-LOOP validation is cells B and C, and it is BINDING here.",
+    "they_are_different": "deferring the multistart TRAINING DATA says nothing about the multistart CLOSED-LOOP validation. The two must never be conflated.",
+    "evidence": "reports/user/2026-08-25_v26b_b1r2a_revisione_indipendente_e_proposta.md line 149 defers the multistart MATRIX as a dataset-scope question; reports/user/2026-07-13_sblocco_actor_markov35_e_warmup_critic.md shows the July refinement that passed nominal and died at step 221 on the -0.20 s start, which is why the multistart validation is binding rather than deferred."
+  },
+  "future_leaf": {
+    "relative_leaf": "j9_runs/j9_closed_loop_v26c_2026-08-26_r1",
+    "is_the_only_destination": true,
+    "must_not_exist_before": true,
+    "does_not_exist_yet": "this preregistration turn creates nothing",
+    "contents": {
+      "per_cell": "j9_cell_<ID>_trace.json, j9_cell_<ID>_kinematics.npz, j9_cell_<ID>_penetration.npz",
+      "aggregate": "v26c_j9_closed_loop_receipt.json"
+    },
+    "write_protocol": "atomic commit, no-clobber under an exclusive sibling lock, modelled on J8: lock taken with O_CREAT|O_EXCL, sibling staging directory, verification, re-check of the leaf, then rename.",
+    "outcome_fail_still_commits": "a behavioural FAIL still commits the full evidence and exits non-zero",
+    "cleanup_on_failure": "recursive removal of the exact staging directory this run created, unlink of its own lock, and at most a NON-RECURSIVE rmdir of the parent if this run created it and it is empty",
+    "no_autonomous_retry": true
+  },
+  "preflight": {
+    "inert": "no torch, no RLlib, no OpenSim import; no environment constructed, reset or stepped; no output written",
+    "reports": "the planned matrix, the actor contract, the penetration bands, the offset unit correction and the multistart disambiguation"
+  },
+  "outcome_policy": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "critic": "excluded",
+    "ppo_updates": 0,
+    "single_execution": true,
+    "no_autonomous_retry": "on failure the evidence is preserved and the run stops"
+  },
+  "deferred_todo": {
+    "loto": "NOT integrated. Future TODO, not J9.",
+    "loco": "NOT integrated. Future TODO, not J9.",
+    "b1r1": "NOT integrated. Future TODO, not J9.",
+    "b1r2": "NOT integrated. Future TODO, not J9.",
+    "multistart_training_data": "DEFERRED and absent, distinct from the binding multistart closed-loop validation in this stage"
+  },
+  "pinned_artefacts_sha256": {
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "v26c_penetration_contract.py": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "v26c_j8_prereg_recovery_fit.json": "8f661320348f6b6f034bbbe7b2c04ca85efc10cac48375349261ce2dbcba737b",
+    "v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "v26c_j8_recovery_fit_authorization.json": "18a3f94b176aa8e53495a3cd99f94646fbe5d9510aae7013d6051d39cd36b684",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/history.json": "150315058a03f5c8e0c1ec851c68125f2036e7b6c9d0ae6024713098f21822a5",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/module_state.pkl": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/v26c_j8_recovery_fit_receipt.json": "13adc58b81ea372edef43a3d57f62b5f971e6be87c5242a8a0e234e993de6995",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759"
+  },
+  "pinned_repo_artefacts_sha256": {
+    "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "Trajectory Generator/osim_trj_cmc_like.py": "26458424c44f18fa1dda20b830fa5e7e825c583cc5d10e6d019cb3bd9a0c6d24",
+    "Trajectory Generator/baseline_MLP/rollout_eval.py": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba",
+    "Trajectory Generator/baseline_MLP/env_factory.py": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+    "Trajectory Generator/baseline_MLP/exploration_noise.py": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f"
+  },
+  "pinned_runtime_sources": {
+    "why": "these four files ARE the runtime this stage executes. Pinning them means verify_prereg authenticates their contents BEFORE any cell runs, so the stage cannot silently execute against a changed environment, a changed rollout helper, a changed env factory or a changed noise generator.",
+    "Trajectory Generator/osim_trj_cmc_like.py": "the environment itself. Pinning it ALSO authenticates the reset semantics this runner transcribes: _initialise_episode computes max_start = max(cfg.t_start, cfg.t_end - episode_duration), requested = cfg.t_start + max(0.0, episode_start_offset_s), episode_start = min(requested, max_start), self.t = episode_start. If that arithmetic ever changes, this pin breaks and the stage refuses rather than checking the reset against a stale rule.",
+    "Trajectory Generator/baseline_MLP/rollout_eval.py": "supplies _held_stochastic_action, the production stochastic path, and _policy_action_with_diagnostics, the deterministic parity reference",
+    "Trajectory Generator/baseline_MLP/env_factory.py": "builds the environment from the verified env_config",
+    "Trajectory Generator/baseline_MLP/exploration_noise.py": "supplies HeldStandardNormal, which J9 imports and instantiates directly. Pinning it AUTHENTICATES THE HELD NOISE SEQUENCE of the three stochastic cells: HeldStandardNormal(np.random.default_rng(cell seed), action_shape, hold_steps=1) is what turns seeds 123/124/125 into the exact unit-normal draws each cell applies. If its generation or hold logic changed, D/E/F would silently explore a different sequence while still reporting the same seeds, so this pin breaks and the stage refuses instead.",
+    "not_modified": "this stage reads all four and modifies none of them"
+  },
+  "imported_frozen_runners": {
+    "v26c_j1_collect.py": "the hardened env builder, summariser and common gate",
+    "v26c_j3_closed_loop.py": "the deterministic action parity and the UNCHANGED kinematic gate",
+    "authenticated": "both are pinned above, so verify_prereg authenticates their CONTENTS before any execution. J9 never modifies either."
+  }
+}

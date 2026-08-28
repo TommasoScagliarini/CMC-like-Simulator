@@ -1,0 +1,55 @@
+# V26 delayed causal morphology corridor — PROMOTED (2026-08-21, decision ii).
+#
+# Q2 positive A/B evidence: exploratory 2026-08-16, chain B0820 (warmup,
+# qualification, preflight) and the FSM v3 validation L0-L3 (report
+# 2026-08-21): with actor FSM v3 and the 1e-9 corridor time tolerance the
+# causal contract failures drop to zero in the preflight smoke. The corridor
+# runs at the sanctioned post-Q2 A/B weight 0.0025 in training_exnovo_cfg.yaml.
+candidate:
+  status: v26_promoted_post_q2_2026-08-21
+  positive_ab_gate: Q2_passed_2026-08-21
+  ppo_updates_authorized: true
+  qualifying_rollouts_authorized: true
+  active_training_config_replaced: true
+
+simulation:
+  segment_duration: 0.01
+
+grf:
+  phase_fsm_input_mode: legacy_events
+  event_contract_id: legacy_events_v1
+  binary_phase_fsm_mode: binary_active
+  binary_phase_detector_profile: validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json
+  binary_phase_detector_profile_sha256: db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2
+  binary_phase_event_contract_id: binary_point_v25+heel_qualified_fsm_v2
+  binary_phase_debounce_s: 0.005
+  detector_sample_dt_s: 0.001
+  policy_step_s: 0.01
+
+reward:
+  morphology_profile: morphology_profiles/ab06_prosthetic_event_warped_mean_std_corridor.json
+  morphology_profile_sha256: 33b1dd7cb0db40110a4f9c1b8c0dd49a498662211e6e132f0f3cefe8edc02a55
+  morphology_phase_mode: event_anchored_causal_delayed_experimental
+  morphology_canonical_to_phase: 0.6223299989
+  morphology_reward_delay_s: 0.04
+  morphology_max_delivery_latency_s: 0.01
+  morphology_causal_max_samples: 4096
+  morphology_causal_event_contract_id: binary_point_v25+heel_qualified_fsm_v2
+  morphology_causal_allow_effects: 1.0
+  morphology_weight: 0.0025
+  morphology_hard_termination_enabled: 0.0
+
+invariants:
+  event_anchor_field: event_time_s
+  confirmation_field: confirmed_time_s
+  delivery_field: delivered_time_s
+  actor_accepted_journal: phase_fsm.accepted_transitions_this_step
+  detector_confirmed_journal: binary_phase_fsm.events_this_step
+  detector_pending_journal: binary_phase_fsm.pending_event
+  detector_cancellation_journal: binary_phase_fsm.candidate_cancellations_this_step
+  delay_observation: false
+  delay_detector_pulses: false
+  delay_policy_actions: false
+  delay_simulator_state: false
+  terminal_pending_rule: drop_samples_at_or_after_pending_onset
+  positive_ab_weights_after_q2: [0.0, 0.0025, 0.005]

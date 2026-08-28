@@ -1,0 +1,36 @@
+{
+  "addendum_id": "b1r1_blocked5_superseded_as_comparator",
+  "date": "2026-08-25",
+  "kind": "ADDITIVE and IMMUTABLE. The blocked 5-fold proposal is SUPERSEDED as a fit design and RETAINED as a comparator. Nothing is deleted or overwritten",
+  "status": "SUPERSEDED_AS_FIT_DESIGN_RETAINED_AS_COMPARATOR",
+
+  "superseded_artifacts": {
+    "script": {"file": "v26b_b1r1_split_study.py", "sha256": "e61c082ddb556ecd6480e6113f8fef12543fcf8269942f015418bef6fc7f42ef"},
+    "test": {"file": "test_v26b_b1r1_split_study.py", "sha256": "08a9562502a21d79e25dcf88aeee7625168a295dfe353061d17e8e3d4bb8c886"},
+    "receipt": {"file": "runs/.../diagnostics/b1r1_split_study/v26b_b1r1_split_study.json", "sha256": "6e4821d102c025fb20e550159fe052e13db2787d4f2d454dbfeeaab4160a2698"},
+    "report": {"file": "reports/user/2026-08-25_v26b_b1r1_studio_split_readonly.md", "sha256": "938fa6c4468599676d07a0f89798d092ddb89423c501d414d2c40d75f964d67a"},
+    "execution_state": "never used for any fit; no candidate, no rollout, no collection"
+  },
+
+  "why_superseded": {
+    "architect_review": "the geometry is too fragmented and the embargo cost excessive: worst nearest-neighbour label baseline 0.204845, mean 0.117938, 21-45% of validation rows beyond the train p99, and 290-343 rows removed per fold",
+    "confirmed_under_corrected_instruments": "recomputed in 23D with a train-only scaler the same design gives worst 0.210008, mean 0.118574, worst-beyond-p99 44.88%, median 330 rows dropped, minimum training rows 857"
+  },
+
+  "three_measurement_defects_corrected_in_the_successor": {
+    "support_dimension": "the superseded study passed 25 columns and relied on a zero-variance filter to drop the two hard-zeroed clock columns implicitly. The effective support is 23D = kept_columns minus CLOCK_COLUMNS = columns 2..24, and the successor states it explicitly",
+    "scaler_leakage": "the superseded study standardised with the mean and standard deviation of the WHOLE dataset, leaking validation statistics into the metric. The successor fits the scaler on TRAINING ROWS ONLY. Verified material: the two scalers differ",
+    "discrete_coverage": "the superseded study checked the three one-hot classes only. The successor checks EXACT signatures over columns (17,18,19,20,21,24); columns 22 and 23 are continuous with 412 and 557 distinct values, and column 24 is categorical with four levels {0, 0.25, 0.5, 1.0}"
+  },
+
+  "what_carries_over_unchanged": {
+    "wait_hs_finding": "phase_fsm_wait_hs=1 exists as one contiguous segment of 187 rows in minus020 alone. The successor proves formally that no in-distribution heldout of it exists",
+    "embargo": "20 steps, fixed by the measured decorrelation criterion (the 50% crossing is at lag 16, so 20 is the smallest admissible multiple of five)",
+    "july_random_80_20_is_rejected": "its minimum temporal distance is one step and over 90% of its validation rows have an immediate training neighbour; its low scores are artefacts of that leakage",
+    "leave_one_trajectory_out_is_rejected": "it leaves WAIT_HS entirely out of training in one fold",
+    "gates": "no threshold is relaxed anywhere"
+  },
+
+  "successor": {"script": "v26b_b1r1_loco_study.py", "design": "leave-one-complete-cycle-out, six folds"},
+  "quarantine_rule": "the superseded files stay readable and are invoked ONLY as a comparator inside the successor study. They must never drive a fit"
+}

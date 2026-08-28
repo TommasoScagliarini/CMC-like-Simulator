@@ -1,0 +1,105 @@
+{
+  "artefacts_sha256": {
+    "history.json": "3eaba5128c1d0734a60127cddeb5f383d794fa59951a3c7cf2eb9e8dd4e46eee",
+    "v26c_j18_candidate_metrics.json": "f4b8688dd8d4d0c4f330064dce4ac9ccd021e9529669a04e97ea615f226f36f3",
+    "v26c_j18_selection.json": "8ef47ef6343399dfded8ffe85ec109a6b420d0c804c32ba19d7b8906348aac30"
+  },
+  "dataset": {
+    "blocks_are_disjoint": true,
+    "priority_order": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "rows": 4221,
+    "rows_by_block": {
+      "A": 500,
+      "B": 14,
+      "C": 2497,
+      "D": 1210
+    }
+  },
+  "inputs": {
+    "architect_go_pins": {
+      "test_v26c_j18_b_only_update.py": "6050f4c062f64c41198c2be0aeaa41c8b83dd35639319046bb4d4e13e3e468aa",
+      "v26c_j18_b_only_update.py": "d3949631ddd135c50bbd91eec26d9f77b70bdf41692a4500e01d0d01a34e992b",
+      "v26c_j18_dataset_manifest.json": "ba9ebf9c77550595562d3047368483f8fab7d4c46a0032c177ffd278a07910d2",
+      "v26c_j18_prereg_addendum_v2_minibatch_and_scaling_2026-08-27.json": "bc50072835929961f85aa5ce955124491ca3c9e16d87ec2691b29ab7b996a71d",
+      "v26c_j18_prereg_addendum_v3_scale_absorption_2026-08-27.json": "e344a5b31909189757e35ba24bb1c66c00848c5ebe59500463e3ed42be3c85d1",
+      "v26c_j18_prereg_b_only_constrained_update.json": "f19de7b5c4fa1c4c6b2101e34013576d88a838032c5c490a788e784504a96720",
+      "v26c_j18_provenance_overlay_j8_2026-08-27.json": "dc4fd169ec95e4bcec1d472ab94f176b980f059ffdd98e28d009e83db0db9128"
+    },
+    "dataset_manifest_sha256": "ba9ebf9c77550595562d3047368483f8fab7d4c46a0032c177ffd278a07910d2",
+    "parent": {
+      "actor_digest": "6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207",
+      "actual_byte_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+      "identity_source": "actual bytes; the leaf sidecar manifest is stale",
+      "path": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/module_state.pkl"
+    },
+    "prereg_addendum_v2_sha256": "bc50072835929961f85aa5ce955124491ca3c9e16d87ec2691b29ab7b996a71d",
+    "prereg_addendum_v3_sha256": "e344a5b31909189757e35ba24bb1c66c00848c5ebe59500463e3ed42be3c85d1",
+    "prereg_sha256": "f19de7b5c4fa1c4c6b2101e34013576d88a838032c5c490a788e784504a96720",
+    "provenance_overlay_sha256": "dc4fd169ec95e4bcec1d472ab94f176b980f059ffdd98e28d009e83db0db9128",
+    "runner_sha256": "d3949631ddd135c50bbd91eec26d9f77b70bdf41692a4500e01d0d01a34e992b"
+  },
+  "kind": "EXECUTION RECEIPT",
+  "protocol": {
+    "batch_size": 128,
+    "batches_per_epoch": 33,
+    "candidates": 16,
+    "epochs": 200,
+    "estimator": "L_M = (N/|M|) * sum_{i in M} w_block(i)/N_block(i) * e_i",
+    "final_short_chunk_kept": true,
+    "no_early_stopping": true,
+    "no_retry": true,
+    "optimizer_steps_per_candidate": 6600,
+    "rng": "np.random.default_rng(123), reset identically per candidate",
+    "seed": 123
+  },
+  "raw_vs_scaled_equivalence": {
+    "bit_identical_is_not_claimed": true,
+    "numpy_max_abs_diff": 3.2045915920875245e-10,
+    "numpy_within_tolerance": true,
+    "ok": true,
+    "tolerance": 1e-06,
+    "torch_max_abs_diff": 1.1920928955078125e-07,
+    "torch_version": "2.10.0",
+    "torch_within_tolerance": true,
+    "weight_round_trip_bit_identical": true,
+    "why": "(W*s)@(o/s) and W@o are different float32 operation sequences and need not agree bit for bit. J11 and J15R1 could claim bit-identity only because their multiply and divide were no-ops on zero weights."
+  },
+  "selection": {
+    "actors_persisted": 0,
+    "candidates_evaluated": 16,
+    "fail_closed": true,
+    "fail_closed_meaning": "no candidate passed every hard gate, so NO actor is written. No threshold is relaxed, no axis value is added and no candidate is re-run. The phase returns to the architect.",
+    "gate_failure_tally": {
+      "G1": 16,
+      "G10": 0,
+      "G11": 0,
+      "G2": 16,
+      "G3": 10,
+      "G4": 5,
+      "G5": 0,
+      "G6": 0,
+      "G7": 0,
+      "G8": 0,
+      "G9": 0
+    },
+    "kind": "SELECTION UNDER THE PREREGISTERED TOTAL ORDER",
+    "ranking_keys": [
+      "MSE_B ascending",
+      "MSE_A ascending",
+      "max_abs_drift over C union D ascending",
+      "candidate_index ascending"
+    ],
+    "selected_candidate_index": null,
+    "sixteen_actors_are_never_persisted": true,
+    "stage": "V26C_J18_J8_B_ONLY_CONSTRAINED_UPDATE",
+    "survivor_count": 0,
+    "survivors_in_rank_order": []
+  },
+  "stage": "V26C_J18_J8_B_ONLY_CONSTRAINED_UPDATE",
+  "verdict": "FAIL_CLOSED_NO_SURVIVOR"
+}

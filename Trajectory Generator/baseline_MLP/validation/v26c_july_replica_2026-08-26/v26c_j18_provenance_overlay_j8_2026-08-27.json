@@ -1,0 +1,131 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, CONTENT-ADDRESSED PROVENANCE OVERLAY",
+  "stage": "V26C_J18_J8_B_ONLY_CONSTRAINED_UPDATE",
+  "date": "2026-08-27",
+  "scope": "records a stale sidecar inside the J8 leaf and establishes, by documentary and empirical evidence, WHICH module actually produced the J9R1 A-F rollouts. Corrects nothing, overwrites nothing, and touches no J8 artefact.",
+
+  "j8_artefacts_modified": "NONE",
+  "overwrites_nothing": true,
+  "is_not_a_scientific_blocker": "correct. The finding is a provenance-reporting defect in one sidecar file. The module bytes, the receipt lineage and the rollout attribution are all sound, and are proved below.",
+
+  "contains_no_execution": {
+    "fit": false,
+    "rollout": false,
+    "environment": false,
+    "critic": false,
+    "ppo": false,
+    "new_collection": false,
+    "candidate_actor_written": false,
+    "j18_runs_created": false,
+    "sealed_seeds_read": 0
+  },
+
+  "the_finding": {
+    "what": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json is BYTE-IDENTICAL to the J2 leaf's manifest. It therefore describes J2, not J8.",
+    "manifest_sha256": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "identical_to": "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json",
+    "consequences_inside_that_file": [
+      "it declares module_state_sha256 = 0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130, which is J2's module, not J8's",
+      "it carries actor_label = J2_BASE35_JULY_FAITHFUL",
+      "it carries status = base-phase fit; never promoted; J3 not run",
+      "its derived_from points past J8's own parent",
+      "it has no actor_digest key at all"
+    ],
+    "also_observed": "the J8 leaf has no commit_verification.json. Its six files are actor_feature_manifest.json, class_and_ctor_args.pkl, metadata.json, module_state.pkl, history.json and v26c_j8_recovery_fit_receipt.json. This matches the J2-era leaf convention and is the same TODO already recorded for the J2 leaf; it is not new to J8.",
+    "severity": "provenance reporting only. No measured quantity, no verdict and no lineage claim outside that one sidecar depends on it."
+  },
+
+  "manifest_declared_hash_vs_actual_byte_hash": {
+    "rule": "these two are DIFFERENT THINGS and are never to be conflated. J18 binds to the actual bytes.",
+    "manifest_declared_module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "manifest_declared_identifies": "J2",
+    "actual_byte_sha256_of_the_j8_module": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "actual_byte_path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/module_state.pkl",
+    "they_disagree": true,
+    "which_one_j18_binds_to": "the ACTUAL BYTE HASH 9c5b1571..., pinned by path in the J18 preregistration. The J8 manifest is never read as an identity source.",
+    "recomputed_actor_digest_j8": "6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207",
+    "recomputed_actor_digest_j2": "59d54240ac628dcbd1d0dbf34328145afa08a7028047a5923298782b79bf5188",
+    "actor_digest_note": "recomputed here for the record because the J8 sidecar carries no actor_digest key. This overlay declares them; it does not write them into any J8 file."
+  },
+
+  "attribution_of_the_A_to_F_rollouts": {
+    "question": "were the J9R1 A-F rollouts, which J8 passes 5/6, actually driven by the J8 module 9c5b1571..., or by the J2 module 0f182ea9...?",
+    "answer": "by J8 9c5b1571.... Established independently by documentary evidence and by empirical falsification. The two agree.",
+
+    "evidence_1_documentary": {
+      "source": "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/v26c_j9r1_closed_loop_receipt.json",
+      "source_sha256": "c201b666f68451e4646fbaae3f149e9afaf873b5c94f99c95fc4286faaeda4f4",
+      "decisive_fields": {
+        "actor_before.artefacts_sha256['rl_module/module_state.pkl']": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+        "amendment.pinned_artefacts_sha256['j8_runs/.../rl_module/module_state.pkl']": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+        "actor_before.lineage.parent_module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130"
+      },
+      "reading": "the receipt pins the ACTOR USED at 9c5b1571... in two independent places, and records J2 0f182ea9... in a SEPARATE field explicitly labelled as the PARENT. The receipt never confuses the two. Only the sidecar manifest does.",
+      "corroborating_field": "actor_before.mask_contract.note = 'the mask FLIP relative to J1/J2/J3, where 25:35 were zero', with ten non-zero controller_norms recorded on columns 25-34. That description fits J8 and is false of J2."
+    },
+
+    "evidence_2_empirical_falsification": {
+      "method": "each trace step records actor_observation_vector_before (35 floats) and policy_mean (2 floats). The recorded observations were replayed through three candidate modules and the outputs compared to the recorded policy_mean. This identifies the module that produced the rollouts and excludes the others.",
+      "structural_discriminator": {
+        "statement": "J2 has the first-layer controller block 25:35 EXACTLY dead; J8 has it live. The two are therefore distinguishable from behaviour alone on any observation with a non-zero controller segment.",
+        "max_abs_first_layer_weight_columns_25_to_35": {
+          "J8": 1.2939e-02,
+          "J2": 0.0,
+          "J4": 4.582815e-04
+        }
+      },
+      "max_abs_deviation_from_recorded_policy_mean": {
+        "units": "normalised action units",
+        "per_cell": {
+          "A": {"n": 500, "J8": 1.435e-07, "J2": 1.533e-02, "J4": 1.483e-02},
+          "B": {"n": 500, "J8": 1.470e-07, "J2": 1.957e-02, "J4": 1.920e-02},
+          "C": {"n": 500, "J8": 1.240e-07, "J2": 1.735e-02, "J4": 1.685e-02},
+          "D": {"n": 500, "J8": 1.337e-07, "J2": 1.494e-02, "J4": 1.466e-02},
+          "E": {"n": 500, "J8": 1.363e-07, "J2": 1.599e-02, "J4": 1.553e-02},
+          "F": {"n": 500, "J8": 1.140e-07, "J2": 1.553e-02, "J4": 1.554e-02}
+        },
+        "worst_case_over_all_six_cells": {"J8": 1.470e-07, "J2": 1.957e-02, "J4": 1.920e-02}
+      },
+      "interpretation": {
+        "J8": "reproduces every one of the 3000 recorded policy_mean pairs to at most 1.470e-07. That is the float32 round-trip noise of storing a float32 observation and a float32 output as JSON decimals and replaying them in float64. It is the signature of the module that actually ran.",
+        "J2": "deviates by up to 1.957e-02, which is 133119x J8's residual and four orders of magnitude above the float32 noise floor.",
+        "J4": "included as a third control, also excluded, deviating by up to 1.920e-02.",
+        "conclusion": "the hypothesis 'the A-F rollouts were driven by J2 0f182ea9...' is FALSIFIED on all six cells. The hypothesis 'they were driven by J8 9c5b1571...' survives on all six."
+      },
+      "epistemic_status": "this is a MEASUREMENT that discriminates between named alternatives, not a correlation. The two candidate modules make quantitatively different predictions on the same recorded inputs, and only one matches."
+    },
+
+    "verdict": "DEMONSTRATED. The J8 module actually used for the A-F 5/6 rollouts is the actual-byte module 9c5b1571..., not J2 0f182ea9.... No blocker. Readiness may close on this point."
+  },
+
+  "binding_consequences_for_j18": [
+    "J18 pins the J8 parent by PATH plus ACTUAL BYTE SHA-256 (9c5b1571...) and never by the leaf manifest.",
+    "J18 never reads j8_runs/.../actor_feature_manifest.json as an identity source. It is pinned by hash only so that any future change to it is detectable.",
+    "J18 recomputes the actor digest from the module bytes rather than trusting any stored digest.",
+    "any actor_feature_manifest.json written for a J18 candidate must be truthful about its own module, as J11 and J15R1 already are; it must carry its own module_state_sha256, its own actor_digest and its own label.",
+    "the absence of commit_verification.json in the J8 leaf does not block reading J8; J18 writes its own commit verification for anything it produces."
+  ],
+
+  "todo_propagated": [
+    "the J8 leaf sidecar actor_feature_manifest.json remains stale and is deliberately LEFT UNMODIFIED by architectural decision. Any future consumer must read this overlay.",
+    "the J8 leaf has no commit_verification.json, as with the J2 leaf.",
+    "no leaf pins the runner that wrote it."
+  ],
+
+  "invariants_verified": {
+    "j18_runs": "ABSENT - not created",
+    "candidate_actor": "NONE - not created",
+    "j8_leaf_files_modified": "NONE",
+    "j2_j4_j7_j9r1_j10r1_leaf_files_modified": "NONE",
+    "locks_or_staging": "NONE",
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "fsm_v3_morphology_reward_sigma_sea_cpp_architecture_production_config": "untouched",
+    "dirty_worktree": "preserved untouched",
+    "subagents_used": 0
+  },
+
+  "self_consistency": {
+    "contains_no_self_hash": true,
+    "how_to_verify": "recompute the SHA-256 of the J8 and J2 module_state.pkl and of the two manifests; re-read the three named fields of the J9R1 receipt; replay the recorded observations of the six traces through both modules and compare to the recorded policy_mean."
+  }
+}

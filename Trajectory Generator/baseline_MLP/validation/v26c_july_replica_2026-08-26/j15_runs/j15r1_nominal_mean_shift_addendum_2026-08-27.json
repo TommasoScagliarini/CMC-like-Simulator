@@ -1,0 +1,98 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, DIAGNOSTIC ADDENDUM",
+  "diagnostic_only": true,
+  "binding": false,
+  "original_verdict_unchanged": "PASS",
+  "original_binding_gates": "17 of 17, unchanged. This addendum evaluates NOTHING that binds and authorizes NOTHING.",
+  "closed_loop_still_required": true,
+  "date": "2026-08-27",
+  "stage": "V26C_J15_FRESH_35D_POST_MISMATCH_REFIT",
+  "operational_name": "J15R1",
+  "written_outside_the_immutable_leaf": true,
+  "the_leaf_was_not_touched": true,
+  "problem": "gate_matrix() declares nominal_mean_shift among the non-binding diagnostics, but audit() never computes it, so the committed receipt lists 12 diagnostics where 13 are declared. The metric was DECLARED but never MEASURED. It binds nothing, so the 17/17 PASS is untouched; this addendum supplies the missing measurement additively, read-only, without altering the leaf.",
+  "method": {
+    "formula": "max(abs(candidate_mean - parent_mean)) over the nominal rows, computed in float64 from float32 forwards - the exact J11 formula",
+    "j11_source": "v26c_j11_multistart_fit.py, audit(), diagnostics.nominal_mean_shift",
+    "rows": "[0, 16000)  - the J7 nominal block, half-open, 16000 rows",
+    "inputs": "the IMMUTABLE J2 parent state, the COMMITTED J15R1 candidate state, and the COMMITTED J15R1 aggregate. Nothing was recomputed, re-fit or re-derived.",
+    "means": "columns [0, 2) of the head output; the log-std rows are not part of this metric",
+    "kernels": "numpy float32 and torch, cross-checked"
+  },
+  "inputs_content_addressed": {
+    "parent_module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "candidate_module_state.pkl": "4d084a2a7f0012bd711f39a987dbb7af30b04e265484128c45b0a92b612ab928",
+    "aggregate_dataset.npz": "f4d0c09c78e812a78910626789043e42a6ee851e99b56e59595f4887d7faebe8",
+    "j15r1_receipt.json": "b7b3e9c7db116af4e19d2807359914a03d7d989824c97393dc997994213de349",
+    "j15r1_commit_verification.json": "551a9cfd8d727ba181bb8ffcb7611d002b49dc77e4a0c78599c436e2378f8821",
+    "j11_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f"
+  },
+  "result": {
+    "nominal_mean_shift": 0.11720377206802368,
+    "maximizing_row": 274,
+    "maximizing_action_column": 0,
+    "maximizing_index": [
+      274,
+      0
+    ],
+    "parent_mean_at_argmax_torch": -0.29448288679122925,
+    "candidate_mean_at_argmax_torch": -0.17727911472320557,
+    "parent_mean_at_argmax_numpy": -0.29448291659355164,
+    "candidate_mean_at_argmax_numpy": -0.17727914452552795,
+    "before_after_note": "'before' is the PARENT forward on raw observations, 'after' the COMMITTED candidate forward on the same raw observations - exactly what J11's before/after arrays are"
+  },
+  "kernel_cross_check": {
+    "numpy_float32": 0.11720377206802368,
+    "torch": 0.11720377206802368,
+    "torch_version": "2.10.0",
+    "absolute_difference_between_kernels": 0.0,
+    "argmax_numpy": [
+      274,
+      0
+    ],
+    "argmax_torch": [
+      274,
+      0
+    ],
+    "argmax_agrees": true,
+    "note": "the metric agrees to the last bit although the individual forward outputs do not: the parent mean at the argmax is -0.29448288679122925 in torch and -0.29448291659355164 in numpy. The float32 rounding is common to both terms and cancels in the subtraction, so the DIFFERENCE is identical while the operands are not. This is reported rather than smoothed over."
+  },
+  "independent_architect_result": {
+    "value": 0.11720377206802368,
+    "index": [
+      274,
+      0
+    ],
+    "parent_about": -0.2944828868,
+    "candidate_about": -0.1772791147,
+    "reproduced_exactly": true,
+    "agreement": "bit-for-bit on the metric and on the maximizing index"
+  },
+  "factual_comparison": {
+    "j15r1_nominal_mean_shift": 0.11720377206802368,
+    "j11_nominal_mean_shift": 0.026410309597849846,
+    "ratio_j15r1_over_j11": 4.437803791499879,
+    "j11_binding": false,
+    "j15r1_nominal_rmse": {
+      "before": 6.85139021447424e-08,
+      "after": 0.015535843869846907
+    },
+    "j11_nominal_rmse": {
+      "before": 6.85139021447424e-08,
+      "after": 0.005378645117674468
+    },
+    "july_context": "the July offline protocol historically used a 0.005 threshold on this quantity. It was NOT a gate in J11 and is NOT a gate here. It is recorded as context only.",
+    "no_threshold_invented": true,
+    "no_verdict_derived": true,
+    "why_the_nominal_block_moves": "it is the self-anchor of the fit; J11 already recorded that it is expected to move and that NO direction is preregistered for it. Nothing in this addendum changes that."
+  },
+  "what_this_addendum_does_not_do": [
+    "it does not change the verdict, which remains PASS with 17 of 17 binding gates",
+    "it does not evaluate, add, remove or reweight any binding gate",
+    "it does not authorize a closed-loop phase, a critic, PPO or any next stage",
+    "it does not modify the committed leaf, its receipt, its report, any frozen source, any production config or any prior evidence",
+    "it does not invent or promote a threshold",
+    "it does not re-run the fit or any rollout, environment, critic or PPO"
+  ],
+  "still_required": "the A-F closed-loop regression gate. Whether the J13 failure - the swing that will not close - has been affected remains UNKNOWN and is not decided here."
+}

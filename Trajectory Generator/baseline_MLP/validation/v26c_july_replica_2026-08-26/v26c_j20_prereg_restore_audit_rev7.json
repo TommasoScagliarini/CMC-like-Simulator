@@ -1,0 +1,168 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION AMENDMENT",
+  "stage": "V26C_J20_RESTORE_AUDIT_R3",
+  "revision": "rev7",
+  "cites": {
+    "base": "v26c_j20_prereg_restore_audit.json",
+    "base_sha256": "1326944edcbe368319409705e6ff2aeafb62f3def4503f467736ba6780c7d9e6",
+    "rev1": "v26c_j20_prereg_restore_audit_rev1.json",
+    "rev1_sha256": "3fa1ae238cfe0c20865850951ee787cf528b1c17cc0ba6fe97a714d9e37c3ef1",
+    "rev2": "v26c_j20_prereg_restore_audit_rev2.json",
+    "rev2_sha256": "59e2e5e04d167eaafd8283800d277ca8415fac8d57a880818a082dbdbb838cf7",
+    "rev3": "v26c_j20_prereg_restore_audit_rev3.json",
+    "rev3_sha256": "bfb6ef9b4b9a176138adae837e622442e4727f1088c81ea124f3a91b6a7ed41e",
+    "rev4": "v26c_j20_prereg_restore_audit_rev4.json",
+    "rev4_sha256": "71a6118f5555472dfc46be424d60010848ac1a80ba4f4f9c1cb970965db1ec77",
+    "rev5": "v26c_j20_prereg_restore_audit_rev5.json",
+    "rev5_sha256": "3d732153fd51bb7956f91d194fc0f4b1e74c7b35cd451d7a24a0cc70255f675d",
+    "rev6": "v26c_j20_prereg_restore_audit_rev6.json",
+    "rev6_sha256": "6575f64ccadf30e53dfc5a1d7af2966541efe6911ad37550adf1e6a2346c6615"
+  },
+  "predecessor_status": "BASE AND REV1 THROUGH REV6 ARE SEALED AND UNMODIFIED. This amendment rewrites none of them; all seven are pinned by the GO and re-hashed at preflight.",
+  "precedence": "rev7 > rev6 > rev5 > rev4 > rev3 > rev2 > rev1 > base",
+  "contains_no_self_hash": true,
+  "self_hash_note": "this file deliberately carries no hash of itself. The R3 runner embeds its sha256 as PIN_PREREG_REV7 and re-hashes it at preflight, so the seal is external.",
+  "additive": "One correction, closing a defect in rev6's own implementation of R9. No gate is added, removed or renamed: the count stays 13. Every predicate rev6 states is retained; one clause is added to R9 and one ordering is fixed inside the wrapper.",
+
+  "correction_1_the_defect": {
+    "found_by": "the architect, in review of the rev6 preparation package, before any execution.",
+    "status_of_r3_at_the_time": "PREPARED, NEVER EXECUTED. No R3 leaf existed, no child had run, and the only GO was the doubly inert DRAFT. The correction is therefore a correction of preparation, not of a result.",
+
+    "DIRECT_EVIDENCE": {
+      "definition": "facts read out of the rev6 package and reproduced by measurement. No interpretation.",
+      "items": [
+        "in v26c_j20_restore_audit_r3_child.py as rev6 left it, compare() computed 'exact' at its return statement and learning_rate_observation() was called afterwards, in wrapped(), and merely assigned into the verdict",
+        "no clause of compare() referenced the observation, so a False 'matches' could not influence 'exact'",
+        "the R9 predicate of the rev6 runner referenced learning_rate_observation in exactly one place: measurements['live_learning_rate_observation'], which is a recorded value and not a gate",
+        "train_ppo_mlp.py:1744 calls _reapply_optimizer_learning_rate BEFORE the capture, and _set_optimizer_learning_rate_on_learner writes float(learning_rate) into every param_group, so param_groups lr on the live side is the stage's CONFIGURED value whatever the restore loaded",
+        "measured on the real checkpoint: with the live param_groups lr overwritten to 1e-4 and the production report recording before=5e-4, the canonical walk returned ZERO differences and evaluate_gates returned 13 of 13 with R9 true"
+      ]
+    },
+
+    "CAUSAL_INFERENCE": {
+      "definition": "the mechanism that connects those facts. An inference, not a measurement.",
+      "claim": "under rev6 the changed-lr corruption class was not covered at all. The production reapply erases the restored learning rate from the only structure the canonical walk inspects, and the one field that still witnesses it was recorded without being required.",
+      "why_it_is_a_contract_defect_and_not_only_a_code_defect": "rev6 lists 'changed beta/eps/lr beyond the effective float32 representation' among the classes that must still be detected, and its own text says R3 'canonicalises it against the checkpoint's lr, so the restored learning rate is measured rather than merely declared to be unmeasurable'. Measuring and recording is not enforcing. The implementation matched the weaker reading; the amendment makes the stronger one binding."
+    },
+
+    "WHAT_IS_NOT_CLAIMED": "nothing here says the restore produces a wrong learning rate. R2's committed production_lr_reports records before=9.999999747378752e-05, which is float32(1e-4) and matches the checkpoint's 1e-4 canonically. The defect is that a wrong value would not have been caught, not that one was observed."
+  },
+
+  "correction_2_the_wrapper_gates_it": {
+    "the_rule": "the learning-rate observation is computed and enforced BEFORE the evidence is written and before the verdict is acted on.",
+    "sequence": [
+      "the ORIGINAL _reapply_optimizer_learning_rate is called first and its return value is handed back untouched - unchanged from rev1",
+      "the live optimizer is captured through the production traversal - unchanged from rev1",
+      "compare() produces the canonical verdict - unchanged from rev6",
+      "enforce_learning_rate_observation() computes the observation, attaches it to the verdict, and if matches is not exactly true appends an explicit problem and sets exact false",
+      "the evidence is written - so a failure still preserves its own explanation",
+      "the existing raise path fires because exact is false; the production run fails"
+    ],
+    "what_is_compared": "the checkpoint's param_groups[0] lr against the 'before' field production itself reports for the optimizer named default_optimizer, both passed through the SAME canonicalisation as everything else: RLlib's convert_to_torch_tensor and then dtype, shape and the sha256 of the C-order bytes.",
+    "no_tolerance": "unchanged. The comparison is exact after canonicalisation. A change smaller than the float32 representation is one RLlib's own conversion destroyed before load_state_dict saw it, exactly as rev6 states for betas and eps.",
+    "fail_closed_cases": [
+      "no production report for default_optimizer: matches false",
+      "the checkpoint carries no lr: matches false",
+      "either value fails to canonicalise: matches false",
+      "the two canonical nodes differ: matches false"
+    ],
+    "the_ordering_is_NOT_changed": "the original still runs first. rev1's requirement is untouched. What changed is only that the audit now refuses to accept the consequence silently."
+  },
+
+  "correction_3_the_runner_requires_it": {
+    "added_to_the_R9_predicate": [
+      "learning_rate_observation is present and is a dict",
+      "its matches is exactly true",
+      "canonical_source_lr is a populated string naming a tensor node, not null and not the string 'None'",
+      "canonical_live_lr_before_reapply equals canonical_source_lr",
+      "live_lr_before_reapply is present, so the observation was made against a real production report rather than against nothing",
+      "canonical_dtype is exactly float32",
+      "gated is exactly true, so an evidence file produced by a wrapper that did not enforce the observation cannot satisfy the predicate"
+    ],
+    "why_the_coherence_clauses": "matches alone is a boolean the payload computes. rev3's principle applies: a predicate must demand the evidence, not the conclusion. The canonical fields make a payload that computed nothing distinguishable from one that computed the comparison.",
+    "everything_else_in_R9_is_unchanged": "every clause rev6 lists is retained verbatim."
+  },
+
+  "correction_4_the_child_hash_is_pinned_here": {
+    "why_the_child_could_be_edited": "v26c_j20_restore_audit_r3_child.py has NEVER executed. No leaf, no receipt and no result names it, and the only GO that referenced it was the doubly inert DRAFT. It is preparation material, not evidence, so correcting it destroys nothing.",
+    "the_new_hash": "db4afc547b4d4194ba828dadb76801ff1877659c1cec8e5d749b2e0ba94decdd",
+    "how_it_is_enforced": "the R3 runner embeds this value as PIN_R3_CHILD and expected_pin_hashes() returns it for the wrapper, so preflight refuses if the wrapper moves. The GO pins it as well. Under rev6 the wrapper was pinned by the GO alone.",
+    "the_frozen_wrapper_is_still_frozen": "v26c_j20_restore_audit_child.py, the file R1 and R2 both used, is NOT modified, NOT copied over and NOT deleted, and still hashes to 38a57b25da27666a99891511666d63cac07534aa7602f20469048012f536caf4."
+  },
+
+  "correction_5_historical_artefacts_are_preserved": {
+    "rev6": {
+      "file": "v26c_j20_prereg_restore_audit_rev6.json",
+      "sha256": "6575f64ccadf30e53dfc5a1d7af2966541efe6911ad37550adf1e6a2346c6615",
+      "status": "SEALED AND UNMODIFIED. rev7 amends it additively and does not rewrite it. Where they disagree, rev7 governs."
+    },
+    "the_original_draft_go": {
+      "file": "v26c_j20_restore_audit_r3_go_DRAFT.json",
+      "sha256": "dce5a521fb21a5e192d341aff0fbc977da87cf71b8a3b0e81bc522399fe2d908",
+      "status": "PRESERVED AS A HISTORICAL PREPARATION ARTEFACT. It is doubly inert, it was never approved, and it is now SUPERSEDED: its pins for the wrapper, the runner and the suite are stale by construction, so validate_go would refuse it on staleness as well as on status.",
+      "rule": "it is never edited and never deleted. The R3 suite re-hashes it to the value above."
+    },
+    "the_revised_draft_go": {
+      "file": "v26c_j20_restore_audit_r3_go_DRAFT_rev7.json",
+      "status": "the current DRAFT. Doubly inert: status is exactly 'DRAFT' and authorises_execution is false. Only the architect may issue an operational GO, as a SEPARATE file, and only after an explicit user authorisation as well."
+    }
+  },
+
+  "correction_6_the_audit_of_similar_fields": {
+    "what_was_asked": "whether any other value is recorded by the wrapper but not required by the predicate.",
+    "method": "every key the wrapper writes into live_optimizer_audit.json was listed and matched against the R9 predicate of the runner.",
+    "the_only_defect_of_this_class": "learning_rate_observation, corrected here.",
+    "recorded_but_not_required_BY_DESIGN": {
+      "raw block, except reproduces_r2_eight and difference_count": "rev6 defines the raw side as PROVENANCE. Its purpose is to reproduce R2's picture so the pass is readable, not to decide.",
+      "accepted_equivalences detail records, raw_leaf_values, raw_moment_digests": "provenance, required to be RECORDED by rev6 and gated through the derived closed-path check and the moments_unchanged flags.",
+      "conversion.downcast_clause_present and conversion.none_passthrough_clause_present": "rev6's fail_closed_on_drift list names exactly three drift guards - the call-site literal, the device parameter and the fixed point - and all three ARE gated. These two flags are informational corroboration and rev6 never promised to enforce them. FLAGGED FOR THE ARCHITECT, NOT CHANGED HERE.",
+      "optimizer_types, expected_optimizer_name, expected_state_indices, expected_param_count, source_state_pkl, device, method, reapplied_learning_rate, production_lr_reports": "context and expectations echoed for the reader. The corresponding claims are gated through optimizer_names, state_indices, param_group_sizes_live and source_state_sha256."
+    },
+    "one_hardening_opportunity_flagged_not_taken": "R9 requires raw.reproduces_r2_eight, a boolean the payload computes, together with raw.difference_count == 8 and the closed accepted-path list. A stricter form would compare raw.differences directly against R2's eight committed strings in the runner. This is the rev3 non-vacuity principle applied one step further. It is NOT adopted here because it is a new requirement rather than a defect: the two adjacent clauses already make a payload that computed nothing detectable. RECORDED FOR THE ARCHITECT."
+  },
+
+  "tests_this_amendment_requires": {
+    "T_lr_real_match_passes": "with the 'before' value R2 actually committed, 9.999999747378752e-05, against the checkpoint's 1e-4, matches must be true and the verdict must stay exact.",
+    "T_lr_mismatch_makes_the_child_non_exact": "a pre-reapply lr that differs beyond float32 must set matches false, append a problem naming the learning rate, and set exact false - asserted on the wrapper's own enforcement function, with no learner and no Algorithm.",
+    "T_lr_overwrite_cannot_hide_it": "with the live param_groups lr rewritten to the configured value, so that the canonical walk returns ZERO differences, a wrong pre-reapply lr must STILL make the verdict non-exact. This is the exact masking scenario, reproduced.",
+    "T_lr_missing_report_fails_closed": "no production report for default_optimizer must yield matches false and a problem.",
+    "T_lr_evidence_mutation_flips_R9": "matches false, a missing observation, a null canonical field, disagreeing canonical fields, a missing live_lr_before_reapply, a wrong canonical dtype and gated false must each flip R9.",
+    "T_rev6_and_the_original_draft_are_preserved": "both must still hash to the values recorded above.",
+    "T_the_frozen_wrapper_is_preserved": "unchanged from rev6."
+  },
+
+  "explicitly_unchanged": [
+    "the thirteen gates R1-R13 by name and by count",
+    "R1-R8 and R10-R13 predicates, verbatim",
+    "every clause of rev6's R9 predicate, all retained",
+    "rev6's canonicalisation, canonical node definition, closed list of eight accepted equivalences and downstream-gate discipline",
+    "the zero-iteration semantics: range(2, 2) is empty",
+    "the 600 s startup timeout",
+    "rev4's environment correction",
+    "the four command operations and the three token counts, 20 / 18 / 25",
+    "train_ppo_mlp.py and every production module, configuration, checkpoint, actor, critic, sigma, optimizer source, environment, reward, C++ plugin and SEA semantics: not modified",
+    "the R1 and R2 runners, suites, GOs and leaves, and the frozen wrapper: byte-identical and pinned",
+    "the fail-closed protocol: no-clobber destination, born-invalid marker, post-commit verification, single execution, no retry",
+    "the verdicts, and the fact that success authorises no PPO, no ex-novo run, no promotion, no training readiness and no next stage"
+  ],
+
+  "note_on_training_readiness": {
+    "the_fact": "a passing R3 sets promotion NONE, training_ready false and next_stage_authorized false. That is deliberate and is stated identically in the base document, rev1, rev4 and rev6.",
+    "the_consequence": "closing G9 does not make the pipeline training-ready. Reaching a state where training_ready is true, while still stopping short of training, would require a SEPARATE evidence-aggregation attestation over the closed gates.",
+    "why_it_cannot_be_precommitted_here": "such an attestation must pin the R3 result, receipt and evidence, and none of those exist: R3 has not run. Pinning nonexistent hashes would be fabrication.",
+    "status": "RECORDED FOR THE ARCHITECT. NOT designed, NOT preregistered and NOT implemented by this amendment."
+  },
+
+  "prohibitions": [
+    "no execution of R3 without BOTH explicit user authorisation and an APPROVED architect GO for stage V26C_J20_RESTORE_AUDIT_R3",
+    "no automatic retry, ever, whatever the outcome",
+    "no write of any kind into the R1 leaf or the R2 leaf",
+    "no rewriting of the base document or of rev1 through rev6",
+    "no editing or deletion of the original DRAFT GO, which is a historical preparation artefact",
+    "no modification of the frozen wrapper v26c_j20_restore_audit_child.py, of the R1 or R2 runners, or of their suites",
+    "no modification of any production file or configuration",
+    "no ray.init, no Algorithm construction, no environment construction, no sampling, no rollout and no training during preparation",
+    "no PPO, no ex-novo run, no promotion, no training readiness",
+    "no tolerance, no epsilon and no approximate comparison anywhere in the canonicaliser or in the learning-rate gate"
+  ]
+}

@@ -1,0 +1,246 @@
+{
+  "schema": "v26c_penetration_reconciliation.1",
+  "kind": "INFORMATIONAL RECONCILIATION - NOT A VERDICT, NOT A PROMOTION",
+  "generated_by": "v26c_penetration_contract.py --reconcile",
+  "contract": {
+    "file": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_penetration_contract_2026-08-26.json",
+    "sha256": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "thresholds_m": {
+      "soft_diagnostic": 0.02,
+      "july_legacy": 0.025,
+      "hard_binding": 0.028
+    }
+  },
+  "pins_verified_count": 11,
+  "runs": {
+    "J1": {
+      "stage": "V26C-J1-TEACHER-COLLECTION",
+      "receipt": "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json",
+      "receipt_sha256": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+      "trace": "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json",
+      "trace_sha256": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+      "historical": {
+        "verdict": "FAIL",
+        "failed": [
+          "max_penetration_m"
+        ],
+        "max_penetration_m": 0.02294380435912411,
+        "deployable": "ABSENT - this receipt schema declares no such field",
+        "promotion": "ABSENT - this receipt schema declares no such field",
+        "next_stage_authorized": "ABSENT - this receipt schema declares no such field",
+        "status": "UNCHANGED - this record never rewrites it"
+      },
+      "penetration_under_new_contract": {
+        "max_penetration_m": 0.02294380435912411,
+        "band": "above_soft_below_july_legacy",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": false,
+          "july_legacy_historical_pass": true,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 97,
+          "at_or_above_july_legacy": 0,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.194,
+          "at_or_above_july_legacy": 0.0,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009232879682211403,
+        "argmax_index_1based": 376,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        }
+      },
+      "behavioural_under_new_contract": {
+        "demonstrable": true,
+        "behavioural_pass_under_new_contract": true,
+        "other_failed_checks": [],
+        "why": "every non-penetration criterion PASSED in the original receipt, so under the new contract the behavioural outcome follows from the penetration band alone"
+      },
+      "unchanged_by_this_record": {
+        "deployable": "ABSENT - this receipt schema declares no such field",
+        "promotion": "ABSENT - this receipt schema declares no such field",
+        "next_stage_authorized": "ABSENT - this receipt schema declares no such field",
+        "note": "reported exactly as the original receipt carries them; an absent field is reported as absent, never invented"
+      }
+    },
+    "J3": {
+      "stage": "V26C-J3-CLOSED-LOOP",
+      "receipt": "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json",
+      "receipt_sha256": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+      "trace": "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json",
+      "trace_sha256": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+      "historical": {
+        "verdict": "FAIL",
+        "failed": [
+          "max_penetration_m"
+        ],
+        "max_penetration_m": 0.02704966381076714,
+        "deployable": false,
+        "promotion": "NONE",
+        "next_stage_authorized": false,
+        "status": "UNCHANGED - this record never rewrites it"
+      },
+      "penetration_under_new_contract": {
+        "max_penetration_m": 0.02704966381076714,
+        "band": "july_legacy_breach_within_hard",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": true,
+          "july_legacy_historical_pass": false,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 106,
+          "at_or_above_july_legacy": 8,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.212,
+          "at_or_above_july_legacy": 0.016,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009717020513204768,
+        "argmax_index_1based": 199,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        }
+      },
+      "behavioural_under_new_contract": {
+        "demonstrable": true,
+        "behavioural_pass_under_new_contract": true,
+        "other_failed_checks": [],
+        "why": "every non-penetration criterion PASSED in the original receipt, so under the new contract the behavioural outcome follows from the penetration band alone"
+      },
+      "unchanged_by_this_record": {
+        "deployable": false,
+        "promotion": "NONE",
+        "next_stage_authorized": false,
+        "note": "reported exactly as the original receipt carries them; an absent field is reported as absent, never invented"
+      }
+    },
+    "J5-r2": {
+      "stage": "V26C-J5-REVALIDATION",
+      "receipt": "j5_runs/j5_revalidation_v26c_2026-08-26_r2/v26c_j5_revalidation_receipt.json",
+      "receipt_sha256": "0ca84932cba49bf9d61381e78fae037b25c83c54371d4a7c87403bd885c02c9e",
+      "trace": "j5_runs/j5_revalidation_v26c_2026-08-26_r2/j5_trace.json",
+      "trace_sha256": "fd51f8be802d3d4ace2bfd9a4b6ca5193382e696baa70e534472841955805b93",
+      "historical": {
+        "verdict": "FAIL",
+        "failed": [
+          "max_penetration_m"
+        ],
+        "max_penetration_m": 0.026913284071471633,
+        "deployable": false,
+        "promotion": "NONE",
+        "next_stage_authorized": false,
+        "status": "UNCHANGED - this record never rewrites it"
+      },
+      "penetration_under_new_contract": {
+        "max_penetration_m": 0.026913284071471633,
+        "band": "july_legacy_breach_within_hard",
+        "flags": {
+          "above_soft_diagnostic": true,
+          "july_legacy_breach": true,
+          "july_legacy_historical_pass": false,
+          "above_hard_binding": false
+        },
+        "binding_pass": true,
+        "binding_verdict": "PASS",
+        "thresholds_m": {
+          "soft_diagnostic": 0.02,
+          "july_legacy": 0.025,
+          "hard_binding": 0.028
+        },
+        "semantics": {
+          "above_soft_iff": "> 0.020",
+          "july_legacy_breach_iff": ">= 0.025",
+          "july_legacy_historical_pass_iff": "< 0.025",
+          "binding_pass_iff": "<= 0.028",
+          "binding_fail_iff": "> 0.028"
+        },
+        "samples": 500,
+        "counts": {
+          "above_soft_diagnostic": 106,
+          "at_or_above_july_legacy": 7,
+          "above_hard_binding": 0
+        },
+        "fractions": {
+          "above_soft_diagnostic": 0.212,
+          "at_or_above_july_legacy": 0.014,
+          "above_hard_binding": 0.0
+        },
+        "mean_penetration_m": 0.009709509637059256,
+        "argmax_index_1based": 199,
+        "counting_conventions": {
+          "above_soft_diagnostic": "strictly > 0.020",
+          "at_or_above_july_legacy": ">= 0.025",
+          "above_hard_binding": "strictly > 0.028"
+        }
+      },
+      "behavioural_under_new_contract": {
+        "demonstrable": true,
+        "behavioural_pass_under_new_contract": true,
+        "other_failed_checks": [],
+        "why": "every non-penetration criterion PASSED in the original receipt, so under the new contract the behavioural outcome follows from the penetration band alone"
+      },
+      "unchanged_by_this_record": {
+        "deployable": false,
+        "promotion": "NONE",
+        "next_stage_authorized": false,
+        "note": "reported exactly as the original receipt carries them; an absent field is reported as absent, never invented"
+      }
+    }
+  },
+  "statements": {
+    "historical_verdicts": "UNCHANGED. Every original verdict stands exactly as recorded.",
+    "deployability": "UNCHANGED. Recorded as False in: J3, J5-r2. ABSENT - never declared by the receipt schema - in: J1. Absent is NOT the same as an explicit false.",
+    "promotion": "UNCHANGED. Recorded as 'NONE' in: J3, J5-r2. ABSENT - never declared by the receipt schema - in: J1. Absent is NOT the same as an explicit false.",
+    "next_stage": "UNCHANGED. Recorded as False in: J3, J5-r2. ABSENT - never declared by the receipt schema - in: J1. Absent is NOT the same as an explicit false.",
+    "authorises": "NOTHING. This record authorises no rollout, fit, training or stage.",
+    "absent_is_not_false": "a field the original receipt never carried is reported as ABSENT. Absent means NOT CONFERRED BY THAT SCHEMA; it is not the same claim as an explicit false."
+  },
+  "contract_effective_date_utc": "2026-08-26",
+  "determinism": {
+    "wall_clock_free": true,
+    "note": "this record carries no generation timestamp. It is a pure function of the pinned contract and the pinned artefacts, so it can be regenerated and compared byte-for-byte."
+  }
+}

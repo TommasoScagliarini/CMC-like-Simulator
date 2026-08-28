@@ -1,0 +1,59 @@
+{
+  "addendum_id": "rev4b_a_corrections",
+  "date": "2026-08-24",
+  "kind": "ADDITIVE, IMMUTABLE, AUTHORITATIVE on the two corrections below. The rev4b amendment, the fit receipt, the rollout receipt and the rev4b report are NOT mutated",
+  "produced_under": "V26B-S1C-3-style read-only audit ordered by the architect after the rev4b review",
+  "parents_preserved": {
+    "amendment_rev4b": "883ffc9a0217fa6fefcabf820b382717b8ad2e8f7ccd5814461b0bb4218f0f93",
+    "fit_receipt": "7f7f10419c84b1a1d03d91082b579551c662ed4d8b579e1a26c79798328f2565",
+    "rollout_receipt": "2032c5a9d5ee448cb45cebf65d13b40efeae062a58c8260fb7f4db413978c1b8",
+    "report": "fd55f6454052b5dbc770692dd05df366881702cfb805a4944d49a42b8ec2a4ab",
+    "status": "all PRESERVED byte-identical; this addendum is the authority on the corrected statements"
+  },
+
+  "CORRECTION_1_JULY_FAITHFUL_CLAIM": {
+    "claim_as_written": "the rev4b amendment, tool docstring and report describe the stage as 'July-faithful'",
+    "verdict": "NOT DEMONSTRABLE AS AN UNQUALIFIED CLAIM. The correct statement is: FAITHFUL TO THE JULY 11/07 DAgger OPERATOR, DIVERGENT IN BALANCE",
+    "what_is_demonstrably_faithful": [
+      "hyperparameters verified from source: epochs 400, batch 64, lr 3e-4, validation_fraction 0.20, patience 60, clip_weight 1.0, logstd_weight 0.1, anchor_weight 1e-5, seed 123, trace_repeat 4, no gradient clipping",
+      "loss composition verbatim (target_domain_imitation.py:1136-1152)",
+      "aggregation operator verbatim: concat(teacher, tile(visited, repeat)), NO truncation and NO dedup (aggregate_dagger_traces)",
+      "time-aligned labels with teacher_index = step - 1 and fail-closed step contiguity",
+      "logstd restored and clock columns zeroed after every optimizer step"
+    ],
+    "what_is_NOT_faithful": [
+      "BALANCE: the on-policy share is 75.82% (1568 of 2068) against July r1's 35.23% (272 of 772), because the S1A prefix is 392 rows against July's 68",
+      "the frozen contiguous holdout 201-300 is absorbed into the fit (declared in rev4b)",
+      "the July physical scaling is used in the fit parametrisation (declared in rev4b)"
+    ],
+    "authoritative_wording": "wherever rev4b or its report says 'July-faithful', read 'faithful to the July 11/07 DAgger operator, with a declared balance divergence of 75.8% vs 35.2% on-policy share'"
+  },
+
+  "CORRECTION_2_MISLABELLED_KEYS_IN_THE_ROLLOUT_RECEIPT": {
+    "defect": "the rev4b rollout receipt's diagnostics.closed_loop_comparison block was produced by calling the L20 module's comparison function (v26b_l20_rollout.closed_loop_comparison), so it carries L20-named keys while holding rev4b VALUES",
+    "not_a_data_error": "the numeric values are rev4b's own and are correct: kinematics_L20.ankle_q equals analysis.trajectory_quality.ankle_q exactly (min +0.023969903588294983). Only the KEY NAMES and one context block are mislabelled",
+    "authoritative_relabelling": {
+      "diagnostics.closed_loop_comparison.kinematics_L20": "READ AS kinematics_REV4B",
+      "diagnostics.closed_loop_comparison.actions_on_visited_states.L20_vs_S0D_same_states": "READ AS REV4B_vs_S0D_same_states",
+      "diagnostics.closed_loop_comparison.actions_on_visited_states.L20_vs_uIK_same_times": "READ AS REV4B_vs_uIK_same_times",
+      "diagnostics.closed_loop_comparison.actions_on_visited_states.S0D_vs_uIK_on_L20_states": "READ AS S0D_vs_uIK_on_REV4B_states",
+      "diagnostics.closed_loop_comparison.scope": "the phrase 'states L20 actually visited' READS AS 'states REV4B actually visited'"
+    },
+    "context_block_belonging_to_another_actor": {
+      "field": "diagnostics.closed_loop_comparison.offline_reference_block",
+      "content": "source 'L20 fit receipt', action_drift_vs_S0D [0.0649, 0.0815], A2_action_drift_vs_S0D [0.0657, 0.0455], S1A_action_drift_vs_S0D [0.384, 0.289]",
+      "authoritative_reading": "these are L20's, A2's and S1A's offline constants, NOT rev4b's. They are contextual reference values inherited from the L20 module and must not be read as rev4b measurements",
+      "rev4b_own_offline_values_for_the_record": {"max_abs_vs_S0D": [1.4592275372819845, 1.1813680633350876], "mean_abs_vs_S0D": [0.37114278535454026, 0.30270977894014156], "source": "rev4b fit receipt, offline_gates.preregistered_measures.max_abs_vs_S0D_INFORMATIONAL"}
+    },
+    "root_cause": "reuse of a per-actor diagnostic function whose key names hard-code the actor it was written for; the function should take the actor label as a parameter",
+    "forward_rule": "any future stage must parameterise the comparison labels by actor, or rename the keys at write time, so a receipt never carries another actor's identifiers"
+  },
+
+  "CORRECTION_3_THE_13_AND_14_FIGURES": {
+    "architect_observation": "first_discrete_fsm_mismatch = 14 and label_valid_prefix_rows = 13 appear in the rev4b rollout receipt while the fit aggregated all 392 S1A rows",
+    "verified_fact": "those two figures describe the REV4B ACTOR'S OWN 42-step rollout compared against the pinned V26 anchor trace. They are not a property of the S1A prefix and were never inputs to the rev4b dataset",
+    "s1a_equivalent_figures": {"compared_steps": 392, "first_mismatch_step": 72, "label_valid_prefix_rows": 71, "reference": "the same pinned V26 anchor PROXY"},
+    "why_the_fit_used_392": "the July 11/07 DAgger path applies NO truncation: aggregate_dagger_traces concatenates teacher + tile(visited) with no filtering, and target_domain_dagger.py never calls truncate_before_discrete_mismatch. July r1 itself aggregated its FULL 68-step prefix. Using all 392 rows is therefore operator-faithful",
+    "status": "no defect in the rev4b dataset construction on this point"
+  }
+}

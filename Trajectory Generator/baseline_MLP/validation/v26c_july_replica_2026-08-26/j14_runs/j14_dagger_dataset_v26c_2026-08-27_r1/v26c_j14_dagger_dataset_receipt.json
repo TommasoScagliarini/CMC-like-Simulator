@@ -1,0 +1,483 @@
+{
+  "schema": "v26c_j14_dagger_dataset_receipt.1",
+  "stage": "V26C_J14_POST_MISMATCH_DAGGER_DATASET",
+  "verdict": "MATERIALIZED",
+  "authoritative": true,
+  "preregistration": {
+    "file": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j14_prereg_dagger_dataset_rev1.json",
+    "sha256": "877cccc1bb93868a5f1050a7cf2cfc1f5776d18437e099996f059373a6cb36d5",
+    "pinned_sources_sha256": {
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/commit_verification.json": "59cd1563ad23713ef00ac5b2e95a334a088257af95c6727520fb895c61a8c61c",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+      "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/commit_verification.json": "1d24eed05dd04c187c014181c89a0611a648e5601cacff5e1ae0221adcfb8643",
+      "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_aggregate_dataset.npz": "a936c580c4db19383255d3d5f7346560e0fd99dc4b139ac202858e82cca13f42",
+      "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/commit_verification.json": "a5ef34e758c50437d28dfbf4413e5a18a2e3ad7ba9d6ec4fb164431b17fcb175",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_A_trace.json": "5e1b91999c2fc764a233b215e204ded00608894cc36a6dac8e6129b09d306e30",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_E_trace.json": "69f031c1ca69e0a4060d52e2d6c9d107987c91c4e63bb4a021e42b81398b3995",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_F_trace.json": "86f16eba23c82cc94404199bea5c482a590f3e4bc96238e4d405906a6afdeb3e",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/v26c_j12_closed_loop_receipt.json": "2b3e20362bb54ea545db3495d2a468d33138555cccf8bd20d3e5ecc3d75caf11",
+      "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+      "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+      "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+      "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+      "v26c_j12_closed_loop.py": "65d7b8619074c909753750f03aec751d38179c2226e50c87da62113ea5769fca",
+      "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+      "v26c_j7_markov_dataset.py": "b3cc2b88997ccb7c23964123d70ac3fb524adf4fdf3e8882d26ce20ff87d1461"
+    },
+    "entries": 21
+  },
+  "sources": {
+    "pinned_sources_sha256": {
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/v26c_j12_closed_loop_receipt.json": "2b3e20362bb54ea545db3495d2a468d33138555cccf8bd20d3e5ecc3d75caf11",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/commit_verification.json": "a5ef34e758c50437d28dfbf4413e5a18a2e3ad7ba9d6ec4fb164431b17fcb175",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_A_trace.json": "5e1b91999c2fc764a233b215e204ded00608894cc36a6dac8e6129b09d306e30",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_E_trace.json": "69f031c1ca69e0a4060d52e2d6c9d107987c91c4e63bb4a021e42b81398b3995",
+      "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_F_trace.json": "86f16eba23c82cc94404199bea5c482a590f3e4bc96238e4d405906a6afdeb3e",
+      "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+      "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+      "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+      "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_dataset_receipt.json": "39cbed8072f0126b84ba40a12d1268991a128e5af3794d6fb74b246c2d509ca2",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_B_teacher_dataset.npz": "2f37fc7cb101550d2fc0f8709cfdfc44ae5e9ae53003bb7903fcb590406acc62",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/j10r1_cell_C_teacher_dataset.npz": "bd78e6ac13ab96d128f57ea5b36d058f5d80c18cfb056bcc76d2179bf1d756f0",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/v26c_j10r1_multistart_teacher_receipt.json": "9c1c26f6e1aaaa96f2c92cb45f6494e889b3124dd6ca99427a11026a8d099f20",
+      "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1/commit_verification.json": "59cd1563ad23713ef00ac5b2e95a334a088257af95c6727520fb895c61a8c61c",
+      "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_aggregate_dataset.npz": "a936c580c4db19383255d3d5f7346560e0fd99dc4b139ac202858e82cca13f42",
+      "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+      "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/commit_verification.json": "1d24eed05dd04c187c014181c89a0611a648e5601cacff5e1ae0221adcfb8643",
+      "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+      "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+      "v26c_j7_markov_dataset.py": "b3cc2b88997ccb7c23964123d70ac3fb524adf4fdf3e8882d26ce20ff87d1461",
+      "v26c_j12_closed_loop.py": "65d7b8619074c909753750f03aec751d38179c2226e50c87da62113ea5769fca"
+    },
+    "source_leaves": {
+      "j12": {
+        "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j12_runs/j12_closed_loop_v26c_2026-08-27_r1",
+        "commit_verification_pass": true,
+        "technical_invalid_marker": false,
+        "no_stale_lock_or_staging": true,
+        "verdict": "FAIL"
+      },
+      "j10r1": {
+        "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1",
+        "commit_verification_pass": true,
+        "technical_invalid_marker": false,
+        "no_stale_lock_or_staging": true,
+        "verdict": "PASS"
+      },
+      "j11": {
+        "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j11_runs/j11_multistart_fit_v26c_2026-08-27_r1",
+        "commit_verification_pass": true,
+        "technical_invalid_marker": false,
+        "no_stale_lock_or_staging": true,
+        "verdict": "PASS"
+      }
+    },
+    "sealed_seeds_never_read": [
+      126,
+      127,
+      128
+    ]
+  },
+  "increment": {
+    "rows": 854,
+    "per_cell": [
+      {
+        "cell": "E",
+        "seed": 124,
+        "mode": "stochastic_held",
+        "episode_start_offset_s": 1.956870983805102,
+        "j12_verdict": "FAIL",
+        "rows": 500,
+        "repeat": 1,
+        "trace_sha256": "69f031c1ca69e0a4060d52e2d6c9d107987c91c4e63bb4a021e42b81398b3995",
+        "label_source": "j1_runs/.../teacher_dataset.npz actions[step - 1], SAME STEP",
+        "time_grid_bit_identical_to_j1": true,
+        "mismatch": {
+          "first_discrete_mismatch_step": 95,
+          "mismatching_columns": [
+            "online_left_in_contact"
+          ],
+          "compared_steps": 500,
+          "discrete_columns": [
+            11,
+            12,
+            13,
+            17,
+            18,
+            19,
+            20,
+            21
+          ],
+          "discrete_feature_names": [
+            "online_left_in_contact",
+            "online_left_heel_strike",
+            "online_left_toe_off",
+            "phase_fsm_wait_hs",
+            "phase_fsm_stance_after_hs",
+            "phase_fsm_swing_after_to",
+            "phase_expected_hs",
+            "phase_expected_to"
+          ],
+          "reference_cell": "A",
+          "truncation_applied": false,
+          "why_not": "the flag is a DIAGNOSTIC. Truncating here would recreate the very coverage gap this stage exists to close."
+        },
+        "rows_pre_mismatch": 94,
+        "rows_post_mismatch": 406,
+        "post_mismatch_fraction": 0.812,
+        "content_hashes": {
+          "observations_raw": "9993b08da5b04a20c2032f913550c71874d026612bf12688c23708ccb9736029",
+          "observations_projected": "dc748404d233e4e2415d4e16669f26816cc562f22228099f3731f4e8f403e14d",
+          "actions": "947a265df4d66596565a652782b8c9b955e1730e2417e7fc30279ffc778af756"
+        },
+        "raw_clock": {
+          "col_0_unique": [
+            0.0
+          ],
+          "col_1_unique": [
+            1.0
+          ]
+        },
+        "distinct_rows": 500
+      },
+      {
+        "cell": "F",
+        "seed": 125,
+        "mode": "stochastic_held",
+        "episode_start_offset_s": 1.956870983805102,
+        "j12_verdict": "FAIL",
+        "rows": 354,
+        "repeat": 1,
+        "trace_sha256": "86f16eba23c82cc94404199bea5c482a590f3e4bc96238e4d405906a6afdeb3e",
+        "label_source": "j1_runs/.../teacher_dataset.npz actions[step - 1], SAME STEP",
+        "time_grid_bit_identical_to_j1": true,
+        "mismatch": {
+          "first_discrete_mismatch_step": 90,
+          "mismatching_columns": [
+            "online_left_in_contact"
+          ],
+          "compared_steps": 354,
+          "discrete_columns": [
+            11,
+            12,
+            13,
+            17,
+            18,
+            19,
+            20,
+            21
+          ],
+          "discrete_feature_names": [
+            "online_left_in_contact",
+            "online_left_heel_strike",
+            "online_left_toe_off",
+            "phase_fsm_wait_hs",
+            "phase_fsm_stance_after_hs",
+            "phase_fsm_swing_after_to",
+            "phase_expected_hs",
+            "phase_expected_to"
+          ],
+          "reference_cell": "A",
+          "truncation_applied": false,
+          "why_not": "the flag is a DIAGNOSTIC. Truncating here would recreate the very coverage gap this stage exists to close."
+        },
+        "rows_pre_mismatch": 89,
+        "rows_post_mismatch": 265,
+        "post_mismatch_fraction": 0.748587570621469,
+        "content_hashes": {
+          "observations_raw": "7075ebb6a9ed5baddb1c62cfa22ada8d42b02e1941a6ab09defbb43359a45e22",
+          "observations_projected": "31c36d598f16d51371ae8aba54bc8b375207b30661bdd6b58b5b7d0831959601",
+          "actions": "f4fd611879ddf53d1fad58584e51aea314820a1251bec1226abdacdfcab2b7d9"
+        },
+        "raw_clock": {
+          "col_0_unique": [
+            0.0
+          ],
+          "col_1_unique": [
+            1.0
+          ]
+        },
+        "distinct_rows": 354
+      }
+    ],
+    "reference_cell": {
+      "cell": "A",
+      "rows": 500,
+      "sha256": "5e1b91999c2fc764a233b215e204ded00608894cc36a6dac8e6129b09d306e30",
+      "why": "the deterministic nominal rollout of the SAME actor, index-comparable because it shares the episode start"
+    },
+    "teacher": {
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_dataset.npz",
+      "sha256": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+      "observations_read": false,
+      "mapping": "actions[step - 1], the SAME instant, no lead and no lag"
+    },
+    "content_hashes": {
+      "observations": "5455089d956b5bff473af84ef122433f474cea2c2bc7e4e0ca462d82c8026c1a",
+      "actions": "24fd23ac68ce6d547bf1d5ac39a1a8ed7f4deafb1d5f33833320c55ac022cedb",
+      "cell": "577aa44593f7fce26fa40b14871646b1a6cb6d482b8099fad388728445ebf291",
+      "seed": "30904cfc8ce533c9c2670531bb3b3da1dee7f3ce71abb23839fbf325f841d2f0",
+      "step": "f7ee3a5ee3457cf0de3110b8f587fccb3b385da9bb7b9e6c2b5310538c83fc58",
+      "post_mismatch": "fc73e7a6e146dfec9ac0d4c143c03547cb5f7b0c1d4399cb2aab3a6be793c6ec",
+      "time_before": "690249d741ba3735ab72511a9262ff47de9b1a08d6c5bc400914663efefd4fd2"
+    },
+    "truncation": {
+      "applied": false,
+      "julys_dagger_did_not_truncate": true,
+      "j7_did_truncate": "429/273/11 of 500, which is why the corpus has no post-mismatch coverage",
+      "julys_binding_todo_2026_07_14": "includendo la regione successiva al mismatch FSM invece di sole interpolazioni pre-evento"
+    },
+    "no_dedup": true,
+    "no_balancing": true,
+    "repeat": 1,
+    "what_the_flag_does_NOT_mean": {
+      "post_mismatch_is_not_a_quality_label": true,
+      "counterexample": "in the same J12 matrix, cell D (seed 123, nominal) diverges at step 12 - EARLIER than E at 95 or F at 90 - and PASSES the behavioural gate. The step at which the discrete comparison first differs carries no failure signal by itself.",
+      "what_it_is": "a provenance marker: which side of the J7 truncation point a row would have fallen on. Nothing downstream may filter or weight by it.",
+      "measured_here": "the flag is recorded per row and used by nothing in this module"
+    },
+    "honest_accounting_of_the_854_rows": {
+      "pre_mismatch_rows": 183,
+      "pre_mismatch_are_near_nominal": "the pre-mismatch halves sit entirely inside the J11 training envelope and add essentially no new coverage. They are kept because truncation is what this stage exists to avoid, not because they carry information.",
+      "post_mismatch_rows": 671,
+      "where_the_value_is": "the post-mismatch rows, and above all those beyond the J11 envelope",
+      "do_not_justify_this_stage_on_854": true
+    }
+  },
+  "coverage": {
+    "training_envelope": {
+      "source": "the J11 aggregate, 24713 rows",
+      "phase_swing_elapsed_norm_max": 0.188846156001091,
+      "pros_knee_angle_min": -1.0090467929840088,
+      "distinct_training_rows": 2210
+    },
+    "per_cell_half": {
+      "E_pre": {
+        "rows": 94,
+        "swing_elapsed_norm_range": [
+          0.0,
+          0.0
+        ],
+        "knee_range": [
+          -0.42944440245628357,
+          -0.17419569194316864
+        ],
+        "rows_beyond_training_swing_max": 0,
+        "rows_beyond_training_knee_min": 0,
+        "rows_beyond_envelope_either": 0
+      },
+      "E_post": {
+        "rows": 406,
+        "swing_elapsed_norm_range": [
+          0.0,
+          0.9465384483337402
+        ],
+        "knee_range": [
+          -1.2137125730514526,
+          -0.17985643446445465
+        ],
+        "rows_beyond_training_swing_max": 211,
+        "rows_beyond_training_knee_min": 53,
+        "rows_beyond_envelope_either": 211
+      },
+      "F_pre": {
+        "rows": 89,
+        "swing_elapsed_norm_range": [
+          0.0,
+          0.0
+        ],
+        "knee_range": [
+          -0.4669034481048584,
+          -0.17419569194316864
+        ],
+        "rows_beyond_training_swing_max": 0,
+        "rows_beyond_training_knee_min": 0,
+        "rows_beyond_envelope_either": 0
+      },
+      "F_post": {
+        "rows": 265,
+        "swing_elapsed_norm_range": [
+          0.0,
+          0.9984615445137024
+        ],
+        "knee_range": [
+          -1.3897613286972046,
+          -0.19176246225833893
+        ],
+        "rows_beyond_training_swing_max": 195,
+        "rows_beyond_training_knee_min": 76,
+        "rows_beyond_envelope_either": 195
+      }
+    },
+    "duplicates": {
+      "within_the_increment": 2,
+      "already_in_the_j11_aggregate": 4,
+      "measured_on": "the PROJECTED rows",
+      "why_not_raw": "on raw rows the count is always zero for the wrong reason: J11 stores the clock as 0, the raw traces as (0, 1), so no raw row can ever match",
+      "not_removed": "this stage does not deduplicate"
+    },
+    "mixing_weight": {
+      "new_rows": 854,
+      "against_tiled_aggregate": "854 / 25567",
+      "against_distinct_rows": "the J11 aggregate holds far fewer DISTINCT rows than its row count, because it is built by np.tile; the effective share of the new rows is correspondingly larger",
+      "repeat_here": 1,
+      "no_repeat_is_inherited": "the factor 8 used elsewhere has no documented rationale, so no repeat can be justified as inherited. Any future repeat would be a NEW number needing its own preregistration."
+    },
+    "binding": false,
+    "thresholds_here": 0
+  },
+  "scientific_assumption": {
+    "what": "the label is an OPEN-LOOP, TIME-INDEXED reference. For the post-mismatch rows it pairs a badly drifted state with the action the teacher would have taken at that instant on the nominal trajectory.",
+    "why_it_is_defensible": "this is the frozen J7 convention and it is DAgger-standard: the teacher says 'come back to the reference'. In a delayed swing that pushes the foot toward contact.",
+    "why_it_is_still_an_assumption": "the prescribed teacher is not a state-feedback expert. The nominal-time reference is not necessarily the correct recovery action from a state far outside the training envelope. July measured 76.27% phase-misaligned rows in its own recovery block and answered with truncation.",
+    "status": "THE LARGEST SCIENTIFIC ASSUMPTION IN THIS DESIGN, stated rather than inherited by default. It is arbitrated by the closed-loop gate, not here.",
+    "no_threshold_attached": true
+  },
+  "dataset_file": "v26c_j14_dagger_increment.npz",
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "arrays": {
+    "observations": "(854, 35) float32, gait clock projected to EXACT zero",
+    "actions": "(854, 2) float32, the J1 teacher at the SAME step",
+    "cell": "(854,) <U1, 'E' or 'F'",
+    "seed": "(854,) int64, 124 or 125",
+    "step": "(854,) int64, 1-based within its own cell",
+    "post_mismatch": "(854,) bool, DIAGNOSTIC: is this row at or after the first discrete mismatch against cell A",
+    "time_before": "(854,) float64, bit-identical to the J1 grid"
+  },
+  "future_aggregate": {
+    "j7_rows": 16713,
+    "cell_B_unique": 500,
+    "cell_C_unique": 500,
+    "cell_repeat": 8,
+    "cell_rows_total": 8000,
+    "new_rows": 854,
+    "new_row_repeat": 1,
+    "total": 25567,
+    "expected_total": 25567,
+    "verified_from_files": true,
+    "arithmetic": "16713 + 8x(500+500) + 854 = 25567",
+    "this_stage_does_not_build_it": "J14 materialises the increment only. The future fit assembles the aggregate and must re-verify these counts against the pinned files."
+  },
+  "seeds": {
+    "read_here": [
+      124,
+      125
+    ],
+    "sealed_never_read": [
+      126,
+      127,
+      128
+    ],
+    "seed_125_is_held_out": false,
+    "why_not": "J7 already contains 11 rows from seed 125 at [16702:16713], bit-identical to the J6 seed-125 probe. A seed already inside the training corpus cannot be called held out.",
+    "genuine_reserve": "seeds 126, 127 and 128, opened by no stage so far"
+  },
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> the current pipeline",
+    "july_role": "methodology and evidence only",
+    "states_from": "the J11 student, as rolled out in the J12 qualification",
+    "labels_from": "the J1 prescribed teacher, same step",
+    "the_fit_that_will_use_this": "NOT part of this stage and NOT authorised by it"
+  },
+  "committed_files_sha256": {
+    "v26c_j14_dagger_increment.npz": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40"
+  },
+  "commit_verification": {
+    "file": "commit_verification.json",
+    "state_when_this_receipt_was_written": "PENDING",
+    "validity_rule": "this leaf is VALID EVIDENCE if and only if commit_verification.json exists beside this receipt and declares pass true",
+    "marker_on_failure": "TECHNICAL_INVALID"
+  },
+  "stack": {
+    "injected": false,
+    "note": "the operational stack"
+  },
+  "inert": {
+    "rollout": false,
+    "fit_executed": false,
+    "optimizer_steps": 0,
+    "critic_touched": false,
+    "ppo_updates": 0,
+    "environment_constructed": false,
+    "torch_imported": false,
+    "sealed_seeds_read": 0
+  },
+  "outcome": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "fit_authorized": false,
+    "critic_authorized": false,
+    "ppo_authorized_to_start": false,
+    "single_execution": true,
+    "no_autonomous_retry": true,
+    "note": "this stage produces a dataset increment and authorises nothing"
+  },
+  "forbidden_here": [
+    "a rollout",
+    "a fit",
+    "an optimizer step",
+    "a weight update",
+    "a critic",
+    "PPO",
+    "environment construction",
+    "importing torch",
+    "promotion",
+    "deployability",
+    "truncating the corrective rows",
+    "filtering by the mismatch flag",
+    "reading seeds 126, 127 or 128",
+    "a second parent",
+    "widening",
+    "contralateral features",
+    "a standalone 25D actor",
+    "dedup",
+    "class balancing",
+    "a repeat factor on the new rows",
+    "an autonomous retry",
+    "an invented threshold",
+    "changing FSM v3, the morphology corridor, the reward, sigma, the SEA or the C++ plugin"
+  ]
+}

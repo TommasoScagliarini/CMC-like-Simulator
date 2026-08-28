@@ -1,0 +1,102 @@
+{
+  "amendment_id": "rev3f_r2_offline_roleweighted",
+  "date": "2026-08-24",
+  "authorized_by": "architect/Codex (B+C accepted with the mandatory role-weighted correction: a flat dataset would let the 12876 alt-start rows dominate ~92% of the loss and would NOT replicate July)",
+  "kind": "ADDITIVE; authorises ONE offline stage (dataset + pre-fit gates + role-weighted refit + post-fit gate + conditional export). NO rollout, NO PPO, NO critic warmup, NO sigma sweep; production/FSM v3/reward/morphology/SEA/C++ untouched; sigma remains UNDECIDED and NON-operational (frozen serialisation placeholder)",
+  "parents_immutable": {
+    "chain": "rev3 (5e0b6a5c/7ef70cbf), rev3a (f74672ad), rev3b (52c87999), rev3c (723c8981), rev3d (7b995277), rev3e (8ac5af69f7914d2a8de19b7da73cd19351876ff3e561660c1b42f51a35b7c04c)",
+    "r1_rollout_receipt": {
+      "sha256": "0fc762fd3271b84907a0cc332f49f16461fa2c948d032eb21962c96038687611"
+    },
+    "r1_rollout_audit_addendum": {
+      "sha256": "8391e424ca576dc16fd71d636a32d468c1146bf5598e43a2a76a31941a345d4a"
+    },
+    "r1_rollout_trace": {
+      "sha256": "a73c4d8f8e26e3e5a95fcc1f0ac42521ea1ba263b3b65583c277b7b75ea8a672",
+      "rows": 242
+    },
+    "r0a_rollout_trace": {
+      "sha256": "8e3aff5465f53f9d9ba5178fe709ffc4329e373f2dc1332d15d43a731ae454ce",
+      "rows": 493,
+      "role": "G1 discrete reference (init actor's nominal det trace, July-13 reference semantics; deviation: 493-step, non-gate-passing)"
+    },
+    "r1_base_dataset": {
+      "npz_sha256": "ce309b40e716342bc00a4fe6e8b835815c93419d36be310271f8f4e2ab7250de",
+      "receipt_sha256": "765c8a90646b005e3bb06a2daf36dfabdd2420a724d116ac6f402e0dd42aae56",
+      "rows": 992
+    },
+    "alt_start_dataset": {
+      "npz": "v26b_dataset_R0_task_20260824T143724.npz",
+      "npz_sha256": "9862d5f83f0471f8503d89e69a9eccc2aba7482641cfb49585a3e4efb706d009",
+      "receipt_sha256": "febf65b5d168409695c5ce8c8720dde100e94814609d677c0f8e47532f26082f",
+      "rows": 12876,
+      "per_start": {
+        "minus020": 6447,
+        "plus020": 6429
+      },
+      "labels": "u_IK already pinned (FULL cache digests rev3b)"
+    },
+    "init_actor_r1": {
+      "actor_digest": "c7bcee1c1165625d0c574a709a9444a98ea95edea8fcddd5d81f59dfa2e3d31e",
+      "module_state_sha256": "12447f48b2458086462fd7dd3e8ca37ccd77db815599bf78cded4672a17f2cf7",
+      "receipt_sha256": "f409e7880e5c8be3c17d81c00b1ddc48c4c4e6c25058b0b55e452aaebb346c42"
+    },
+    "code_test_pins": {
+      "v26b_r1_postrun_audit.py": "503ab902ea64e36c70c1d5835a6f690800ca273a20b73ba73b23393438845fd6",
+      "test_v26b_r1_rollout_postrun.py": "9ea306630cdf2e89f0ef1aa1ead793a16567800852bb2e2138b5349e902d5363",
+      "v26b_dagger_r1.py": "a742855be1f3a16a320104f613e6c5c63ccc1e1ae9e5c21c99d3663bfd6abafd",
+      "v26b_r1_rollout.py": "c63949cde72638c90d2cc81f99aa4c3766f25aa7403b3f692aa58284b55f7ec4"
+    }
+  },
+  "dataset_r2": {
+    "roles_unique_rows_no_physical_duplication": {
+      "base": {
+        "source": "frozen R1 dataset npz ce309b40... verbatim",
+        "rows": 992,
+        "sub_roles_for_postfit_gate": {
+          "ik_nominal_det": 500,
+          "ik_onpolicy_det (R0a)": 492
+        }
+      },
+      "r1_prefix": {
+        "source": "R1 trace a73c4d8f... steps 1..98 ONLY (label-valid prefix vs the R0a discrete reference); steps 99..242 EXCLUDED and counted (144 rows)",
+        "labels": "u_IK same absolute t (FULL-pinned nominal cache)"
+      },
+      "alt_minus020": {
+        "rows": 6447
+      },
+      "alt_plus020": {
+        "rows": 6429
+      }
+    },
+    "dedup": "bitwise across the union, fail-closed: identical obs + identical label collapsed and reported (expected: the shared reset row between base and r1_prefix); identical obs + DIFFERENT label = ABORT",
+    "per_row_provenance": "role, job_id, seed, t_pre, start recorded per row"
+  },
+  "role_weighted_loss": {
+    "july_masses": {
+      "base": 16000,
+      "r1_prefix": 712,
+      "alt_minus020": 4000,
+      "alt_plus020": 4000,
+      "total": 24712,
+      "evidence": "markov_dataset_report.json 13/07: nominal_training_samples 16000, recovery_training_samples 712, additional_recovery_datasets 2x4000; alt mass split equally between the two starts per the architect's order"
+    },
+    "formula": "w_r = mass_r / 24712; per-row weight lambda_i = w_r(i) / n_unique_r(i); per-row error e_i = mean_j (m_ij - y_ij)^2 / Var_{r(i),j} with per-role per-joint label variances fixed a priori; batch data term = (sum_i lambda_i * e_i) / (sum_i lambda_i) over the minibatch (weighted mean, unbiased estimator of the global role-weighted objective for any batch composition); regularisers unchanged from rev3d (lambda_clip on all rows, lambda_phi aux on all rows, lambda_anchor ||theta - theta_R1||^2)",
+    "numeric_weights_w_r": {
+      "base": 0.6474749919,
+      "r1_prefix": 0.0288119133,
+      "alt_minus020": 0.1618565474,
+      "alt_plus020": 0.1618565474
+    },
+    "note": "n_unique_r uses the POST-dedup unique row count of each role; the three masses are the historical 13/07 counts from the pinned receipt and are not changed"
+  },
+  "pre_fit_gates_fail_closed": {
+    "G1": "the 8 July discrete features of every kept r1_prefix row must EQUAL the R0a reference trace at the same step; exclusion of steps 99..242 (144 rows) recorded; abort if the excluded on-policy fraction > 0.80",
+    "G2": "declared reproducible causal signature = the 8 discrete features (exact values) + phase_stance_elapsed_norm and phase_swing_elapsed_norm quantised at 0.05; on the aggregated dataset ZERO groups with per-joint label spread > 0.2; if the gate proves too coarse for continuous features it is NOT relaxed: STOP with diagnostics",
+    "G3": "kNN k=5, leakage-free (standardisation mean/std computed on the TRAIN part only, constant features excluded) with a role-STRATIFIED deterministic holdout (per-role numpy default_rng(2026) permutation, 20% per role); holdout RMSE <= 0.15 per joint",
+    "coverage": "per-role NN-distance quantiles (each role's rows to the rest of the dataset) reported; every role must be present with its expected unique count"
+  },
+  "refit": "full mean 35D network initialised EXACTLY from the R1 actor c7bcee1c...; rev3d numeric protocol unchanged (300 epochs, batch 256, Adam lr 1e-4, seed 2026, log-std frozen placeholder, no critic, privileged clock columns zero + bit-identical invariance, lambda_clip 1.0, lambda_phi 0.1, lambda_anchor 1e-3); ONLY the data loss becomes role-weighted; NO tuning after seeing results",
+  "post_fit_gate": "RMSE <= 0.15 per joint on: aggregate, base (992), BC nominal (500), R0a on-policy (492), r1_prefix, alt minus020, alt plus020; Q3 invariants; save/reload bit-exact; clock invariance; weighted objective value reported; leakage-free holdout RMSE reported. PASS -> atomic no-clobber export of the new actor (V2_R2); FAIL -> no export OR a clearly-marked rejected artefact, never replacing any frozen",
+  "prohibitions": "no rollout, no PPO, no critic warmup, no sigma sweep; sigma 0.005 remains UNDECIDED and NON-operational"
+}

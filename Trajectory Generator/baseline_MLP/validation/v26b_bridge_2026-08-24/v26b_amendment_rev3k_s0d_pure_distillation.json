@@ -1,0 +1,68 @@
+{
+  "amendment_id": "rev3k_s0d_pure_distillation",
+  "date": "2026-08-24",
+  "authorized_by": "architect GO for S0D-0 (preregistration) + S0D-1 (tooling/tests + read-only pre-gate) ONLY; fit/export/rollout NOT authorised (each needs its own future token/GO)",
+  "kind": "ADDITIVE, immutable; every existing parent/artefact stays untouched",
+  "parents_immutable": {
+    "chain": "rev3..rev3j (last: rev3j 723474d3692db2c1199c1e535b05f0e217a37103ef076048198eaa8ea5d9e82b) + rev3i 7cde9329 + all audit memos/supplements",
+    "anchor_coverage_pass": {
+      "coverage_json_sha256": "5c8123607bba3bf6339ad220163f95966a0f9cf4497854ed32aac863e1e9218e",
+      "unique_rows": 19314
+    },
+    "collection_tooling": {
+      "v26b_anchors.py": "20e6db932ccda9a9015bf7dc7462759dde4d7c689f899873f883c7409d96dfac",
+      "v26b_v2.py (job_id parsing)": "683895bb6b23cc7b0d78dbdba2dfefcc24e332036e75643c7a238415b3bbd27f"
+    },
+    "init_v1": {
+      "actor_digest": "ae846220a6f7f1ac1289ccc9636e3ad2e5bc7842ba7ece0b62bb9d7590e7f587",
+      "receipt_sha256": "65b447ea331d58b457fe6df48e67697dbd6693986552411c0f9780c75ffb995c",
+      "note": "SOLE init of the future fit; JUL_H0/R0a/R1/R2G/R2I NEVER init or labels"
+    },
+    "july_anchor_evidence": {
+      "file": "target_domain_imitation.py",
+      "sha256_current": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3",
+      "lines": "1141-1146 (== July blob bdbf99c1:789-794)",
+      "semantics": "anchor_weight * MEAN over the 6 FULL pi tensors of mean-squared deltas, logstd rows restored to the anchor at every loss evaluation (delta zero) => explicit-0.5 head factors",
+      "historical_weight_bc_dagger_1107": 1e-05,
+      "weight_evidence": "parser default 1e-5 (blob line 949) and r2 adaptation_report.json hyperparameters.anchor_weight = 1e-05"
+    },
+    "r2i_status": "V2_R2I stays a non-promoted candidate; V2_R2G stays AUDIT-REJECTED"
+  },
+  "s0d_objective": "PURE distillation of the August V26 39D behaviour into the causal/deployable 35D student: dataset = ALL 19314 unique rows of the coverage-PASS anchor collection (3 starts x collection sigmas 0.0025/0.005/0.01 x seeds 1000-1003 + the 3 det seed-123 traces); input obs35; label = deterministic V26 mean SAME-STATE (the coverage-verified u_T). NO IK labels, NO R0a/R1/R2*/JUL_H0 as init or labels, NO DAgger, NO PPO, NO critic, NO operational sigma (logstd stays the undecided placeholder)",
+  "split_leakage_free_by_job_before_dedup": {
+    "rule": "for each of the 9 (start, sigma) cells, numpy default_rng(2026) consumed in the DECLARED order (start in [minus020, nominal, plus020] x sigma in [0.0025, 0.005, 0.01]) selects via permutation of the seed list [1000, 1001, 1002, 1003] ONE whole trace as holdout (first element), the other 3 to train; the 3 deterministic seed-123 traces are TRAIN",
+    "after_dedup": "every unique row whose provenance includes ANY holdout trace is assigned HOLDOUT ONLY; otherwise TRAIN; zero bitwise obs across the split by construction, verified explicitly; identical obs with different labels = fail-closed abort (none exist by the collection guarantee)",
+    "records": "held-out job ids per cell + SHA-256 digests of the sorted train/holdout row-index arrays"
+  },
+  "pre_gate_s0d1": {
+    "estimator": "kNN k=5, standardisation mean/std computed on TRAIN rows only, 33 active features (dead privileged clock columns excluded)",
+    "binding": "RMSE vs u_T <= 0.15 per joint (REUSED G3-blocked preregistered threshold, rev3g) on the holdout AGGREGATE and on EACH start and on EACH of the 9 start x sigma cells",
+    "diagnostics_no_new_thresholds": "causal-signature ambiguity scan and sigma-robustness-scale comparison (0.0025-0.01) reported ONLY as diagnostics",
+    "on_fail": "STOP; no fit"
+  },
+  "future_fit_preregistered_NOT_authorised": {
+    "token": "V26B-S0D-FIT (distinct, not granted)",
+    "data_weighting": "row-uniform over the unique TRAIN rows (NO July masses, NO tiling)",
+    "budget": {
+      "epochs": 300,
+      "fixed_final": true,
+      "batch_size": 256,
+      "lr": 0.0001,
+      "seed": 2026
+    },
+    "loss": "flat 2-output MSE + action-clip penalty 1.0 (historical) + anchor = EXACT July BC/DAgger 11/07 semantics: 1e-5 * mean over the 6 FULL tensors (explicit-0.5 head factors, logstd restored/frozen) towards theta_V1 in the fit's parametric space - NOT the rev3i 0.01 weight; NO aux phase loss",
+    "scaling": "July physical scaling on the 10 Markov features with T1/T2 function-preservation tests <= 1e-5 on all rows (rev3g machinery)",
+    "invariants": "Q3 (10 keys, clock zero + bit-identical invariance, logstd placeholder, save/reload bit-exact), no critic"
+  },
+  "future_postfit_gate_preregistered": {
+    "rmse_max_per_joint": 0.1,
+    "threshold_source": "existing Q1 (rev3 protocol offline criteria)",
+    "applied_to": "holdout aggregate AND each start AND each start x sigma cell; TRAIN metrics reported separately and distinctly",
+    "plus": "save/reload, Q3, T1/T2",
+    "on_pass": "no-clobber export only"
+  },
+  "future_rollout_separate_NOT_authorised": {
+    "definition": "ONE nominal deterministic rollout, the EXACT existing command/config (rev3c/e/j pattern), binding gate 500/500 episode_time_limit; whole-trace corrected counters/FSM/morphology/kinematics diagnostics; B3 phase-window ONLY (never the global min); the full V3 3-start gate stays NOT EVALUATED"
+  },
+  "dagger_clause": "if the future rollout fails, any DAgger stays V26-teacher -> student and requires a NEW amendment; automatic IK labelling is FORBIDDEN"
+}

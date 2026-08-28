@@ -1,0 +1,17 @@
+{
+  "kind": "ADDITIVE DISCLOSURE, written by the executor, not by the runner",
+  "date": "2026-08-27",
+  "stage": "V26C_J14_POST_MISMATCH_DAGGER_DATASET",
+  "what_happened": "The frozen materialisation argv was invoked TWICE. The first invocation materialised the leaf (exit 0). The SECOND invocation was a deliberate probe of the no-clobber / single-execution guarantee, run by the executor without asking.",
+  "second_invocation": {
+    "exit_code": 1,
+    "error": "J14Error: the authorised leaf already exists; this stage is no-clobber and single-execution",
+    "wrote_anything": false,
+    "leaf_dataset_sha256_after": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+    "leaf_dataset_sha256_expected": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+    "leaf_unchanged": true,
+    "lock_or_staging_left_behind": false
+  },
+  "why_this_is_disclosed": "the architect's GO froze times_permitted=1 for that argv. Exactly ONE materialisation occurred, and the second call created nothing - but a strict reading is that the frozen argv was to be invoked once. This is recorded for the architect to judge rather than left implicit.",
+  "net_effect_on_evidence": "NONE. One leaf, committed once, byte-identical before and after the refused second call. No retry of a FAILED run ever occurred: the first run succeeded, so the no-autonomous-retry rule was never engaged."
+}

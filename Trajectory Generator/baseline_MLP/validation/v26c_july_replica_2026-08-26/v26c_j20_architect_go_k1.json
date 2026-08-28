@@ -1,0 +1,44 @@
+{
+  "kind": "ARCHITECT GO — SINGLE EXECUTION, K1 PROBE ONLY",
+  "stage": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "date": "2026-08-27",
+  "approved_by": "Codex architect after an independent audit that reproduced: telemetry 161/161, J20 readiness 191/191, derivation --check matches, preflight READY 20/20, dry-run inert, git diff --check clean, no J20 leaf and no active J20/PPO/Ray process",
+  "authorises_execution": true,
+  "authorises_warmup": false,
+  "authorises_training": false,
+  "authorises_rollout": false,
+  "authorises_ppo": false,
+  "execution_limit": 1,
+  "retry_authorised": false,
+  "scope": "Execute exactly once the K1 probe of the critic-only warm-up readiness stage: build ONE module of the pinned class at the pinned geometry with inference_only=False, transplant the ten J19A actor tensors through warm_start.transplant_actor_state driven by the real feature resolver against the explicit overlay, measure the 29 preregistered properties P01-P29, and write only j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1.",
+  "authorised_output": "j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1",
+  "authorised_command": "/opt/anaconda3/envs/envCMC-rllib/bin/python v26c_j20_critic_warmup_readiness.py --probe --go-file v26c_j20_architect_go_k1.json",
+  "failure_handling": {
+    "any_failure": "preserve all evidence, leave the TECHNICAL_INVALID marker in place if post-commit verification fails, and do NOT retry",
+    "no_autonomous_retry": true
+  },
+  "actor_immutability_required": true,
+  "explicitly_not_authorised": [
+    "the critic-only warm-up itself, V26C_J20_CRITIC_WARMUP",
+    "the sealed warm-up command registered in the preregistration",
+    "any autonomous retry, whatever the outcome",
+    "starting Ray",
+    "constructing or stepping an environment",
+    "any rollout",
+    "any call to algo.train()",
+    "constructing an optimizer or taking an optimizer step",
+    "PPO or ex-novo training",
+    "any fit or actor update",
+    "changes to FSM v3, detector, morphology corridor, reward, sigma, SEA, C++ plugin, network architecture or production configuration",
+    "promotion to any subsequent pipeline phase"
+  ],
+  "pinned_artefacts_sha256": {
+    "v26c_j20_prereg_critic_warmup_readiness.json": "f4ec06d77641a460e26df554f4c5c0f10ebceacb4534bbd0368773294706130c",
+    "v26c_j20_critic_warmup_readiness.py": "d33e0709ca4682ef857e07a85c7015d2d857aba2b04f454afb3bc1aa0c57858b",
+    "test_v26c_j20_critic_warmup_readiness.py": "34558c921f7d9d3b892aa69ba38e2efc7599dab5eb97619224be2a8435d14939",
+    "v26c_j20_derive_warmup_config.py": "f21654ce315827e11bf3a7a8c48331454b71a0c9f439c75454f9652ede81aaaf",
+    "v26c_j20_warmup_cfg.yaml": "d8bcfd39f6015eaf7a41deda2edec201e9dbe89df6c425a67f3bf14bc5e4f525",
+    "v26c_j20_actor_feature_manifest_overlay.json": "b0f9035413be0a56216e391cd27c4282c3cb708b7733a67ad32e506d281d39ca",
+    "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530"
+  }
+}

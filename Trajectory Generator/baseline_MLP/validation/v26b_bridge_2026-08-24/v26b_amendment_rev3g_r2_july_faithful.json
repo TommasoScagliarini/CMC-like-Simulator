@@ -1,0 +1,129 @@
+{
+  "amendment_id": "rev3g_r2_july_faithful",
+  "date": "2026-08-24",
+  "authorized_by": "architect GO after the mandatory supplementary audit (memo 1221cd35... + supplement e0dd2c4d...)",
+  "kind": "ADDITIVE, immutable once written; authorises ONE offline R2 stage (prefit gates -> fit -> postfit gates -> conditional export). NO rollout, PPO, critic warmup, sigma sweep or ex-novo; production/FSM v3/reward/morphology/SEA/C++ untouched; sigma remains the UNDECIDED frozen placeholder",
+  "parents_immutable": {
+    "chain": "rev3 (5e0b6a5c/7ef70cbf), rev3a (f74672ad), rev3b (52c87999), rev3c (723c8981), rev3d (7b995277), rev3e (8ac5af69), rev3f (011eff9b5da77dd437fb1e9f046988929dea3b196a66c8e4a0adb1e993ef3652 - NOT superseded as record: its G2-coarse STOP stays valid negative evidence)",
+    "audit_memos": {
+      "rev3g_memo": "1221cd35d64b22f6a19149116c5615b85bd6cca13cd6b52be8be8b93494a8e0e",
+      "rev3g_supplement": "e0dd2c4de7b11817ecdbbc17078dc09b31f5a351bf1e14ddb8dcb0f0bce5fcc4",
+      "g2_stop_diag_report": "ba3bc9f41b8a490a3a5b3a7a10f2d2ca94f6931e8ead86b51a63d42812b59b8e",
+      "g2_stop_artifact": "c5653ec83c2960a827e8de2c891488f1cecabdbeb1700c1c97c2c841c959e8c5"
+    },
+    "init_parent_r1": {
+      "actor_digest": "c7bcee1c1165625d0c574a709a9444a98ea95edea8fcddd5d81f59dfa2e3d31e",
+      "module_state_sha256": "12447f48b2458086462fd7dd3e8ca37ccd77db815599bf78cded4672a17f2cf7",
+      "receipt": "f409e7880e5c8be3c17d81c00b1ddc48c4c4e6c25058b0b55e452aaebb346c42"
+    },
+    "historical_parent_jul_h0": {
+      "run": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13",
+      "adaptation_report_sha256": "deb900a6be1107c0fa917cd6adf6aa69e9e214f1f9f60f9926f84e24b7e1bdeb",
+      "run_summary_sha256": "15daef3e7395839a1f6e78d08e8c769b5597e6a27abbe12b8056c9ac4601a6b7",
+      "markov_dataset_report_sha256": "2e07c80e2c29336146928d159346f7ee875c9dfd6feceb98418a09d9533cdb1e",
+      "module_state_sha256_byte_identical_to_JUL_H0": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b",
+      "historical_gate": "run_summary ok:false (nominal shift) - non-gate-passing parent, recorded fact"
+    },
+    "datasets": {
+      "base_npz": "ce309b40e716342bc00a4fe6e8b835815c93419d36be310271f8f4e2ab7250de",
+      "alt_npz": "9862d5f83f0471f8503d89e69a9eccc2aba7482641cfb49585a3e4efb706d009",
+      "r1_trace": "a73c4d8f8e26e3e5a95fcc1f0ac42521ea1ba263b3b65583c277b7b75ea8a672",
+      "r0a_trace_g1_reference": "8e3aff5465f53f9d9ba5178fe709ffc4329e373f2dc1332d15d43a731ae454ce"
+    },
+    "preexisting_tooling": {
+      "v26b_r2_offline.py (build_r2_dataset + G1)": "7c310fc3cc3bb1ea0b5edf84917156e61b3fa376d370b325ef0cff9361fc49ee",
+      "test_v26b_r2_offline.py": "16fafee4e268dc80fa1e145b0afa65991e2cd3bb53e4901fc5d55e46be4ecd4f",
+      "target_domain_imitation.py (July scaling/anchor reference)": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3",
+      "v26b_dagger_r1.py": "a742855be1f3a16a320104f613e6c5c63ccc1e1ae9e5c21c99d3663bfd6abafd"
+    },
+    "circular_pin_resolution": "this amendment pins the PRE-EXISTING tooling; the NEW tool v26b_r2g.py pins THIS amendment's sha; the execution receipt pins the new tool+tests (established chain pattern)"
+  },
+  "exact_masses_correcting_rev3f_text": {
+    "base": 0.6474587245063127,
+    "r1_prefix": 0.028811913240530916,
+    "alt_minus020": 0.16186468112657817,
+    "alt_plus020": 0.16186468112657817,
+    "note": "= 16000/24712, 712/24712, 4000/24712; the rev3f amendment TEXT carried transcription errors, its CODE was already exact; rev3f is not mutated"
+  },
+  "dataset": "identical to rev3f: 992 unique base + 97 unique r1_prefix (valid steps 1..98 of the R1 trace only, minus the 1 identical-label reset-row collision) + alt 6447/6429; NO physical tiling; labels u_IK at the same absolute time; NONE of the 144 post-mismatch rows",
+  "objective": "role-mass-weighted FLAT MSE on the 2 outputs: L_data = sum_i(lambda_i*e_i)/sum_i(lambda_i), e_i = mean_j (m_ij - y_ij)^2 (NO per-role variance normalisation), lambda_i = w_r / n_r_train (n_r_train = unique rows of the role in the TRAIN part of the preregistered split, so the role masses hold exactly over the fitted corpus); NO auxiliary phase loss (removed entirely)",
+  "anchor_july_semantics": "0.01 * SUM over the 6 mean-parameter tensors of mean((p - p0)^2), with theta_0 = theta_R1 expressed in the SAME parametric space used by the fit (the SCALED space)",
+  "clip_interpretation_no_silent_assumption": "'clip 1.0' = the ACTION-clip penalty relu(|m|-1)^2 * mean with weight 1.0, identical in the chain (rev3d) and in July (clip_weight); NO gradient-norm clipping exists in either lineage and none is introduced",
+  "july_physical_scaling_with_function_preservation": {
+    "features_scales_indices": {
+      "pros_knee_angle_previous_endpoint": [
+        25,
+        1.0
+      ],
+      "pros_knee_angle_served_ref": [
+        26,
+        1.0
+      ],
+      "pros_knee_angle_served_ref_vel": [
+        27,
+        4.0
+      ],
+      "pros_knee_angle_served_ref_accel": [
+        28,
+        60.0
+      ],
+      "pros_knee_angle_sea_u": [
+        29,
+        1.0
+      ],
+      "pros_ankle_angle_previous_endpoint": [
+        30,
+        1.0
+      ],
+      "pros_ankle_angle_served_ref": [
+        31,
+        1.0
+      ],
+      "pros_ankle_angle_served_ref_vel": [
+        32,
+        3.5
+      ],
+      "pros_ankle_angle_served_ref_accel": [
+        33,
+        55.0
+      ],
+      "pros_ankle_angle_sea_u": [
+        34,
+        1.0
+      ]
+    },
+    "training_input": "x_scaled = x_raw / scale (per-column, the 10 features; others untouched)",
+    "init_transform": "W1_scaled_init[:, c] = W1_R1_raw[:, c] * scale_c (float64 transform, cast float32) so that model_scaled(x_scaled) == R1(x_raw)",
+    "anchor_target": "theta_R1_scaled (the transformed init)",
+    "export": "W1_raw_export[:, c] = W1_scaled_fit[:, c] / scale_c (float64, cast float32): the exported module consumes RAW physical observations (July absorption, target_domain_imitation.py:1049 and :1203-1207)",
+    "preregistered_numeric_tests_mandatory": "on ALL corpus rows, float64 forward: (T1) |R1_raw(x_raw) - model_scaled_init(x_scaled)|max <= 1e-5; (T2 post-fit) |model_scaled_fit(x_scaled) - export_raw(x_raw)|max <= 1e-5; both max-abs values REPORTED"
+  },
+  "chain_numerics_unchanged": {
+    "epochs": 300,
+    "fixed_final": true,
+    "batch_size": 256,
+    "lr": 0.0001,
+    "seed": 2026,
+    "clip_weight": 1.0,
+    "no_early_stopping_no_validation_model_selection": true,
+    "logstd": "frozen placeholder rows-zero bias float32(ln 0.005)",
+    "clock_contract": "privileged clock columns hard-zeroed every step and at export, bit-identical invariance (rev3d)",
+    "critic": "absent"
+  },
+  "prefit_gates": {
+    "G1": "unchanged (exact discrete prefix vs the R0a reference; 144/242 excluded; abort > 0.80)",
+    "G3_blocked_BINDING": "kNN k=5 in raw-standardised 33D (train-only scaling), preregistered leakage-controlled split: group-holdout 3/13 whole trajectories per alt start (default_rng(2026) permutation), blocked windows base steps 201-300 / prefix steps 41-60 with 10/5-step embargo excluded from both sides; RMSE <= 0.15 per output on the AGGREGATE and on EACH role",
+    "envelope_magnitude_BINDING": "zero non-adjacent pairs within D_max = 2*r_star with excess |du|_g / (2*Q99_g*d) > kappa_m = 10; r_star = p50 of same-trajectory consecutive-step distances; Q99 = per-joint 99th percentile of adjacent slopes; SF=2 and kappa_m=10 declared a priori",
+    "diagnostics_reported_never_autopromoting": "envelope violation density, adjacent tail rate, excess ratios, G3 row-random",
+    "counterfactual_mandatory": "the 144 post-mismatch R1 rows with same-time labels must be shown REJECTED by the blocked gate (kNN-vs-label > 0.15)",
+    "on_binding_fail": "STOP without fit/export"
+  },
+  "fit_corpus": "the TRAIN part of the preregistered split (holdout and embargo rows excluded from the fit)",
+  "postfit_gates": {
+    "BINDING": "RMSE <= 0.15 per output on the leakage-controlled HOLDOUT, aggregate and each role (rows never seen by the fit)",
+    "also_reported_distinct": "fit-corpus (train) RMSE per role and aggregate",
+    "invariants": "new actor digest recorded; no critic; logstd placeholder; clock contract bit-identical; save/reload bit-exact; production untouched",
+    "function_preservation": "T1 prefit mandatory; T2 export-space inference smoke test mandatory (both reported with max abs)"
+  },
+  "on_pass": "atomic no-clobber export V2_R2G + canonical receipt; on any FAIL: no export (or clearly-marked rejected artefact), STOP"
+}

@@ -1,0 +1,352 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j10r1_prereg_multistart_teacher",
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_proposed": "V26C_J10R1_MULTISTART_TEACHER",
+  "authorisation_status": "NOT_GRANTED at the time of writing - the architect authorises execution internally after review",
+  "date_utc": "2026-08-27",
+  "architect_decision": {
+    "decision": "apply the July MULTISTART METHODOLOGY exclusively to the August V26 lineage",
+    "taken_by": "the architect, explicitly",
+    "not_reopened": "this preregistration implements that decision. It proposes no alternative architecture and reconsiders no part of the choice.",
+    "july_status": "METHODOLOGY ONLY. No July checkpoint, dataset, label or artefact is an operative parent, input or output of this stage."
+  },
+  "why_this_stage_exists": {
+    "measured_gap": "the J9R1 closed-loop qualification FAILED on cell B, the -0.20 s start: 0 valid cycles, 0 heel strikes, FSM stuck in WAIT_HS for 500/500 steps. The measured cause is a support gap: the J7 training set contains ZERO rows in the WAIT_HS state - the FSM one-hot takes only (0,1,0) STANCE_AFTER_HS on 12486 rows and (0,0,1) SWING_AFTER_TO on 4227 rows across all 16713 rows, and (1,0,0) WAIT_HS appears 0 times.",
+    "evidence": "reports/user/2026-08-27_qualifica_closed_loop_j9r1.md and j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/v26c_j9r1_closed_loop_receipt.json",
+    "what_this_stage_does_about_it": "collects prescribed-teacher rollouts at the two non-nominal starts, so that a LATER and SEPARATELY AUTHORISED fit can be given the states the actor has never seen. This stage collects only; it fits nothing."
+  },
+  "what_this_stage_is": "exactly TWO prescribed-teacher rollouts of 500 steps each, at the two non-nominal episode start offsets, collected with the J1 semantics and gated per cell.",
+  "what_this_stage_is_not": [
+    "a fit, an adaptation or any weight update",
+    "a student rollout - the J8 student is NEVER used, neither as a policy nor as a label source",
+    "a critic warm-up",
+    "a PPO run of any kind",
+    "a closed-loop qualification",
+    "a promotion, a deployability claim or an authorisation of any next stage"
+  ],
+  "operational_parent": {
+    "path": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+    "module_state_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+    "is_the_only_parent": true,
+    "role": "the August V26 imitative actor. It defines the OBSERVATION CONTRACT - actor width, feature names and mask. It is NOT the action source.",
+    "same_parent_as_j1": "this is byte-identical to the parent v26c_j1_collect.py pins at line 66, so J10 collects from the same operative actor as the nominal J1 collection",
+    "forbidden_markers": [
+      "controller_memory_ablation",
+      "target_domain_",
+      "2026-07-",
+      "markov35",
+      "zero_iter_port"
+    ],
+    "j8_student_excluded": "the J8 student actor is NEVER loaded, never queried and never used to produce a label. Its use as a label source is explicitly forbidden here."
+  },
+  "label_source": {
+    "source": "target_domain_imitation.prescribed_teacher_action, reused READ-ONLY",
+    "what_it_is": "the PRESCRIBED teacher - a reference/inverse-kinematics action, not a policy sample. No checkpoint is queried for the action.",
+    "lookahead_s": 0.0,
+    "sigma": [
+      0.0,
+      0.0
+    ],
+    "noise_hold_steps": 1,
+    "executed_equals_teacher": "with sigma exactly zero the executed action equals the teacher action; the noise vector is recorded and is exactly zero",
+    "no_other_label_source_permitted": true,
+    "forbidden_call_sites": [
+      "build_target_env_config",
+      "_teacher.main(",
+      ".main("
+    ]
+  },
+  "matrix": {
+    "cells": 2,
+    "order_is_frozen": "B then C, in that order",
+    "steps_per_cell": 500,
+    "seed": 123,
+    "offset_unit": "SECONDS of episode start time, relative to cfg.t_start",
+    "cell_list": [
+      {
+        "id": "B",
+        "episode_start_offset_s": 1.756870983805102,
+        "label": "-0.20 s"
+      },
+      {
+        "id": "C",
+        "episode_start_offset_s": 2.156870983805102,
+        "label": "+0.20 s"
+      }
+    ],
+    "nominal_not_collected": "the nominal start is NOT re-collected: it already exists as the J1 leaf and is unchanged",
+    "behavioural_fail_fast": false,
+    "fail_fast_rule": "a behavioural FAIL in one cell is PRESERVED and the other cell still runs. Only a technical or integrity exception stops the collection, fail-closed."
+  },
+  "runtime": {
+    "pinned_config": "runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "builder": "v26c_j1_collect.build_full_env_config and verify_env_config, REUSED UNMODIFIED",
+    "fsm": "v3, unmodified",
+    "production_untouched": "FSM, morphology corridor, reward, SEA and the C++ plugin are not touched",
+    "env_mutation": {
+      "rule": "the base env config is built and verified in full BEFORE any mutation. Then ONLY episode_start_offset_s and the per-cell output_dir may differ.",
+      "proof": "the set of differing keys must be a SUBSET of {episode_start_offset_s, output_dir}; every other key is compared for exact equality against the verified base and the count of stable keys is recorded",
+      "no_second_j1_verify_on_mutated_config": "J1.verify_env_config pins the nominal offset including in its runtime literal cross-check, so a non-nominal cell would fail it for a purely technical reason. The base is verified before the mutation instead."
+    },
+    "recording": {
+      "record_outputs": true,
+      "save_outputs_on_close": true,
+      "why": "the J9 technical failure was caused by building the base with output_dir=None, which disables recording. J10 builds the base with a REAL output root and verifies both flags fail-closed before any environment exists.",
+      "expected_sim_outputs_per_cell": 19
+    },
+    "no_rllib_needed": "the action source is the prescribed teacher, so no RLModule is loaded and no policy is queried. No Ray cluster, no Ray worker and no EnvRunner is started.",
+    "environments": "ONE at a time, sequential, closed FAIL-CLOSED after each cell"
+  },
+  "reset_check": {
+    "offset_is_relative_to_t_start": true,
+    "semantics": "osim_trj_cmc_like._initialise_episode: max_start = max(cfg.t_start, cfg.t_end - episode_duration); requested = cfg.t_start + max(0.0, episode_start_offset_s); episode_start = min(requested, max_start); self.t = episode_start",
+    "expected_values": {
+      "B": "11.99 + 1.756870983805102 = 13.746870983805103",
+      "C": "11.99 + 2.156870983805102 = 14.146870983805101"
+    },
+    "tolerance_s": 1e-09,
+    "tolerance_justification": "the comparison is an exact arithmetic identity; 1e-9 s is a cross-platform float-representation allowance, not a behavioural tolerance",
+    "checked_immediately_after_reset": true,
+    "never_compared_against_the_offset_itself": true,
+    "recorded_fields": [
+      "cfg_t_start_s",
+      "cfg_t_end_s",
+      "episode_duration_s",
+      "requested_unclamped_time_s",
+      "max_start_s",
+      "expected_reset_time_s",
+      "actual_reset_time_s",
+      "reset_time_error_s",
+      "clamped"
+    ],
+    "expected_values_are_the_float_results": "these are the values IEEE-754 double arithmetic actually produces, not the decimal sum rounded by hand. The J10 record stated ...102 for both, which is the last digit wrong in each case. The comparison is made at 1e-9 s so the difference is not binding, but a preregistered constant that is not the value the run records is a defect in the record.",
+    "clamping_caveat": "these values assume the clamp does not bite. cfg.t_start and cfg.t_end come from the model setup XML and are read LIVE in run_cell; the preflight does not compute a reset time at all, because it may not construct an environment and hard-coding t_end would be false precision."
+  },
+  "per_cell_saved_artefacts": {
+    "teacher_dataset.npz": {
+      "observations": "the RAW 35-wide actor observation at each step, float32, shape [500, 35]",
+      "actions": "the PRESCRIBED TEACHER action, float32, shape [500, 2]",
+      "executed_actions": "what was actually stepped, float32, shape [500, 2]",
+      "action_noises": "the applied noise vector, float32, shape [500, 2], exactly zero at sigma 0",
+      "times": "the pre-step simulation time, float64, shape [500]",
+      "actor_feature_names": "the 35 feature names, in order"
+    },
+    "trace.json": "the full per-step trace, including reward_terms, phase_fsm and the raw actor observation",
+    "kinematics.npz": "knee_rad and ankle_rad per step plus the feature names",
+    "penetration.npz": "penetration_m per step",
+    "sim_outputs/": "EXACTLY 19 regular files, counted and listed after env.close(); a non-empty directory is not accepted",
+    "sha256_manifest": "every artefact listed here, and every one of the 19 sim_outputs, is hashed before the receipt is written and recorded by leaf-relative path"
+  },
+  "per_cell_binding_gate": {
+    "applies_to": "BOTH cells, independently",
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "valid_cycles_min": 2,
+    "phase_timeout_stance_max": 0,
+    "phase_timeout_swing_max": 0,
+    "morphology_causal_contract_failure_max": 0,
+    "hs_cancelled_count_max": 0,
+    "resync_count_max": 1,
+    "action_clipped_steps_max": 0,
+    "action_clipping_is_binding_here": "unlike J1, where clipping was diagnostic, J10 requires ZERO action clipping: a clipped prescribed-teacher action would mean the recorded label is not the label that was executed",
+    "kinematic_quality": {
+      "source": "v26c_j3_closed_loop.J3_KINEMATIC_GATE, IDENTICAL to J9R1, unchanged",
+      "ankle_min_rad_max": -0.03,
+      "ankle_min_direction": "ankle_min <= -0.03 rad; more negative PASSES, exactly -0.03 PASSES",
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [
+        -1.5,
+        0.0
+      ],
+      "ankle_bounds_rad": [
+        -0.7,
+        0.7
+      ]
+    },
+    "penetration": {
+      "authority": "v26c_penetration_contract_2026-08-26.json, the single authority",
+      "soft_diagnostic_m": 0.02,
+      "soft_status": "DIAGNOSTIC, never a blocker",
+      "july_legacy_diagnostic_m": 0.025,
+      "july_legacy_status": "DIAGNOSTIC, never a blocker",
+      "hard_binding_m": 0.028,
+      "hard_status": "the SOLE binding penetration criterion: fail iff > 0.028, so exactly 0.028 PASSES",
+      "no_local_threshold": "no penetration threshold is written down in the runner"
+    }
+  },
+  "coverage_gate": {
+    "scope": "the COLLECTION AS A WHOLE, not per cell",
+    "criterion": "the union of the two cells' observation rows must contain AT LEAST ONE row with phase_fsm_wait_hs == 1",
+    "why": "that is the exact gap measured in J7, where phase_fsm_wait_hs is constant zero across all 16713 rows. A collection that does not contain the missing state would not close the gap it exists to close.",
+    "feature_resolution": "phase_fsm_wait_hs is resolved BY NAME from the feature names of the LIVE RUNTIME ENVIRONMENT (base.actor_feature_names, 35 wide), never by a hard-coded index and NEVER from the parent's 39-wide actor feature manifest. The receipt records resolved_by accordingly.",
+    "no_invented_thresholds": "there is NO minimum count, NO required fraction and NO per-cell requirement. The criterion is at least one row, and nothing more is asserted.",
+    "binding": true,
+    "recorded": "the per-cell and total count of WAIT_HS rows is reported as evidence alongside the boolean",
+    "manifest_is_provenance_only": "the parent manifest declares the 39-wide June-lineage slice; it is recorded as provenance and is not the resolver"
+  },
+  "diagnostics_not_binding": [
+    "episode_return",
+    "realized_noise_rms",
+    "max_reserve_norm_nm",
+    "mean_reserve_norm_nm",
+    "slew_limited_steps"
+  ],
+  "diagnostics_exclusion_note": "valid_cycle_count is NOT listed here: valid_cycles is a BINDING check, and listing its measure among the non-binding diagnostics would be self-contradictory. action_clipped_steps is likewise NOT listed: clipping is binding in this stage. This corrects the ambiguity observed in the J9R1 receipt.",
+  "telemetry_integrity": {
+    "status": "a SEPARATE fail-closed TECHNICAL invariant, never a behavioural criterion",
+    "source": "v26c_j3_closed_loop.telemetry_integrity, reused unmodified",
+    "on_failure": "the cell's qualification is technically INVALID - a statement about the evidence, never about the gait"
+  },
+  "aggregate": {
+    "pass_iff": "2/2 cells behavioural PASS, 2/2 telemetry-valid, AND the coverage gate satisfied",
+    "confers_nothing": "an aggregate PASS produces a dataset. It authorises no fit, no critic, no PPO, no promotion and no next stage."
+  },
+  "future_leaf": {
+    "relative_leaf": "j10r1_runs/j10r1_multistart_teacher_v26c_2026-08-27_r1",
+    "is_the_only_destination": true,
+    "must_not_exist_before": true,
+    "does_not_exist_yet": "this preregistration turn creates nothing",
+    "write_protocol": "atomic commit, no-clobber under an exclusive sibling lock: lock taken with O_CREAT|O_EXCL, sibling staging directory, verification, re-check of the leaf, rename, THEN post-commit verification of every recorded path and hash",
+    "provenance_rule": "every path recorded in the receipt is LEAF-RELATIVE and therefore valid after the commit. No receipt field may contain a staging path. This corrects the defect observed in the J9R1 receipt, whose sim_outputs strings point at the renamed staging directory.",
+    "outcome_fail_still_commits": "a behavioural or coverage FAIL still commits the full evidence and exits non-zero; a technical or integrity error commits nothing",
+    "cleanup_on_failure": "recursive removal of the exact staging directory this run created, unlink of its own lock, and at most a NON-RECURSIVE rmdir of the parent if this run created it and it is empty",
+    "no_autonomous_retry": true,
+    "validity_is_conditional": "the committed leaf is VALID EVIDENCE if and only if commit_verification.json exists inside it and declares pass true. The leaf is born carrying a TECHNICAL_INVALID marker, committed by the rename itself and removed only after the verification passes, so an unverified leaf is never indistinguishable from a verified one.",
+    "outcome_technical_invalid": "a post-commit verification failure leaves the leaf in place, marked TECHNICAL_INVALID, and exits non-zero. No deletion, no repair, no retry."
+  },
+  "preflight": {
+    "inert": "no torch, no RLlib, no OpenSim import; no environment constructed, reset or stepped; no output written",
+    "sentinel": "the base is built against an INERT sentinel output root whose existence is measured before and after and which must never be created",
+    "reports": "the planned matrix, the parent, the label source, the gates, the coverage criterion and the reset expectations"
+  },
+  "outcome_policy": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "fit_authorized": false,
+    "critic_authorized": false,
+    "ppo_authorized_to_start": false,
+    "single_execution": true,
+    "no_autonomous_retry": "on failure the evidence is preserved and the run stops"
+  },
+  "deferred_todo": {
+    "loto": "NOT integrated. Future TODO, not J10R1.",
+    "loco": "NOT integrated. Future TODO, not J10R1.",
+    "b1r1": "NOT integrated. Future TODO, not J10R1.",
+    "b1r2": "NOT integrated. Future TODO, not J10R1.",
+    "generalisation_dataset_epic": "OPEN. This stage still covers AB06 and three starts of the same trial; it demonstrates no generalisation to other subjects, trials or speeds.",
+    "the_fit_that_uses_this_data": "NOT part of this stage. Combining these rows with J7 and refitting is a SEPARATE stage requiring its own preregistration and its own authorisation.",
+    "j10_rejected_bundle": "the rejected J10 bundle stays byte-identical as evidence. It is never edited and never executed. TODO for the architect only: decide whether it is archived."
+  },
+  "unchanged": {
+    "j0_to_j9r1": "no existing artefact, runner, test, receipt, trace or run leaf from J0 through J9R1 is modified",
+    "production": "FSM, morphology corridor, reward, SEA, the C++ plugin and every production configuration are untouched",
+    "scope": "everything this stage adds lives inside Trajectory Generator"
+  },
+  "cross_platform": "pathlib and os.rename only; no shell, no os-specific path handling; macOS arm64 and Windows x86",
+  "pinned_artefacts_sha256": {
+    "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+    "v26c_penetration_contract.py": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "v26c_j9r1_closed_loop.py": "f58b0d14b077536ced24ec3063bd2154ed1e207b42532bddc76177f1e02e4a3c",
+    "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1/v26c_j9r1_closed_loop_receipt.json": "c201b666f68451e4646fbaae3f149e9afaf873b5c94f99c95fc4286faaeda4f4",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27"
+  },
+  "pinned_repo_artefacts_sha256": {
+    "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best/module_state.pkl": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+    "Trajectory Generator/osim_trj_cmc_like.py": "26458424c44f18fa1dda20b830fa5e7e825c583cc5d10e6d019cb3bd9a0c6d24",
+    "Trajectory Generator/baseline_MLP/env_factory.py": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+    "Trajectory Generator/baseline_MLP/exploration_noise.py": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f",
+    "Trajectory Generator/baseline_MLP/target_domain_imitation.py": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3"
+  },
+  "pinned_runtime_sources_note": "target_domain_imitation.py is pinned because prescribed_teacher_action is the LABEL SOURCE; a change to it would change every label this stage produces. osim_trj_cmc_like.py is pinned because it also authenticates the transcribed reset semantics.",
+  "supersedes_rejected_j10": {
+    "what_happened": "the J10 readiness bundle was REJECTED by the architect BEFORE any execution. J10 was never run: no rollout, no leaf, no lock, no staging and no output were ever produced by it.",
+    "rejected_stage": "V26C_J10_MULTISTART_TEACHER",
+    "rejected_leaf_never_created": "j10_runs/j10_multistart_teacher_v26c_2026-08-27_r1",
+    "decided_by": "the architect, at the readiness gate",
+    "date_utc": "2026-08-27",
+    "reasons_verbatim_scope": "the corrections were issued without changing the matrix, the parent, the teacher, the gates or the science. They are integrity requirements on how the evidence is resolved, counted, hashed and committed - not a redesign of the experiment.",
+    "reasons": [
+      "the coverage feature was to be resolved from the parent's actor feature MANIFEST. That manifest declares the 39-wide June-lineage slice, while the live runtime actor block is 35-wide, so a manifest-resolved index is not the index the environment actually produces. Coverage must be resolved from the LIVE RUNTIME ENVIRONMENT and the receipt must say so.",
+      "the per-cell check on sim_outputs accepted any NON-EMPTY directory. That accepts 18 files from a writer that failed silently, and accepts 20 from something else writing into the directory. The requirement is EXACTLY 19 regular files, listed and counted in the receipt.",
+      "the receipt recorded artefact PATHS but no artefact HASHES, so nothing downstream could prove that the file it reads is the file that was measured. Every one of the four per-cell artefacts and all 19 sim_outputs must be hashed before the receipt is written.",
+      "there was no verification that the recorded leaf-relative paths RESOLVE and that the recorded hashes REPRODUCE once the staging directory has been renamed onto the leaf. An unverified commit can leave a leaf that looks valid and is not.",
+      "there were no tests proving that the rejected J10 bundle stays byte-identical, nor that the successor actually refuses a wrong output count, a staging path or a tampered hash.",
+      "the readiness bundle carried four further record defects found in the independent review: a per-cell env_config digest taken over the staging path and therefore unreproducible by construction; a top-level runtime digest describing the inert preflight config rather than the one that produced the data; a blanket paths_are_leaf_relative claim contradicted by five repository-relative fields; and preregistered reset constants whose last digit was not the value the arithmetic produces."
+    ],
+    "rejected_bundle_sha256": {
+      "v26c_j10_prereg_multistart_teacher.json": "79b1b573eb45831e7333c3dbc539f76a7e9555986b38e73ea83a91590f8241d7",
+      "v26c_j10_multistart_teacher.py": "4d436aceaf0d78aee269f24cf90d47ca81877eecd49aeb155768b0613e35fa18",
+      "test_v26c_j10_multistart_teacher.py": "fc1cf58721f84302b5a8f3665133cefde8d27ff130108189be7b39bec1ae1ba5",
+      "v26c_j10_multistart_teacher_authorization.json": "d6a3fddd6fb1681fd65a49e0e1bdc5f7880c441d6ca059c941fc573f27a5346f"
+    },
+    "rejected_readiness_report_sha256": {
+      "reports/user/2026-08-27_v26c_j10_multistart_teacher_readiness.md": "a1f75107673a58deb798424c33cf1e142523c9573d9b812d31ce3a88287c80f9"
+    },
+    "those_files_are_immutable": "the rejected J10 bundle and its readiness report are PRESERVED byte-identical as the record of what was proposed and refused. They are never edited, never repaired and never executed. This stage verifies their hashes and refuses to run if any of them changed.",
+    "this_stage_is_additive": "J10R1 is a SUCCESSOR, not an edit. It has its own preregistration, runner, tests, authorisation, readiness record and its own leaf."
+  },
+  "mandatory_corrections": {
+    "1_coverage_resolved_from_live_runtime": {
+      "requirement": "evaluate_coverage and the receipt must declare resolved_by = the feature names of the LIVE RUNTIME ENVIRONMENT, never the parent manifest",
+      "implementation": "runtime_feature_names(base) reads base.actor_feature_names from the constructed environment, exactly as v26c_j1_collect.py:621 does, and requires the 35-wide runtime block",
+      "manifest_status": "the parent's 39-wide actor_feature_manifest.json is recorded as provenance ONLY and is never used to resolve an index"
+    },
+    "2_exactly_19_sim_outputs": {
+      "requirement": "after env.close() each cell must require EXACTLY 19 regular files in its sim_outputs directory, fail-closed; a non-empty directory is not enough",
+      "implementation": "the entries are listed after close(); non-regular entries are refused; the count must equal 19 exactly, and both the count and the file names are recorded in the receipt",
+      "why_not_at_least": "18 means a writer failed silently and 19 was never produced; 20 means something other than this cell wrote into the directory. Both are integrity failures, so the test is equality, not a lower bound"
+    },
+    "3_hash_every_artefact_before_the_receipt": {
+      "requirement": "before the receipt is written, compute and record the SHA-256 of the four per-cell artefacts and of all 19 sim_outputs, keyed by leaf-relative path",
+      "artefacts": [
+        "j10r1_cell_<ID>_teacher_dataset.npz",
+        "j10r1_cell_<ID>_trace.json",
+        "j10r1_cell_<ID>_kinematics.npz",
+        "j10r1_cell_<ID>_penetration.npz"
+      ],
+      "count_per_cell": 23,
+      "dataset_hash_is_binding_for_j11": "the teacher_dataset.npz SHA-256 is BINDING: the future J11 fit must verify it before consuming the dataset, so that the rows it trains on are provably the rows this stage collected",
+      "j11_is_not_authorised_here": "recording a binding hash for J11 authorises no fit"
+    },
+    "4_post_commit_verification": {
+      "requirement": "after the commit, re-resolve every recorded leaf-relative path and recompute every recorded hash inside the COMMITTED leaf; a mismatch is a TECHNICAL INVALID outcome, preserved fail-closed and never promoted",
+      "why_it_cannot_run_before_the_rename": "the receipt is written into the staging directory and its paths are leaf-relative, so they only resolve once the rename has happened. The verification therefore runs IMMEDIATELY AFTER the rename, which is what this correction requires.",
+      "atomic_semantics": {
+        "problem": "os.rename is atomic, but atomicity says nothing about whether the committed bytes are the bytes that were measured. A leaf could exist, look complete, and not match its own receipt.",
+        "solution": "the leaf is BORN INVALID. A TECHNICAL_INVALID marker is written into the STAGING directory BEFORE the rename, so it is committed BY the rename and travels with it. There is therefore no instant at which a leaf exists without an explicit statement that it is unverified - not even if the process is killed between the rename and the verification. Validity is then made positive: the receipt declares this leaf valid IF AND ONLY IF commit_verification.json exists beside it and declares pass true.",
+        "on_pass": "commit_verification.json is written with pass true, the recomputed hashes, the file and directory counts and the receipt's own SHA-256 - which a receipt can never carry itself. The birth marker is then removed, and that removal is the LAST write of the commit.",
+        "on_failure": "commit_verification.json is written with pass false and the birth marker is rewritten to say the verification failed, then the runner raises. The leaf is PRESERVED as evidence about the commit: not deleted, not repaired, not retried.",
+        "no_apparently_valid_leaf": "guaranteed by construction, not by convention: the marker exists from the instant the leaf does. If recording the verification itself fails - ENOSPC, EROFS, EIO, precisely the fault class this check exists to detect - the marker is already there and the leaf stays invalid.",
+        "path_containment": "a recorded path that is absolute, that contains a backslash, that is a symlink or that resolves outside the leaf is an integrity failure, not a lookup miss",
+        "interrupt_is_not_a_verdict": "the verification catches Exception, never BaseException. A Ctrl-C or a SystemExit propagates with the leaf left marked invalid, instead of being recorded as a verification verdict that would permanently invalidate a byte-perfect collection.",
+        "the_receipt_is_checked_too": "the receipt is the file the verifier reads, so it is also the file that most needs checking: its committed bytes are compared against the SHA-256 measured on the staged receipt, so a corrupted receipt cannot validate itself.",
+        "the_cell_list_must_be_complete": "the committed receipt must record every cell of the frozen matrix, in order. A receipt that lost a cell would otherwise verify only what it still lists and be declared valid.",
+        "rename_replaces_an_empty_destination_on_posix": "known and stated: POSIX rename(2) silently replaces an EMPTY destination directory, so the no-clobber re-check immediately before the rename is check-then-act. The exclusive lock excludes every other run of this stage; the residual case is a foreign process creating an empty directory at the leaf path inside that window, which would destroy no evidence because an empty directory holds none. Windows fails closed here, raising FileExistsError. After the rename the leaf is additionally required to carry the pre-commit marker, so a leaf that is not the directory this run staged is refused.",
+        "cleanup_failure_is_surfaced": "a staging directory that cannot be removed - an open handle on Windows - is reported on stderr rather than silently ignored, because it will block the next run and this stage never repairs itself."
+      }
+    },
+    "5_dedicated_tests": {
+      "j10_byte_identity": "the four rejected J10 files and the J10 readiness report must hash to their pinned values",
+      "wrong_output_count": "the exactly-19 check must REFUSE 18 and REFUSE 20",
+      "staging_paths": "no receipt field may contain a staging path; every recorded path is leaf-relative",
+      "hash_mismatch_and_tampering": "the post-commit verifier must FAIL on a tampered file, on a deleted file, on an extra file in sim_outputs and on a path that escapes the leaf",
+      "born_invalid_leaf": "static proof that the marker is written before the rename and removed after it, and that the verification does not catch BaseException",
+      "receipt_integrity": "the committed receipt must match the staged bytes, and a receipt that lost or reordered a cell must be refused rather than verified into validity"
+    }
+  },
+  "rejected_j10_bundle_sha256": {
+    "v26c_j10_prereg_multistart_teacher.json": "79b1b573eb45831e7333c3dbc539f76a7e9555986b38e73ea83a91590f8241d7",
+    "v26c_j10_multistart_teacher.py": "4d436aceaf0d78aee269f24cf90d47ca81877eecd49aeb155768b0613e35fa18",
+    "test_v26c_j10_multistart_teacher.py": "fc1cf58721f84302b5a8f3665133cefde8d27ff130108189be7b39bec1ae1ba5",
+    "v26c_j10_multistart_teacher_authorization.json": "d6a3fddd6fb1681fd65a49e0e1bdc5f7880c441d6ca059c941fc573f27a5346f"
+  },
+  "rejected_j10_bundle_rule": "verify_prereg hashes each of these files and REFUSES to run if any of them changed. The rejected bundle is immutable evidence."
+}

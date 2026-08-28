@@ -1,0 +1,81 @@
+{
+  "artefacts_sha256": {
+    "probe_actor_transplant_report.json": "73bb4c78f9e3910d552308250bf6dda29028bf6182a9760d0965db3c45ff0f80",
+    "probe_full_module_state.pkl": "b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2",
+    "probe_module_manifest.json": "eab14deedfe88449bac9ab37f5f56959d3213a3d0830ce7f22b71bb3aedfceaa",
+    "v26c_j20_probe_result.json": "51b5f999f22fbd937b754159fc7a44f2fc3efa72463ea137154829b9d71d2452"
+  },
+  "authoritative_path": "warm_start.transplant_actor_state",
+  "checks_passed": 28,
+  "checks_total": 29,
+  "failed_checks": [
+    "P24_frozen_module_still_gives_the_critic_gradient"
+  ],
+  "inert": {
+    "actor_edited": false,
+    "algo_train_called": false,
+    "environment_constructed": false,
+    "environment_stepped": false,
+    "optimizer_constructed": false,
+    "optimizer_step_taken": false,
+    "ppo_updates": 0,
+    "ray_cluster_started": false,
+    "rollout_performed": false,
+    "warmup_executed": false
+  },
+  "inputs": {
+    "architect_go_pins": {
+      "j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module/module_state.pkl": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+      "test_v26c_j20_critic_warmup_readiness.py": "34558c921f7d9d3b892aa69ba38e2efc7599dab5eb97619224be2a8435d14939",
+      "v26c_j20_actor_feature_manifest_overlay.json": "b0f9035413be0a56216e391cd27c4282c3cb708b7733a67ad32e506d281d39ca",
+      "v26c_j20_critic_warmup_readiness.py": "d33e0709ca4682ef857e07a85c7015d2d857aba2b04f454afb3bc1aa0c57858b",
+      "v26c_j20_derive_warmup_config.py": "f21654ce315827e11bf3a7a8c48331454b71a0c9f439c75454f9652ede81aaaf",
+      "v26c_j20_prereg_critic_warmup_readiness.json": "f4ec06d77641a460e26df554f4c5c0f10ebceacb4534bbd0368773294706130c",
+      "v26c_j20_warmup_cfg.yaml": "d8bcfd39f6015eaf7a41deda2edec201e9dbe89df6c425a67f3bf14bc5e4f525"
+    },
+    "baseline_pins_sha256": {
+      "asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+      "tb_logging.py": "b5543e286410aa9476b5e91614b3d1028516696f1a5c743ec858d1e2c609ce26",
+      "train_ppo_mlp.py": "cbd278c39c4fe9efcfb52b7a95eb3e85f24020eb6aedd1892f7832b1472be375",
+      "warm_start.py": "84706218dcc4c5cb7f97a8f3f67ef40ba9e064ba5aef25cb6559d1c8a506c34c"
+    },
+    "config_sha256": "d8bcfd39f6015eaf7a41deda2edec201e9dbe89df6c425a67f3bf14bc5e4f525",
+    "j19a_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "j19a_module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+    "overlay_sha256": "b0f9035413be0a56216e391cd27c4282c3cb708b7733a67ad32e506d281d39ca",
+    "prereg_sha256": "f4ec06d77641a460e26df554f4c5c0f10ebceacb4534bbd0368773294706130c",
+    "runner_sha256": "d33e0709ca4682ef857e07a85c7015d2d857aba2b04f454afb3bc1aa0c57858b"
+  },
+  "j19a_leaf_unchanged": true,
+  "kind": "EXECUTION RECEIPT",
+  "next_stage_authorized": false,
+  "promotion": "NONE",
+  "stage": "V26C_J20_CRITIC_WARMUP_READINESS",
+  "verdict": "FAIL_CLOSED",
+  "warmup_command_preregistered": [
+    "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/train_ppo_mlp.py",
+    "--worker-process",
+    "--config",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_warmup_cfg.yaml",
+    "--output-dir",
+    "<OUTPUT_DIR>",
+    "--warm-start-raw",
+    "--warm-start-raw-source",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+    "--warm-start-raw-source-feature-manifest",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_actor_feature_manifest_overlay.json",
+    "--asymmetric-actor-critic",
+    "--freeze-actor",
+    "--freeze-logstd",
+    "--iterations",
+    "1",
+    "--checkpoint-every",
+    "1",
+    "--retain-iteration-checkpoints",
+    "--tensorboard",
+    "--no-progress",
+    "--no-update-history"
+  ],
+  "warmup_not_executed_by_this_stage": true
+}

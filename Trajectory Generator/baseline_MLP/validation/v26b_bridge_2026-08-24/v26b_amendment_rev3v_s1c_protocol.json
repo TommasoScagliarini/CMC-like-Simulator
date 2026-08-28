@@ -1,0 +1,98 @@
+{
+  "amendment_id": "rev3v_s1c_quality_protocol_and_sign_audit",
+  "date": "2026-08-24",
+  "token": "V26B-S1C-PROTOCOL (protocol, sign audit, static tests and report ONLY)",
+  "kind": "ADDITIVE. No fit, no rollout, no collection, no promotion, no production change. rev3l..rev3u and every artifact remain immutable",
+  "architect_ruling": "the 7 FSM/safety gates PASS is accepted as closed-loop ELIGIBILITY only; the qualitative promotion of A2 is REFUSED. A2 stays NON-DEPLOYABLE and sigma stays UNRESOLVED",
+  "SIGN_AND_TARGET_AUDIT": {
+    "coordinate_under_test": "obs35[4] = pros_ankle_angle, the PROSTHETIC ankle joint angle; obs35[2] = pros_knee_angle. Bounds knee (-1.5, 0), ankle (-0.7, +0.7) rad. In this convention NEGATIVE ankle = plantarflexion (push-off), POSITIVE = dorsiflexion",
+    "two_distinct_references_were_in_play": {
+      "training_target": "u_IK AB06 prosthetic-side action, decoded per PROTOCOL_F2R sec.3 as q_ankle = 0.7*a, q_knee = 0.75*a - 0.75. Measured on the 500 nominal rows: q_ankle_IK min -0.15516, max +0.40018, 19.4% of rows NEGATIVE (73 of the 380 training rows, 19.2%)",
+      "reporting_reference": "cache targets[:,2], the HEALTHY CONTRALATERAL ankle. Measured: min +0.08647, max +0.44138, mean +0.23356, frac_negative 0.000 - it NEVER goes negative",
+      "distance_between_them": "RMSE(q_ankle_IK, healthy_ankle) = 0.13480 on the ankle and 0.09596 on the knee: they are different signals, not two views of one target"
+    },
+    "why_sign_agreement_was_1.0_while_the_ankle_stayed_POSITIVE": "the receipt metric was mean(sign(pros_ankle) == sign(healthy_ankle)). The healthy reference is positive on 100% of rows and the realized prosthetic ankle is positive on 100% of rows, so the comparison is DEGENERATE: it returns 1.0 by construction and carries no information. It never tested the plantarflexion requirement. The metric is hereby declared VOID for degenerate references",
+    "were_we_chasing_the_wrong_target_or_the_wrong_coordinate": {
+      "verdict": "the TRAINING target was the right coordinate and the right signal (prosthetic-side IK, which does contain the negative tract). The REPORTING reference was a different coordinate (healthy contralateral) and was silently used to judge quality",
+      "consequence_measured": "S0D sits at RMSE 0.04763 from the healthy ankle while the IK target sits at 0.13480 from it. Optimising towards u_IK therefore moves AWAY from the healthy reference BY CONSTRUCTION: A2 went 0.04763 -> 0.06772. The 'quality regression' of A2 is the mechanical consequence of optimising towards one reference while grading against the other, not a defect of the fit",
+      "rule_from_now_on": "quality is judged prosthetic-vs-prosthetic-IK in the prosthetic convention; the healthy contralateral signal is a SYMMETRY diagnostic and may never be used for sign agreement or as the optimisation reference"
+    }
+  },
+  "CAUSAL_DIAGNOSIS": {
+    "q1_why_the_offline_gain_does_not_transfer": {
+      "action_space_transfer_is_GOOD": "A2 closed 19% (knee) and 15% (ankle) of the action gap to u_IK on its own visited states, matching the offline holdout gain (18.3% / 13.8%)",
+      "joint_angle_space_transfer_is_ASYMMETRIC": "RMSE(pros_knee, q_knee_IK): S0D 0.12639 -> A2 0.12279 (slightly better). RMSE(pros_ankle, q_ankle_IK): S0D 0.13458 -> A2 0.15229 (WORSE). The ankle gain does not merely fail to transfer: it inverts",
+      "mechanism": "only one half of the ankle command change is physically realisable, so a symmetric change in command produces an ASYMMETRIC change in the realised joint: the positive half lands, the negative half is absorbed. The realised ankle therefore drifts upward"
+    },
+    "q2_why_the_ankle_stays_POSITIVE_evidence": {
+      "the_policy_ALREADY_commands_plantarflexion": "S0D commands q_ankle down to -0.49494 on 11.8% of rows - far more negative than the IK target's -0.15516. A2 commands down to -0.28817 on 11.0% of rows",
+      "the_command_never_reaches_the_joint": "pros_ankle_angle_served_ref NEVER goes negative: S0D min +0.01600 (0.0% negative), A2 min +0.03170 (0.0%). The realised joint follows the served reference almost exactly",
+      "quantified_on_the_rows_that_matter": "on the 46 S0D rows commanding q_ankle < -0.05, the served reference averages +0.1918 and the realised angle +0.1906: the command is simply not honoured",
+      "not_an_actuator_saturation": "pros_ankle_angle_sea_u stays within |u| <= 0.052 and never approaches 1.0: the SEA is not saturated. The block is in the reference-governor / slew path (ankle slew 2.0 rad/s = 0.02 rad per 10 ms step), not in the actuator",
+      "smoking_gun": "on the 97 rows where the IK target is NEGATIVE, the realised ankle went from S0D +0.1433 to A2 +0.1743: on exactly the push-off rows where plantarflexion is wanted, A2 is MORE dorsiflexed than S0D"
+    },
+    "BLOCKER_DECLARED": "a negative realised ankle excursion is NOT achievable by any policy change under the current frozen reference-governor/slew configuration. Even a command of -0.49 produces a served reference of +0.19. Preregistering an ankle-negative gate on the realised joint angle would preregister an UNREACHABLE gate. This is a plant/pipeline finding, not a learning finding, and its remedy lies in production configuration, which this stage may not touch"
+  },
+  "S1C_PROTOCOL": {
+    "init": "EXCLUSIVELY S0D 481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a. A1..A6 and S1A are never init, source or anchor",
+    "stage_order": "S1C-0 feasibility probe (offline, no fit, no rollout) -> architect review -> S1C-1 fit (only if S1C-0 says REACHABLE) -> architect review -> closed-loop gate under its own token",
+    "S1C_0_feasibility_probe": {
+      "question": "under the FROZEN production reference path, does there exist ANY admissible command sequence that drives the realised pros_ankle_angle to <= -0.03 inside the B3 phase window?",
+      "method": "offline reachability on the recorded traces: forward-simulate the served-reference dynamics (6 Hz filter + 2.0 rad/s ankle slew, both frozen) from the observed states under the most aggressive admissible command, and compare the reachable envelope with the -0.03 requirement. Uses ONLY recorded data and frozen parameters; no episode is executed",
+      "outcomes": {
+        "REACHABLE": "S1C-1 may preregister a binding ankle-negative gate",
+        "UNREACHABLE": "the ankle-negative requirement is escalated to the architect as a PRODUCTION-CONFIGURATION question; no fit is run against an unreachable target"
+      }
+    },
+    "S1C_1_candidates_finite": {
+      "count": 3,
+      "open_search": false,
+      "fixed": "anchor/task ratio r = 5 (the only ratio that survived the rev3t hierarchy), 300 epochs, batch 256, Adam lr 1e-4, seed 2026, deterministic, clock re-zeroed, logstd bit-identical, July parametric anchor 1e-5",
+      "varied": "a phase-localised weight w on the push-off rows (the rows where q_ankle_IK < 0), w in {2, 4, 8}, applied INSIDE the task role only",
+      "rationale": "the row-uniform MSE spends its bounded budget uniformly, while the plantarflexion requirement is concentrated on 19.2% of the rows. w localises the budget without touching the ratio r or any threshold",
+      "conditional": "this grid is executed ONLY if S1C-0 returns REACHABLE"
+    },
+    "PREREGISTERED_QUALITY_GATES": {
+      "convention": "all joint-angle gates on the PROSTHETIC coordinate, negative = plantarflexion, compared against the PROSTHETIC IK target. The healthy contralateral signal appears only as a symmetry diagnostic",
+      "G1_gait_preservation": "the seven rev3u FSM/safety gates, unchanged and binding",
+      "G2_non_regression_vs_S0D_on_the_IK_target": {
+        "metric": "RMSE(pros_q, q_IK) per joint",
+        "baseline_S0D": [
+          0.12639,
+          0.13458
+        ],
+        "rule": "must be <= the S0D baseline per joint. A2 would FAIL this on the ankle (0.15229 > 0.13458): the gate that was missing"
+      },
+      "G3_non_regression_vs_S0D_on_the_symmetry_reference": {
+        "metric": "RMSE(pros_q, healthy_q) per joint",
+        "baseline_S0D": [
+          0.12057,
+          0.04763
+        ],
+        "rule": "must be <= 1.05 x the S0D baseline per joint, so no future candidate may improve on one reference while silently regressing on the other"
+      },
+      "G4_shape": {
+        "pearson_r": "per joint, >= the S0D value minus 0.02, computed vs the PROSTHETIC IK target",
+        "amplitude_ratio": "std(pros_q)/std(q_IK) within [0.80, 1.25] per joint",
+        "sign_agreement": "VOID whenever the reference is sign-degenerate; when both signs are present it is computed and the degeneracy status is always recorded"
+      },
+      "G5_ankle_negative_excursion": {
+        "metric": "min realised pros_ankle_angle inside the B3 phase window [0.55, 0.80]",
+        "threshold": -0.03,
+        "binding": "ONLY if S1C-0 returns REACHABLE; otherwise recorded as an OPEN BLOCKER and never used to pass or fail a candidate",
+        "note": "the B3 phase field has been identically zero on every v3 trace of this chain (S0D, R2I, S1A, A2), so the window itself is currently not evaluable; S1C-0 must also determine whether that field is usable"
+      },
+      "no_walking_claim": "no offline metric may declare walking; no gate may be relaxed to accommodate a candidate"
+    },
+    "sigma": "UNRESOLVED and NOT operational. No S1C stage assumes 0.005 or any other value; rollouts, when authorised, use the deterministic mean",
+    "prohibitions": [
+      "no fit or rollout in this stage",
+      "no promotion",
+      "no production/env/reward/FSM/SEA/corridor change",
+      "no use of A1..A6 or S1A as init/source/anchor",
+      "no new collection",
+      "no threshold change once frozen"
+    ]
+  },
+  "next_step_requested_from_architect": "review this protocol and decide (a) whether to authorise the S1C-0 feasibility probe, and (b) whether the ankle-negative requirement should become a production-configuration question rather than a learning objective"
+}

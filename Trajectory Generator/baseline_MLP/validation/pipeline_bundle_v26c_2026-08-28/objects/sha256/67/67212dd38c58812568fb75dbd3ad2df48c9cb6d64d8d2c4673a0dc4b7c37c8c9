@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reward ex_novo - baseline MLP</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #5d667a;
+      --line: #d8dee9;
+      --reward: #1f7a5b;
+      --reward-soft: #dff3eb;
+      --penalty: #b33c32;
+      --penalty-soft: #f8e4e1;
+      --post: #8a5a16;
+      --post-soft: #fff0d6;
+      --diag: #345995;
+      --diag-soft: #e5ecfb;
+      --disabled: #687083;
+      --disabled-soft: #eceff4;
+      --code: #eef2f7;
+      --shadow: 0 1px 2px rgba(25, 31, 44, 0.08), 0 8px 24px rgba(25, 31, 44, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 28px clamp(18px, 4vw, 44px) 18px;
+      background: #111827;
+      color: #f9fafb;
+      border-bottom: 1px solid #0b1020;
+    }
+
+    main {
+      padding: 22px clamp(18px, 4vw, 44px) 40px;
+      max-width: 1540px;
+      margin: 0 auto;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight: 760;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 8px 0;
+      color: var(--muted);
+    }
+
+    .subhead {
+      max-width: 980px;
+      color: #c8d2e2;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .badges,
+    .stats,
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badges {
+      margin-top: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+      color: #eef4ff;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      white-space: nowrap;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .formula {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcff;
+      min-width: 0;
+    }
+
+    .formula code {
+      display: block;
+      padding: 10px;
+      border-radius: 6px;
+      background: var(--code);
+      color: #162032;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(170px, 1fr));
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .flow-lane {
+      min-width: 170px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcff;
+      padding: 10px;
+      position: relative;
+    }
+
+    .flow-lane:not(:last-child)::after {
+      content: ">";
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8791a3;
+      font-weight: 800;
+      background: var(--bg);
+      border-radius: 999px;
+      width: 18px;
+      height: 18px;
+      text-align: center;
+      line-height: 18px;
+      z-index: 1;
+    }
+
+    .flow-title {
+      font-size: 13px;
+      font-weight: 760;
+      margin-bottom: 8px;
+      color: #101828;
+    }
+
+    .chip {
+      display: block;
+      width: 100%;
+      margin: 6px 0;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font-size: 12px;
+      color: #263246;
+      overflow-wrap: anywhere;
+    }
+
+    .chip.reward {
+      border-color: #9bd7c3;
+      background: var(--reward-soft);
+    }
+
+    .chip.penalty {
+      border-color: #e7b4ae;
+      background: var(--penalty-soft);
+    }
+
+    .chip.post {
+      border-color: #f1cf8f;
+      background: var(--post-soft);
+    }
+
+    .chip.diag {
+      border-color: #b9c8ea;
+      background: var(--diag-soft);
+    }
+
+    .chip.disabled {
+      border-color: #d2d7e1;
+      background: var(--disabled-soft);
+      color: var(--disabled);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .legend .chip {
+      display: inline-flex;
+      width: auto;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .weights {
+      display: grid;
+      gap: 10px;
+    }
+
+    .weight-group {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcff;
+    }
+
+    .weight-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 12px;
+      border-top: 1px solid #eef1f6;
+    }
+
+    .weight-row:first-of-type {
+      border-top: 0;
+    }
+
+    .weight-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      color: #182234;
+    }
+
+    .filters {
+      margin-bottom: 10px;
+    }
+
+    input,
+    select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+    }
+
+    input {
+      min-width: min(360px, 100%);
+      flex: 1 1 260px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      padding: 9px 10px;
+      vertical-align: top;
+      border-bottom: 1px solid #edf1f6;
+      text-align: left;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f0f4f9;
+      color: #263246;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      z-index: 2;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .term-id {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-weight: 700;
+      color: #111827;
+      overflow-wrap: anywhere;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.reward,
+    .pill.active {
+      color: #0d5b41;
+      background: var(--reward-soft);
+    }
+
+    .pill.penalty {
+      color: #8b261f;
+      background: var(--penalty-soft);
+    }
+
+    .pill.post {
+      color: #6b440c;
+      background: var(--post-soft);
+    }
+
+    .pill.diag,
+    .pill.derived {
+      color: #233f78;
+      background: var(--diag-soft);
+    }
+
+    .pill.disabled,
+    .pill.imitation {
+      color: #535d70;
+      background: var(--disabled-soft);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcff;
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .note-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .note-list li {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 1120px) {
+      .layout,
+      .formula-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      header,
+      main {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .section {
+        padding: 14px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      th:nth-child(4),
+      td:nth-child(4),
+      th:nth-child(7),
+      td:nth-child(7) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reward ex_novo - baseline MLP</h1>
+    <p class="subhead">
+      Mappa grafica della reward usata da <code>RewardShapingWrapper</code> in modalita <code>ex_novo</code>.
+      La parte positiva viene composta prima del clipping; safety, contatto, range e vincoli ex-novo restano post-clipping.
+    </p>
+    <div class="badges" aria-label="sorgenti analizzate">
+      <span class="badge">Config: training_exnovo_cfg.yaml</span>
+      <span class="badge">Formula: reward_function.py::compute_reward</span>
+      <span class="badge">Termini env: osim_trj_cmc_like.py::_get_reward</span>
+      <span class="badge">Wrapper: RewardShapingWrapper</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2>Formula ex_novo</h2>
+      <div class="formula-grid">
+        <div class="formula">
+          <h3>Pre-clipping</h3>
+          <code>positive_preclip =
+  0.20 * tracking_score
++ 0.00 * reference_score
++ 0.00 * bio_score
++ 0.35 * contact_load_score
++ 0.25 * phase_regular_score
+- penalty
+
+reward_base = clip(positive_preclip, 0.0, 1.0)</code>
+        </div>
+        <div class="formula">
+          <h3>Post-clipping</h3>
+          <code>reward =
+  reward_base
+- safety_term
+- grf_penetration_term
+- grf_ankle_moment_flip_term
+- phase_timeout_penalty_term
+- exnovo_task_term
+- prosthetic_joint_range_term
+- morphology_term
+- oob_term</code>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="chip reward">Reward / score positivo</span>
+        <span class="chip penalty">Penalty pre-clip</span>
+        <span class="chip post">Penalty post-clip</span>
+        <span class="chip diag">Derivato / diagnostico</span>
+        <span class="chip disabled">Peso zero o solo imitation</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Flusso grafico</h2>
+      <div id="flow" class="flow" aria-label="diagramma del flusso reward">
+        <div class="flow-lane">
+          <div class="flow-title">Sorgenti</div>
+          <span class="chip diag">env reward_terms</span>
+          <span class="chip diag">wrapper task terms</span>
+          <span class="chip diag">policy_segment_values</span>
+        </div>
+        <div class="flow-lane">
+          <div class="flow-title">Score positivi pre-clip</div>
+          <span class="chip reward">tracking_score * 0.20</span>
+          <span class="chip reward">contact_load_score * 0.35</span>
+          <span class="chip reward">phase_regular_score * 0.25</span>
+          <span class="chip disabled">reference_score * 0.00</span>
+          <span class="chip disabled">bio_score * 0.00</span>
+        </div>
+        <div class="flow-lane">
+          <div class="flow-title">Penalty pre-clip</div>
+          <span class="chip penalty">effort + smoothness + saturation</span>
+          <span class="chip penalty">command_rate aggregate</span>
+          <span class="chip penalty">SEA usability terms</span>
+          <span class="chip disabled">optional direct command terms</span>
+        </div>
+        <div class="flow-lane">
+          <div class="flow-title">Clip</div>
+          <span class="chip diag">reward_base = clip(pre, 0, 1)</span>
+          <span class="chip diag">pre-clip reward cannot go below 0</span>
+        </div>
+        <div class="flow-lane">
+          <div class="flow-title">Penalty post-clip</div>
+          <span class="chip post">safety + GRF feasibility</span>
+          <span class="chip post">phase timeout guard</span>
+          <span class="chip post">swing/load/slip task</span>
+          <span class="chip post">q range + oob</span>
+          <span class="chip disabled">morphology weight 0</span>
+        </div>
+        <div class="flow-lane">
+          <div class="flow-title">Output</div>
+          <span class="chip reward">reward</span>
+          <span class="chip diag">reward_components</span>
+          <span class="chip diag">reward_terms</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="section">
+        <h2>Catalogo termini</h2>
+        <div class="cards" id="summaryCards" aria-label="conteggio termini"></div>
+        <div class="filters" aria-label="filtri catalogo">
+          <input id="searchBox" type="search" placeholder="Cerca termine, formula, gruppo o nota">
+          <select id="stageFilter" aria-label="filtra per stage">
+            <option value="">Tutti gli stage</option>
+          </select>
+          <select id="statusFilter" aria-label="filtra per stato">
+            <option value="">Tutti gli stati</option>
+          </select>
+          <select id="groupFilter" aria-label="filtra per gruppo">
+            <option value="">Tutti i gruppi</option>
+          </select>
+        </div>
+        <table aria-label="tutti i termini reward">
+          <thead>
+            <tr>
+              <th>Termine</th>
+              <th>Ruolo</th>
+              <th>Stage</th>
+              <th>Stato</th>
+              <th>Peso / blend</th>
+              <th>Origine / formula</th>
+              <th>Gruppo</th>
+            </tr>
+          </thead>
+          <tbody id="termRows"></tbody>
+        </table>
+      </section>
+
+      <aside class="section">
+        <h2>Pesi ex_novo</h2>
+        <div id="weights" class="weights"></div>
+      </aside>
+    </div>
+
+    <section class="section">
+      <h2>Note operative</h2>
+      <ul class="note-list">
+        <li><code>reference_score</code> e <code>bio_score</code> sono ancora calcolati ma hanno blend 0.0 nella configurazione ex-novo: restano diagnostici/legacy.</li>
+        <li><code>phase_timeout_loss</code> entra due volte: dentro <code>phase_regularity_loss</code> per il punteggio pre-clip e come <code>phase_timeout_penalty_term</code> post-clip.</li>
+        <li><code>segment_delta_loss</code>, <code>qdot_ref_loss</code>, <code>qddot_ref_loss</code>, <code>jerk_ref_loss</code>, <code>reference_governor_loss</code> e <code>u_rate_loss</code> sono attivi tramite <code>command_rate_loss</code>; i loro pesi diretti sono 0.0.</li>
+        <li><code>morphology_loss</code>, <code>reserve_residual_loss</code>, <code>pelvis_height_loss</code> e <code>policy_action_clip_loss</code> sono visualizzati ma non modificano la reward con i pesi attuali.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script id="reward-data" type="application/json">
+{
+  "coords": {
+    "prosthetic": ["pros_knee_angle", "pros_ankle_angle"],
+    "bio": ["pelvis_tx", "pelvis_ty", "pelvis_tz", "pelvis_tilt", "pelvis_list", "pelvis_rotation", "hip_flexion_r", "knee_angle_r", "ankle_angle_r", "hip_flexion_l", "hip_adduction_l"]
+  },
+  "flow": [
+    {
+      "title": "Sorgenti",
+      "chips": [
+        {"text": "env reward_terms", "className": "diag"},
+        {"text": "wrapper task terms", "className": "diag"},
+        {"text": "policy_segment_values", "className": "diag"}
+      ]
+    },
+    {
+      "title": "Score positivi pre-clip",
+      "chips": [
+        {"text": "tracking_score * 0.20", "className": "reward"},
+        {"text": "contact_load_score * 0.35", "className": "reward"},
+        {"text": "phase_regular_score * 0.25", "className": "reward"},
+        {"text": "reference_score * 0.00", "className": "disabled"},
+        {"text": "bio_score * 0.00", "className": "disabled"}
+      ]
+    },
+    {
+      "title": "Penalty pre-clip",
+      "chips": [
+        {"text": "effort + smoothness + saturation", "className": "penalty"},
+        {"text": "command_rate aggregate", "className": "penalty"},
+        {"text": "SEA usability terms", "className": "penalty"},
+        {"text": "optional direct command terms", "className": "disabled"}
+      ]
+    },
+    {
+      "title": "Clip",
+      "chips": [
+        {"text": "reward_base = clip(pre, 0, 1)", "className": "diag"},
+        {"text": "pre-clip reward cannot go below 0", "className": "diag"}
+      ]
+    },
+    {
+      "title": "Penalty post-clip",
+      "chips": [
+        {"text": "safety + GRF feasibility", "className": "post"},
+        {"text": "phase timeout guard", "className": "post"},
+        {"text": "swing/load/slip task", "className": "post"},
+        {"text": "q range + oob", "className": "post"},
+        {"text": "morphology weight 0", "className": "disabled"}
+      ]
+    },
+    {
+      "title": "Output",
+      "chips": [
+        {"text": "reward", "className": "reward"},
+        {"text": "reward_components", "className": "diag"},
+        {"text": "reward_terms", "className": "diag"}
+      ]
+    }
+  ],
+  "weightGroups": [
+    {
+      "title": "Blend positivi pre-clip",
+      "items": [
+        ["blend_tracking", "0.20"],
+        ["blend_reference", "0.00"],
+        ["blend_bio", "0.00"],
+        ["blend_contact_load", "0.35"],
+        ["blend_phase_regular", "0.25"],
+        ["clip_low / clip_high", "0.0 / 1.0"]
+      ]
+    },
+    {
+      "title": "Score sharpness",
+      "items": [
+        ["tracking_weight", "8.0"],
+        ["reference_weight", "6.0"],
+        ["bio_weight", "2.0"],
+        ["phase_regularity_weight", "4.0"],
+        ["imitation_weight", "8.0"],
+        ["served_imitation_weight", "8.0"]
+      ]
+    },
+    {
+      "title": "Penalty pre-clip",
+      "items": [
+        ["effort_weight", "0.05"],
+        ["smoothness_weight", "0.02"],
+        ["saturation_weight", "0.10"],
+        ["command_rate_weight", "0.05"],
+        ["segment_delta_weight", "0.00"],
+        ["qdot_ref_weight", "0.00"],
+        ["qddot_ref_weight", "0.00"],
+        ["jerk_ref_weight", "0.00"],
+        ["reference_governor_weight", "0.00"],
+        ["u_rate_weight", "0.00"],
+        ["sea_saturation_weight", "0.10"],
+        ["sea_torque_error_weight", "0.01"],
+        ["sea_tau_spring_effort_weight", "0.00"],
+        ["sea_tau_spring_rate_weight", "0.00"],
+        ["sea_motor_speed_weight", "0.01"],
+        ["sea_motor_accel_weight", "0.005"],
+        ["sea_motor_power_weight", "0.005"],
+        ["policy_action_clip_weight", "0.00"]
+      ]
+    },
+    {
+      "title": "Penalty post-clip",
+      "items": [
+        ["safety_weight", "2.0"],
+        ["grf_penetration_weight", "0.5"],
+        ["grf_ankle_moment_flip_weight", "0.05"],
+        ["phase_timeout_penalty_weight", "0.10"],
+        ["swing_unloading_weight", "0.02"],
+        ["contact_overload_weight", "0.02"],
+        ["grf_slip_weight", "0.02"],
+        ["reserve_residual_weight", "0.00"],
+        ["pelvis_height_weight", "0.00"],
+        ["prosthetic_joint_range_weight", "1.0"],
+        ["morphology_weight", "0.00"],
+        ["oob_weight", "2.0"]
+      ]
+    },
+    {
+      "title": "Phase internals",
+      "items": [
+        ["phase_event_order_weight", "1.0"],
+        ["phase_period_weight", "1.0"],
+        ["phase_periodicity_weight", "0.5"],
+        ["phase_stance_fraction_weight", "0.5"],
+        ["phase_timeout_weight", "0.5"],
+        ["phase_period_nominal_s", "1.58"],
+        ["phase_period_soft_margin_s", "0.25"],
+        ["phase_stance_fraction_min/max", "0.50 / 0.80"]
+      ]
+    }
+  ],
+  "terms": [
+    {"id": "positive_preclip", "role": "formula", "stage": "pre-clip", "status": "derived", "weight": "n/a", "source": "compute_reward", "group": "Formula finale", "formula": "blend scores - penalty", "note": "Valore non loggato direttamente; e' la quantita prima del clip."},
+    {"id": "reward_base", "role": "reward", "stage": "clip output", "status": "active", "weight": "clip_low=0.0, clip_high=1.0", "source": "compute_reward", "group": "Formula finale", "formula": "clip(positive_preclip, clip_low, clip_high)", "note": "Componente loggata come reward_base."},
+    {"id": "reward", "role": "reward", "stage": "final", "status": "active", "weight": "n/a", "source": "compute_reward", "group": "Formula finale", "formula": "reward_base - postclip terms", "note": "Reward scalare restituita all'agente."},
+    {"id": "penalty", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "sum weighted", "source": "compute_reward", "group": "Penalty pre-clip", "formula": "somma dei loss pre-clip pesati", "note": "Sottratta prima del clip."},
+    {"id": "exnovo_task_term", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "sum weighted", "source": "compute_reward", "group": "Task ex-novo", "formula": "swing_unloading + overload + slip + reserve + pelvis", "note": "Sottratta dopo il clip."},
+
+    {"id": "tracking_score", "role": "reward", "stage": "pre-clip", "status": "active", "weight": "blend_tracking=0.20", "source": "compute_reward", "group": "Tracking SEA", "formula": "1 / (1 + tracking_weight * tracking_loss)", "note": "Premia la capacita SEA di seguire la reference servita dalla policy."},
+    {"id": "tracking_loss", "role": "loss", "stage": "source", "status": "active", "weight": "tracking_weight=8.0", "source": "env", "group": "Tracking SEA", "formula": "mean(tracking_position_loss, tracking_velocity_loss)", "note": "Loss aggregato usato da tracking_score."},
+    {"id": "tracking_position_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via tracking_loss", "source": "env", "group": "Tracking SEA", "formula": "mean per-coordinate normalized q error", "note": "Media sulle coordinate protesiche."},
+    {"id": "tracking_velocity_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via tracking_loss", "source": "env", "group": "Tracking SEA", "formula": "mean per-coordinate normalized qdot error", "note": "Media sulle coordinate protesiche."},
+    {"id": "{coord}_tracking_position_loss", "expand": "prosthetic", "role": "loss", "stage": "source", "status": "active", "weight": "via tracking_position_loss", "source": "env", "group": "Tracking SEA", "formula": "normalized_square(q_ref - q)", "note": "Termine generato per ogni coordinata protesica."},
+    {"id": "{coord}_tracking_velocity_loss", "expand": "prosthetic", "role": "loss", "stage": "source", "status": "active", "weight": "via tracking_velocity_loss", "source": "env", "group": "Tracking SEA", "formula": "normalized_square(qdot_ref - qdot)", "note": "Termine generato per ogni coordinata protesica."},
+    {"id": "{coord}_tracking_q_error", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Tracking SEA", "formula": "q_ref - q", "note": "Errore q in unita fisiche, non pesato direttamente."},
+    {"id": "{coord}_tracking_qdot_error", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Tracking SEA", "formula": "qdot_ref - qdot", "note": "Errore qdot in unita fisiche, non pesato direttamente."},
+    {"id": "{coord}_reward_q_range", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "scale", "source": "env", "group": "Tracking SEA", "formula": "normalizer q range", "note": "Scala usata per normalizzare position loss."},
+    {"id": "{coord}_reward_qdot_range", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "scale", "source": "env", "group": "Tracking SEA", "formula": "normalizer qdot range", "note": "Scala usata per normalizzare velocity loss."},
+
+    {"id": "reference_score", "role": "reward", "stage": "pre-clip", "status": "disabled", "weight": "blend_reference=0.00", "source": "compute_reward", "group": "Reference legacy", "formula": "1 / (1 + reference_weight * reference_loss)", "note": "Calcolato ma non usato nella configurazione ex-novo."},
+    {"id": "reference_loss", "role": "loss", "stage": "source", "status": "disabled", "weight": "reference_weight=6.0; blend=0", "source": "env", "group": "Reference legacy", "formula": "reference_position_loss", "note": "Target IK prescritto disabilitato per ex-novo."},
+    {"id": "reference_position_loss", "role": "loss", "stage": "source", "status": "disabled", "weight": "via reference_loss; blend=0", "source": "env", "group": "Reference legacy", "formula": "mean per-coordinate prescribed IK q error", "note": "Diagnostico in ex-novo."},
+    {"id": "{coord}_reference_position_loss", "expand": "prosthetic", "role": "loss", "stage": "source", "status": "disabled", "weight": "blend_reference=0", "source": "env", "group": "Reference legacy", "formula": "normalized_square(q_base - q)", "note": "Per coordinata protesica."},
+    {"id": "{coord}_reference_q_error", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Reference legacy", "formula": "q_base - q", "note": "Errore rispetto a IK prescritto."},
+
+    {"id": "bio_score", "role": "reward", "stage": "pre-clip", "status": "disabled", "weight": "blend_bio=0.00", "source": "compute_reward", "group": "Biologico legacy", "formula": "1 / (1 + bio_weight * bio_loss)", "note": "Calcolato ma non usato nella configurazione ex-novo."},
+    {"id": "bio_loss", "role": "loss", "stage": "source", "status": "disabled", "weight": "bio_weight=2.0; blend=0", "source": "env", "group": "Biologico legacy", "formula": "bio_position_loss", "note": "Traccia biologica disabilitata nello scalare ex-novo."},
+    {"id": "bio_position_loss", "role": "loss", "stage": "source", "status": "disabled", "weight": "via bio_loss; blend=0", "source": "env", "group": "Biologico legacy", "formula": "mean per biological-context coordinate", "note": "Media sulle coordinate biologiche di contesto."},
+    {"id": "{coord}_bio_position_loss", "expand": "bio", "role": "loss", "stage": "source", "status": "disabled", "weight": "blend_bio=0", "source": "env", "group": "Biologico legacy", "formula": "normalized_square(q_base - q)", "note": "Termine generato per coordinata biologica se presente nel modello."},
+    {"id": "{coord}_bio_q_error", "expand": "bio", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Biologico legacy", "formula": "q_base - q", "note": "Errore q biologico in unita fisiche."},
+
+    {"id": "contact_load_score", "role": "reward", "stage": "pre-clip", "status": "active", "weight": "blend_contact_load=0.35", "source": "wrapper", "group": "Contatto protesico", "formula": "clip(normal_force_bw / contact_load_target_bw, 0, 1)", "note": "Attivo solo quando la stance protesica e' attesa."},
+    {"id": "contact_load_loss", "role": "loss", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Contatto protesico", "formula": "(1 - contact_load_score)^2 in stance", "note": "Log diagnostico; non viene sottratto direttamente."},
+    {"id": "prosthetic_stance_expected", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Contatto protesico", "formula": "phase/contact state", "note": "Indicatore 0/1 per stance attesa."},
+    {"id": "prosthetic_swing_expected", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Contatto protesico", "formula": "phase/contact state", "note": "Indicatore 0/1 per swing atteso."},
+    {"id": "prosthetic_normal_force_bw", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "normalizer", "source": "wrapper", "group": "Contatto protesico", "formula": "online_gait.left.normal_force_bw", "note": "Forza verticale normalizzata a body weight."},
+    {"id": "prosthetic_slip_speed_m_s", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "scale for grf_slip_loss", "source": "wrapper", "group": "Contatto protesico", "formula": "online_grf.left.slip_speed", "note": "Velocita di slip del contatto protesico."},
+    {"id": "swing_unloading_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "swing_unloading_weight=0.02", "source": "wrapper", "group": "Task ex-novo", "formula": "bounded_square(normal_bw / swing_unloading_force_tol_bw) in swing", "note": "Parte di exnovo_task_term."},
+    {"id": "contact_overload_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "contact_overload_weight=0.02", "source": "wrapper", "group": "Task ex-novo", "formula": "bounded_square(max(0, normal_bw - contact_load_max_bw))", "note": "Parte di exnovo_task_term."},
+    {"id": "grf_slip_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "grf_slip_weight=0.02", "source": "wrapper", "group": "Task ex-novo", "formula": "bounded_square(slip_speed / grf_slip_speed_scale_m_s) if loaded", "note": "Parte di exnovo_task_term."},
+
+    {"id": "phase_regular_score", "role": "reward", "stage": "pre-clip", "status": "active", "weight": "blend_phase_regular=0.25", "source": "wrapper", "group": "Fase gait", "formula": "phase_credit * score(phase_regularity_loss, phase_regularity_weight)", "note": "Premia sequenza e periodicita' degli eventi online."},
+    {"id": "phase_regularity_loss", "role": "loss", "stage": "source", "status": "active", "weight": "phase_regularity_weight=4.0", "source": "wrapper", "group": "Fase gait", "formula": "weighted phase event/order/period/timeout losses", "note": "Loss aggregato per phase_regular_score."},
+    {"id": "phase_event_order_loss", "role": "loss", "stage": "source", "status": "active", "weight": "phase_event_order_weight=1.0", "source": "wrapper", "group": "Fase gait", "formula": "invalid HS/TO order count", "note": "Entra in phase_regularity_loss."},
+    {"id": "phase_period_loss", "role": "loss", "stage": "source", "status": "active", "weight": "phase_period_weight=1.0", "source": "wrapper", "group": "Fase gait", "formula": "Huber interval around nominal +/- soft margin", "note": "Entra in phase_regularity_loss."},
+    {"id": "phase_period_hard_loss", "role": "loss", "stage": "source", "status": "active", "weight": "phase_period_weight=1.0", "source": "wrapper", "group": "Fase gait", "formula": "Huber interval outside hard min/max", "note": "Entra in phase_regularity_loss."},
+    {"id": "phase_periodicity_loss", "role": "loss", "stage": "source", "status": "active", "weight": "phase_periodicity_weight=0.5", "source": "wrapper", "group": "Fase gait", "formula": "Huber((period - previous_period) / scale)", "note": "Entra in phase_regularity_loss."},
+    {"id": "phase_stance_fraction_loss", "role": "loss", "stage": "source", "status": "active", "weight": "phase_stance_fraction_weight=0.5", "source": "wrapper", "group": "Fase gait", "formula": "Huber interval stance fraction [0.50, 0.80]", "note": "Entra in phase_regularity_loss."},
+    {"id": "phase_timeout_loss", "role": "penalty", "stage": "source + post-clip", "status": "active", "weight": "phase_timeout_weight=0.5; post=0.10", "source": "wrapper", "group": "Fase gait", "formula": "phase_stance_timeout_loss + phase_swing_timeout_loss", "note": "Entra in phase_regularity_loss e nel post-clip timeout term."},
+    {"id": "phase_timeout_penalty_term", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "phase_timeout_penalty_weight=0.10", "source": "compute_reward", "group": "Fase gait", "formula": "0.10 * phase_timeout_loss", "note": "Sottratto dopo il clip."},
+    {"id": "phase_stance_timeout_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via phase_timeout_loss", "source": "wrapper", "group": "Fase gait", "formula": "Huber interval stance elapsed <= 1.45 s", "note": "Parte di phase_timeout_loss."},
+    {"id": "phase_swing_timeout_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via phase_timeout_loss", "source": "wrapper", "group": "Fase gait", "formula": "Huber interval swing elapsed <= 0.90 s", "note": "Parte di phase_timeout_loss."},
+    {"id": "phase_stance_elapsed_s", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "time - last HS while in stance", "note": "Diagnostico timeout."},
+    {"id": "phase_swing_elapsed_s", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "time - last TO while in swing", "note": "Diagnostico timeout."},
+    {"id": "phase_stance_hard_timeout_s", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "threshold", "source": "wrapper", "group": "Fase gait", "formula": "2.20", "note": "Soglia di terminazione hard stance."},
+    {"id": "phase_swing_hard_timeout_s", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "threshold", "source": "wrapper", "group": "Fase gait", "formula": "1.30", "note": "Soglia di terminazione hard swing."},
+    {"id": "phase_timeout_exceeded", "role": "diagnostic", "stage": "termination", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "1 if hard timeout exceeded", "note": "Quando 1, il wrapper termina l'episodio."},
+    {"id": "phase_timeout_side", "role": "diagnostic", "stage": "termination", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "1=stance, 2=swing", "note": "Codice lato timeout."},
+    {"id": "phase_valid_cycle_count", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "valid cycle counter", "note": "Influenza phase_credit internamente."},
+    {"id": "phase_last_period_s", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "last HS-to-HS period", "note": "Diagnostico periodo."},
+    {"id": "phase_previous_period_s", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "previous HS-to-HS period", "note": "Usato per periodicity loss."},
+    {"id": "phase_last_stance_fraction", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Fase gait", "formula": "(TO - HS) / period", "note": "Diagnostico stance fraction."},
+
+    {"id": "effort_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "effort_weight=0.05", "source": "env", "group": "Comando policy", "formula": "mean(u^2)", "note": "Penalizza ampiezza comando SEA normalizzato."},
+    {"id": "smoothness_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "smoothness_weight=0.02", "source": "env", "group": "Comando policy", "formula": "segment_knot_delta_loss", "note": "Con policy_knots=1 resta tipicamente 0, ma e' visualizzato."},
+    {"id": "segment_knot_delta_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via smoothness_loss", "source": "env", "group": "Comando policy", "formula": "bounded normalized delta among inner knots", "note": "Sorgente di smoothness_loss."},
+    {"id": "saturation_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "saturation_weight=0.10", "source": "env", "group": "Comando policy", "formula": "mean(saturation excursion^2)", "note": "Penalizza |u| vicino/sopra sea_u_saturation_threshold."},
+    {"id": "u_abs_max", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Comando policy", "formula": "max(abs(u))", "note": "Diagnostico saturazione comando."},
+    {"id": "u_saturation_fraction", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Comando policy", "formula": "mean(abs(u) >= threshold)", "note": "Diagnostico saturazione comando."},
+    {"id": "command_rate_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "command_rate_weight=0.05", "source": "env", "group": "Reference model", "formula": "mean(segment_delta, qdot_ref, qddot_ref, jerk_ref, reference_governor, u_rate)", "note": "Aggregato attivo; i componenti diretti hanno peso 0 ma contribuiscono qui."},
+    {"id": "segment_delta_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via command_rate_loss; direct=0", "source": "env", "group": "Reference model", "formula": "bounded normalized diff(policy segment values)", "note": "Contribuisce a command_rate_loss."},
+    {"id": "qdot_ref_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via command_rate_loss; direct=0", "source": "env", "group": "Reference model", "formula": "bounded normalized served reference velocity", "note": "Contribuisce a command_rate_loss."},
+    {"id": "qddot_ref_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via command_rate_loss; direct=0", "source": "env", "group": "Reference model", "formula": "bounded normalized served reference acceleration", "note": "Contribuisce a command_rate_loss."},
+    {"id": "jerk_ref_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via command_rate_loss; direct=0", "source": "env", "group": "Reference model", "formula": "bounded normalized served jerk abs max", "note": "Contribuisce a command_rate_loss."},
+    {"id": "reference_governor_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via command_rate_loss; direct=0", "source": "env", "group": "Reference model", "formula": "mean(limit fractions velocity/acceleration/jerk)", "note": "Contribuisce a command_rate_loss."},
+    {"id": "u_rate_loss", "role": "loss", "stage": "source", "status": "active", "weight": "via command_rate_loss; direct=0", "source": "env", "group": "Reference model", "formula": "mean(square(delta_u / sea_u_rate_scale))", "note": "Contribuisce a command_rate_loss."},
+    {"id": "reference_velocity_limit_fraction", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via reference_governor_loss", "source": "env", "group": "Reference model", "formula": "governor velocity limit fraction", "note": "Componente diagnostica del reference governor."},
+    {"id": "reference_acceleration_limit_fraction", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via reference_governor_loss", "source": "env", "group": "Reference model", "formula": "governor acceleration limit fraction", "note": "Componente diagnostica del reference governor."},
+    {"id": "reference_jerk_limit_fraction", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via reference_governor_loss", "source": "env", "group": "Reference model", "formula": "governor jerk limit fraction", "note": "Componente diagnostica del reference governor."},
+    {"id": "{coord}_reference_target_error_rms_rad", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Reference model", "formula": "governor target_error_rms_rad", "note": "Diagnostico per coordinata."},
+    {"id": "{coord}_reference_velocity_abs_max_rad_s", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Reference model", "formula": "served velocity abs max", "note": "Diagnostico per coordinata."},
+    {"id": "{coord}_reference_acceleration_abs_max_rad_s2", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Reference model", "formula": "served acceleration abs max", "note": "Diagnostico per coordinata."},
+    {"id": "{coord}_reference_jerk_abs_max_rad_s3", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Reference model", "formula": "served jerk abs max", "note": "Diagnostico per coordinata."},
+
+    {"id": "sea_saturation_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "sea_saturation_weight=0.10", "source": "env", "group": "SEA fisico", "formula": "mean(raw torque proximity^2 + saturation_fraction)", "note": "Penalizza saturazione low-level del SEA."},
+    {"id": "sea_torque_error_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "sea_torque_error_weight=0.01", "source": "env", "group": "SEA fisico", "formula": "mean((torque_error_rms / F_opt)^2)", "note": "Errore tracking coppia SEA."},
+    {"id": "sea_tau_spring_effort_loss", "role": "penalty", "stage": "pre-clip", "status": "disabled", "weight": "sea_tau_spring_effort_weight=0.00", "source": "env", "group": "SEA fisico", "formula": "bounded tau_spring_rms / F_opt", "note": "Visualizzato ma non pesato attualmente."},
+    {"id": "sea_tau_spring_rate_loss", "role": "penalty", "stage": "pre-clip", "status": "disabled", "weight": "sea_tau_spring_rate_weight=0.00", "source": "env", "group": "SEA fisico", "formula": "bounded tau_spring_rate_rms / rate_scale", "note": "Visualizzato ma non pesato attualmente."},
+    {"id": "sea_motor_speed_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "sea_motor_speed_weight=0.01", "source": "env", "group": "SEA fisico", "formula": "(motor_speed_rms / scale)^2", "note": "Penalizza velocita motore."},
+    {"id": "sea_motor_accel_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "sea_motor_accel_weight=0.005", "source": "env", "group": "SEA fisico", "formula": "(motor_accel_rms / scale)^2", "note": "Penalizza accelerazione motore."},
+    {"id": "sea_motor_power_loss", "role": "penalty", "stage": "pre-clip", "status": "active", "weight": "sea_motor_power_weight=0.005", "source": "env", "group": "SEA fisico", "formula": "(motor_power_rms / scale)^2", "note": "Penalizza potenza motore."},
+    {"id": "sea_tau_input_saturation_fraction", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_saturation_loss", "source": "env", "group": "SEA fisico", "formula": "mean low-level input saturation fraction", "note": "Diagnostico aggregato."},
+    {"id": "{coord}_sea_tau_spring_rms_nm", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_tau_spring_effort_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "RMS tau_spring", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_tau_spring_abs_max_nm", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "SimulationRunner", "group": "SEA fisico", "formula": "max(abs(tau_spring))", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_tau_spring_rate_rms_nm_s", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_tau_spring_rate_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "RMS d(tau_spring)/dt", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_tau_spring_rate_abs_max_nm_s", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "SimulationRunner", "group": "SEA fisico", "formula": "max(abs(d(tau_spring)/dt))", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_tau_input_raw_rms_nm", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_saturation_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "RMS raw motor input torque", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_tau_input_raw_abs_max_nm", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "SimulationRunner", "group": "SEA fisico", "formula": "max(abs(raw motor input torque))", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_tau_input_saturation_fraction", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_saturation_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "fraction of raw input beyond clamp", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_torque_error_rms_nm", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_torque_error_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "RMS(tau_ref - tau_spring)", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_motor_speed_rms_rad_s", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_motor_speed_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "RMS motor speed", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_motor_speed_abs_max_rad_s", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "SimulationRunner", "group": "SEA fisico", "formula": "max(abs(motor speed))", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_motor_accel_rms_rad_s2", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_motor_accel_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "RMS motor acceleration", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_motor_accel_abs_max_rad_s2", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "SimulationRunner", "group": "SEA fisico", "formula": "max(abs(motor acceleration))", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_motor_power_rms_w", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via sea_motor_power_loss", "source": "SimulationRunner", "group": "SEA fisico", "formula": "RMS motor power", "note": "Copiato da sea_segment_diagnostics."},
+    {"id": "{coord}_sea_motor_power_abs_max_w", "expand": "prosthetic", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "SimulationRunner", "group": "SEA fisico", "formula": "max(abs(motor power))", "note": "Copiato da sea_segment_diagnostics."},
+
+    {"id": "policy_action_clip_loss", "role": "penalty", "stage": "pre-clip", "status": "disabled", "weight": "policy_action_clip_weight=0.00", "source": "wrapper", "group": "Action clipping", "formula": "mean((raw - clipped)^2 / (1 + squared))", "note": "Visualizzato ma peso zero."},
+    {"id": "policy_action_clip_fraction", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Action clipping", "formula": "fraction of action dims clipped", "note": "Diagnostico."},
+    {"id": "policy_action_clip_abs_max", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Action clipping", "formula": "max(abs(raw - clipped))", "note": "Diagnostico."},
+
+    {"id": "safety_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "safety_weight=2.0", "source": "env", "group": "Safety / GRF", "formula": "truncation_penalty if unsafe", "note": "Sottratto dopo il clip come safety_term."},
+    {"id": "safety_term", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "2.0 * safety_loss", "source": "compute_reward", "group": "Safety / GRF", "formula": "safety_weight * safety_loss", "note": "Componente post-clip loggata."},
+    {"id": "grf_penetration_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "grf_penetration_weight=0.5", "source": "env", "group": "Safety / GRF", "formula": "min(25, penetration_excess / scale)^2", "note": "Sottratto dopo il clip."},
+    {"id": "grf_penetration_term", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "0.5 * grf_penetration_loss", "source": "compute_reward", "group": "Safety / GRF", "formula": "grf_penetration_weight * grf_penetration_loss", "note": "Componente post-clip loggata."},
+    {"id": "grf_penetration_m", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Safety / GRF", "formula": "max applied contact penetration", "note": "Diagnostico in metri."},
+    {"id": "grf_penetration_excess_m", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via grf_penetration_loss", "source": "env", "group": "Safety / GRF", "formula": "max(0, penetration - soft_threshold)", "note": "Diagnostico in metri."},
+    {"id": "grf_penetration_scale_m", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "normalizer", "source": "env", "group": "Safety / GRF", "formula": "termination_threshold - soft_threshold", "note": "Scala del loss di penetrazione."},
+    {"id": "grf_ankle_moment_flip_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "grf_ankle_moment_flip_weight=0.05", "source": "env", "group": "Safety / GRF", "formula": "contact-patch ankle moment flip loss", "note": "Sottratto dopo il clip."},
+    {"id": "grf_ankle_moment_flip_term", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "0.05 * loss", "source": "compute_reward", "group": "Safety / GRF", "formula": "grf_ankle_moment_flip_weight * grf_ankle_moment_flip_loss", "note": "Componente post-clip loggata."},
+    {"id": "grf_ankle_moment_flip_tau_nm", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "env", "group": "Safety / GRF", "formula": "ankle moment diagnostic", "note": "Diagnostico in N-m."},
+    {"id": "grf_ankle_moment_flip_excess_nm", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "via loss", "source": "env", "group": "Safety / GRF", "formula": "excess beyond tau tolerance", "note": "Diagnostico in N-m."},
+    {"id": "grf_ankle_moment_flip_raw_loss_nm2", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "raw", "source": "env", "group": "Safety / GRF", "formula": "raw loss before normalization", "note": "Diagnostico."},
+
+    {"id": "oob_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "oob_weight=2.0", "source": "compute_reward(reference)", "group": "Range protesico", "formula": "mean squared excursion of commanded reference outside oob band", "note": "Calcolato da policy_segment_values, non da reward_terms."},
+    {"id": "oob_raw_loss", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "compute_reward(reference)", "group": "Range protesico", "formula": "mean raw excursion^2", "note": "Diagnostico in rad^2."},
+    {"id": "oob_term", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "2.0 * oob_loss", "source": "compute_reward", "group": "Range protesico", "formula": "oob_weight * oob_loss", "note": "Sottratto dopo il clip."},
+    {"id": "prosthetic_joint_range_loss", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "prosthetic_joint_range_weight=1.0", "source": "wrapper", "group": "Range protesico", "formula": "actual q excursion outside prosthetic_joint_q band", "note": "Sottratto dopo il clip."},
+    {"id": "prosthetic_joint_range_raw_loss", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Range protesico", "formula": "raw actual q excursion^2", "note": "Diagnostico in rad^2."},
+    {"id": "prosthetic_joint_range_term", "role": "penalty", "stage": "post-clip", "status": "active", "weight": "1.0 * prosthetic_joint_range_loss", "source": "compute_reward", "group": "Range protesico", "formula": "prosthetic_joint_range_weight * loss", "note": "Componente post-clip loggata."},
+    {"id": "prosthetic_knee_q_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Range protesico", "formula": "actual pros_knee_angle", "note": "Valore q simulato."},
+    {"id": "prosthetic_ankle_q_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Range protesico", "formula": "actual pros_ankle_angle", "note": "Valore q simulato."},
+
+    {"id": "morphology_loss", "role": "penalty", "stage": "post-clip", "status": "disabled", "weight": "morphology_weight=0.00", "source": "wrapper", "group": "Morphology corridor", "formula": "0.5 * (knee_loss + ankle_loss)", "note": "Profilo caricato ma peso attuale 0.0."},
+    {"id": "morphology_term", "role": "penalty", "stage": "post-clip", "status": "disabled", "weight": "0.0 * morphology_loss", "source": "compute_reward", "group": "Morphology corridor", "formula": "morphology_weight * morphology_loss", "note": "Componente post-clip loggata, attualmente 0."},
+    {"id": "morphology_available", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "1 if profile/phase/ref available", "note": "Controlla disponibilita' corridor."},
+    {"id": "morphology_phase", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "normalized online gait phase", "note": "Fase usata per interpolare il corridor."},
+    {"id": "morphology_knee_loss", "role": "loss", "stage": "diagnostic", "status": "diagnostic", "weight": "via morphology_loss; weight 0", "source": "wrapper", "group": "Morphology corridor", "formula": "interval loss served knee ref vs corridor", "note": "Diagnostico con peso finale 0."},
+    {"id": "morphology_ankle_loss", "role": "loss", "stage": "diagnostic", "status": "diagnostic", "weight": "via morphology_loss; weight 0", "source": "wrapper", "group": "Morphology corridor", "formula": "interval loss served ankle ref vs corridor", "note": "Diagnostico con peso finale 0."},
+    {"id": "morphology_knee_raw_loss_rad2", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "raw knee excursion^2", "note": "Diagnostico."},
+    {"id": "morphology_ankle_raw_loss_rad2", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "raw ankle excursion^2", "note": "Diagnostico."},
+    {"id": "morphology_knee_excursion_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "knee excursion outside corridor", "note": "Diagnostico."},
+    {"id": "morphology_ankle_excursion_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "ankle excursion outside corridor", "note": "Diagnostico."},
+    {"id": "morphology_knee_value_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "pros_knee_angle_served_ref", "note": "Reference servita usata per corridor."},
+    {"id": "morphology_ankle_value_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "pros_ankle_angle_served_ref", "note": "Reference servita usata per corridor."},
+    {"id": "morphology_knee_min_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "corridor min knee", "note": "Bound interpolato."},
+    {"id": "morphology_knee_max_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "corridor max knee", "note": "Bound interpolato."},
+    {"id": "morphology_ankle_min_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "corridor min ankle", "note": "Bound interpolato."},
+    {"id": "morphology_ankle_max_rad", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "wrapper", "group": "Morphology corridor", "formula": "corridor max ankle", "note": "Bound interpolato."},
+
+    {"id": "reserve_residual_loss", "role": "penalty", "stage": "post-clip", "status": "disabled", "weight": "reserve_residual_weight=0.00", "source": "wrapper", "group": "Reserve / residual", "formula": "0.5 * (reserve_norm_loss + residual_norm_loss)", "note": "Monitor diagnostico; non pesa con config attuale."},
+    {"id": "reserve_norm_loss", "role": "loss", "stage": "diagnostic", "status": "diagnostic", "weight": "via disabled aggregate", "source": "wrapper", "group": "Reserve / residual", "formula": "bounded_square(reserve_norm / reserve_norm_scale_nm)", "note": "Diagnostico."},
+    {"id": "residual_norm_loss", "role": "loss", "stage": "diagnostic", "status": "diagnostic", "weight": "via disabled aggregate", "source": "wrapper", "group": "Reserve / residual", "formula": "bounded_square(residual_norm / residual_norm_scale_nm)", "note": "Diagnostico."},
+    {"id": "reserve_norm_nm", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "so_diagnostics", "group": "Reserve / residual", "formula": "tau_reserve_norm", "note": "Diagnostico static optimization."},
+    {"id": "residual_norm_nm", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "so_diagnostics", "group": "Reserve / residual", "formula": "residual_norm", "note": "Diagnostico static optimization."},
+    {"id": "pelvis_height_loss", "role": "penalty", "stage": "post-clip", "status": "disabled", "weight": "pelvis_height_weight=0.00", "source": "wrapper", "group": "Pelvis", "formula": "bounded_square(max(0, pelvis_height_min_m - pelvis_ty) / scale)", "note": "Monitor diagnostico; non pesa con config attuale."},
+    {"id": "pelvis_ty_m", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "0", "source": "observation", "group": "Pelvis", "formula": "pelvis_ty", "note": "Altezza pelvis in metri."},
+
+    {"id": "sound_imitation_loss", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "sum weighted sound-leg imitation coord losses", "note": "Calcolato per pretraining imitation; in ex_novo non modifica reward."},
+    {"id": "served_imitation_loss", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "sum weighted sound-leg target vs served reference losses", "note": "Calcolato per pretraining imitation; in ex_novo non modifica reward."},
+    {"id": "imitation_score", "role": "reward", "stage": "imitation only", "status": "imitation", "weight": "blend_imitation only if reward_mode=imitation", "source": "compute_reward", "group": "Imitation legacy", "formula": "1 / (1 + imitation_weight * sound_imitation_loss)", "note": "Score non usato in ex_novo."},
+    {"id": "served_imitation_score", "role": "reward", "stage": "imitation only", "status": "imitation", "weight": "blend_served_imitation only if reward_mode=imitation", "source": "compute_reward", "group": "Imitation legacy", "formula": "1 / (1 + served_imitation_weight * served_imitation_loss)", "note": "Score non usato in ex_novo."},
+    {"id": "{coord}_imitation_loss", "expand": "prosthetic", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "position + velocity sound target loss", "note": "Per coordinata protesica."},
+    {"id": "{coord}_served_imitation_loss", "expand": "prosthetic", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "served reference vs sound target loss", "note": "Per coordinata protesica."},
+    {"id": "{coord}_imitation_position_loss", "expand": "prosthetic", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "normalized q sound target loss", "note": "Per coordinata protesica."},
+    {"id": "{coord}_imitation_velocity_loss", "expand": "prosthetic", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "normalized qdot sound target loss", "note": "Per coordinata protesica."},
+    {"id": "{coord}_served_imitation_position_loss", "expand": "prosthetic", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "normalized q_ref vs sound target", "note": "Per coordinata protesica."},
+    {"id": "{coord}_served_imitation_velocity_loss", "expand": "prosthetic", "role": "loss", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "normalized qdot_ref vs sound target", "note": "Per coordinata protesica."},
+    {"id": "{coord}_imitation_position_weight", "expand": "prosthetic", "role": "diagnostic", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "position weight", "note": "Diagnostico imitation."},
+    {"id": "{coord}_imitation_velocity_weight", "expand": "prosthetic", "role": "diagnostic", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "velocity weight", "note": "Diagnostico imitation."},
+    {"id": "{coord}_imitation_position_range_rad", "expand": "prosthetic", "role": "diagnostic", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "position normalizer", "note": "Diagnostico imitation."},
+    {"id": "{coord}_imitation_velocity_range_rad_s", "expand": "prosthetic", "role": "diagnostic", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "velocity normalizer", "note": "Diagnostico imitation."},
+    {"id": "{coord}_imitation_target_q", "expand": "prosthetic", "role": "diagnostic", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "q_sound target", "note": "Diagnostico imitation."},
+    {"id": "{coord}_imitation_target_qdot", "expand": "prosthetic", "role": "diagnostic", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "qd_sound target", "note": "Diagnostico imitation."},
+    {"id": "{coord}_imitation_target_phase", "expand": "prosthetic", "role": "diagnostic", "stage": "imitation only", "status": "imitation", "weight": "not used in ex_novo", "source": "env", "group": "Imitation legacy", "formula": "target phase", "note": "Diagnostico imitation."},
+
+    {"id": "terminated", "role": "diagnostic", "stage": "termination", "status": "diagnostic", "weight": "0", "source": "env/wrapper", "group": "Episode end", "formula": "bool terminated as float", "note": "Loggato in reward_terms."},
+    {"id": "truncated", "role": "diagnostic", "stage": "termination", "status": "diagnostic", "weight": "0", "source": "env/wrapper", "group": "Episode end", "formula": "bool truncated as float", "note": "Loggato in reward_terms."},
+    {"id": "reward_env_original", "role": "diagnostic", "stage": "diagnostic", "status": "diagnostic", "weight": "discarded", "source": "wrapper", "group": "Formula finale", "formula": "env_reward before RewardShapingWrapper replacement", "note": "Preservato in info, ma non restituito all'agente."}
+  ]
+}
+  </script>
+
+  <script>
+    const DATA = JSON.parse(document.getElementById("reward-data").textContent);
+
+    function expandTerms() {
+      const expanded = [];
+      for (const term of DATA.terms) {
+        if (!term.expand) {
+          expanded.push({ ...term });
+          continue;
+        }
+        const coords = DATA.coords[term.expand] || [];
+        for (const coord of coords) {
+          const next = {};
+          for (const [key, value] of Object.entries(term)) {
+            if (key === "expand") continue;
+            next[key] = typeof value === "string" ? value.replaceAll("{coord}", coord) : value;
+          }
+          expanded.push(next);
+        }
+      }
+      return expanded;
+    }
+
+    const TERMS = expandTerms();
+    const STAGE_LABELS = {
+      "pre-clip": "pre-clip",
+      "post-clip": "post-clip",
+      "clip output": "clip",
+      "final": "finale",
+      "source": "sorgente",
+      "source + post-clip": "sorgente + post",
+      "diagnostic": "diagnostico",
+      "termination": "terminazione",
+      "imitation only": "solo imitation"
+    };
+
+    const STATUS_LABELS = {
+      active: "attivo",
+      derived: "derivato",
+      diagnostic: "diagnostico",
+      disabled: "peso zero",
+      imitation: "solo imitation"
+    };
+
+    function cssClassForTerm(term) {
+      if (term.status === "disabled" || term.status === "imitation") return term.status;
+      if (term.stage.includes("post-clip")) return "post";
+      if (term.role === "penalty") return "penalty";
+      if (term.role === "reward") return "reward";
+      return "diag";
+    }
+
+    function renderFlow() {
+      const root = document.getElementById("flow");
+      root.innerHTML = "";
+      for (const lane of DATA.flow) {
+        const node = document.createElement("div");
+        node.className = "flow-lane";
+        const title = document.createElement("div");
+        title.className = "flow-title";
+        title.textContent = lane.title;
+        node.appendChild(title);
+        for (const chip of lane.chips) {
+          const item = document.createElement("span");
+          item.className = `chip ${chip.className || ""}`;
+          item.textContent = chip.text;
+          node.appendChild(item);
+        }
+        root.appendChild(node);
+      }
+    }
+
+    function renderWeights() {
+      const root = document.getElementById("weights");
+      root.innerHTML = "";
+      for (const group of DATA.weightGroups) {
+        const box = document.createElement("div");
+        box.className = "weight-group";
+        const title = document.createElement("h3");
+        title.textContent = group.title;
+        box.appendChild(title);
+        for (const [name, value] of group.items) {
+          const row = document.createElement("div");
+          row.className = "weight-row";
+          const label = document.createElement("span");
+          label.textContent = name;
+          const val = document.createElement("span");
+          val.className = "weight-value";
+          val.textContent = value;
+          row.append(label, val);
+          box.appendChild(row);
+        }
+        root.appendChild(box);
+      }
+    }
+
+    function uniq(values) {
+      return [...new Set(values)].sort((a, b) => String(a).localeCompare(String(b)));
+    }
+
+    function populateFilters() {
+      const stage = document.getElementById("stageFilter");
+      const status = document.getElementById("statusFilter");
+      const group = document.getElementById("groupFilter");
+      for (const value of uniq(TERMS.map((term) => term.stage))) {
+        stage.add(new Option(STAGE_LABELS[value] || value, value));
+      }
+      for (const value of uniq(TERMS.map((term) => term.status))) {
+        status.add(new Option(STATUS_LABELS[value] || value, value));
+      }
+      for (const value of uniq(TERMS.map((term) => term.group))) {
+        group.add(new Option(value, value));
+      }
+    }
+
+    function rowMatches(term, query, stage, status, group) {
+      if (stage && term.stage !== stage) return false;
+      if (status && term.status !== status) return false;
+      if (group && term.group !== group) return false;
+      if (!query) return true;
+      const haystack = [
+        term.id,
+        term.role,
+        term.stage,
+        term.status,
+        term.weight,
+        term.source,
+        term.group,
+        term.formula,
+        term.note
+      ].join(" ").toLowerCase();
+      return haystack.includes(query);
+    }
+
+    function renderSummary(visibleTerms) {
+      const root = document.getElementById("summaryCards");
+      const active = visibleTerms.filter((term) => term.status === "active").length;
+      const post = visibleTerms.filter((term) => term.stage.includes("post-clip")).length;
+      const diag = visibleTerms.filter((term) => term.status === "diagnostic").length;
+      const disabled = visibleTerms.filter((term) => term.status === "disabled" || term.status === "imitation").length;
+      const values = [
+        ["Termini visibili", visibleTerms.length],
+        ["Attivi nello scalare", active],
+        ["Post-clip", post],
+        ["Diagnostici", diag],
+        ["Peso zero / imitation", disabled],
+        ["Totale espanso", TERMS.length]
+      ];
+      root.innerHTML = "";
+      for (const [label, value] of values) {
+        const card = document.createElement("div");
+        card.className = "stat-card";
+        const num = document.createElement("div");
+        num.className = "stat-number";
+        num.textContent = value;
+        const lab = document.createElement("div");
+        lab.className = "stat-label";
+        lab.textContent = label;
+        card.append(num, lab);
+        root.appendChild(card);
+      }
+    }
+
+    function renderRows() {
+      const query = document.getElementById("searchBox").value.trim().toLowerCase();
+      const stage = document.getElementById("stageFilter").value;
+      const status = document.getElementById("statusFilter").value;
+      const group = document.getElementById("groupFilter").value;
+      const visible = TERMS.filter((term) => rowMatches(term, query, stage, status, group));
+      renderSummary(visible);
+      const body = document.getElementById("termRows");
+      body.innerHTML = "";
+      for (const term of visible) {
+        const tr = document.createElement("tr");
+        const cls = cssClassForTerm(term);
+        tr.innerHTML = `
+          <td><div class="term-id"></div><p></p></td>
+          <td><span class="pill ${term.role === "penalty" ? "penalty" : term.role === "reward" ? "reward" : "diag"}"></span></td>
+          <td><span class="pill ${cls}"></span></td>
+          <td><span class="pill ${term.status}"></span></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        `;
+        tr.children[0].querySelector(".term-id").textContent = term.id;
+        tr.children[0].querySelector("p").textContent = term.note || "";
+        tr.children[1].querySelector("span").textContent = term.role;
+        tr.children[2].querySelector("span").textContent = STAGE_LABELS[term.stage] || term.stage;
+        tr.children[3].querySelector("span").textContent = STATUS_LABELS[term.status] || term.status;
+        tr.children[4].textContent = term.weight;
+        tr.children[5].innerHTML = `<strong>${escapeHtml(term.source)}</strong><br>${escapeHtml(term.formula)}`;
+        tr.children[6].textContent = term.group;
+        body.appendChild(tr);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function init() {
+      renderFlow();
+      renderWeights();
+      populateFilters();
+      renderRows();
+      for (const id of ["searchBox", "stageFilter", "statusFilter", "groupFilter"]) {
+        document.getElementById(id).addEventListener("input", renderRows);
+        document.getElementById(id).addEventListener("change", renderRows);
+      }
+      window.REWARD_GRAPH_TERMS = TERMS;
+    }
+
+    init();
+  </script>
+</body>
+</html>

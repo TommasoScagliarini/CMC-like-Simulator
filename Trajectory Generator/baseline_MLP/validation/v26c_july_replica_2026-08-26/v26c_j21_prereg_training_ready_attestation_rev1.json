@@ -1,0 +1,245 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION AMENDMENT",
+  "stage": "V26C_J21_TRAINING_READY_ATTESTATION",
+  "revision": "rev1",
+  "cites": {
+    "base": "v26c_j21_prereg_training_ready_attestation.json",
+    "base_sha256": "df178ffae521aaf46837258ce2036789c6f8ae9f6b4cfb27b4cd11b85d06da79"
+  },
+  "predecessor_status": "THE BASE DOCUMENT IS SEALED AND UNMODIFIED. This amendment rewrites none of it; the base is pinned by the aggregator and re-hashed at preflight. Where the two disagree, rev1 governs.",
+  "precedence": "rev1 > base",
+  "contains_no_self_hash": true,
+  "self_hash_note": "this file carries no hash of itself. The aggregator embeds its sha256 as PIN_PREREG_REV1 and re-hashes it at preflight, so the seal is external.",
+  "additive": "Three gates are added (T16, T17, T18), one is redefined (T15), one is narrowed to supporting telemetry (the worker-sync clause of T8), and several recorded fields are corrected or made truthful. The gate count moves from 15 to 18. No gate is removed and no predicate is weakened except where the base document was factually WRONG, which is stated openly below.",
+
+  "correction_1_T15_was_factually_wrong": {
+    "what_the_base_said": "T15_no_upstream_stage_ever_claimed_readiness: every upstream receipt and result aggregated here records promotion NONE ... J21 is the FIRST and ONLY place where training_ready may become true.",
+    "why_that_is_wrong": "J19A legitimately records actor_promoted true. It promoted an ACTOR, at its own stage, under its own preregistration, after eleven binding eligibility criteria. That is a real, correct, recorded promotion. A document asserting that no upstream promotion occurred is false, and a gate built on that assertion would either be vacuous or would have to be lied to.",
+    "the_second_error": "'the FIRST and ONLY place where training_ready may become true' is a claim about the whole project's history that this stage cannot verify and does not need.",
+    "what_T15_now_gates": [
+      "no upstream stage promoted THIS J20 checkpoint to TRAINING_INPUT_ONLY",
+      "no upstream stage claimed CHECKPOINT training readiness, i.e. no aggregated receipt or result records training_ready true",
+      "no upstream stage authorised a launch, a next stage, PPO, an ex-novo run or a deployment"
+    ],
+    "what_T15_now_records_as_COMPATIBLE_and_DISTINCT": {
+      "j19a_actor_promotion": "actor_promoted true at stage V26C_J19A_SINGLE_REPRODUCTION",
+      "scope": "STAGE-LOCAL ACTOR PROMOTION. It says an actor passed J19A's offline eligibility and was persisted. It is a different object (an actor, not a checkpoint) and a different claim (offline eligibility, not training readiness).",
+      "why_it_does_not_conflict": "TRAINING_INPUT_ONLY is a CHECKPOINT-level status for the J20 warm-up checkpoint. J19A never made, and could not have made, that claim: the J20 checkpoint did not exist yet.",
+      "how_it_is_verified": "the aggregator reads actor_promoted from the J19A result, requires it to be exactly true, and records it under a heading that names it as compatible. A J19A that did NOT promote its actor would fail the gate, because then the actor inside the checkpoint would have no eligibility behind it."
+    },
+    "the_claim_J21_is_allowed_to_make": "J21 is the first CURRENT V26C checkpoint-level TRAINING_INPUT_ONLY attestation after J20. It is not 'the first training_ready ever' and no document in this package may say so."
+  },
+
+  "correction_2_training_counters_are_scoped_and_typed": {
+    "what_was_wrong": "the base recorded training_started false and training_iterations_run 0 without saying WHOSE training, which reads as though nothing anywhere was ever trained. The J20 critic warm-up did complete one real training iteration, and saying otherwise would be false. The base also wrote the FAIL side as 'and_every_other_flag_above: false', which types a COUNT as a boolean.",
+    "the_scope_that_now_applies": "training_started false and training_iterations_run 0 refer to, and ONLY to, (a) downstream post-J20 actor-updating PPO or ex-novo pilot training, and (b) the execution of J21 itself. They say nothing about the J20 critic warm-up, which is recorded separately and truthfully.",
+    "the_separately_recorded_truth": {
+      "critic_warmup_iterations_completed": 1,
+      "checkpoint_logical_iteration": 1,
+      "next_logical_iteration": 2,
+      "j21_execution_training_iterations": 0,
+      "downstream_actor_training_started": false
+    },
+    "typing_rule": "every training-iteration count is a NUMBER. training_iterations_run, j21_execution_training_iterations, critic_warmup_iterations_completed, checkpoint_logical_iteration and next_logical_iteration are integers on PASS and on FAIL alike. Only the boolean flags are booleans. The FAIL field set is written out in full below rather than by reference.",
+    "mandatory_final_fields_on_FAIL": {
+      "training_ready": false,
+      "promotion": "NONE",
+      "training_started": false,
+      "training_iterations_run": 0,
+      "sampling": false,
+      "rollout": false,
+      "ray_started": false,
+      "environment_constructed": false,
+      "launch_authorized": false,
+      "next_stage_authorized": false,
+      "ppo_authorized": false,
+      "ex_novo_authorized": false,
+      "deployable": false
+    },
+    "environment_constructed_is_scoped_to_J21": "false means THIS stage constructs no environment. Prior stages did construct environments - J19B, J19C and R3 all did, and R3 declared it. The field describes J21, and both the result and the report say so."
+  },
+
+  "correction_3_worker_sync_needs_real_proof": {
+    "what_was_wrong": "the base proved 'the worker weights were synchronised' from learners/default_policy/weights_seq_no == 1 in the committed iteration row. That is a counter of how many times the learner published weights. It does not show that the EnvRunners received them, how many EnvRunners were checked, or that what they hold is the intended actor.",
+    "the_proof_now_required": "the pinned J20 actor_transplant_report.json, under integration_validation, must record ALL of:",
+    "required_fields": {
+      "weights_synced_before_first_sample": true,
+      "env_runner_count_checked": 14,
+      "env_runner_actors_exact": true,
+      "env_runner_actor_digests": "a list of exactly 14 entries, every one equal to d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+      "learner_actor": {
+        "exact": true,
+        "max_abs_diff": 0.0,
+        "expected_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "actual_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "missing_keys": []
+      },
+      "saved_initial_actor": {
+        "exact": true,
+        "max_abs_diff": 0.0,
+        "expected_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "actual_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "missing_keys": []
+      }
+    },
+    "weights_seq_no_is_demoted": "learners/default_policy/weights_seq_no == 1 is still READ and still RECORDED, as SUPPORTING TELEMETRY. It is no longer a binding clause of T8 and it is not the proof of anything. A run in which it were absent would still pass T8; a run in which the transplant report's integration_validation did not hold would fail T16.",
+    "gate": "T16"
+  },
+
+  "correction_4_lineage_must_be_measured": {
+    "what_was_wrong": "the base gated lineage against a CONSTANT string plus a substring scan of pin labels for July markers. A constant is not a measurement, and the substring scan is actively unsound here because the whole validation directory is named v26c_july_replica_2026-08-26, so every label contains the word 'july'.",
+    "the_chain_now_measured_byte_for_byte": [
+      {
+        "link": "August V26 imitation -> J2",
+        "recorded_by": "the J2 receipt, derivation.parent and output_files_sha256",
+        "parent_path": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+        "parent_module_state_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+        "parent_manifest39_sha256": "2837779ceb5953b18cf9be0e62836c8cc56d3fe871c48b869a5cedb6b0d81945",
+        "child_module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+        "child_manifest35_sha256": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+        "width_transition": "39 -> 35"
+      },
+      {
+        "link": "J2 -> J8",
+        "recorded_by": "the J8 receipt, inputs.parent and output.files",
+        "parent_module_state_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+        "child_module_state_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82"
+      },
+      {
+        "link": "J8 -> J18",
+        "recorded_by": "the J18 receipt, inputs.parent",
+        "parent_module_state_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+        "parent_actor_digest": "6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207",
+        "note": "J18 persisted ZERO actors: its selection was fail-closed. It contributes the constrained-update protocol and the candidate metrics, not an actor. J19A reproduces candidate c13 from the J8 parent."
+      },
+      {
+        "link": "J18 / J8 -> J19A",
+        "recorded_by": "the J19A receipt inputs and the J19A actor_feature_manifest",
+        "j18_leaf": "j18_runs/j18_b_only_update_v26c_2026-08-27_r1",
+        "parent_j8_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+        "parent_of_j8_sha256": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+        "manifest_derived_from_parent": "J8",
+        "manifest_source_actor_digest": "6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207",
+        "output_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "output_module_state_sha256": "8153dc9765cb984ae05502b57283c00c09b12de2c4b9d5128a0de0fc12566530",
+        "observation_width": 35
+      },
+      {
+        "link": "J19A -> J20 warm-up",
+        "recorded_by": "the J20 actor_transplant_report",
+        "source_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "target_actor_digest_after": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+        "manifest_declared_and_validated": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96"
+      }
+    ],
+    "newly_pinned_for_this_purpose": [
+      "the August V26 imitation rl_module_best module_state.pkl and actor_feature_manifest.json",
+      "the J2 rl_module module_state.pkl, actor_feature_manifest.json and receipt",
+      "the J8 rl_module module_state.pkl and receipt",
+      "the J18 receipt and the J18 provenance overlay v26c_j18_provenance_overlay_j8_2026-08-27.json"
+    ],
+    "gate": "T17"
+  },
+
+  "correction_5_july_semantics_refined": {
+    "what_was_too_crude": "'no July artefact among the operational inputs', tested by substring. Unsound, and it does not say what a July artefact IS.",
+    "FORBIDDEN_as_operational_parent_or_training_input": [
+      "any July checkpoint",
+      "any July actor weights",
+      "any July dataset",
+      "any July trace",
+      "any July labels"
+    ],
+    "ALLOWED_as_disclosed_informational_protocol_sources": [
+      "July-derived methodological constants, such as the hyperparameter provenance the J2 receipt cites",
+      "July-derived physical scaling code and the documented seeding and split protocol",
+      "the 25 mm July legacy reference band, which is diagnostic and never binding",
+      "stage and directory LABELS that contain the word July, including the containing directory v26c_july_replica_2026-08-26"
+    ],
+    "the_JULY_FAITHFUL_label_must_not_cause_a_false_failure": {
+      "the_situation": "J8 is labelled July-faithful because it replicates July's ALGORITHM, scaling, hyperparameters and seeding protocol. Its actual parent bytes are the August V26 J2 module.",
+      "the_rule": "a label is not a lineage. What decides is the parent BYTES, and T17 measures them.",
+      "the_positive_evidence_required": "the J8 receipt's july_faithfulness.does_not_replicate must list July's dataset, July's parent, July's actor and July's output, and its operational_lineage must name the August V26 J2 parent. A J8 that claimed to replicate July's parent or actor WOULD fail."
+    },
+    "gate": "T1, redefined to use the measured chain of T17 plus this positive evidence, instead of the substring scan"
+  },
+
+  "correction_6_exact_J19C_values": {
+    "what_was_wrong": "the base document recorded J19C H as approximately 0.025684 m and I as approximately 0.024763 m. Rounded approximations have no place in an immutable evidence document.",
+    "the_exact_values_from_the_receipt": {
+      "G": 0.024417393735478,
+      "H": 0.025684338426320914,
+      "I": 0.024762677044730928
+    },
+    "the_J19B_values_were_already_exact": {
+      "A": 0.02442140287670189,
+      "B": 0.023472629968460532,
+      "C": 0.022554834542696293,
+      "D": 0.024681825128941546,
+      "E": 0.02445683512352716,
+      "F": 0.025615055309162808
+    },
+    "unchanged": "the disclosure itself: every cell exceeds the 20 mm soft band; only F and H reach the 25 mm July reference, with 4 samples of 500 each; no cell exceeds the 28 mm hard band, which is the sole binding threshold."
+  },
+
+  "correction_7_content_integrity_hardened": {
+    "what_was_missing": "the base verified the J19B and J19C committed maps by re-hashing whatever they contained. It never checked that the maps were PRESENT, were dictionaries, had the expected sizes, or that the leaves contained nothing BEYOND what the maps name. An emptied map would have verified vacuously, and an added file would have gone unnoticed.",
+    "now_required": {
+      "committed_maps_are_present_dicts_of_exact_size": {"j19b": 132, "j19c": 66},
+      "no_extras": "the CURRENT file set of each J19 leaf must equal exactly the committed-map keys PLUS that leaf's own receipt and commit_verification.json. Any additional file is a failure.",
+      "exact_leaf_sets": {
+        "j19a": 7,
+        "j19b": 134,
+        "j19c": 68,
+        "r3": 11,
+        "checkpoint_last": 24
+      },
+      "j19a_expected_files": [
+        "commit_verification.json", "history.json",
+        "rl_module/actor_feature_manifest.json",
+        "rl_module/class_and_ctor_args.pkl", "rl_module/module_state.pkl",
+        "v26c_j19a_result.json",
+        "v26c_j19a_single_reproduction_receipt.json"
+      ],
+      "r3_expected_files": [
+        "RESTORE_AUDIT_PASSED", "child_stdout_stderr.txt",
+        "commit_verification.json", "faulthandler.log",
+        "live_optimizer_audit.json", "summary.json",
+        "tensorboard/events.out.tfevents.1787873944.MacBook-Pro.local.42763.0",
+        "training_cfg.resolved.yaml", "v26c_j20_restore_audit_receipt.json",
+        "v26c_j20_restore_audit_result.json", "watchdog_state.json"
+      ]
+    },
+    "the_24_file_checkpoint_gate_is_unchanged": "T12 keeps it exactly as the base defines it.",
+    "test_technique": "the tests for a missing map and for an unexpected file MUST use a hermetic technique that never touches a real leaf: the file-set and map checks take their inputs as arguments, so a test supplies a synthetic set. No test creates, deletes or renames anything under any leaf.",
+    "gate": "T18"
+  },
+
+  "unchanged_from_the_base": [
+    "the object under attestation, the J20 warm-up checkpoint_last, identified by its hashes",
+    "the readiness scope: CHECKPOINT readiness only, and the pilot protocol remains NOT SEALED and must not be invented",
+    "promotion TRAINING_INPUT_ONLY on PASS, NONE on FAIL, never deployable",
+    "training_ready true only on a full pass; no partial credit",
+    "the warm-up leaf and its RESTORE_AUDIT_PENDING marker stay byte-immutable; G9 closure is read from the R3 receipt",
+    "gates T2, T3, T4, T5, T6, T7, T9, T10, T11, T12, T13 and T14 exactly as the base defines them",
+    "T8 exactly as the base defines it EXCEPT that its worker-sync clause is demoted to supporting telemetry",
+    "the standard-library-only constraint and the self-audit",
+    "inheriting the 92 R3 GO pins through the GO's own pinned hash, which the architect has accepted",
+    "the fail-closed protocol, the no-clobber destination, the born-invalid marker, the single evaluation and the absence of any retry"
+  ],
+
+  "gate_count": {"base": 15, "rev1": 18, "added": ["T16", "T17", "T18"],
+                 "redefined": ["T1", "T15"], "narrowed": ["T8"]},
+
+  "prohibitions_restated": [
+    "no execution without BOTH explicit user authorisation and an APPROVED architect GO for stage V26C_J21_TRAINING_READY_ATTESTATION",
+    "no retry, whatever the outcome",
+    "no write of any kind into the warm-up leaf or any prior leaf",
+    "no modification of the base preregistration or of the original DRAFT GO",
+    "no import of train_ppo_mlp, ray, torch, numpy, gymnasium, opensim or any simulation module",
+    "no subprocess, no ray.init, no Algorithm construction, no environment construction, no sampling, no rollout, no training",
+    "no invention of a pilot configuration or a launch command",
+    "no promotion beyond TRAINING_INPUT_ONLY, and never deployable",
+    "no claim that J21 is the first training_ready in the project's history"
+  ]
+}

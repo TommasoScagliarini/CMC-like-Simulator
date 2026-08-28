@@ -1,0 +1,63 @@
+{
+  "schema": "v26b_addendum.1",
+  "addendum": "B1R2A-BASELINE-AND-CLIP",
+  "amends": "v26b_amendment_b1r2a_budget.json",
+  "amends_sha256": "b64888a6eeaf0fbad98b2168a343f1e2caf5a4a1a380935345470e18980fc09d",
+  "status": "PRE-REGISTERED BEFORE EXECUTION. Immutable and additive. It CLARIFIES the amendment; it does not alter it. The amended file is left byte-identical.",
+  "authorized_by": "architect, 2026-08-25",
+  "reason": "Two conceptual corrections raised by the architect before execution. Nothing had been executed when this addendum was written: no fold, no fit, no receipt.",
+
+  "correction_1_baseline_qualification": {
+    "supersedes_phrase": "the amendment's experiment_matrix arm A field 'everything_else': 'identical to B1R1'",
+    "why_it_was_wrong": "Unqualified, that phrase would imply the validation design is also identical to B1R1. It is not. B1R1 used 6 leave-one-complete-cycle-out folds holding out 910 rows. B1R2-A uses the CORRECTED Rev1 design: 11 folds, 8 structurally complete cycles plus 3 tails, holding out all 1313 non-WAIT rows exactly once.",
+    "correct_statement": "The single experimental variable is the OPTIMISATION BUDGET measured against the CORRECTED Rev1 baseline (11 folds / 1313 rows), not against B1R1 (6 folds / 910 rows).",
+    "what_is_inherited_from_B1R1_unchanged": [
+      "fit procedure: v26b_b_exec.fit_masked, reused with unchanged semantics",
+      "optimizer Adam, batch 64, lr 3e-4, seed 123, per-epoch shuffle",
+      "loss: flat MSE + clip-loss 1.0 + logstd 0.1 + anchor 1e-5",
+      "patience 60, improvement epsilon 1e-9",
+      "dataset, labels, caches, the three pinned V26 anchors, 1500 rows",
+      "student: 35D, hard input mask on columns 0:2 and 25:35, effective 23D, frozen logstd, untouched critic",
+      "parent: B0 35D masked, byte-identical",
+      "all gate thresholds, imported from v26b_b1r1_exec and not relaxed",
+      "embargo 20, WAIT reconstruction-only"
+    ],
+    "what_changed_and_why": {
+      "validation_design": "6 folds / 910 heldout rows -> 11 folds / 1313 heldout rows",
+      "classification": "METHODOLOGICAL PREREQUISITE, not a second experimental arm",
+      "justification": "The B1R2 rev1 study established that the 6-fold design left 403 rows never held out, and that the error is concentrated in two of those segments which are structurally complete cycles. Selecting an epoch on a curve blind to 403 of 1313 rows would be unsound regardless of budget. The corrected design is the precondition for the budget question to be answerable at all, not a competing treatment.",
+      "matrix_impact": "none. The experiment matrix still has exactly ONE binding row, arm A."
+    },
+    "how_the_budget_contrast_stays_clean": "Because arm A records every fold's full 1200-epoch curve with no internal early stop, the July rule is applied twice to the SAME curves: truncated at 400 and over the full 1200. The 400-truncation IS the corrected-design 400-epoch reference. The budget contrast is therefore internal to arm A, on identical fits and an identical 11-fold design, with no confound from the design correction. e_star_400 remains DIAGNOSTIC ONLY and can never change e*, the gates or the verdict.",
+    "honest_limitation": "A direct B1R1-vs-B1R2A contrast is NOT available and must not be claimed: the two differ in both design and budget. Only the internal 400-vs-1200 contrast is a valid budget measurement."
+  },
+
+  "correction_2_clip_is_not_gradient_clipping": {
+    "why_it_matters": "The amendment lists the loss as 'flat MSE + clip 1.0 + logstd 0.1 + anchor 1e-5'. Read carelessly, 'clip 1.0' could be mistaken for gradient clipping. It is not, and the receipt and report must not permit that reading.",
+    "what_clip_1_0_actually_is": {
+      "symbol": "J_CLIP_W",
+      "value": 1.0,
+      "kind": "loss term weight, an action-bound penalty",
+      "formula": "clip_loss = mean(relu(abs(mean_output) - 1.0) ** 2)",
+      "purpose": "penalises predicted actions outside the normalised bound [-1, +1]; it acts on the network OUTPUT, inside the objective",
+      "applied_to": "the loss, before backward()"
+    },
+    "gradient_clipping": {
+      "status": "NONE",
+      "value": null,
+      "note": "no gradient-norm or gradient-value clipping is applied anywhere. The only gradient manipulation in fit_masked is the first-layer column mask W1.grad.mul_(col_mask), which zeroes the masked and clock columns and is a masking operation, not clipping.",
+      "enforced_by": "the test asserts that no clip_grad call exists in the executor or in fit_masked"
+    },
+    "receipt_and_report_requirement": "both must carry these two fields explicitly and separately: 'clip_loss_weight_J_CLIP_W' and 'gradient_clipping': 'none'."
+  },
+
+  "unchanged_by_this_addendum": [
+    "the hypothesis and its single variable",
+    "the epoch selection rule and its no-future-reading property",
+    "every gate and every threshold",
+    "the stop/go policy, including NO-GO stopping offline with no candidate promoted",
+    "the prohibition on rollout, collection, DAgger, PPO, gradient clipping and any autonomous arm B"
+  ],
+
+  "execution_order_required": "no training may run before the additive test suite passes and the preflight returns GO. The executor refuses to fit without its authorized stage token and a matching pre-registration hash."
+}

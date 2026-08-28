@@ -1,0 +1,198 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j5_amendment_r2_rerun",
+  "kind": "ADDITIVE, IMMUTABLE",
+  "stage_authorised": "V26C-J5-REVALIDATION",
+  "attempt": "r2",
+  "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer, not approver.",
+  "date_utc": "2026-08-26",
+  "does_not_rewrite": {
+    "statement": "This amendment is ADDITIVE and stands BESIDE the J5 authorisation amendment. It rewrites nothing: v26c_j5_amendment_revalidation.json keeps its own text, hash and scope, and the r1 leaf is preserved byte-for-byte.",
+    "j5_amendment_file": "v26c_j5_amendment_revalidation.json",
+    "j5_amendment_sha256": "033061fdd2bc289cdcb431a0c0df04a036bd660e7bda9490ec17870947ebcec0",
+    "j1_verdict_unchanged": "FAIL",
+    "j3_verdict_unchanged": "FAIL",
+    "j4_verdict_unchanged": "PASS (TECHNICAL/OFFLINE - POST-CRASH FINALIZED)"
+  },
+  "r1_attempt": {
+    "leaf": "j5_runs/j5_revalidation_v26c_2026-08-26_r1",
+    "status": "TECHNICALLY INVALID - NO VERDICT",
+    "why_invalid": "the process aborted while the FIRST env.step() was in progress: zero env.step() calls returned and zero trace rows were completed. No trace, no kinematics and no receipt were written, so the attempt carries no gate result of any kind. It is neither a PASS nor a FAIL: it is not evidence about the actor.",
+    "exit_code": 1,
+    "exact_cause": {
+      "summary": "a standard SLSQP clipping RuntimeWarning, non-fatal under Python's default warning policy, was promoted to a fatal exception by the -W error flag",
+      "exception": "RuntimeWarning: Values in x were outside bounds during a minimize step, clipping to bounds",
+      "raised_in": "scipy/optimize/_optimize.py::_check_clip_x, reached from static_optimization.py::_solve_slsqp -> scipy.optimize.minimize(method=SLSQP)",
+      "entered_from": "v26c_j5_revalidation.py::run, the first env.step(raw)",
+      "not_a_gate_failure": true,
+      "not_a_defect_of_j5_tooling": false,
+      "not_a_defect_of_the_actor": true,
+      "why_j3_was_unaffected": "the authorised J3 rollout command did not carry -W error; the J4 fit did carry it but never reaches SciPy or OpenSim",
+      "classification": "INVOCATION-PROTOCOL ERROR. Not an actor failure and not a gate failure, but an incompatibility between the authorised command line and the production simulator's normal warning behaviour.",
+      "j5_tooling_gap": {
+        "gap": "the r1 J5 preflight did NOT detect or block the -W error invocation. It reported GO under a command line that could not survive the first simulator step.",
+        "closed_by": "the r2 preflight raises an explicit blocker when an -W error filter is active, returns BLOCKED with exit 1, and run() refuses before the production stack is built, before the environment is constructed and before the r2 leaf is created",
+        "status": "CLOSED in the r2 tooling"
+      },
+      "warning_nature": "a standard SLSQP clipping warning, non-fatal under Python's default warning policy",
+      "rollout_eval_precedent": "rollout_eval.py lines 434-445 disable ALL warnings globally by default, citing a bounded-least-squares fallback RuntimeWarning as an example. It does NOT document this exact SciPy _check_clip_x warning.",
+      "what_this_does_not_establish": "nothing about whether the rollout would have been physically valid. r1 produced no evidence about the actor's behaviour."
+    },
+    "preservation": {
+      "rule": "the r1 leaf is preserved BYTE-FOR-BYTE. No file may be added to it, removed from it or changed in it - not even a forensic log copy.",
+      "files": 19,
+      "top_level_entries": [
+        "sim_outputs"
+      ],
+      "receipt_present": false,
+      "trace_present": false,
+      "kinematics_present": false
+    },
+    "external_evidence_not_runtime_verified": {
+      "run_log": "/private/tmp/claude-501/-Users-tommy-Documents-CMC-like-Simulator---Claude/3f19a1c0-cfce-40b3-bbf6-4703f4fb4c90/scratchpad/j5_run.log",
+      "run_log_sha256": "83ec482c2261c757aee9450d97bdf65be952d1bc5cc5e71a8c4a0aed5622f887",
+      "run_log_lines": 112,
+      "note": "the log lives in a session scratchpad outside the repository and is therefore recorded as evidence only, never verified at runtime. It is NOT copied into the r1 leaf, which stays byte-for-byte as the aborted attempt left it."
+    },
+    "env_step_returns": 0,
+    "completed_trace_rows": 0
+  },
+  "authorises": {
+    "scope": "exactly one authorised r2 re-run",
+    "attempts_authorised": 1,
+    "permitted": [
+      "ONE deterministic closed-loop rollout of the pinned J4 recovery actor under the pinned v3 runtime, into the new leaf j5_runs/j5_revalidation_v26c_2026-08-26_r2"
+    ],
+    "forbidden": [
+      "a third attempt, or any retry of r2 whatever its outcome",
+      "reusing, modifying, deleting or adding to the r1 leaf",
+      "any fit, optimizer step, DAgger round or progressive recovery iteration",
+      "sigma or exploration noise of any kind",
+      "critic training or PPO updates",
+      "ex-novo training",
+      "promotion of any artefact",
+      "LOTO",
+      "LOCO",
+      "B1R1",
+      "B1R2",
+      "a standalone 25D actor",
+      "widening the actor beyond 35D",
+      "contralateral features",
+      "modifying any content-addressed J0-J4 artefact or script",
+      "modifying env, reward, model or the semantic content of any gate"
+    ],
+    "promotion_policy": "a J5 PASS confers NO promotion, NO deployability and NO authorisation of any next stage."
+  },
+  "r2_execution": {
+    "leaf": "j5_runs/j5_revalidation_v26c_2026-08-26_r2",
+    "no_clobber": true,
+    "warning_policy": {
+      "rule": "the production command MUST NOT use -W error",
+      "why": "the production simulator emits a standard SLSQP clipping RuntimeWarning from the Static Optimization fallback, which is non-fatal under Python's default warning policy. Promoting it to an exception aborted r1 inside its first step, before any evidence about the actor could be produced.",
+      "command": "/opt/anaconda3/envs/envCMC-rllib/bin/python 'Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j5_revalidation.py' --authorized-stage V26C-J5-REVALIDATION --out-dir 'Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r2'",
+      "enforced_by": "the J5 preflight raises a blocker and exits 1 when an -W error filter is active; run() refuses before constructing the production stack, the environment or the r2 leaf"
+    },
+    "unchanged_from_r1": [
+      "the operational actor: the pinned J4 recovery checkpoint, 35D, clock [0,1] hard-zero, controller [25..34] live",
+      "the pinned runtime config a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db and its builder",
+      "seed 123 for numpy, torch and env.reset",
+      "500 steps, deterministic mean, no sigma, the RAW action stepped",
+      "the COMMON gate and the kinematic quality, inherited verbatim from J3",
+      "the telemetry-integrity invariant, evaluated separately",
+      "the required J3 and J1 comparisons, derived from the pinned traces",
+      "deployable false, promotion NONE, next stage unauthorised, retry forbidden"
+    ],
+    "changed_from_r1": [
+      "the only accepted production leaf is now j5_revalidation_v26c_2026-08-26_r2",
+      "the production command drops -W error"
+    ]
+  },
+  "pinned_artefacts_sha256": {
+    "v26c_j5_amendment_revalidation.json": "033061fdd2bc289cdcb431a0c0df04a036bd660e7bda9490ec17870947ebcec0",
+    "v26c_j3_amendment_recovery_only.json": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+    "v26c_j1_amendment_soft_fail.json": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+    "v26c_j4_recovery.py": "24dceef98242cc9e02f63d0442e8361bae32994c0829859b1747f0e7091a6841",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/j4_fit_original.log": "88e9312626d23ce49685576e263df1b93c0f4f8d077415cc1d0bdaadb188dbcf",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+    "j4_runs/j4_recovery_v26c_2026-08-26_r1/v26c_j4_recovery_receipt.json": "887f2b94e5a22a9c8013497164db090c2e910804730c5f3aa9c4f4d5f308c354",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_activations.sto": "4aad3a3b72d6175ef963682fba90ed3d33f8485ea232c1331af907258bd7602f",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_gait_events_online.csv": "41c81847dd75f354a8f0d4f4e157816b700968c46ff50dc3d5b763ba25fc9354",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_kinematics.sto": "ed70177c8c81c631790f8c0663e5563402dcfa10d0d5d31cc54bbde90170c99c",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_kinematics_reference.sto": "7a733bd8f1d5ee8582167b5963c74489444b83c0a77d2f05ee4ef46ce31187c3",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_muscle_forces.sto": "1c82f852100594f70c111b924faa4462ddea01edb0c7349ffbf1ceedb3deb65f",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_online_grf.sto": "baa8b332769e5a1bda820f0218b6a3c29c051ef062ce6ffdeb8dfdd65beb4a39",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_power.sto": "e3bee3824dc0fa3e7944628d3fabb7eb3da9c9d16546ac7f8902f17ca85d53b1",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_recruitment.sto": "4c5685224ec6c205db988c533e0426fa7957092a5ca662c685a7d749e369af26",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_reserve_controls.sto": "98d43cd7c7d0b146f2e1d445313ba0bf796bbbca1146247aabf4f5c971fca08d",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_reserve_torques.sto": "c1c75be293377a3d4e426d6831551a223fc2a6a94b040fbb4c6fcad240003227",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_controls.sto": "0a4a842cdfa5c7ea4523a0f5e8d7a4d06b20ae8b3e817ad91a75bec8eab62008",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_derivatives.sto": "3a525e464f326e34ec3e77f5c1177024cd5a8cc1b79bcb2cc4d0f99d116a5cc7",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "86c2156960a0e2b4363b53315adfd9d24552e02126197fd95aa7d8fa360e961a",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_states.sto": "cd3349b9af40bb82691df1a252d131cefd0c8bfcfcf025f97ba0b30bc97189d2",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_torques.sto": "0695a1693f11e78121b7a4c2d6b562b32f712013bff26c7c6df3d38367d61715",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "a2f55147fabec8b059fa8352bd3074f98b5dadb627ed1342438d07eb0fbffa15",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_states.sto": "d94256ff12eb6297b7efc8383c2230899de1214e63f239a04182c9949c088c79",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_tau_bio.sto": "88461deecf18a120f42f1d517b3ef8548b49c9107d1c46098c80e1442b3828c9"
+  },
+  "superseded_artefacts_sha256": {
+    "note": "the J5 runner and test AS THEY WERE for the r1 attempt. They are recorded for provenance and are deliberately NOT verified at runtime, because the r2 preparation edits them.",
+    "v26c_j5_revalidation.py": "3bf6ed0d8a5b7d2b10a151e05784c1b59917efbf9d609a52589a231403d245d7",
+    "test_v26c_j5_revalidation.py": "bfbdcd79dda400c3b46dc34c660ee92aaba61f091d40aa346e596c8d7ec726f0"
+  },
+  "gates": {
+    "statement": "UNCHANGED. Exactly the J3 gates, inherited verbatim, with no threshold added, moved, relaxed or reinterpreted, and no change to env, reward, model or gate semantics.",
+    "common": {
+      "steps_required": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycles_min": 2,
+      "phase_timeout_stance_max": 0,
+      "phase_timeout_swing_max": 0,
+      "morphology_causal_contract_failure_max": 0,
+      "hs_cancelled_count_max": 0,
+      "resync_count_max": 1,
+      "max_penetration_m_max": 0.02
+    },
+    "kinematic_quality": {
+      "ankle_min_rad_max": -0.03,
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [
+        -1.5,
+        0.0
+      ],
+      "ankle_bounds_rad": [
+        -0.7,
+        0.7
+      ]
+    },
+    "hard_guard_m": 0.028,
+    "soft_diagnostic_m": 0.02
+  },
+  "outcome_policy": {
+    "pass_condition": "every J3 gate passes AND the telemetry integrity invariant holds",
+    "on_pass": {
+      "deployable": false,
+      "promotion": "NONE",
+      "next_stage_authorized": false
+    },
+    "on_fail": {
+      "artefacts_preserved": true,
+      "quarantined": true,
+      "retry": "FORBIDDEN"
+    },
+    "automatic_promotion": "NONE, under any outcome"
+  },
+  "immutability": "this file is content-addressed by the artefacts it pins. Any change to a pinned artefact invalidates it. It is never edited in place, and it never edits the J5 authorisation amendment."
+}

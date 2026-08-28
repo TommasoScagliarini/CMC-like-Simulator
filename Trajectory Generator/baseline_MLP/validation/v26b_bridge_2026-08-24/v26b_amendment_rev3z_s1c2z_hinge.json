@@ -1,0 +1,109 @@
+{
+  "amendment_id": "rev3z_s1c2z_ankle_sign_hinge",
+  "date": "2026-08-24",
+  "token": "V26B-S1C-2Z-FIT (offline fit only)",
+  "kind": "ADDITIVE and IMMUTABLE. Corrects the rev3y objective WITHOUT mutating rev3y or any prior artifact",
+  "architect_decision": {
+    "rev3y_window_mean_grid": "REJECTED UNEXECUTED: the window-mean blend destroys 75% (beta 0.5), 93.75% (beta 0.75) and 100% (beta 1.0) of the intra-window slope and curvature energy, with a maximum label distortion of 0.09104 rad against a mean intra-window range of 0.06193 rad and a total negative excursion of 0.15516 rad",
+    "evidence": "exact by algebra: inside a window the blend gives y_tilde - mean = (1-beta)*(y - mean), so amplitude and range scale by (1-beta) and slope/curvature energies by (1-beta)^2. Measured identically over all 7 windows and over the 6 stable-regime windows",
+    "consequence": "no rev3y candidate is executed; rev3y remains immutable and unexecuted"
+  },
+  "parents_immutable": {
+    "rev3y": "eb54fd266461e56728dd5387f6019a3eb23243eb4c4e0e79541cfeaf520139c6",
+    "rev3y_preflight_receipt": "6504e4f44d88e41cfa5750c751e83fe4bb9c697427a4a285793c46aeccb0a2dc",
+    "rev3y_tool": "112eb2d1988c6bfb0694ea828dc0efa8ac01f44410d5a312fc257e5bac8343c1",
+    "rev3x_addendum_a_status": "de53d529343edd5d82af786036368d7b885ad686af18469088a3dc8ccb563cf5",
+    "rev3x": "041bbc38dec9209d1b0420be8b641da4224fb256f11e420204710476e871f433",
+    "s1c1_aggregate": "58874483683ff3f9eb6741f7f752fbb5b9c8fec96b3277c3543f0eae58b7d3e4",
+    "rev3w": "92cf4aaf11dc0698054134c49efaaf34e16f5411579da6499ffae4e203dc2b47",
+    "rev3w_addendum_a": "7c4f39b9e0e2e2a579a189dffd35807ba71cada88c0e2b20c2a25c9f8214935b",
+    "rev3v": "889f1068a9ddb8db8241b62b569a85fbc6baf3d7673ae626c4df5e51902ed984",
+    "rev3s": "89e8c227eecb2a80350307d6c0315e0f90e42b37ecae1d75fea30f9da2e067a0",
+    "s0d_actor": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+    "s0d_module_state": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597"
+  },
+
+  "objective": {
+    "form": "L = L_frozen_pointwise + lambda_h * mean_over_hinge_rows_in_batch( relu(q_pred_ankle)^2 )",
+    "L_frozen_pointwise": "EXACTLY the frozen two-role objective: r * mean_anchor(row MSE vs u_S0D) + 1 * mean_task(row MSE vs u_IK) + 1.0 * action-clip penalty + 1e-5 * July parametric anchor towards theta_S0D. The TASK LABELS ARE NOT MODIFIED IN ANY WAY: no blending, no weighting, no window mean",
+    "q_pred_ankle": "0.7 * predicted ankle action, i.e. the production absolute decode of the ankle channel",
+    "margin_delta": 0.0,
+    "delta_rationale": "delta = 0 is fixed. A positive margin was considered and rejected: at the window edges the IK target itself is only -0.003 to -0.013 rad, so any delta above about 0.005 would demand MORE than the target and reintroduce the label distortion this amendment exists to avoid",
+    "one_sided": "the hinge is EXACTLY ZERO wherever q_pred_ankle <= 0 and positive only where q_pred_ankle > 0. Unlike the rejected S1C-1 pointwise weight, it never deepens a command that already satisfies the sign",
+    "contiguity_argument": "on a window W that is contiguous by construction, 'every row of W has a negative command' is logically equivalent to 'the negative interval covering W is contiguous'. Per-row sign satisfaction therefore yields contiguity WITHOUT any coupling between rows",
+    "applied_to": "the TASK-role rows of the batch only. The anchor block carries identical inputs, so applying the hinge to both blocks would double its effective weight; this is fixed here, before execution"
+  },
+
+  "hinge_rows_frozen": {
+    "definition": "TRAIN rows whose decoded AB06 IK ankle target is negative, EXCLUDING the first negative window steps 6-14",
+    "count": 64,
+    "train_rows_total": 380,
+    "train_negative_rows_total": 73,
+    "early_window_rows_excluded_from_hinge_only": 9,
+    "early_window_treatment": "steps 6-14 REMAIN in the fit under the ordinary pointwise loss and under S0D preservation; only the hinge does not act on them",
+    "early_window_rationale": "S1C-2 established that this window is not observable from the 35D state (fold [1,100]: balanced accuracy 0.4725, positive recall 0.0000). Applying a sign hinge to rows the network cannot distinguish would push it to violate the sign elsewhere",
+    "no_runtime_change": "the exclusion is an OFFLINE row selection computed from the frozen IK target. No runtime clock is exposed, no input is added or altered, the clock columns stay hard-zeroed",
+    "windows_on_the_500_rows": [[6, 14], [112, 132], [174, 179], [267, 290], [330, 334], [423, 445], [482, 490]],
+    "holdout_window": "[267, 290], 24 rows, entirely inside the frozen holdout 201-300: DIAGNOSTIC ONLY, it never enters the fit under any term"
+  },
+
+  "candidates_closed_grid": {
+    "lambda_h": [0.5, 1.0, 2.0],
+    "count": 3,
+    "open_search": false,
+    "no_retry": true,
+    "no_fourth_value": true,
+    "ids": ["L05", "L10", "L20"]
+  },
+
+  "unchanged_and_pinned": {
+    "init": "EXCLUSIVELY S0D actor 481dd0d2... / module_state cda6d893..., reloaded fresh and digest-verified per candidate",
+    "forbidden_as_init_source_anchor": ["W2", "W4", "W8", "A1", "A2", "A3", "A4", "A5", "A6", "S1A", "JUL_H0", "R0a", "R1", "R2G", "R2I", "V1"],
+    "july": "ONLY the 1e-5 parametric anchor and a benchmark; NEVER init and NEVER a label",
+    "r": 5,
+    "epochs": 300,
+    "batch_size": 256,
+    "optimizer": "Adam",
+    "lr": 0.0001,
+    "seed": 2026,
+    "deterministic_algorithms": true,
+    "clock_columns": "re-zeroed after every optimizer step",
+    "logstd": "restored BIT-IDENTICAL to the init",
+    "early_stopping": "none",
+    "split": "frozen 380 train (steps 1-190 and 311-500) / holdout 201-300 / embargo 191-200 and 301-310",
+    "batching": "the frozen T1R mechanism is UNCHANGED: one deterministic shuffled union of the two 380-row role blocks, per-role means computed separately inside every batch. NO sequential minibatches are introduced",
+    "gates": "the rev3s I -> P -> T -> D hierarchy with the rev3v thresholds byte-for-byte unchanged; evaluated by the unmodified v26b_s1b_protocol.offline_hierarchy",
+    "sigma": "UNRESOLVED and not chosen"
+  },
+
+  "offline_diagnostics_non_binding_no_new_thresholds": [
+    "rev3x persistence metrics on the ordered holdout: duty cycle, run count, mean and max run length of the negative command",
+    "predicted served reference through the rev3w VALIDATED production replica (slew limiter + third-order jerk-limited model)",
+    "pointwise ankle and knee RMSE and max error versus the UNCHANGED IK target",
+    "within-window range, slope energy and curvature energy of the fitted output versus the unchanged IK target - measurable precisely because the labels are untouched",
+    "fraction of positive command inside the negative windows, reported SEPARATELY for the stable holdout window [267,290] and for the early transient window [6,14]",
+    "the same quantities for S0D, A2 and the AB06 IK target as references"
+  ],
+
+  "materialisation": {
+    "path_template": "candidates/S1C2Z_<ID>_35D_NONDEPLOYABLE",
+    "student_dir_forbidden": true,
+    "atomic_no_clobber": true,
+    "deployable": false,
+    "state_derived_from_offline_verdict": {
+      "fail": "OFFLINE_FAILED_QUARANTINED - quarantined, may_not_be_source, no rollout pending or permitted",
+      "pass": "OFFLINE_PASSED_ROLLOUT_NOT_AUTHORISED - admitted to a future closed-loop gate under its own token, never promoted here"
+    },
+    "rule": "the rollout/promotion status is DERIVED from the offline verdict, never inherited unconditionally (rev3x status addendum)"
+  },
+
+  "B3": "INDETERMINATE and a separate open blocker: the phase field is identically zero on every v3 trace; no production or logging change is made",
+  "prohibitions": [
+    "no rollout, episode, collection or promotion",
+    "no production/env/reward/FSM/morphology/SEA/corridor/C++ change",
+    "no sigma choice",
+    "no threshold, gate, split, seed or numeric change",
+    "no mutation of rev3y or of any prior artifact",
+    "no fourth lambda_h, no retry"
+  ]
+}

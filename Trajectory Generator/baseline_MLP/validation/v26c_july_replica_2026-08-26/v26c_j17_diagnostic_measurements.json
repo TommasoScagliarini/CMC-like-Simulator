@@ -1,0 +1,484 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, DIAGNOSTIC MEASUREMENTS",
+  "stage": "V26C_J17_CAUSAL_DIAGNOSIS",
+  "date": "2026-08-27",
+  "authorised_by": {
+    "record": "v26c_j17_architect_go_2026-08-27.json",
+    "sha256": "ac5e063750f8284824acebd6815def09561a940200b3e30e3b9ae441155478ca"
+  },
+  "preregistration": {
+    "path": "v26c_j17_prereg_causal_diagnosis.json",
+    "sha256": "1e765477660e0f0c7d80b91cd677889b974394b1c4dd12b85cfa24bcb991fba4"
+  },
+  "produced_by": "the executor's own measurements; independent subagent audits are reconciled in the user report",
+  "contains_no_execution": {
+    "fit": false,
+    "rollout": false,
+    "environment": false,
+    "critic": false,
+    "ppo": false,
+    "sealed_seeds_read": 0
+  },
+  "T2_integrity_and_lineage": {
+    "verdict": "every lineage claim VERIFIES by hash; no structural anomaly found",
+    "chain": {
+      "root_august_v26_39D": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+      "root_input_width": 39,
+      "root_records_no_parent": "no resume_from / warm_start / restore key in its resolved config; only checkpoint_every and checkpoint_timeout_s, which are unrelated",
+      "j2_35D": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+      "j11": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+      "j15r1": "4d084a2a7f0012bd711f39a987dbb7af30b04e265484128c45b0a92b612ab928"
+    },
+    "both_actors_declare_the_same_J2_parent_and_it_matches_disk": true,
+    "july_as_operational_input": "NONE. Every July occurrence in the J2/J11/J15R1 runners is a prose or docstring reference; no July weight file or dataset is opened by any of them.",
+    "feature_manifests": {
+      "count": 35,
+      "name_lists_identical_across_J2_J11_J15R1": true,
+      "each_manifest_self_references_its_own_module": true,
+      "deployable": false
+    },
+    "class_and_ctor_args_byte_identical_across_all_three": true,
+    "logstd": {
+      "J11_bit_identical_to_parent": true,
+      "J15R1_bit_identical_to_parent": true,
+      "sigma": [
+        0.004999999670722372,
+        0.004999999670722372
+      ]
+    },
+    "clock_columns_exactly_zero": {
+      "J2": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "J11": [
+        0,
+        1
+      ],
+      "J15R1": [
+        0,
+        1
+      ],
+      "note": "J2 additionally masks the controller block 25..34; both students activate it, which is the intended mask flip"
+    },
+    "critic_keys_present": {
+      "J2": 0,
+      "J11": 0,
+      "J15R1": 0
+    },
+    "scale_absorption": {
+      "applied_in_both": true,
+      "raw_vs_scaled_max_abs_diff": {
+        "J11": 0.0,
+        "J15R1": 0.0
+      },
+      "scaled_features": 4,
+      "note": "both committed actors consume RAW observations"
+    },
+    "forward_validated_against_runtime": {
+      "method": "the executor's numpy forward was compared with the policy_mean the runtime recorded in the committed traces",
+      "max_abs_diff_J11_on_J12_cellA": 1.429e-07,
+      "max_abs_diff_J15R1_on_J16_cellA": 1.583e-07,
+      "meaning": "float32 noise; every offline number below is computed with a forward that reproduces the runtime"
+    }
+  },
+  "T4_parameter_delta": {
+    "norms": {
+      "J11_minus_J2": 2.616128,
+      "J15R1_minus_J2": 7.150613,
+      "J15R1_minus_J11": 7.055817
+    },
+    "ratio_J15R1_over_J11_displacement_from_parent": 2.7333,
+    "relative_to_parent_norm": {
+      "J11": 0.17893,
+      "J15R1": 0.48906
+    },
+    "decomposition": {
+      "backbone_weights": {
+        "J11_minus_J2": 2.608696,
+        "J15R1_minus_J2": 7.136669
+      },
+      "output_head_pi_1_weight": {
+        "J11_minus_J2": 0.182541,
+        "J15R1_minus_J2": 0.395046
+      },
+      "biases": {
+        "J11_minus_J2": 0.074211,
+        "J15R1_minus_J2": 0.20776
+      }
+    },
+    "finding": "the displacement is dominated by the BACKBONE in both actors; J15R1 moved 2.73x further from the same parent than J11 did",
+    "controller_column_norm_sum": {
+      "J2": 0.0,
+      "J11": 2.60799,
+      "J15R1": 5.760024
+    }
+  },
+  "T3_offline_action_comparison": {
+    "inputs": "the committed J15R1 aggregate, 25567 rows, identical for both actors",
+    "units": {
+      "normalised": "u in [-1,1]",
+      "physical": "u * max_delta_rad, max_delta_rad = 0.35 rad"
+    },
+    "error_versus_teacher_label_RMSE_normalised": {
+      "nominal_anchor_500_unique": {
+        "J11": 0.005379,
+        "J15R1": 0.015536,
+        "change_pct": 188.8
+      },
+      "J7_recovery_713": {
+        "J11": 0.084148,
+        "J15R1": 0.081121,
+        "change_pct": -3.6
+      },
+      "cell_B_unique_500": {
+        "J11": 0.008264,
+        "J15R1": 0.017372,
+        "change_pct": 110.2
+      },
+      "cell_C_unique_500": {
+        "J11": 0.007684,
+        "J15R1": 0.01997,
+        "change_pct": 159.9
+      },
+      "J14_recovery_854": {
+        "J11": 0.459119,
+        "J15R1": 0.181555,
+        "change_pct": -60.5
+      }
+    },
+    "finding": "the refit TRADED anchor fidelity for recovery fidelity: -60.5% on the corrective block, +110% to +189% on the three anchor blocks that cells A-D exercise",
+    "delta_J15R1_minus_J11_per_block": {
+      "nominal_anchor": {
+        "knee_rmse_norm": 0.017395,
+        "knee_shift_rad": 0.000693,
+        "ankle_rmse_norm": 0.01014,
+        "ankle_shift_rad": 0.000471
+      },
+      "cell_B_unique": {
+        "knee_rmse_norm": 0.018122,
+        "knee_shift_rad": -0.001331
+      },
+      "cell_C_unique": {
+        "knee_rmse_norm": 0.020428,
+        "knee_shift_rad": -0.001378
+      },
+      "J14_recovery": {
+        "knee_rmse_norm": 0.536005,
+        "knee_shift_rad": 0.101744,
+        "ankle_rmse_norm": 0.167995,
+        "ankle_shift_rad": -0.008023
+      },
+      "J14_post_mismatch_671": {
+        "knee_rmse_norm": 0.602793,
+        "knee_shift_norm": 0.350626
+      },
+      "J14_pre_mismatch_183": {
+        "knee_rmse_norm": 0.091792,
+        "knee_shift_norm": 0.07096
+      }
+    },
+    "anchor_error_in_radians": {
+      "J2_parent": 0.0,
+      "J11": 0.002084,
+      "J15R1": 0.006554,
+      "note": "knee RMSE against the anchor labels; the parent is exact"
+    }
+  },
+  "T6_fit_reconstruction": {
+    "hyperparameters_identical_to_J11": true,
+    "epochs_run": 400,
+    "best_epoch": 397,
+    "stopped_early": false,
+    "split": {
+      "train": 20454,
+      "val": 5113
+    },
+    "optimizer_steps_derived": 64000,
+    "trainable": [
+      "pi.0.0.weight",
+      "pi.0.0.bias",
+      "pi.0.2.weight",
+      "pi.0.2.bias",
+      "pi.1.weight",
+      "pi.1.bias"
+    ],
+    "anchor_penalty": {
+      "weight": 0.01,
+      "space": "PARAMETER space, L2 to the initialisation",
+      "not_output_space": true
+    },
+    "composition": {
+      "unique_rows": 3067,
+      "distinct_rows_measured": 3060,
+      "total_rows": 25567,
+      "blocks": [
+        {
+          "id": "j7_nominal",
+          "unique": 500,
+          "repeat": 32,
+          "rows": 16000
+        },
+        {
+          "id": "j7_recovery",
+          "unique": 713,
+          "repeat": 1,
+          "rows": 713
+        },
+        {
+          "id": "cell_B",
+          "unique": 500,
+          "repeat": 8,
+          "rows": 4000
+        },
+        {
+          "id": "cell_C",
+          "unique": 500,
+          "repeat": 8,
+          "rows": 4000
+        },
+        {
+          "id": "j14",
+          "unique": 854,
+          "repeat": 1,
+          "rows": 854
+        }
+      ]
+    },
+    "THE_KEY_MEASUREMENT_initial_squared_error_mass_at_the_J2_parent": {
+      "j7_nominal": {
+        "rows": 16000,
+        "pct_rows": 62.58,
+        "SE_mass": 5.6294859162e-10,
+        "pct_mass": 0.0
+      },
+      "j7_recovery": {
+        "rows": 713,
+        "pct_rows": 2.79,
+        "SE_mass": 11.133689167,
+        "pct_mass": 3.59
+      },
+      "cell_B": {
+        "rows": 4000,
+        "pct_rows": 15.65,
+        "SE_mass": 32.672616193,
+        "pct_mass": 10.54
+      },
+      "cell_C": {
+        "rows": 4000,
+        "pct_rows": 15.65,
+        "SE_mass": 3.2798511138,
+        "pct_mass": 1.06
+      },
+      "j14": {
+        "rows": 854,
+        "pct_rows": 3.34,
+        "SE_mass": 262.91136944,
+        "pct_mass": 84.81
+      },
+      "total_mass_J15R1_aggregate": 309.9975,
+      "total_mass_J11_aggregate": 47.0862,
+      "ratio": 6.58,
+      "interpretation_EVIDENCE": "the nominal block is SELF-DISTILLED from the parent: its squared error at initialisation is 5.6e-10, i.e. exactly zero within float32 noise. It therefore contributes NO gradient at step 0 and can only push back once the network has already moved away from it. Meanwhile 3.34% of the rows carry 84.81% of the error mass."
+    },
+    "label_neighbourhood_conflict": {
+      "reference_set": "the 1500 anchor rows cells A-D exercise: 500 nominal + 500 B + 500 C",
+      "distance": "L2 in units of per-feature standard deviation over the aggregate",
+      "J14_rows_within_sigma": {
+        "0.25": 9,
+        "0.5": 45,
+        "1.0": 217,
+        "2.0": 398,
+        "3.0": 463,
+        "5.0": 510
+      },
+      "median_label_difference_norm": {
+        "0.25": 0.056,
+        "0.5": 0.0645,
+        "1.0": 0.2947,
+        "2.0": 0.135,
+        "3.0": 0.1599,
+        "5.0": 0.1895
+      },
+      "anchor_label_dispersion_norm": 0.3983,
+      "median_distance_between_neighbouring_nominal_anchors_sigma": 0.3459,
+      "J14_p5_distance_to_nearest_anchor_sigma": 0.4845,
+      "anchors_with_a_J14_row_within_3_sigma": "846 of 1500",
+      "finding_CALIBRATED": "conflict EXISTS and the regions overlap - 846 of 1500 anchors have a J14 row within 3 sigma, and the closest J14 rows are nearer to anchors than many anchors are to each other. But at the closest range the conflict is MODEST: the 45 rows within 0.5 sigma differ in label by a median of 0.0645, about 16% of the anchor label dispersion."
+    },
+    "anchor_output_displacement_from_parent": {
+      "J11_median": 0.004645,
+      "J11_max": 0.028414,
+      "J15R1_median": 0.012937,
+      "J15R1_max": 0.148582
+    },
+    "correlation_anchor_proximity_to_J14_vs_displacement": {
+      "value": -0.341,
+      "reading": "anchors closer to a J14 row moved MORE. r^2 is about 0.12, so it explains a small part of the variance. THIS IS A CORRELATION, NOT A CAUSE."
+    }
+  },
+  "T5_trace_analysis": {
+    "observations_are_recorded": true,
+    "field": "actor_observation_vector_before, 35 floats per step, in both J12 and J16 traces",
+    "consequence": "the counterfactual IS possible: both actors were applied to the SAME visited states. No reconstruction was invented.",
+    "counterfactual_J15R1_minus_J11_on_J12_visited_states": {
+      "A": {
+        "n": 500,
+        "knee_rmse_norm": 0.052146,
+        "knee_shift_norm": 0.018062
+      },
+      "B": {
+        "n": 500,
+        "knee_rmse_norm": 0.024086,
+        "knee_shift_norm": -0.005952
+      },
+      "C": {
+        "n": 500,
+        "knee_rmse_norm": 0.031133,
+        "knee_shift_norm": -0.006024
+      },
+      "D": {
+        "n": 500,
+        "knee_rmse_norm": 0.028609,
+        "knee_shift_norm": 0.005116
+      },
+      "E": {
+        "n": 500,
+        "knee_rmse_norm": 0.441211,
+        "knee_shift_norm": 0.228072
+      },
+      "F": {
+        "n": 354,
+        "knee_rmse_norm": 0.646639,
+        "knee_shift_norm": 0.379152
+      }
+    },
+    "step_1_is_an_identical_state_in_both_runs": true,
+    "step_1_action_difference_cell_A": {
+      "knee_norm": 0.036497,
+      "knee_rad": 0.012774,
+      "ankle_norm": 0.022131
+    },
+    "temporal_ordering_per_cell": {
+      "A": {
+        "kin_diff_gt_1e-6": 2,
+        "gt_1e-3": 6,
+        "gt_1e-2": 10,
+        "pen_gt_0.020": 28,
+        "pen_ge_0.025": 31,
+        "pen_gt_0.028": 206
+      },
+      "B": {
+        "kin_diff_gt_1e-6": 3,
+        "gt_1e-3": 11,
+        "gt_1e-2": 27,
+        "pen_gt_0.020": 47,
+        "pen_ge_0.025": 52,
+        "pen_gt_0.028": 392
+      },
+      "C": {
+        "kin_diff_gt_1e-6": 2,
+        "gt_1e-3": 5,
+        "gt_1e-2": 8,
+        "pen_gt_0.020": 11,
+        "pen_ge_0.025": 14,
+        "pen_gt_0.028": 61
+      },
+      "D": {
+        "kin_diff_gt_1e-6": 2,
+        "gt_1e-3": 6,
+        "gt_1e-2": 11,
+        "pen_gt_0.020": 28,
+        "pen_ge_0.025": 31,
+        "pen_gt_0.028": null
+      },
+      "E": {
+        "kin_diff_gt_1e-6": 2,
+        "gt_1e-3": 6,
+        "gt_1e-2": 10,
+        "pen_gt_0.020": 27,
+        "pen_ge_0.025": 31,
+        "pen_gt_0.028": 209
+      },
+      "F": {
+        "kin_diff_gt_1e-6": 2,
+        "gt_1e-3": 6,
+        "gt_1e-2": 10,
+        "pen_gt_0.020": 27,
+        "pen_ge_0.025": 72,
+        "pen_gt_0.028": 209
+      }
+    },
+    "ordering_finding_EVIDENCE": "in every one of the six cells the kinematic divergence is measurable 15 to 35 steps BEFORE penetration crosses the soft 0.020 band, and the action divergence is present at step 1 on an identical observation. The ordering is action -> kinematics -> penetration, with margin far above recording resolution.",
+    "first_soft_crossing_J12_vs_J16": {
+      "A": [
+        51,
+        28
+      ],
+      "B": [
+        48,
+        47
+      ],
+      "C": [
+        19,
+        11
+      ],
+      "D": [
+        43,
+        28
+      ],
+      "E": [
+        51,
+        27
+      ],
+      "F": [
+        264,
+        27
+      ]
+    },
+    "early_window_direction": {
+      "definition": "step 1 to the first J16 sample above 0.020",
+      "knee_pct_steps_less_flexed_in_J16": {
+        "A": 85.2,
+        "B": 21.7,
+        "C": 20.0,
+        "D": 77.8,
+        "E": 88.5,
+        "F": 88.5
+      },
+      "knee_mean_delta_rad": {
+        "A": 0.012798,
+        "B": -0.012576,
+        "C": -0.007514,
+        "D": 0.005388,
+        "E": 0.017911,
+        "F": 0.019336
+      },
+      "ankle_mean_delta_rad": {
+        "A": -0.007362,
+        "B": -0.002969,
+        "C": -0.003777,
+        "D": -0.004961,
+        "E": -0.007999,
+        "F": -0.00594
+      },
+      "finding_CALIBRATED": "the ankle delta is negative in ALL SIX cells; the knee delta FLIPS SIGN between {A,D,E,F} and {B,C}. There is no single joint direction common to every failing cell."
+    },
+    "within_run_association_kinematics_versus_penetration": {
+      "corr_knee_pen_positive_in": "12 of 12 cell-runs",
+      "mean": 0.2091,
+      "corr_ankle_pen_positive_in": "11 of 12 cell-runs",
+      "finding_NEGATIVE_RESULT": "the within-run association predicts that a MORE NEGATIVE ankle accompanies LESS penetration - the opposite of what would be needed to explain J16 from its negative ankle delta. The simple kinematic mechanism is therefore NOT supported by these data. The within-run correlation is also confounded by gait phase and cannot carry a cross-run causal claim. Reported as a refutation of a tidy story, not smoothed over."
+    }
+  }
+}

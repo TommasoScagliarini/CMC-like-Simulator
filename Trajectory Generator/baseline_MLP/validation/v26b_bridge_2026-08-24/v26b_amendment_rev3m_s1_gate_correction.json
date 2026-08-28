@@ -1,0 +1,24 @@
+{
+  "amendment_id": "rev3m_s1_gate_correction",
+  "date": "2026-08-24",
+  "authorized_by": "architect immediate correction: the rev3l offline gate pair (task RMSE <= 0.15 vs IK AND drift <= 0.10 vs S0D on the SAME 500 rows) is mathematically incompatible given |u_S0D - u_IK| ~ 0.38+ (triangle inequality); the behaviour change ON the target rows is INTENTIONAL",
+  "kind": "ADDITIVE; supersedes ONLY the offline_gates block of rev3l (7545201d..., itself immutable)",
+  "parents_immutable": {
+    "rev3l": "7545201df4e5aefb4fdccca9efc1425a9a4dde581a4c20269c0d3fd86aa794d5",
+    "rev3k": "8f34c95ee7c69029e0d3e8715f3e62fe9652533a03e0dd4b8fb7b38114377437",
+    "s0d_base": {
+      "rollout_receipt": "cbec1a671b7cdf2980881ec4ca33f69534e66d94cbbfa86c7b9cd9c1a39412b7",
+      "actor": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a"
+    }
+  },
+  "corrected_preservation_semantics": {
+    "a_parameter_anchor": "July 1e-5 * mean over the 6 FULL tensors towards theta_S0D (unchanged)",
+    "b_function_preservation_T1_T2": "EXCLUSIVELY scaling/export equivalence (<= 1e-5), never a behaviour gate",
+    "c_behaviour_gate_Q1_source_holdout": "Q1 <= 0.10 per joint (reused T1R P1 / rev3k postfit threshold) computed on a SOURCE HOLDOUT strictly SEPARATE from the 500 IK task rows: the rev3k provenance-held anchor rows (whole held-out traces), labels = S0D deterministic mean SAME-STATE (numpy forward, digest-pinned), minus any bitwise row shared with the 500 task rows (exclusion recorded)",
+    "no_drift_gate_on_task_rows": "the drift of the fitted actor vs S0D on the 500 IK rows is reported as EXPECTED DIAGNOSTICS only (anticipated magnitude ~0.38, the frozen structural gap); never a gate",
+    "fallback_declared": "if the separate source holdout is not constructible without leakage, only the parameter anchor + diagnostic drift remain, declared openly"
+  },
+  "disjointness_and_label_conflict_rule": "the source holdout and the 500 task rows must be verified bitwise-disjoint (provenance-aware); any shared row is EXCLUDED from the source holdout and counted; labels never conflict by construction (different label functions apply to disjoint row sets)",
+  "task_gate_unchanged": "RMSE <= 0.15 per joint vs u_IK AB06 on the 500 task rows (rev3b R0a threshold)",
+  "everything_else_in_rev3l": "unchanged (init S0D, July protocol facts, budget, prohibitions, single future nominal rollout with separate token)"
+}

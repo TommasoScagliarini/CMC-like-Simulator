@@ -1,0 +1,244 @@
+{
+  "protocol_id": "F1-S1-ablation-39to35-sigma-v1",
+  "title": "F1 - Ablation causale della regressione 39->35 e della scala stocastica (protocollo preregistrato, stage S1)",
+  "date": "2026-08-23",
+  "plan": "reports/plans/2026-08-22_piano_operativo_recupero_pipeline_exnovo_v26_fsmv3_morphology.md#fase-1",
+  "f0_gate_report": "reports/user/2026-08-23_fase0_gate_finale_recupero_ab06.md",
+  "status": "preregistered_before_any_F1_rollout_or_fit",
+  "roles": {
+    "executor": "Claude Fable 5 (max)",
+    "architect_gate_owner": "Codex"
+  },
+  "scope_S1": [
+    "protocollo",
+    "tooling",
+    "test sintetici",
+    "dry-run manifest/job matrix"
+  ],
+  "forbidden_in_S1": [
+    "rollout",
+    "simulazione",
+    "fit",
+    "modifica file dirty/produzione/C++/SEA/model/reward"
+  ],
+  "runtime": {
+    "target": "v3_canonical",
+    "config": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "rollout_eval_sha256_pin_source": "F0 receipts (rollout_eval.py `5433bcbc...`, re-hashed by the driver at launch)",
+    "isometry_rule": "A_iso, B, C, D share env/reward/reset/physics/slew/OOB/terminations/starts: identical --config, identical CLI except --checkpoint/--seed/--action-selection/--output-dir and the A_iso driver flag."
+  },
+  "starts": {
+    "minus020": 1.756870983805102,
+    "nominal": 1.956870983805102,
+    "plus020": 2.156870983805102
+  },
+  "seeds": {
+    "development": [
+      123,
+      124,
+      125
+    ],
+    "sealed_never_used": [
+      126,
+      127,
+      128
+    ]
+  },
+  "sigma": {
+    "constant": 0.005,
+    "log_std_float32": -5.2983174324035645,
+    "entropy_expected_nat": -7.758758,
+    "entropy_tolerance_nat": 1e-05,
+    "structural_rule": "pi.1.weight rows 2:4 == 0 and pi.1.bias[2:4] == float32(ln 0.005); detach() alone is not a freeze"
+  },
+  "candidates": {
+    "A_ISO39_V3": {
+      "actor": "V26_39D rl_module_best (frozen)",
+      "adapter": "aiso4",
+      "driver": "f1_rollout_aiso",
+      "sigma": "native (deterministic gate jobs only)",
+      "restored_signals": "4/6 (healthy_knee/ankle_angle_imitation_target[_vel]); gait_phase_sin/cos remain as B sees them: (0,1)",
+      "limitation": "A_iso measures the value of the 4 dropped targets under B's runtime; it does NOT restore the prescribed clock. A_iso differs from A_native also by slew 2.5/2.0 vs 0, reward ex_novo vs imitation, starts, terminations: A_native remains a non-isometric control."
+    },
+    "A_ISO39_V3_S005": {
+      "actor": "V26_39D with constant-sigma head (derived, stage 1)",
+      "adapter": "aiso4",
+      "use": "sigma-matched stochastic comparison with C and D"
+    },
+    "B": {
+      "actor": "B0820_H0 rl_module_last (hard-drop transplant actor, bit-exact)",
+      "driver": "rollout_eval",
+      "sigma": "native state-dependent (~0.5)"
+    },
+    "C": {
+      "actor": "B with constant-sigma head (derived, stage 1)",
+      "driver": "rollout_eval",
+      "sigma": 0.005,
+      "rule": "C-det must be bit-identical to B-det"
+    },
+    "D": {
+      "actor": "refit of B's mean (stage 2)",
+      "driver": "rollout_eval",
+      "sigma": 0.005
+    },
+    "A_NATIVE_39D": {
+      "reuse": "F0 ctrl39 jobs (V26_39D under v26_imitation_native)",
+      "class": "non_isometric_control"
+    },
+    "E": {
+      "reuse": "F0 JUL_H0 det/stoch jobs under v3_canonical",
+      "class": "non_isometric_historical_control"
+    },
+    "A_ISO39CLK_V3": {
+      "adapter": "aiso6clk",
+      "class": "optional_diagnostic",
+      "gate_relevant": false
+    }
+  },
+  "contrasts": {
+    "drop": "A_iso (det) vs B (det): isometric, measures the damage of the 4 dropped targets under the final runtime",
+    "sigma": "B-stoch-native vs C-stoch-0.005 paired by (start, seed) with common random numbers (same torch seed, identical architecture => identical standard-normal sequence; verified on step 1 and by rep2 bit-exactness)",
+    "recoverability_offline": "D vs C (== B mean) fidelity to the teacher on held-out trajectories",
+    "recoverability_closed_loop": "D vs B/C and fraction of A_iso (det); D-stoch-0.005 vs C-stoch-0.005 paired",
+    "excluded": "A_native vs anything isometric; E vs anything isometric (controls only)"
+  },
+  "dataset": {
+    "source": "F1 B-stoch-native traces (rollout_policy_trace.json, rollout_reset_diagnostics.json)",
+    "train_seeds": [
+      123,
+      124
+    ],
+    "val_seeds": [
+      125
+    ],
+    "split": "per trajectory (6 train / 3 validation trajectories)",
+    "include_det": false,
+    "obs35": "actor_observation_vector_before (real env vectors, float32-cast for the student)",
+    "t_pre": "[reset_time] + time[:-1] (exact env floats)",
+    "obs39": "obs35 with the 4 targets inserted at 2:6; targets from the A_iso adapter trace of the same start (t_pre exact match) or the env-built reconstructor",
+    "teacher": "V26_39D deterministic mean on obs39 (numpy float64 forward on float32-cast inputs)",
+    "no_new_collection_after_fit": true,
+    "dagger_rounds": 0
+  },
+  "refit": {
+    "init": "B actor (hard-drop)",
+    "trainable": "full mean network (encoder + pi.1 mean rows)",
+    "frozen": [
+      "pi.1 log-std rows (buffers: weight 0, bias ln 0.005)",
+      "first-layer columns gait_phase_sin/cos hard-zero"
+    ],
+    "loss": "MSE(mean, teacher) + clip_weight * mean(relu(|mean|-1)^2) + anchor_weight * mean((p-p_init)^2)",
+    "budget": {
+      "epochs": 300,
+      "batch_size": 256,
+      "lr": 0.0001,
+      "optimizer": "Adam",
+      "seed": 2026,
+      "clip_weight": 1.0,
+      "anchor_weight": 0.0
+    },
+    "selection": "fixed_final_epoch (no early stopping, no selection on validation or closed-loop)",
+    "motivation": "July adaptation: 400 epochs x 128 batch x lr 5e-5 on 24712 rows (~77k steps) reached val RMSE 0.0081; D has ~3000 training rows -> 300 x ~12 batches = ~3600 steps at lr 1e-4 is a deliberately minimal budget (recoverability test, not a bridge)."
+  },
+  "metrics": {
+    "valid_cycles": "summary phase_valid_cycle_count (v3-accepted chain HS->TO->HS), cross-checked with the trace last step",
+    "knee_rom": "kinematics_actual.knee.rom (time-domain, effective kinematics .sto)",
+    "horizon_completed": "end_reason == episode_time_limit and steps == env horizon (500)",
+    "reserve": "reserve.series_norm_max_nm",
+    "penetration": "penetration.series_max_m",
+    "teacher_rmse": "sqrt(mean((mean_candidate(obs35) - teacher(obs39))^2)) over rows of the named split",
+    "negative_ankle": "reported only (F2 requirement, not an F1 gate)"
+  },
+  "gates": {
+    "G1_integrity": {
+      "type": "hard",
+      "checks": [
+        "every F1 job: receipt status ok, rc 0, summary.ok, trace present, SHA re-verified, closure pre == post == manifest",
+        "seeds used ⊆ {123,124,125}; sealed seeds absent from manifest and receipts",
+        "C-det trace SHA == B-det trace SHA at the 3 starts (sigma head does not change the deterministic mean)",
+        "F1 B-det trace SHA == F0 B0820_H0 det trace SHA at the 3 starts (cross-phase reproducibility)",
+        "PASSTHROUGH_B nominal trace SHA == F1 B-det nominal trace SHA (hook path inert)",
+        "A_iso jobs: projection_assert_count == steps; sidecar t_pre == [reset_time] + time[:-1]; env actor names == manifest35; inserted names == manifest39",
+        "reconstruction config keys equal between v26 native and v3 canonical configs (f1_common.TARGET_RECONSTRUCTION_KEYS)",
+        "adapter reconstruction vs F0 ctrl39 traces, two EXACT comparisons with no tolerance (instrumentation revision r3): (a) reconstruction cast to the env observation dtype read from the env (observation_space.dtype) == obs39[:,2:6] bit-for-bit at identical t_pre, all rows, 3 starts; (b) float64 reconstruction at the post-step times == the env's own imitation_target_q/qdot recorded in the same trace bit-for-bit; both max_abs_diff == 0.0; recorded values must be representable in the observation dtype; the raw float64-vs-recorded difference (float32 quantisation of the recording) is informational only",
+        "numpy teacher mean vs A_iso recorded raw action: max |diff| <= 1e-5 on all A_iso det steps",
+        "derived modules C, A_ISO39_V3_S005, D: log-std rows zero, bias float32 ln 0.005, entropy -7.758758 ± 1e-5 after reload; mean parameters of C == B and of A_ISO39_V3_S005 == V26 bit-exact; D clock columns zero",
+        "CRN: B-stoch vs C-stoch same seed: step-1 standard-normal draw identical (|z_B - z_C| <= 1e-5); B-stoch nominal seed123 rep2 bit-exact to rep1",
+        "dataset: per-trajectory split, train seeds {123,124}, val {125}, no overlap, rows == trace rows, arrays SHA in receipt",
+        "refit: epochs_run == 300, selection fixed_final_epoch, dagger_rounds 0, new_collection_after_fit false"
+      ],
+      "revision_note_r3": "2026-08-23 S2a: the r1/r2 wording compared a float64 reconstruction with the float32-recorded observation and could never be exact by construction (env observation dtype float32, half-ulp 2.38e-7 at |v| in [4,8)); the causal proof showed 6000/6000 cells bit-exact after the cast and 6000/6000 float64 post-step cells bit-exact. The projection contract (project39to35(obs39) == obs35 exact, bitwise) is unchanged."
+    },
+    "G2_fidelity": {
+      "type": "hard",
+      "primary": {
+        "rule": "rmse_D_val <= 0.5 * rmse_C_val",
+        "note": "C mean == B mean (hard-drop error to the teacher); validation = seed 125 trajectories (3 starts)"
+      },
+      "overfit_guard": {
+        "rule": "rmse_D_val <= 1.5 * rmse_D_train"
+      },
+      "secondary_informational": {
+        "rule": "rmse_D_val <= 0.02",
+        "motivation": "July adapted actor reached 0.0081 in-distribution; 0.02 is a loose off-policy bound, reported not gated"
+      }
+    },
+    "G3_closed_loop": {
+      "type": "hard",
+      "aiso_success_predicate": {
+        "rules": [
+          "sum over 3 det starts of valid_cycles >= 4",
+          ">= 2 starts with valid_cycles >= 1",
+          ">= 2 starts with horizon_completed",
+          ">= 2 starts with knee_rom >= 0.6 rad"
+        ],
+        "motivation": "F0: A_native 3/2/2 cycles (7), horizon 3/3, knee ROM 1.00/1.00/0.88; JUL_H0 det under v3 3/2/0 (5), horizon 2/3, ROM 0.93/0.92/0.87; B 0/0/0, ROM 0.18/0.34/0.28. 0.6 rad sits between B's max and the July/V26 floor.",
+        "if_false": "G3 = NOT_EVALUABLE_AISO_FAILED: the failure is NOT attributed to the drop; F2 must be redesigned (runtime/clock bootstrap), see plan."
+      },
+      "D_vs_C_det": {
+        "cycles": "sum_cycles(D) >= max(1, ceil(0.5 * sum_cycles(A_iso))) and sum_cycles(D) > sum_cycles(C)",
+        "knee_rom": ">= 2 of 3 starts with knee_rom(D) >= knee_rom(C) + 0.5 * (knee_rom(A_iso) - knee_rom(C))",
+        "horizon": ">= 2 of 3 starts with horizon_completed(D)",
+        "safety": "per start reserve_norm_max(D) <= 1.15 * max(reserve_norm_max(C), reserve_norm_max(A_iso)); end_reason != grf_penetration at >= 2 starts",
+        "fraction_of_aiso": 0.5,
+        "motivation": "recovering half of the B->A_iso gap in cycles and ROM with a minimal off-policy refit is the minimum evidence that the hard-drop (not sigma, not the runtime) is the dominant, supervision-recoverable cause; less than that reopens the diagnosis before spending budget on a larger corpus (plan, Gate F1)."
+      },
+      "D_vs_C_stoch": {
+        "rules": [
+          "mean horizon fraction (D) >= mean horizon fraction (C) over 9 paired jobs",
+          "sum_cycles(D) >= sum_cycles(C) over 9 paired jobs"
+        ],
+        "note": "non-regression at sigma 0.005 with CRN pairing"
+      }
+    },
+    "G4_sigma_contrast": {
+      "type": "diagnostic",
+      "report": [
+        "paired (start,seed) deltas B-stoch-native vs C-stoch-0.005: horizon, cycles, return, clipped steps, penetration, reserve",
+        "B-det vs B-stoch vs C-stoch"
+      ]
+    },
+    "G5_controls": {
+      "type": "diagnostic",
+      "report": [
+        "A_native (F0 ctrl39) vs A_iso: runtime effect on the privileged actor",
+        "E (JUL_H0) vs B/C/D: historical, non-isometric",
+        "A_ISO39CLK_V3 (if executed): clock bootstrap mechanism"
+      ]
+    }
+  },
+  "decision_rule": "F1 PASS iff G1 PASS and G2 PASS and G3 PASS (with A_iso success predicate true). Any FAIL stops promotion to F2 bridge; A_iso predicate false => F2 redesign, not a drop attribution.",
+  "artefact_rules": {
+    "content_addressed": true,
+    "no_clobber": true,
+    "sha256_everywhere": true,
+    "F0_immutable": true,
+    "dirty_user_files_immutable": [
+      "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml",
+      "Trajectory Generator/runs/historical_runs.index.json",
+      "Trajectory Generator/runs/historical_runs.md"
+    ],
+    "root": "Trajectory Generator/runs/rollout/validation/f1_ablation_runs/"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "schema": "v26c_penetration_contract.1",
+  "id": "v26c_penetration_contract_2026-08-26",
+  "kind": "ADDITIVE, IMMUTABLE, AUTHORITATIVE FOR EVERY SUBSEQUENT STAGE",
+  "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer, not approver.",
+  "date_utc": "2026-08-26",
+  "scope": {
+    "applies_to": "every V26C stage evaluated from this date onward, and any successor pipeline that adopts this contract",
+    "does_not_apply_to": "runs already executed and recorded. Their receipts were produced under the contract in force at the time and remain valid evidence of that contract.",
+    "supersedes_clause": "the penetration acceptance clause of the earlier amendments, WITHOUT editing them. Those files keep their own text and their own hashes; this contract stands beside them and governs future evaluation."
+  },
+  "bands": {
+    "soft_diagnostic": {
+      "value_m": 0.020,
+      "role": "SOFT DIAGNOSTIC",
+      "binding": false,
+      "never_a_blocker": true,
+      "sample_above_iff": "> 0.020",
+      "max_above_iff": "> 0.020",
+      "at_exactly_0.020": "NOT above; not counted",
+      "meaning": "reported on every stage as a shaping/attention signal. It never fails a run and never blocks a stage."
+    },
+    "july_legacy_hard_reference": {
+      "value_m": 0.025,
+      "role": "JULY LEGACY HARD REFERENCE - COMPARATIVE DIAGNOSTIC ONLY",
+      "binding": false,
+      "never_a_blocker": true,
+      "historical_semantics": "July's own gate passed iff max < 0.025 (strict). teacher_summary.json records gate.penetration_below_hard_guard for the 2026-07-11_v2 teacher.",
+      "breach_diagnostic_iff": ">= 0.025",
+      "at_exactly_0.025": "BREACH under the diagnostic convention (>= 0.025), because July's pass was strict (< 0.025)",
+      "meaning": "reported so any result can be compared with the July operating point. It carries no acceptance power today."
+    },
+    "hard_binding": {
+      "value_m": 0.028,
+      "role": "THE ONLY HARD BINDING THRESHOLD",
+      "binding": true,
+      "pass_iff": "<= 0.028",
+      "fail_stop_iff": "> 0.028",
+      "at_exactly_0.028": "PASS - the bound is inclusive",
+      "meaning": "the single penetration criterion that can fail or stop a run. It matches the runtime termination boundary exactly."
+    }
+  },
+  "boundary_matrix": [
+    {"observed_max_m": 0.019999, "above_soft": false, "july_legacy_breach": false, "above_hard": false, "band": "within_soft", "binding_pass": true},
+    {"observed_max_m": 0.020000, "above_soft": false, "july_legacy_breach": false, "above_hard": false, "band": "within_soft", "binding_pass": true},
+    {"observed_max_m": 0.020001, "above_soft": true, "july_legacy_breach": false, "above_hard": false, "band": "above_soft_below_july_legacy", "binding_pass": true},
+    {"observed_max_m": 0.025000, "above_soft": true, "july_legacy_breach": true, "above_hard": false, "band": "july_legacy_breach_within_hard", "binding_pass": true},
+    {"observed_max_m": 0.025001, "above_soft": true, "july_legacy_breach": true, "above_hard": false, "band": "july_legacy_breach_within_hard", "binding_pass": true},
+    {"observed_max_m": 0.028000, "above_soft": true, "july_legacy_breach": true, "above_hard": false, "band": "july_legacy_breach_within_hard", "binding_pass": true},
+    {"observed_max_m": 0.028001, "above_soft": true, "july_legacy_breach": true, "above_hard": true, "band": "above_hard", "binding_pass": false}
+  ],
+  "counting_conventions": {
+    "samples_above_soft": "strictly > 0.020",
+    "samples_at_or_above_july_legacy": "at or above 0.025 (>= 0.025)",
+    "samples_above_hard": "strictly > 0.028",
+    "rationale": "the soft and hard counts use strict inequalities, matching the existing steps_above_soft code and the runtime termination test. The July legacy count uses >= because July's pass was strict (< 0.025), so its complement is >=."
+  },
+  "runtime_unchanged": {
+    "statement": "the RUNTIME is not touched by this contract. Reward shaping and termination keep their pinned values.",
+    "grf_penetration_penalty_threshold_m": 0.020,
+    "grf_penetration_termination_m": 0.028,
+    "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "runtime_termination_test": "osim_trj_cmc_like.py terminates when applied penetration > grf_penetration_termination_m, so the gate's inclusive <= 0.028 and the runtime agree exactly at the boundary"
+  },
+  "does_not_do": {
+    "does_not_rewrite_historical_verdicts": "the J1 FAIL, the J3 FAIL, the J4 technical/offline PASS and the J5-r2 FAIL all STAND exactly as recorded. This contract never edits a receipt, a trace or a run leaf.",
+    "confers_no_deployability": true,
+    "confers_no_promotion": true,
+    "authorises_no_next_stage": true,
+    "authorises_no_rollout_fit_or_training": true,
+    "reconciliation_is_informational": "any re-evaluation of a past run under this contract is a separate, clearly labelled reconciliation record. It never replaces the original verdict."
+  },
+  "pinned_artefacts_sha256": {
+    "v26c_j1_amendment_soft_fail.json": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9",
+    "v26c_j3_amendment_recovery_only.json": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+    "v26c_j5_amendment_revalidation.json": "033061fdd2bc289cdcb431a0c0df04a036bd660e7bda9490ec17870947ebcec0",
+    "v26c_j5_amendment_r2_rerun.json": "246caf8f61f38cd7cb5640dbec601d355e02ee46cce2a95a63b0b7874f4d17d0",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+    "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+    "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r2/v26c_j5_revalidation_receipt.json": "0ca84932cba49bf9d61381e78fae037b25c83c54371d4a7c87403bd885c02c9e",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r2/j5_trace.json": "fd51f8be802d3d4ace2bfd9a4b6ca5193382e696baa70e534472841955805b93",
+    "j5_runs/j5_revalidation_v26c_2026-08-26_r2/j5_kinematics.npz": "ce5eae3fcd2ba429f883d48d6bc5266107506133c8f88c5fc3833802e136aa25"
+  },
+  "immutability": "this file is content-addressed by the artefacts it pins. Any change to a pinned artefact invalidates it. It is never edited in place."
+}

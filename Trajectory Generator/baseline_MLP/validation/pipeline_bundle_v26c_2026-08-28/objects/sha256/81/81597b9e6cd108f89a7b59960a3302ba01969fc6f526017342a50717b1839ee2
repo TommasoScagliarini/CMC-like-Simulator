@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phase Recognition FSM - baseline MLP</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #5d667a;
+      --line: #d8dee9;
+      --state: #245b8f;
+      --state-soft: #e4effb;
+      --valid: #1f7a5b;
+      --valid-soft: #dff3eb;
+      --invalid: #b33c32;
+      --invalid-soft: #f8e4e1;
+      --timeout: #8a5a16;
+      --timeout-soft: #fff0d6;
+      --diag: #515a6d;
+      --diag-soft: #eceff4;
+      --reward: #5b3f99;
+      --reward-soft: #ebe6fb;
+      --code: #eef2f7;
+      --shadow: 0 1px 2px rgba(25, 31, 44, 0.08), 0 8px 24px rgba(25, 31, 44, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    header {
+      padding: 28px clamp(18px, 4vw, 44px) 18px;
+      background: #111827;
+      color: #f9fafb;
+      border-bottom: 1px solid #0b1020;
+    }
+
+    main {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 22px clamp(18px, 4vw, 44px) 40px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight: 760;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 8px 0;
+      color: var(--muted);
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .subhead {
+      max-width: 1080px;
+      color: #c8d2e2;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .badges,
+    .legend,
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badges {
+      margin-top: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+      color: #eef4ff;
+      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      white-space: nowrap;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .diagram-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcff;
+      padding: 10px;
+    }
+
+    .fsm-svg {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+      display: block;
+    }
+
+    .state-box {
+      fill: #ffffff;
+      stroke: var(--state);
+      stroke-width: 2;
+      rx: 8;
+    }
+
+    .state-box.timeout {
+      stroke: var(--timeout);
+      fill: var(--timeout-soft);
+    }
+
+    .state-box.pseudo {
+      stroke: var(--diag);
+      fill: var(--diag-soft);
+      stroke-dasharray: 7 5;
+    }
+
+    .state-title {
+      font-weight: 800;
+      fill: var(--ink);
+      font-size: 17px;
+    }
+
+    .state-text {
+      fill: var(--muted);
+      font-size: 12px;
+    }
+
+    .edge {
+      fill: none;
+      stroke-width: 2.2;
+      marker-end: url(#arrow);
+    }
+
+    .edge.valid {
+      stroke: var(--valid);
+    }
+
+    .edge.invalid {
+      stroke: var(--invalid);
+      stroke-dasharray: 8 6;
+    }
+
+    .edge.timeout {
+      stroke: var(--timeout);
+      stroke-dasharray: 10 5;
+    }
+
+    .edge-label {
+      font-size: 12px;
+      fill: #172033;
+      paint-order: stroke;
+      stroke: #fbfcff;
+      stroke-width: 5px;
+      stroke-linejoin: round;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.valid,
+    .chip.valid {
+      color: #0d5b41;
+      background: var(--valid-soft);
+      border-color: #9bd7c3;
+    }
+
+    .pill.invalid,
+    .chip.invalid {
+      color: #8b261f;
+      background: var(--invalid-soft);
+      border-color: #e7b4ae;
+    }
+
+    .pill.timeout,
+    .chip.timeout {
+      color: #6b440c;
+      background: var(--timeout-soft);
+      border-color: #f1cf8f;
+    }
+
+    .pill.state,
+    .chip.state {
+      color: #194b79;
+      background: var(--state-soft);
+      border-color: #a9caef;
+    }
+
+    .pill.reward,
+    .chip.reward {
+      color: #473075;
+      background: var(--reward-soft);
+      border-color: #c4b6ec;
+    }
+
+    .pill.diag,
+    .chip.diag {
+      color: #4e586a;
+      background: var(--diag-soft);
+      border-color: #d2d7e1;
+    }
+
+    .chip {
+      display: inline-flex;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      font-size: 12px;
+    }
+
+    .legend {
+      margin-top: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcff;
+    }
+
+    .card code {
+      display: block;
+      margin-top: 8px;
+      padding: 9px;
+      border-radius: 6px;
+      background: var(--code);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .weight-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      padding: 5px 0;
+      border-top: 1px solid #eef1f6;
+      font-size: 12px;
+    }
+
+    .weight-row:first-child {
+      border-top: 0;
+    }
+
+    .weight-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      color: #182234;
+    }
+
+    .filters {
+      margin-bottom: 10px;
+    }
+
+    input,
+    select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+    }
+
+    input {
+      min-width: min(420px, 100%);
+      flex: 1 1 260px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      padding: 9px 10px;
+      vertical-align: top;
+      border-bottom: 1px solid #edf1f6;
+      text-align: left;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #f0f4f9;
+      color: #263246;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      z-index: 2;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .term-id {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-weight: 760;
+      color: #111827;
+      overflow-wrap: anywhere;
+    }
+
+    .note-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .note-list li {
+      margin: 5px 0;
+    }
+
+    @media (max-width: 1120px) {
+      .grid,
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      header,
+      main {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .section {
+        padding: 14px;
+      }
+
+      th:nth-child(4),
+      td:nth-child(4) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Phase Recognition FSM</h1>
+    <p class="subhead">
+      Grafo della macchina a stati implementata in <code>prosthetic_phase_fsm.py</code> per il tracking HS-TO-HS della protesi sinistra. La FSM usa solo eventi online GRF, forza normale e flag di contatto.
+    </p>
+    <div class="badges">
+      <span class="badge">FSM: Trajectory Generator/prosthetic_phase_fsm.py</span>
+      <span class="badge">Env hook: osim_trj_cmc_like.py::_update_phase_fsm</span>
+      <span class="badge">Reward hook: reward_function.py</span>
+      <span class="badge">Config: training_exnovo_cfg.yaml</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <h2>Grafo stati e transizioni</h2>
+      <div class="diagram-wrap">
+        <svg class="fsm-svg" viewBox="0 0 1180 680" role="img" aria-label="Grafo FSM phase recognition">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+
+          <rect class="state-box" x="70" y="250" width="250" height="128"></rect>
+          <text class="state-title" x="95" y="285">WAIT_HS</text>
+          <text class="state-text" x="95" y="310">state_id = 0</text>
+          <text class="state-text" x="95" y="330">initial / expected HS</text>
+          <text class="state-text" x="95" y="350">progress = 0.0</text>
+
+          <rect class="state-box" x="465" y="82" width="270" height="142"></rect>
+          <text class="state-title" x="490" y="118">STANCE_AFTER_HS</text>
+          <text class="state-text" x="490" y="143">state_id = 1</text>
+          <text class="state-text" x="490" y="163">expected TO</text>
+          <text class="state-text" x="490" y="183">progress = 0.25</text>
+          <text class="state-text" x="490" y="203">tracks stance_elapsed_s</text>
+
+          <rect class="state-box" x="465" y="430" width="270" height="142"></rect>
+          <text class="state-title" x="490" y="466">SWING_AFTER_TO</text>
+          <text class="state-text" x="490" y="491">state_id = 2</text>
+          <text class="state-text" x="490" y="511">expected HS</text>
+          <text class="state-text" x="490" y="531">progress = 0.50</text>
+          <text class="state-text" x="490" y="551">landing window may activate</text>
+
+          <rect class="state-box timeout" x="880" y="250" width="240" height="128"></rect>
+          <text class="state-title" x="905" y="286">TIMEOUT</text>
+          <text class="state-text" x="905" y="311">state_id = 4</text>
+          <text class="state-text" x="905" y="331">absorbing guard state</text>
+          <text class="state-text" x="905" y="351">side: 1 stance, 2 swing</text>
+
+          <rect class="state-box pseudo" x="70" y="52" width="250" height="124"></rect>
+          <text class="state-title" x="95" y="87">INVALID_EVENT</text>
+          <text class="state-text" x="95" y="112">declared state_id = 5</text>
+          <text class="state-text" x="95" y="132">not latched in code</text>
+          <text class="state-text" x="95" y="152">one-step flag + counter</text>
+
+          <rect class="state-box pseudo" x="860" y="52" width="280" height="124"></rect>
+          <text class="state-title" x="885" y="87">VALID_CYCLE_COMPLETED</text>
+          <text class="state-text" x="885" y="112">declared state_id = 3</text>
+          <text class="state-text" x="885" y="132">not latched in code</text>
+          <text class="state-text" x="885" y="152">cycle_completed_this_step = 1</text>
+
+          <path class="edge valid" d="M320 285 C390 235, 420 190, 465 155"></path>
+          <text class="edge-label" x="333" y="230">heel_strike</text>
+          <text class="edge-label" x="333" y="248">accept HS, progress 0.25</text>
+
+          <path class="edge valid" d="M600 224 C610 285, 610 360, 600 430"></path>
+          <text class="edge-label" x="626" y="323">toe_off and stance_elapsed >= 0.05 s</text>
+          <text class="edge-label" x="626" y="341">valid TO, progress 0.50</text>
+
+          <path class="edge valid" d="M465 501 C360 492, 345 392, 465 184"></path>
+          <text class="edge-label" x="256" y="468">heel_strike and swing_elapsed >= 0.20 s</text>
+          <text class="edge-label" x="256" y="486">period/stance fraction updated</text>
+          <text class="edge-label" x="256" y="504">cycle_completed_this_step = 1</text>
+
+          <path class="edge timeout" d="M735 158 C825 170, 850 230, 880 290"></path>
+          <text class="edge-label" x="746" y="191">stance_elapsed &gt; 2.20 s</text>
+
+          <path class="edge timeout" d="M735 500 C825 492, 850 400, 880 345"></path>
+          <text class="edge-label" x="746" y="475">swing_elapsed &gt; 1.30 s</text>
+
+          <path class="edge invalid" d="M195 250 C160 212, 158 184, 195 176"></path>
+          <text class="edge-label" x="73" y="215">toe_off before HS</text>
+
+          <path class="edge invalid" d="M465 118 C410 91, 350 87, 320 102"></path>
+          <text class="edge-label" x="340" y="75">double HS before TO</text>
+
+          <path class="edge invalid" d="M465 184 C398 187, 350 152, 320 132"></path>
+          <text class="edge-label" x="336" y="163">TO too early</text>
+
+          <path class="edge invalid" d="M465 500 C405 450, 352 414, 320 154"></path>
+          <text class="edge-label" x="326" y="391">HS too early</text>
+
+          <path class="edge invalid" d="M465 545 C375 540, 305 474, 300 176"></path>
+          <text class="edge-label" x="333" y="564">double TO before HS</text>
+
+          <path class="edge valid" d="M860 114 C804 114, 768 121, 735 143"></path>
+          <text class="edge-label" x="749" y="102">valid HS after swing</text>
+
+        </svg>
+      </div>
+      <div class="legend">
+        <span class="chip state">Stato operativo</span>
+        <span class="chip valid">Transizione valida</span>
+        <span class="chip invalid">Evento invalido, non latched</span>
+        <span class="chip timeout">Timeout hard</span>
+        <span class="chip diag">Stato dichiarato ma non assegnato</span>
+        <span class="chip reward">Termine reward/observation</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Input, update e reward</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Input FSM</h3>
+          <p>Ogni step usa eventi filtrati sul lato sinistro e ordinati per timestamp.</p>
+          <code>update(
+  time_s=t,
+  events=online_events[left],
+  normal_force_bw=Fz / body_weight,
+  in_contact=online_grf.left.in_contact
+)</code>
+        </div>
+        <div class="card">
+          <h3>Observation actor</h3>
+          <p>La policy vede one-hot dello stato operativo, evento atteso, elapsed normalizzati e progress credit.</p>
+          <code>phase_fsm_wait_hs
+phase_fsm_stance_after_hs
+phase_fsm_swing_after_to
+phase_expected_hs / phase_expected_to
+phase_stance_elapsed_norm
+phase_swing_elapsed_norm
+phase_cycle_progress_credit</code>
+        </div>
+        <div class="card">
+          <h3>Reward ex_novo</h3>
+          <p>La FSM aggiunge due reward positive pre-clip e una penalty pre-clip per eventi invalidi.</p>
+          <code>+ 0.20 * phase_event_progress_score
++ 0.15 * landing_window_contact_score
+- 0.10 * invalid_event_loss
+- 0.10 * contact_validity_loss</code>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="section">
+        <h2>Catalogo transizioni e segnali</h2>
+        <div class="filters">
+          <input id="searchBox" type="search" placeholder="Cerca stato, evento, soglia, reward term">
+          <select id="kindFilter" aria-label="filtra per tipo">
+            <option value="">Tutti i tipi</option>
+          </select>
+        </div>
+        <table aria-label="transizioni e segnali FSM">
+          <thead>
+            <tr>
+              <th>Elemento</th>
+              <th>Tipo</th>
+              <th>Condizione / formula</th>
+              <th>Effetto</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </section>
+
+      <aside class="section">
+        <h2>Parametri ex_novo</h2>
+        <div id="params"></div>
+      </aside>
+    </div>
+
+    <section class="section">
+      <h2>Note di lettura</h2>
+      <ul class="note-list">
+        <li><code>INVALID_EVENT</code> e <code>VALID_CYCLE_COMPLETED</code> sono costanti dichiarate, ma il codice non assegna mai <code>state_id</code> a 5 o 3: sono eventi/flag di step, non stati latched.</li>
+        <li><code>TIMEOUT</code> e' assorbente nel codice corrente: dopo un timeout, gli handler non recuperano la sequenza con nuovi eventi.</li>
+        <li>Il primo <code>heel_strike</code> valido porta a <code>STANCE_AFTER_HS</code> con progress 0.25; il ciclo completo HS-TO-HS aggiorna periodo, stance fraction e manda per uno step progress 1.0.</li>
+        <li>La landing window e' attiva solo in <code>SWING_AFTER_TO</code> tra 0.55 s e 1.10 s di swing; il contatto in quella finestra produce <code>landing_window_contact_score</code>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script id="fsm-data" type="application/json">
+{
+  "params": [
+    ["min_stance_duration_s", "0.05"],
+    ["min_swing_duration_s", "0.20"],
+    ["landing_window_start_s", "0.55"],
+    ["landing_window_end_s", "1.10"],
+    ["landing_force_full_credit_bw", "0.65"],
+    ["stance_hard_timeout_s", "2.20"],
+    ["swing_hard_timeout_s", "1.30"],
+    ["blend_phase_event_progress", "0.20"],
+    ["blend_landing_window_contact", "0.15"],
+    ["phase_invalid_event_weight", "0.10"],
+    ["phase_contact_validity_weight", "0.10"]
+  ],
+  "items": [
+    {"id": "WAIT_HS", "kind": "state", "condition": "initial state; expected_next_event = heel_strike", "effect": "state_id=0, progress reset to 0.0 when refreshed"},
+    {"id": "STANCE_AFTER_HS", "kind": "state", "condition": "entered after accepted heel_strike", "effect": "state_id=1, expected_next_event=toe_off, stance_elapsed_s tracked"},
+    {"id": "SWING_AFTER_TO", "kind": "state", "condition": "entered after valid toe_off", "effect": "state_id=2, expected_next_event=heel_strike, swing_elapsed_s tracked"},
+    {"id": "TIMEOUT", "kind": "state", "condition": "stance_elapsed > 2.20 s or swing_elapsed > 1.30 s", "effect": "state_id=4, timeout_exceeded=1, timeout_side=1 stance or 2 swing"},
+    {"id": "VALID_CYCLE_COMPLETED", "kind": "pseudo-state", "condition": "declared constant state_id=3; never assigned in implementation", "effect": "represented by cycle_completed_this_step=1 on valid HS after swing"},
+    {"id": "INVALID_EVENT", "kind": "pseudo-state", "condition": "declared constant state_id=5; never assigned in implementation", "effect": "represented by invalid_event_this_step=1, invalid_event_type, invalid_event_count++"},
+
+    {"id": "WAIT_HS --heel_strike--> STANCE_AFTER_HS", "kind": "valid transition", "condition": "heel_strike while state_id == WAIT_HS", "effect": "accept HS; last_valid_hs_time=event_time; valid_hs_count++; progress=0.25"},
+    {"id": "STANCE_AFTER_HS --toe_off--> SWING_AFTER_TO", "kind": "valid transition", "condition": "toe_off and event_time - last_valid_hs_time >= min_stance_duration_s", "effect": "accept TO; last_valid_to_time=event_time; valid_to_count++; progress=0.50"},
+    {"id": "SWING_AFTER_TO --heel_strike--> STANCE_AFTER_HS", "kind": "valid transition", "condition": "heel_strike and event_time - last_valid_to_time >= min_swing_duration_s", "effect": "valid_cycle_count++; cycle_completed_this_step=1; period/stance fraction updated; accept HS; progress=1.0 for that step"},
+    {"id": "STANCE_AFTER_HS --timeout--> TIMEOUT", "kind": "timeout transition", "condition": "stance_elapsed_s > stance_hard_timeout_s", "effect": "state_id=TIMEOUT; timeout_exceeded=1; timeout_side=1"},
+    {"id": "SWING_AFTER_TO --timeout--> TIMEOUT", "kind": "timeout transition", "condition": "swing_elapsed_s > swing_hard_timeout_s", "effect": "state_id=TIMEOUT; timeout_exceeded=1; timeout_side=2"},
+
+    {"id": "to_before_hs", "kind": "invalid transition", "condition": "toe_off while WAIT_HS", "effect": "invalid_event_this_step=1; invalid_event_type=to_before_hs; state remains WAIT_HS"},
+    {"id": "double_hs_before_to", "kind": "invalid transition", "condition": "heel_strike while STANCE_AFTER_HS", "effect": "invalid_event_this_step=1; invalid_event_type=double_hs_before_to; state remains STANCE_AFTER_HS"},
+    {"id": "to_too_early_after_hs", "kind": "invalid transition", "condition": "toe_off while STANCE_AFTER_HS but stance_elapsed < 0.05 s", "effect": "invalid_event_this_step=1; invalid_event_type=to_too_early_after_hs; state remains STANCE_AFTER_HS"},
+    {"id": "hs_too_early_after_to", "kind": "invalid transition", "condition": "heel_strike while SWING_AFTER_TO but swing_elapsed < 0.20 s", "effect": "invalid_event_this_step=1; invalid_event_type=hs_too_early_after_to; state remains SWING_AFTER_TO"},
+    {"id": "double_to_before_hs", "kind": "invalid transition", "condition": "toe_off while SWING_AFTER_TO", "effect": "invalid_event_this_step=1; invalid_event_type=double_to_before_hs; state remains SWING_AFTER_TO"},
+
+    {"id": "phase_event_progress_score", "kind": "reward term", "condition": "payload copies cycle_progress_credit", "effect": "positive pre-clip reward: blend_phase_event_progress * score"},
+    {"id": "landing_window_contact_score", "kind": "reward term", "condition": "SWING_AFTER_TO and 0.55 <= swing_elapsed_s <= 1.10 and in_contact", "effect": "clip(normal_force_bw / 0.65, 0, 1); positive pre-clip reward"},
+    {"id": "invalid_event_loss", "kind": "reward term", "condition": "invalid_event_this_step", "effect": "pre-clip penalty: phase_invalid_event_weight * invalid_event_loss"},
+    {"id": "contact_validity_loss", "kind": "reward term", "condition": "currently emitted as 0.0 by payload", "effect": "pre-clip penalty hook: phase_contact_validity_weight * contact_validity_loss"},
+    {"id": "phase_regular_score", "kind": "reward term", "condition": "RewardShapingWrapper builds it from FSM period, order, stance fraction and timeout losses", "effect": "positive pre-clip reward through blend_phase_regular"},
+    {"id": "phase_timeout_loss", "kind": "reward term", "condition": "Huber interval over FSM stance_elapsed_s and swing_elapsed_s", "effect": "inside phase_regular_score and post-clip phase_timeout_penalty_term"},
+
+    {"id": "phase_fsm_wait_hs", "kind": "actor observation", "condition": "state_id == WAIT_HS", "effect": "one-hot state feature"},
+    {"id": "phase_fsm_stance_after_hs", "kind": "actor observation", "condition": "state_id == STANCE_AFTER_HS", "effect": "one-hot state feature"},
+    {"id": "phase_fsm_swing_after_to", "kind": "actor observation", "condition": "state_id == SWING_AFTER_TO", "effect": "one-hot state feature"},
+    {"id": "phase_expected_hs", "kind": "actor observation", "condition": "expected_next_event == heel_strike", "effect": "event expectation feature"},
+    {"id": "phase_expected_to", "kind": "actor observation", "condition": "expected_next_event == toe_off", "effect": "event expectation feature"},
+    {"id": "phase_stance_elapsed_norm", "kind": "actor observation", "condition": "stance_elapsed_s / stance_hard_timeout_s", "effect": "clipped to [0, 1.5]"},
+    {"id": "phase_swing_elapsed_norm", "kind": "actor observation", "condition": "swing_elapsed_s / swing_hard_timeout_s", "effect": "clipped to [0, 1.5]"},
+    {"id": "phase_cycle_progress_credit", "kind": "actor observation", "condition": "cycle_progress_credit", "effect": "0.0 wait, 0.25 HS, 0.50 TO, 1.0 cycle complete step"},
+
+    {"id": "state_id", "kind": "phase_fsm payload", "condition": "STATE_NAMES numeric key", "effect": "raw payload field; mirrored as phase_fsm_state_id in reward_terms"},
+    {"id": "state_name", "kind": "phase_fsm payload", "condition": "STATE_NAMES.get(state_id)", "effect": "raw payload field for readable diagnostics"},
+    {"id": "expected_next_event", "kind": "phase_fsm payload", "condition": "WAIT_HS/SWING_AFTER_TO -> heel_strike; STANCE_AFTER_HS -> toe_off; else none", "effect": "raw payload field; also encoded in actor expected-event features"},
+    {"id": "stance_elapsed_s", "kind": "phase_fsm payload", "condition": "time_s - last_valid_hs_time while STANCE_AFTER_HS", "effect": "raw payload field; used by timeout loss and actor normalized feature"},
+    {"id": "swing_elapsed_s", "kind": "phase_fsm payload", "condition": "time_s - last_valid_to_time while SWING_AFTER_TO", "effect": "raw payload field; used by timeout loss, landing window and actor normalized feature"},
+    {"id": "cycle_progress_credit", "kind": "phase_fsm payload", "condition": "updated by accepted HS/TO and refresh_scores", "effect": "raw payload field; mirrored as phase_event_progress_score and phase_cycle_progress_credit"},
+    {"id": "valid_hs_count", "kind": "phase_fsm payload", "condition": "accepted heel_strike count", "effect": "raw payload field; mirrored as phase_valid_hs_count"},
+    {"id": "valid_to_count", "kind": "phase_fsm payload", "condition": "accepted toe_off count", "effect": "raw payload field; mirrored as phase_valid_to_count"},
+    {"id": "valid_cycle_count", "kind": "phase_fsm payload", "condition": "accepted HS after valid TO count", "effect": "raw payload field; mirrored as phase_valid_cycle_count"},
+    {"id": "invalid_event_this_step", "kind": "phase_fsm payload", "condition": "set by _mark_invalid for current update", "effect": "raw payload field; mirrored as invalid_event_loss"},
+    {"id": "invalid_event_count", "kind": "phase_fsm payload", "condition": "incremented by every invalid event", "effect": "raw payload field; also logged by reward_components/reward_terms"},
+    {"id": "invalid_event_type", "kind": "phase_fsm payload", "condition": "string reason from _mark_invalid", "effect": "raw payload field for diagnostics"},
+    {"id": "cycle_completed_this_step", "kind": "phase_fsm payload", "condition": "valid HS after SWING_AFTER_TO", "effect": "raw payload field; keeps progress=1.0 for that step"},
+    {"id": "timeout_exceeded", "kind": "phase_fsm payload", "condition": "hard timeout reached in _refresh_time_terms", "effect": "raw payload field; mirrored as phase_timeout_exceeded"},
+    {"id": "timeout_side", "kind": "phase_fsm payload", "condition": "1 stance, 2 swing", "effect": "raw payload field; mirrored as phase_timeout_side"},
+    {"id": "last_period_s", "kind": "phase_fsm payload", "condition": "current HS - previous HS after completed cycle", "effect": "raw payload field; mirrored as phase_last_period_s"},
+    {"id": "previous_period_s", "kind": "phase_fsm payload", "condition": "previous last_period_s before update", "effect": "raw payload field; mirrored as phase_previous_period_s"},
+    {"id": "last_stance_fraction", "kind": "phase_fsm payload", "condition": "(previous TO - previous HS) / period", "effect": "raw payload field; mirrored as phase_last_stance_fraction"},
+
+    {"id": "phase_fsm_state_id", "kind": "reward_terms diagnostic", "condition": "payload state_id", "effect": "logged in reward_terms"},
+    {"id": "phase_valid_hs_count", "kind": "reward_terms diagnostic", "condition": "valid_hs_count", "effect": "logged in reward_terms"},
+    {"id": "phase_valid_to_count", "kind": "reward_terms diagnostic", "condition": "valid_to_count", "effect": "logged in reward_terms"},
+    {"id": "phase_valid_cycle_count", "kind": "reward_terms diagnostic", "condition": "valid_cycle_count", "effect": "logged in reward_terms"},
+    {"id": "phase_stance_elapsed_s", "kind": "reward_terms diagnostic", "condition": "stance_elapsed_s", "effect": "used by reward shaping timeout loss"},
+    {"id": "phase_swing_elapsed_s", "kind": "reward_terms diagnostic", "condition": "swing_elapsed_s", "effect": "used by reward shaping timeout loss"},
+    {"id": "phase_timeout_exceeded", "kind": "reward_terms diagnostic", "condition": "timeout_exceeded", "effect": "logged in reward_terms"},
+    {"id": "phase_timeout_side", "kind": "reward_terms diagnostic", "condition": "timeout_side", "effect": "1 stance, 2 swing"},
+    {"id": "phase_last_period_s", "kind": "reward_terms diagnostic", "condition": "last_period_s", "effect": "used by period loss"},
+    {"id": "phase_previous_period_s", "kind": "reward_terms diagnostic", "condition": "previous_period_s", "effect": "used by periodicity loss"},
+    {"id": "phase_last_stance_fraction", "kind": "reward_terms diagnostic", "condition": "last_stance_fraction", "effect": "used by stance fraction loss"},
+    {"id": "landing_window_active", "kind": "reward_terms diagnostic", "condition": "SWING_AFTER_TO and landing window bounds", "effect": "logged in reward_terms"}
+  ]
+}
+  </script>
+
+  <script>
+    const DATA = JSON.parse(document.getElementById("fsm-data").textContent);
+    const KIND_CLASS = {
+      "state": "state",
+      "pseudo-state": "diag",
+      "valid transition": "valid",
+      "invalid transition": "invalid",
+      "timeout transition": "timeout",
+      "reward term": "reward",
+      "actor observation": "state",
+      "phase_fsm payload": "diag",
+      "reward_terms diagnostic": "diag"
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderParams() {
+      const root = document.getElementById("params");
+      root.innerHTML = "";
+      for (const [name, value] of DATA.params) {
+        const row = document.createElement("div");
+        row.className = "weight-row";
+        row.innerHTML = `<span>${escapeHtml(name)}</span><span class="weight-value">${escapeHtml(value)}</span>`;
+        root.appendChild(row);
+      }
+    }
+
+    function populateKinds() {
+      const select = document.getElementById("kindFilter");
+      const kinds = [...new Set(DATA.items.map((item) => item.kind))].sort();
+      for (const kind of kinds) {
+        select.add(new Option(kind, kind));
+      }
+    }
+
+    function renderRows() {
+      const query = document.getElementById("searchBox").value.trim().toLowerCase();
+      const kind = document.getElementById("kindFilter").value;
+      const rows = DATA.items.filter((item) => {
+        if (kind && item.kind !== kind) return false;
+        if (!query) return true;
+        return [item.id, item.kind, item.condition, item.effect].join(" ").toLowerCase().includes(query);
+      });
+      const body = document.getElementById("rows");
+      body.innerHTML = "";
+      for (const item of rows) {
+        const cls = KIND_CLASS[item.kind] || "diag";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><span class="term-id">${escapeHtml(item.id)}</span></td>
+          <td><span class="pill ${cls}">${escapeHtml(item.kind)}</span></td>
+          <td>${escapeHtml(item.condition)}</td>
+          <td>${escapeHtml(item.effect)}</td>
+        `;
+        body.appendChild(tr);
+      }
+    }
+
+    function init() {
+      renderParams();
+      populateKinds();
+      renderRows();
+      document.getElementById("searchBox").addEventListener("input", renderRows);
+      document.getElementById("kindFilter").addEventListener("change", renderRows);
+      window.PHASE_FSM_GRAPH_ITEMS = DATA.items;
+    }
+
+    init();
+  </script>
+</body>
+</html>

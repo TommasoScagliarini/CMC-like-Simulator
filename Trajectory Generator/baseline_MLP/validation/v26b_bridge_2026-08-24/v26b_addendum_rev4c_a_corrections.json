@@ -1,0 +1,44 @@
+{
+  "addendum_id": "rev4c_a_corrections",
+  "date": "2026-08-24",
+  "kind": "ADDITIVE, IMMUTABLE, AUTHORITATIVE on the corrections below. The rev4c amendment, the fit receipt, the rollout receipt and the rev4c report are NOT mutated; no artifact is rewritten",
+  "produced_under": "read-only audit ordered by the architect after the rev4c review, before any REV4D authorisation",
+
+  "parents_preserved": {
+    "amendment_rev4c": "b25b0fe4f89a9ea4a7ac6b6b9ca8b5d2d393e4535a2a0944edd5386dd62790bb",
+    "fit_receipt": "c3fef01223dd8aa5ebcc9c5208407bc78dec0bdac7e2d63197e8fa319a4b4f4a",
+    "rollout_receipt": "188574622251931577d85fa5b1fe6ec7a6fa433b396aeb10f4a1dabd9f698a50",
+    "report": "0b9a7bb1f8ecb4f47b91238cbbf94df9b3d318cd0e2d62b47dae283cdb73589a",
+    "status": "all PRESERVED byte-identical; this addendum is the authority on the corrected statements"
+  },
+
+  "CORRECTION_1_A2_LABEL_IN_THE_ROLLOUT_RECEIPT": {
+    "defect": "the rev4c rollout receipt field seven_gates.meaning contains the prose 'closed-loop eligibility of A2'",
+    "scope": "TEXTUAL ONLY. It is a VALUE string, not a key. It was inherited verbatim from the frozen tool v26b_s1b_rollout.eligibility_gates:190, which rev4c reuses deliberately so that the gate arithmetic stays byte-identical across stages",
+    "not_a_data_error": "every numeric value under seven_gates was computed from THIS rollout's analysis: steps 116, phase_timeout 0/0, morphology rows_positive 0, hs_cancelled 0, resync 0, valid_cycle 0, penetration 0.028665339192614346 m. None of them belongs to A2",
+    "authoritative_reading": {
+      "seven_gates.meaning": "READ AS 'closed-loop eligibility of REV4C. A PASS marks ONLY CLOSED_LOOP_ELIGIBLE_PENDING_ARCHITECT_AUDIT: it is NOT a promotion, the candidate stays NON-DEPLOYABLE, and it does NOT resolve sigma'"
+    },
+    "why_the_guard_did_not_catch_it": "the rev4c hygiene contract assert_no_foreign_labels scans dictionary KEYS for foreign actor labels and forbids offline_reference_block anywhere; it does not scan free-text VALUES. The rev4c-authored block diagnostics.actor_comparison is correctly parameterised (actor_label REV4C, neutral keys) and carries no foreign offline_reference_block",
+    "forward_rule": "a future stage must either parameterise the prose of eligibility_gates by actor label, or rewrite that string at write time, and the hygiene contract must additionally scan value strings for foreign actor labels outside declared provenance subtrees"
+  },
+
+  "CORRECTION_2_THE_SINGLE_VARIABLE_CLAIM": {
+    "claim_as_written": "the rev4c amendment states 'experiment_type: single variable: the on-policy share, 75.82% -> 35.23%. Everything else is byte-identical to rev4b'",
+    "verdict": "NOT EXACT. The share was manipulated by CUTTING THE PREFIX from 392 rows to 68, and the prefix length simultaneously determines which teacher time indices, and therefore which negative-ankle windows, are represented on-policy",
+    "measured_confound": {
+      "rev4b": {"prefix_rows": 392, "on_policy_share": 0.7582205029013539, "distinct_negative_time_indices": 65, "negative_windows": [[6, 14], [112, 132], [174, 179], [267, 290], [330, 334]]},
+      "rev4c": {"prefix_rows": 68, "on_policy_share": 0.3523316062176166, "distinct_negative_time_indices": 9, "negative_windows": [[6, 14]]},
+      "consequence": "TWO dimensions moved together: on-policy weight AND negative-ankle cycle coverage (65 -> 9 distinct indices, 5 windows -> 1). The 116-step result cannot be attributed to the share alone"
+    },
+    "what_remains_valid": "the preregistered primary test was well posed and its verdict stands as recorded: survival 116 > 100, so the specific hypothesis 'rev4b's collapse was caused by the 75.82% configuration' is supported, and the single-round DAgger direction does not close. What is NOT established is that the SHARE, as opposed to the coverage, is the operative variable",
+    "authoritative_wording": "wherever rev4c or its report says 'single variable', read 'single manipulated quantity (the prefix length), which moves the on-policy share and the negative-ankle coverage together'",
+    "additional_confound_inside_the_repeat_operator": {
+      "fact": "adapt_actor draws the validation split as a seeded random permutation over the AGGREGATE (target_domain_imitation.py:846-852, mode seeded_random_fraction), so exact copies produced by trace_repeat straddle train and validation",
+      "measured": "with trace_repeat 4 the probability that a given unique on-policy row has copies on both sides is 0.5886 for the 772-row rev4c aggregate and 0.5895 for the 2068-row rev4b aggregate, i.e. about 40 of 68 and 231 of 392 unique on-policy rows leak into validation; with trace_repeat 1 the probability is exactly 0",
+      "consequence": "validation MSE and the early-stopping decision are optimistically biased whenever trace_repeat > 1. Offline validation MSE must not be used as a promotion criterion, and trace_repeat cannot be varied without also varying this leakage"
+    }
+  },
+
+  "scope_note": "the architect ordered the addendum for the A2 textual defect. CORRECTION_2 is added because this audit established that a frozen rev4c claim is inexact and the architect's REV4D decision depends on it. It is flagged in the accompanying report so the architect may reject it; nothing is mutated either way"
+}

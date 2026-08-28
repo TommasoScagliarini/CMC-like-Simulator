@@ -1,0 +1,749 @@
+
+
+****************************************************************
+[DEBUG] >>> SYSTEM ALERT: IL PLUGIN E' STATO CARICATO IN MEMORIA.
+[DEBUG] >>> INIZIO REGISTRAZIONE OGGETTI...
+[DEBUG] >>> SEA: registered.
+****************************************************************
+
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.1742 rad
+[Runner] SEA_Ankle motor_angle = 0.0518 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+2026-08-27 21:40:52,829	WARNING algorithm_config.py:5108 -- You are running PPO on the new API stack! This is the new default behavior for this algorithm. If you don't want to use the new API stack, set `config.api_stack(enable_rl_module_and_learner=False,enable_env_runner_and_connector_v2=False)`. For a detailed migration guide, see here: https://docs.ray.io/en/master/rllib/new-api-stack-migration-guide.html
+[2026-08-27 21:40:53,281 E 62966 35829478] core_worker.cc:2194: Actor with class name: 'SingleAgentEnvRunner' and ID: '4f981487d2a8e85f2acefb9901000000' has constructor arguments in the object store and max_restarts > 0. If the arguments in the object store go out of scope or are lost, the actor restart will fail. See https://github.com/ray-project/ray/issues/53727 for more details.
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 00000000fce670a93c56caadfe19847eae9f0ea3d0f6fba08dc3d38e8643f296 Worker ID: 82131362ec5aaaaa3a7f7425a30d6d5957b1548b7f7c0b6d0883170e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 54372 Worker PID: 63048 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 680000006d6472b573ee3c09433a24282bec241eb1c051537eecd145d0ca01be Worker ID: e00048fd2f1e6e8f2015c0c72ae5706bba0fed40e4641584cfae9ffe Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 55412 Worker PID: 63189 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 104x across cluster] (Ray deduplicates logs by default. Set RAY_DEDUP_LOGS=0 to disable log deduplication, or see https://docs.ray.io/en/master/ray-observability/user-guides/configure-logging.html#log-deduplication for more options.)[0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: cb000000b1d67090f66a0ca36a700736a0b398fb45fe846f56e617bbf4887bbd Worker ID: 027da8af2b8cbd172eefeba262628b830f1b4ceaf095efed2f8060d8 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56428 Worker PID: 63318 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 99x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 2c01000056ee89b191d2a02adf9df171c5474fece9ba8ef9d2625bf379195fc2 Worker ID: d01e4be1ea838bd32f3ea15ea99f92af7255623d1eede8c84729a69e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57410 Worker PID: 63432 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 97x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 8d0100005ac0efa19337701c6c55a02b6f27184b0191dd9f22d36a64ec73c457 Worker ID: 9d963d54ca3925f3badccf1fecceeac4cef7aecf645aa151c731dfbf Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 58393 Worker PID: 63562 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 97x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: ef0100001c366c2f75c41b1babbc9df68b1c44604d187badd8ec991e202252da Worker ID: 9b6ea7c3fc9e2ae70a086d233bd119f3d3bcfc15a7a4a6739f977a4a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 59387 Worker PID: 63713 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 98x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 4f020000677fa209d63c13932837424c3084c77762ce2bbc8c7e59baae3f48e2 Worker ID: 943e46662a08c22657b0b99ee766b5241cc651bdba805c2786287bed Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 60355 Worker PID: 63864 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: b00200001aeb5b79160cb6432ad4959c4b08e31acc2c96e5d0d9c043e9032481 Worker ID: 91c04f3fe13498c182ba3c280391bf19f7757dbec367035bc7d856c1 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61330 Worker PID: 63996 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 97x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 100300002434d25859085cb75addaf2527ae19adf2f743dd76c2ce7918f38519 Worker ID: a3251066796cd48fb0981fd21b5cbb7fd3902d82b10b8ee1e1d5b124 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 62296 Worker PID: 64112 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 710300009d1817889173e5164170839f571c576a994d831488582a01efa6417d Worker ID: 5852e93a380a29d7a5ace739dc3076e31d05b9c8b6c14327375d8525 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 63272 Worker PID: 64227 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 97x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: d103000053c047d545587dd9a630d1b3367edc11406600274d89a46a03797e62 Worker ID: 66d78f0ac5b9d53807f4d84a1183eda087ec7ec59d7a03156916946e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 64236 Worker PID: 64357 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 32040000e90ab85f2c9f34d2783d9d452cc15b27108da57259f53c93d60cc94b Worker ID: 4dace3ba1eea15744bc901a12a7141a7830e4596ca4f7a9d7bc3f947 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 65205 Worker PID: 64473 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 97x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 9104000034d92c6b899efee9c91d5ccc8a2d25e26362c72bbefddb68fa85b3d4 Worker ID: 7a6d84fd32c8679ab5b9f735e7c341bb7e4be3ed6bfa3d725c1e6bbe Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 49779 Worker PID: 64595 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 95x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: f1040000e695e5206172189213e65291b03497c595b3138ef24e1ae1c5eb0f88 Worker ID: 4d9598bacb1a52a443b36f3d437ecaa077b40bfb8e6005f310c7d99f Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 50753 Worker PID: 64716 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 5105000090f6ba50821eb507c74af056516c2f35b02fab547076be3dddf138f7 Worker ID: 555e926bd8547b39b2e2679046adfa55eab9853eb7b4863aefb2f8ee Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 51716 Worker PID: 64831 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: b1050000ad6c344b5516e484ef74e556b8032936f9fee44f829909eeb0fec050 Worker ID: b74536319fd515df26ed533333736a3da49bae2a36d958a73fcd70d8 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52685 Worker PID: 65021 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 1006000086550214706adb3c2f0ab429c998ef88a63a2c1769418c1f4137f4e2 Worker ID: 5559498b782811248d6b4b8b859ca7ea274364d797ab359d3a42543b Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 53628 Worker PID: 65141 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 95x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 670600008d514933ad6bb6787423080ff1e335fbd4eae7680fd697f61804410c Worker ID: 922eb4c73e0ea2c45c73e7f15cd0f79f0390914aaa2b4c1726f47f14 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 54541 Worker PID: 65247 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 87x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: c5060000ed75ba719779b1a3c1840440ef84a43bc46d00c83230521c46d20551 Worker ID: 3de538e7170713a4816b4cf28258abb307211f25102adae1079c1e45 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 55485 Worker PID: 65369 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 94x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 230700005c489d3169ef190a0dd511560c1e2c6e6feae019032587108e079ff7 Worker ID: 5ec6853796d47d34ac15b32e3aea9d97ae4b01477ba889cd4aad0f92 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56429 Worker PID: 65487 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 94x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 7e070000f4e2815164f90bb09b4f9d03ab953c9ec80abb8a9888e9a360751539 Worker ID: 9898d46642b73a143f1458a022f65fb1d900a9c39f3789e07bac4c80 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57337 Worker PID: 65607 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 91x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: db0700007e77df0c62399a6d80a34fba9288e653a0184c9c7e05817f816b083b Worker ID: c52334e1ce0bf4d2ad611015dd64871df14ad84cbcc94f9f040fad36 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 58269 Worker PID: 65718 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 36080000a39876003f302f9e756224a98607f0a240af6f3660c7b383923b8c23 Worker ID: 770410417d7e234ea4b0a85dbec7f26e676238504cc7729ac314be76 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 59186 Worker PID: 65834 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 91x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 92080000ea028b61e70de412e7395ab206982b1350e0175c2a39d6782439c9cf Worker ID: 5e62801e76f8436a55a7d76ed52d04359946e5a0d7b5ed83e6c44365 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 60113 Worker PID: 65988 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 92x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: f0080000f4d445d0cd722202656cce26901495b9d3a75800c2b28f95bdcbb5f0 Worker ID: 0457eeb54b4bb73d2e4288ee9269614a3d43654bf6c45ba386c8bf4f Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61051 Worker PID: 66101 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 94x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 4a0900004c460d8e408a328a2ad720c05fecafe6662cf7031575e501ac8eb132 Worker ID: 8f603f140e28f87abe807a1266763725e27e0f1211f294f08b518244 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61956 Worker PID: 66217 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: a4090000c34b5d6d49332b52ca7812f7a15ebdd645aa8ec28618355696bc7619 Worker ID: 4f4f687a4960d3eb9b865bd7717f1df17c6edeea44f3344ed9e12b7c Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 62862 Worker PID: 66335 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 000a000011f0ba0fadfc3947e7a9311a7bb3a6eaea4185d8ac8ecfd9e8c83a8b Worker ID: 8db1aeb8eeb47109d0780c650248bf0605a1a9f64e3c644849c22428 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 63787 Worker PID: 66446 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 92x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 5d0a0000da4d3eba91b8a421d9b86e5cafe72225719cebfa8048b09ff9fd9078 Worker ID: e34d88e900215a122fa6871e58ba122f18e0e8a2386e217135266aeb Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 64721 Worker PID: 66572 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: b80a0000d84f8d3a6f1e83fc8e15381038a6183ed21da9776f13bcebd24544e8 Worker ID: 41a41af2b89dcc49e4bf87d01eea793588a1f07a2333c5a28285ae60 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 49255 Worker PID: 66682 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 91x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 150b0000b4b232d213313818d9dd851d410049dd2c6d508dad38fb674ff23541 Worker ID: a87b0d82c2a20c3a5bfbc098b05506112dbb92ad300fd302b9da7f05 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 50184 Worker PID: 66795 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 720b0000b56fed55dca05e4e878b4c87107bad74680c501720dd79129fa43634 Worker ID: d8ba14e88d7a98c134a4e8b94d52e543ae23c5082b1c1eeb17d48a81 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 51121 Worker PID: 66954 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: d10b000085f36ac736e96b71ecfce81877ab3db7a5a31a8eb5967de09c4ddf4a Worker ID: 03a48bb433b673939aa6fe2c27f9a70af12966a5b4ed57123e28754a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52077 Worker PID: 67071 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 95x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 2e0c0000a3c5f7cb80762b514a605038ce21240b5ede531b9b2d40deeae14305 Worker ID: c23d2bcc46b50a32f57defae42bca5b11b2ff0cf40b321a8dc1973f0 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 53017 Worker PID: 67192 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 8d0c0000a7ccd037aed511b2290b723ac274a6b4e8533ae13b7ceaef2ea4f9ea Worker ID: 0671a10430675c4689df1d00c5753251d80a5c7e5cd6a3613d328691 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 53979 Worker PID: 67313 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 95x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: ea0c0000c6fa71b618a11c9825b6c887c29fedd46bc555d515c08a303b55ae1c Worker ID: 3b691a851f20551fbe770a0eb894d3244af9969fddc2d9f3d8a01b81 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 54939 Worker PID: 67425 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 4a0d0000772d1ec96ec055032e3d521b68b3ccab87503b096e566ee340697bf7 Worker ID: c566cd1a4479face9b5287f86d8c6a98afbc20c57c6d9e49372368a2 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 55896 Worker PID: 67548 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: aa0d00006e357460802b44861e36b612819f7c031a15c38abb047488bcc744c9 Worker ID: a5834769b08d7e2790d54b9ab9146cab8a998dbb6ce152c1c31a5df5 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56853 Worker PID: 67669 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 060e00005e9c1f754cfa925965960634f3751befbbbc7d082c29a9b143452acd Worker ID: fae573b98bc6d8945da1e9602130a566cf3b93c8fc010741b2524915 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57774 Worker PID: 67779 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 91x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 650e000073d78aad34e51827e9ce0c98d77d51cda06d7b46d287e6978be87809 Worker ID: 96879709bb38d6cefe8bd518b51be4b5c66f08dee0002a7f550502ac Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 58731 Worker PID: 67936 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: c10e00008180550ae1c57c22841a0911403e943171f67c7c412ebea11d8f7c6f Worker ID: 0aaf84721b491dcc3f9ec02c7f027a6367edfb95205c3835f3fa7139 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 59649 Worker PID: 68052 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 91x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 210f00009fc4cfd316aef4d636e4d3ab76c024950e34333ccf95034a1cf0326d Worker ID: a2d9fd46d9b6e3c50620ac7ee2122d6810cba71a54296bcb65b8cb79 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 60616 Worker PID: 68177 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 97x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 7d0f000007b502f6d2009a2b87a28916e0fc5491d18fb1c4cbe091e6b2dc0813 Worker ID: 90e88fce10bef87463e68115445165b152d0dce08f81baa63e8dda02 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61541 Worker PID: 68287 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 92x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: dc0f00009b357e970a966892dcc480cf38943a652a8199ed02084fab84528bc5 Worker ID: 83156b7f6defe2b6b7aab892dfa2346f2f20cab085487bcedc1728fd Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 62492 Worker PID: 68407 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 95x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 39100000b96d750d1dd8208aa8813adc5cade2f71b8c652244293864a3ea3321 Worker ID: ca1923d84a59c00b6ce601f9e40d9eb80abf1236d5da953be3312856 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 63417 Worker PID: 68527 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 92x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 961000007eb057ee1945ba162b41b850322eb1c10e0a0fe78707d8fce1873513 Worker ID: 4752cece4f7b447172368c43f6cfb9040141a00948588a2b9c499ca5 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 64359 Worker PID: 68641 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: f3100000bba86edad0900355c42cd85037d3e1aa5fc7a224f86f02d3ed9e4ba7 Worker ID: 11bfd971775adf7e0a406a5809e6eda8d64b1cfdd7994e9c8c5ca935 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 65300 Worker PID: 68759 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 94x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 5011000044305be36f9de996299e27a2683563c84783a8cb62f18b26497ced1f Worker ID: e07baae17521897e4b2cc8ec23895aee5c7c95a998be1be47f7e79cb Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 49855 Worker PID: 68882 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: b0110000177cef89afcf7575498cdc020f8eeb97250ce279de849f6451af4bdc Worker ID: 1338ab047f01d38f6fd590925db9f90ad4c1dab00ab748b558f6ec3a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 50818 Worker PID: 68997 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 96x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 0d1200000a6b9b40761203a98b4ac38dec3ca3be400d9260af2d44bb55944e9b Worker ID: 6609abb4a82aa205ce34c04f5bc24cf1699ddaf6fecf9110348a8060 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 51750 Worker PID: 69130 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 93x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 6512000068f34b5b892130b2edd22f8ffc3430866ab7c29c2c54e8f876f4a760 Worker ID: f8efa7ed47bc3610ced8949d4fe96ee1f3f5a0f9c4dd3caa21d8d723 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52636 Worker PID: 69240 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 88x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: bc1200000a95df0581e125c0ccd4e39adec3a0fb0707439179559307dc0797e7 Worker ID: 6efce5d6e0ba6ffea9da8dc81d085b45ae8fc62c8bcd7a03524ecd4a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 53517 Worker PID: 69346 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 87x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 17130000b9aff9e9c762037a6ea07f3c831289e10afb02cbc8bb166874d3c1a8 Worker ID: b41caf98d758b90d9e187d2120bc23f37a69aa2a270c6aadddd09ede Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 54448 Worker PID: 69470 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 7013000058b5b39b7c9273e96044e88a70af3e36795dbb3c955882e7acf2e474 Worker ID: cd2214cbab54ee245f9444e3cac288b7583d8ea9a459db94ea25c0db Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 55360 Worker PID: 69579 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: ca130000e5f01b67d77df4e134c0f04cf81e68deeb4c97ed49894e13405008fd Worker ID: 08d4cda1eef6dc4a01e33a15f95be036ce55af7f9bd1c352918b921b Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56258 Worker PID: 69730 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 24140000d1533000d3fe61e5bcedc2201d579da71d4fe05d5746382fd86d0464 Worker ID: 7aa67e82229f93c6a0165b1f75d61372a05e0333e62597489afbc6b2 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57165 Worker PID: 69846 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 7e140000e0a87df7787b340db8abbfd59fda6dac9b1675f1e3d76c5115e38b25 Worker ID: 8b66e5e6e9c404096f6218f8991f7805af8b54a2a1c2346b1376af37 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 58065 Worker PID: 69964 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: d8140000e447568c9e179345512ee044d6b7f71429d2af7967c9e620da76c4b3 Worker ID: bfc09029020589e067eb3e69a4e5d6bfbb55f008f23ac40a62fb6691 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 58969 Worker PID: 70072 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 3215000037f7ce2453272fd49a0524009f343a2ca97b2f1399122293d9b42c90 Worker ID: eae41362ed03f753f920aa60e1855db3bd57bfb6dd3bc655219e642f Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 59870 Worker PID: 70188 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 8c15000048188b0645b8c4a987216e29e8db727af8cb1697d001819fbbfcdd37 Worker ID: 66dc98347ca789a4114962410bca7dbc72f12438253781d60d2f997a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 60772 Worker PID: 70305 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: e6150000caeccbc38000ac4ce47a8fd696659d4fa00c167715be99b7ae7b9ad9 Worker ID: a4b1a75156b389308a391bac4bcb003662032cf3457bad73db24711e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61672 Worker PID: 70420 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 40160000520811bf927852ee8b634661194c68849e711155dd2d2806b84e28b0 Worker ID: 4d53c03b58c3e501e9a296f95972b2d13f0839fd3d78fa7145318551 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 62578 Worker PID: 70538 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 9a160000464ec47bb68a1a32c281e316851b20964eecb10716a9c20e27482d09 Worker ID: d0a64488323b2e6f98c8e2b48a9eddaffa531734fe696ee510634251 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 63477 Worker PID: 70647 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: f4160000c760d2bb44de8f5e77f03df769e25399c867a062fc14648e66cee65f Worker ID: 883e3e690b6010dec9a9e441a3e9ce81d954417c48e1f0d13f98bb2c Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 64385 Worker PID: 70762 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 4e17000048428081414e9acddd44512879412fe336596478cde4cd1ac83c49d3 Worker ID: d732cd313a0ca1d89b73e753b9f4ed2b8ed9486e02b91a0e06c58c30 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 65289 Worker PID: 70883 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: a8170000cb4d40b1759e9fec225a82ba1b669fed76adaadaa510666a15e4d5c3 Worker ID: 1dce0a6a95083047639682d9e391f8d53c1af34f84f958f32b78bbda Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 49815 Worker PID: 70992 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 01180000306fdf6115086ef8e524fe910c3f45db81aff9e02041f9324609f8fa Worker ID: 287c0f5ba4fd7e15007da8cf93306e249ca7f956c213dcf29b063aad Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 50712 Worker PID: 71116 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 89x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 581800008f8437eb770cc3cec66ce464eba5f0837c083ab9bb7e43996ca9408b Worker ID: 8f171b1d5c6b839efa0f233a6c0849ac19df640fc745ef78101cdc67 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 51583 Worker PID: 71224 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 87x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: ae18000006cee862152fa444e57803b4e0fb8b08bf289b3e17e9a0ee40ab7695 Worker ID: 133294c2319fb07ee37f9b24a335282d08cf0958d99f2187a2d2ae22 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52445 Worker PID: 71336 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 85x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 061900009af105d350cb57798ff9d473da166169c0d63d4be765e72e1587847a Worker ID: 2a839cc1b465cf4d5aaf1e9c14e5e89a3eada714e201a702c486087a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 53333 Worker PID: 71472 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 89x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 601900005be61498518ee8ab2026b9187859064dcef33e3cc2456934bfa88666 Worker ID: aa47c8700cb332ae364d0933e0bf652d4efe35a7a34f6fd2fc0cebb8 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 54255 Worker PID: 71582 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 90x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: b8190000fb8fd4d8b258f984ef3703da1c5a1e28d953d39f5599e72b99fb5995 Worker ID: 4f46f139f5a5ccf439cf3c067556d846dc4edbe8ca04cbdc65186dcc Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 55141 Worker PID: 71699 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 88x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 0e1a00008e94bf75ed664e01b285896b58bd9371d003b0948debba83ac7ad173 Worker ID: 2f0806d9c5e9865d72aa17ce2df61efc691f8f0d83adc47e9d426e79 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56006 Worker PID: 71809 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 85x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 611a0000ef1aed5561a1dd62ae40d77ca0b1218579ad8700daba07ad0243257b Worker ID: e9a25e933929d0c66838b3f563213c347a9f7aca3691afdddc020ec5 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56842 Worker PID: 71914 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 84x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: b51a000057e6248a8ddc64f6452a59687c70c1d5066449d7d35501853048cb94 Worker ID: 451bda2cc14d56d62daa3a683a1d198eec1eb4583df3ecfa6b75d57e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57675 Worker PID: 72025 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 071b0000205f1e6d3cd3353645808d476344acb89ce9a9d6b77557c3e10f654e Worker ID: cbbfc6eefb14b6d9da97840361d0337344e8ea8627c2081d159d900e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 58511 Worker PID: 72133 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 591b0000a98fd76902d27b740b84cb0f693ae69f10c07ee2652e3ced3da93a8a Worker ID: b20bc32ba7b7a2771b86f5b93d6e83d2c01f2f8ace5696be1201c03f Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 59339 Worker PID: 72278 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: ac1b0000a7cb24fd56795e8c5b579ce83b74b4571ddcbda5c1505cdb8f35de95 Worker ID: b9365847e559395fb0f71e49af5a017b6a1134f0eb5da3d0e5c1462b Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 60171 Worker PID: 72379 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: ff1b0000b45eeb2baae457262775010bd7fb99097a6a5fe074dda5d45246e86c Worker ID: 52194a61d6a3f29e567eab2b45d9eef379cb03ade850d9b7dae63c7f Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61000 Worker PID: 72487 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 501c0000f3f7f131a0211eafe7e56969377b3248c2afd8d45ccaf2c5edcfe4c3 Worker ID: 42b377388b19fadaf83d2f2e9232edc982f5ae353d1b8a7cc43307e1 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61815 Worker PID: 72596 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: a21c000060c2987f972ef6aae971f4df85d4272826641a4dbb5a204ef4cb7e72 Worker ID: 354e4cd10acc2b02646a06895b01317900893edd9fe7092cbf767bd4 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 62635 Worker PID: 72697 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: f51c000086addce752a350bf902a01745b7b74ddc539a2863c110842568d473b Worker ID: 9f554dc22e73f6523d7862471cf9bb34c697d30ff2d6523de058355a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 63467 Worker PID: 72804 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 471d0000b1d3d68078dbb675175cdd4aebb41d7eba9df4161338a2ecf3111e71 Worker ID: dff74ceb617bb1d17b0e14f860dc430a559b5dce0700a26363a0da65 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 64296 Worker PID: 72915 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 991d0000b764ddc3d5415c6101f1ac1bce25b55c6371a846a6ecd73ac1cf6194 Worker ID: aecdb9306c9f90f8a64b166b953c38b8d06f04d7997c72b481a54f52 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 65124 Worker PID: 73016 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: ec1d000068ab4d0b691c160a1a9811932f39787b1476bca83777befc0da24752 Worker ID: 3a7de142abc58a27763e2add1921f3a8681ec174202c3e93fc17c017 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 49571 Worker PID: 73133 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 3f1e00006d8f1dcf798560bdf261547428b5aa6d287af1ea86fb5e982df1ae5a Worker ID: 341d0e6227aef4d5ca6dbe36c8f147a3bffedd25ea3c838e43b26205 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 50409 Worker PID: 73237 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 931e00000f115775a0686da79964486617b3db5cef34da7de662685275dd82a9 Worker ID: 4b845af71ed3cf0bb89857ebdbe416b27d9f38872850c82059aa5ba1 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 51248 Worker PID: 73343 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 84x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: e51e0000ee7c788a863b9460480f43b36505bd1651bb5a28822234ea693744d9 Worker ID: 5a767a1f837deaa6ebdcef7475783fd358c512e7d6b467b54db0ca9f Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52075 Worker PID: 73459 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 371f0000fc01d0a5e7024ea118a6351709156bccfa5c6589b25ee5a1032e9c62 Worker ID: de794cbd9cf403b532cce4fad6bbce422a49fcaf7d2d641f6fca104b Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52901 Worker PID: 73565 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 8a1f00000cd442f4147ac94e3fa7c7f9995ef41bc7523e1379806b3e9e870bfc Worker ID: 0d081ecb1b2d12e9662e87fa93c9a5b3b3f302dcc2031c0c39a34491 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 53733 Worker PID: 73675 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: db1f00008af33c816df7b0e71ba3ecb6741db25c73e9b2cd28fae2de03384abc Worker ID: 8d99c1e522ca5d99ed16fe2091373ceeb02bb07fca5e900fe1c71665 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 54576 Worker PID: 73817 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 2c200000c692fd8a9dbfd2131f4c709df0c2275199d0ede1111068c34556d953 Worker ID: 7e6b42574be483712e6c44fdf71917af7a95d7f060c998ef13a37fa6 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 55386 Worker PID: 73916 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 7f200000486db69f64b335761c0cb1095fa7f7fd3979cbaf1adb58a10d410ca2 Worker ID: 2f9188cd438169a0266faf16af87a7c640c0bc3d700ce950ccbe2db6 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56216 Worker PID: 74027 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: d0200000f5af37dab5d898e47a1a6412a9f11b85a51a148ca7b3b2b76f2561e0 Worker ID: a83f06c0a06c8972e016e7212fd1f86e7cac39351f2c876591724090 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57029 Worker PID: 74135 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 22210000d7543f32ba7e28b9b50b696e6347ca852cc3f0ca24366184979976bf Worker ID: 351ddcb346e87820723ea1fb71920e49ad9bfae247ce2921088ce047 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57852 Worker PID: 74236 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 752100001803ea0b4f54147339e5d74d4c6e6a1b95b7ecd32a868991e425ecc1 Worker ID: a926f408f9862cfba6c1cdd30779dd2374a776a2ba71d5b6ad369c13 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 58681 Worker PID: 74347 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: c7210000a80cb8ee54918395b71305f9bb124b8381448032c6d8966a28483cb2 Worker ID: f583337f5300dfb573697a75398403cd3e4367a3b8bfe02f316dc964 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 59508 Worker PID: 74453 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 18220000b87357179e426994d3197db51e8c53020765c31aa71680693a7b9bfe Worker ID: 28a776db042d338dcb97e5a418170cddd8b74a033ea39d9b97986859 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 60322 Worker PID: 74565 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 6b220000ebfe5e61362d90549c7c61d65592ae0731356decbbecfb6b9f11b701 Worker ID: 17bb745c4834969058afe285e363dd5e9e1e4c2d76d12793e2da9951 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61149 Worker PID: 74665 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: bf2200004ce9f732b73cc71d6590de77bb45297e0d8ca46e75616dab2df3a4bb Worker ID: ef97c986061afe690588c5b0505958ac61d4dc5d2425bf1ac0557fc6 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 61990 Worker PID: 74776 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 85x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 112300008e9882b2c22f0423f73dc326aa043dd77d839b7ae101be310cc5b7a1 Worker ID: 25a0ac9eae62edf47dd9ec37cfee03f23a524272c3008346701d8a5b Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 62805 Worker PID: 74885 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 622300002a28a85d2607f9d5ad951ff39f2f79bdaa3102c8379de8ddc9f6bdce Worker ID: 3596ac49e576309e9890ae72c9d21acda05775c278da562e9abd575c Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 63620 Worker PID: 74985 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: b4230000f6c19fc24daf663c58de1a2b04127d1f467517ef840ccc0ef726335f Worker ID: f6784a50f0c08da7b488f93d9d63cd4cf678eb53d7306977aeaa8402 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 64442 Worker PID: 75092 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 05240000b37ada187ea7e07118c44c4bb41f03d744c94195c77b51dfe15cb1fb Worker ID: 3cdf0d2ddcfbcf3a942dd6dee40fd9c96a123be2eace1e260b802efc Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 65247 Worker PID: 75201 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 79x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 54240000f4c086725b218fd21ab8dca57515ef3c54ca1143162543dec258ef0e Worker ID: 313e8f77c3ced01a85245c404e43e545a25b58552e7874f38c98181e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 49674 Worker PID: 75300 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: a5240000158774abfd1d1f5122b089889b1d1625064b2fc260f88ea7dc04bf1c Worker ID: c32c8290295e54b132c0dfc5216909b3424149440eb95033e0dbc689 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 50493 Worker PID: 75449 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: f72400006978703f3a4890b415fb453eb0180a2058fcd6fef4f75092e1d5bfd1 Worker ID: e406c1bce8099ca1f96fe17d2067992ed96990b842885be30e11a021 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 51314 Worker PID: 75551 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 42250000eb3d1225c0dd7143c0a85880b3fe10302ad3d16534b0c1a4cea2f9e5 Worker ID: c9bace492365a9906e113b38428ac7740c66ecf7436d373934179114 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52071 Worker PID: 75645 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 75x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 9325000043d71790abcdbc6e7fa6c50cc899addc09bcd04a38a8c7436b098181 Worker ID: e910c2ba1d1b948b9f0f068389384c8d63b8fe5580cbadf16063a099 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 52884 Worker PID: 75762 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: e5250000153cbfcf01eb572b2bba653d0db907179e98b2135c7cea600bb9d149 Worker ID: 7986d269c0e3d582e24c122b26e6c4c17966e3ce9a08063aa7a23c6e Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 53713 Worker PID: 75864 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 3526000009c1a04ba06cea6f20139ef3eadb7489c51e7a8796d2604c13147a3f Worker ID: 06ea88bd9780100cdfd20454ab495c0bc81e4a6d77909edbfabc5889 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 54541 Worker PID: 75971 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 80x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 88260000dcf7867150082ba793093fad20d62897fe8312fd53249e0a060512fe Worker ID: dbd7e44447556e6bf2de24128c24da331acfd07d1ef9388985b605dc Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 55374 Worker PID: 76078 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 83x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: d9260000cfbee3904ffeb2c2eaed29284880386a01e6cbb4ce2042aff7280b1a Worker ID: 6dce2eccf03941b9c9d564399baf92c51a9db3ae177454b1562bab32 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 56186 Worker PID: 76179 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 2b2700008bfa01eb05eb68d53238947bf5a793abd3297bdb22dc04cbd80d4772 Worker ID: 1b483f748bc9bd79e2dee52908a7a3a0faa623210f8b40639c41991a Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57005 Worker PID: 76287 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 82x across cluster][0m
+[33m(raylet)[0m A worker died or was killed while executing a task by an unexpected system error. To troubleshoot the problem, check the logs for the dead worker. Lease ID: 7c270000da442d3e0bfa6d3e7e72ed4cd6df55a13d7f8f9734a0e71e17d97618 Worker ID: 09e50ffbcc64727dae69d2869d68a384a8b6072ea086be5e8aa23066 Node ID: 0bc24d8509f5325cf230d103a0e8e0f7e5fc84579679b66075fc3667 Worker IP address: 127.0.0.1 Worker port: 57824 Worker PID: 76394 Worker exit type: SYSTEM_ERROR Worker exit detail: Failed to deserialize the setup hook method.
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/ray/_private/runtime_env/setup_hook.py", line 244, in load_and_execute_setup_hook_func
+    setup_func = pickle.loads(worker_setup_func_info.function)
+ModuleNotFoundError: No module named 'train_ppo_mlp'
+[32m [repeated 81x across cluster][0m
+{"training_timeout": "PPOConfig.build_algo exceeded the 600 s wall-clock timeout (child self-guard).", "stop_reason": "phase_timeout", "timed_out_iteration": null}

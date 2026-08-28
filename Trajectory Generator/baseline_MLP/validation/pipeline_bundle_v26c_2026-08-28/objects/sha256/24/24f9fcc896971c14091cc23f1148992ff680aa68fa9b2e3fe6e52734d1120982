@@ -1,0 +1,224 @@
+# V26C J20-K1R1 — Esecuzione dell'emendamento al gradiente non degenere
+
+**Data**: 2026-08-27
+**Stadio**: `V26C_J20_K1R1_NONDEGENERATE_GRADIENT_AMENDMENT` — **esecuzione**
+**Emenda**: `V26C_J20_CRITIC_WARMUP_READINESS`
+**Esecutore**: Opus 5, effort xhigh — braccio operativo. Codex architetto e gate owner.
+
+## VERDETTO: `PASS` — 12/12 check emendati, **composito 29/29**
+
+`vf_encoder.0.weight`, il tensore che K1 non era riuscito a osservare, riceve una norma di
+gradiente di **15.325**, finita e strettamente positiva. Il difetto era nello stimolo di K1,
+non nel modulo.
+
+**Il leaf K1 resta `FAIL_CLOSED` 28/29, byte-invariato.** Non è stato riscritto, non è stato
+riprovato, non è stato toccato.
+
+**Nessun warm-up. Nessun PPO. Nessun Ray. Nessun ambiente. Nessun rollout. Nessun optimizer.**
+
+---
+
+## 1. Esecuzione unica
+
+| | |
+|---|---|
+| GO architetto | `v26c_j20_k1r1_architect_go.json` — `5323b448c0ee37e7c15175745fd2306cd4beeccfbf7a4404cd1896018a4bf07d` |
+| pin verificati | **14/14** prima del lancio, nessuno stantio, nessun extra, nessun mancante |
+| destinazione prima del lancio | **assente** |
+| esecuzioni | **una sola** |
+| exit code | **0** |
+| retry | **nessuno** |
+
+Comando, eseguito da
+`Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26`:
+
+```
+/opt/anaconda3/envs/envCMC-rllib/bin/python v26c_j20_k1r1_gradient_amendment.py \
+    --probe --go-file v26c_j20_k1r1_architect_go.json
+```
+
+Output:
+
+```json
+{
+  "leaf": "j20_runs/j20_k1r1_nondegenerate_gradient_v26c_2026-08-27_r1",
+  "verdict": "PASS",
+  "composite": "29/29"
+}
+```
+
+## 2. I dodici check emendati
+
+| id | esito | |
+|---|---|---|
+| **A01** | PASS | il record K1 è esattamente `FAIL_CLOSED` 28/29 **prima E dopo** la misura |
+| **A02** | PASS | lo stimolo soddisfa tutte e undici le proprietà preregistrate |
+| **A03** | PASS | lo stimolo coincide col digest pinnato |
+| **A04** | PASS | modulo caricato **esattamente** dal leaf K1, contratto di freeze **vivo** |
+| **A05** | PASS | la loss è finita |
+| **A06** | PASS | tutti e sei i tensori critic hanno norma finita e **strettamente positiva** |
+| **A07** | PASS | **`vf_encoder.0.weight` ha gradiente** — la quantità che K1 non poteva osservare |
+| **A08** | PASS | **nessun** parametro attore ha ricevuto gradiente |
+| **A09** | PASS | le righe log-std sono invariate |
+| **A10** | PASS | tutti e sedici i tensori byte-identici prima e dopo il backward |
+| **A11** | PASS | i dieci tensori attore ancora byte-identici a J19A |
+| **A12** | PASS | il digest canonico riproduce ancora `d4a13ff7…` |
+
+**12/12.**
+
+## 3. Le norme di gradiente
+
+### I sei tensori critic — tutti strettamente positivi
+
+| tensore | norma |
+|---|---|
+| `vf.bias` | 36.0 |
+| `vf.weight` | 37.812931060791016 |
+| `vf_encoder.0.bias` | 10.401909828186035 |
+| **`vf_encoder.0.weight`** | **15.325203895568848** |
+| `vf_encoder.2.bias` | 20.145442962646484 |
+| `vf_encoder.2.weight` | 32.9008903503418 |
+
+### I sei parametri unici dell'attore — nessun gradiente
+
+`pi.1.weight`, `pi.1.bias`, `pi_encoder.0.weight`, `pi_encoder.0.bias`,
+`pi_encoder.2.weight`, `pi_encoder.2.bias`: tutti **`None`**.
+
+Il freeze regge, e il critic è raggiungibile mentre l'attore è tagliato fuori dal grafo.
+
+## 4. Il composito
+
+| | |
+|---|---|
+| check immutabili K1 letti | **28** |
+| unico fallimento K1 | `P24_frozen_module_still_gives_the_critic_gradient` |
+| P24 emendato | **passa** (`A06 ∧ A07 ∧ A08`) |
+| composito | **29 / 29** |
+| verdetto | **PASS** |
+| `the_k1_result_is_NOT_rewritten` | **True** |
+| `the_k1_leaf_still_reads_fail_closed` | **True** |
+
+I ventotto sono **letti dal record immutabile, non ri-misurati**: erano evidenza prodotta una
+volta sotto un GO, e rieseguirli l'avrebbe sostituita invece di aggiungervi.
+
+## 5. Load esatto e contratto di freeze vivo
+
+| | |
+|---|---|
+| stesso insieme di chiavi | **True** |
+| tensori live / salvati | **16 / 16** |
+| byte-identici al pickle K1 | **16 / 16** |
+| chiavi mancanti / inattese | **nessuna / nessuna** |
+
+Contratto letto **sul modulo costruito**: `_freeze_actor True`, `_freeze_logstd True`,
+`inference_only False`, `_n_actor 35`, `_n_full 84`, `_action_dim 2`, `has_vf True`,
+`has_vf_encoder True` → `contract_holds True`.
+
+## 6. Lo stimolo effettivamente usato
+
+Committato nel leaf come `k1r1_stimulus.npy` e riletto in modo indipendente: shape `(8, 84)`
+float32, digest C-order `4f643e9cf7d46fb95044cf87ad09342ba56c2e22ca7cda4b72bd57e2a537fb35`,
+coincidente col pinnato. **Nessun elemento nullo**, range
+`[-0.9947916865348816, +0.9947916865348816]`.
+
+Costruzione, algebrica e senza RNG:
+`value[p-1][q-1] = sign · ((p·37 + q·53 + p·q) mod 191 + 1) / 192`, con `p, q` 1-based e
+`sign = -1` per `(p+q)` dispari. Pesi per riga sul termine di valore: `[1..8]`.
+
+## 7. Immutabilità — verificata tre volte, poi da me una quarta
+
+| | |
+|---|---|
+| K1 verificato **prima** della misura | **True** |
+| K1 verificato **dopo** il backward, prima di ogni scrittura | **True** |
+| hash before == after | **True** |
+| K1 ri-hashato **dopo il commit** | `k1_leaf_unchanged_post_commit: true` |
+| mio ri-hash indipendente, post esecuzione | **6/6 byte-invariati** |
+| verdetto K1 su disco | ancora **`FAIL_CLOSED`** |
+
+**J19A: 7/7 file byte-invariati**, ri-hashati da me dopo l'esecuzione.
+
+Invariati e ri-verificati anche: runner K1R1 `572e17e7…`, prereg K1R1 `d770477c…`, suite K1R1
+`882328aa…`, GO K1R1 `5323b448…`, runner K1 `d33e0709…`, GO K1 `aca75c7c…`,
+`asymmetric_rl_module.py` `5084786c…`.
+
+## 8. Leaf e verifica post-commit
+
+**Leaf**: `j20_runs/j20_k1r1_nondegenerate_gradient_v26c_2026-08-27_r1/` — **5 file**, un solo
+leaf nuovo in `j20_runs`.
+
+| SHA-256 | byte | file |
+|---|---|---|
+| `46fd00b1e4dd5cb824b30edb1e03a35e5c6990d3aca89701251439cdbb44a3bc` | 10 952 | `v26c_j20_k1r1_result.json` |
+| `25b499764f371e5822b5cfd58faf4ebccf920cc2c6e18f5c479b7b14eb737d06` | 4 882 | `v26c_j20_k1r1_gradient_amendment_receipt.json` |
+| `0a246c04524d31ac1c0e6fbb418bc1d1c1c75a82eb38c8c21248297d32b89591` | 2 816 | `k1r1_stimulus.npy` |
+| `a06967633a2075c11762aca98a50b2e1a22a973ed0c98f0ab8af6f7ea4b370e1` | 1 173 | `k1r1_stimulus_manifest.json` |
+| `8a2718089ecbb79f19d2f6554c51173925353b7fd01ea7193c8e0c346ffb63be` | 1 211 | `commit_verification.json` |
+
+Verifica post-commit: `ok: true`, `problems: []`, **3 file su 3 registrati**; ri-hash
+indipendente **3/3**. I due non registrati sono il receipt — che non può contenere il proprio
+hash — e `commit_verification.json`, scritto dopo il commit.
+
+**`TECHNICAL_INVALID` assente**: rimosso solo dopo che la verifica è passata. Nessuna staging
+residua, nessun lock.
+
+## 9. Inerzia
+
+Tutti e quindici i contatori negativi: `k1_retried` **False**, `k1_result_rewritten` **False**,
+`algo_train_called` **False**, `optimizer_constructed` **False**, `optimizer_step_taken`
+**False**, `ray_cluster_started` **False**, `environment_constructed` **False**,
+`environment_stepped` **False**, `rollout_performed` **False**, `actor_edited` **False**,
+`actor_transplanted` **False**, `critic_replaced` **False**, `warmup_executed` **False**,
+`checkpoint_promoted` **False**, `ppo_updates` **0**.
+
+**Sui processi Ray**: i due `gcs_server` sulla macchina sono **preesistenti**, avviati il
+**18/08/2026**; la sessione Ray più recente su disco è del **21/08**. Nessuna sessione del
+27/08. La sonda non ha avviato nulla.
+
+`promotion: NONE`, `next_stage_authorized: false`.
+
+## 10. Decisione e significato
+
+- **K1 era un `FAIL_CLOSED` del gate, non una prova che il critic fosse non addestrabile.**
+  Ora è misurato: sotto uno stimolo non degenere il gradiente arriva a tutti e sei i tensori
+  critic, primo layer incluso.
+- **Il record storico resta intatto.** K1 continua a leggere `FAIL_CLOSED` 28/29: è quello che
+  è successo. Il composito 29/29 è una lettura *aggiuntiva*, non una riscrittura.
+- **Il gate conclusivo resta comunque quello di luglio**: warm-up reale su dati campionati più
+  restore audit. Un gradiente prova che il grafo è connesso; il digest fresco → caldo →
+  ripristinato prova che il critic si è mosso e che il movimento è recuperabile. È il gate
+  `G9` della preregistrazione J20, e non è stato eseguito.
+
+## 11. Limiti
+
+- Il risultato riguarda **un solo backward su uno stimolo sintetico**. Dice che la torre di
+  valore è differenziabile e che il freeze regge; **non** dice nulla su quanto il critic
+  imparerebbe, né su quale explained variance raggiungerebbe.
+- **Nessun ambiente è stato costruito.** Il comportamento dell'attore sotto campionamento
+  parallelo Ray resta l'affermazione non testata più grande del percorso.
+- **Nulla è promosso, nulla è deployable.**
+
+## 12. Fase successiva — esplicitamente NON autorizzata
+
+- **Il warm-up del solo critic, `V26C_J20_CRITIC_WARMUP`, NON è autorizzato** e non è stato
+  preparato né eseguito. Richiede un GO separato.
+- Il comando sigillato del warm-up, preregistrato in J20, **non è stato eseguito**.
+- Nessun retry di K1 né di K1R1 è stato tentato o è autorizzato.
+- L'audit di restore a zero iterazioni richiesto dal gate `G9` resta da fare.
+
+**TODO propagati**: `policy_std` sempre `null`, difetto cosmetico ereditato da J12; manifest
+della leaf J8 stantio, invariato per decisione architetturale; leaf J8 senza
+`commit_verification.json`; `nominal_mean_shift` dichiarato e non misurato in J15R1;
+`ENV_MUTATION_POLICY` in J19C superset conservativa ereditata; suite readiness J18, J19A, J19B,
+J19C, J20 non modificate dopo i rispettivi GO; il debito noto su
+`validation/verify_h1_readiness.py`, il cui ramo `> 0.0` era garantito dal bias; **LOTO**,
+**LOCO**, **B1R1**, **B1R2**; l'**Epic** di generalizzazione multi-modello.
+
+## 13. STOP
+
+Esecuzione singola completata, verdetto **`PASS`**, composito **29/29**, leaf verificato, K1 e
+J19A byte-invariati, nessun retry.
+
+**Nessuna fase successiva avviata. Nessun warm-up preparato né eseguito.**
+
+**Fermo in attesa del tuo audit.**

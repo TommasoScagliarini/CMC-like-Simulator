@@ -1,0 +1,195 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j9r1_recording_amendment",
+  "kind": "ADDITIVE, IMMUTABLE, INSTRUMENTATION AMENDMENT",
+  "stage_proposed": "V26C_J9R1_CLOSED_LOOP",
+  "stage_not_yet_authorised": "this stage is PROPOSED. No fresh user authorisation exists, so nothing here is authorised to execute.",
+  "authorisation_status": "NOT_GRANTED - fresh explicit user authorization required after readiness. No authorisation is attributed to the user by this record, and the consumed J9 authorisation is not reusable.",
+  "date_utc": "2026-08-26",
+  "relationship_to_j9": {
+    "is_not_a_retry": "J9R1 is a SEPARATE ADDITIVE STAGE with its own token and its own leaf. It does not retry, resume or reuse the consumed J9 attempt.",
+    "j9_originals_are_immutable": "the J9 preregistration, runner, test and authorisation are NOT rewritten, NOT edited and NOT superseded in place. They stand as the record of what was specified and what was attempted.",
+    "what_changed": "INSTRUMENTATION ONLY: how the environment is told to record its own outputs.",
+    "what_did_not_change": "the scientific contract in its entirety - the matrix, the gates, the seeds, sigma, the step count, the order, the actor, the lineage and every threshold."
+  },
+  "corrected_defect": {
+    "record": "v26c_j9_technical_failure_2026-08-26.json",
+    "summary": "the J9 runner built its base env config through the hardened J1 builder with output_dir=None, which sets record_outputs False and save_outputs_on_close False and omits output_dir and output_prefix entirely (v26c_j1_collect.py:325-330). Each cell then added back only output_dir (v26c_j9_closed_loop.py:369), leaving both flags False, so osim_trj_cmc_like.close() never called save_results() (osim_trj_cmc_like.py:2048-2053) and the post-close requirement for sim_outputs (v26c_j9_closed_loop.py:916-917) could never be satisfied.",
+    "class": "instrumentation contradiction internal to the J9 runner",
+    "not_in": "the environment, the J1 builder, the actor, any production source, the FSM, the morphology corridor, the reward, the SEA or the C++ plugin"
+  },
+  "the_correction": {
+    "principle": "build the base with a REAL output root, exactly as J1, J3, J5 and J6 all do, and let every cell inherit the recording flags from that verified base.",
+    "july_faithfulness": "J1, J3, J5 and J6 were ALL produced with record_outputs True. Enabling recording RESTORES parity with the entire V26C closed-loop evidence base; the J9 attempt, with recording off, was the anomaly. This correction removes a deviation rather than introducing one.",
+    "base_construction": "v26c_j1_collect.build_full_env_config(cfg, output_dir=<root>) with a NON-NONE root, so the base carries record_outputs True, save_outputs_on_close True, output_dir and output_prefix",
+    "fail_closed_verification": "the runner verifies that record_outputs is exactly True, that save_outputs_on_close is exactly True and that output_prefix is present, and refuses otherwise BEFORE any environment is constructed",
+    "per_cell_mutation": "UNCHANGED from J9: each cell mutates only episode_start_offset_s and its own output_dir. The subset contract is preserved literally.",
+    "output_prefix": "INHERITED from the verified base and NEVER mutated per cell",
+    "layout": "the J9 per-cell layout is kept: <staging>/j9_cell_<ID>_sim_outputs. The environment consumes that exact final path; no further nesting is appended by the runner.",
+    "dynamics_neutrality": {
+      "claim": "recording is neutral with respect to the SIMULATED RESULT, not free of technical cost",
+      "neutral_with_respect_to": [
+        "the equations of motion",
+        "the actions",
+        "the simulated state",
+        "the policy",
+        "the integrator",
+        "the FSM",
+        "the morphology corridor",
+        "the reward"
+      ],
+      "evidence": "simulation_runner.py:486-487 - the record flag gates exactly one thing, `if record: self._recorder.record(...)`, a buffer append that consumes state and writes none back. _disable_output_files (osim_trj_cmc_like.py:2202-2214) only clears save_* file flags. No policy, no seed and no dynamic environment field differs between the J9 and the J9R1 configuration.",
+      "residual_technical_risk": {
+        "what": "recording is NOT free: it accumulates per-step samples in memory for the whole 500-step episode and performs file I/O in save_results() at close. It therefore adds RAM cost and close-time I/O, and can affect wall-clock.",
+        "concrete_exposure": "the environment enforces a per-step wall timeout (step_wall_timeout_s, passed to runner.step_until at osim_trj_cmc_like.py:1855-1857). A slower machine or a loaded one could in principle trip a technical timeout that the recording-off configuration would not have tripped.",
+        "not_a_scientific_risk": "if it fires it is a TECHNICAL failure, fail-closed, committing nothing - never a behavioural result and never an inference about the actor.",
+        "mitigation": "this is the SAME recording mode already used by J1, J3, J5 and J6 on this machine, each of which completed 500 steps and wrote its sim_outputs without tripping any timeout. The risk is therefore measured by four prior runs, not assumed away.",
+        "honest_limit": "J9R1 runs six cells sequentially in one process, which J1/J3/J5/J6 did not. Cumulative memory across six recorded episodes is not covered by those precedents; each cell's recorder is rebuilt per environment, but this has not been measured."
+      }
+    }
+  },
+  "preflight_sentinel": {
+    "rule": "the preflight builds its base against an INERT SENTINEL output root that must never be created",
+    "proof": "the preflight records the existence of the sentinel and of <sentinel>/sim_outputs BEFORE and AFTER building the base config, and refuses if either appeared",
+    "why_it_is_safe": "v26c_j1_collect.build_full_env_config only formats path strings; directory creation happens later, inside SimulationRunner.__init__, at environment construction time - which the preflight never reaches",
+    "remains_inert": "no heavy import, no environment constructed, reset or stepped, no output written"
+  },
+  "scientific_contract_unchanged": {
+    "status": "VALUE/FIELD-EQUIVALENT to the J9 preregistration on every frozen scientific field: each field listed here holds the same value as its J9 counterpart. This is a field-by-field equality claim, NOT a byte-level equality of the two documents, which differ in prose, ordering and instrumentation. The J9R1 test proves it by importing both runners and comparing the scientific constants.",
+    "cells": 6,
+    "order": "A, B, C, D, E, F, frozen",
+    "steps_per_cell": 500,
+    "cell_list": [
+      {
+        "id": "A",
+        "mode": "deterministic",
+        "seed": 123,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal"
+      },
+      {
+        "id": "B",
+        "mode": "deterministic",
+        "seed": 123,
+        "episode_start_offset_s": 1.756870983805102,
+        "label": "-0.20 s"
+      },
+      {
+        "id": "C",
+        "mode": "deterministic",
+        "seed": 123,
+        "episode_start_offset_s": 2.156870983805102,
+        "label": "+0.20 s"
+      },
+      {
+        "id": "D",
+        "mode": "stochastic_held",
+        "seed": 123,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "E",
+        "mode": "stochastic_held",
+        "seed": 124,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      },
+      {
+        "id": "F",
+        "mode": "stochastic_held",
+        "seed": 125,
+        "episode_start_offset_s": 1.956870983805102,
+        "label": "nominal sigma 0.005"
+      }
+    ],
+    "offset_unit": "SECONDS of episode start time",
+    "sigma": 0.005,
+    "noise_hold_steps": 1,
+    "behavioural_fail_fast": false,
+    "aggregate_pass_iff": "6/6 cells behavioural PASS AND 6/6 cells telemetry-valid",
+    "telemetry_integrity": "a SEPARATE fail-closed technical invariant, unchanged",
+    "penetration_bands": {
+      "soft_diagnostic_m": 0.02,
+      "soft_status": "DIAGNOSTIC, never a blocker",
+      "july_legacy_diagnostic_m": 0.025,
+      "july_legacy_status": "DIAGNOSTIC, never a blocker",
+      "hard_binding_m": 0.028,
+      "hard_status": "the SOLE binding penetration criterion: fail iff > 0.028, so exactly 0.028 PASSES",
+      "authority": "v26c_penetration_contract_2026-08-26.json"
+    },
+    "kinematic_gate": "v26c_j3_closed_loop.J3_KINEMATIC_GATE, UNCHANGED: ankle_min <= -0.03 rad, ankle ROM >= 0.30, knee ROM >= 0.60, knee strictly flexed, knee bounds (-1.5, 0.0), ankle bounds (-0.7, 0.7)",
+    "fsm_gate": "the J1 common criteria, unchanged: 500 steps, episode_time_limit, >= 2 valid cycles, zero phase timeouts, zero morphology causal failures, zero cancelled HS, <= 1 resync",
+    "reset_semantics": "unchanged: episode_start_offset_s is RELATIVE to cfg.t_start, expected = min(cfg.t_start + max(0, offset), max_start), checked immediately after reset at 1e-9 s against the LIVE cfg.t_start, cfg.t_end and env_cfg.episode_duration",
+    "actor": "the same J8 six-file leaf, module_state 9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82, loaded read-only, hash checked before AND after",
+    "lineage": "AUGUST V26: the J8 actor from the J2 parent and the current J7 dataset. July is METHODOLOGY AND EVIDENCE ONLY.",
+    "actor_shape": "one 35D actor; clock columns 0:2 exactly zero, controller columns 25:35 live; NO standalone 25D, NO widening, NO contralateral input",
+    "excluded": "critic, PPO, any fit or weight update, promotion, deployability",
+    "deferred_todo": [
+      "LOTO",
+      "LOCO",
+      "B1R1",
+      "B1R2",
+      "multistart TRAINING DATA"
+    ]
+  },
+  "destination": {
+    "stage_token": "V26C_J9R1_CLOSED_LOOP",
+    "relative_leaf": "j9r1_runs/j9r1_closed_loop_v26c_2026-08-26_r1",
+    "distinct_from_j9": "the J9 leaf name is never reused; the two stages cannot collide",
+    "must_not_exist_before": true,
+    "write_protocol": "atomic commit, no-clobber under an exclusive sibling lock, unchanged from J9",
+    "outcome_fail_still_commits": "a behavioural FAIL still commits the full evidence and exits non-zero; a technical or integrity error commits nothing",
+    "no_autonomous_retry": true
+  },
+  "authorisation_policy": {
+    "fresh_user_authorization_required": true,
+    "old_authorisation_not_reusable": "v26c_j9_closed_loop_authorization.json, ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597, is SPENT against the technical failure and covers a different runner and a different stage token",
+    "old_user_text_not_reusable": "the earlier 'ok procedi' authorised the J9 command and must NOT be carried over to J9R1",
+    "this_turn_produces": "a readiness / PIN bundle with a CANDIDATE command only. No final authorisation is created and nothing is executed.",
+    "status": "NOT_GRANTED"
+  },
+  "this_amendment_does_not": [
+    "execute anything",
+    "rewrite or edit the J9 preregistration, runner, test or authorisation",
+    "modify any J0-J8 artefact, the failure record, any July source, any report or any configuration",
+    "modify FSM, morphology, reward, SEA or the C++ plugin",
+    "change any scientific criterion, threshold, seed, sigma, step count or cell",
+    "authorise execution"
+  ],
+  "outcome_policy": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "closed_loop_executed": false,
+    "single_execution": true,
+    "no_autonomous_retry": true
+  },
+  "pinned_artefacts_sha256": {
+    "v26c_j9_prereg_closed_loop.json": "e6a6888a473d5ef76b1f009037f7825995fd62b35cc51749dfe41ad7f718c44a",
+    "v26c_j9_closed_loop.py": "8b6c36db2fd9bd63bde41d9903d4e1eb1d1e312b8cbf790e9bf1ea5b4875ac67",
+    "test_v26c_j9_closed_loop.py": "c30a1ff40d1f3aeefdb1e02210ecf6e2a04d7749448a7592cba212e8b47d867f",
+    "v26c_j9_closed_loop_authorization.json": "ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597",
+    "v26c_j9_technical_failure_2026-08-26.json": "67c97df1b302cfa98a77c673410e67e56ea0dd34b2d380cf65c34f8916645a20",
+    "j9_technical_failure_2026-08-26/j9_run.out": "adb7fd4c65fa24cf876101b92de73e779370970eaeceb13c3f1674ee4da7b5ef",
+    "j9_technical_failure_2026-08-26/j9_run.err": "51ffda559e29f6efdfbf7359e84a7297d1560625e8444be540040c81eb8eeb1a",
+    "j9_technical_failure_2026-08-26/j9_run.exit": "d01f9a6087a5da5cdae0bd0314d8ba9a4e8546b0f4cb2a5424bc09487e8c6d26",
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461",
+    "v26c_penetration_contract.py": "9257e9b8cdf54d9a59bfe2ee25526b283408d325a900156a69d64dbf196298dc",
+    "v26c_j1_collect.py": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+    "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/history.json": "150315058a03f5c8e0c1ec851c68125f2036e7b6c9d0ae6024713098f21822a5",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/rl_module/module_state.pkl": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1/v26c_j8_recovery_fit_receipt.json": "13adc58b81ea372edef43a3d57f62b5f971e6be87c5242a8a0e234e993de6995"
+  },
+  "pinned_repo_artefacts_sha256": {
+    "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "Trajectory Generator/osim_trj_cmc_like.py": "26458424c44f18fa1dda20b830fa5e7e825c583cc5d10e6d019cb3bd9a0c6d24",
+    "Trajectory Generator/baseline_MLP/rollout_eval.py": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba",
+    "Trajectory Generator/baseline_MLP/env_factory.py": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+    "Trajectory Generator/baseline_MLP/exploration_noise.py": "ea716c198cfce5e649a6d7bf5b046365c2dd9c3d3eb8f2c0a84f913e119eeb9f"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j7_materialize_authorization",
+  "kind": "ADDITIVE, IMMUTABLE, FORMAL AUTHORISATION",
+  "stage_authorised": "V26C-J7-MATERIALIZE",
+  "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer, not approver.",
+  "date_utc": "2026-08-26",
+  "what_this_authorises": "writing to disk, ONCE, the dataset that v26c_j7_markov_dataset.assemble() already produces in memory and that the J7 preflight has audited. It authorises nothing else.",
+  "frozen_inputs_note": "these three files are FROZEN. The materializer refuses to run if any byte of them differs. It never edits them and never reimplements assemble(). frozen_inputs below is a pure path -> sha256 map and carries nothing else.",
+  "bootstrap": {
+    "rule": "v26c_j7_markov_dataset.py is authenticated byte-for-byte against its frozen hash BEFORE it is imported or executed. Authentication that happens after exec is not authentication.",
+    "loading": "importlib.util.spec_from_file_location on the exact builder path, then exec_module. Never an import by name, which would search sys.path and could execute a namesake.",
+    "preloaded_module": "FAIL CLOSED. If a module of the builder's name is already present in sys.modules, this layer refuses outright - even when its __file__ and hash match the frozen builder. Those bytes executed before this layer authenticated them, so it cannot attest to what ran: identity is not provenance, and hashing the file on disk today says nothing about what was executed earlier. There is no reuse branch. The materializer must run in a process that has not already imported the builder.",
+    "post_load": "the loaded module's __file__ and hash are re-checked, and the bootstrap trace must show the builder's verification before its execution",
+    "on_mismatch": "refuse before any import or execution"
+  },
+  "frozen_inputs": {
+    "v26c_j7_prereg_markov_dataset.json": "bea97f268d2080968954cd694c7244cc3dc9d1f40ea4ae4ec79e9726fa9edf96",
+    "v26c_j7_markov_dataset.py": "b3cc2b88997ccb7c23964123d70ac3fb524adf4fdf3e8882d26ce20ff87d1461",
+    "test_v26c_j7_markov_dataset.py": "aca18c3f73f91d8be9fc3621a5e33b97d400ee7ef3d3b9c825db0db2bbd32924"
+  },
+  "destination": {
+    "relative_leaf": "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1",
+    "is_the_only_destination": true,
+    "resolution": "the leaf is ALWAYS <root>/j7_runs/j7_markov_dataset_v26c_2026-08-26_r1. The relative part is not overridable under any flag. Only the root can be redirected, by an explicit in-process test override that stamps the receipt as non-authoritative.",
+    "must_not_exist_before": true,
+    "must_not_be_a_symlink": true,
+    "no_clobber": true,
+    "write_protocol": "atomic commit, no-clobber under exclusive materializer lock: acquire a sibling lock with O_CREAT|O_EXCL, create a sibling staging directory, write and round-trip verify the bytes there, re-check the leaf immediately before committing, then rename the staging onto the leaf.",
+    "lock": {
+      "file": ".lock_j7_markov_dataset_v26c_2026-08-26_r1",
+      "sibling_of": "the leaf, inside j7_runs - never inside the leaf itself",
+      "acquisition": "os.open with O_CREAT | O_EXCL | O_WRONLY",
+      "serialises": "materializer instances, and only those",
+      "does_not_guarantee": "nothing is claimed against a writer that ignores the lock. os.rename on POSIX will silently replace an existing EMPTY directory, so the rename alone is not a no-clobber primitive; the lock plus the re-check immediately before the rename close that window between materializer instances only.",
+      "if_it_pre_exists": "FAIL CLOSED. The run stops, reports the lock, and removes NO lock it does not own - stale or live is not a distinction it is allowed to make.",
+      "released_by": "only the run that created it, on success after the rename and on failure during cleanup"
+    },
+    "cleanup_on_failure": {
+      "staging": "shutil.rmtree, ONLY on the exact staging directory this run created",
+      "lock": "unlinked only if this run created it",
+      "parent": "at most a NON-RECURSIVE rmdir, only if this run created it and only if it is empty; the error is ignored when it is not",
+      "never": "no recursive removal of j7_runs, and no removal of anything this run did not create. Content that appeared concurrently survives."
+    }
+  },
+  "authorised_outputs": {
+    "dataset": "v26c_j7_markov_recovery_dataset.npz",
+    "receipt": "v26c_j7_markov_dataset_receipt.json",
+    "count": 2,
+    "no_other_file": "the leaf holds exactly these two files and nothing else"
+  },
+  "dataset_contract": {
+    "keys": [
+      "observations",
+      "actions",
+      "actor_feature_names"
+    ],
+    "no_other_key": true,
+    "observations_shape": [
+      16713,
+      35
+    ],
+    "actions_shape": [
+      16713,
+      2
+    ],
+    "dtype": "float32",
+    "actor_feature_names_count": 35,
+    "allow_pickle": false,
+    "content_hash_observations": "a59fb89b43a372162661ec8cf131b5abbf1e9ce32b16f98518af9010a4cf587a",
+    "content_hash_actions": "6e920c2f890dbdc2cfacf6a2c6842b34c6f33e24499d0d8716bd6347624bde4f",
+    "content_hash_definition": "sha256 over the array dtype, shape and C-contiguous bytes, as v26c_j7_markov_dataset._sha_array computes it",
+    "if_the_content_hash_differs": "REFUSE. The dataset written must be bit-identical to the one the preflight audited, or it is a different dataset."
+  },
+  "receipt_contract": {
+    "must_record": [
+      "the pinned hashes of every input",
+      "the sha256 of the dataset file on disk",
+      "the array content hashes",
+      "the schema and the composition",
+      "the per-seed penetration summary, produced by the contract evaluator",
+      "teacher observations_read = false"
+    ],
+    "allow_nan": false
+  },
+  "this_stage_does_not": [
+    "fit, adapt or train anything",
+    "construct, reset or step an environment",
+    "run any rollout",
+    "touch the critic or run PPO",
+    "recompute, filter, dedup, downsample or reorder the dataset",
+    "modify FSM, morphology, reward, SEA or the C++ plugin",
+    "modify the J2 parent or any existing artefact",
+    "promote anything or authorise a next stage"
+  ],
+  "outcome_policy": {
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "single_execution": true,
+    "no_autonomous_retry": "on failure the evidence is preserved and the run stops"
+  }
+}

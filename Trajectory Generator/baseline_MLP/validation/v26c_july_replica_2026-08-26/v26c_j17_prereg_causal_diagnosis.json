@@ -1,0 +1,242 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, PREREGISTRATION",
+  "stage_proposed": "V26C_J17_CAUSAL_DIAGNOSIS",
+  "authorisation_status": "NOT_GRANTED_PENDING_ARCHITECT_AUDIT",
+  "execution_permitted_now": false,
+  "written_before_any_new_computation": true,
+  "date": "2026-08-27",
+  "contains_no_conclusion": true,
+  "problem": {
+    "fact_1": "J12 qualified the J11 actor on the frozen A-F matrix: 4/6 behavioural PASS (A, B, C, D passed; E and F failed on valid_cycles and a swing that would not close), 6/6 telemetry valid.",
+    "fact_2": "J14 materialised 854 corrective rows from the two failed cells; J15R1 refit fresh from J2 on 25567 rows and passed its 17/17 supervised gate, lowering RMSE on the 854 corrective rows by 53.7%.",
+    "fact_3": "J16 re-ran the SAME matrix with the SAME thresholds, changing only the actor, and returned 0/6 behavioural PASS, 6/6 telemetry valid. A, B, C, E and F terminate on grf_penetration above the 0.028 m hard bar; D completes 500 steps within the bar but records a single valid cycle against the two required.",
+    "fact_4": "in J16 every FSM target metric is zero: no swing timeout, no stance timeout, no hs_cancelled, no resync, no morphology contract failure, in any cell. The J13 failure mode is absent and a different one has appeared.",
+    "question": "WHY did a supervised improvement on the corrective region coincide with a closed-loop regression on the anchors? This stage seeks the cause. It executes nothing."
+  },
+  "hypotheses": {
+    "H1_fresh_aggregate_refit_nominal_drift": {
+      "statement": "the fresh refit on the enlarged aggregate moved the nominal region enough to break the anchors, independently of what the recovery rows contain.",
+      "discriminating_tests": [
+        "T2 layer-wise parameter delta",
+        "T3 offline action delta on the nominal anchors versus the recovery block",
+        "T6 fit reconstruction: effective weighting of nominal versus recovery samples"
+      ],
+      "would_be_supported_if": "the offline action shift on nominal anchors is large relative to the shift on the recovery block, AND the layer delta is spread over the backbone rather than concentrated in the head",
+      "would_be_rejected_if": "the nominal action shift is small and comparable to J11-vs-J2 drift, or the anchors' shift is not in the direction that increases penetration"
+    },
+    "H2_recovery_dominance_or_label_conflict": {
+      "statement": "the 854 recovery rows, or their labels, conflict with nominal labels in overlapping regions of observation space and pull the policy there.",
+      "discriminating_tests": [
+        "T6 local-neighborhood label conflict between the recovery rows and their nearest nominal rows, measured without training",
+        "T3 per-block offline deltas",
+        "T6 effective sample weighting"
+      ],
+      "would_be_supported_if": "recovery rows have near neighbours in the nominal blocks with materially different labels, and the action shift is largest exactly on the nominal rows that are near recovery rows",
+      "would_be_rejected_if": "recovery rows are far from every nominal row, or conflicting pairs are too few to carry the observed shift"
+    },
+    "H3_scaling_action_or_loader_mismatch": {
+      "statement": "a scaling, action-semantics or loader/runtime mismatch makes the committed J15R1 actor behave differently from what its offline evaluation implies.",
+      "discriminating_tests": [
+        "T2 integrity: scaler absorption, action convention, module class, state keys, logstd, critic absence",
+        "T3 offline evaluation in BOTH normalised and physical action units",
+        "comparison of the J15R1 first-layer scale absorption against J11's"
+      ],
+      "would_be_supported_if": "the two actors disagree about units, the absorbed scales differ, or the runtime loader resolves a different module or state",
+      "would_be_rejected_if": "both actors share the identical loader path, class, state keys, feature manifest and scale convention"
+    },
+    "H4_covariate_support_mismatch": {
+      "statement": "the states J16 actually visits fall outside the support of the aggregate the refit saw, so the fit's offline improvement does not transfer.",
+      "discriminating_tests": [
+        "T5 first divergence instant from the existing J12/J16 traces",
+        "distance of the visited J16 states from the training aggregate, computed on recorded observations only"
+      ],
+      "would_be_supported_if": "J16 leaves the training support before the penetration breach and the departure precedes the action divergence",
+      "would_be_rejected_if": "the divergence is present from the first steps, inside the support"
+    },
+    "H5_critic_logstd_or_lineage_contamination": {
+      "statement": "an unexpected initialisation, a critic or log-std contamination, or a lineage that is not what the records claim, explains the change.",
+      "discriminating_tests": [
+        "T2 hash and provenance verification of J2, J11 and J15R1, INCLUDING whether J11 truly belongs to the August V26 -> 35D student lineage, which is NOT assumed",
+        "log-std bit-identity to parent, critic key absence, trainable set"
+      ],
+      "would_be_supported_if": "any recorded lineage claim fails against the artefacts",
+      "would_be_rejected_if": "every lineage claim verifies by hash and the log-std and critic contracts hold in both actors"
+    },
+    "H6_temporal_knee_ankle_drift_preceding_penetration": {
+      "statement": "a specific knee or ankle drift precedes the penetration breach in time, so penetration is a consequence rather than the primary failure.",
+      "discriminating_tests": [
+        "T5 temporal relation between action delta, ankle and knee trajectories and the penetration series, from the existing traces only"
+      ],
+      "would_be_supported_if": "a kinematic deviation is measurable strictly before the first sample above the soft band and grows monotonically into it",
+      "would_be_rejected_if": "penetration and the kinematic deviation rise together within the recording resolution, leaving no temporal ordering"
+    }
+  },
+  "tests": {
+    "T1_preregistration": "this document. No computation precedes it.",
+    "T2_integrity_and_lineage": "manifest 35D, module and state hashes, scaler, log-std, critic exclusion, loader and runtime semantics, for J11 AND J15R1, plus the J2 parent and the August V26 root. J11's membership of the operational lineage is VERIFIED, never assumed.",
+    "T3_offline_action_comparison": "both actors applied to the SAME frozen inputs, reporting RMSE, MAE, max and SIGNED shift per action, in normalised AND physical units, with sample counts and effective weighting, separated at least into: nominal anchors / A-D region, J7, cell B, cell C, J14 recovery.",
+    "T4_parameter_delta": "per-layer delta between J11, J15R1 and the J2 parent, separating bias and output-head drift from backbone drift.",
+    "T5_trace_analysis": "ONLY the existing J12 and J16 traces and NPZ. First instant of action and kinematic divergence; temporal relation between action delta, ankle/knee and penetration. Both actors are applied to the same frozen observations ONLY IF those observations are recorded; otherwise the limit is DECLARED and no reconstruction is invented.",
+    "T6_fit_reconstruction": "exact reconstruction of the J15R1 fit from its committed artefacts: counts, weights, split, scaling, early stopping, parent and initialisation, trainable set. Quantification of label and local-neighborhood conflict between nominal and recovery. NO training is run.",
+    "T7_independent_audits": "parallel read-only subagents; divergences from my own conclusions are reported, not silently reconciled."
+  },
+  "variables_measured": {
+    "actions": [
+      "normalised",
+      "physical"
+    ],
+    "per_action_statistics": [
+      "RMSE",
+      "MAE",
+      "max absolute",
+      "signed mean shift"
+    ],
+    "blocks": [
+      "nominal anchors / A-D region",
+      "J7 nominal",
+      "J7 recovery",
+      "cell B unique",
+      "cell C unique",
+      "J14 recovery (854)",
+      "J14 post-mismatch (671)",
+      "J14 pre-mismatch (183)"
+    ],
+    "parameters": [
+      "per-layer L2 delta",
+      "bias delta",
+      "output-head delta",
+      "backbone delta"
+    ],
+    "traces": [
+      "first divergence step",
+      "action delta over time",
+      "ankle",
+      "knee",
+      "penetration series",
+      "temporal ordering"
+    ],
+    "always_reported": [
+      "sample count",
+      "effective weighting"
+    ]
+  },
+  "discrimination_criteria": {
+    "rule": "each hypothesis is graded SUPPORTED, REJECTED or INCONCLUSIVE, with an explicit confidence and the reasoning for it.",
+    "evidence_classes": "every statement is labelled EVIDENCE (measured), INFERENCE (derived from measurement) or HYPOTHESIS TO TEST. A correlation is never called a cause.",
+    "inconclusive_is_a_valid_outcome": true,
+    "no_hypothesis_is_preregistered_as_expected": true,
+    "multiple_hypotheses_may_hold": "H1 to H6 are not mutually exclusive and will not be forced into a single winner."
+  },
+  "declared_limits": {
+    "no_new_rollout": "no environment is built and no episode is run, so no counterfactual closed-loop evidence can be produced by this stage.",
+    "observations_may_not_be_recorded": "if the J12/J16 traces do not carry the raw observations, the two actors CANNOT be applied to identical visited states. That limit will be stated, not worked around.",
+    "no_training": "label-conflict and weighting analyses are static; no fit, no ablation, no retraining is performed.",
+    "single_trial": "AB06 and three gait starts. Nothing here generalises beyond that.",
+    "sealed": "seeds 126, 127, 128 and the G-I phase are SEALED: not read, not generated, not used.",
+    "july": "July artefacts are informative reference only, never a parent, checkpoint or operational dataset."
+  },
+  "forbidden_here": [
+    "a fit",
+    "a rollout",
+    "a new collection",
+    "a critic",
+    "PPO",
+    "promotion",
+    "modifying any existing actor, dataset or config",
+    "a separate 25D actor",
+    "widening",
+    "contralateral features",
+    "changing FSM v3, the morphology corridor, the reward, sigma, the SEA, the C++ plugin or production",
+    "reading or generating seeds 126, 127 or 128",
+    "opening the G-I phase",
+    "executing the proposed correction",
+    "an autonomous retry",
+    "starting J18"
+  ],
+  "deliverable": {
+    "a_minimal_correction_will_be_PROPOSED_not_executed": true,
+    "must_explicitly_evaluate": "whether J11 plus a recovery-only update constrained by anchor and output-drift penalties is valid and preferable to a fresh refit",
+    "must_specify": [
+      "prerequisites",
+      "risks",
+      "offline metrics",
+      "closed-loop gate"
+    ],
+    "report": "reports/user/2026-08-27_v26c_j17_diagnosi_causale_regressione_j16.md"
+  },
+  "todo_carried": [
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "generalisation / Epic",
+    "nominal_mean_shift declared but never measured inside the J15R1 runner",
+    "policy_std always null, cosmetic defect inherited from J12",
+    "every phase closes with a user report, audited before the next begins"
+  ],
+  "pinned_artifacts_sha256": {
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/history.json": "bbfcc0c64e8d8c9019d8bb8a7bfd485228c707b7b3229649cce1d946dcc96d14",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json": "9cc0276c22c9cd41d75a12ad1e09e6ce1931cf8a27eafc3ab0741cd5937f6b28",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/rl_module/module_state.pkl": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_aggregate_dataset.npz": "a936c580c4db19383255d3d5f7346560e0fd99dc4b139ac202858e82cca13f42",
+    "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1/v26c_j11_multistart_fit_receipt.json": "39228c5cf00a753f1d57f07d4794ac2996401e1b40587cf1ec1e5f5e2b0ae65f",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_A_kinematics.npz": "2aaaf45047e8a25a0d21a63e84bcf10a784487819daafc65686fde90ba4ee8a5",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_A_penetration.npz": "a521ec63c79d6f7f3f5e1502e171c5d18810f85af931430aa69d2c1b66cc58f5",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_A_trace.json": "5e1b91999c2fc764a233b215e204ded00608894cc36a6dac8e6129b09d306e30",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_B_kinematics.npz": "0850d1c2eb3504521f2d68e47f1e902139311626a6cf9c1f6f715f98ff7f1536",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_B_penetration.npz": "bba7ce66e32eac48c7ac53ea2b12b6b0737d7bd091a83738bd7071bfdd04232d",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_B_trace.json": "569359aac8685bb94a48d602384c0dff73e27ae0bdb7ed5a504bc5f6544cfa4c",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_C_kinematics.npz": "2c46a633272759d724426e94fe7e28ee95973bfb64821307ddb5f034be02babd",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_C_penetration.npz": "1d12251683bd4d601d20c197287db6d4802cd13b0644f8e48b36c10f79523c71",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_C_trace.json": "b073c9a55695a352d5add69715aa925b415f77497db28603127f6f71d83d5e7a",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_D_kinematics.npz": "6ba7f44c871549c83fb52d420660326cbd9639a0e7cc47f63f473888b1db5582",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_D_penetration.npz": "98b838d35569e068399f18606a8a9e38767f1824616f502c14f79573c6b8c07d",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_D_trace.json": "aeb83f9b125e8bf573cbac99416e2f1b4d54f43e51da89af2601101c8cfa053f",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_E_kinematics.npz": "5ae3d9653fc84b86927f71d680b9c88b38f99330a0f2e9c13c09d127b14d99eb",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_E_penetration.npz": "a5e0664b249c83bb18f38dc3c03cceae87dd5c566331822980c4cc4f11b96ba3",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_E_trace.json": "69f031c1ca69e0a4060d52e2d6c9d107987c91c4e63bb4a021e42b81398b3995",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_F_kinematics.npz": "bcef5c757fffaa4b707b7117b86e4878be1307814db96228c7d6c801b2695275",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_F_penetration.npz": "9f2d367fcf29a5715c724feda8ab82d886f8bbd0f5b90511c37a98b89234013b",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/j12_cell_F_trace.json": "86f16eba23c82cc94404199bea5c482a590f3e4bc96238e4d405906a6afdeb3e",
+    "j12_runs/j12_closed_loop_v26c_2026-08-27_r1/v26c_j12_closed_loop_receipt.json": "2b3e20362bb54ea545db3495d2a468d33138555cccf8bd20d3e5ecc3d75caf11",
+    "j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_dataset_receipt.json": "e7262bf9d96e57fda6b3ecee18c58eb4f29ee48f71ff71bc5eba07a3d6abd79b",
+    "j14_runs/j14_dagger_dataset_v26c_2026-08-27_r1/v26c_j14_dagger_increment.npz": "54b2b8e86a922f554b1fa3bc379737d51000bd0b36596439babd0464e39b0d40",
+    "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/history.json": "71c375ebad117d24df8ff5b2dc573f957cbf43d2b610f0ea43023a7cd9523c81",
+    "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/rl_module/actor_feature_manifest.json": "bb24bedca3f8572e370d92ff02640a3890171888215017cd2821d62245670653",
+    "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/rl_module/module_state.pkl": "4d084a2a7f0012bd711f39a987dbb7af30b04e265484128c45b0a92b612ab928",
+    "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/v26c_j15_aggregate_dataset.npz": "f4d0c09c78e812a78910626789043e42a6ee851e99b56e59595f4887d7faebe8",
+    "j15_runs/j15_fresh_refit_v26c_2026-08-27_r1/v26c_j15_fresh_refit_receipt.json": "b7b3e9c7db116af4e19d2807359914a03d7d989824c97393dc997994213de349",
+    "j15_runs/j15r1_nominal_mean_shift_addendum_2026-08-27.json": "9c50cbfbe6e345dcd3625570d492c460da88009522e24822a7ca0951125c2cfc",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_kinematics.npz": "be6792d412be70d4b5db907e9f04bf326fc22e8c71beb902db4612b885d870e0",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_penetration.npz": "643c1c800702490cc15b0ecc24721d80a52a30b15d684e041a4082b5569e52d2",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_A_trace.json": "c71bcf926006deffe0cbedabeca2132e9306e6508cf35b9e77bf45cc3ac6042f",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_kinematics.npz": "c1c1229a5a5ca19217a6970f9e447a3979cd726bc0e40d19a16b802e61fa098e",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_penetration.npz": "15b67fc60463017feaebb07d9a477ee285cc0653934d7af15ed23df7075d9bbf",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_B_trace.json": "e58c24a7c6d61c049117cdf513ecc204a9882fd5d039d9f3148b46aaaecac7cc",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_kinematics.npz": "f6c85b1c6db1f3b6147133dc2c2e4f84fac3738183cb376a6a55f1c473374cc7",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_penetration.npz": "46f82272e6793fca61a2817c508db1b6f7cacf3f834ab7b21604c416f19b42b7",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_C_trace.json": "f0352758d91ca5716d61def186533d97a4f632ac0f3c38f72b12edf4e77780b7",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_kinematics.npz": "a2092c52d02d2713e3fa182c18bcd6d3a324a7a4d18ce5d657d60ed6de89e2ff",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_penetration.npz": "988a38f6175f8e807bc5fad394d4bf55d3a19c3ea0d368e54494b4be2d63616f",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_D_trace.json": "aa10a7f7a609da2076439a59c0e6034113857c4261b10b37e04d92508deb4ddf",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_kinematics.npz": "fbd07e43c7e545b8cb157e9562424bddc6880899e101e74378a1adf6d345b4ca",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_penetration.npz": "95d25025f6688bcb9540afb2c5a846990764a738ab1ed376b196a741d7c0cf8e",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_E_trace.json": "74528468b5c01e0120f8f90ba95f32ff1d9ec2ee9afb0bc283fc144517680f5c",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_kinematics.npz": "ee6d370a4ca176316bc09d7832a5a7406d1a5b486e2e16ae25bcf9f12f151313",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_penetration.npz": "8aa631d0fdd9fe6fdbc6671eed6fcbca8868cc2ac1b7f772126e49427032eaae",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/j16_cell_F_trace.json": "946d04f5d2f37da77d9991aea2b7cd219f63d0f97b4f1ec2f793a53c6cf72eaa",
+    "j16_runs/j16_closed_loop_v26c_2026-08-27_r1/v26c_j16_closed_loop_receipt.json": "7cceb98f33f548e5930fb8e37846a08738c360aa801216533e59003f2b6ebbc9",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "0c88018d66a648c0a36826f6edbf5e5494ef0c9b496142e1e971e7ab3b1ade81",
+    "j2_runs/j2_base_v26c_2026-08-26_r1/rl_module/module_state.pkl": "0f182ea9f8939e2b7824e85c12c57343309c444680682b9bce5858dd74f9d130",
+    "j7_runs/j7_markov_dataset_v26c_2026-08-26_r1/v26c_j7_markov_recovery_dataset.npz": "bb9b21f029063562bc0229fcc6601dd98e19d071f115811f7d8cb918be852e27",
+    "v26c_j15_fresh_refit_r1.py": "2972e4b4dbfe6e247b48b94cb6c4c8606cd8c893b59f0cbdc30c72220129efb1",
+    "v26c_j8_recovery_fit.py": "76047cb844c2ae720fab3e7b24d90aa563451e6b038c1d1e98098765762e3899",
+    "v26c_penetration_contract_2026-08-26.json": "95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461"
+  },
+  "pin_count": 57,
+  "self_consistency": {
+    "contains_no_self_hash": true,
+    "contains_no_conclusion": true,
+    "written_before_measurement": true
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, VERSIONED PREREGISTRATION ADDENDUM",
+  "version": 2,
+  "supersedes": null,
+  "amends": "v26c_j18_prereg_b_only_constrained_update.json (version 1)",
+  "rewrites_history": false,
+  "overwrites_nothing": true,
+  "stage": "V26C_J18_J8_B_ONLY_CONSTRAINED_UPDATE",
+  "date": "2026-08-27",
+  "status": "EXECUTION PREPARATION ONLY. No fit, no rollout, no environment, no critic, no PPO, no new collection, no candidate actor, no j18_runs, no sealed seed, no valid architect GO.",
+  "contains_no_self_hash": true,
+
+  "why_this_addendum_exists": "version 1 registered the objective sum_b w_b * MSE_b and the fit protocol, but left two semantics unstated that the execution path cannot avoid deciding. Both are closed here, additively and before execution, rather than being settled implicitly inside code.",
+
+  "gap_1_minibatch_semantics": {
+    "the_gap": "version 1 registered a PER-BLOCK objective, in which every block is averaged within itself and then weighted. Minibatch training does not see blocks; it sees rows. A naive per-batch mean over rows would silently reweight every block by how many of its rows happened to land in the batch, so the optimised objective would not be the registered one.",
+
+    "estimator": {
+      "formula": "L_M = (N / |M|) * sum_{i in M} [ w_block(i) / N_block(i) * e_i ]",
+      "where": {
+        "N": 4221,
+        "N_is": "the size of the disjoint union of the four blocks",
+        "|M|": "the size of the minibatch, 128 for the first 32 chunks of an epoch and 125 for the final short chunk",
+        "e_i": "the squared error at row i, averaged over the TWO action dimensions",
+        "w_block(i)": "the weight of the block row i belongs to: w_A = 1.0, w_B = beta, w_C = w_D = lambda",
+        "N_block(i)": "the row count of that block: N_A = 500, N_B = 14, N_C = 2497, N_D = 1210",
+        "per_row_coefficient": "coef_i = w_block(i) / N_block(i), rebuilt per candidate because w_B and w_C/w_D come from the grid"
+      },
+      "identity_over_a_full_epoch": "summing the chunk losses weighted by |M|/N gives sum_i coef_i * e_i = sum_b w_b * (1/N_b) * sum_{i in b} e_i = sum_b w_b * MSE_b, which is exactly the objective registered in version 1.",
+      "unbiasedness": "for a uniformly drawn M of any fixed size, E[L_M] = (N/|M|) * (|M|/N) * sum_i coef_i * e_i = sum_b w_b * MSE_b. L_M is therefore an unbiased estimator of the registered objective, not an approximation of it.",
+      "what_this_prevents": "block B holds 14 rows out of 4221. Under a naive per-batch row mean its influence would fluctuate with sampling and would be governed by row counts rather than by beta. Under this estimator beta alone governs it, which is what version 1 registered."
+    },
+
+    "rng_and_order_semantics": {
+      "generator": "numpy.random.default_rng(123)",
+      "reset_per_candidate": true,
+      "reset_semantics": "each of the 16 candidates constructs its OWN default_rng(123) before its first epoch, so all 16 traverse the identical sequence of permutations. Candidate-to-candidate differences come only from the grid values, never from the data order.",
+      "per_epoch": "one call to rng.permutation(N) yields a full permutation of the 4221 row indices",
+      "coverage": "one visit per row per epoch; no sampling with replacement, no dropped rows",
+      "chunking": "consecutive chunks of 128 taken from the permutation in order, INCLUDING the final short chunk of 125. The short chunk is kept, not dropped, and the N/|M| factor makes it a correctly scaled estimator rather than an over- or under-weighted one.",
+      "batches_per_epoch": 33,
+      "chunk_sizes": "32 chunks of 128 and 1 chunk of 125; 32*128 + 125 = 4221",
+      "epochs": 200,
+      "optimizer_steps_per_candidate": 6600,
+      "steps_arithmetic": "200 * 33 = 6600",
+      "no_early_stopping": true,
+      "no_retry": true,
+      "seed_order_preserved_from_july": [
+        "import torch",
+        "torch.manual_seed(123)",
+        "np.random.seed(123)",
+        "deterministic initialisation from the parent, which consults no RNG",
+        "np.random.default_rng(123) for the permutation stream",
+        "the optimizer"
+      ],
+      "fresh_per_candidate": ["parent bytes reloaded pristine", "torch seed", "numpy legacy seed", "Adam optimizer and its moment buffers", "permutation generator"]
+    },
+
+    "checkpoint_selection_unchanged": {
+      "rule": "after each epoch, evaluate the FULL-BLOCK composite objective sum_b w_b * MSE_b and keep the best; ties resolved to the EARLIEST epoch",
+      "domain_of_evaluation": "the scaled training domain, the same domain the loss is computed in",
+      "why_that_is_stated": "the raw and scaled domains agree to at most 1.192e-07, so the argmin can differ between them only in a tie already resolved by the earliest-epoch rule. The domain is written down so the choice is auditable rather than incidental.",
+      "final_metrics_and_gates": "evaluated on the FINAL RAW actor, after the scales are absorbed, never in the scaled domain"
+    }
+  },
+
+  "gap_2_scaling_for_a_live_controller_parent": {
+    "the_gap": "the July convention trains on obs/scales and absorbs the scales into pi.0.0.weight at save so the committed actor consumes RAW observations. J11 and J15R1 initialised the trainable parameters directly from their parent's RAW weights and fed scaled inputs. That is only function-preserving when the parent's weights on the scaled columns are ZERO, which was true of their parent J2 and is NOT true of J8.",
+
+    "measurement": {
+      "scaled_columns": [
+        {"index": 27, "name": "pros_knee_angle_served_ref_vel", "scale": 4.0, "parent_max_abs_weight": 2.065141e-03},
+        {"index": 28, "name": "pros_knee_angle_served_ref_accel", "scale": 60.0, "parent_max_abs_weight": 3.697728e-04},
+        {"index": 32, "name": "pros_ankle_angle_served_ref_vel", "scale": 3.5, "parent_max_abs_weight": 3.183345e-03},
+        {"index": 33, "name": "pros_ankle_angle_served_ref_accel", "scale": 55.0, "parent_max_abs_weight": 3.810721e-04}
+      ],
+      "j2_had_these_columns_exactly_zero": true,
+      "j8_has_them_live": true,
+      "naive_approach_error": {
+        "what": "initialise from RAW weights and feed obs/scales, as J11 and J15R1 did",
+        "max_abs_output_change_before_any_training": 1.077083e-02,
+        "units": "normalised action units",
+        "comparison": "that is roughly 74x the G1 drift budget of 0.005, and it would be applied silently at step 0, before a single gradient. The candidate would start from a DIFFERENT actor than J8.",
+        "status": "REJECTED for J18"
+      },
+      "correct_approach": {
+        "what": "convert the parent's first-layer weight into the scaled domain before training: W_scaled = W_raw * scales, column-wise; then feed obs/scales",
+        "max_abs_output_change_numpy_float32": 5.960464e-08,
+        "max_abs_output_change_torch": 1.192093e-07,
+        "torch_version_observed": "2.10.0",
+        "note_on_1_192093e-07": "this is 2^-23, the float32 epsilon. The deviation is arithmetic rounding, not a change of function.",
+        "status": "ADOPTED"
+      },
+      "weight_round_trip": {
+        "claim": "(W_raw * scales) / scales == W_raw",
+        "measured_max_abs_difference": 0.0,
+        "bit_identical": true,
+        "verified_in_float32": true,
+        "consequence": "absorbing the scales at save is EXACT for these weights and these scale values, so the committed raw actor is not degraded by the round trip. This is asserted at run time rather than assumed, because it is a property of these particular values and not a theorem."
+      }
+    },
+
+    "binding_contract": {
+      "before_the_optimizer": "assert that the scaled-domain parameters reproduce the parent's raw-domain output on the full 4221-row union to within the tolerance below, in BOTH the numpy float32 and torch kernels. If the assertion fails the run aborts before a single optimizer step.",
+      "raw_vs_scaled_tolerance": 1e-06,
+      "why_a_tolerance_and_not_bit_identity": "(W*s) @ (o/s) and W @ o are different sequences of float32 operations and need not agree bit for bit. J11 and J15R1 could assert bit-identity only because their multiply and divide were no-ops on zero weights. Claiming bit-identity here would be false, so a measured tolerance is registered instead.",
+      "at_save": "divide the scaled first-layer weight by the scales column-wise, re-zero the clock columns, and assert the weight round trip is bit-identical",
+      "gates_are_evaluated_on": "the final RAW actor only"
+    }
+  },
+
+  "everything_in_version_1_stands_unchanged": [
+    "the objective sum_b w_b * MSE_b and the four disjoint blocks",
+    "the block composition, priority order A > B > C > D, counts and hashes",
+    "the finite 16-candidate grid, its axes, values and enumeration order",
+    "seed 123, 200 epochs, batch 128, Adam, no validation split",
+    "all eleven hard gates G1 to G11 and every threshold",
+    "the total ranking order and the fail-closed rule",
+    "the statement that offline gates shortlist and do not certify closed-loop behaviour"
+  ],
+
+  "execution_scope_registered_here": {
+    "candidates_run": 16,
+    "each_initialised_independently_from_pristine_parent_bytes": true,
+    "actors_persisted": "AT MOST ONE - the top-ranked survivor under the version 1 total order",
+    "metrics_and_gate_outcomes_persisted": "ALL SIXTEEN candidates, every gate G1 to G11, pass or fail, with the measured value",
+    "if_zero_survivors": "fail closed: no actor is written at all, the leaf records the failure and every candidate's metrics, and the phase returns to the architect",
+    "sixteen_actors_are_never_persisted": true
+  },
+
+  "invariants": {
+    "not_modified": ["J8", "J2", "J7", "J9R1", "J10R1", "production configuration", "FSM v3", "detector and morphology", "reward", "sigma", "SEA and the C++ plugin", "network architecture"],
+    "logstd": "rows 2:4 of pi.1.weight and pi.1.bias, projected after every optimizer step and at restore and at save, asserted byte-identical to J8 and state-independent",
+    "clock_columns": "columns 0 and 1 of pi.0.0.weight, exactly zero after every step and at save",
+    "encoder_aliases": "rebuilt byte-identical at save",
+    "key_set": "identical to J8's ten keys with identical shapes, 35D, no critic",
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "dirty_worktree": "preserved untouched"
+  },
+
+  "self_consistency": {
+    "contains_no_self_hash": true,
+    "how_to_verify": "re-derive 32*128 + 125 = 4221 and 200*33 = 6600; recompute the naive and corrected scaling deviations from the J8 parent bytes and the 4221-row union; recompute the weight round trip."
+  }
+}

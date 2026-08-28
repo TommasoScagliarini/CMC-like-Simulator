@@ -1,0 +1,219 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION",
+  "stage": "V26C_J21_TRAINING_READY_ATTESTATION",
+  "revision": "base",
+  "written_at_stage": "preparation only; this document is sealed before any execution and is never rewritten",
+  "contains_no_self_hash": true,
+  "self_hash_note": "this file deliberately carries no hash of itself. The aggregator embeds its sha256 as PIN_PREREG and re-hashes it at preflight, so the seal is external and cannot be forged from inside the document.",
+
+  "purpose": {
+    "one_sentence": "Read the already-committed evidence of J19A, J19B, J19C, K1R1, the J20 critic-only warm-up and the J20 R3 restore audit, verify every binding property and every pinned byte, and - only if all of it holds - attest that the EXISTING J20 warm-up checkpoint is TRAINING_READY as an INPUT checkpoint for a future conservative PPO pilot.",
+    "what_it_is_not": "it is not permission to launch anything. It is an attestation about an artefact, not an authorisation of an action.",
+    "why_a_separate_stage": "R3 closed G9 and, by its own preregistration, authorises nothing. Aggregating the closed gates into a readiness statement is a different act with a different blast radius, and it must be preregistered and reviewed on its own terms.",
+    "what_it_does_not_do": [
+      "it does not train: no training code is imported and none is reachable",
+      "it does not sample and does not roll out",
+      "it does not start Ray, does not construct an Algorithm and does not construct an environment",
+      "it does not import train_ppo_mlp, ray, torch, numpy, gymnasium, opensim or any simulation module",
+      "it does not launch, schedule or authorise a pilot",
+      "it does not modify any production file, configuration, checkpoint or prior leaf",
+      "it does not write into the warm-up leaf, whose RESTORE_AUDIT_PENDING marker stays byte-immutable",
+      "it does not promote anything to deployable",
+      "it does not retry, under any outcome"
+    ]
+  },
+
+  "lineage": {
+    "operational": "August V26 imitation -> J2 35D -> J8 -> J18 c13 -> J19A -> J19B / J19C -> J20 critic-only warm-up -> J20 R3 restore audit",
+    "student": "one single native 35D actor. No separate 25D, no widening, no contralateral feature.",
+    "july": "INFORMATIONAL ONLY. July is a methodological source and a diagnostic reference band. It is NOT an operational input to any stage aggregated here, and the aggregator fails closed if a July artefact appears among the operational inputs.",
+    "how_it_is_checked": "gate T1 verifies that the pinned operational input set contains no July leaf, that J19A's recorded parent is the J18 leaf, and that the lineage string recorded in the result equals the one above."
+  },
+
+  "the_object_under_attestation": {
+    "what": "the checkpoint directory j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/checkpoint_last",
+    "identified_by": {
+      "learner_module_state": "57720e2e3fa8a1fd412ba028e2452dead681d57ea1357be1c9f44f152b3cd168",
+      "learner_optimizer_state": "51d97ef016aea2086201b55db807f3273b76784bbafdea6cc9e5c7fea90294be",
+      "actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+      "critic_digest": "2fa9c124e7b49b679df6db35f6cd4577a70e543541feaa3e6b32bac7afa0a410",
+      "files": "all 24 files of the checkpoint tree, pinned individually"
+    },
+    "the_attestation_is_about_this_object_and_nothing_else": "not about a pilot, not about a protocol, not about a deployment."
+  },
+
+  "readiness_scope": {
+    "why_this_section_exists": "'training_ready' has to mean something precise or it means nothing. It is scoped here, exhaustively, to a named hash-identified object and a named list of properties.",
+    "training_ready_true_asserts_exactly": [
+      "the checkpoint exists, every one of its 24 files matches its pin, and it is byte-identical to the one J20 wrote",
+      "it reloads through the REAL production path train_ppo_mlp.run -> algo.restore_from_path, proven by R3 at 13/13, and comes back exact: the full sixteen-key module, the actor digest, the critic digest, the log-std slice, sigma, the six Adam moment pairs, every Adam step, and - under rev7 - the learning rate the restore itself produced",
+      "the actor it carries is the J19A actor, bit-exact, and that actor is offline-eligible on all eleven binding criteria and reproducible on all thirty-six exact fields",
+      "that actor qualified closed-loop 6/6 on A-F and 3/3 on held-out G-I, with the actor unchanged across every cell",
+      "no cell breached the binding penetration threshold, under the current pinned contract",
+      "every FSM v3 and morphology incident counter is zero across all nine cells and across the warm-up's 4096 recorded rows",
+      "the critic was trained and changed while the actor and the log-std stayed bit-exact, over exactly one logical iteration of exactly 4096 sampled steps, with the worker weights synchronised once",
+      "nothing upstream of this attestation ever claimed promotion, training readiness or a next-stage authorisation"
+    ],
+    "training_ready_true_does_NOT_assert": [
+      "that any pilot configuration is correct, safe or sealed",
+      "that any launch command is correct or approved",
+      "that the hyperparameters, iteration count, stopping rule, safety monitors or rollback plan of a pilot exist",
+      "that the resulting policy is deployable, safe on hardware, or fit for a subject",
+      "that a pilot will converge, or that it is a good idea",
+      "anything at all about July as an operational baseline"
+    ],
+    "the_pilot_protocol_is_NOT_SEALED": {
+      "status": "AT THE TIME THIS DOCUMENT IS WRITTEN, no pilot configuration file and no pilot launch command exist, are pinned, or are approved.",
+      "consequence": "J21 attests CHECKPOINT readiness, not PILOT readiness. These are different objects and the distinction is load-bearing.",
+      "what_is_forbidden": "the aggregator must NOT invent, propose, derive or pin a pilot config or a launch command. If it did, it would be manufacturing evidence for a thing that does not exist.",
+      "why_this_does_not_make_the_attestation_empty": "the readiness_scope above is a closed list of properties of a hash-identified artefact, every one of which is measured from committed evidence. A future pilot still needs its own preregistration, its own GO and its own user authorisation; what it will NOT need is to re-litigate whether this checkpoint is sound."
+    }
+  },
+
+  "gates": {
+    "count": 15,
+    "note": "named T1..T15 so they are never confused with the warm-up's G1..G12 or the restore audit's R1..R13. All fifteen must pass; the verdict is fail-closed.",
+
+    "T1_lineage_is_august_operational_july_informational": "the recorded operational lineage equals the pinned string; J19A's recorded parent is the J18 leaf; no pinned operational input path contains a July leaf identifier; the student is the single 35D actor.",
+
+    "T2_j19a_reproducibility_and_offline_eligibility": "v26c_j19a_result.json reports eligibility.ok true with all ELEVEN binding criteria (G5, G6, G3, G4, E-C, E-D, G7, G8, G9, G10, G11) passed; exact_fields.ok true with count 36 and failed_fields empty; actor_promoted true. The receipt reports verdict PASS, reproducibility_ok true, eligibility_ok true, exact_fields_failed empty, non_finite_count 0, promotion_blocked_by_non_finite false and rollout_performed false. G1 and G2 are DIAGNOSTIC ONLY and are recorded, never gated.",
+
+    "T3_j19b_six_of_six": "the J19B receipt reports verdict PASS, aggregate_pass true, cells_total 6, cells_behavioural_pass 6, cells_telemetry_valid 6, actor_unchanged true, and every one of the six cells reports verdict PASS with behavioural_pass and telemetry_valid true.",
+
+    "T4_j19c_three_of_three_heldout": "the J19C receipt reports verdict PASS, aggregate_pass true, cells_total 3, cells_behavioural_pass 3, cells_telemetry_valid 3, actor_unchanged true, and every one of the three held-out cells G, H, I reports verdict PASS with behavioural_pass and telemetry_valid true.",
+
+    "T5_penetration_contract_and_no_hard_breach": "the pinned contract v26c_penetration_contract_2026-08-26.json re-hashes to 95a47d5317be4b1a2f55084fcb3548e479c2333093adc29b4205ad150d48e461 and declares bands soft_diagnostic 0.020 m, july_legacy 0.025 m, hard_binding 0.028 m; both J19 receipts name that same contract hash as their penetration authority; and for EVERY one of the nine cells binding_pass is true, above_hard_binding count is exactly 0 and the above_hard_binding flag is false. The sole binding threshold is 0.028 m and no sample anywhere exceeds it.",
+
+    "T6_fsm_v3_and_morphology_counters_are_zero": "across all nine cells the counters phase_timeout_stance, phase_timeout_swing, morphology_causal_contract_failure, resync_count and hs_cancelled_count are ALL exactly 0; and the warm-up's training_health reports phase_timeout_stance_rows, morphology_causal_contract_failure_rows, resync_event_rows, resync_count_max, hs_cancelled_count_max, missing_telemetry_rows and timeout_side_disagreement_rows ALL exactly 0 over observed_rows 4096. Any non-zero value in this set fails the stage.",
+
+    "T7_k1r1_nondegenerate_gradient": "v26c_j20_k1r1_result.json reports verdict PASS with amended_checks_passed 12 of 12, promotion NONE and next_stage_authorized false.",
+
+    "T8_j20_critic_warmup_twelve_of_twelve": "v26c_j20_critic_warmup_result.json reports verdict AWAITING_RESTORE_AUDIT with gates_passed 12, gates_total 12 and gates_failed empty, and all twelve named gates true; actor.actor_all_byte_identical true with actor_digest equal to the expected d4a13ff7...; actor.logstd_rows_byte_identical true and sigma both 0.004999999670722372; critic_digest_before differs from critic_digest_after; num_env_steps_sampled_lifetime and steps_sampled_this_iteration both exactly 4096; mean_kl_loss exactly 0; the worker weights were synchronised exactly once, learners/default_policy/weights_seq_no == 1 in the committed iteration row; checkpoint.present and checkpoint.ok true with 16 learner module keys, 6 Adam entries at indices [6..11], param group size 12 and only_the_critic_has_adam_moments true.",
+
+    "T9_r3_restore_audit_thirteen_of_thirteen": "v26c_j20_restore_audit_result.json of the R3 leaf reports stage V26C_J20_RESTORE_AUDIT_R3, verdict RESTORE_AUDIT_PASS, gates_passed 13 of 13, gates_failed empty, gates_not_evaluated empty and live_restore.completed true; its receipt reports g9_closed true, child_returncode 0, source_tree_unchanged true and pins_unchanged true; commit_verification reports ok true with problems empty and marker RESTORE_AUDIT_PASSED; the R3 leaf carries RESTORE_AUDIT_PASSED and does NOT carry TECHNICAL_INVALID.",
+
+    "T10_r3_live_optimizer_is_exact_under_rev7": "live_optimizer_audit.json of the R3 leaf reports kind 'LIVE OPTIMIZER RESTORE AUDIT, CANONICALISED', stage_marker after_restore, exact true, problems empty; canonical.difference_count 0 with an empty differences list and digests_match true; accepted_equivalences_are_exactly_the_expected_eight true with unexplained_canonical_paths empty; moment_digests_match true and moments_unchanged_by_canonicalisation true on BOTH sides; conversion.call_site_verified true and both fixed-point flags true; and the rev7 learning-rate gate holds: learning_rate_observation.matches true, gated true, canonical_source_lr equal to canonical_live_lr_before_reapply, live_lr_before_reapply present and canonical_dtype float32. source_state_sha256 equals the pinned learner state.",
+
+    "T11_warmup_leaf_is_byte_immutable": "every file of j20_runs/j20_critic_warmup_v26c_2026-08-27_r1 that this stage pins re-hashes to its pin; the leaf still carries RESTORE_AUDIT_PENDING at its pinned hash; it does NOT carry RESTORE_AUDIT_PASSED and does NOT carry TECHNICAL_INVALID. G9's closure is read from the R3 receipt, NEVER by mutating this leaf.",
+
+    "T12_checkpoint_files_are_pinned_and_present": "all 24 files of checkpoint_last exist and match their pins, including module_state.pkl at 57720e2e... and learner/state.pkl at 51d97ef0...; checkpoint_last_meta.json reports logical_iteration 1 and rllib_training_iteration 1.",
+
+    "T13_runtime_config_and_source_are_pinned": "every artefact named by the R3 architect GO - 92 labels, including train_ppo_mlp.py, tb_logging.py, warm_start.py, asymmetric_rl_module.py, both warm-up configs, the actor feature overlay, the runtime reference config and every preregistration from base through rev7 - re-hashes to the hash the GO records; and the additional artefacts this stage pins, including the penetration contract and its module, re-hash to their pins.",
+
+    "T14_j21_itself_constructs_no_runtime_and_trains_nothing": "the aggregator audits ITS OWN source at run time: it must import none of train_ppo_mlp, ray, torch, numpy, gymnasium, opensim, simulation_runner, model_loader or rollout_eval, at module level or inside any function, and must contain no call to ray.init, build_algo, restore_from_path, algo.train, sample, rollout or subprocess. It must launch no process. A violation fails the stage rather than being reported as a warning.",
+
+    "T15_no_upstream_stage_ever_claimed_readiness": "every upstream receipt and result aggregated here records promotion NONE, training_ready false and next_stage_authorized false. J21 is the FIRST and ONLY place where training_ready may become true, and only in the narrow sense defined above."
+  },
+
+  "accepted_diagnostics_disclosed": {
+    "why_this_section_exists": "a readiness statement that hides its own caveats is worth nothing. These are recorded here BEFORE any execution, and the aggregator reproduces them in its result rather than discovering them.",
+    "every_cell_exceeds_the_soft_20mm_band": {
+      "fact": "all nine cells report above_soft_diagnostic true, with per-cell counts of samples above 0.020 m between 90 and 106 out of 500.",
+      "status": "DIAGNOSTIC, never binding. The contract states the soft band is never a blocker.",
+      "measured_max_penetration_m": {
+        "A": 0.02442140287670189, "B": 0.023472629968460532,
+        "C": 0.022554834542696293, "D": 0.024681825128941546,
+        "E": 0.02445683512352716, "F": 0.025615055309162808,
+        "G": 0.024417393735478, "H": 0.025684, "I": 0.024763
+      }
+    },
+    "two_cells_exceed_the_25mm_july_legacy_band": {
+      "fact": "J19B cell F reaches 0.025615055309162808 m with 4 samples of 500 at or above 0.025 m, and J19C cell H reaches approximately 0.025684 m with 4 samples of 500 at or above 0.025 m. No other cell reaches that band.",
+      "status": "DIAGNOSTIC, never binding. 0.025 m is the JULY LEGACY reference, and July is informational only.",
+      "not_hidden": "both are recorded in the committed receipts, both are reproduced by the aggregator, and both are disclosed in the attestation result and in the user report."
+    },
+    "no_cell_exceeds_the_28mm_hard_binding_band": {
+      "fact": "above_hard_binding count is exactly 0 in all nine cells and the flag is false in all nine.",
+      "status": "BINDING, and it PASSES. This is the only penetration threshold that can fail the stage.",
+      "boundary_semantics": "binding_pass iff max <= 0.028, so exactly 0.028 would still pass; binding_fail iff strictly > 0.028."
+    },
+    "j19a_diagnostic_only_criteria": {
+      "fact": "G1 preservation_max_drift_C measured 0.046971050069934295 and G2 preservation_max_drift_D measured 0.019819501669915418.",
+      "status": "DIAGNOSTIC ONLY by J19A's own preregistration, recorded and never gated here."
+    },
+    "j19a_post_485_target_region_diagnostic": {
+      "fact": "rmse 0.3633046263558258, max_abs 0.9579328495761824 over 485 rows, binding false.",
+      "status": "DIAGNOSTIC. These rows are the TARGET REGION of the correction, so a corrected actor is expected to differ there."
+    },
+    "j19a_weight_round_trip": {
+      "fact": "58 of 8960 entries are not bit-identical after the scale absorption round trip, max_abs_delta 1.862645149230957e-09.",
+      "status": "DIAGNOSTIC, declared by J19A as not a gate."
+    }
+  },
+
+  "promotion_semantics": {
+    "on_pass": "TRAINING_INPUT_ONLY",
+    "definition": "the checkpoint may be used as the RESUME INPUT of a future conservative PPO pilot that is itself separately preregistered, separately reviewed and separately authorised. Nothing else.",
+    "explicitly_not": ["deployable", "clinically usable", "subject-ready", "hardware-ready", "a released policy", "an approved pilot"],
+    "mandatory_final_fields_on_PASS": {
+      "training_ready": true,
+      "promotion": "TRAINING_INPUT_ONLY",
+      "training_started": false,
+      "training_iterations_run": 0,
+      "sampling": false,
+      "rollout": false,
+      "ray_started": false,
+      "environment_constructed": false,
+      "launch_authorized": false,
+      "next_stage_authorized": false,
+      "ppo_authorized": false,
+      "ex_novo_authorized": false,
+      "deployable": false
+    },
+    "mandatory_final_fields_on_FAIL": {
+      "training_ready": false,
+      "promotion": "NONE",
+      "and_every_other_flag_above": false
+    },
+    "training_ready_is_never_true_without_a_full_pass": "there is no partial credit. Fifteen of fifteen or nothing."
+  },
+
+  "fail_closed_conditions": [
+    "any pinned artefact missing, unreadable or hash-changed",
+    "any required field absent from any evidence file - a missing field is a FAILURE, never a default",
+    "any stale marker: the warm-up leaf not carrying RESTORE_AUDIT_PENDING, or carrying a pass marker; the R3 leaf not carrying RESTORE_AUDIT_PASSED, or still carrying TECHNICAL_INVALID; either earlier restore-audit leaf having lost TECHNICAL_INVALID",
+    "contradictory lineage: a July artefact among the operational inputs, a recorded parent that is not the J18 leaf, or a lineage string that does not match",
+    "any hard-binding penetration breach, in any cell, by any sample",
+    "any non-zero FSM v3 or morphology target counter, in any cell or in the warm-up training health",
+    "any actor digest mismatch, anywhere it is recorded",
+    "any evidence that J21 itself constructs runtime, starts Ray, constructs an environment, samples, rolls out or trains",
+    "any upstream receipt claiming promotion, training readiness or a next-stage authorisation",
+    "the destination leaf already existing"
+  ],
+
+  "protocol": {
+    "destination": "j21_runs/j21_training_ready_attestation_v26c_2026-08-28_r1",
+    "no_clobber": "the aggregator refuses to start if the destination exists",
+    "born_invalid": "the leaf is created with TECHNICAL_INVALID written FIRST, before anything else, and the aggregator asserts that marker is the only resident before evaluating",
+    "marker_removed_last": "TECHNICAL_INVALID is replaced by TRAINING_READY_ATTESTED only after all fifteen gates pass AND post-commit verification passes",
+    "post_commit_verification": "every leaf-relative path named by the committed receipt is re-hashed against the receipt and against the bytes that were written, and every pinned artefact is re-hashed",
+    "single_execution": "one evaluation, no loop, no retry under any outcome, and NO subprocess of any kind",
+    "go_required": "--execute refuses to run without a valid architect GO whose status is exactly APPROVED, whose stage is exactly V26C_J21_TRAINING_READY_ATTESTATION and whose closed set of pins all re-hash correctly",
+    "inert_modes": "--preflight-only and --dry-run write nothing and launch nothing",
+    "implementation_constraint": "STANDARD LIBRARY ONLY. hashlib, json, pathlib, argparse, sys, os, ast, datetime. No third-party import at any level."
+  },
+
+  "verdicts": {
+    "on_success": "TRAINING_READY_ATTESTED",
+    "on_failure": "FAIL_CLOSED",
+    "what_success_still_does_not_authorise": [
+      "launching a training run of any kind",
+      "PPO",
+      "an ex-novo run",
+      "a pilot",
+      "any deployment",
+      "any subsequent stage"
+    ]
+  },
+
+  "prohibitions": [
+    "no execution without BOTH explicit user authorisation and an APPROVED architect GO for stage V26C_J21_TRAINING_READY_ATTESTATION",
+    "no retry, whatever the outcome",
+    "no write of any kind into the warm-up leaf, the R1, R2 or R3 restore-audit leaves, or any J19 leaf",
+    "no modification of any production file, configuration, checkpoint or preregistration",
+    "no import of train_ppo_mlp, ray, torch, numpy, gymnasium, opensim or any simulation module",
+    "no subprocess, no ray.init, no Algorithm construction, no environment construction, no sampling, no rollout, no training",
+    "no invention of a pilot configuration or a launch command",
+    "no promotion beyond TRAINING_INPUT_ONLY, and never deployable"
+  ]
+}

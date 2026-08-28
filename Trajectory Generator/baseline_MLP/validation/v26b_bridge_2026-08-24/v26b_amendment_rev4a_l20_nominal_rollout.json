@@ -1,0 +1,108 @@
+{
+  "amendment_id": "rev4a_l20_nominal_rollout",
+  "date": "2026-08-24",
+  "token": "V26B-L20-NOMINAL-ROLLOUT",
+  "kind": "ADDITIVE and IMMUTABLE. Converts the non-authoritative proposal into an authoritative amendment. No prior artifact is mutated",
+  "converted_from": {
+    "proposal": "Trajectory Generator/baseline_MLP/validation/v26b_bridge_2026-08-24/v26b_PROPOSAL_ONLY_rev4a_l20_rollout.json",
+    "proposal_sha256": "8ce44caf78db542e4ef1249f76439e00377c0c0a86aa2cfaee286d1d14d8e2ce",
+    "status_of_the_proposal": "PRESERVED unchanged; it remains non-authoritative. This amendment is the authority"
+  },
+  "parents_immutable": {
+    "s1c3_diagnosis_report": "aee7164164a0a00042a649d85d8d8cc77a6842026e0803c6c0e0ce4e9fb48bf4",
+    "rev3z": "7f642c18bec1ba8bd07e15bca576e017eae2db079138e2d9b16b2310410101a9",
+    "rev3z_aggregate": "8836e8b49e17055cebe53dff5de592bf7ca7f427cca18aa35b371b1c3b6956dc",
+    "rev3y": "eb54fd266461e56728dd5387f6019a3eb23243eb4c4e0e79541cfeaf520139c6",
+    "rev3x_addendum_a_status": "de53d529343edd5d82af786036368d7b885ad686af18469088a3dc8ccb563cf5",
+    "rev3w": "92cf4aaf11dc0698054134c49efaaf34e16f5411579da6499ffae4e203dc2b47",
+    "rev3v": "889f1068a9ddb8db8241b62b569a85fbc6baf3d7673ae626c4df5e51902ed984",
+    "rev3u": "a3b17a883fb43006f7a3d49b9a1a1e77334f0974e959241af3a496f62259a011",
+    "rev3s": "89e8c227eecb2a80350307d6c0315e0f90e42b37ecae1d75fea30f9da2e067a0",
+    "s0d_actor": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a"
+  },
+
+  "MAX_ABS_DEMOTION_SCOPED": {
+    "change": "for THIS diagnostic eligibility decision only, the P-gate component max_abs_max_per_joint = 0.25 is INFORMATIONAL rather than binding",
+    "unchanged_and_still_binding_elsewhere": ["mean_abs <= 0.10 per joint", "rms <= 0.15 per joint", "per-discrete-stratum mean_abs <= 0.10", "T target improvement >= 10% per joint", "parameter_shift_sq <= 0.5", "action drift <= 0.10 per joint", "I integrity", "the seven closed-loop gates"],
+    "historical_outcomes_NOT_rewritten": "the receipts and aggregates of W2, W4, W8, L05, L10, L20, A1 and every other candidate keep their recorded FAIL verdicts, their violation lists and their quarantine states byte-for-byte. Nothing is re-scored retroactively and no prior artifact is edited",
+    "scope_limit": "this demotion applies ONLY to admitting L20 to the single closed-loop test authorised here. It does not change rev3s, rev3v or any gate definition, and it does not authorise any fit",
+    "justification_on_record": "F2R/T1R offline criteria are RMSE-type (P1_preservation_rmse_max_per_joint <= 0.10) with no binding per-row maximum; the max-type quantity P5 max_abs_dW1 is marked informational; the 13/07 selection was made by the closed-loop gate with the offline gate at ok:false",
+    "measured_consequence": "under the July-style criterion set L20 passes: mean 0.0584/0.0809, rms 0.0792/0.1280, strata max 0.0925, T improvement 18.5/21.6 %, parameter_shift_sq 0.4267, action drift 0.0649/0.0815"
+  },
+
+  "MANDATORY_DOCUMENTARY_CORRECTION_DAGGER": {
+    "claim_being_corrected": "the worker's earlier statement that building DAgger on a non-walking parent is refuted by the chain, citing the sequence R0a 493 -> R1 242 -> R2I 197",
+    "architect_ruling": "REJECTED as stated. In July the BC clone survived about 68 steps and its prefix was used successfully; S1A provides 392 steps of prefix. The R0a -> R1 degradation must be attributed to the SPECIFIC DIVERGENT PROTOCOL of that chain, not treated as a refutation of a true July-style DAgger",
+    "protocol_features_to_which_the_degradation_is_attributed": ["300 fixed epochs with no early stopping", "batch 256", "lr 1e-4", "seed 2026", "logstd placeholder", "anchor 1e-3", "phase auxiliary head"],
+    "worker_verification": "the anchor weight 1e-3 is CONFIRMED: both the V2_R0a and V2_DAGGER_R1 receipts record 0.001. The remaining listed features match the frozen chain numerics recorded in those receipts (300 epochs, batch 256, lr 1e-4, seed 2026)",
+    "july_contrast_on_record": "the 11/07 DAgger used 400 epochs WITH early stopping on a validation split (best epoch 368), a small anchor to the initial weights, and label aggregation on the states the actor actually visited; its round 1 aggregated the 68-step BC rollout prefix",
+    "authoritative_status": "a July-faithful DAgger from a non-walking or partially-walking parent is NOT refuted by this chain's evidence and remains architecturally open",
+    "forward_rule": {
+      "if_L20_FAILS": "the next architectural candidate REMAINS a July-faithful DAgger on the S1A prefix (392 steps)",
+      "if_L20_PASSES": "the architect decides after the audit how to use it",
+      "binding": "this rule is recorded now, before the rollout outcome is known"
+    }
+  },
+
+  "candidate_under_test": {
+    "id": "L20",
+    "module_dir": "runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1C2Z_L20_35D_NONDEPLOYABLE/rl_module",
+    "actor_digest": "71d21f309ccf1df7bf8aac60cbf8d1c4322586a6f0fe959f8f522624ee23db55",
+    "fit_receipt_sha256": "03802eadd3fc6371a1f959116b44694d5736ced59ff056e6e4162aae36ce71a9",
+    "files_sha256": {
+      "actor_feature_manifest.json": "3caa814aed9f10ecdb5316ba8cc59be1d9513a82e3c44826d592c00e0283e985",
+      "class_and_ctor_args.pkl": "c9a6722ff95642795bfe1146d0087a68b5861fd508cbe3692195b2d820d810a7",
+      "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "module_state.pkl": "390c42e0c9bf7bfa64aa129a00ca3c1177ff32d8a7e9c922f335d4cc996867ff"
+    },
+    "recorded_offline_state": "OFFLINE_FAILED_QUARANTINED with violation ['max_abs>0.25'] - PRESERVED, not rewritten",
+    "admission_basis": "admitted to this single test under the scoped max_abs demotion above, which does not alter that recorded state",
+    "immutability": "READ-ONLY: module, fit receipt and manifest digest-verified BEFORE and AFTER the run; no flag is edited whatever the outcome",
+    "no_other_candidate": "A1-A6, W2/W4/W8, L05, L10, S1A, A2 are NOT rolled out"
+  },
+
+  "harness_equivalence": {
+    "rule": "the SAME frozen harness and config as the S0D, S1A and A2 rollouts; the command may differ from the frozen rev3u command ONLY in --checkpoint and --output-dir, verified fail-closed",
+    "rollout_eval_sha256": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba",
+    "v3_canonical_yaml_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "morphology_corridor_sha256": "33b1dd7cb0db40110a4f9c1b8c0dd49a498662211e6e132f0f3cefe8edc02a55",
+    "action_selection": "deterministic mean; NO sigma sampling and NO sigma choice"
+  },
+
+  "job_dir": "runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/rollouts/l20_nominal_det/S1C2Z_L20_35D__v3_canonical__nominal__det",
+
+  "execution_policy": {"exactly_one_launch": true, "no_retry": true, "no_tuning": true, "no_clobber": true},
+
+  "binding_closed_loop_gates_unchanged": {
+    "completion": "500/500 steps AND end_reason episode_time_limit",
+    "phase_timeout_stance": 0,
+    "phase_timeout_swing": 0,
+    "morphology_causal_contract_failure": "rows_positive 0 AND max 0 AND failure false, read PER ROW from reward_terms.morphology_causal_failed_closed, never inferred from end_reason",
+    "hs_cancelled_count": "max over rows 0 AND final 0",
+    "resync_count": "max over rows <= 1 AND final <= 1",
+    "valid_cycle_count": ">= 1",
+    "penetration": "max <= 0.020 m and no grf_penetration termination"
+  },
+
+  "mandatory_diagnostics_never_a_gate": [
+    "all v3 FSM counters, end_reason and cycles recorded verbatim",
+    "prosthetic knee and ankle sign, range, min, max and mean",
+    "RMSE, Pearson correlation, sign agreement and amplitude ratio versus the PROSTHETIC IK target, with the healthy contralateral signal only as a symmetry diagnostic",
+    "actions on the visited states versus S0D and versus u_IK",
+    "fraction of positive ankle command inside the negative IK windows",
+    "comparison with S0D (500/500), A2 (500/500) and S1A (392/500)",
+    "B3 only inside the phase window [0.55, 0.80], not_evaluable while the phase field is zero"
+  ],
+
+  "outcome_policy": {
+    "on_pass": "mark ONLY CLOSED_LOOP_ELIGIBLE_PENDING_ARCHITECT_AUDIT; no promotion, no deployable status, no anchor construction; the architect decides afterwards",
+    "on_fail": "quarantine, causal diagnosis, NO relaunch, NO tuning; the next architectural candidate remains a July-faithful DAgger on the S1A prefix per the forward rule above",
+    "either_way": "no write under student/, candidate flags unchanged, sigma NOT resolved, B3 still INDETERMINATE"
+  },
+
+  "explicit_limitation": "even a PASS does not recover the push-off sign: L20 leaves 54 of the 64 window rows with a positive ankle command, against S0D's 60. This test answers how far the actor can move and still walk, not whether plantarflexion can be recovered",
+
+  "prohibitions": ["no second rollout", "no other candidate", "no retry", "no fit", "no collection", "no promotion or deploy",
+                    "no sigma choice", "no production/env/reward/FSM/morphology/SEA/corridor/C++ change",
+                    "no rewriting of historical outcomes", "no change to any other gate or threshold"]
+}

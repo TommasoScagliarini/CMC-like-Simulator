@@ -1,0 +1,126 @@
+{
+  "amendment_id": "rev3r_s1a_nominal_deterministic_rollout",
+  "date": "2026-08-24",
+  "token": "V26B-S1A-NOMINAL-ROLLOUT",
+  "kind": "ADDITIVE. One single closed-loop deterministic nominal evaluation of the immutable rev3q candidate. No existing file/artifact/contract is modified",
+  "purpose": "ELIGIBILITY of S1A as a future source==init for a July-style anchor-collection stage. NOT a deployable promotion",
+  "parents_immutable": {
+    "rev3q": "74b23e6f5a202b260320718e43dd70f483dc898dc5805d91a28eeb52546bc667",
+    "rev3q_receipt": "0d2aa071458c5ea855c1f33d7fcfb7689bc0560ea08b38321bada7d404eafe5a",
+    "rev3q_tool": "5fc377b0570bd7a9db3b1bca8f6659e391e96a3741323eedaa9a55d593a88fb7",
+    "rev3q_test": "b0bf8909bce0206546d5aaeae4def6143aadd966adab2e8f03c4688f23d68828",
+    "rev3p": "617440544a6193646b1e5f8e5d3e4d91f56f36e93b9accfe6fbfd5ebbf3d21e6",
+    "rev3o": "abe463c3d64b4b91a0d5ef83517159bcc6fc417d029be4dd51db9c92a0dfc978",
+    "rev3n": "0677ad577336240b26cf6947e9e3d60d74632a35724f49b5f06bf4bc5aa377e3",
+    "rev3m": "8af3ad654e49e19f5a6d2dbcf128faf5ce424206a5def715d177f7fbda93e0c0",
+    "rev3l": "7545201df4e5aefb4fdccca9efc1425a9a4dde581a4c20269c0d3fd86aa794d5"
+  },
+  "candidate_under_test": {
+    "module_dir": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1A_IK_AB06_35D_NONDEPLOYABLE/rl_module",
+    "actor_digest": "8f3e0ce17eff7c741dcf72de6d0fec0c372f9dbc7a9b3119d41c155ec8603e35",
+    "files_sha256": {
+      "actor_feature_manifest.json": "8c3418769adf4cfa8c117e5f1aa94a0e66a674ac16e540f02fc14be332544ffd",
+      "class_and_ctor_args.pkl": "c9a6722ff95642795bfe1146d0087a68b5861fd508cbe3692195b2d820d810a7",
+      "metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "module_state.pkl": "345539298a9cf369c98f24bc8ebc3e7ea06a112f980e83e4e0607bd7e1264c30"
+    },
+    "receipt_sha256": "0d2aa071458c5ea855c1f33d7fcfb7689bc0560ea08b38321bada7d404eafe5a",
+    "status_flags": {
+      "deployable": false,
+      "rollout_pending": true,
+      "sigma_unresolved": true,
+      "promotion_requires": "closed-loop nominal rollout under a separate token"
+    },
+    "immutability": "READ-ONLY: the candidate's module, receipt and manifest are digest-verified BEFORE and AFTER the run; the flags are NEVER edited, whatever the outcome"
+  },
+  "production_pins_resolved": {
+    "rollout_eval.py": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "5433bcbcd90cbfbc04429a42dcda3669649ed9e3b1daa0866c0d96681a127dba"
+    },
+    "v3_canonical_resolved_yaml": {
+      "path": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+      "sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db"
+    },
+    "morphology_corridor_profile": {
+      "path": "Trajectory Generator/baseline_MLP/morphology_profiles/ab06_prosthetic_event_warped_mean_std_corridor.json",
+      "sha256": "33b1dd7cb0db40110a4f9c1b8c0dd49a498662211e6e132f0f3cefe8edc02a55"
+    }
+  },
+  "command_resolved": [
+    "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+    "--checkpoint",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/candidates/S1A_IK_AB06_35D_NONDEPLOYABLE/rl_module",
+    "--no-auto-config",
+    "--config",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "--episode-start-offset-s",
+    "1.956870983805102",
+    "--action-selection",
+    "deterministic",
+    "--seed",
+    "123",
+    "--output-dir",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/rollouts/s1a_nominal_det/S1A_35D__v3_canonical__nominal__det",
+    "--record-outputs",
+    "--record-policy-trace",
+    "--no-progress",
+    "--run-timeout-s",
+    "7200",
+    "--stall-timeout-s",
+    "1500",
+    "--step-timeout-s",
+    "900",
+    "--startup-timeout-s",
+    "900"
+  ],
+  "command_shape_note": "identical construction to rev3c/e/j: JOB_TIMEOUT_ARGS is the canonical flag set of the chain and contains --step-timeout-s 900 and --startup-timeout-s 900 as prescribed, plus --no-progress, --run-timeout-s 7200 and --stall-timeout-s 1500 already used by every prior rollout of this chain",
+  "job_dir": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/rollouts/s1a_nominal_det/S1A_35D__v3_canonical__nominal__det",
+  "execution_policy": {
+    "exactly_one_launch": true,
+    "no_retry": true,
+    "no_tuning": true,
+    "no_clobber": "the job dir must not exist; it is created with exist_ok=False and the log with mode 'x'",
+    "action_selection": "deterministic mean; NO operational sigma (0.005 remains an unresolved serialisation placeholder)"
+  },
+  "binding_eligibility_gates": {
+    "completion": "steps 500/500 AND end_reason == episode_time_limit",
+    "phase_timeout": "phase_timeout_stance == 0 AND phase_timeout_swing == 0, counted over ALL rows from reward_terms.phase_timeout_exceeded + phase_timeout_side (1=stance, 2=swing)",
+    "morphology_causal_contract_failure": "rows_positive == 0 AND max == 0 AND failure == false, read PER ROW from reward_terms.morphology_causal_failed_closed, NEVER inferred from end_reason",
+    "hs_cancelled_count": "max over rows == 0 AND final == 0",
+    "resync_count": "max over rows <= 1 AND final <= 1, both recorded",
+    "valid_cycle_count": ">= 1",
+    "penetration": "max <= 0.020 m AND no grf_penetration termination",
+    "meaning": "entry gate to the anchor-collection stage ONLY; never a deployable promotion"
+  },
+  "mandatory_diagnostics_never_relaxable": [
+    "invalid events (count, per-step type) and valid HS / TO counts",
+    "morphology_causal dropped_wait_hs and terminal_flushed (last and max)",
+    "knee/ankle q min, max, mean, sign fraction, out-of-bounds steps",
+    "RMSE, Pearson correlation, sign agreement and shape statistics vs the prescribed targets on the grid",
+    "B3 computed ONLY inside the phase window [0.55, 0.80] via reward_terms.pros_ankle_angle_imitation_target_phase (not_evaluable if the field is zero, NEVER the global minimum)",
+    "raw and applied actions, clipping and saturation fractions over the whole trace",
+    "reserve norm, episode return",
+    "comparison with the S0D rollout and with the July homologs where homologous"
+  ],
+  "outcome_policy": {
+    "on_fail": "preserve everything, diagnose the cause, write FAIL receipt + report, STOP. No retry, no tuning, no promotion",
+    "on_pass": "write PASS eligibility receipt + report and STOP for Codex audit. Do NOT build the anchors",
+    "candidate_flags_after_either_outcome": "unchanged: deployable false, rollout_pending true"
+  },
+  "prohibitions": [
+    "no second execution",
+    "no DAgger",
+    "no anchor construction",
+    "no PPO/critic",
+    "no multistart",
+    "no morphology fit",
+    "no training",
+    "no sigma sweep",
+    "no promotion or alias",
+    "no output under student/",
+    "no modification of production env/reward/FSM/corridor/SEA/C++/config",
+    "no modification of any existing amendment/tool/receipt/log/report/candidate"
+  ]
+}

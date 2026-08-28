@@ -1,0 +1,134 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION AMENDMENT",
+  "stage": "V26C_J20_RESTORE_AUDIT_R2",
+  "revision": "rev4",
+  "cites": {
+    "base": "v26c_j20_prereg_restore_audit.json",
+    "base_sha256": "1326944edcbe368319409705e6ff2aeafb62f3def4503f467736ba6780c7d9e6",
+    "rev1": "v26c_j20_prereg_restore_audit_rev1.json",
+    "rev1_sha256": "3fa1ae238cfe0c20865850951ee787cf528b1c17cc0ba6fe97a714d9e37c3ef1",
+    "rev2": "v26c_j20_prereg_restore_audit_rev2.json",
+    "rev2_sha256": "59e2e5e04d167eaafd8283800d277ca8415fac8d57a880818a082dbdbb838cf7",
+    "rev3": "v26c_j20_prereg_restore_audit_rev3.json",
+    "rev3_sha256": "bfb6ef9b4b9a176138adae837e622442e4727f1088c81ea124f3a91b6a7ed41e"
+  },
+  "predecessor_status": "BASE, REV1, REV2 AND REV3 ARE SEALED AND UNMODIFIED. This amendment rewrites none of them.",
+  "precedence": "rev4 > rev3 > rev2 > rev1 > base",
+  "contains_no_self_hash": true,
+  "additive": "One correction to the child's environment. No gate is added, removed or redefined: the count stays 13 and every predicate is untouched.",
+
+  "the_r1_attempt": {
+    "leaf": "j20_runs/j20_restore_audit_v26c_2026-08-27_r1",
+    "verdict": "FAIL_CLOSED, 4 of 13 gates",
+    "marker": "TECHNICAL_INVALID, still in place",
+    "status": "PRESERVED AS IMMUTABLE EVIDENCE. R2 must never write into it, reuse it, overwrite it or delete it. R2 re-hashes every file of it before and after its own child and fails closed on any difference.",
+    "gates_that_passed": ["R8", "R10", "R11", "R13"],
+    "what_R1_did_establish": "the checkpoint FILE is sound: sixteen keys load with strict=True and are all byte-identical, the actor digest is d4a13ff7..., the critic digest is 2fa9c124..., the log-std slice and sigma are exact, the Adam state holds indices [6..11] which ARE the six critic tensors, all twelve moments are byte-identical and every step is 81.",
+    "what_R1_did_not_establish": "anything about the LIVE optimizer, because algo.restore_from_path was never reached."
+  },
+
+  "observed_cause": {
+    "classification": "EVIDENCE, not inference",
+    "child_returncode": 124,
+    "stop_reason": "phase_timeout",
+    "stop_message": "Training STOPPED - PPOConfig.build_algo exceeded the 600 s wall-clock timeout (child self-guard).",
+    "watchdog_phase": "PPOConfig.build_algo",
+    "occurrences_in_the_r1_child_log": 115,
+    "the_error": "ModuleNotFoundError: No module named 'train_ppo_mlp', raised inside ray/_private/runtime_env/setup_hook.py at pickle.loads(worker_setup_func_info.function); Ray reported 'Worker exit detail: Failed to deserialize the setup hook method.'",
+    "occurrences_in_the_successful_warm_up_log": 0,
+    "pythonpath_in_the_r1_child_environment": null,
+    "the_mechanism": [
+      "train_ppo_mlp.py registers runtime_env['worker_process_setup_hook'] = _worker_setup",
+      "Ray serialises that hook BY REFERENCE to the module that defines it, so every worker must be able to import train_ppo_mlp",
+      "Ray workers are fresh processes: they rebuild sys.path from the interpreter and PYTHONPATH, never from the driver's runtime sys.path.insert",
+      "the warm-up launched train_ppo_mlp.py directly, so baseline_MLP was sys.path[0] and the workers could import it - hence zero occurrences in its log",
+      "operation 4 of the command derivation substitutes the script with the validation-only wrapper, so sys.path[0] became the validation directory",
+      "the wrapper adds baseline_MLP to sys.path inside its own process only, and launch_once set only PYTHONDONTWRITEBYTECODE in the child environment",
+      "every EnvRunner therefore died, build_algo could never finish, and the child self-guard fired at 600 s"
+    ],
+    "what_this_is_not": "it is not a statement about the checkpoint, the optimizer, the configuration, the hardware or the restorability. That code never ran."
+  },
+
+  "the_single_correction": {
+    "what": "launch_once prepends the ABSOLUTE baseline_MLP directory to PYTHONPATH in the environment it hands to the child process.",
+    "where": "the R2 runner only, in the environment dictionary passed to subprocess.Popen",
+    "rules": [
+      "the value is the absolute baseline_MLP directory, derived from the runner's own resolved __file__, never a relative path and never a cwd-dependent one",
+      "it is PREPENDED, so it wins over any pre-existing entry",
+      "any pre-existing PYTHONPATH is PRESERVED VERBATIM after the separator; when there is no pre-existing value no separator is added",
+      "the separator is os.pathsep, so the same code is correct on macOS and on Windows",
+      "the environment is a COPY of os.environ; the runner's own os.environ is never mutated",
+      "fail-closed: the runner refuses to launch if that directory is not absolute or does not contain train_ppo_mlp.py"
+    ],
+    "why_this_and_nothing_else": "it is the minimum that makes the module importable by a fresh worker process. It touches no production file, no configuration, no checkpoint and no gate."
+  },
+
+  "explicitly_unchanged": [
+    "train_ppo_mlp.py and every other production module: not modified",
+    "v26c_j20_warmup_critic_only_cfg.yaml and every other configuration: not modified",
+    "the checkpoint under audit and the whole warm-up leaf: read only",
+    "the four command operations and the delegated trainer argv: same tokens, same order, same count of 18",
+    "the thirteen gates R1-R13 and every one of their predicates, including rev3's tightened R9",
+    "the zero-iteration semantics: iteration_start is still derived as restored_logical_iteration + 1 = 2 against a target of 1, so range(2, 2) is empty",
+    "the normalisation rules of rev2 and the evidence contract of rev3",
+    "the validation-only wrapper v26c_j20_restore_audit_child.py: byte-identical to the one R1 used",
+    "the fail-closed protocol: no-clobber destination, born-invalid marker written first and removed last, post-commit verification, single execution"
+  ],
+
+  "changes_that_follow_mechanically_from_the_new_leaf": {
+    "note": "these are consequences of the architect's requirement of a distinct leaf, declared here so they are not silent",
+    "--output-dir": "now points at j20_runs/j20_restore_audit_v26c_2026-08-27_r2",
+    "--audit-evidence": "now points at that leaf's live_optimizer_audit.json",
+    "everything_else_in_the_argv": "identical to R1"
+  },
+
+  "stage_identifier": {
+    "r1": "V26C_J20_RESTORE_AUDIT",
+    "r2": "V26C_J20_RESTORE_AUDIT_R2",
+    "why_they_differ": "so that the R1 architect GO can never authorise R2 and the R2 GO can never authorise R1. validate_go compares the stage exactly, so a mismatched GO is refused rather than silently accepted."
+  },
+
+  "no_automatic_retry": {
+    "rule": "R2 is NOT a retry. It is a separate, separately preregistered, separately authorised single execution.",
+    "requirements": [
+      "R2 runs only under its own architect GO, in its own file, with status exactly APPROVED and stage V26C_J20_RESTORE_AUDIT_R2",
+      "no runner may re-launch a child after any outcome; there is exactly one subprocess.Popen and no code path reaches it twice",
+      "if R2 fails, there is no R3 without a further architect decision",
+      "the R1 leaf is never reused, and the R2 leaf is refused if it already exists"
+    ]
+  },
+
+  "smoke_test": {
+    "purpose": "check the necessary condition that failed, without building an Algorithm, without constructing an environment, without starting Ray and without training anything.",
+    "method": "two subprocesses whose working directory is the validation directory. The first has no PYTHONPATH and must report that importlib.util.find_spec('train_ppo_mlp') is None. The second is given the environment the R2 runner's own child_environment() builds and must report that find_spec is not None. find_spec RESOLVES a module without executing it, so nothing is imported, nothing is initialised and there is no side effect.",
+    "what_it_proves": "that the corrected environment makes train_ppo_mlp findable by a fresh interpreter that does not inherit the parent's runtime sys.path - the exact condition whose absence killed every R1 worker.",
+    "what_it_does_NOT_prove": "that Ray will therefore deserialise the setup hook and that build_algo will complete. That remains a HYPOTHESIS until R2 actually runs. No Ray is started here, deliberately, so that nothing in this preparation can be mistaken for a second audit."
+  },
+
+  "destination": {
+    "leaf": "j20_runs/j20_restore_audit_v26c_2026-08-27_r2",
+    "no_clobber": "the runner refuses to start if it exists",
+    "born_invalid": "TECHNICAL_INVALID written FIRST and asserted to be the only resident before the child is launched",
+    "marker_removed_last": "replaced by RESTORE_AUDIT_PASSED only after all thirteen gates and post-commit verification pass"
+  },
+
+  "verdicts": {
+    "on_success": "RESTORE_AUDIT_PASS",
+    "on_failure": "FAIL_CLOSED",
+    "on_success_still_false": {
+      "promotion": "NONE",
+      "training_ready": false,
+      "next_stage_authorized": false
+    },
+    "what_success_would_close": "gate G9 of V26C_J20_CRITIC_WARMUP, and nothing else"
+  },
+
+  "prohibitions": [
+    "no execution of R2 until the architect issues an APPROVED GO for stage V26C_J20_RESTORE_AUDIT_R2",
+    "no retry, whatever the outcome",
+    "no write, of any kind, into the R1 leaf",
+    "no rewriting of the base document, rev1, rev2 or rev3",
+    "no modification of any production file or configuration",
+    "no PPO, no ex-novo run, no promotion, no training readiness"
+  ]
+}

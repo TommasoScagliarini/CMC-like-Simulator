@@ -1,0 +1,47 @@
+{
+  "addendum_id": "rev3w_a_probe_corrections",
+  "date": "2026-08-24",
+  "kind": "ADDITIVE, IMMUTABLE. Corrects two items of the S1C-0 deliverable WITHOUT touching the original receipt or report, which stay byte-identical",
+  "parent": {
+    "amendment_rev3w": "92cf4aaf11dc0698054134c49efaaf34e16f5411579da6499ffae4e203dc2b47",
+    "probe_receipt": {
+      "path": "Trajectory Generator/runs/rollout/validation/v26b_bridge_runs/2026-08-24_V26B_anchors_r1/s1c0_probe/v26b_s1c0_probe_20260824_205625.json",
+      "sha256": "00e6141f4051117ef2425d144e062fd9cb61708a70e18e5d38b56864f67d8d2c",
+      "status": "PRESERVED, never rewritten"
+    },
+    "probe_report": {
+      "path": "reports/user/2026-08-24_v26b_s1c0_probe_reachable.md",
+      "sha256": "21f6faee58bf7b8691dc5b6bdd017c37f92f3caa07b83209a7ba7a73b70b26e8",
+      "status": "PRESERVED, never rewritten"
+    }
+  },
+  "correction_1_magnitude_wording": {
+    "where": "S1C-0 report section 3 and the paired test message",
+    "wrong_wording": "'due ordini di grandezza sotto la tolleranza 1e-3' / 'two orders of magnitude'",
+    "measured_values": {
+      "post_burn_in_max_abs_error_rad": 0.0001038,
+      "validation_tolerance_rad": 0.001
+    },
+    "correct_statement": "the margin is a factor of 1e-3 / 1.038e-4 = 9.634, i.e. ABOUT 9.6x, just under one order of magnitude - NOT two",
+    "scope": "wording only: no number, threshold, model parameter or verdict changes. The validation verdict (model accepted, tolerance 1e-3 met) is unaffected",
+    "note": "the same overstatement had already been partially corrected inside the test message before delivery ('an order of magnitude'); this addendum makes the exact factor explicit and binding"
+  },
+  "correction_2_test_digest": {
+    "where": "probe receipt code_digests['test_v26b_s1c0_probe.py']",
+    "value_in_the_receipt": null,
+    "why_null": "the receipt was written by the probe execution, which preceded the creation of the test file; the field was therefore legitimately null at write time",
+    "final_test_digest": "dc8486aae5acf8664f8f4353d203b679cd296cc799fdac15790b3f9e9cc2e912",
+    "final_test_path": "Trajectory Generator/baseline_MLP/validation/v26b_bridge_2026-08-24/test_v26b_s1c0_probe.py",
+    "test_result_of_record": "PASS, 40 checks",
+    "rule": "the receipt keeps null and is NOT rewritten; this addendum is the authoritative record of the final test digest"
+  },
+  "unchanged": [
+    "the REACHABLE verdict and its scope limit",
+    "every measured number",
+    "every threshold",
+    "the reconstructed production chain",
+    "A2 stays NON-DEPLOYABLE",
+    "sigma stays UNRESOLVED",
+    "case (c): the B3 phase field is identically zero and G5 remains a separate open blocker"
+  ]
+}

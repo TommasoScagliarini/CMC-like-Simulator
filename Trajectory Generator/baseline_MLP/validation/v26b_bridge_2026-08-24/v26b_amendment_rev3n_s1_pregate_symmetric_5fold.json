@@ -1,0 +1,100 @@
+{
+  "amendment_id": "rev3n_s1_pregate_symmetric_5fold_median",
+  "date": "2026-08-24",
+  "token": "V26B-S1-REV3N-PREREG-MEDIAN (explicitly NOT V26B-S1-FIT)",
+  "authorized_by": "architect decision 2026-08-24: approves the symmetric blocked 5-fold kNN5 instrument with embargo 10 and PRIMARY gate = median of the 5 folds <= 0.15 per joint; threshold/metric/labels unchanged; the original FAIL receipt is preserved as evidence, superseded ONLY as pre-gate instrument",
+  "kind": "ADDITIVE; supersedes ONLY the pre-gate INSTRUMENT definition of rev3l (single hold window 201-300). rev3l (7545201d...) and rev3m (8af3ad65...) remain immutable and are NOT modified",
+  "parents_immutable": {
+    "rev3l": "7545201df4e5aefb4fdccca9efc1425a9a4dde581a4c20269c0d3fd86aa794d5",
+    "rev3m": "8af3ad654e49e19f5a6d2dbcf128faf5ce424206a5def715d177f7fbda93e0c0",
+    "rev3k": "8f34c95ee7c69029e0d3e8715f3e62fe9652533a03e0dd4b8fb7b38114377437",
+    "s0d_base": {
+      "rollout_receipt": "cbec1a671b7cdf2980881ec4ca33f69534e66d94cbbfa86c7b9cd9c1a39412b7",
+      "actor": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+      "module_state": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597"
+    },
+    "nominal_ik_cache_ab06": "3dd878d4d6d2930d730c1a67f39d6799f20221e7659a435c02d062bfd553d9b0"
+  },
+  "preserved_evidence": {
+    "original_pregate_receipt_sha256": "a437f1ef0d7762db5914d14be19b390ddc6ada9a126d9db2ef8f810d08a43389",
+    "status": "IMMUTABLE EVIDENCE, PRESERVED; superseded ONLY as pre-gate instrument (single-window). Its numbers remain valid and MUST be reproduced bit-exact by fold 3 of this amendment ([201,300] = the original hold window): [0.15220686466232133, 0.10626628039651334]",
+    "original_log_sha256": "c8fc0e9c478210aebd47399a1817a3c17ef79aeb7c9dc0e8aff7ca14373991fb",
+    "original_report_sha256": "74ed4341ccb6302a2ce09a496f281da06d5ab78c74f2e9777bb16b469a1432df",
+    "byte_reproducibility_requirement": "v26b_s1_prereg.py (858037282a7928e79b664419f7d47302dfd7703beb68db5e95f74d1f32ac25a0) and test_v26b_s1_prereg.py (1074e70f8003501ea68acebf0fed0bb23d9b237ea831d92568e815edba4fa40c) are NOT modified by rev3n; the rev3n instrument lives in a separate additive module, so the FAIL receipt stays fully byte-reproducible (verified fail-closed at every rev3n execution)"
+  },
+  "diagnostic_basis": {
+    "diag_module_sha256": "a90a6b1f27de4ea7b225f8701d89bcc912555e37b5226a92bba275d5e63bd735",
+    "diag_json_sha256": "f20986466743a3436e03a363556fabbb95c1cf43a6afa3fed0120835269a852d",
+    "diag_report_sha256": "9b40f32f2677e529e33528dc784f7a8f90008c055a24d669ff6206e3d85a0dbe",
+    "facts": {
+      "window_sweep_401_windows_knee_median": 0.1463080144578592,
+      "fraction_of_windows_that_would_fail_0p15_knee": 0.4513715710723192,
+      "own_label_baseline_knee_median": 0.1474848729332921,
+      "own_label_baseline_ankle_median": 0.19958572736193322,
+      "own_label_ankle_fraction_gt_0p15": 0.9825436408977556,
+      "corr_error_vs_nn_distance": -0.06790527292783057,
+      "corr_error_vs_local_uik_slope": 0.6864827675708891,
+      "density_curve": "knee RMSE ~0.144-0.152 flat from 95 to 380 train rows (aliasing plateau, not coverage)",
+      "interpretation": "the single-window outcome sits inside the instrument noise band; the same instrument would not certify S0D's OWN (rollout-certified) actions. The FAIL was an instrument-resolution artifact, not evidence that u_IK is unlearnable"
+    }
+  },
+  "instrument_rev3n": {
+    "estimator": "kNN k=5, mean of the 5 nearest neighbours in standardized 35D state space (UNCHANGED from rev3l)",
+    "labels": "u_IK AB06 from the pinned nominal cache (UNCHANGED)",
+    "standardization": "train-only mean/std per fold; features constant on that fold's train set excluded and RECORDED (UNCHANGED rule)",
+    "threshold_per_joint": 0.15,
+    "threshold_provenance": "reused rev3b R0a gate; NOT relaxed, NOT re-tuned",
+    "folds": [
+      [
+        1,
+        100
+      ],
+      [
+        101,
+        200
+      ],
+      [
+        201,
+        300
+      ],
+      [
+        301,
+        400
+      ],
+      [
+        401,
+        500
+      ]
+    ],
+    "embargo_steps": 10,
+    "free_parameters": "ZERO: the 5 contiguous equal blocks are fixed by the geometry (500 rows / 100-row hold); no fold position was chosen after seeing any error",
+    "primary_metric": "MEDIAN of the 5 per-fold RMSE, per joint",
+    "pass_rule": "PASS iff median <= 0.15 for BOTH joints (knee and ankle)",
+    "always_reported_non_binding": [
+      "all 5 per-fold RMSE per joint",
+      "max, mean, count of folds <= 0.15",
+      "own-label (S0D actions) kNN baseline per fold",
+      "per-fold excluded constant features",
+      "per-fold train row counts"
+    ],
+    "single_execution": "the rev3n pre-gate is executed EXACTLY ONCE under this token; no retry, artifacts preserved regardless of outcome"
+  },
+  "future_postfit_gates_binding_when_V26B_S1_FIT_is_granted": {
+    "G_task_blocked_holdout": "the ORIGINAL blocked holdout steps 201-300 remains a SEPARATE post-fit gate: RMSE vs u_IK <= 0.15 per joint, computed strictly OUT-OF-SAMPLE. The fit MUST exclude rows 201-300 AND the embargo rows (191-200, 301-310) from its training set; it must NEVER become an in-sample metric",
+    "full_500_metrics": "DIAGNOSTIC only, never a gate",
+    "Q1_source_holdout_rev3m": "BINDING <= 0.10 per joint on the rev3m source holdout (rev3k provenance-held rows, 4480 minus the 6 bitwise-shared rows excluded = 4474 usable; labels = S0D deterministic mean same-state)",
+    "parameter_anchor": "July 1e-5 * mean over the 6 FULL tensors towards theta_S0D (rev3m (a), unchanged)",
+    "function_preservation_T1_T2": "scaling/export equivalence only (<= 1e-5), never a behaviour gate (rev3m (b), unchanged)",
+    "drift_vs_S0D_on_task_rows": "DIAGNOSTIC only, expected magnitude ~0.38 (frozen structural gap); never a gate (rev3m, unchanged)",
+    "init": "exclusively S0D 481dd0d2... (rev3l, unchanged)"
+  },
+  "prohibitions_under_this_token": [
+    "no fit",
+    "no export",
+    "no rollout",
+    "no threshold/metric/label change",
+    "no modification of rev3l/rev3m/receipts/logs/reports already frozen",
+    "no DAgger, no multistart, no sigma sweep, no critic",
+    "V26B-S1-FIT remains NOT granted"
+  ]
+}

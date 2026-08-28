@@ -1,0 +1,167 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j9_technical_failure_2026-08-26",
+  "kind": "ADDITIVE, IMMUTABLE, FORENSIC RECORD",
+  "stage_attempted": "V26C-J9-CLOSED-LOOP-QUALIFICATION",
+  "date_utc": "2026-08-26",
+  "status": "TECHNICAL FAILURE. No behavioural verdict was RETURNED, OBSERVED, PERSISTED or VALIDATABLE, and no inference is admissible.",
+  "record_role": {
+    "forensic_only": true,
+    "never_a_parent": true,
+    "never_data": true,
+    "never_a_gate_input": true,
+    "note": "this record exists so the single consumed attempt is auditable. Nothing in it qualifies, disqualifies or describes the J8 actor's behaviour."
+  },
+  "authorization_consumed": {
+    "file": "v26c_j9_closed_loop_authorization.json",
+    "sha256": "ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597",
+    "status": "SPENT against this technical failure",
+    "single_execution_honoured": true,
+    "retry": "NONE. The runner did not retry and no second invocation was made.",
+    "reusable": false
+  },
+  "frozen_command_executed": {
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "argv": [
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j9_closed_loop.py",
+      "--run",
+      "--authorized-stage",
+      "V26C-J9-CLOSED-LOOP-QUALIFICATION",
+      "--out",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j9_runs/j9_closed_loop_v26c_2026-08-26_r1"
+    ],
+    "flags_added_or_removed": "NONE. The command was invoked exactly as authorised.",
+    "exit_code": 1
+  },
+  "what_happened": {
+    "cell_A": "COMPLETED all 500 steps and closed cleanly. The last progress record is {\"cell\": \"A\", \"step\": 500}.",
+    "cells_B_to_F": "NEVER STARTED. The matrix raised before cell B was constructed.",
+    "cells_started": 1,
+    "cells_whose_verdict_was_returned_logged_or_committed": 0,
+    "in_memory_evaluation_precision": {
+      "what_the_code_did": "in run_cell the per-cell summary, penetration report, gate, telemetry integrity and cell verdict for A ARE computed in memory BEFORE the sim_outputs check at v26c_j9_closed_loop.py:916-917. So the code did evaluate them.",
+      "what_the_exception_prevented": "the raise aborted run_cell before it returned, so those values were never returned to run_matrix, never logged, never aggregated and never committed. They exist in no artefact and are IRRECOVERABLE.",
+      "therefore": "no behavioural verdict for cell A was RETURNED, OBSERVED, PERSISTED or VALIDATABLE. It is not correct to say the code 'never reached' a verdict; it is correct to say no verdict survives, none can be inspected, and NO INFERENCE from it is admissible.",
+      "aggregate": "the matrix aggregate was never computed at all: run_matrix requires all six cell results and received none."
+    },
+    "behavioural_fail_fast": "NOT involved. This was not a behavioural FAIL; the no-fail-fast policy was never exercised.",
+    "exception": "__main__.J9Error: cell A: production sim_outputs are missing at .../j9_runs/.staging_j9_closed_loop_v26c_2026-08-26_r1/j9_cell_A_sim_outputs",
+    "raise_site": "v26c_j9_closed_loop.py:917, inside run_cell, after the step loop and after env.close()",
+    "traceback_chain": [
+      "v26c_j9_closed_loop.py:1127 sys.exit(main())",
+      "v26c_j9_closed_loop.py:1116 main -> run_matrix",
+      "v26c_j9_closed_loop.py:1013 run_matrix -> run_cell",
+      "v26c_j9_closed_loop.py:917 run_cell -> raise J9Error"
+    ]
+  },
+  "confirmed_root_cause": {
+    "summary": "the J9 runner configured the environment with recording DISABLED and then required the recorded output. The contradiction is entirely internal to the J9 runner; the environment behaved exactly as configured.",
+    "deterministic": "yes. It would fail identically on every cell and every run; it is not flaky and not environment-dependent.",
+    "chain": [
+      {
+        "file": "v26c_j1_collect.py",
+        "lines": "325-330",
+        "fact": "the hardened builder makes recording conditional on its output_dir argument: record_outputs = bool(output_dir is not None); save_outputs_on_close = bool(output_dir is not None); and only inside `if output_dir is not None:` does it set output_dir = <root>/sim_outputs and output_prefix = 'j1_teacher_episode'."
+      },
+      {
+        "file": "v26c_j9_closed_loop.py",
+        "lines": "354, 499, 974",
+        "fact": "base_env_config forwards that argument, and BOTH call sites - the preflight at 499 and run_matrix at 974 - pass output_dir=None. The base therefore carried record_outputs False, save_outputs_on_close False, and no output_dir or output_prefix key at all."
+      },
+      {
+        "file": "v26c_j9_closed_loop.py",
+        "lines": "369, 383",
+        "fact": "cell_env_config added back only env['output_dir'], leaving both flags False. The subset guard at 383 permits adding nothing but output_dir, so output_prefix could not be restored either."
+      },
+      {
+        "file": "osim_trj_cmc_like.py",
+        "lines": "2048-2053",
+        "fact": "close() calls self.runner.save_results() ONLY IF record_outputs AND save_outputs_on_close AND runner is not None. Both conjuncts were False, so save_results() was never called."
+      },
+      {
+        "file": "osim_trj_cmc_like.py",
+        "lines": "2073-2074, 2202-2214",
+        "fact": "with record_outputs False the env calls _disable_output_files(cfg), which clears every save_* flag on the simulator config."
+      },
+      {
+        "file": "osim_trj_cmc_like.py",
+        "lines": "1855, 2574",
+        "fact": "the stepper receives record=self.env_cfg.record_outputs (False), and reset_outputs() is skipped, so no sample was ever buffered."
+      },
+      {
+        "file": "v26c_j9_closed_loop.py",
+        "lines": "916-917",
+        "fact": "the runner then required a non-empty per-cell sim_outputs directory that nothing had been asked to write, and raised."
+      }
+    ],
+    "counter_evidence_that_the_pattern_works": "j3_runs/j3_base_v26c_2026-08-26_r1/sim_outputs contains 19 files, because J3 called the same builder with a real output_dir. J1, J3, J5 and J6 all ran with record_outputs True; J9 was the anomaly.",
+    "responsibility": "a defect in the J9 runner authored for this stage, not in the environment, the builder, the actor or any production source."
+  },
+  "concurrent_findings_not_causal": {
+    "path_convention": "J1 writes <leaf>/sim_outputs; J9 pointed output_dir directly at <staging>/j9_cell_<ID>_sim_outputs. A divergence, not the cause.",
+    "output_prefix": "never set, so the environment default 'rl_episode' (osim_trj_cmc_like.py:285) would have applied. Not the cause.",
+    "directory_existence": "it cannot be determined post hoc whether the directory existed but was empty or was never created, because the staging was correctly removed. Both branches fail identically."
+  },
+  "non_causal_warnings_observed": {
+    "scipy_slsqp": "RuntimeWarning: Values in x were outside bounds during a minimize step, clipping to bounds - benign, emitted by the static-optimisation solver. Fatal only under -W error, which was NOT used.",
+    "rllib": "DeprecationWarning on RLModule(config=...) - benign.",
+    "neither_is_causal": true
+  },
+  "post_failure_state_measured": {
+    "leaf": "ABSENT - nothing was committed",
+    "staging": "ABSENT - the exact staging directory the run created was removed",
+    "lock": "ABSENT - released by the run that owned it",
+    "j9_runs_parent": "ABSENT - it was empty, so the non-recursive rmdir removed it",
+    "concurrent_content_destroyed": "NONE",
+    "receipt": "NONE - no receipt exists for this attempt",
+    "behavioural_verdict": "NONE SURVIVES. Cell A's verdict was computed in memory but never returned, logged, persisted or validated, and is irrecoverable; the matrix aggregate was never computed. Nothing may be inferred from either.",
+    "fail_closed_behaved_as_designed": true
+  },
+  "j8_actor_integrity": {
+    "module_state_sha256": "9c5b157156e6b9c2a69a16f14908d6750ac6acdad95516eba9ac9378912dbc82",
+    "byte_identical_after_the_attempt": true,
+    "leaf": "j8_runs/j8_recovery_fit_v26c_2026-08-26_r1",
+    "note": "the actor was loaded read-only and is unchanged"
+  },
+  "j9_artefacts_at_time_of_attempt_sha256": {
+    "v26c_j9_prereg_closed_loop.json": "e6a6888a473d5ef76b1f009037f7825995fd62b35cc51749dfe41ad7f718c44a",
+    "v26c_j9_closed_loop.py": "8b6c36db2fd9bd63bde41d9903d4e1eb1d1e312b8cbf790e9bf1ea5b4875ac67",
+    "test_v26c_j9_closed_loop.py": "c30a1ff40d1f3aeefdb1e02210ecf6e2a04d7749448a7592cba212e8b47d867f",
+    "v26c_j9_closed_loop_authorization.json": "ff789766cb27798b659f7922ea2d88a0f49f112bb054634c6258a9dd49639597",
+    "unchanged_by_the_attempt": true,
+    "not_edited_by_this_record": "these four artefacts are IMMUTABLE and are not modified. The correction lives in a separate additive J9R1 layer."
+  },
+  "preserved_logs": {
+    "directory": "j9_technical_failure_2026-08-26",
+    "copied_verbatim_from": "the session-temporary scratchpad of the executing session, before it could be cleared",
+    "files": {
+      "j9_run.out": {
+        "sha256": "adb7fd4c65fa24cf876101b92de73e779370970eaeceb13c3f1674ee4da7b5ef",
+        "bytes": 5955,
+        "content": "the runner's stdout: environment build log and the per-cell progress records for cell A through step 500"
+      },
+      "j9_run.err": {
+        "sha256": "51ffda559e29f6efdfbf7359e84a7297d1560625e8444be540040c81eb8eeb1a",
+        "bytes": 2179,
+        "content": "the runner's stderr: the scipy and RLlib warnings and the full J9Error traceback"
+      },
+      "j9_run.exit": {
+        "sha256": "d01f9a6087a5da5cdae0bd0314d8ba9a4e8546b0f4cb2a5424bc09487e8c6d26",
+        "bytes": 14,
+        "content": "the recorded exit code line: EXIT CODE = 1"
+      }
+    }
+  },
+  "what_may_not_be_concluded": [
+    "nothing about the J8 actor's closed-loop behaviour. Cell A's in-memory verdict did not survive the exception and no inference from it is admissible.",
+    "nothing about any gate, penetration band, kinematic criterion or telemetry invariant",
+    "nothing about the reachability of the -0.20 s and +0.20 s starts",
+    "no comparison with July or with any V26C stage"
+  ],
+  "successor": {
+    "stage": "V26C_J9R1_CLOSED_LOOP",
+    "relationship": "an ADDITIVE corrected layer, not a retry of this attempt",
+    "requires": "a fresh user authorisation. The consumed authorisation above is not reusable."
+  }
+}

@@ -1,0 +1,581 @@
+{
+  "protocol_id": "F2R-S0-bridge-rev3",
+  "title": "F2R - bridge teacher-student causale (student 35D deployable, teacher privilegiato A_iso6clk), protocollo rev3 preregistrato",
+  "date": "2026-08-23",
+  "source": "reports/user/2026-08-23_f1_s1_protocollo_tooling_dryrun.md section 13 (revision 3, architect PASS)",
+  "stage_authorised": "S0 only: tooling + synthetic tests + dry-run (no rollout, no env stepping, no real P0, no real refit, no training, no production change)",
+  "runtime": {
+    "target": "v3_canonical",
+    "config": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db"
+  },
+  "starts": {
+    "minus020": 1.756870983805102,
+    "nominal": 1.956870983805102,
+    "plus020": 2.156870983805102
+  },
+  "seeds": {
+    "det_training_side": 123,
+    "collection_stochastic": [
+      123,
+      124
+    ],
+    "validation_held_out_promotion_gate": 125,
+    "sealed_test_f3_only": [
+      126,
+      127,
+      128
+    ],
+    "rules": [
+      "seed 125: never in any dataset, label, fit, aggregation, batch selection or tuning; used only as go/no-go promotion gate V; its traces generate no labels/datasets",
+      "seeds 126-128: sealed until F3, opened once",
+      "deterministic rollouts (seed 123) are training side: gate measurement A/B/C and, when preregistered, aggregation; they are not validation"
+    ]
+  },
+  "actors": {
+    "init_primary": {
+      "name": "JUL_H0",
+      "actor_digest": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+      "module_state_sha256": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b",
+      "immutable": true,
+      "structure": {
+        "keys": 10,
+        "pi.0.0.weight": [
+          256,
+          35
+        ],
+        "pi.0.2.weight": [
+          256,
+          256
+        ],
+        "pi.1.weight": [
+          4,
+          256
+        ],
+        "clock_columns_zero": true,
+        "log_std": "constant sigma 0.005"
+      }
+    },
+    "negative_control": {
+      "name": "B0820_H0",
+      "actor_digest": "ce46f729080b069274f6f69a504dfedc92440584f4e4eb6281bdcc153c3a193a",
+      "never_init": true
+    },
+    "teacher": {
+      "name": "V26_39D",
+      "actor_digest": "5bbc6cbd3c7e3ec37524b7b6b69ca017af48057cac5207cf755d3b2f72c2709e",
+      "fed_with": "4 prescribed targets at 2:6 + prescribed right clock at 0:2 (= A_iso6clk)",
+      "evaluation": "offline numpy float64 forward on the student's visited obs35 (float32-cast), torch-path deviation <= 1e-5 verified in F1"
+    }
+  },
+  "anchors": {
+    "policy": "only the three existing A_iso6clk traces (F1 aiso_clk_diag), content-addressed; no new stochastic teacher rollouts before tooling, P0 and T1 commissioning are audited",
+    "trace_sha256": {
+      "minus020": "05de8103802af4363c12dcd3ee56b87cc1c3a3954640156a68b5d7d83141f79a",
+      "nominal": "3a66d1098a553a1680dff028413f4eb27697d81c64cf8c15193e3937e41b0fed",
+      "plus020": "5375547a9211e9fce2341feb8c7d57d82b689d25de26147bc49945999b20ad68"
+    },
+    "adapter_trace_sha256": {
+      "minus020": "cf1691a286e58674ed4b085a24993b038a133644ba00f960a36e628cc87f6075",
+      "nominal": "419581fd745f626371f87efc6ad92e19f7c9d52ce5ed9c800d1c574830f2eaea",
+      "plus020": "ffa8d670a0b561fd2983a3b9b0d66da8042eedb8e6bed3bf3aed7bcad1d65476"
+    },
+    "rows": 1500
+  },
+  "action_semantics": {
+    "mode": "absolute",
+    "policy_knots": 1,
+    "bounds_rad": {
+      "pros_knee_angle": [
+        -1.5,
+        0.0
+      ],
+      "pros_ankle_angle": [
+        -0.7,
+        0.7
+      ]
+    },
+    "decode": "q_j = low_j + 0.5*(a_j + 1)*(high_j - low_j) per joint (knee q = 0.75 a - 0.75; ankle q = 0.7 a); clip a to [-1,1]; knee flexion negative; ankle negative = plantarflexion",
+    "encode": "a_j = 2 (q_j - low_j)/(high_j - low_j) - 1, clipped to [-1, 1] (target_domain_imitation.encode_absolute_action)",
+    "slew": "per component, 2.5 rad/s knee and 2.0 rad/s ankle relative to the previous policy endpoint (feature 25/30), dt 0.01 s",
+    "ik_teacher": "u_IK(t) = encode(q_IK(t + 0.01 s + lookahead)), lookahead 0.0 s (July teacher_summary), q_IK = prescribed prosthetic IK (base_kin, 6 Hz low-pass)",
+    "composition": "per-joint composition of absolute position targets is well posed at command level (component-wise decode/clip/slew); behavioural equivalence is NOT assumed: T2 needs its own closed-loop gates"
+  },
+  "variants": {
+    "T1": {
+      "role": "commissioning",
+      "label": "u_T both joints",
+      "rounds": 1,
+      "rollouts": "3 det seed 123",
+      "stop": "always (structural inability on B3)",
+      "consumes_T2_budget": false
+    },
+    "T1R": {
+      "role": "corrective commissioning (architect decision 2026-08-23, report sections 14.15-14.16): one corrective refit + 3 deterministic rollouts + gate A; B/C informative; STOP always; unlocks T2 only on A PASS",
+      "label": "knee = u_T, ankle = u_IK (task role); preservation role target = recorded JUL_H0 action (never u_T)",
+      "init": "JUL_H0 (theta_0, actor digest a0801a9e…), never the T1 student",
+      "rounds": 1,
+      "max_rounds": 1,
+      "consumes_T2_budget": false,
+      "stop": "always (commissioning): no dataset aggregation, no promotion in the T2 sense, no T3 trigger",
+      "dataset": {
+        "task": "3 pinned A_iso6clk anchors (purpose anchor, seed 123) + on-policy states of the 3 pinned T1 deterministic rollouts (purpose det, seed 123), labels knee u_T / ankle u_IK with exact t_pre lookup on the privileged caches",
+        "preservation": "the 3 pinned JUL_H0 deterministic F0 jobs (seed 123), target = recorded raw_policy_action (deterministic mean), separated from the task labels",
+        "dedup": "within role by bitwise input (first kept; identical inputs with different targets -> fail closed); cross-role: the 3 reset-row collisions (one per start, t_pre == reset time, step 1) are removed from the task role and preservation wins; each collision reported with input sha256, both targets and their delta",
+        "expected_counts": {
+          "task_rows": 2994,
+          "preservation_rows": 1176,
+          "cross_role_collisions": 3,
+          "task_within_role_duplicates": 3,
+          "preservation_within_role_duplicates": 0
+        },
+        "seeds": "123 only; 124 unused (no stochastic rollouts exist); 125 and 126-128 never"
+      },
+      "loss": "L = mean_j E_task[(m_j - y_j)^2]/Var_task_j + beta * mean_j E_pres[(m_j - a_j)^2]/Var_pres_j + lambda_phi*L_aux + lambda_clip*clip + lambda_a*||theta - theta_0||^2; per-joint variances fixed a priori from the training rows; L_task and L_pres are per-role per-joint means (group-balanced, not row-count weighted); masks separate the roles",
+      "beta": 1.0,
+      "beta_rationale": "equal weight of the two dimensionless (1 - R^2 like) terms, chosen a priori; sensitivities 0.5/2 reported descriptively only, no adaptive sweep on the gate",
+      "budget": "frozen refit_budget (300 epochs, batch 256, Adam lr 1e-4, seed 2026, clip_weight 1.0, lambda_phi 0.1, lambda_anchor 1e-3 kept for continuity)",
+      "criteria": {
+        "P1_preservation_rmse_max_per_joint": 0.1,
+        "P2_ankle_rmse_max_anchors": 0.1,
+        "P2_ankle_rmse_max_t1_states": 0.15,
+        "P3_knee_rmse_max_anchors": 0.5,
+        "P3b_knee_rmse_max_t1_states": 0.75,
+        "P4_invariants": [
+          "clock_columns_zero",
+          "logstd_constant",
+          "ten_keys",
+          "save_reload_exact",
+          "clock_invariance_bit_identical"
+        ],
+        "P5_parameter_shift": "informational",
+        "rule": "P1, P2, P3, P3b and P4 all mandatory; any FAIL -> no export, no rollout"
+      },
+      "rollouts": "exactly 3 deterministic seed-123 rollouts (STUDENT_T1R_r1__v3_canonical__<start>__det), GATE-ONLY: enters_dataset false, generates_labels false, never aggregated; no stochastic, no seed 125",
+      "gate": "A (hard, A6 with the unwrapped estimator); B and C computed as informative; V/R NOT_EVALUATED; unlock_t2 = A.pass; promotion never; t3_trigger never",
+      "unlock_rule": "T2 round 1 may start from the T1R student ONLY behind a verified T1R gate artefact with A PASS (exactly one gate_T1R_round_1_*.json, records' trace digests = disk, receipts ok/seed 123/det referencing the T1R module digest); otherwise T2 round 1 is locked (fail-closed, no fallback)",
+      "attempts": {
+        "orchestration_attempt_1": {
+          "tag": "20260823_185113",
+          "utc": "2026-08-23T16:51:11Z",
+          "outcome": "aborted in driver preflight (fail-closed), zero rollouts, no simulation process",
+          "counts_as_closed_loop_attempt": false
+        },
+        "closed_loop_rollout_attempt": {
+          "rule": "the next matrix --execute --phase T1R --round 1 after the architect's audit is the FIRST AND ONLY closed-loop rollout attempt of T1R (3 det seed-123 gate-only rollouts); no retry",
+          "executed": false
+        }
+      }
+    },
+    "T2": {
+      "role": "primary",
+      "label": "knee = u_T, ankle = u_IK",
+      "max_rounds": 4,
+      "rollouts_per_round": {
+        "det_123": 3,
+        "stoch_123_124": 6,
+        "stoch_125_gate": 3
+      }
+    },
+    "T3": {
+      "role": "contingency",
+      "label": "u_IK both joints",
+      "max_rounds": 2,
+      "trigger": "T2 passes A and fails B3, or preregistered equivalent diagnosis: B2 and/or B5 FAIL with A PASS",
+      "tuning": "none"
+    }
+  },
+  "student": {
+    "contract": "35D deployable MLP 35-256-256-2(+2 logstd), tanh",
+    "hard_constraints": [
+      "W1[:,0:2] == 0 after every optimiser step and at export",
+      "pi.1 log-std rows == 0, bias == float32(ln 0.005)",
+      "no prescribed clock/targets/time/index in the input"
+    ],
+    "aux_head": {
+      "training_time_only": true,
+      "target": "c(t) prescribed (sin, cos)",
+      "exported": false
+    },
+    "export": {
+      "keys_exactly": [
+        "pi_encoder.0.weight",
+        "pi_encoder.0.bias",
+        "pi_encoder.2.weight",
+        "pi_encoder.2.bias",
+        "pi.0.0.weight",
+        "pi.0.0.bias",
+        "pi.0.2.weight",
+        "pi.0.2.bias",
+        "pi.1.weight",
+        "pi.1.bias"
+      ],
+      "save_reload_bit_exact": true,
+      "invariance_test": "mu(x) bit-identical under perturbation of indices 0:2"
+    }
+  },
+  "refit_budget": {
+    "epochs": 300,
+    "batch_size": 256,
+    "lr": 0.0001,
+    "optimizer": "Adam",
+    "seed": 2026,
+    "clip_weight": 1.0,
+    "lambda_phi": 0.1,
+    "lambda_anchor": 0.001,
+    "selection": "closed_loop_only",
+    "loss": "mean||mu - u*||^2 + clip_weight*mean relu(|mu|-1)^2 + lambda_phi*mean||h - c(t)||^2 + lambda_anchor*||theta - theta_{r-1}||^2"
+  },
+  "dataset": {
+    "D1": "anchors only (1500 A_iso6clk rows)",
+    "D_next": "D_r union labelled rows of the student's seed-123 det and seed-123/124 stochastic rollouts of round r; seed 125 never",
+    "t_pre": "[reset_time] + time[:-1] exact env floats",
+    "labels": "actions only (no feature leakage); obs35 float32-cast",
+    "dedup": "(job_id, step)",
+    "balance": "per start, declared",
+    "T1R": "two roles (task / preservation) as in variants.T1R.dataset; never aggregated into D_r of T2"
+  },
+  "p0": {
+    "data": "JUL_H0 deterministic F0 jobs under v3 (3 starts) = test states; anchors A_iso6clk (3 starts) fixed in train",
+    "folds": "LOSO over the 3 JUL_H0 starts: train = the OTHER two JUL_H0 starts + the 3 anchors MINUS exactly one row, the same-start anchor reset row (amendment B, see amendment_B_reset_row); test = the held-out JUL_H0 start only, FULL (reset row included); standardisation fitted on train only; no held-out row anywhere in train/standardisation/selection (strict bitwise row assert applied after the exclusion)",
+    "amendment_B_reset_row": {
+      "adopted": "2026-08-23",
+      "decision": "architect, option B (scientific: the reset state is relevant to the online bootstrap problem and must remain in TEST)",
+      "timing": "pre-metric: adopted after the first real P0 attempt (2026-08-23T15:02:11Z) failed closed at the leakage assert in the first fold BEFORE any estimator was fitted or any metric computed; no P0 artefact was produced",
+      "evidence": "read-only diagnosis: in every fold exactly one bitwise collision = row 0 (first pre-action observation, t_pre == reset time) of the held-out JUL_H0 start vs row 0 of the same-start A_iso6clk anchor; the env reset is policy-independent (reset diagnostics SHA equal: 42d07621…, 3d3b8dfa…, 614e0e5c…); rows diverge from index 1; no other duplicate within or across trajectories",
+      "rule": "in each LOSO fold, TRAIN excludes exactly one row: index 0 of the anchor of the held-out start; TEST is unchanged (500/500/176 rows, reset row included); the other two JUL_H0 starts and the remaining 1499 anchor rows are retained",
+      "excluded_row": {
+        "set": "train",
+        "source": "anchor of the held-out start",
+        "index": 0,
+        "definition": "first pre-action observation with t_pre == reset time of the held-out start, bitwise identical to held-out test row 0"
+      },
+      "test_rows_excluded": 0,
+      "train_anchor_reset_rows_excluded_per_fold": 1,
+      "anchor_rows_retained_per_fold": 1499,
+      "structural_validation_fail_closed": [
+        "time provenance (t_pre, reset_time) present on the held-out test and the same-start anchor",
+        "t_pre[0] == reset_time on both and equal across the two",
+        "anchor row 0 bitwise identical to held-out test row 0 (missing expected reset duplicate -> fail)",
+        "anchor row 0 unique within the anchor and test row 0 unique within the test set (ambiguity -> fail)",
+        "exactly one full-row collision before the exclusion",
+        "after the exclusion: no held-out row bitwise present in train (full rows and selected columns); any additional or non-reset duplicate -> fail"
+      ],
+      "provenance_per_fold": [
+        "test_rows_excluded",
+        "train_anchor_reset_rows_excluded",
+        "excluded start/index/t_pre/reset_time/reason",
+        "train_rows_before/after",
+        "collisions_before_rule/after_rule"
+      ],
+      "unchanged": [
+        "thresholds_frozen",
+        "estimators",
+        "seeds",
+        "refit_budget",
+        "label",
+        "variants",
+        "forbidden_inputs",
+        "test set size"
+      ]
+    },
+    "label": "c(t_pre) prescribed from the 125 right heel strikes (offset 0), computed offline; never a feature",
+    "forbidden_inputs": [
+      "time",
+      "step index",
+      "gait_phase_sin",
+      "gait_phase_cos"
+    ],
+    "variants": {
+      "pre_cycle": "online clock triplet (14,15,16) excluded",
+      "post_cycle": "triplet allowed, reported separately"
+    },
+    "estimators": {
+      "ridge": {
+        "lambda": 0.01,
+        "on": "standardised features"
+      },
+      "mlp": {
+        "hidden": [
+          64,
+          64
+        ],
+        "activation": "tanh",
+        "optimizer": "Adam",
+        "lr": 0.001,
+        "epochs": 200,
+        "seed": 2026
+      }
+    },
+    "metric": "circular error |phi_hat - phi| mod 1, phi_hat = atan2(sin, cos)/2pi",
+    "thresholds_frozen": {
+      "median_pre_cycle": 0.05,
+      "p90_pre_cycle": 0.2,
+      "rule": ">= 2 folds of 3 (MLP), fold +0.20 always reported, computed once with frozen hyperparameters"
+    },
+    "baselines_1nn_jul_states": {
+      "minus020": [
+        0.019,
+        0.145
+      ],
+      "nominal": [
+        0.046,
+        0.185
+      ],
+      "plus020": [
+        0.119,
+        0.174
+      ]
+    },
+    "fail_meaning": "stateless 35D contract insufficient -> architectural decision before any rollout",
+    "executed_in_S0": false
+  },
+  "gates": {
+    "aggregation_rule": "per start on the 3 deterministic rollouts (seed 123); phase-aligned metrics = median over that start's valid cycles; a start without valid cycles FAILS that metric; '2of3' or 'all3' as indicated",
+    "A": {
+      "A1_first_hs_delay_s": {
+        "min": 0.15,
+        "max": 2.0,
+        "rule": "all3"
+      },
+      "A2_cycles": {
+        "min_per_start": 1,
+        "min_two_starts": 2,
+        "rule": "all3_and_2of3"
+      },
+      "A3_hs_cancelled_max": {
+        "value": 0,
+        "resync_max": 1,
+        "rule": "all3"
+      },
+      "A4_horizon": {
+        "steps": 500,
+        "no_phase_timeout": true,
+        "rule": "all3"
+      },
+      "A5_online_clock_informative_within_s": {
+        "value": 3.5,
+        "rule": "all3"
+      },
+      "A6_online_period_s": {
+        "min": 1.45,
+        "max": 1.7,
+        "drift_max_cycle_per_s": 0.055,
+        "rule": "all3",
+        "drift_estimator": "unwrapped_circular_difference",
+        "amendment_A6_unwrap": {
+          "adopted": "2026-08-23",
+          "decision": "architect (authorised after the T1 commissioning audit)",
+          "rule": "drift = linear slope vs time of the UNWRAPPED circular difference ((prescribed - online + 0.5) mod 1) - 0.5, numpy.unwrap on 2*pi*diff / 2*pi, over the rows after the online clock became informative, excluding saturated (0,1) rows; threshold 0.055 cycle/s and the period band [1.45, 1.70] s unchanged; no other threshold changed",
+          "reason": "the offset between the online (prosthetic heel-strike) clock and the prescribed (sound-side) clock is physiologically ~0.42-0.48 cycle; when it crosses +-0.5 the centred difference flips sign mid-series and the fitted slope is inflated (T1 student minus020: +0.423 wrapped vs -0.063 unwrapped; JUL_H0 minus020: +0.450 vs -0.031); anchors unaffected (-0.019..-0.027 both ways)",
+          "evidence": "report section 14.13; T1 gate recomputed from the existing artefacts only (no rollout): verdict unchanged (A FAIL: A5 nominal; A6 periods 1.421/1.105 out of band, drift -0.063/+0.111 beyond 0.055)",
+          "fail_closed": "slope None (A6 FAIL) on fewer than 2 informative rows, degenerate time span or non-finite values; legacy wrapped slope kept in the record for audit only"
+        }
+      },
+      "A7_stance_fraction_min": {
+        "value": 0.3,
+        "rule": "all3"
+      }
+    },
+    "B": {
+      "B1_knee_rom_min_rad": {
+        "value": 0.6,
+        "rule": "all3"
+      },
+      "B2_knee_vs_corridor": {
+        "rmse_max_rad": 0.16,
+        "pearson_min": 0.85,
+        "rule": "2of3"
+      },
+      "B3_ankle_negative_window": {
+        "phase_window": [
+          0.55,
+          0.8
+        ],
+        "min_max_rad": -0.03,
+        "rule": "2of3"
+      },
+      "B4_ankle_rmse_max_rad": {
+        "value": 0.25,
+        "rule": "2of3"
+      },
+      "B5_stance_fraction": {
+        "min": 0.5,
+        "max": 0.75,
+        "rule": "2of3"
+      },
+      "B6_corridor_coverage": {
+        "settled_fraction_min": 0.6,
+        "dropped_fraction_max": 0.4,
+        "rule": "all3"
+      }
+    },
+    "C": {
+      "C1_penetration_max_m": {
+        "value": 0.02,
+        "rule": "all3"
+      },
+      "C2_no_grf_penetration_termination": {
+        "rule": "all3"
+      },
+      "C3_reserve_norm_max_nm_per_start": {
+        "value": 1000.0,
+        "rule": "all3",
+        "note": "per start, no global aggregate"
+      },
+      "C4_clipped_steps_max": {
+        "value": 30,
+        "rule": "all3"
+      },
+      "C5_action_abs_max": {
+        "value": 1.3,
+        "rule": "all3"
+      }
+    },
+    "V": {
+      "seed": 125,
+      "jobs": 3,
+      "rules": [
+        "horizon 500 at 3/3",
+        ">= 1 valid cycle at each start",
+        "no grf_penetration termination",
+        "C1-C3 satisfied on each job"
+      ],
+      "semantics": "held-out promotion gate: FAIL blocks promotion to R/F3; never used for fit/aggregation/batch selection/tuning; generates no labels/datasets"
+    },
+    "R": {
+      "jobs": 9,
+      "seeds": [
+        123,
+        124,
+        125
+      ],
+      "rules": [
+        "horizon >= 8/9",
+        ">= 1 valid cycle in >= 8/9",
+        "C1-C3 on each job"
+      ],
+      "note": "the 3 seed-125 jobs are those of V (no new 125 collection); only for a round that passed A, B, C and V"
+    },
+    "references_frozen_from": {
+      "corridor": "ab06_prosthetic_event_warped_mean_std_corridor.json (alpha 0.6223, ankle mean min -0.311 at 0.65, knee mean min -1.038 at 0.72)",
+      "JUL_H0_det_v3": {
+        "knee_rmse": [
+          0.116,
+          0.138
+        ],
+        "knee_r": [
+          0.871,
+          0.905
+        ],
+        "ankle_min_window": [
+          -0.047,
+          -0.051
+        ],
+        "stance_fraction": [
+          0.561,
+          0.62
+        ],
+        "penetration_mm": [
+          27.0,
+          28.0
+        ]
+      },
+      "teacher_A_iso6clk": {
+        "knee_rmse": [
+          0.272,
+          0.281
+        ],
+        "knee_r": [
+          0.333,
+          0.386
+        ],
+        "ankle_min_window": [
+          0.166,
+          0.186
+        ],
+        "stance_fraction": [
+          0.399,
+          0.413
+        ],
+        "penetration_mm": [
+          12.6,
+          16.2
+        ],
+        "reserve_nm": [
+          920,
+          931
+        ]
+      },
+      "A_native": {
+        "knee_r": [
+          0.428,
+          0.512
+        ],
+        "stance_fraction": [
+          0.37,
+          0.385
+        ],
+        "reserve_nm": [
+          934,
+          954
+        ]
+      }
+    }
+  },
+  "sequence_rev3": [
+    "S0: tooling + synthetic tests + dry-run manifest (no rollout) -> audit Codex",
+    "P0: offline observability on JUL_H0 states (LOSO without leakage) -> audit",
+    "T1 commissioning: refit from anchors + 3 det -> gate A -> STOP always -> audit",
+    "T1R corrective commissioning (architect decision 2026-08-23): one preserving refit from JUL_H0 -> 3 det seed-123 rollouts -> gate A (B/C informative) -> STOP/audit; T2 round 1 starts from the T1R student only behind a verified A PASS",
+    "T2 round r (<= 4): D_r -> refit theta_r -> rollouts 123 det / 123-124 stoch / 125 stoch -> gates det A -> B -> C -> gate V(125) -> if all PASS: promotion to R without aggregation; else aggregation of 123/124 only -> D_{r+1} -> audit per round",
+    "T3 (<= 2 rounds) only on the preregistered trigger, same sequence, no tuning",
+    "R (9 stochastic incl. the 3 V jobs) -> audit",
+    "F3 with sealed seeds 126-128 and critic warmup (F4) only afterwards; every FAIL stops fail-closed"
+  ],
+  "s0_forbidden": [
+    "rollout",
+    "env stepping/simulation",
+    "real P0",
+    "real refit",
+    "training",
+    "production modification",
+    "modification of F0/F1/dirty user files",
+    "new traces"
+  ],
+  "amendments": {
+    "T1R_corrective_commissioning": {
+      "adopted": "2026-08-23",
+      "status": "tooling implemented and tested; refit/rollouts NOT executed pending the architect's go",
+      "frozen_decisions": [
+        "init T1R = JUL_H0, not T1",
+        "task = anchors + T1 on-policy states seed 123; knee u_T, ankle u_IK",
+        "preservation = JUL_H0 states seed 123, recorded JUL action, never u_T",
+        "per-joint normalised loss, beta = 1, frozen budget",
+        "dedup within role, conflicts fail closed; 3 reset collisions removed from task, preservation wins, reported with input digest and target delta; group-balanced role masks",
+        "criteria P1-P5 with mandatory P3b <= 0.75; any FAIL blocks export/rollout",
+        "exactly 3 det seed-123 rollouts then gate A; B/C informative; STOP always; only A PASS unlocks T2; no aggregation",
+        "75 legacy jobs unchanged, +3 T1R jobs = 78",
+        "gates: T1R with V/R NOT_EVALUATED, unlock_t2 = A.pass, no promotion, no T3 trigger",
+        "full provenance pins (T1 receipts/traces, JUL jobs, caches, exact t_pre lookup, teacher route, hashes, counts 2994/1176, clock ABI, log_std, 10 keys, save/reload, clock invariance); no seed 125/126-128"
+      ]
+    },
+    "preflight_scoping": {
+      "adopted": "2026-08-23",
+      "decision": "architect (proposal A hybrid, fail-closed)",
+      "cause": "matrix --execute --phase T1R failed closed in preflight_all(described): the 3 valid T1 outputs (non-selected) were rejected only because their stored f2r_driver_inputs_digest (1d7d202b…) differs from the current one (d94faa95…) after audited tooling changes (A6-unwrap, T1R variant, pins); git_head had the same latent effect",
+      "semantics": [
+        "global preflight over every existing output keeps all archival-integrity / self-consistency checks (receipt schema f2r.1, F0 closure fields, status/rc, summary/trace SHA vs disk, command binding, job_inputs_digest, symlinks, RECEIPT_VERIFY_FIELDS except git_head)",
+        "current-revision equality (f2r_driver_inputs_digest, git_head) required ONLY for the selected jobs (relaunch candidates; verify_existing strict, run_job unchanged)",
+        "for non-selected outputs a revision mismatch is informative: listed in preflight.tooling_revision_differs (and in the launch status); receipts/outputs never rewritten",
+        "run_job / closure / pins / post-checks of the selected jobs unchanged and fail-closed",
+        "legacy job specs and commands byte-identical (fingerprints 86e27ef8… / 72bc9c57… pre and post)"
+      ],
+      "aborted_artefacts_kept": [
+        "rollouts/source_closure_manifest_20260823_185113.json",
+        "rollouts/f2r_job_matrix_execute_20260823_185113.json",
+        "rollouts/f2r_job_matrix_status_20260823_185113.json (status aborted, preflight error recorded)"
+      ]
+    }
+  }
+}

@@ -1,0 +1,702 @@
+{
+  "schema": "v26c_j5_revalidation.1",
+  "stage": "V26C-J5-REVALIDATION",
+  "verdict": "FAIL",
+  "verdict_kind": "FRESH DETERMINISTIC CLOSED-LOOP REVALIDATION",
+  "gate_pass": false,
+  "qualification_technically_valid": true,
+  "stack": {
+    "name": "production",
+    "operational": true,
+    "injected": false,
+    "note": "the production torch/RLlib/OpenSim stack"
+  },
+  "authorisation": {
+    "authorised_by": "THE USER, explicitly. The architect is gate owner and reviewer.",
+    "scope": "exactly one authorised r2 re-run",
+    "amendments": {
+      "j5_authorisation": {
+        "file": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j5_amendment_revalidation.json",
+        "sha256": "033061fdd2bc289cdcb431a0c0df04a036bd660e7bda9490ec17870947ebcec0"
+      },
+      "j5_r2_rerun": {
+        "file": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j5_amendment_r2_rerun.json",
+        "sha256": "246caf8f61f38cd7cb5640dbec601d355e02ee46cce2a95a63b0b7874f4d17d0"
+      }
+    },
+    "amendment_manifest_entries": 36,
+    "execution_requires": "--authorized-stage V26C-J5-REVALIDATION --out-dir <fresh leaf>",
+    "expected_leaf": "j5_revalidation_v26c_2026-08-26_r2",
+    "attempts_authorised": 1,
+    "production_command_forbids": [
+      "-W error"
+    ]
+  },
+  "attempt": "r2",
+  "r1_attempt_preserved": {
+    "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r1",
+    "files": 19,
+    "sha256": {
+      "sim_outputs/j1_teacher_episode_activations.sto": "4aad3a3b72d6175ef963682fba90ed3d33f8485ea232c1331af907258bd7602f",
+      "sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+      "sim_outputs/j1_teacher_episode_gait_events_online.csv": "41c81847dd75f354a8f0d4f4e157816b700968c46ff50dc3d5b763ba25fc9354",
+      "sim_outputs/j1_teacher_episode_kinematics.sto": "ed70177c8c81c631790f8c0663e5563402dcfa10d0d5d31cc54bbde90170c99c",
+      "sim_outputs/j1_teacher_episode_kinematics_reference.sto": "7a733bd8f1d5ee8582167b5963c74489444b83c0a77d2f05ee4ef46ce31187c3",
+      "sim_outputs/j1_teacher_episode_muscle_forces.sto": "1c82f852100594f70c111b924faa4462ddea01edb0c7349ffbf1ceedb3deb65f",
+      "sim_outputs/j1_teacher_episode_online_grf.sto": "baa8b332769e5a1bda820f0218b6a3c29c051ef062ce6ffdeb8dfdd65beb4a39",
+      "sim_outputs/j1_teacher_episode_power.sto": "e3bee3824dc0fa3e7944628d3fabb7eb3da9c9d16546ac7f8902f17ca85d53b1",
+      "sim_outputs/j1_teacher_episode_recruitment.sto": "4c5685224ec6c205db988c533e0426fa7957092a5ca662c685a7d749e369af26",
+      "sim_outputs/j1_teacher_episode_reserve_controls.sto": "98d43cd7c7d0b146f2e1d445313ba0bf796bbbca1146247aabf4f5c971fca08d",
+      "sim_outputs/j1_teacher_episode_reserve_torques.sto": "c1c75be293377a3d4e426d6831551a223fc2a6a94b040fbb4c6fcad240003227",
+      "sim_outputs/j1_teacher_episode_sea_controls.sto": "0a4a842cdfa5c7ea4523a0f5e8d7a4d06b20ae8b3e817ad91a75bec8eab62008",
+      "sim_outputs/j1_teacher_episode_sea_derivatives.sto": "3a525e464f326e34ec3e77f5c1177024cd5a8cc1b79bcb2cc4d0f99d116a5cc7",
+      "sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "86c2156960a0e2b4363b53315adfd9d24552e02126197fd95aa7d8fa360e961a",
+      "sim_outputs/j1_teacher_episode_sea_states.sto": "cd3349b9af40bb82691df1a252d131cefd0c8bfcfcf025f97ba0b30bc97189d2",
+      "sim_outputs/j1_teacher_episode_sea_torques.sto": "0695a1693f11e78121b7a4c2d6b562b32f712013bff26c7c6df3d38367d61715",
+      "sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "a2f55147fabec8b059fa8352bd3074f98b5dadb627ed1342438d07eb0fbffa15",
+      "sim_outputs/j1_teacher_episode_states.sto": "d94256ff12eb6297b7efc8383c2230899de1214e63f239a04182c9949c088c79",
+      "sim_outputs/j1_teacher_episode_tau_bio.sto": "88461deecf18a120f42f1d517b3ef8548b49c9107d1c46098c80e1442b3828c9"
+    },
+    "status": "TECHNICALLY INVALID - NO VERDICT",
+    "steps_completed": 0,
+    "cause": "a benign SciPy SLSQP RuntimeWarning promoted to a fatal exception by -W error, inside the FIRST env.step()",
+    "preserved_byte_for_byte": true,
+    "never_reused": "r1 is never read as evidence about the actor and never written to"
+  },
+  "warning_policy": {
+    "forbidden": [
+      "-W error"
+    ],
+    "sys_warnoptions": [],
+    "error_filter_active": false,
+    "why": "the production simulator legitimately emits SciPy RuntimeWarnings from the Static Optimization SLSQP fallback; promoting them to exceptions aborts a physically valid rollout, as the r1 attempt showed"
+  },
+  "output_isolation": {
+    "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs/j5_revalidation_v26c_2026-08-26_r2",
+    "injected_stack": false,
+    "production_leaf_enforced": true,
+    "intentional_exception": "the production leaf is the ONLY path allowed inside the repository, and it is matched by equality",
+    "protected_trees": {
+      "REPO": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+      "HERE": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26",
+      "J5_OUT_ROOT": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j5_runs",
+      "J1_RUN_ROOT": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j1_runs",
+      "J1_LEAF": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j1_runs/j1_nominal_v26c_2026-08-26_r1",
+      "J2_RUN_ROOT": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j2_runs",
+      "J3_RUN_ROOT": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j3_runs",
+      "J3_LEAF": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j3_runs/j3_base_v26c_2026-08-26_r1",
+      "J4_RUN_ROOT": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j4_runs",
+      "J4_LEAF": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j4_runs/j4_recovery_v26c_2026-08-26_r1",
+      "J4_MODULE": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module"
+    }
+  },
+  "inputs_sha256": {
+    "pinned_runtime_config": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+    "env_config": "6144698129fcdbd1d4c54469aecc5f9fe3e889ec7039decd6523f75cadea5854",
+    "j4_artefacts": {
+      "history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87",
+      "j4_fit_original.log": "88e9312626d23ce49685576e263df1b93c0f4f8d077415cc1d0bdaadb188dbcf",
+      "recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+      "rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+      "v26c_j4_recovery_receipt.json": "887f2b94e5a22a9c8013497164db090c2e910804730c5f3aa9c4f4d5f308c354"
+    },
+    "j5_amendment": "033061fdd2bc289cdcb431a0c0df04a036bd660e7bda9490ec17870947ebcec0",
+    "j5_amendment_r2": "246caf8f61f38cd7cb5640dbec601d355e02ee46cce2a95a63b0b7874f4d17d0"
+  },
+  "actor": {
+    "leaf": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j4_runs/j4_recovery_v26c_2026-08-26_r1",
+    "artefacts_sha256": {
+      "history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87",
+      "j4_fit_original.log": "88e9312626d23ce49685576e263df1b93c0f4f8d077415cc1d0bdaadb188dbcf",
+      "recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+      "rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+      "rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+      "v26c_j4_recovery_receipt.json": "887f2b94e5a22a9c8013497164db090c2e910804730c5f3aa9c4f4d5f308c354"
+    },
+    "verdict": "PASS",
+    "verdict_kind": "TECHNICAL/OFFLINE - POST-CRASH FINALIZED",
+    "selection": {
+      "best_epoch": 9,
+      "epochs_run": 69,
+      "best_validation_mse": 1.3680861457032734e-06,
+      "stale_epochs_at_stop": 60,
+      "patience": 60,
+      "epoch_budget": 400,
+      "patience_fired": true,
+      "stopped_by": "patience",
+      "rule": "first epoch improving by more than 1e-9; stop after 60 stale epochs; best state restored",
+      "reconstructed_from": "history.json, replayed; no training was run",
+      "reconstructed_validation_mse": 1.3680852362085716e-06,
+      "restored_best_state_verified": true
+    },
+    "recovery_rmse": {
+      "rmse_before": 0.027500254739313064,
+      "rmse_after": 0.026792278307060945,
+      "improved": true,
+      "requirement": "rmse_after < rmse_before, enforced before the receipt is written. A direction, not a magnitude"
+    },
+    "controller_column_norms": {
+      "pros_knee_angle_previous_endpoint": 0.000622039835434407,
+      "pros_knee_angle_served_ref": 0.0007745183538645506,
+      "pros_knee_angle_served_ref_vel": 0.00014757257304154336,
+      "pros_knee_angle_served_ref_accel": 4.2681243940023705e-05,
+      "pros_knee_angle_sea_u": 0.0008348111878149211,
+      "pros_ankle_angle_previous_endpoint": 0.0033659925684332848,
+      "pros_ankle_angle_served_ref": 0.0006681074155494571,
+      "pros_ankle_angle_served_ref_vel": 0.0003177331236656755,
+      "pros_ankle_angle_served_ref_accel": 7.328071660595015e-05,
+      "pros_ankle_angle_sea_u": 0.0031069142278283834
+    },
+    "role": "the ONLY actor J5 may roll out"
+  },
+  "lineage_preserved": {
+    "pins_sha256": {
+      "j1_receipt": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+      "j1_trace": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+      "j3_receipt": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+      "j3_trace": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+      "j3_runner": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+      "j4_runner": "24dceef98242cc9e02f63d0442e8361bae32994c0829859b1747f0e7091a6841",
+      "j4_amendment": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+      "j1_amendment": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9"
+    },
+    "j5_amendment_sha256": "033061fdd2bc289cdcb431a0c0df04a036bd660e7bda9490ec17870947ebcec0",
+    "j5_amendment_r2_sha256": "246caf8f61f38cd7cb5640dbec601d355e02ee46cce2a95a63b0b7874f4d17d0",
+    "amendments_verified": [
+      "j5_authorisation",
+      "j5_r2_rerun"
+    ],
+    "j5_amendment_manifest_sha256": {
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/history.json": "e8a07fdfb77656a1a9f3c4d158b949f8a793c015106396015761748d50fb6b87",
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/j4_fit_original.log": "88e9312626d23ce49685576e263df1b93c0f4f8d077415cc1d0bdaadb188dbcf",
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/recovery_dataset.npz": "28eda638bd5441698611fce7f9d9b65660b3e21581805434f41c57d1a745357e",
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/actor_feature_manifest.json": "3454a6de085a14510874af8222e266eacac1dd194460e26902ffa29606df3c03",
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/class_and_ctor_args.pkl": "897e2f13695c52a411d49f957bdaf99ab864411334538703844f1b063857cd02",
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/rl_module/module_state.pkl": "14a3630f757a5da2055eb754f6249fad8e7989a6d5e6c18f526c76415dad31aa",
+      "j4_runs/j4_recovery_v26c_2026-08-26_r1/v26c_j4_recovery_receipt.json": "887f2b94e5a22a9c8013497164db090c2e910804730c5f3aa9c4f4d5f308c354",
+      "v26c_j4_recovery.py": "24dceef98242cc9e02f63d0442e8361bae32994c0829859b1747f0e7091a6841",
+      "v26c_j3_closed_loop.py": "f14e7ce06161228ef81f44f38863269b283002661d97e7995d48106152850759",
+      "v26c_j3_amendment_recovery_only.json": "fed5b81666782902ed4ab0187da457cdfbf0516dd676c049fdfe41e48d21614f",
+      "v26c_j1_amendment_soft_fail.json": "db2aa552ab517ed3f2f8f5a74e276a88b549d24ef6d931f2fe3521cf34906bd9",
+      "j3_runs/j3_base_v26c_2026-08-26_r1/v26c_j3_closed_loop_receipt.json": "34d856b0b4acabd000a1e6257767c6049a1f9f2147eb99d6f3801ca7559ff422",
+      "j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+      "j1_runs/j1_nominal_v26c_2026-08-26_r1/v26c_j1_collection_receipt.json": "f54028d58dc9bfde01ede3c2a72f7ea63b67aeead02979291b03cd468bf37cdd",
+      "j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+      "v26c_j5_amendment_revalidation.json": "033061fdd2bc289cdcb431a0c0df04a036bd660e7bda9490ec17870947ebcec0",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_activations.sto": "4aad3a3b72d6175ef963682fba90ed3d33f8485ea232c1331af907258bd7602f",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_gait_events_online.csv": "41c81847dd75f354a8f0d4f4e157816b700968c46ff50dc3d5b763ba25fc9354",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_kinematics.sto": "ed70177c8c81c631790f8c0663e5563402dcfa10d0d5d31cc54bbde90170c99c",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_kinematics_reference.sto": "7a733bd8f1d5ee8582167b5963c74489444b83c0a77d2f05ee4ef46ce31187c3",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_muscle_forces.sto": "1c82f852100594f70c111b924faa4462ddea01edb0c7349ffbf1ceedb3deb65f",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_online_grf.sto": "baa8b332769e5a1bda820f0218b6a3c29c051ef062ce6ffdeb8dfdd65beb4a39",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_power.sto": "e3bee3824dc0fa3e7944628d3fabb7eb3da9c9d16546ac7f8902f17ca85d53b1",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_recruitment.sto": "4c5685224ec6c205db988c533e0426fa7957092a5ca662c685a7d749e369af26",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_reserve_controls.sto": "98d43cd7c7d0b146f2e1d445313ba0bf796bbbca1146247aabf4f5c971fca08d",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_reserve_torques.sto": "c1c75be293377a3d4e426d6831551a223fc2a6a94b040fbb4c6fcad240003227",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_controls.sto": "0a4a842cdfa5c7ea4523a0f5e8d7a4d06b20ae8b3e817ad91a75bec8eab62008",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_derivatives.sto": "3a525e464f326e34ec3e77f5c1177024cd5a8cc1b79bcb2cc4d0f99d116a5cc7",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "86c2156960a0e2b4363b53315adfd9d24552e02126197fd95aa7d8fa360e961a",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_states.sto": "cd3349b9af40bb82691df1a252d131cefd0c8bfcfcf025f97ba0b30bc97189d2",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_sea_torques.sto": "0695a1693f11e78121b7a4c2d6b562b32f712013bff26c7c6df3d38367d61715",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "a2f55147fabec8b059fa8352bd3074f98b5dadb627ed1342438d07eb0fbffa15",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_states.sto": "d94256ff12eb6297b7efc8383c2230899de1214e63f239a04182c9949c088c79",
+      "j5_runs/j5_revalidation_v26c_2026-08-26_r1/sim_outputs/j1_teacher_episode_tau_bio.sto": "88461deecf18a120f42f1d517b3ef8548b49c9107d1c46098c80e1442b3828c9"
+    },
+    "j5_amendment_manifest_entries": 36,
+    "j1_verdict": "FAIL",
+    "j1_max_penetration_m": 0.02294380435912411,
+    "j3_verdict": "FAIL",
+    "j3_failed": [
+      "max_penetration_m"
+    ],
+    "j3_max_penetration_m": 0.02704966381076714,
+    "j4_verdict": "PASS",
+    "j4_verdict_kind": "TECHNICAL/OFFLINE - POST-CRASH FINALIZED",
+    "statement": "the J1 FAIL, the J3 FAIL and the J4 technical/offline PASS all STAND. J5 neither re-scores nor retroactively promotes any of them, whatever it finds."
+  },
+  "runtime_contract": {
+    "actor_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos",
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "actor_feature_count": 35,
+    "observation_feature_count": 84,
+    "n_actor": 35,
+    "expected_steps": 500,
+    "manifest_matches_pinned_j2": true,
+    "source": "the runtime manifest is compared name-by-name with the pinned J2 manifest"
+  },
+  "runtime_identity": {
+    "fsm_behaviour_version": "v3",
+    "event_source": "binary_active_v26",
+    "observed_versions": [
+      "v3"
+    ],
+    "observed_event_sources": [
+      "binary_active_v26"
+    ]
+  },
+  "deterministic_semantics": {
+    "seed": 123,
+    "seeded": [
+      "numpy.random.seed(123)",
+      "torch.manual_seed(123)",
+      "env.reset(seed=123)"
+    ],
+    "action_selection": "deterministic",
+    "path": "module.forward_inference({'obs': ...}) -> get_inference_action_dist_cls().from_logits(logits).to_deterministic().sample(); flat Box fallback = the Gaussian mean, i.e. logits[..., :dim]",
+    "exploration_noise": "NONE: no noise is drawn, injected or held",
+    "sigma": "forbidden at this stage. It is never set and never varied; the policy std is only RECORDED as a per-step diagnostic",
+    "stepped_with": "the RAW deterministic action, exactly as rollout_eval.run does. The clipped action is a DIAGNOSTIC mirror and is never passed to the environment",
+    "max_abs_action_minus_mean": 0.0,
+    "rollout_eval_parity_steps": 500,
+    "rollout_eval_parity_checked": true
+  },
+  "actor_contract": {
+    "width": 35,
+    "full_observation_width": 84,
+    "hard_zero_columns": [
+      0,
+      1
+    ],
+    "controller_columns_live": [
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "input_layers_verified": {
+      "pi.0.0.weight": {
+        "shape": [
+          256,
+          35
+        ],
+        "zero_columns": [
+          0,
+          1
+        ],
+        "controller_norms": {
+          "25": 0.000622039835434407,
+          "26": 0.0007745183538645506,
+          "27": 0.00014757257304154336,
+          "28": 4.2681243940023705e-05,
+          "29": 0.0008348111878149211,
+          "30": 0.0033659925684332848,
+          "31": 0.0006681074155494571,
+          "32": 0.0003177331236656755,
+          "33": 7.328071660595015e-05,
+          "34": 0.0031069142278283834
+        }
+      },
+      "pi_encoder.0.weight": {
+        "shape": [
+          256,
+          35
+        ],
+        "zero_columns": [
+          0,
+          1
+        ],
+        "controller_norms": {
+          "25": 0.000622039835434407,
+          "26": 0.0007745183538645506,
+          "27": 0.00014757257304154336,
+          "28": 4.2681243940023705e-05,
+          "29": 0.0008348111878149211,
+          "30": 0.0033659925684332848,
+          "31": 0.0006681074155494571,
+          "32": 0.0003177331236656755,
+          "33": 7.328071660595015e-05,
+          "34": 0.0031069142278283834
+        }
+      },
+      "aliases_bit_identical": true
+    },
+    "actor_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos",
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "widening": "NONE - the actor stays 35D",
+    "standalone_25d": "NONE",
+    "contralateral_features": "ABSENT",
+    "note": "J2/J3 hard-zeroed the clock AND the controller memory; the recovery stage lifted the controller columns, so at J5 only the clock stays at zero"
+  },
+  "summary": {
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "max_penetration_m": 0.026913284071471633,
+    "valid_cycle_count": 2,
+    "valid_hs_count": 3,
+    "valid_to_count": 3,
+    "phase_timeout_stance": 0,
+    "phase_timeout_swing": 0,
+    "morphology_causal_contract_failure": 0,
+    "hs_cancelled_count": 0,
+    "resync_count": 0,
+    "action_clipped_steps": 0,
+    "fsm_behaviour_versions": [
+      "v3"
+    ],
+    "event_sources": [
+      "binary_active_v26"
+    ],
+    "episode_return": 40.30931584318691,
+    "realized_noise_rms": [
+      0.0,
+      0.0
+    ],
+    "action_noise_sigma": [
+      0.0,
+      0.0
+    ],
+    "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+  },
+  "kinematics": {
+    "steps": 500,
+    "knee_min_rad": -0.9912651777267456,
+    "knee_max_rad": -0.14447981119155884,
+    "ankle_min_rad": -0.10674814879894257,
+    "ankle_max_rad": 0.4095623195171356,
+    "source": "the per-step PRE-ACTION prosthetic_state, read by name from the pinned actor feature manifest"
+  },
+  "j5_gate": {
+    "common": {
+      "steps_required": 500,
+      "end_reason": "episode_time_limit",
+      "valid_cycles_min": 2,
+      "phase_timeout_stance_max": 0,
+      "phase_timeout_swing_max": 0,
+      "morphology_causal_contract_failure_max": 0,
+      "hs_cancelled_count_max": 0,
+      "resync_count_max": 1,
+      "max_penetration_m_max": 0.02
+    },
+    "kinematic_quality": {
+      "ankle_min_rad_max": -0.03,
+      "ankle_amplitude_min_rad": 0.3,
+      "knee_amplitude_min_rad": 0.6,
+      "knee_strictly_flexed": true,
+      "knee_bounds_rad": [
+        -1.5,
+        0.0
+      ],
+      "ankle_bounds_rad": [
+        -0.7,
+        0.7
+      ]
+    },
+    "source": "inherited VERBATIM from v26c_j3_closed_loop"
+  },
+  "gate": {
+    "common": {
+      "checks": {
+        "steps": true,
+        "end_reason": true,
+        "valid_cycles": true,
+        "phase_timeout_stance": true,
+        "phase_timeout_swing": true,
+        "morphology_causal_contract_failure": true,
+        "hs_cancelled_count": true,
+        "resync_count": true,
+        "max_penetration_m": false
+      },
+      "failed": [
+        "max_penetration_m"
+      ],
+      "pass": false,
+      "kinematic_quality_applies": false
+    },
+    "kinematic_quality": {
+      "ankle_min": {
+        "observed_rad": -0.10674814879894257,
+        "threshold_rad": -0.03,
+        "pass": true
+      },
+      "ankle_amplitude": {
+        "observed_rad": 0.5163104683160782,
+        "threshold_rad": 0.3,
+        "pass": true
+      },
+      "knee_amplitude": {
+        "observed_rad": 0.8467853665351868,
+        "threshold_rad": 0.6,
+        "pass": true
+      },
+      "knee_strictly_flexed": {
+        "fraction_negative": 1.0,
+        "max_rad": -0.14447981119155884,
+        "pass": true
+      },
+      "within_bounds": {
+        "knee_outside": 0,
+        "ankle_outside": 0,
+        "knee_bounds_rad": [
+          -1.5,
+          0.0
+        ],
+        "ankle_bounds_rad": [
+          -0.7,
+          0.7
+        ],
+        "pass": true
+      }
+    },
+    "checks": {
+      "steps": true,
+      "end_reason": true,
+      "valid_cycles": true,
+      "phase_timeout_stance": true,
+      "phase_timeout_swing": true,
+      "morphology_causal_contract_failure": true,
+      "hs_cancelled_count": true,
+      "resync_count": true,
+      "max_penetration_m": false,
+      "kinematic_ankle_min": true,
+      "kinematic_ankle_amplitude": true,
+      "kinematic_knee_amplitude": true,
+      "kinematic_knee_strictly_flexed": true,
+      "kinematic_within_bounds": true
+    },
+    "failed": [
+      "max_penetration_m"
+    ],
+    "pass": false,
+    "kinematic_quality_applies": true,
+    "telemetry_integrity_evaluated_separately": true,
+    "diagnostics_not_binding": {
+      "action_clipped_steps": 0
+    }
+  },
+  "telemetry_integrity": {
+    "kind": "TELEMETRY INTEGRITY INVARIANT",
+    "valid_hs_count": 3,
+    "valid_to_count": 3,
+    "valid_cycle_count": 2,
+    "checks": {
+      "hs_at_least_cycles": true,
+      "to_at_least_cycles": true,
+      "hs_to_difference_within_one": true
+    },
+    "pass": true,
+    "qualification_technically_valid": true,
+    "invariant": {
+      "hs_at_least_cycles": true,
+      "to_at_least_cycles": true,
+      "hs_to_difference_max": 1,
+      "kind": "TELEMETRY INTEGRITY INVARIANT",
+      "note": "a valid cycle is bounded by its own HS and TO, so neither count may fall below the cycle count, and the two may differ by at most one because an episode can end mid-cycle. This checks the SELF-CONSISTENCY of the recorded evidence; it invents no behavioural or promotion threshold and is not part of the behavioural gate.",
+      "on_violation": "the qualification is technically INVALID: the evidence contradicts itself, so neither a PASS nor a FAIL on gait can be asserted from it"
+    },
+    "is_behavioural_gate": false,
+    "is_promotion_threshold": false
+  },
+  "comparison": {
+    "status": "EVIDENCE ONLY - a comparison is never a gate, never reinterprets a threshold and never excuses a FAIL",
+    "soft_diagnostic_m": 0.02,
+    "hard_guard_m": 0.028,
+    "references_derived_from_pinned_traces": {
+      "j3": {
+        "label": "j3",
+        "source": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j3_runs/j3_base_v26c_2026-08-26_r1/j3_trace.json",
+        "sha256": "b36f85dc0b6aa8c0fa6d6d6b404ae8fdd51528129c3aeac5004451ec6d4bcbae",
+        "rows": 500,
+        "max_penetration_m": 0.02704966381076714,
+        "steps_above_soft": 106,
+        "steps_above_hard": 0,
+        "soft_threshold_m": 0.02,
+        "derivation": "recomputed from the pinned trace; no hard-coded value is used"
+      },
+      "j1": {
+        "label": "j1",
+        "source": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j1_runs/j1_nominal_v26c_2026-08-26_r1/teacher_trace.json",
+        "sha256": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3",
+        "rows": 500,
+        "max_penetration_m": 0.02294380435912411,
+        "steps_above_soft": 97,
+        "steps_above_hard": 0,
+        "soft_threshold_m": 0.02,
+        "derivation": "recomputed from the pinned trace; no hard-coded value is used"
+      }
+    },
+    "j5": {
+      "max_penetration_m": 0.026913284071471633,
+      "steps_above_soft": 106,
+      "steps_above_hard": 0
+    },
+    "vs_j3_base": {
+      "j3_max_penetration_m": 0.02704966381076714,
+      "j3_steps_above_soft": 106,
+      "delta_max_penetration_m": -0.00013637973929550573,
+      "delta_steps_above_soft": 0
+    },
+    "vs_j1_teacher": {
+      "j1_max_penetration_m": 0.02294380435912411,
+      "j1_steps_above_soft": 97,
+      "delta_max_penetration_m": 0.003969479712347523,
+      "delta_steps_above_soft": 9
+    }
+  },
+  "diagnostics_not_binding": {
+    "action_clipped_steps": 0
+  },
+  "deployable": false,
+  "promotion": "NONE",
+  "next_stage_authorized": false,
+  "automatic_promotion": "NONE, under any outcome",
+  "quarantine": {
+    "applies": true,
+    "artefacts_preserved": true,
+    "retry": "FORBIDDEN without an explicit new authorisation; this stage never retries itself"
+  },
+  "forbidden_here": [
+    "retry",
+    "fit",
+    "optimizer",
+    "DAgger",
+    "progressive iteration",
+    "sigma",
+    "critic",
+    "PPO",
+    "ex-novo",
+    "promotion",
+    "LOTO",
+    "LOCO",
+    "B1R1",
+    "B1R2",
+    "standalone 25D",
+    "widening",
+    "contralateral features"
+  ],
+  "generated_at_utc": "2026-08-26T13:23:54Z",
+  "outputs_sha256": {
+    "j5_kinematics.npz": "ce5eae3fcd2ba429f883d48d6bc5266107506133c8f88c5fc3833802e136aa25",
+    "j5_trace.json": "fd51f8be802d3d4ace2bfd9a4b6ca5193382e696baa70e534472841955805b93",
+    "sim_outputs/j1_teacher_episode_activations.sto": "9f15a85da11f1308e3ce806fcdd0d77bdf284e64f86633465d7191cf725e3a60",
+    "sim_outputs/j1_teacher_episode_gait_events.csv": "63ceebf66957642fad3f88f4e9d4f55f1b35987c1b5805a0ab39a59a9aba605c",
+    "sim_outputs/j1_teacher_episode_gait_events_online.csv": "5b1492dfd5c3f8397d9fa924b897ebe9321127b5510ac3e6f755cf7dbdc91551",
+    "sim_outputs/j1_teacher_episode_kinematics.sto": "80408d40c3f9bc9d9a07b980bbb3f2f6f65924ba339f5a5c28880948f30b1f18",
+    "sim_outputs/j1_teacher_episode_kinematics_reference.sto": "fde15a3d470f98c730362b1407ab2d33a0992c9c6ae9333f5119ba42d1b7e6d0",
+    "sim_outputs/j1_teacher_episode_muscle_forces.sto": "4b4e1ba2d58cefd23aa66a8dce0e9edda85e843e2b6fce34e1bee1323db98766",
+    "sim_outputs/j1_teacher_episode_online_grf.sto": "6b2fdf76391b3c3fb871560514c7e7853f12aa910fc7a2294770aad4547cd5f5",
+    "sim_outputs/j1_teacher_episode_power.sto": "23d6860f1f40d95f88e44fdefc0b82a6afb6eeafe59e37cee5ae3fecd694bc35",
+    "sim_outputs/j1_teacher_episode_recruitment.sto": "1d466385e24e29637865cc5faf904a001add59515ac07e232c5dc139f72fe4b0",
+    "sim_outputs/j1_teacher_episode_reserve_controls.sto": "f60713080f2f9e656be1e343bd112432ce195b3714f3f9668c62b4611fc626fc",
+    "sim_outputs/j1_teacher_episode_reserve_torques.sto": "a720d1cf50e147886af5c4f2a13bbb00da07445c1a62ec8bd4feb3849742e16d",
+    "sim_outputs/j1_teacher_episode_sea_controls.sto": "43c7612b80da081d642cce3e90d7f32675b7708df80d7eb7525993bd0547df1f",
+    "sim_outputs/j1_teacher_episode_sea_derivatives.sto": "2c6ca80e2809e098c5b4b781067b7832159193fef405c31c7b4ce19ea9ea5d95",
+    "sim_outputs/j1_teacher_episode_sea_diagnostics.sto": "ae8f61637a1f6bf9e33dc8dd04511c941858ba737f3025d40b4501a7c396268e",
+    "sim_outputs/j1_teacher_episode_sea_states.sto": "3cacfdc9e0ab65154eb2550d76d9a68253374438756158eda74e3f6ff5e29e19",
+    "sim_outputs/j1_teacher_episode_sea_torques.sto": "fd3da33842e9fd92726b230526ba8c190ade2ba50307d5a5567f948e15c0df36",
+    "sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto": "6d30e089e04c0897b74fd04eef8cd80a117dad7ec1232593d73767b6fe0775c1",
+    "sim_outputs/j1_teacher_episode_states.sto": "85e17133fbba23f7469454552c31ec3fbf44112f7118eaa7457141a1995f3e2e",
+    "sim_outputs/j1_teacher_episode_tau_bio.sto": "8e081f8ffb91302fa3637b1739e15e5bb8d08f5ce3f8b95371596a2ccde1b30a"
+  },
+  "outputs_sha256_excludes": {
+    "file": "v26c_j5_revalidation_receipt.json",
+    "why": "a receipt cannot hash itself; its own digest is taken by the reviewer"
+  },
+  "sim_outputs": {
+    "count": 19,
+    "files": [
+      "sim_outputs/j1_teacher_episode_activations.sto",
+      "sim_outputs/j1_teacher_episode_gait_events.csv",
+      "sim_outputs/j1_teacher_episode_gait_events_online.csv",
+      "sim_outputs/j1_teacher_episode_kinematics.sto",
+      "sim_outputs/j1_teacher_episode_kinematics_reference.sto",
+      "sim_outputs/j1_teacher_episode_muscle_forces.sto",
+      "sim_outputs/j1_teacher_episode_online_grf.sto",
+      "sim_outputs/j1_teacher_episode_power.sto",
+      "sim_outputs/j1_teacher_episode_recruitment.sto",
+      "sim_outputs/j1_teacher_episode_reserve_controls.sto",
+      "sim_outputs/j1_teacher_episode_reserve_torques.sto",
+      "sim_outputs/j1_teacher_episode_sea_controls.sto",
+      "sim_outputs/j1_teacher_episode_sea_derivatives.sto",
+      "sim_outputs/j1_teacher_episode_sea_diagnostics.sto",
+      "sim_outputs/j1_teacher_episode_sea_states.sto",
+      "sim_outputs/j1_teacher_episode_sea_torques.sto",
+      "sim_outputs/j1_teacher_episode_so_torque_diagnostics.sto",
+      "sim_outputs/j1_teacher_episode_states.sto",
+      "sim_outputs/j1_teacher_episode_tau_bio.sto"
+    ],
+    "required": true
+  }
+}

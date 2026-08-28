@@ -1,0 +1,834 @@
+{
+  "schema": "v26c_j0_audit.2",
+  "stage": "V26C-J0-AUDIT",
+  "kind": "READ-ONLY audit. No fit, no rollout, no collection, no promotion, no training, no modification of any existing artefact.",
+  "july_stage_base": {
+    "run": "target_domain_imitation_no_controller_memory_2026-07-13",
+    "parent": {
+      "path": "validation/controller_memory_ablation/2026-07-13_zero_iter_port/rl_module_initial_warm_start",
+      "module_state_sha256": "fdb46637a603654524dc0de6afd8527c54cec6edaf356d95e8148e513fd66421",
+      "actor_digest": "1e9738a5fc30ac5f8c3e938fa4f2e81f7769f10425dda3df93827782377392c7",
+      "W1_shape": [
+        256,
+        25
+      ],
+      "zero_columns": [
+        0,
+        1
+      ],
+      "note": "a genuinely 25-wide network, not a 35-wide one with columns masked"
+    },
+    "dataset": {
+      "provenance": "a prescribed-teacher rollout of 500 steps; the pairs are observation -> PRESCRIBED TEACHER action",
+      "artefacts": {
+        "teacher_dataset": "Trajectory Generator/runs/training/target_domain_imitation_no_controller_memory_2026-07-13/teacher_dataset.npz",
+        "teacher_dataset_sha256": "13af1cfd467cfb39bebe200860483172eac3776157dc32a308e24d227b8f0691",
+        "teacher_trace": "Trajectory Generator/runs/training/target_domain_imitation_no_controller_memory_2026-07-13/teacher_trace.json",
+        "teacher_trace_sha256": "fd92e0710bff10383f5f7d216c1ae64c66ff2cf7a13c3c879d0b0b83df8ff1ce"
+      },
+      "samples": 500,
+      "n_actor": 25
+    },
+    "teacher_rollout_gate": {
+      "steps": 500,
+      "expected_steps": 500,
+      "end_reason": "episode_time_limit",
+      "terminated": false,
+      "truncated": true,
+      "max_penetration_m": 0.02294380435912411,
+      "hard_penetration_m": 0.025,
+      "valid_cycle_count": 2.0,
+      "valid_hs_count": 3.0,
+      "valid_to_count": 3.0,
+      "action_abs_max": 0.7813355326652527,
+      "slew_limited_steps": 143,
+      "gate_pass": true
+    },
+    "fit": {
+      "scope": "the ENTIRE mean actor",
+      "split": {
+        "kind": "random",
+        "validation_fraction": 0.2,
+        "training_samples": 400,
+        "validation_samples": 100
+      },
+      "hyperparameters": {
+        "seed": 123,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "validation_fraction": 0.2,
+        "patience": 60,
+        "clip_weight": 1.0,
+        "logstd_weight": 0.1,
+        "anchor_weight": 1e-05,
+        "freeze_logstd_head": false
+      },
+      "epochs": {
+        "requested": 400,
+        "run": 243,
+        "best_epoch": 183
+      },
+      "best_validation_mse": 0.00014186832413543016,
+      "initial_prediction": {
+        "mse": 0.02800249498461728,
+        "rmse": 0.16733946033323185,
+        "max_abs_error": 0.5272607803344727,
+        "out_of_bounds_fraction": 0.0,
+        "per_action_rmse": [
+          0.20100812730995016,
+          0.12490285314828234
+        ]
+      },
+      "adapted_prediction": {
+        "mse": 0.00013881969754034286,
+        "rmse": 0.011782177113774129,
+        "max_abs_error": 0.07428214699029922,
+        "out_of_bounds_fraction": 0.0,
+        "per_action_rmse": [
+          0.010056020311674355,
+          0.013285926786335923
+        ]
+      },
+      "logstd_head_max_abs_parameter_change": 0.0,
+      "critic_trained": false,
+      "ppo_updates": 0,
+      "disabled_clock_column_norms": {
+        "gait_phase_sin": 0.0,
+        "gait_phase_cos": 0.0
+      }
+    },
+    "output_actor_digest": "5616be85c815eece79c08730d05529a7b41ea60f3e36033fb5276edc83dd2bf7",
+    "ok": true,
+    "stage": "complete"
+  },
+  "july_markov_census": {
+    "runs": [
+      {
+        "run": "target_domain_markov35_phase_aligned_scaled_cols_r16_alt8_2026-07-13",
+        "present": true,
+        "ok": false,
+        "offline_gate_pass": false,
+        "train_full_actor": false,
+        "nominal_repeat": 16,
+        "aggregate_samples": 16712,
+        "anchor_weight": 0.001,
+        "best_validation_mse": 0.00022902412456460297,
+        "nominal_mean_shift_max_abs": 0.03998469840735197
+      },
+      {
+        "run": "target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13",
+        "present": true,
+        "ok": false,
+        "offline_gate_pass": false,
+        "train_full_actor": true,
+        "nominal_repeat": 32,
+        "aggregate_samples": 24712,
+        "anchor_weight": 0.01,
+        "best_validation_mse": 6.632255099248141e-05,
+        "nominal_mean_shift_max_abs": 0.03159449528902769
+      },
+      {
+        "run": "target_domain_markov35_phase_aligned_scaled_full_r64_alt8_anchor05_2026-07-13",
+        "present": true,
+        "ok": false,
+        "offline_gate_pass": false,
+        "train_full_actor": true,
+        "nominal_repeat": 64,
+        "aggregate_samples": 40712,
+        "anchor_weight": 0.05,
+        "best_validation_mse": 5.699607208953239e-05,
+        "nominal_mean_shift_max_abs": 0.019084937870502472
+      },
+      {
+        "run": "target_domain_markov35_robust_2026-07-13",
+        "present": true,
+        "ok": false,
+        "offline_gate_pass": false,
+        "train_full_actor": null,
+        "nominal_repeat": 8,
+        "aggregate_samples": 6500,
+        "anchor_weight": 0.001,
+        "best_validation_mse": 0.00039956203545443714,
+        "nominal_mean_shift_max_abs": 0.035696486942470074
+      },
+      {
+        "run": "target_domain_markov35_robust_conservative_r64_2026-07-13",
+        "present": true,
+        "ok": false,
+        "offline_gate_pass": false,
+        "train_full_actor": null,
+        "nominal_repeat": 64,
+        "aggregate_samples": 34500,
+        "anchor_weight": 0.01,
+        "best_validation_mse": 9.987544035539031e-05,
+        "nominal_mean_shift_max_abs": 0.006106212735176086
+      },
+      {
+        "run": "target_domain_markov35_robust_conservative_r96_2026-07-13",
+        "present": true,
+        "ok": true,
+        "offline_gate_pass": true,
+        "train_full_actor": null,
+        "nominal_repeat": 96,
+        "aggregate_samples": 50500,
+        "anchor_weight": 0.02,
+        "best_validation_mse": 7.233471842482686e-05,
+        "nominal_mean_shift_max_abs": 0.004909336566925049
+      }
+    ],
+    "strict_offline_gate_pass": [
+      "target_domain_markov35_robust_conservative_r96_2026-07-13"
+    ],
+    "operationally_selected": "target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13",
+    "warning": "run_summary.gate_pass is the OFFLINE adaptation gate ONLY and MUST NOT be used to identify the operational July stage: the selected actor fails it, and the run that passes it was rejected dynamically."
+  },
+  "july_stage_markov_selected": {
+    "run": "target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13",
+    "builder": {
+      "path": "Trajectory Generator/baseline_MLP/target_domain_markov_adaptation.py",
+      "sha256": "7518f1d4bdaa31505d8335934ce3478ebc03dc1cb1f31b508b5ec4a229cba7e0",
+      "matches_pin": true
+    },
+    "parent": {
+      "path": "Trajectory Generator/runs/training/validation/controller_memory_ablation/2026-07-13_markov35_zero_iter_port/rl_module_initial_warm_start",
+      "module_state_sha256": "f4775d17d9af4a7a9232399f50b43b967e7b8da925c194218f69461551cd47b5",
+      "actor_digest": "42837d4802d71b708f48ed4f035bffcfa0accd650803f9c5fdef50d405ead30e",
+      "W1_shape": [
+        256,
+        35
+      ],
+      "zero_columns": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ]
+    },
+    "dataset": {
+      "nominal_self_anchors": 16000,
+      "nominal_steps": 500,
+      "nominal_repeat": 32,
+      "nominal_label_source": "the SOURCE ACTOR'S OWN policy_action_mean, read from the deterministic zero-column rollout trace - NOT a teacher",
+      "phase_aligned_recovery": 712,
+      "recovery_label_source": "time-aligned prescribed teacher, truncated at the first discrete mismatch",
+      "recovery_trace_filters": [
+        {
+          "original_steps": 500,
+          "retained_steps": 119,
+          "first_discrete_mismatch_step": 120
+        },
+        {
+          "original_steps": 500,
+          "retained_steps": 118,
+          "first_discrete_mismatch_step": 119
+        },
+        {
+          "original_steps": 500,
+          "retained_steps": 119,
+          "first_discrete_mismatch_step": 120
+        }
+      ],
+      "alternative_start_teacher_samples": 8000,
+      "aggregate_samples": 24712
+    },
+    "fit": {
+      "scope": "the ENTIRE mean network (train_full_actor = true), not only the ten controller columns",
+      "train_full_actor": true,
+      "hyperparameters": {
+        "seed": 123,
+        "batch_size": 128,
+        "learning_rate": 5e-05,
+        "validation_fraction": 0.2,
+        "patience": 60,
+        "clip_weight": 1.0,
+        "logstd_weight": 0.0,
+        "anchor_weight": 0.01,
+        "freeze_logstd_head": true,
+        "trainable_first_layer_features": null,
+        "first_layer_feature_scales": {
+          "pros_knee_angle_previous_endpoint": 1.0,
+          "pros_knee_angle_served_ref": 1.0,
+          "pros_knee_angle_served_ref_vel": 4.0,
+          "pros_knee_angle_served_ref_accel": 60.0,
+          "pros_knee_angle_sea_u": 1.0,
+          "pros_ankle_angle_previous_endpoint": 1.0,
+          "pros_ankle_angle_served_ref": 1.0,
+          "pros_ankle_angle_served_ref_vel": 3.5,
+          "pros_ankle_angle_served_ref_accel": 55.0,
+          "pros_ankle_angle_sea_u": 1.0
+        }
+      },
+      "epochs": {
+        "requested": 400,
+        "run": 400,
+        "best_epoch": 392
+      },
+      "best_validation_mse": 6.632255099248141e-05,
+      "split": {
+        "kind": "random over the REPEATED dataset",
+        "validation_fraction": 0.2,
+        "caveat": "with nominal_repeat 32 a validation row has 31 identical copies in training; this does NOT measure generalisation"
+      }
+    },
+    "output_actor_digest": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+    "offline_gate": {
+      "nominal_mean_shift_within_limit": false,
+      "new_columns_learned": true,
+      "logstd_head_unchanged": true,
+      "requested_actor_train_scope_applied": true,
+      "requested_actor_update_scope_observed": true,
+      "gate_pass": false,
+      "max_nominal_mean_shift": 0.005,
+      "observed": {
+        "rms": 0.004175083023500488,
+        "max_abs": 0.03159449528902769,
+        "per_action_rms": [
+          0.004622478919209622,
+          0.0036735983922724313
+        ]
+      }
+    }
+  },
+  "gate_reconciliation": {
+    "artefact": {
+      "path": "validation/controller_memory_ablation/2026-07-13_markov35_final_gate.json",
+      "sha256": "1f5125617a8d7705f02e28b4d6ac7e09922551a7695ce7f4a1665e5c2641d4b8"
+    },
+    "level_1_offline_adaptation_gate": {
+      "what": "run_summary.gate_pass: nominal mean shift within max_nominal_mean_shift, columns learned, log-std unchanged, scope observed",
+      "selected_run": "FAIL, on the strict single-sample criterion only: max_abs 0.03159449528902769 > 0.005, while rms is 0.004175083023500488 and p95 0.00795625988394022",
+      "r96_run": "PASS (max_abs 0.004909336566925049)"
+    },
+    "level_2_selection_gate": {
+      "what": "closed-loop start and exploration robustness - the PRIMARY warm-start gate",
+      "criteria": {
+        "all_deterministic_starts_complete": true,
+        "all_stochastic_sigma_0_005_complete": true,
+        "all_rollouts_have_valid_cycle": true,
+        "all_rollouts_below_0_025_m_guard": true,
+        "all_rollouts_without_action_clipping": true,
+        "actor_contains_no_prescribed_runtime_features": true,
+        "actor_bit_exact_after_critic_warmup": true,
+        "critic_changed_and_restored_exactly": true,
+        "nominal_return_not_regressed_vs_25_feature_baseline": false,
+        "strict_offline_single_sample_shift_gate": false,
+        "pass": true,
+        "rationale": "Closed-loop start and exploration robustness are the primary warm-start gate. A stricter nominal refinement reduced offline shift but failed dynamically, so it was rejected instead of weakening the safety threshold."
+      },
+      "pass": true,
+      "rationale_verbatim": "Closed-loop start and exploration robustness are the primary warm-start gate. A stricter nominal refinement reduced offline shift but failed dynamically, so it was rejected instead of weakening the safety threshold.",
+      "criteria_false_but_not_blocking": [
+        "nominal_return_not_regressed_vs_25_feature_baseline",
+        "strict_offline_single_sample_shift_gate"
+      ]
+    },
+    "decision": {
+      "decision": "SELECT_MARKOV35_FOR_H0_H1_WITH_WARM_CRITIC",
+      "training_ready": true,
+      "deployment_validated": false,
+      "selected_checkpoint": "Trajectory Generator/runs/training/target_domain_markov35_phase_aligned_scaled_full_r32_alt8_2026-07-13/rl_module_target_adapted",
+      "selected_actor_digest": "a0801a9e635db4f2973da7d8f6461cbbf7b1643efef1dedc2baafd9c9f95ca21",
+      "digest_matches_pin": true,
+      "dataset_composition": {
+        "nominal_source_policy_anchors": 16000,
+        "phase_aligned_stochastic_recovery": 712,
+        "alternative_start_teacher_samples": 8000
+      }
+    },
+    "closed_loop_evidence": {
+      "deterministic": [
+        {
+          "start": "nominal",
+          "steps": 500,
+          "valid_cycles": 2,
+          "max_penetration_m": 0.02395957553235469,
+          "clipped_steps": 0,
+          "pass": true
+        },
+        {
+          "start": "minus_0_20_s",
+          "steps": 500,
+          "valid_cycles": 2,
+          "max_penetration_m": 0.02460202939096984,
+          "clipped_steps": 0,
+          "pass": true
+        },
+        {
+          "start": "plus_0_20_s",
+          "steps": 500,
+          "valid_cycles": 2,
+          "max_penetration_m": 0.024323924384327976,
+          "clipped_steps": 0,
+          "pass": true
+        }
+      ],
+      "stochastic_sigma_0_005": [
+        {
+          "seed": 123,
+          "steps": 500,
+          "valid_cycles": 3,
+          "max_penetration_m": 0.023268426267771973,
+          "clipped_steps": 0,
+          "pass": true
+        },
+        {
+          "seed": 124,
+          "steps": 500,
+          "valid_cycles": 3,
+          "max_penetration_m": 0.023883867413594984,
+          "clipped_steps": 0,
+          "pass": true
+        },
+        {
+          "seed": 125,
+          "steps": 500,
+          "valid_cycles": 3,
+          "max_penetration_m": 0.024164960176760928,
+          "clipped_steps": 0,
+          "pass": true
+        }
+      ],
+      "summary": "3/3 deterministic starts and 3/3 stochastic seeds passed, 500 steps each, all below the 0.025 m guard, zero action clipping"
+    },
+    "root_cause_recorded_by_july": {
+      "architecture_rejected": false,
+      "reward_failure": false,
+      "adaptation_protocol_failure": true,
+      "phase_label_audit": {
+        "original_recovery_samples": 1500,
+        "phase_aligned_samples": 356,
+        "phase_misaligned_samples": 1144,
+        "phase_misaligned_fraction": 0.7626666666666667,
+        "first_mismatch_steps": [
+          120,
+          119,
+          120
+        ]
+      },
+      "additional_causes": [
+        "Unscaled served-reference accelerations dominated the new first-layer inputs.",
+        "Alternative-start examples were underrepresented relative to repeated nominal samples.",
+        "Updating only the ten new input columns could not learn their interaction with FSM and physical-state features."
+      ]
+    },
+    "reconciliation": "July resolved the disagreement explicitly: closed-loop robustness is primary and the strict offline single-sample shift is not. The conservative candidate that optimised the offline number failed dynamically and was rejected rather than weakening the 0.025 m safety threshold. The methodological precedent is the SELECTED run, and an offline-only failure is not by itself a stop.",
+    "consequence_for_v26b": "The V26B B-branch was blocked entirely on OFFLINE reconstruction gates and never reached a closed-loop measurement. Under the July precedent that ordering is inverted."
+  },
+  "parent_equivalence": {
+    "v26_august_parent": {
+      "path": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+      "module_state_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+      "matches_pin": true,
+      "W1_shape": [
+        256,
+        39
+      ]
+    },
+    "v1_35d_transplant": {
+      "sha256": "16c2d1ae9fb4e77fffa092d74d37e78f54ba24d990774e91bf1d412c551bb031",
+      "matches_pin": true,
+      "zero_columns": [
+        0,
+        1
+      ]
+    },
+    "b0_35d_masked": {
+      "sha256": "aa7ea0fa1bbef8bb6ef2a33ee8ebe5defeeb4959148a589b81ff994cf291171f",
+      "matches_pin": true,
+      "zero_columns": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ]
+    },
+    "july_base_parent": {
+      "W1_shape": [
+        256,
+        25
+      ],
+      "zero_columns": [
+        0,
+        1
+      ]
+    },
+    "july_markov_parent": {
+      "W1_shape": [
+        256,
+        35
+      ],
+      "zero_columns": [
+        0,
+        1,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ]
+    },
+    "b0_is_v1_with_controller_columns_zeroed": true,
+    "b0_matches_july_markov_parent_zero_set": true,
+    "declared_deviation": "July's BASE stage used a genuinely 25-wide network; the replay uses ONE 35D actor with columns 25..34 hard-zeroed for the base stage and re-enabled afterwards in the SAME actor. A zero column contributes nothing to the forward pass, so the base stage is functionally equivalent, and this is what makes the later re-enabling possible without a second network. Approved by the user: no separate 25D network, no widening."
+  },
+  "current_gate_contract": {
+    "j1_teacher_collection_gate": {
+      "name": "COMMON gate: integrity, runtime, safety, contract",
+      "criteria": {
+        "steps_required": 500,
+        "end_reason": "episode_time_limit",
+        "valid_cycles_min": 2,
+        "phase_timeout_stance_max": 0,
+        "phase_timeout_swing_max": 0,
+        "morphology_causal_contract_failure_max": 0,
+        "hs_cancelled_count_max": 0,
+        "resync_count_max": 1,
+        "max_penetration_m_max": 0.02
+      },
+      "purpose": "necessary to ACCEPT the collected dataset. It says the teacher rollout was complete, safe and contract-conformant; it says nothing about gait quality",
+      "kinematic_quality_applies": false,
+      "why_not": "the kinematic gate qualifies the gait an ACTOR produces. Imposing it on the teacher collection would confuse dataset integrity with actor quality"
+    },
+    "j3_actor_closed_loop_gate": {
+      "name": "COMMON gate + full kinematic quality",
+      "criteria": {
+        "steps_required": 500,
+        "end_reason": "episode_time_limit",
+        "valid_cycles_min": 2,
+        "phase_timeout_stance_max": 0,
+        "phase_timeout_swing_max": 0,
+        "morphology_causal_contract_failure_max": 0,
+        "hs_cancelled_count_max": 0,
+        "resync_count_max": 1,
+        "max_penetration_m_max": 0.02,
+        "kinematic_quality": {
+          "ankle_min_rad": -0.03,
+          "ankle_amplitude_min_rad": 0.3,
+          "knee_amplitude_min_rad": 0.6,
+          "knee_strictly_flexed": true,
+          "within_bounds": true
+        }
+      },
+      "kinematic_quality": {
+        "ankle_min_rad": -0.03,
+        "ankle_amplitude_min_rad": 0.3,
+        "knee_amplitude_min_rad": 0.6,
+        "knee_strictly_flexed": true,
+        "within_bounds": true
+      },
+      "source": "v26b_b1_base_fit.declared_closed_loop_gates, already fixed, not relaxed",
+      "worked_example": "an ankle minimum of -0.0099 rad FAILS, because -0.0099 > -0.03"
+    },
+    "diagnostics_not_binding": {
+      "fields": [
+        "action_clipped_steps"
+      ],
+      "rule": "recorded in the receipt, never a pass criterion. Promoting it to a binding gate requires an already-approved source, which does not exist"
+    },
+    "current_runtime_thresholds": {
+      "pinned_config_sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+      "grf_soft_threshold_m": 0.02,
+      "grf_hard_termination_m": 0.028,
+      "both_must_be_recorded_by_the_collector": true
+    },
+    "july_historical_only": {
+      "guard_m": 0.025,
+      "teacher_max_penetration_m": 0.02294380435912411,
+      "selected_actor_closed_loop_max_penetration_m": [
+        0.02395957553235469,
+        0.02460202939096984,
+        0.024323924384327976
+      ],
+      "status": "HISTORICAL EVIDENCE, EXPLICITLY NOT ISOMETRIC to the current runtime",
+      "warning": "July's rollouts sat between 0.0233 and 0.0246 m, i.e. ABOVE the current 0.020 m soft threshold and below its own 0.025 m guard. A July number must never be reused as a current pass criterion, and July's closed-loop success does not transfer numerically to the current gate."
+    }
+  },
+  "collector_contract": {
+    "negative_control": {
+      "builder": "Trajectory Generator/baseline_MLP/target_domain_imitation.py::build_target_env_config",
+      "sha256": "442be2222c935e18607e944d946d23bc8151b32c5e57d64036b8e5a00c1e9ed3",
+      "v3_keys_checked": [
+        "binary_phase_detector_profile_file",
+        "binary_phase_invalid_event_policy",
+        "event_contract_id",
+        "binary_phase_event_contract_id",
+        "binary_phase_fsm_mode",
+        "binary_phase_actor_fsm_version",
+        "binary_phase_debounce_s",
+        "phase_fsm_input_mode",
+        "phase_sensor_on_threshold_n",
+        "phase_sensor_off_threshold_n",
+        "phase_sensor_dwell_s",
+        "detector_sample_dt_s"
+      ],
+      "v3_keys_MISSING_from_historical_builder": [
+        "binary_phase_detector_profile_file",
+        "binary_phase_invalid_event_policy",
+        "event_contract_id",
+        "binary_phase_event_contract_id",
+        "binary_phase_fsm_mode",
+        "binary_phase_actor_fsm_version",
+        "binary_phase_debounce_s",
+        "phase_fsm_input_mode",
+        "phase_sensor_on_threshold_n",
+        "phase_sensor_off_threshold_n",
+        "phase_sensor_dwell_s",
+        "detector_sample_dt_s"
+      ],
+      "forwards_morphology": false,
+      "forwards_corridor": false,
+      "verdict": "INCOMPLETE FOR v3 - MUST NOT be used for the current collection",
+      "risk": "it would build a teacher on a non-v3 detector/FSM while appearing to honour the pinned runtime config"
+    },
+    "reference_builders": {
+      "files": [
+        "train_ppo_mlp.py",
+        "rollout_eval.py"
+      ],
+      "v3_keys_present": {
+        "train_ppo_mlp.py": [
+          "binary_phase_detector_profile_file",
+          "binary_phase_invalid_event_policy",
+          "event_contract_id",
+          "binary_phase_event_contract_id",
+          "binary_phase_fsm_mode",
+          "binary_phase_actor_fsm_version",
+          "binary_phase_debounce_s",
+          "phase_fsm_input_mode",
+          "phase_sensor_on_threshold_n",
+          "phase_sensor_off_threshold_n",
+          "phase_sensor_dwell_s",
+          "detector_sample_dt_s"
+        ],
+        "rollout_eval.py": [
+          "binary_phase_detector_profile_file",
+          "binary_phase_invalid_event_policy",
+          "event_contract_id",
+          "binary_phase_event_contract_id",
+          "binary_phase_fsm_mode",
+          "binary_phase_actor_fsm_version",
+          "binary_phase_debounce_s",
+          "phase_fsm_input_mode",
+          "phase_sensor_on_threshold_n",
+          "phase_sensor_off_threshold_n",
+          "phase_sensor_dwell_s",
+          "detector_sample_dt_s"
+        ]
+      }
+    },
+    "dual_contract_ids": {
+      "values": {
+        "event_contract_id": "legacy_events_v1",
+        "binary_phase_event_contract_id": "binary_point_v25+heel_qualified_fsm_v2"
+      },
+      "rule": "TWO DISTINCT keys with DIFFERENT values, both required. They must never be merged, swapped or treated as a rename of one another.",
+      "evidence": "rollout_eval.py lines 523 and 530; train_ppo_mlp.py lines 1301 and 1308; the pinned config assigns event_contract_id=legacy_events_v1 and binary_phase_event_contract_id=binary_point_v25+heel_qualified_fsm_v2"
+    },
+    "config_to_env_key_renames": {
+      "table": {
+        "binary_phase_detector_profile": "binary_phase_detector_profile_file"
+      },
+      "why": "the ONLY genuine config -> env rename is the detector profile, which the config calls binary_phase_detector_profile and the env calls binary_phase_detector_profile_file. An earlier draft also listed invalid_event_policy and event_contract_id as renames: both were WRONG. The config already uses binary_phase_invalid_event_policy verbatim, and event_contract_id is a SEPARATE key that coexists with binary_phase_event_contract_id with a different value.",
+      "verified_against": [
+        "train_ppo_mlp.py",
+        "rollout_eval.py"
+      ]
+    },
+    "required_of_the_new_collector": {
+      "source_of_truth": "the pinned runtime config a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db",
+      "must_assemble": "the FULL env_config, semantically identical to rollout_eval.run / train_ppo_mlp.build_config, including the reward and morphology blocks",
+      "must_not_call": "build_target_env_config or target_domain_imitation.main",
+      "must_assert_into_its_receipt": [
+        "binary_phase_detector_profile_file",
+        "binary_phase_actor_fsm_version == v3",
+        "phase_fsm_input_mode",
+        "binary_phase_fsm_mode",
+        "binary_phase_invalid_event_policy",
+        "event_contract_id AND binary_phase_event_contract_id, both, with their distinct pinned values",
+        "binary_phase_debounce_s",
+        "phase_sensor_on_threshold_n",
+        "phase_sensor_off_threshold_n",
+        "phase_sensor_dwell_s",
+        "detector_sample_dt_s",
+        "the pinned collection semantics: seed, teacher_lookahead_s, action_noise_sigma, action_noise_hold_steps",
+        "corridor profile with its alpha and weight",
+        "start condition",
+        "the CURRENT grf soft threshold 0.020 m AND hard termination 0.028 m, both values",
+        "the binding V26B closed-loop gate criteria",
+        "the episode and phase timeouts",
+        "the reward block",
+        "the morphology block"
+      ],
+      "fail_closed": "a missing or mismatched field must abort the collection before any environment step"
+    },
+    "production_untouched": "the historical builder is READ, never modified; no production, FSM, GRF, morphology, reward, SEA or C++ file is edited"
+  },
+  "replay_plan": {
+    "status": "SPECIFICATION - the executor stops at preflight and awaits the architect's GO",
+    "actor": "ONE 35D actor, 35 -> 256 -> 256 -> 4, columns 0,1 and 25..34 hard-zero during the base stage, columns 25..34 re-enabled in the SAME actor afterwards",
+    "parent": {
+      "exclusive": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+      "sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+      "no_july_checkpoint_or_dataset_as_operational_parent": true
+    },
+    "stage_J1_collection": {
+      "what": "a NEW prescribed-teacher nominal rollout of 500 steps under the CURRENT EGRF/FSM v3 runtime and corridor, producing 500 observation -> prescribed pairs, plus its own teacher-rollout gate",
+      "july_analogue": "target_domain_imitation_no_controller_memory_2026-07-13/teacher_dataset.npz + teacher_trace.json",
+      "collection_semantics_pinned": {
+        "seed": 123,
+        "teacher_lookahead_s": 0.0,
+        "action_noise_sigma": [
+          0.0,
+          0.0
+        ],
+        "action_noise_hold_steps": 1,
+        "action_noise_hold_duration_s": 0.01,
+        "provenance": "target_domain_imitation_no_controller_memory_2026-07-13: run_summary.teacher and teacher_summary.json; seed from adaptation_report.hyperparameters.seed",
+        "status": "JULY ARTEFACT VALUES, NOT DEFAULTS - the collector must pin them explicitly"
+      },
+      "must_not_substitute": [
+        "the 1500 three-anchor V26B rows",
+        "LOTO / LOCO / 11-fold segment-blocked designs",
+        "the u_IK bridge labels"
+      ],
+      "why": "July's base labels are the PRESCRIBED TEACHER on states the teacher itself visited. None of the above is that object.",
+      "gate": {
+        "binding": {
+          "steps_required": 500,
+          "end_reason": "episode_time_limit",
+          "valid_cycles_min": 2,
+          "phase_timeout_stance_max": 0,
+          "phase_timeout_swing_max": 0,
+          "morphology_causal_contract_failure_max": 0,
+          "hs_cancelled_count_max": 0,
+          "resync_count_max": 1,
+          "max_penetration_m_max": 0.02
+        },
+        "kind": "COMMON gate only: integrity, runtime, safety, contract",
+        "kinematic_quality_applies": false,
+        "source": "the already-fixed V26B gate, NOT July's 0.025 m",
+        "july_observed_HISTORICAL_ONLY": {
+          "steps": 500,
+          "expected_steps": 500,
+          "end_reason": "episode_time_limit",
+          "terminated": false,
+          "truncated": true,
+          "max_penetration_m": 0.02294380435912411,
+          "hard_penetration_m": 0.025,
+          "valid_cycle_count": 2.0,
+          "valid_hs_count": 3.0,
+          "valid_to_count": 3.0,
+          "action_abs_max": 0.7813355326652527,
+          "slew_limited_steps": 143,
+          "gate_pass": true
+        },
+        "july_not_isometric": true
+      }
+    },
+    "stage_J2_base_fit": {
+      "scope": "the ENTIRE mean actor, with columns 0,1 and 25..34 held at exact zero",
+      "split": "random 80/20, as July",
+      "hyperparameters_recovered_verbatim": {
+        "seed": 123,
+        "batch_size": 64,
+        "learning_rate": 0.0003,
+        "validation_fraction": 0.2,
+        "patience": 60,
+        "clip_weight": 1.0,
+        "logstd_weight": 0.1,
+        "anchor_weight": 1e-05,
+        "freeze_logstd_head": false
+      },
+      "epochs_max": 400,
+      "july_reference_outcome": {
+        "best_epoch": 183,
+        "adapted_rmse": 0.011782177113774129
+      },
+      "note": "these hyperparameters are exactly the ones the V26B branch had pinned as the July protocol; that pin was faithful to the BASE stage"
+    },
+    "stage_J3_closed_loop": {
+      "what": "closed-loop rollout of the fitted actor, the PRIMARY gate per the July precedent",
+      "ordering": "closed-loop is primary; an offline-only shortfall is not by itself a stop",
+      "gate": {
+        "steps_required": 500,
+        "end_reason": "episode_time_limit",
+        "valid_cycles_min": 2,
+        "phase_timeout_stance_max": 0,
+        "phase_timeout_swing_max": 0,
+        "morphology_causal_contract_failure_max": 0,
+        "hs_cancelled_count_max": 0,
+        "resync_count_max": 1,
+        "max_penetration_m_max": 0.02,
+        "kinematic_quality": {
+          "ankle_min_rad": -0.03,
+          "ankle_amplitude_min_rad": 0.3,
+          "knee_amplitude_min_rad": 0.6,
+          "knee_strictly_flexed": true,
+          "within_bounds": true
+        }
+      },
+      "gate_kind": "COMMON gate + full kinematic quality",
+      "gate_source": "the already-fixed V26B closed-loop gate; July's 0.025 m guard and its 22.94 mm teacher penetration are historical evidence only and are NOT isometric to the current runtime"
+    },
+    "stage_J4_markov": {
+      "what": "re-enable columns 25..34 in the SAME actor and adapt the whole mean network, July markov stage",
+      "not_in_scope_now": true,
+      "open_choice": "exploration sigma for the stochastic recovery traces - July used 0.005; sigma is deferred by standing governance and is NOT assumed"
+    },
+    "future_todo_non_operational": {
+      "note": "preserved, not deleted, not operational, no artefact removed",
+      "items": [
+        "LOTO 3-fold (B1)",
+        "LOCO 6-fold (B1R1)",
+        "11-fold 8 complete cycles + 3 tails (B1R2)",
+        "B1R2-A budget arm",
+        "B1R2-B learning-rate arm"
+      ]
+    },
+    "authority": "The USER holds exclusive authority over any deviation on dataset, split, gate, architecture, hyperparameters or order. Values recovered verbatim from the July artefacts are not deviations. The architect's standing mandate covers the July-faithful collection and fit after the architect's GO."
+  },
+  "open_points": [
+    {
+      "id": "O1",
+      "topic": "prescribed teacher semantics under v3",
+      "statement": "July's base labels come from the prescribed teacher of that runtime. That the current v3 prescribed teacher is the same object is NOT verified; it becomes verifiable at collection time through the teacher-rollout gate.",
+      "blocking_now": false
+    },
+    {
+      "id": "O2",
+      "topic": "teacher-rollout gate outcome under v3",
+      "statement": "July's teacher rollout passed its own gate (500 steps, penetration 0.02294 < 0.025, 2 valid cycles). Whether it passes under v3 and the current corridor is unknown until collected.",
+      "blocking_now": false
+    },
+    {
+      "id": "O3",
+      "topic": "exploration sigma",
+      "statement": "Needed only by the later Markov stage. July used 0.005. Sigma is deferred by standing governance and is not assumed here.",
+      "blocking_now": false
+    }
+  ],
+  "verdict": "GO-FOR-ARCHITECT-REVIEW",
+  "verdict_reason": "Both July stages are fully reconstructed from code and artefacts, the two gate levels are reconciled, the parent chain is verified, and the replay plan carries no invented default. No open point blocks the preflight. The executor stops here and awaits the architect's GO.",
+  "generated_at_utc": "2026-08-25T23:19:30Z"
+}

@@ -1,0 +1,107 @@
+{
+  "amendment_id": "rev3y_s1c2_preflight",
+  "date": "2026-08-24",
+  "token": "V26B-S1C-2-PREFLIGHT (read-only audit + preregistration; NO fit)",
+  "kind": "ADDITIVE. Observability audit, objective-family comparison and conditional preregistration. No fit, rollout, episode, collection, promotion, sigma or production change. No prior artifact is mutated",
+  "architect_decision": "the pointwise push-off weight is DISCARDED after S1C-1 (three candidates, all FAIL P_preservation, all quarantined)",
+  "parents_immutable": {
+    "rev3x": "041bbc38dec9209d1b0420be8b641da4224fb256f11e420204710476e871f433",
+    "rev3x_addendum_a_status": "de53d529343edd5d82af786036368d7b885ad686af18469088a3dc8ccb563cf5",
+    "s1c1_aggregate": "58874483683ff3f9eb6741f7f752fbb5b9c8fec96b3277c3543f0eae58b7d3e4",
+    "rev3w": "92cf4aaf11dc0698054134c49efaaf34e16f5411579da6499ffae4e203dc2b47",
+    "rev3w_addendum_a": "7c4f39b9e0e2e2a579a189dffd35807ba71cada88c0e2b20c2a25c9f8214935b",
+    "rev3v": "889f1068a9ddb8db8241b62b569a85fbc6baf3d7673ae626c4df5e51902ed984",
+    "rev3s": "89e8c227eecb2a80350307d6c0315e0f90e42b37ecae1d75fea30f9da2e067a0",
+    "s0d_actor": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a"
+  },
+  "OBSERVABILITY_AUDIT_PREREGISTERED_BEFORE_ANY_CLASSIFICATION": {
+    "question": "do the frozen 35D inputs distinguish the rows of the continuous NEGATIVE AB06 IK ankle window from the neighbouring rows whose target is non-negative?",
+    "label": "y = 1 iff the decoded IK ankle target q = 0.7*u_IK[:,1] is negative; measured structure on the 500 frozen rows: 97 positives (19.4%) in 7 contiguous runs of lengths [9, 21, 6, 24, 5, 23, 9]",
+    "only_structural_counts_were_inspected_before_freezing_this_criterion": true,
+    "splits": "the FROZEN rev3n geometry: 5 contiguous blocked folds of 100 rows with embargo 10, train-only standardisation, constants excluded per fold. No new split is invented",
+    "feature_sets": {
+      "runtime_available": "all 35 minus the dead prescribed clock (0,1) and minus any feature constant on the fold's training rows. This is the set the deployed policy actually sees",
+      "physical_only_diagnostic": "the runtime-available set minus the online phase family (14,15 online gait phase sin/cos, 16 cycle duration, 20,21 phase_expected_hs/to, 22,23 stance/swing elapsed norm, 24 cycle progress credit). DIAGNOSTIC ONLY: it answers whether localisation leans on the online phase estimate, and its failure is NOT by itself a NO-GO, because those features are legitimately available at runtime"
+    },
+    "estimators": [
+      "kNN k=5 majority classifier on the standardised state",
+      "kNN k=5 regression of the signed IK ankle target, reporting the conditional-variance ratio Var(residual)/Var(target)"
+    ],
+    "controls": [
+      "block-permutation null: labels permuted by contiguous blocks of 25 rows, 20 repetitions, seed 2026, to calibrate what temporal autocorrelation alone can produce",
+      "cross-class versus intra-class nearest-neighbour distance contrast, to detect aliasing directly",
+      "per-fold reporting, because fold [301,400] contains only 5 positives"
+    ],
+    "GO_NO_GO_CRITERION_FROZEN": {
+      "GO": "on the RUNTIME-AVAILABLE feature set, pooled over the 5 folds: balanced accuracy >= 0.75 AND positive-class recall >= 0.60 AND balanced accuracy exceeding the block-permutation null mean by >= 0.10",
+      "NO_GO": "any of the three conditions fails",
+      "thresholds_are_a_priori": "0.75, 0.60 and 0.10 are round values chosen before any classification was run; they are declared as chosen, not derived",
+      "consequence_of_NO_GO": "the S1C-2 fit is NOT authorised and the minimal architectural correction is proposed as a SEPARATE stage; no objective-function change can create information the input lacks"
+    }
+  },
+  "OBJECTIVE_FAMILY_COMPARISON_NO_TRAINING": {
+    "A_supervised_phase_window_target": {
+      "idea": "keep the per-row supervised form but replace the pointwise label on the push-off rows with a window-consistent target (identical or smoothed target across the contiguous negative block), so the network is asked for a coherent block rather than 73 independent rows",
+      "causal_MLP_compatibility": "FULL: the policy still maps s_t -> a_t with no memory; the label is computed offline from already-recorded data, so no runtime input changes and no future observation is used",
+      "training_machinery": "unchanged: the frozen row-shuffled T1R union and the group-balanced per-role means continue to apply; no sequential minibatch is required",
+      "clock_dependence": "none at runtime. The window is defined offline on the recorded IK target; the policy must still infer it from the state",
+      "precondition": "the window must be OBSERVABLE from the state, otherwise the network averages across aliased rows - exactly the fragmentation measured in S1C-1"
+    },
+    "B_run_fragmentation_temporal_consistency_loss": {
+      "idea": "penalise fragmentation of the output's negative runs, or penalise sign changes between consecutive outputs",
+      "requires_sequential_minibatches": "YES: the loss couples outputs at consecutive time steps, so batches must be contiguous ordered segments instead of the frozen shuffled union. This is a structural change to the training loop and would invalidate the group-balanced per-role mechanism as currently frozen",
+      "future_dependence": "a run length at t needs outputs at t+1... A backward-only variant (a_t versus a_{t-1}) is causal within the loss. In either case the POLICY stays causal, because a non-causal LOSS at training time does not make a non-causal INPUT at runtime; this distinction must be stated explicitly in any future protocol",
+      "avoiding_absolute_clock": "the loss must use only relative differences between consecutive outputs inside a segment. If it used the phase field or absolute time to define windows it would reintroduce a clock dependence that the runtime policy cannot exploit, since the prescribed clock columns are hard-zeroed",
+      "fundamental_limit": "a temporal loss CANNOT create information the input lacks. If two rows are aliased in 35D a memoryless network must emit the same action for both, so the fragmentation would be irreducible by any loss"
+    },
+    "shared_precondition": "both families reduce to the SAME precondition, which is exactly what the observability audit decides. This is why the audit gates the choice rather than following it",
+    "preference_rule_frozen_before_the_audit": {
+      "if_GO": "family A is preferred: it achieves the same objective without sequential minibatches, without any future dependence and without touching the frozen T1R mechanism, so it changes one thing at a time",
+      "if_NO_GO": "neither family is authorised; the minimal architectural correction is proposed separately"
+    }
+  },
+  "S1C_2_PROTOCOL_CONDITIONAL_ON_GO": {
+    "status": "PREREGISTERED BUT NOT AUTHORISED. It may be executed only after an explicit architect token, and only if the audit returns GO",
+    "init": "EXCLUSIVELY S0D 481dd0d2... (August V26 imitation -> 35D). W2/W4/W8, A1..A6, S1A, A2 are forbidden as init, source or anchor. July is used ONLY as parametric anchor 1e-5 and as benchmark, NEVER as init or label",
+    "objective": "family A: two-role loss with r = 5 unchanged; the TASK label on the rows of each contiguous negative IK window is replaced by the WINDOW-CONSISTENT target (the mean of the decoded IK target over that window, re-encoded to the action convention); all other task rows keep their pointwise label",
+    "candidates_budget_max": 3,
+    "candidate_grid": "the window-target blend beta_w in {0.5, 0.75, 1.0}, where the task label on a window row is (1-beta_w)*pointwise + beta_w*window_mean. beta_w = 0 would reproduce A2 and is therefore excluded",
+    "numerics_unchanged": {
+      "epochs": 300,
+      "batch_size": 256,
+      "optimizer": "Adam",
+      "lr": 0.0001,
+      "seed": 2026,
+      "deterministic_algorithms": true,
+      "clock_columns": "re-zeroed after every step",
+      "logstd": "restored BIT-IDENTICAL to the init",
+      "early_stopping": "none",
+      "retry": "forbidden"
+    },
+    "splits_unchanged": "the frozen 380 training rows (steps 1-190, 311-500), holdout 201-300, embargo 191-200 and 301-310",
+    "gates_unchanged": "the rev3s hierarchy I -> P -> T -> D with the rev3v thresholds EXACTLY as frozen. No threshold is changed, added or removed",
+    "preregistered_persistence_diagnostics": "identical to rev3x: duty cycle, run count, mean and max run length of the negative command on the ordered held-out rows, plus the predicted served reference through the rev3w validated replica, plus the same quantities for S0D, A2 and the AB06 IK target. Non-binding, no thresholds, B3 remains INDETERMINATE while the phase field is null",
+    "materialisation": "candidates/S1C2_<ID>_35D_NONDEPLOYABLE, no-clobber, deployable false; the rollout/promotion status MUST be derived from the offline verdict per the rev3x status addendum",
+    "sigma": "UNRESOLVED and not chosen"
+  },
+  "MINIMAL_ARCHITECTURAL_CORRECTION_IF_NO_GO": {
+    "status": "PROPOSAL ONLY, separate stage, not authorised here",
+    "principle": "if the window is not observable from the runtime-available state, the deficit is informational and no loss can repair it. The minimal correction adds observability, not capacity",
+    "options_ranked_by_invasiveness": [
+      "1. a short causal feature window: feed the policy a small fixed lag stack of already-available physical channels (for example the ankle angle and the GRF over the last k steps). It stays causal and needs no new sensor, but it changes the 35D input contract and therefore the deployable actor definition",
+      "2. minimal recurrence: a single-state memory on the existing inputs. Strictly more invasive than the lag stack and harder to certify against the frozen invariants",
+      "3. exposing an existing but currently unused signal, if the audit shows the deficit is localised to one missing channel"
+    ],
+    "explicitly_not_proposed": "no change to env, reward, FSM, morphology, SEA, corridor or C++ is proposed by this document"
+  },
+  "prohibitions": [
+    "no fit",
+    "no rollout or episode",
+    "no collection",
+    "no promotion",
+    "no sigma choice",
+    "no change to the rev3v gates or thresholds",
+    "no mutation of any prior artifact",
+    "no production/env/reward/FSM/morphology/SEA/C++ change"
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "schema": "v26c_amendment.1",
+  "id": "v26c_j12_architect_go_2026-08-27",
+  "kind": "ADDITIVE, IMMUTABLE, ARCHITECT GO RECORD",
+  "stage": "V26C_J12_CLOSED_LOOP_QUALIFICATION",
+  "date_utc": "2026-08-27",
+  "what_this_is": "the architect's explicit GO for the J12 closed-loop qualification. It is ADDITIVE: it neither modifies nor supersedes the readiness authorization or the readiness report, both of which remain immutable evidence of what was proposed and reviewed.",
+  "does_not_modify": [
+    "v26c_j12_closed_loop_authorization.json",
+    "v26c_j12_prereg_closed_loop_qualification.json",
+    "v26c_j12_closed_loop.py",
+    "test_v26c_j12_closed_loop.py",
+    "reports/user/2026-08-27_v26c_j12_closed_loop_qualification_readiness.md",
+    "any J0-J11 artefact, July source, report or production configuration"
+  ],
+  "approval": {
+    "granted_by": "the architect",
+    "granted": true,
+    "readiness_revision_approved": "r2",
+    "verbatim": "GO ARCHITETTO - J12 e' approvato.",
+    "prior_state": "the readiness authorization declares execution_permitted_now false; THIS record is the explicit GO that lifts it, without editing that file",
+    "execution_permitted_now": true
+  },
+  "pinned_bundle_sha256": {
+    "v26c_j12_closed_loop_authorization.json": "0d83943e0e057cc925cfc395945d86ff53c756909010d4781423039b595ca3bf",
+    "v26c_j12_closed_loop.py": "65d7b8619074c909753750f03aec751d38179c2226e50c87da62113ea5769fca",
+    "test_v26c_j12_closed_loop.py": "ba0a899b0b6c9835cefa27ea4fb0282f6237c0e30bc251825771eb02ca9209ce",
+    "v26c_j12_prereg_closed_loop_qualification.json": "5f0ed000b62c7c64ceaca8eca0d83d36e863619bf528a285aa7d596d63120bbe"
+  },
+  "pinned_by": "the architect, in the GO message, hash by hash",
+  "on_any_hash_mismatch": "DO NOT EXECUTE. The GO covers exactly these four files and nothing else.",
+  "the_actor": {
+    "stage": "V26C_J11_MULTISTART_FIT",
+    "leaf": "j11_runs/j11_multistart_fit_v26c_2026-08-27_r1",
+    "module_state_sha256": "19bf8a43804774c06c24db30626138856bb07acf7002419606d8c1bb887f6b73",
+    "is_the_only_actor": true,
+    "is_j8": false,
+    "is_j4": false,
+    "is_july": false
+  },
+  "matrix": {
+    "cells_count": 6,
+    "steps_per_cell": 500,
+    "order_is_frozen": "A, B, C, D, E, F, sequential",
+    "noise_hold_steps": 1,
+    "sigma": 0.005,
+    "behavioural_fail_fast": false,
+    "cells": [
+      {"id": "A", "mode": "deterministic", "seed": 123, "offset_s": 1.956870983805102, "label": "nominal"},
+      {"id": "B", "mode": "deterministic", "seed": 123, "offset_s": 1.756870983805102, "label": "-0.20 s"},
+      {"id": "C", "mode": "deterministic", "seed": 123, "offset_s": 2.156870983805102, "label": "+0.20 s"},
+      {"id": "D", "mode": "stochastic_held", "seed": 123, "offset_s": 1.956870983805102, "label": "nominal sigma 0.005"},
+      {"id": "E", "mode": "stochastic_held", "seed": 124, "offset_s": 1.956870983805102, "label": "nominal sigma 0.005"},
+      {"id": "F", "mode": "stochastic_held", "seed": 125, "offset_s": 1.956870983805102, "label": "nominal sigma 0.005"}
+    ]
+  },
+  "authorised_execution": {
+    "attempts": 1,
+    "single_attempt": true,
+    "no_retry": true,
+    "no_variant": "no flag may be added, removed or altered",
+    "cwd": "/Users/tommy/Documents/CMC-like-Simulator - Claude",
+    "interpreter": "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+    "argv": [
+      "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j12_closed_loop.py",
+      "--run",
+      "--authorized-stage",
+      "V26C_J12_CLOSED_LOOP_QUALIFICATION",
+      "--out",
+      "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j12_runs/j12_closed_loop_v26c_2026-08-27_r1"
+    ],
+    "leaf": "j12_runs/j12_closed_loop_v26c_2026-08-27_r1",
+    "output_root_override": "MUST BE UNSET",
+    "capture_directory": "j12_execution_2026-08-27",
+    "capture_is_outside_the_leaf": "stdout, stderr and the exit code are captured into an ADDITIVE directory that is not the transactional leaf, so capture can never disturb the atomic commit",
+    "capture_is_redirection_only": "it cannot cause a second attempt"
+  },
+  "required_before_execution": {
+    "non_mutating_checks": [
+      "the full selftest must be PASS",
+      "py_compile on the runner and the test",
+      "the preflight must be GO with no blockers and with torch and ray absent from sys.modules",
+      "no J12 leaf, no lock, no staging, no sentinel"
+    ],
+    "module_load_smoke_test": {
+      "why": "ray's checkpoint loader catches EVERY exception while unpickling class_and_ctor_args.pkl and silently returns a weightless base RLModule. A rollout against an empty network would produce evidence about nothing.",
+      "must_prove": [
+        "the loaded class is exactly AsymmetricActorCriticTorchRLModule",
+        "get_state() is non-empty",
+        "it holds exactly the ten actor keys",
+        "every tensor is bit-identical to the pinned module_state.pkl"
+      ],
+      "constructs_no_environment": true
+    },
+    "on_any_failure": "DO NOT EXECUTE J12. Stop and report with the evidence."
+  },
+  "outcome_policy": {
+    "behavioural_fail": "the leaf IS COMMITTED with the full six-cell evidence, the post-commit verification passes, verdict FAIL, exit non-zero. PRESERVE, report, STOP. No retry.",
+    "telemetry_invalid": "verdict INVALID - a statement about the evidence, never about the gait. PRESERVE, report, STOP.",
+    "post_commit_verification_failure": "the leaf is preserved, marked TECHNICAL_INVALID, commit_verification pass false. PRESERVE, report, STOP.",
+    "technical_error": "NO leaf committed; staging and lock removed. STOP and report.",
+    "pass": "the leaf is committed, commit_verification pass true, the marker is gone, verdict PASS, exit 0. PRESERVE, report, hand back."
+  },
+  "a_pass_does_not_authorise": [
+    "the critic warm-up, which is explicitly NOT to be started",
+    "PPO of any kind",
+    "promotion of any actor",
+    "deployment or any deployability claim",
+    "any change to FSM, morphology corridor, reward, SEA or the C++ plugin"
+  ],
+  "after_the_run": {
+    "inspect": "the leaf, the receipt, commit_verification and all six cell results",
+    "report": "reports/user/2026-08-27_v26c_j12_closed_loop_qualification_execution.md",
+    "then": "STOP for the architect's independent review"
+  },
+  "penetration_reading": {
+    "soft_diagnostic": "> 0.020 m, never binding",
+    "july_legacy_diagnostic": ">= 0.025 m, never binding",
+    "hard_binding": "> 0.028 m is the ONLY binding bar; exactly 0.028 PASSES"
+  },
+  "outcome_of_this_file": {
+    "executes_nothing_itself": true,
+    "deployable": false,
+    "promotion": "NONE",
+    "next_stage_authorized": false,
+    "critic_authorized": false,
+    "ppo_authorized_to_start": false,
+    "single_execution": true,
+    "no_autonomous_retry": true
+  }
+}

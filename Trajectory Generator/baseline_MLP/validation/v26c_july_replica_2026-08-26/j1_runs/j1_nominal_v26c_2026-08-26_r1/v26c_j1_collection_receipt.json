@@ -1,0 +1,157 @@
+{
+  "schema": "v26c_j1_collection.1",
+  "stage": "V26C-J1-TEACHER-COLLECT",
+  "verdict": "FAIL",
+  "pinned_config": {
+    "path": "Trajectory Generator/runs/training/MLP_ExNovo_B0820_fsmv3_fixedcorridor_50iter/training_cfg.resolved.yaml",
+    "sha256": "a870cc38a77d853bbd5fba86b51cfcc3ef20a33a5823f4a42f1b968ba4a537db"
+  },
+  "parent": {
+    "path": "Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+    "module_state_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+    "role": "the EXCLUSIVE operative parent",
+    "july_status": "methodological evidence only; no July checkpoint, dataset or label is used as an operative input"
+  },
+  "env_contract": {
+    "verified_fields": 44,
+    "v3_fields": 12,
+    "core_fields": 23,
+    "protocol_fixed_fields": 4,
+    "reward_block_keys": 125,
+    "reward_verified": "every key and value equals the pinned mapping",
+    "morphology_keys_verified": 17,
+    "contract_ids": {
+      "event_contract_id": "legacy_events_v1",
+      "binary_phase_event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+      "distinct": true
+    },
+    "config_to_env_rename_applied": {
+      "binary_phase_detector_profile": "binary_phase_detector_profile_file"
+    },
+    "status": "PASS"
+  },
+  "env_config_sha256": "2fb0126cca580d7b8c420353507a3a20cb98e77e7500fbad4fd37e403b3a8853",
+  "collection_semantics": {
+    "pinned": {
+      "seed": 123,
+      "teacher_lookahead_s": 0.0,
+      "action_noise_sigma": [
+        0.0,
+        0.0
+      ],
+      "action_noise_hold_steps": 1,
+      "action_noise_hold_duration_s": 0.01
+    },
+    "label_source": "prescribed_teacher_action on states visited by that same prescribed teacher; no other label source is permitted",
+    "status": "PASS",
+    "note": "July artefact values, not defaults"
+  },
+  "label_source": "prescribed_teacher_action on states visited by that same prescribed teacher; no other label source is permitted",
+  "runtime_identity": {
+    "fsm_behaviour_version": "v3",
+    "event_source": "binary_active_v26",
+    "observed_versions": [
+      "v3"
+    ],
+    "observed_event_sources": [
+      "binary_active_v26"
+    ],
+    "note": "verified on EVERY row; not a new gate, a check that the collected runtime is the preregistered one"
+  },
+  "realized_noise_rms": [
+    0.0,
+    0.0
+  ],
+  "summary": {
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "max_penetration_m": 0.02294380435912411,
+    "valid_cycle_count": 2,
+    "valid_hs_count": 3,
+    "valid_to_count": 3,
+    "phase_timeout_stance": 0,
+    "phase_timeout_swing": 0,
+    "morphology_causal_contract_failure": 0,
+    "hs_cancelled_count": 0,
+    "resync_count": 0,
+    "action_clipped_steps": 0,
+    "fsm_behaviour_versions": [
+      "v3"
+    ],
+    "event_sources": [
+      "binary_active_v26"
+    ],
+    "episode_return": 42.11134093575315,
+    "realized_noise_rms": [
+      0.0,
+      0.0
+    ],
+    "action_noise_sigma": [
+      0.0,
+      0.0
+    ],
+    "aggregation": "cumulative counters aggregated with MAX, never the last row: under the v3 cancellation contract valid_hs_count can decrease"
+  },
+  "j1_gate": {
+    "steps_required": 500,
+    "end_reason": "episode_time_limit",
+    "valid_cycles_min": 2,
+    "phase_timeout_stance_max": 0,
+    "phase_timeout_swing_max": 0,
+    "morphology_causal_contract_failure_max": 0,
+    "hs_cancelled_count_max": 0,
+    "resync_count_max": 1,
+    "max_penetration_m_max": 0.02
+  },
+  "gate": {
+    "checks": {
+      "steps": true,
+      "end_reason": true,
+      "valid_cycles": true,
+      "phase_timeout_stance": true,
+      "phase_timeout_swing": true,
+      "morphology_causal_contract_failure": true,
+      "hs_cancelled_count": true,
+      "resync_count": true,
+      "max_penetration_m": false
+    },
+    "failed": [
+      "max_penetration_m"
+    ],
+    "pass": false,
+    "kinematic_quality_applies": false
+  },
+  "diagnostics_not_binding": {
+    "action_clipped_steps": 0
+  },
+  "actor_contract": {
+    "width": 35,
+    "masked_columns": [
+      0,
+      1,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "note": "the same single 35D actor; no standalone 25D artefact, no widening; contralateral absence is intentional"
+  },
+  "future_todo_non_operational": [
+    "LOTO (B1)",
+    "LOCO (B1R1)",
+    "B1R2",
+    "B1R2-A",
+    "B1R2-B"
+  ],
+  "generated_at_utc": "2026-08-26T00:01:48Z",
+  "outputs_sha256": {
+    "teacher_dataset.npz": "724d11342da3f3610152d7bd4cc7ca0dc1e8eb8c26a5b7c0947eb2451d1f8c41",
+    "teacher_trace.json": "39af8f0b2d4b8f7e44f917e82ea0e435fa3889c4d022d06b5d6373212c691bd3"
+  }
+}

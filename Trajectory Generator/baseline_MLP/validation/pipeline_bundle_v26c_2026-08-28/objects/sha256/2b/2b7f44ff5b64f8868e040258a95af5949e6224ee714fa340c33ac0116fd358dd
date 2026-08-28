@@ -1,0 +1,299 @@
+# V26C J20 — Esecuzione della sonda K1
+
+**Data**: 2026-08-27
+**Stadio**: `V26C_J20_CRITIC_WARMUP_READINESS` — **esecuzione della sola sonda K1**
+**Esecutore**: Opus 5, effort xhigh — braccio operativo. Codex architetto e gate owner.
+
+## VERDETTO: `FAIL_CLOSED` — 28/29 check
+
+La sonda è stata eseguita **una sola volta**, come autorizzato. **Nessun retry.**
+
+Il check fallito è **`P24_frozen_module_still_gives_the_critic_gradient`**, e il difetto è
+**nella mia sonda, non nella pipeline**: lo stimolo che uso per misurare dove arrivano i
+gradienti è un batch di **zeri**, e con input nullo il gradiente dei pesi di primo strato è
+**esattamente zero per costruzione**, indipendentemente da qualunque freeze. Il dettaglio è
+nella sezione 5.
+
+Tutto il resto è passato, incluso l'intero percorso reale di trapianto.
+
+**Nessun warm-up. Nessun PPO. Nessun Ray avviato. Nessun ambiente. Nessun rollout. Nessun
+optimizer. Nessuna fase successiva autorizzata.**
+
+---
+
+## 1. Problema
+
+La catena V26C ha un attore qualificato (J19A, 35D) e nessun critic. Prima di poter
+preregistrare un warm-up del solo critic serviva stabilire — **misurandolo, non
+dichiarandolo** — che il modulo che il warm-up costruirebbe si comporta come sostenuto: che
+porti un critic 84D vivo, che i dieci tensori attore vi si trapiantino **byte-identici**
+attraverso il **percorso di produzione reale**, che il critic non venga importato dalla
+sorgente, che σ resti 0.005 e che il meccanismo di freeze tagli davvero l'attore dal grafo.
+
+## 2. Perimetro autorizzato
+
+GO dell'architetto `v26c_j20_architect_go_k1.json`, SHA-256
+`aca75c7c12585b5b1ee50c52ebabf3030facf8c83e4ece668e70e421cd3f44f0`.
+
+| | |
+|---|---|
+| stage | `V26C_J20_CRITIC_WARMUP_READINESS` |
+| `authorises_execution` | `true` |
+| `authorises_warmup` / `training` / `rollout` / `ppo` | **tutti `false`** |
+| `execution_limit` | 1 |
+| `retry_authorised` | `false` |
+| pin | **7/7**, insieme esattamente coincidente coi richiesti, nessuno extra, nessuno mancante |
+
+Validato **read-only** prima dell'esecuzione: il runner ha risposto `VALIDO`, i sette hash
+dichiarati coincidevano coi byte reali, e la destinazione `j20_runs` era assente.
+
+**Nota di ambiente**: `apply_patch` non esiste in questa installazione. Il file GO è stato
+creato con lo strumento di scrittura file, come in tutte le fasi precedenti di questa catena.
+Lo segnalo perché la tua istruzione lo nominava esplicitamente.
+
+## 3. Esecuzione
+
+Una sola invocazione, dalla directory di validazione:
+
+```
+/opt/anaconda3/envs/envCMC-rllib/bin/python v26c_j20_critic_warmup_readiness.py \
+    --probe --go-file v26c_j20_architect_go_k1.json
+```
+
+Exit code **0**. Una sola esecuzione, nessun retry, nessun processo figlio.
+
+## 4. Artefatti
+
+**Leaf**: `j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1/` — **6 file**, un solo
+leaf in `j20_runs`.
+
+| SHA-256 | byte | file |
+|---|---|---|
+| `51b5f999f22fbd937b754159fc7a44f2fc3efa72463ea137154829b9d71d2452` | 13 657 | `v26c_j20_probe_result.json` |
+| `73bb4c78f9e3910d552308250bf6dda29028bf6182a9760d0965db3c45ff0f80` | 7 139 | `probe_actor_transplant_report.json` |
+| `b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2` | 956 401 | `probe_full_module_state.pkl` |
+| `eab14deedfe88449bac9ab37f5f56959d3213a3d0830ce7f22b71bb3aedfceaa` | 1 047 | `probe_module_manifest.json` |
+| `8d2a4ba9a8e286194eb239665b0d1d71179cf52160b4bed93a4a99cddb18d128` | 4 232 | `v26c_j20_critic_warmup_readiness_receipt.json` |
+| `06b60b92af40b852cdbff77551421189c2235f8b64165d972f7e4784e6eeb063` | 405 | `commit_verification.json` |
+
+**Verifica post-commit**: `ok: true`, `problems: []`, **4 file su 4 registrati** verificati.
+Ri-hash indipendente da parte mia: **4/4 coincidono** col receipt. I due file non registrati
+sono il receipt — che non può contenere il proprio hash — e `commit_verification.json`,
+scritto dopo il commit. È lo stesso schema di J18, J19A, J19B e J19C.
+
+Marcatore **`TECHNICAL_INVALID` assente**: rimosso solo dopo che la verifica è passata.
+Nessuna staging residua, nessun lock.
+
+---
+
+## 5. Il check fallito, e perché è mio
+
+### Cosa dice l'evidenza
+
+| braccio | parametri attore con gradiente | parametri critic con gradiente |
+|---|---|---|
+| **congelato** | **nessuno** | 5 su 6 — manca `vf_encoder.0.weight` |
+| **controllo** (non congelato) | 5 — `pi_encoder.0.bias`, `pi_encoder.2.weight`, `pi_encoder.2.bias`, `pi.1.weight`, `pi.1.bias` | 5 su 6 — manca `vf_encoder.0.weight` |
+
+`named_parameters()` deduplica i parametri condivisi, quindi l'attore ha 6 tensori unici e il
+critic 6.
+
+### La causa
+
+`gradient_reach` alimenta il modulo con `torch.zeros((8, 84))`. Per uno strato lineare
+`y = W x + b` vale `∂L/∂W = (∂L/∂y) · xᵀ`. **Con `x = 0` il gradiente dei pesi di primo
+strato è identicamente nullo**, qualunque cosa faccia il freeze. Il gradiente del **bias**
+non ne risente, perché `∂L/∂b = ∂L/∂y`.
+
+L'evidenza è esattamente quella che questa ipotesi predice, e **solo** quella:
+
+- in **entrambi** i bracci manca **soltanto** il peso di primo strato — `vf_encoder.0.weight`
+  nel critic, `pi_encoder.0.weight` nell'attore del braccio di controllo;
+- i rispettivi **bias di primo strato ricevono gradiente**;
+- i pesi di **secondo** strato lo ricevono, perché il loro ingresso è
+  `tanh(W₀·0 + b₀) = tanh(b₀) ≠ 0`.
+
+Il braccio di **controllo è non congelato** e mostra la stessa lacuna: nessuna spiegazione
+legata al freeze può rendere conto di questo pattern. Il difetto è nello stimolo della mia
+sonda.
+
+### Cosa la sonda ha comunque stabilito, e cosa no
+
+**Stabilito.** Il freeze funziona, e la prova non è vacua: **cinque** parametri attore che
+ricevono dimostrabilmente gradiente quando il modulo non è congelato ne ricevono **zero**
+quando lo è. `P23` e `P25` sono passati e si sostengono a vicenda. Cinque dei sei tensori
+critic ricevono gradiente nel braccio congelato, quindi la torre del valore **è raggiungibile**
+mentre l'attore è tagliato fuori.
+
+**Non stabilito.** Che `vf_encoder.0.weight` riceverebbe gradiente sotto uno stimolo non
+degenere. Dalla forma chiusa della derivata **lo si inferisce**, ma in questa esecuzione **non
+è stato misurato**, e non lo rivendico come misura. `P24`, così com'è scritto, chiede che
+tutti e sei i tensori critic ricevano gradiente: ha fallito, e il verdetto `FAIL_CLOSED` è
+corretto.
+
+### Cosa non ho fatto
+
+**Non ho ritentato.** Il GO vieta il retry qualunque sia l'esito. Non ho modificato la sonda,
+né rilassato `P24`, né rieseguito con un altro stimolo: correggere lo stimolo cambia
+l'esperimento, e un esperimento diverso richiede una nuova preregistrazione e un nuovo GO.
+La decisione è tua.
+
+---
+
+## 6. Risultati esatti — i 28 check passati
+
+### Il percorso reale di trapianto
+
+`warm_start.transplant_actor_state`, la funzione che `train_ppo_mlp` chiama davvero, guidata
+da `warm_start.resolve_source_actor_features` contro l'overlay esplicito.
+
+| | |
+|---|---|
+| `mode` | `drop` |
+| `zero_target_features` | `['gait_phase_sin', 'gait_phase_cos']` |
+| `critic_init_mode` | **`fresh_target_untouched`** |
+| `source_state_is_actor_only` | `True`, chiavi non-attore: **nessuna** |
+| feature copiate | **33** |
+| feature condivise azzerate | le **2** gait-clock |
+| feature target-only azzerate / source-only scartate | **nessuna** / **nessuna** |
+| `target_non_actor_state_unchanged` | **`True`** |
+| `source_config_exists` | `False` — vero e atteso: J19A è un fit offline, non un run di training |
+
+### Attore
+
+- **10/10 tensori byte-identici** a J19A: stesso dtype, stessa shape, stessi byte C-order;
+- digest canonico dopo il trapianto: **`d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96`**, identico a J19A;
+- il comparatore di `warm_start` stesso: `exact = True`, `max_abs_diff = 0.0`;
+- i quattro alias encoder restano byte-identici alle loro sorgenti;
+- **i byte dell'attore sopravvivono al backward**: ri-verificati identici dopo il passaggio di gradiente.
+
+### Critic
+
+- **16 chiavi** costruite, di cui le **6** del critic con shape esatte
+  `(256,84) (256,) (256,256) (256,) (1,256) (1,)`, **87 809 parametri**;
+- il comparatore di `warm_start` sul blocco non-attore: `exact = True`, `max_abs_diff = 0.0`
+  → **il critic è l'inizializzazione del target, non qualcosa importato dalla sorgente**;
+- digest del critic fresco: **`5ce4ef41d5677623de42081adc23b6f4168d3a0141d222f0ec64c683203e1096`**.
+
+**Un risultato inatteso e verificato.** Quel digest **coincide esattamente** con il
+`before_training` registrato dal warm-up di luglio (markov35, attore **35D**, 13/07) e da
+quello di agosto (B0820, attore **39D**, 20/08). Nella mia indagine read-only avevo segnalato
+questa coincidenza come **incerta**, perché la mia ricostruzione offline dava valori diversi
+per larghezze d'attore diverse. Ora è **misurata**: l'inizializzazione fresca del critic è
+riproducibile a seed 123 e **indipendente dalla larghezza dell'attore**, quindi è pinnabile.
+
+### σ, log-std e colonne
+
+| | |
+|---|---|
+| σ misurato | `[0.004999999670722372, 0.004999999670722372]` |
+| atteso / tolleranza | `0.005` / `1e-09` — scarto **3.3e-10**, dentro |
+| log-std stato-indipendente | **`True`** (righe 2:4 di `pi.1.weight` esattamente zero) |
+| righe log-std byte-identiche a J19A | **`True`** |
+| colonne clock 0–1 esattamente zero | **`True`** → l'azzeramento del trapianto è un **no-op dimostrato** |
+| colonne controller-memory 25:35 | **byte-identiche alla sorgente e vive**, non azzerate |
+
+### Modulo completo
+
+SHA-256 `b5aef9b22a60ce664e8d5fc9415621448b24cd90fe7c2a27fc732f5b275edcd2`, **diverso** da
+quello di J19A `8153dc97…` — come deve, perché porta sei tensori che J19A non ha. Il confronto
+vincolante resta sui **tensori attore**, e quelli sono byte-identici. È la semantica del gate
+`G8`, dimostrata prima che il warm-up esista.
+
+Non è un attore, non è un candidato, non è promuovibile: `promotion: NONE`,
+`next_stage_authorized: false`.
+
+---
+
+## 7. Contatori di inerzia
+
+Tutti negativi, come registrati dalla sonda:
+
+| contatore | valore |
+|---|---|
+| `algo_train_called` | `False` |
+| `optimizer_constructed` | `False` |
+| `optimizer_step_taken` | `False` |
+| `ray_cluster_started` | `False` |
+| `environment_constructed` | `False` |
+| `environment_stepped` | `False` |
+| `rollout_performed` | `False` |
+| `actor_edited` | `False` |
+| `warmup_executed` | `False` |
+| `ppo_updates` | `0` |
+
+**Sui processi Ray.** Sulla macchina esistono due `gcs_server`, ma sono **preesistenti**:
+avviati il **18/08/2026**, da 8 e 9 giorni, e la sessione Ray più recente su disco è del
+21/08. `session_latest` punta al 21/08. **Nessuna sessione del 27/08.** La sonda non ha
+avviato nulla.
+
+---
+
+## 8. Invarianti — verificati, non assunti
+
+- **Leaf J19A: 7/7 file byte-invariati**, ri-hashati indipendentemente da me dopo
+  l'esecuzione, incluso il backward.
+- `git diff --check`: **pulito**.
+- **Un solo leaf creato**, `j20_runs/j20_critic_warmup_readiness_v26c_2026-08-27_r1`. Nessun
+  altro leaf, nessuna staging, nessun lock, nessun `TECHNICAL_INVALID` residuo in tutta
+  `validation/`.
+- **Nessuna directory sotto `Trajectory Generator/runs/training` toccata.**
+- Non modificati: `training_exnovo_cfg.yaml`, `training_cfg.yaml`, il plugin C++ SEA, il
+  modello OpenSim, FSM v3, detector, corridoio morphology, reward, sigma, architettura di rete,
+  e i runner e leaf J0–J19.
+- L'unica riga sporca in `training_exnovo_cfg.yaml` (`progress: false → true`) era già presente
+  all'inizio della sessione e non è mia.
+
+---
+
+## 9. Limiti
+
+- Il verdetto è **`FAIL_CLOSED`**. Non è un fallimento della pipeline né del percorso di
+  produzione, ma **la sonda non ha stabilito quello che si era impegnata a stabilire**, e la
+  differenza fra le due cose non va smussata.
+- Il difetto è nello **stimolo** della mia sonda, non nel meccanismo di freeze, non nel
+  trapianto, non nel modulo. Che `vf_encoder.0.weight` riceverebbe gradiente sotto uno stimolo
+  non degenere è un'**inferenza dalla forma chiusa della derivata**, non una misura di questa
+  esecuzione.
+- La sonda **non costruisce alcun ambiente**: non dice nulla sul comportamento dell'attore
+  sotto campionamento parallelo Ray, che resta l'affermazione non testata più grande del
+  percorso.
+- **Nulla è promosso, nulla è deployable.**
+
+---
+
+## 10. Fase successiva — esplicitamente NON autorizzata
+
+- **Il warm-up del solo critic, `V26C_J20_CRITIC_WARMUP`, NON è autorizzato.** Il GO K1 pone
+  a `false` `authorises_warmup`, `authorises_training`, `authorises_rollout` e
+  `authorises_ppo`, e questo report non lo autorizza.
+- Il comando sigillato del warm-up, preregistrato, **non è stato eseguito**.
+- Nessun retry di K1 è stato tentato né è autorizzato.
+- Una eventuale correzione dello stimolo della sonda è un **esperimento diverso**: richiede
+  una nuova preregistrazione e un nuovo GO. È una tua decisione.
+
+**TODO propagati:**
+
+- `P24` da rivedere: stimolo non degenere, oppure riformulazione del check che tenga conto del
+  fatto che il gradiente del peso di primo strato è nullo per costruzione sotto input nullo;
+- l'audit di restore a zero iterazioni che il gate `G9` richiede;
+- `policy_std` sempre `null`, difetto cosmetico ereditato da J12;
+- il manifest della leaf J8 resta stantio, invariato per decisione architetturale;
+- la leaf J8 non ha `commit_verification.json`, come la leaf J2;
+- `nominal_mean_shift` dichiarato e non misurato nel runner J15R1;
+- `ENV_MUTATION_POLICY` in J19C resta una superset conservativa ereditata;
+- le suite readiness J18, J19A, J19B, J19C e J20 restano ciascuna con i propri check storici
+  non modificati dopo l'emissione dei rispettivi GO;
+- **LOTO**, **LOCO**, **B1R1**, **B1R2**;
+- l'**Epic** di generalizzazione multi-modello.
+
+---
+
+## 11. STOP
+
+Sonda K1 eseguita **una sola volta**, verdetto **`FAIL_CLOSED` 28/29**, leaf committato e
+verificato, attore J19A byte-invariato, nessun retry.
+
+**Nessun warm-up avviato. Nessuna fase successiva iniziata.**
+
+**Fermo in attesa del tuo audit.**

@@ -1,0 +1,102 @@
+{
+  "actor_feature_count": 35,
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "trainable_markov_features": [
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "nominal_steps": 500,
+  "nominal_repeat": 64,
+  "nominal_training_samples": 32000,
+  "recovery_steps": 1500,
+  "recovery_repeat": 1,
+  "recovery_training_samples": 1500,
+  "aggregate_samples": 34500,
+  "traces": [
+    {
+      "trace_index": 1,
+      "steps": 500,
+      "policy_mean_vs_teacher_rmse": 0.03756951168179512,
+      "policy_mean_vs_teacher_max_abs": 0.1686372458934784
+    },
+    {
+      "trace_index": 2,
+      "steps": 500,
+      "policy_mean_vs_teacher_rmse": 0.05126301944255829,
+      "policy_mean_vs_teacher_max_abs": 0.19397380948066711
+    },
+    {
+      "trace_index": 3,
+      "steps": 500,
+      "policy_mean_vs_teacher_rmse": 0.035362329334020615,
+      "policy_mean_vs_teacher_max_abs": 0.1799587458372116
+    }
+  ],
+  "additional_recovery_datasets": [
+    {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_minus020/teacher_dataset.npz",
+      "samples": 500,
+      "training_samples": 500
+    },
+    {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_plus020/teacher_dataset.npz",
+      "samples": 500,
+      "training_samples": 500
+    }
+  ],
+  "nominal_trace": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_zero_column_deterministic/rollout_policy_trace.json",
+  "recovery_traces": [
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_zero_sigma0005_seed123/rollout_policy_trace.json",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_zero_sigma0005_seed124/rollout_policy_trace.json",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_zero_sigma0005_seed125/rollout_policy_trace.json"
+  ],
+  "recovery_datasets": [
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_minus020/teacher_dataset.npz",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/controller_memory_ablation/2026-07-13_markov35_teacher_start_plus020/teacher_dataset.npz"
+  ],
+  "teacher_dataset": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/target_domain_imitation_no_controller_memory_2026-07-13/teacher_dataset.npz"
+}

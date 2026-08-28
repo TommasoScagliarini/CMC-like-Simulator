@@ -1,0 +1,194 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, POINT CORRECTION OVERLAY",
+  "stage": "V26C_J17_CAUSAL_DIAGNOSIS",
+  "date": "2026-08-27",
+  "scope": "a minimal, additive correction of the effective-weighting fields in the J17 architect-audit addendum. It corrects NUMBERS AND FRAMING ONLY. No measurement, no verdict, no hypothesis grading and no architectural decision changes.",
+  "overwrites_nothing": true,
+  "originals_left_byte_identical": true,
+
+  "contains_no_execution": {
+    "fit": false,
+    "rollout": false,
+    "environment": false,
+    "critic": false,
+    "ppo": false,
+    "new_collection": false,
+    "sealed_seeds_read": 0
+  },
+
+  "pinned_addendum_artefacts_sha256": {
+    "v26c_j17_architect_audit_addendum_2026-08-27.json": "9f9dde817e4ad169ea05ecffb071f23af90d2570bfbb5c130b2777bedf9cea79",
+    "reports/user/2026-08-27_v26c_j17_architect_audit_addendum.md": "fa53184fca4a75b2ef369b0f800f690fe742544810a6bef70f7921335973f46e"
+  },
+  "pinned_j17_artefacts_sha256": {
+    "v26c_j17_prereg_causal_diagnosis.json": "1e765477660e0f0c7d80b91cd677889b974394b1c4dd12b85cfa24bcb991fba4",
+    "v26c_j17_architect_go_2026-08-27.json": "ac5e063750f8284824acebd6815def09561a940200b3e30e3b9ae441155478ca",
+    "v26c_j17_diagnostic_measurements.json": "5c5f309a5cde39a6233d52afe65d90be17a999879ea8acbecb64f53429434e5c",
+    "v26c_j17_reconciliation_and_corrections.json": "d165b86732ce78000355f64b220382e6723edccbfc0a65f0e4032189b9ad2d56",
+    "reports/user/2026-08-27_v26c_j17_diagnosi_causale_regressione_j16.md": "80562064f2b274014bf42794824b67b04e0c34f3367b2a63f59385cc0495df8a"
+  },
+
+  "defects_corrected": [
+    {
+      "id": "D1",
+      "where": "v26c_j17_architect_audit_addendum_2026-08-27.json :: gap_1_T3_complete.blocks.cell_B_unique and .cell_C_unique",
+      "field": "share_of_aggregate_pct",
+      "recorded_value": 1.9556,
+      "corrected_value": 15.6452,
+      "nature": "INTERNAL INCONSISTENCY. The same record declares effective_rows = 4000 while the share was computed from the 500-row unique slice. The two fields contradicted each other inside one object.",
+      "root_cause": "the generating expression used len(index_slice), which is the 500-row unique view, instead of unique_rows x repeat_factor",
+      "severity": "presentational and arithmetic; it does not touch any measured statistic"
+    },
+    {
+      "id": "D2",
+      "where": "reports/user/2026-08-27_v26c_j17_architect_audit_addendum.md :: section 2, effective-weighting table, rows 'cella B' and 'cella C'",
+      "recorded_value": 15.6455,
+      "corrected_value": 15.6452,
+      "nature": "ROUNDING ERROR. 4000/25567*100 = 15.64516759885790276528337310, which is 15.6452 at four decimals, not 15.6455.",
+      "root_cause": "hand arithmetic, not the generating code",
+      "severity": "presentational"
+    },
+    {
+      "id": "D3",
+      "where": "both artefacts, the effective-weighting listing",
+      "nature": "CATEGORY ERROR. nominal_anchor_A_D_region, j14_post_mismatch_671 and j14_pre_mismatch_183 were listed alongside the disjoint blocks as if they were additive members of the aggregate. They are not.",
+      "correction": "nominal_anchor_A_D_region is an ANALYTIC VIEW of the 500 unique nominal rows, whose aggregate weight is already carried in full by j7_nominal (16000 rows). j14_post_mismatch_671 and j14_pre_mismatch_183 are a PARTITION of j14_recovery_854 (671 + 183 = 854), not two further blocks to add.",
+      "severity": "framing; it made a reader able to double-count"
+    }
+  ],
+
+  "self_corrections_applied_in_place_before_acceptance": [
+    {
+      "id": "S1",
+      "what": "the field share_pct_exact claimed exactness it does not have",
+      "why_it_was_wrong": "25567 = 37 x 691. Neither factor is 2 or 5, so every share is a REPEATING decimal and cannot be written exactly in decimal form at any finite precision. The stored strings are correctly-rounded Decimal approximations at 28 significant digits, not exact values.",
+      "fix": "renamed to share_pct_decimal_28sig, and share_pct_fraction added per block carrying the exact rational value"
+    },
+    {
+      "id": "S2",
+      "what": "the sum's exactness was asserted from a sum of decimals",
+      "fix": "exactness now rests on the integer row sum (25567) and on the rational fraction sum (2556700/25567 = 100). No decimal sum is used as evidence."
+    },
+    {
+      "id": "S3",
+      "what": "an earlier draft of this file truncated the Decimal strings to 21 significant digits while the note claimed 28",
+      "fix": "all five values now carry the full 28-significant-digit Decimal, and the note describes what they are"
+    }
+  ],
+
+  "corrected_effective_weighting": {
+    "rule": "only DISJOINT blocks contribute to the aggregate weight. Their row counts sum to the aggregate exactly, and their percentages sum to exactly 100.",
+    "denominator_rows": 25567,
+    "blocks": [
+      {
+        "id": "j7_nominal",
+        "unique_rows": 500,
+        "repeat_factor": 32,
+        "rows": 16000,
+        "share_pct_fraction": "1600000/25567",
+        "share_pct_decimal_28sig": "62.58067039543161106113349239",
+        "share_pct_4dp": 62.5807
+      },
+      {
+        "id": "j7_recovery",
+        "unique_rows": 713,
+        "repeat_factor": 1,
+        "rows": 713,
+        "share_pct_fraction": "71300/25567",
+        "share_pct_decimal_28sig": "2.788751124496421167911761255",
+        "share_pct_4dp": 2.7888
+      },
+      {
+        "id": "cell_B",
+        "unique_rows": 500,
+        "repeat_factor": 8,
+        "rows": 4000,
+        "share_pct_fraction": "400000/25567",
+        "share_pct_decimal_28sig": "15.64516759885790276528337310",
+        "share_pct_4dp": 15.6452
+      },
+      {
+        "id": "cell_C",
+        "unique_rows": 500,
+        "repeat_factor": 8,
+        "rows": 4000,
+        "share_pct_fraction": "400000/25567",
+        "share_pct_decimal_28sig": "15.64516759885790276528337310",
+        "share_pct_4dp": 15.6452
+      },
+      {
+        "id": "j14_recovery_854",
+        "unique_rows": 854,
+        "repeat_factor": 1,
+        "rows": 854,
+        "share_pct_fraction": "85400/25567",
+        "share_pct_decimal_28sig": "3.340243282356162240388000156",
+        "share_pct_4dp": 3.3402
+      }
+    ],
+    "checks": {
+      "exactness_rests_on_integers_not_on_decimals": "the aggregate shares sum to exactly 100 because the ROW COUNTS sum to exactly the denominator, and because the five rational fractions sum to exactly 100. No decimal sum is used to establish exactness.",
+      "rows_sum": 25567,
+      "rows_sum_equals_aggregate": true,
+      "row_arithmetic": "500x32 + 713x1 + 500x8 + 500x8 + 854x1 = 16000 + 713 + 4000 + 4000 + 854 = 25567",
+      "fraction_sum": "1600000/25567 + 71300/25567 + 400000/25567 + 400000/25567 + 85400/25567 = 2556700/25567 = 100",
+      "fraction_sum_is_exactly_100": true,
+      "unique_rows_sum": 3067,
+      "sum_of_the_four_decimal_display_values": "100.0001",
+      "why_that_is_not_an_inconsistency": "62.5807 + 2.7888 + 15.6452 + 15.6452 + 3.3402 = 100.0001. Five values rounded INDEPENDENTLY to four decimals need not sum to the rounding of their total: four of the five round upward here. The exact aggregate share is 100, and the rounding of that exact total to four decimals is 100.0000. The 100.0001 figure is an artefact of independent rounding and is stated here so it cannot be mistaken for a new defect."
+    },
+    "precision_note": "25567 = 37 x 691, so no share is a terminating decimal and NONE of them can be written exactly in decimal form. Three representations are therefore given per block: share_pct_fraction is the EXACT rational value; share_pct_decimal_28sig is a Decimal APPROXIMATION at 28 significant digits, correctly rounded, not exact; share_pct_4dp is that value rounded to four decimals for display. The earlier field name share_pct_exact was wrong and is retired."
+  },
+
+  "views_and_subpartitions_not_additive": [
+    {
+      "id": "nominal_anchor_A_D_region",
+      "rows": 500,
+      "kind": "ANALYTIC VIEW",
+      "of": "j7_nominal",
+      "why_not_additive": "these are the 500 unique nominal rows. The block j7_nominal already carries them 32 times, for 16000 rows and 62.5807% of the aggregate. Counting the view again would double-count them.",
+      "per_row_statistics_are_valid": "yes - the T3 statistics on this view are correct as reported, because tiling does not change a per-row statistic. Only its aggregate WEIGHT was misrepresented."
+    },
+    {
+      "id": "j14_post_mismatch_671",
+      "rows": 671,
+      "kind": "SUBPARTITION",
+      "of": "j14_recovery_854",
+      "why_not_additive": "671 + 183 = 854, exactly the parent block. The two halves partition it and must not be added to it."
+    },
+    {
+      "id": "j14_pre_mismatch_183",
+      "rows": 183,
+      "kind": "SUBPARTITION",
+      "of": "j14_recovery_854",
+      "why_not_additive": "as above"
+    }
+  ],
+
+  "what_is_NOT_changed_by_this_correction": [
+    "every RMSE, MAE, maximum absolute value and signed mean shift in the T3 tables, in both normalised and physical units - all are per-row statistics, unaffected by how a block's aggregate share is reported",
+    "the initial squared-error mass measurement, which is computed from the actual 25567-row arrays and never used share_of_aggregate_pct",
+    "the T5 distances and the temporal ordering",
+    "every hypothesis grading H1 to H6",
+    "the architectural decision recorded in the addendum: J8 5/6 as best closed-loop actor, J11 4/6, J15R1 0/6, J8 as the future operational parent with a constrained B-only incremental update, J11 and J14 as diagnostic evidence only, no July artefact in the lineage",
+    "the DAgger reformulation"
+  ],
+
+  "invariants_verified": {
+    "j18_or_j18_runs": "ABSENT",
+    "j17_runs": "ABSENT",
+    "g_i_runs_ppo_runs_critic_runs": "ABSENT",
+    "locks_or_staging": "NONE",
+    "pre_existing_actors_datasets_configs_modified": "NONE",
+    "the_two_addendum_artefacts_modified": "NONE - pinned byte-identical above",
+    "the_five_j17_artefacts_modified": "NONE - pinned byte-identical above",
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "dirty_worktree": "preserved untouched",
+    "subagents_used": 0
+  },
+
+  "self_consistency": {
+    "contains_no_self_hash": true,
+    "how_to_verify": "recompute the SHA-256 of the two pinned addendum artefacts and the five pinned J17 artefacts, and re-derive the five block percentages from 25567."
+  }
+}

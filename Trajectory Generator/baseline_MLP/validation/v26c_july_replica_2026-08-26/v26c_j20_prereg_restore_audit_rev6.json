@@ -1,0 +1,301 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION AMENDMENT",
+  "stage": "V26C_J20_RESTORE_AUDIT_R3",
+  "revision": "rev6",
+  "cites": {
+    "base": "v26c_j20_prereg_restore_audit.json",
+    "base_sha256": "1326944edcbe368319409705e6ff2aeafb62f3def4503f467736ba6780c7d9e6",
+    "rev1": "v26c_j20_prereg_restore_audit_rev1.json",
+    "rev1_sha256": "3fa1ae238cfe0c20865850951ee787cf528b1c17cc0ba6fe97a714d9e37c3ef1",
+    "rev2": "v26c_j20_prereg_restore_audit_rev2.json",
+    "rev2_sha256": "59e2e5e04d167eaafd8283800d277ca8415fac8d57a880818a082dbdbb838cf7",
+    "rev3": "v26c_j20_prereg_restore_audit_rev3.json",
+    "rev3_sha256": "bfb6ef9b4b9a176138adae837e622442e4727f1088c81ea124f3a91b6a7ed41e",
+    "rev4": "v26c_j20_prereg_restore_audit_rev4.json",
+    "rev4_sha256": "71a6118f5555472dfc46be424d60010848ac1a80ba4f4f9c1cb970965db1ec77",
+    "rev5": "v26c_j20_prereg_restore_audit_rev5.json",
+    "rev5_sha256": "3d732153fd51bb7956f91d194fc0f4b1e74c7b35cd451d7a24a0cc70255f675d"
+  },
+  "predecessor_status": "BASE, REV1, REV2, REV3, REV4 AND REV5 ARE SEALED AND UNMODIFIED. This amendment rewrites none of them; all six are pinned by the GO and re-hashed at preflight.",
+  "precedence": "rev6 > rev5 > rev4 > rev3 > rev2 > rev1 > base",
+  "contains_no_self_hash": true,
+  "self_hash_note": "this file deliberately carries no hash of itself. The R3 runner embeds its sha256 as PIN_PREREG_REV6 and re-hashes it at preflight, so the seal is external.",
+  "additive": "One semantic correction to the COMPARISON used by R9, one reporting discipline for the gates that are downstream of R9, and one strengthened evidence contract. No gate is added, removed or renamed: the count stays 13. R1-R8 and R10-R13 keep their predicates verbatim. The 600 s startup timeout is deliberately left unchanged.",
+
+  "correction_1_what_R3_honestly_is": {
+    "the_name": "R3 is the THIRD CORRECTIVE ATTEMPT OF THE RESTORE AUDIT.",
+    "why_the_wording_matters": "rev5 established that calling a second attempt anything other than a second attempt would let the record read as though R1 had never happened. The same honesty applies here: R1 failed on the environment, R2 failed on the comparison criterion, and R3 is a third attempt at the same audit. It is corrective, separately preregistered and separately authorised.",
+    "what_remains_true_from_rev4_and_rev5": [
+      "it is NEVER automatic: no runner re-launches a child after any outcome",
+      "there is exactly one subprocess.Popen and no code path reaches it twice",
+      "it has its own preregistration, its own GO, its own stage identifier and its own leaf",
+      "the R1 leaf and the R2 leaf are never reused, rewritten or deleted"
+    ],
+    "authorisation_required": "R3 may be executed EXACTLY ONCE, and only after BOTH an explicit user authorisation AND an explicit architect GO whose status is exactly APPROVED and whose stage is exactly V26C_J20_RESTORE_AUDIT_R3. Neither alone is sufficient.",
+    "if_R3_also_fails": "there is no R4 without a further, separate architect decision. Failure is not a licence to iterate."
+  },
+
+  "correction_2_the_demonstrated_false_mismatch": {
+    "why": "R2 reached the restore for the first time and failed gate R9 with eight differences. rev5's discipline of separating what was observed from what explains it is applied again here.",
+
+    "DIRECT_EVIDENCE": {
+      "definition": "facts read out of the committed R2 artefacts and out of the installed library. No interpretation.",
+      "items": [
+        "the R2 child exited with returncode 1 and summary.json records stop_reason 'error'",
+        "live_optimizer_audit.json records exact false, difference_count 8 and one problem",
+        "all eight differences are inside param_groups[0]: amsgrad, capturable, decoupled_weight_decay, differentiable and maximize each read 'prim vs scalar'; betas[0] reads 0.9 vs 0.8999999761581421; betas[1] reads 0.999 vs 0.9990000128746033; eps reads 1e-08 vs 9.99999993922529e-09",
+        "moment_digests_source and moment_digests_live are identical for all six state indices and both moment keys: 12 of 12 tensors agree on dtype, shape and the sha256 of their C-order bytes",
+        "state_indices_source and state_indices_live are both [6, 7, 8, 9, 10, 11]",
+        "top_level_keys_source and top_level_keys_live are both ['param_groups', 'state']",
+        "param_group_sizes_live is [12] and the single optimizer is named 'default_optimizer' of type Adam",
+        "source_state_sha256 is 51d97ef016aea2086201b55db807f3273b76784bbafdea6cc9e5c7fea90294be, the pinned learner state",
+        "production_lr_reports records before 9.999999747378752e-05, requested 0.0001 and after 0.0001",
+        "the R2 traceback shows the raise inside the wrapper called from train_ppo_mlp.py line 1744, which is BEFORE line 1747 where restored_training_iteration is assigned",
+        "R8 and R13 passed in R2: the sixteen module keys load with strict=True and are byte-identical, the actor digest is d4a13ff7..., the critic digest is 2fa9c124..., sigma is 0.004999999670722372 on both dimensions, the Adam indices [6..11] ARE the six critic tensors and every step is 81.0",
+        "in the installed ray 2.55.1, ray/rllib/core/learner/torch/torch_learner.py TorchLearner._set_optimizer_state calls self._named_optimizers[name].load_state_dict(convert_to_torch_tensor(state_dict['state'], device=self._device))",
+        "in the installed ray/rllib/utils/torch_utils.py, convert_to_torch_tensor applies tree.map_structure(mapping, x) to EVERY leaf; mapping returns None unchanged, keeps an existing torch tensor, wraps a numpy array with torch.from_numpy, and otherwise computes torch.from_numpy(np.asarray(item)); it then executes 'if tensor.is_floating_point() and tensor.dtype != torch.float16: tensor = tensor.float()' and finally tensor.to(device)"
+      ]
+    },
+
+    "CAUSAL_INFERENCE": {
+      "definition": "the mechanism that, in our judgement, connects those facts. It is an inference, not a measurement.",
+      "claim": "the eight differences are artefacts of comparing the checkpoint BEFORE RLlib's conversion against the live optimizer AFTER it. They are not evidence about the restore.",
+      "supporting_steps": [
+        "the object the audit reads off the pickle, entry['state'], is precisely the argument RLlib passes to convert_to_torch_tensor; the live optimizer is precisely what load_state_dict produced from the converted copy",
+        "a Python bool leaf reaches the else branch of mapping and becomes torch.from_numpy(np.asarray(False)), a zero-dimensional tensor of dtype bool; it is not floating point, so it is not downcast",
+        "a Python float leaf becomes a zero-dimensional float64 tensor and is then downcast by tensor.float() to float32, which is why 0.9 reads back as 0.8999999761581421, 0.999 as 0.9990000128746033 and 1e-08 as 9.99999993922529e-09",
+        "rev2's normalisation puts a Python bool in the typed ('prim','bool',value) branch, evaluated FIRST, and puts a zero-dimensional tensor in the ('scalar', value) branch; the two branches can never compare equal, which is exactly the 'prim vs scalar' text of the five boolean differences",
+        "the moments were already numpy float32 on the checkpoint side, so the conversion is a no-op for them, which is why 12 of 12 agree byte for byte",
+        "weight_decay is a Python int and the params entries are Python ints; rev2's rule 4 sends both a Python int and a zero-dimensional int tensor to ('scalar', value), so they compared equal and never appeared among the differences",
+        "foreach and fused are None on both sides and mapping passes None through unchanged, so they compared equal",
+        "lr does not appear among the differences because the original _reapply_optimizer_learning_rate runs BEFORE the capture, as rev1 requires, and overwrites param_groups lr with the exact Python float 1e-4"
+      ],
+      "measured_support": "the architect independently read the installed implementation and confirmed both clauses: convert_to_torch_tensor preserves existing tensors, routes every non-None leaf through numpy into torch, downcasts every floating tensor except float16 to float32, and then moves to the target device. This report was verified in first person against the same installed files before this amendment was written."
+    },
+
+    "WHAT_IS_NOT_DEMONSTRATED": {
+      "the_checkpoint_is_corrupt": "NOT demonstrated. Nothing in R2 indicates it and R8/R13 indicate the contrary.",
+      "the_live_optimizer_is_byte_exact": "NOT demonstrated either. The criterion R2 applied was defective, so its verdict is unusable in BOTH directions. R9 has still never produced a valid answer.",
+      "consequence": "R3 exists to obtain a valid answer, not to obtain a passing one."
+    }
+  },
+
+  "correction_3_the_comparison_is_canonicalised": {
+    "the_rule": "R9 compares the checkpoint and the live optimizer under the SAME post-RLlib-conversion semantics. Both sides are passed through the conversion RLlib itself performs, and only the results are compared.",
+    "not_a_tolerance": "no epsilon, no relative tolerance, no approximate equality and no numeric comparison of any kind is introduced. After canonicalisation the comparison is still exact: dtype, shape and the sha256 of the C-order bytes of every leaf.",
+    "why_canonicalising_BOTH_sides_and_not_only_the_source": "converting only the checkpoint would leave the live side at the mercy of whatever torch's load_state_dict did to it afterwards. Converting both makes the comparison a comparison of fixed points of one function, which is what 'the same semantics' has to mean if it is to mean anything.",
+
+    "the_conversion": {
+      "function": "ray.rllib.utils.torch_utils.convert_to_torch_tensor, IMPORTED from the installed library and never reimplemented",
+      "arguments": "the whole optimizer state_dict of each side, with device taken from the live learner's own _device, so the canonical form is produced on the device the restore actually used",
+      "why_import_and_not_copy": "a reimplementation could drift from the library. Importing the exact function makes 'the exact conversion semantics RLlib uses' literally true rather than approximately true.",
+      "fail_closed_on_drift": [
+        "the source of TorchLearner._set_optimizer_state must still contain the literal call convert_to_torch_tensor(state_dict[\"state\"], device=self._device); if it does not, the audit fails closed rather than canonicalising through a path RLlib no longer takes",
+        "convert_to_torch_tensor must still accept a device parameter; if it does not, the audit fails closed",
+        "the conversion must be a FIXED POINT on both sides: canonical(convert(x)) must equal canonical(convert(convert(x))). If applying the conversion twice moves either side, the canonicalisation is not idempotent, the argument above does not hold, and the audit fails closed"
+      ]
+    },
+
+    "the_canonical_node": {
+      "order_is_significant": "the branches are evaluated in this order and the order is part of the specification",
+      "1_None": "('none',). convert_to_torch_tensor passes None through, so None survives canonicalisation and a None that became a value is still caught.",
+      "2_str": "('str', value). Strings are not leaves of an optimizer state_dict; the branch exists so an unexpected one is recorded rather than swallowed.",
+      "3_torch_tensor_of_any_rank_including_zero": "('t', dtype string with the 'torch.' prefix stripped, shape tuple, sha256 of the C-order bytes of the detached CPU copy). This ONE branch carries every scalar and every moment. It is where byte identity is enforced, and it is where dtype is preserved.",
+      "4_list_and_tuple": "('seq', [canonical items]). A tuple and a list with the same contents canonicalise equal, because betas survives the round trip as either.",
+      "5_dict": "('map', sorted list of (canonical key, canonical value)); keys are canonicalised as ('key', type name, value) so an integer key stays an integer key and can never collide with a string key.",
+      "6_anything_else": "('opaque', type name), which can never equal a real value on the other side, so an unrecognised type fails closed."
+    },
+
+    "why_zero_dimensional_tensors_are_NOT_collapsed_to_scalars": "rev2 collapsed them, for a good reason at the time: it was the only way to make the checkpoint's Python float step equal the live 0-D tensor step. Canonicalisation removes that need, because after the conversion BOTH sides hold a 0-D tensor. Keeping them as typed tensors is what restores the discrimination rev2 had to give up: a bool and a numeric zero now differ by dtype, not by a branch name.",
+
+    "declared_consequence_carried_over_from_rev1_and_rev2": "the original _reapply_optimizer_learning_rate still runs FIRST and still overwrites param_groups lr with the stage's configured value. R3 does not change that ordering. R3 additionally RECORDS the pre-overwrite value, which production reports as production_lr_reports[...]['before'], and canonicalises it against the checkpoint's lr, so the restored learning rate is measured rather than merely declared to be unmeasurable. This is an addition to the evidence, not a change to the production path."
+  },
+
+  "correction_4_what_must_still_be_detected": {
+    "principle": "the canonicalisation exists to remove a representational difference, not to remove the audit's teeth. Every corruption class below must still fail the gate, and each is listed with the mechanism that catches it.",
+    "classes": {
+      "boolean_flip": "False and True convert to 0-D bool tensors whose single byte differs, so their sha256 differs. CAUGHT.",
+      "boolean_versus_numeric_zero_dtype_confusion": "np.asarray(False) has dtype bool; np.asarray(0) has dtype int64. The canonical node carries the dtype, so ('t','bool',(),...) never equals ('t','int64',(),...). CAUGHT, and caught more sharply than under rev2, which could only distinguish them because bool took a different branch.",
+      "changed_beta_eps_or_lr_beyond_the_effective_float32_representation": "both sides are downcast to float32 by the same function; two values that differ in float32 produce different bytes. CAUGHT. A difference that does NOT survive float32 is not a difference the restore could have preserved, because RLlib's own conversion destroyed it before load_state_dict ever saw it; refusing to report it is a statement about the restore, not a tolerance applied to the comparison.",
+      "dropped_or_added_key": "the map branch compares the canonical key lists first and reports the asymmetric difference. CAUGHT.",
+      "shortened_or_reordered_params": "params is a list and canonicalises to ('seq', [...]), which preserves both length and order. CAUGHT.",
+      "changed_state_index_set": "the state dict's canonical key list changes, and the explicit state_indices comparison of rev3's predicate is retained unchanged. CAUGHT twice.",
+      "changed_moment_value_dtype_or_shape": "the tensor node carries dtype, shape and the sha256 of the bytes. CAUGHT. Moment tensors are float32 on both sides before and after conversion, so they stay BYTE-EXACT through canonicalisation: the conversion is a no-op for them and this is asserted, not assumed."
+    },
+    "moments_must_stay_byte_exact": "the predicate requires moment_digests_source and moment_digests_live, computed AFTER canonicalisation, to be equal element by element for all six indices and both moment keys, and additionally requires that canonicalisation did not alter either side's moment digests relative to their raw form. A canonicalisation that touched a moment would be a canonicalisation that had overreached."
+  },
+
+  "correction_5_the_pass_must_be_evidential": {
+    "why": "a relaxed predicate and a correct predicate can produce the same boolean. The difference has to be visible in the artefact, otherwise the reader is asked to trust the implementation.",
+    "the_evidence_records_all_of": {
+      "raw_provenance": "both sides are ALSO normalised under rev2's exact rules, unchanged, and the resulting differences are recorded. On the state R2 measured this list must reproduce R2's eight strings exactly. Recording it makes R3 a superset of R2 rather than a replacement of it.",
+      "raw_leaf_values": "for every path that differs raw, the evidence records the type and the repr of the value on BOTH sides, so a future reader can see what actually differed without re-running anything.",
+      "canonical_digests": "a whole-tree canonical digest per side, a param_groups canonical digest per side, and the equality of each pair",
+      "canonical_differences": "the full list, which must be empty",
+      "accepted_equivalences": "the CLOSED list of paths that differ raw and agree canonically, each with both raw values and the canonical node they both collapse to. This list must equal EXACTLY the eight paths R2 measured. A ninth accepted equivalence is a change in the object under audit and is a PROBLEM, not a convenience.",
+      "conversion_provenance": "ray version, torch version, numpy version, the absolute path and sha256 of the installed torch_utils.py and torch_learner.py, the sha256 of the source text of convert_to_torch_tensor and of TorchLearner._set_optimizer_state, the parameter list of convert_to_torch_tensor, the device used, and the result of the fixed-point check on both sides",
+      "the_unchanged_rev3_fields": "kind, stage_marker, source_state_pkl, source_state_sha256, top_level_keys of both sides, state_indices of both sides, expected_state_indices, expected_param_count, param_group_sizes_live, learner_count, optimizer_names, optimizer_types, expected_optimizer_name, method"
+    },
+    "the_eight_accepted_equivalences": [
+      "param_groups[0].amsgrad",
+      "param_groups[0].betas[0]",
+      "param_groups[0].betas[1]",
+      "param_groups[0].capturable",
+      "param_groups[0].decoupled_weight_decay",
+      "param_groups[0].differentiable",
+      "param_groups[0].eps",
+      "param_groups[0].maximize"
+    ]
+  },
+
+  "R9_superseded": {
+    "label": "R9_live_optimizer_is_byte_exact_after_restore_under_rllib_conversion_semantics",
+    "supersedes": "the R9 verdict predicate of rev3, in full. rev3's predicate is not weakened: every clause of it is retained and the canonical clauses are added.",
+    "unchanged_from_rev1_rev3_and_rev5": [
+      "it runs inside the production child process, at the instant algo.restore_from_path returns",
+      "the original _reapply_optimizer_learning_rate is called FIRST and its return value is handed back untouched",
+      "the capture uses the production traversal _learner_call_results -> foreach_learner -> get_optimizers_for_module",
+      "the evidence is written BEFORE any raise, so a failure preserves its own explanation",
+      "a mismatch RAISES; it is never downgraded to a warning"
+    ],
+    "the_predicate_now_requires_all_of": [
+      "the evidence file exists and its kind is exactly 'LIVE OPTIMIZER RESTORE AUDIT, CANONICALISED'",
+      "stage_marker is exactly 'after_restore'",
+      "source_state_sha256 equals 51d97ef016aea2086201b55db807f3273b76784bbafdea6cc9e5c7fea90294be",
+      "exact is exactly true",
+      "canonical.differences is an empty LIST and canonical.difference_count is 0",
+      "problems is an empty list",
+      "canonical.digest_source and canonical.digest_live are both present and equal, and canonical.digests_match is true",
+      "canonical.param_groups.exact is true, its differences is an empty list and its digests_match is true",
+      "moment_digests_source equals moment_digests_live, entry by entry, for the six indices and both moment keys",
+      "moments_unchanged_by_canonicalisation is true on both sides",
+      "accepted_equivalences names exactly the eight paths listed above, no more and no fewer",
+      "raw.differences reproduces R2's eight strings exactly",
+      "conversion.call_site_verified is true and conversion.fixed_point_source and conversion.fixed_point_live are both true",
+      "top_level_keys_source and top_level_keys_live are both exactly ['param_groups', 'state']",
+      "state_indices_source and state_indices_live are both exactly [6, 7, 8, 9, 10, 11]",
+      "param_group_sizes_live is exactly [12]",
+      "learner_count is 1, exactly one optimizer was captured, and it is named 'default_optimizer'",
+      "summary.optimizer_lr_audit holds an entry whose stage is 'after_restore'"
+    ]
+  },
+
+  "correction_6_downstream_gates": {
+    "the_observation": "in R2, gates R3, R4, R6, R7 and R12 were reported as failures. None of them was an autonomous measurement. The wrapper raised inside _reapply_optimizer_learning_rate at train_ppo_mlp.py line 1744, which is called before line 1747 assigns restored_training_iteration and before the blocks that record actor_freeze_audit and critic_state_audit. Those five gates read fields that the aborted run never wrote.",
+    "why_this_matters": "a gate that reads a field an aborted run never wrote has not measured anything. Reporting it as a failure alongside a genuine failure overstates how much went wrong and hides which single thing did.",
+    "the_rule": "R3's runner computes live_restore_completed FIRST, from the child returncode, the summary stop_reason and the live evidence verdict. R3, R4, R6, R7 and R12 are EVALUATED only when live_restore_completed is true.",
+    "what_this_does_NOT_do": [
+      "it does not make them pass. When they are not evaluated they are not passed, they do not count towards the passed total, and the verdict is still FAIL_CLOSED.",
+      "it does not change a single predicate. The predicates of R3, R4, R6, R7 and R12 are byte-identical to the base document's.",
+      "it does not suppress a genuine failure. If the live restore completed and one of the five then fails, it fails as an autonomous measurement and is reported as one."
+    ],
+    "how_it_is_recorded": "the result records, per gate, evaluated true or false, passed true or false, and for a gate that was not evaluated the reason 'downstream of R9: the live restore did not complete, so the fields this gate reads were never written'. The receipt records gates_passed, gates_total, gates_failed and gates_not_evaluated separately."
+  },
+
+  "the_wrapper": {
+    "file": "v26c_j20_restore_audit_r3_child.py",
+    "why_a_new_file": "v26c_j20_restore_audit_child.py is pinned by the R1 GO, by the R2 GO and by both receipts, and it is part of R1's and R2's evidence. It is NOT modified, NOT copied over and NOT deleted. R3 uses a new file and re-hashes the old one to its pin, 38a57b25da27666a99891511666d63cac07534aa7602f20469048012f536caf4.",
+    "validation_only": true,
+    "modifies_no_production_file": "it rebinds one attribute of the imported train_ppo_mlp module inside its own process only, and that rebinding dies with the process. The only file it writes is live_optimizer_audit.json inside this stage's own validation leaf, which physically sits under baseline_MLP/validation/ - the accurate claim rev3 required.",
+    "it_does_not_emulate": "after installing the wrap it sets sys.argv and calls train_ppo_mlp.main(), which reaches run() and the real algo.restore_from_path. It constructs no Algorithm of its own and reimplements no RLlib code path.",
+    "it_imports_ray_only_for_the_conversion": "the child already runs inside the Ray-enabled trainer process. It imports convert_to_torch_tensor; it never calls ray.init itself."
+  },
+
+  "the_command": {
+    "operations": "the same four operations rev1 and rev3 settle. Operation 4 now substitutes the script with v26c_j20_restore_audit_r3_child.py instead of the R2 wrapper.",
+    "token_counts_unchanged": {
+      "derived_command_tokens": 20,
+      "delegated_trainer_argv": 18,
+      "full_child_argv": 25
+    },
+    "changes_that_follow_mechanically_from_the_new_leaf": {
+      "--output-dir": "j20_runs/j20_restore_audit_v26c_2026-08-28_r3",
+      "--audit-evidence": "that leaf's live_optimizer_audit.json",
+      "everything_else_in_the_delegated_argv": "identical to R2, which was identical to R1"
+    },
+    "iteration_start_is_not_passed": "unchanged. args.iteration_start stays 0 so train_ppo_mlp.py derives it from the restored checkpoint."
+  },
+
+  "destination": {
+    "leaf": "j20_runs/j20_restore_audit_v26c_2026-08-28_r3",
+    "no_clobber": "the runner refuses to start if it exists",
+    "born_invalid": "TECHNICAL_INVALID written FIRST and asserted to be the only resident before the child is launched",
+    "marker_removed_last": "replaced by RESTORE_AUDIT_PASSED only after all thirteen gates are evaluated, all pass, and post-commit verification passes"
+  },
+
+  "the_draft_go_must_be_doubly_inert": {
+    "rule": "the DRAFT GO carries status 'DRAFT' AND authorises_execution false.",
+    "unchanged": "only the exact string 'APPROVED' authorises, and the stage must match V26C_J20_RESTORE_AUDIT_R3 exactly."
+  },
+
+  "tests_this_amendment_requires": {
+    "T_accepted_equivalences": "each of the eight R2 differences must be shown to be an ACCEPTED EQUIVALENCE: the two raw values differ under rev2's normalisation and agree under canonicalisation. Asserted one path at a time, with the real values, not as a group.",
+    "T_bool_flip": "False against True must differ canonically",
+    "T_bool_versus_numeric_zero": "False against int 0, and True against int 1, must differ canonically, by dtype",
+    "T_float_beyond_float32": "a beta, an eps and an lr changed by more than the float32 resolution must differ canonically; and the evidence must show that a change smaller than the float32 resolution is one the conversion itself has already erased",
+    "T_dropped_key": "removing a param_groups key on one side must differ",
+    "T_added_key": "adding a param_groups key on one side must differ",
+    "T_shortened_params": "shortening the params list must differ",
+    "T_reordered_params": "reordering the params list must differ",
+    "T_state_index_set": "removing one of the six Adam entries, and adding a seventh, must each differ",
+    "T_moment_value": "perturbing a single element of exp_avg or exp_avg_sq must differ, naming that index and that key",
+    "T_moment_dtype": "the same moment as float64 against float32 must differ",
+    "T_moment_shape": "the same moment reshaped must differ",
+    "T_moments_are_byte_exact": "canonicalising a float32 moment must not change its digest",
+    "T_fixed_point": "canonical(convert(x)) must equal canonical(convert(convert(x))) for a structure holding every leaf class present in the real state",
+    "T_none_survives": "None must canonicalise to ('none',) and must differ from any value",
+    "T_no_tolerance": "the canonicaliser must contain no epsilon, no isclose and no approximate comparison; asserted statically over the source",
+    "T_downstream_classification": "with the live restore incomplete, R3, R4, R6, R7 and R12 must be reported as not evaluated and must not count as passed; with it complete they must be evaluated and must still fail on a genuine perturbation",
+    "T_gates_still_thirteen_and_non_vacuous": "a correct run passes all thirteen, and a representative perturbation flips each one"
+  },
+
+  "note_on_the_historical_R1_and_R2_suite_checks": {
+    "observation": "re-running the two predecessor suites now reports test_v26c_j20_restore_audit.py at 264/266 and test_v26c_j20_restore_audit_r2.py at 219/223.",
+    "which_checks": {
+      "R1": ["B06 --preflight-only creates no leaf", "I07 the destination is currently absent"],
+      "R2": ["C29 the smoke test created no R2 leaf", "E01 the R2 destination is absent", "H02 preflight passes", "H04 preflight creates no leaf"]
+    },
+    "cause": "every one of them asserts that its own stage's destination leaf does not exist. That was true only before that stage ran. R1 has run and R2 has run, so both leaves exist, and R2's preflight additionally refuses on its own no-clobber rule - which is the rule working, not failing.",
+    "classification": "EXPECTED POST-EXECUTION STATE, not a regression and not a defect. rev5 already recorded the R1 pair under exactly this heading; the R2 quartet is the same class.",
+    "decision": "ANNOTATED, NOT CORRECTED. Both suites stay byte-identical - test_v26c_j20_restore_audit.py at 07213d4d13c2ffb0965673ec7960ce8db3153fb9c3393006a77d0aaba0530860 and test_v26c_j20_restore_audit_r2.py at 9f0f69f1695ea64404587d6274079317925a877a729df6f589b05a8c5faabae8 - because both are pinned and both are part of their stage's evidence. The R3 suite verifies that neither has moved.",
+    "what_it_does_not_mean": "it says nothing about R3. R3's own destination is absent, its own suite passes in full, and its preflight reads READY."
+  },
+
+  "explicitly_unchanged": [
+    "the thirteen gates R1-R13 by name and by count",
+    "R1-R8 and R10-R13 predicates, verbatim",
+    "the zero-iteration semantics: iteration_start is derived as restored_logical_iteration + 1 = 2 against a target of 1, so range(2, 2) is empty",
+    "the 600 s startup timeout: NOT raised, NOT lowered, NOT made configurable",
+    "the environment correction rev4 authorised and rev5 confirmed: the absolute baseline_MLP directory prepended to PYTHONPATH",
+    "train_ppo_mlp.py, tb_logging.py, warm_start.py, asymmetric_rl_module.py and every other production module: not modified",
+    "v26c_j20_warmup_cfg.yaml, v26c_j20_warmup_critic_only_cfg.yaml, the overlay and training_exnovo_cfg.yaml: not modified",
+    "the actor, the critic, sigma, the optimizer source, the environment, the reward, the C++ plugin and the SEA semantics: not touched",
+    "the checkpoint under audit and the whole warm-up leaf: read only",
+    "the R1 runner, the R1 suite, the R1 GO, the R1 leaf, the R2 runner, the R2 suite, the R2 GO, the R2 leaf and the frozen wrapper: byte-identical and pinned",
+    "the fail-closed protocol: no-clobber destination, born-invalid marker written first and removed last, post-commit verification, single execution",
+    "the verdicts, and the fact that success still authorises no PPO, no ex-novo run, no promotion, no training readiness and no next stage"
+  ],
+
+  "verdicts": {
+    "on_success": "RESTORE_AUDIT_PASS",
+    "on_failure": "FAIL_CLOSED",
+    "on_success_still_false": {
+      "promotion": "NONE",
+      "training_ready": false,
+      "next_stage_authorized": false
+    },
+    "what_success_would_close": "gate G9 of V26C_J20_CRITIC_WARMUP, and nothing else"
+  },
+
+  "prohibitions": [
+    "no execution of R3 without BOTH explicit user authorisation and an APPROVED architect GO for stage V26C_J20_RESTORE_AUDIT_R3",
+    "no automatic retry, ever, whatever the outcome",
+    "no write of any kind into the R1 leaf or the R2 leaf",
+    "no rewriting of the base document, rev1, rev2, rev3, rev4 or rev5",
+    "no modification of the frozen wrapper v26c_j20_restore_audit_child.py, of the R1 or R2 runners, or of their suites",
+    "no modification of any production file or configuration",
+    "no ray.init, no Algorithm construction, no environment construction, no sampling, no rollout and no training during preparation",
+    "no PPO, no ex-novo run, no promotion, no training readiness",
+    "no tolerance, no epsilon and no approximate comparison anywhere in the canonicaliser"
+  ]
+}

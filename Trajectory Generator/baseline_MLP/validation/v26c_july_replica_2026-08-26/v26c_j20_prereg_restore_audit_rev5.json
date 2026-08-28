@@ -1,0 +1,124 @@
+{
+  "kind": "IMMUTABLE PREREGISTRATION AMENDMENT",
+  "stage": "V26C_J20_RESTORE_AUDIT_R2",
+  "revision": "rev5",
+  "cites": {
+    "base": "v26c_j20_prereg_restore_audit.json",
+    "base_sha256": "1326944edcbe368319409705e6ff2aeafb62f3def4503f467736ba6780c7d9e6",
+    "rev1": "v26c_j20_prereg_restore_audit_rev1.json",
+    "rev1_sha256": "3fa1ae238cfe0c20865850951ee787cf528b1c17cc0ba6fe97a714d9e37c3ef1",
+    "rev2": "v26c_j20_prereg_restore_audit_rev2.json",
+    "rev2_sha256": "59e2e5e04d167eaafd8283800d277ca8415fac8d57a880818a082dbdbb838cf7",
+    "rev3": "v26c_j20_prereg_restore_audit_rev3.json",
+    "rev3_sha256": "bfb6ef9b4b9a176138adae837e622442e4727f1088c81ea124f3a91b6a7ed41e",
+    "rev4": "v26c_j20_prereg_restore_audit_rev4.json",
+    "rev4_sha256": "71a6118f5555472dfc46be424d60010848ac1a80ba4f4f9c1cb970965db1ec77"
+  },
+  "predecessor_status": "BASE, REV1, REV2, REV3 AND REV4 ARE SEALED AND UNMODIFIED. This amendment rewrites none of them; rev4 in particular is pinned above and re-hashed at preflight.",
+  "precedence": "rev5 > rev4 > rev3 > rev2 > rev1 > base",
+  "contains_no_self_hash": true,
+  "additive": "Two semantic corrections and one strengthened verification. No gate is added, removed or redefined: the count stays 13 and every predicate is untouched. The 600 s startup timeout is deliberately left unchanged.",
+
+  "correction_1_what_R2_honestly_is": {
+    "the_name": "R2 is the SECOND CORRECTIVE ATTEMPT OF THE RESTORE AUDIT.",
+    "why_the_wording_matters": "rev4 said 'R2 is NOT a retry'. That is true in the governance sense and false in the plain sense: it is a second attempt at the same audit, after the first one failed. Calling it anything else would let the record read as though R1 had never happened. The honest description is: a second attempt, corrective, separately preregistered, and separately authorised.",
+    "what_remains_true_from_rev4": [
+      "it is NEVER automatic: no runner re-launches a child after any outcome",
+      "there is exactly one subprocess.Popen and no code path reaches it twice",
+      "it has its own preregistration, its own GO, its own stage identifier and its own leaf",
+      "the R1 leaf is never reused, rewritten or deleted"
+    ],
+    "authorisation_required": "R2 may be executed EXACTLY ONCE, and only after BOTH an explicit user authorisation AND an explicit architect GO whose status is exactly APPROVED and whose stage is V26C_J20_RESTORE_AUDIT_R2. Neither alone is sufficient.",
+    "if_R2_also_fails": "there is no R3 without a further, separate architect decision. Failure is not a licence to iterate."
+  },
+
+  "correction_2_evidence_versus_inference": {
+    "why": "rev4 mixed observed facts and the mechanism that explains them under one heading. They are separated here so a reader can audit each on its own terms.",
+
+    "DIRECT_EVIDENCE": {
+      "definition": "facts read out of the committed R1 artefacts. No interpretation.",
+      "items": [
+        "the R1 child exited with returncode 124",
+        "summary.json records stop_reason 'phase_timeout'",
+        "summary.json records stop_message 'Training STOPPED - PPOConfig.build_algo exceeded the 600 s wall-clock timeout (child self-guard).'",
+        "watchdog_state.json records phase 'PPOConfig.build_algo' with timeout_s 600.0",
+        "child_stdout_stderr.txt contains 115 occurrences of the string \"No module named 'train_ppo_mlp'\"",
+        "each occurrence carries the traceback File ray/_private/runtime_env/setup_hook.py, line 244, in load_and_execute_setup_hook_func -> setup_func = pickle.loads(worker_setup_func_info.function) -> ModuleNotFoundError",
+        "Ray reported 'Worker exit type: SYSTEM_ERROR, Worker exit detail: Failed to deserialize the setup hook method.'",
+        "the R1 child environment carried no PYTHONPATH: launch_once set only PYTHONDONTWRITEBYTECODE",
+        "the successful critic-only warm-up log contains 0 occurrences of the same string",
+        "train_ppo_mlp.py line 1696 assigns runtime_env['worker_process_setup_hook'] = _worker_setup",
+        "no live_optimizer_audit.json was written, and no summary field describing a restore was produced"
+      ]
+    },
+
+    "CAUSAL_INFERENCE": {
+      "definition": "the mechanism that, in our judgement, connects those facts. It is an inference, not a measurement.",
+      "claim": "the script substitution of operation 4 removed baseline_MLP from sys.path[0]; nothing replaced it; Ray workers could therefore not import the module the pickled setup hook refers to, so every EnvRunner died and build_algo never completed.",
+      "supporting_steps": [
+        "cloudpickle serialises a function defined in an IMPORTABLE module by reference, and a function defined in __main__ by value",
+        "when train_ppo_mlp.py runs as a script, _worker_setup lives in __main__ and is pickled BY VALUE, so a worker needs no import - its own docstring states this: 'Picklable-by-value (defined in __main__ when run as a script)'",
+        "the validation-only wrapper IMPORTS train_ppo_mlp instead, so _worker_setup.__module__ is 'train_ppo_mlp' and cloudpickle pickles it BY REFERENCE",
+        "a by-reference payload requires every worker to import train_ppo_mlp",
+        "Ray workers are fresh processes that rebuild sys.path from the interpreter and PYTHONPATH; they never inherit the driver's runtime sys.path.insert"
+      ],
+      "measured_support_added_by_this_amendment": "the smoke test below measures the by-reference payload and reproduces the exact ModuleNotFoundError, which moves several of these steps from argument to observation. What stays inferential is the attribution of the WARM-UP's success to by-value pickling: that run was not instrumented, and its zero occurrences are consistent with the explanation without proving it."
+    },
+
+    "STILL_A_HYPOTHESIS": {
+      "claim": "with baseline_MLP first on PYTHONPATH, Ray will deserialise the hook, build_algo will complete and algo.restore_from_path will be reached.",
+      "status": "NOT VERIFIED. The smoke test establishes the necessary condition - the payload deserialises in a fresh interpreter - but not the sufficient one. Only executing R2 can settle it.",
+      "what_would_falsify_it": "an R2 run that still fails in build_algo, with or without the same error."
+    }
+  },
+
+  "correction_3_the_smoke_test_is_strengthened": {
+    "what_rev4_specified": "importlib.util.find_spec in a fresh interpreter, with and without the corrected environment.",
+    "why_that_was_insufficient": "find_spec proves the module is FINDABLE. It does not exercise the operation that actually failed, which was cloudpickle deserialising a by-reference payload. A package could be findable and the payload still fail for another reason.",
+    "what_is_required_now": {
+      "step_1_preliminary": "keep the find_spec check as a cheap preliminary, negative and positive.",
+      "step_2_serialise": "in the preparing process, with baseline_MLP importable, import train_ppo_mlp and serialise train_ppo_mlp._worker_setup with the SAME serialiser Ray uses, ray.cloudpickle.",
+      "step_3_negative": "in a NEW interpreter whose working directory is the validation directory and whose environment carries no PYTHONPATH, deserialise that exact payload. It MUST fail, and it must fail PRECISELY with ModuleNotFoundError naming train_ppo_mlp - not with some other error that would merely look like a failure.",
+      "step_4_positive": "in a NEW interpreter with the same working directory and the environment child_environment() builds, deserialise the same payload. It MUST succeed and yield a callable whose __module__ is 'train_ppo_mlp' and whose __name__ is '_worker_setup'.",
+      "step_5_never_call_it": "the deserialised function is NEVER invoked. Its identity is inspected and nothing more.",
+      "step_6_no_ray_runtime": "ray.init is never called, no Ray daemon, raylet, GCS or worker process is started, and the count of Ray-related processes must be unchanged across the whole check.",
+      "step_7_record_both": "both the negative and the positive outcome are recorded, because a smoke test that only reports success cannot distinguish a real pass from a check that never ran."
+    },
+    "additional_recorded_observation": "the payload produced from the imported module is on the order of tens of bytes and contains the literal 'train_ppo_mlp', which is what a by-reference pickle looks like; a by-value pickle of an equivalent function is an order of magnitude larger. This is recorded as corroboration of the causal inference above, not as a gate."
+  },
+
+  "the_draft_go_must_be_doubly_inert": {
+    "rule": "the DRAFT GO carries status 'DRAFT' AND authorises_execution false.",
+    "why": "rev4's DRAFT declared authorises_execution true and relied on the status check alone. One inert field is enough for correctness and two are enough for a reader who glances. validate_go must refuse it on both counts.",
+    "unchanged": "only the exact string 'APPROVED' authorises, and the stage must match exactly."
+  },
+
+  "explicitly_unchanged": [
+    "the 600 s startup timeout: NOT raised, NOT lowered, NOT made configurable",
+    "the stage identifier V26C_J20_RESTORE_AUDIT_R2, so neither GO can start the other stage",
+    "the only two argv differences from R1: --output-dir and --audit-evidence, both consequences of the new leaf",
+    "the thirteen gates R1-R13 and every predicate, including rev3's tightened R9",
+    "the zero-iteration semantics: range(2, 2) is empty",
+    "the single environment correction rev4 authorised, exactly as rev4 describes it",
+    "the validation-only wrapper, byte-identical to the one R1 used",
+    "train_ppo_mlp.py, every production module and every configuration: not modified",
+    "the R1 runner, the R1 suite, the R1 GO and every file of the R1 leaf: byte-identical and pinned"
+  ],
+
+  "note_on_the_two_historical_R1_suite_checks": {
+    "observation": "re-running test_v26c_j20_restore_audit.py now reports 2 failures out of 266: 'B06 --preflight-only creates no leaf' and 'I07 the destination is currently absent'.",
+    "cause": "both assert that the R1 destination leaf does not exist. That was true only before R1 ran. R1 has run, so the leaf exists.",
+    "classification": "EXPECTED POST-EXECUTION STATE, not a regression and not a defect. It is the same destination-absence class already seen in the J20, K1 and K1R1 suites.",
+    "decision": "ANNOTATED, NOT CORRECTED. test_v26c_j20_restore_audit.py stays byte-identical at 07213d4d13c2ffb0965673ec7960ce8db3153fb9c3393006a77d0aaba0530860 because it is pinned and is part of R1's evidence. The R2 suite verifies that it has not moved."
+  },
+
+  "prohibitions": [
+    "no execution of R2 without BOTH explicit user authorisation and an APPROVED architect GO for stage V26C_J20_RESTORE_AUDIT_R2",
+    "no automatic retry, ever, whatever the outcome",
+    "no write of any kind into the R1 leaf",
+    "no rewriting of the base document, rev1, rev2, rev3 or rev4",
+    "no modification of any production file or configuration",
+    "no ray.init, no Algorithm construction, no environment construction and no training during preparation",
+    "no PPO, no ex-novo run, no promotion, no training readiness"
+  ]
+}

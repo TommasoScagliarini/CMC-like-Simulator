@@ -1,0 +1,143 @@
+{
+  "kind": "ADDITIVE, IMMUTABLE, VERSIONED PREREGISTRATION ADDENDUM",
+  "version": 3,
+  "supersedes": null,
+  "amends": "v26c_j18_prereg_addendum_v2_minibatch_and_scaling_2026-08-27.json (version 2), on THREE pre-execution points",
+  "v2_left_byte_identical": true,
+  "rewrites_history": false,
+  "overwrites_nothing": true,
+  "stage": "V26C_J18_J8_B_ONLY_CONSTRAINED_UPDATE",
+  "date": "2026-08-27",
+  "status": "EXECUTION PREPARATION ONLY. No fit, no rollout, no environment, no critic, no PPO, no new collection, no candidate actor, no j18_runs, no sealed seed, no valid architect GO.",
+  "contains_no_self_hash": true,
+
+  "scope": "THREE pre-execution clarifications, all registered before any fit has been run: (1) the scale-absorption contract; (2) the statistical qualification of the minibatch estimator; (3) the elimination of every run-time import of a prior-stage executable module. Nothing that governs the experiment is touched: not the objective, not the four blocks, not the grid or its enumeration, not the eleven gates, not a single threshold, not the ranking order, not the fail-closed rule, not the per-row coefficients, not the RNG or chunking semantics.",
+  "the_three_points": [
+    {"id": "V3-1", "point": "scale absorption", "amends": "version 2 gap_2", "recorded_in": "defect_corrected and binding_replacement_contract"},
+    {"id": "V3-2", "point": "minibatch statistical qualification", "amends": "version 2 gap_1", "recorded_in": "wording_amendment_to_v2"},
+    {"id": "V3-3", "point": "no run-time import of a prior-stage module", "amends": "nothing in version 2; it constrains the runner", "recorded_in": "no_prior_stage_module_is_imported_at_run_time"}
+  ],
+
+  "defect_corrected": {
+    "id": "V2-S1",
+    "what_v2_said": "version 2 recorded, under gap_2_scaling_for_a_live_controller_parent.measurement.weight_round_trip, that the weight round trip is bit-identical with a measured max absolute difference of 0.0.",
+    "what_is_actually_true": "that measurement was taken on the PARENT's weights and in the direction (W*s)/s, which is exact for those particular values. It says nothing about the POST-TRAINING direction (W/s)*s on weights produced by Adam.",
+    "why_the_post_training_claim_would_be_invalid": "for arbitrary float32 values, dividing by s and multiplying back is not the identity. It fails for a large fraction of entries at the registered non-unit scales, materially so at s = 3.5, 55 and 60, where a substantial share of arbitrary float32 values do not round-trip. Any contract requiring byte identity there would abort sound runs.",
+    "severity": "PRE-EXECUTION. No fit has been run under either version. Nothing measured, no verdict and no artefact depends on the retired claim.",
+    "status_of_the_code_at_the_time_of_this_correction": "the runner did NOT carry a post-training byte-identity assertion. An earlier draft did; it was found by the two-epoch synthetic test double, which aborted on it, and it had already been replaced by a functional check before this addendum. Version 3 nonetheless registers the contract explicitly, because v2's wording could be read as extending the parent-side claim to the post-training direction, and because the functional check is here strengthened."
+  },
+
+  "binding_replacement_contract": {
+    "at_save": "convert the trained scaled-domain first-layer weight to the raw domain, W_raw = W_scaled / scales, column-wise, then re-zero the clock columns.",
+    "what_is_required": {
+      "measure": "the FINAL functional equivalence between the training-domain state evaluated on obs/scales and the raw actor evaluated on raw obs",
+      "rows": "ALL 4221 rows of the disjoint union, not a sample",
+      "kernels": ["numpy float64", "torch float32"],
+      "each_side_evaluated_like_for_like": "within one kernel, so the float32-vs-float64 kernel gap is never mistaken for an absorption error",
+      "threshold": 1e-06,
+      "relation": "<=",
+      "on_failure": "the candidate raises and the run stops. No tolerance is widened."
+    },
+    "what_is_NOT_required": {
+      "byte_identity_of_the_weight_round_trip": false,
+      "why": "(x/s)*s is not the identity on arbitrary float32 values at these scales. Requiring it would fail candidates whose FUNCTION is preserved to within 1e-6 of an action unit, one-millionth, which is the property that actually matters.",
+      "instead": "the maximum absolute weight round-trip delta, the count of entries that are not bit-identical and their fraction are RECORDED PER CANDIDATE as diagnostics, and gate nothing."
+    },
+    "gates_are_evaluated_on": "the RAW actor only, exactly as in version 1. Unchanged.",
+    "parent_side_claim_retained_and_scoped": {
+      "claim": "(W_parent * scales) / scales == W_parent",
+      "direction": "raw -> scaled -> raw",
+      "measured_max_abs_difference": 0.0,
+      "bit_identical": true,
+      "applies_to": "the PARENT's weights only, before any training",
+      "does_not_apply_to": "any post-training weight, in either direction",
+      "still_asserted_at_run_time": true
+    }
+  },
+
+  "wording_amendment_to_v2": {
+    "id": "V2-S2",
+    "where": "version 2, gap_1_minibatch_semantics.estimator.identity_over_a_full_epoch",
+    "what_v2_said": "summing the chunk losses weighted by |M|/N over one epoch gives exactly sum_b w_b * MSE_b, and L_M is an unbiased estimator of that objective",
+    "precise_statement": "the epoch identity holds for a FIXED parameter vector theta. During SGD theta changes from minibatch to minibatch, so the sum of the realised chunk losses across an epoch is not literally sum_b w_b * MSE_b at any single theta.",
+    "unbiasedness_is_claimed_only_where_it_holds": {
+      "holds": "L_M is an unbiased estimator of sum_b w_b * MSE_b when M is drawn UNIFORMLY and INDEPENDENTLY of theta.",
+      "does_not_hold_for_the_actual_training_loop": "training uses RANDOM RESHUFFLING, i.e. sampling without replacement within an epoch. After the first minibatch the current theta depends on the rows already visited, and the next chunk is drawn from the remainder, so the chunk and theta are not independent. NO claim of conditional unbiasedness is made for a real step, and version 2's per-step wording is retired.",
+      "what_is_claimed_instead": [
+        "the per-row coefficients are exactly w_block(i) / N_block(i), so each block's influence is governed by its registered weight and never by how many of its rows land in a batch",
+        "coverage is exact: one permutation per epoch, every row visited exactly once, the final short chunk kept and scaled by N/|M|",
+        "the checkpoint-selection objective is evaluated on the FULL blocks at a single FROZEN theta after each epoch and is therefore exactly sum_b w_b * MSE_b, with no estimator involved"
+      ]
+    },
+    "also_unaffected": "the checkpoint-selection objective, which is evaluated on the FULL blocks at a single frozen theta after each epoch and is therefore exactly sum_b w_b * MSE_b.",
+    "severity": "wording and a retired statistical claim. No formula, weight, threshold, coefficient or measurement changes."
+  },
+
+  "no_prior_stage_module_is_imported_at_run_time": {
+    "rule": "J18 imports no executable module of any earlier stage. A J18 GO pins SEVEN artefacts; depending on code it does not pin would put the run's behaviour outside the GO's control.",
+    "forbidden_imports": ["v26c_j8_recovery_fit", "v26c_j11_multistart_fit", "v26c_j14_dagger_dataset"],
+    "locally_transcribed_instead": [
+      {
+        "what": "the canonical actor digest",
+        "source_semantics": "warm_start.actor_state_digest: for each key in sorted(WARM_START_ACTOR_KEYS), update with the key's utf-8 bytes then with that tensor's digest; a tensor digest is sha256 over the ascii dtype, then repr of the integer shape tuple, then the C-ordered bytes",
+        "held_honest_by": "tests asserting it reproduces J8 = 6a879714044ba8321fedf8e554d0f2ec448c1f1177e1648e4e4aa72195031207 and J2 = 59d54240ac628dcbd1d0dbf34328145afa08a7028047a5923298782b79bf5188 from their artefacts"
+      },
+      {
+        "what": "the July physical scales",
+        "mapping_in_registered_order": [
+          ["pros_knee_angle_previous_endpoint", 1.0],
+          ["pros_knee_angle_served_ref", 1.0],
+          ["pros_knee_angle_served_ref_vel", 4.0],
+          ["pros_knee_angle_served_ref_accel", 60.0],
+          ["pros_knee_angle_sea_u", 1.0],
+          ["pros_ankle_angle_previous_endpoint", 1.0],
+          ["pros_ankle_angle_served_ref", 1.0],
+          ["pros_ankle_angle_served_ref_vel", 3.5],
+          ["pros_ankle_angle_served_ref_accel", 55.0],
+          ["pros_ankle_angle_sea_u", 1.0]
+        ],
+        "missing_name_policy": "a missing registered name is a HARD FAILURE, never a silent 1.0",
+        "resolved_non_unit_columns_on_the_current_35_names": [[27, 4.0], [28, 60.0], [32, 3.5], [33, 55.0]]
+      },
+      {
+        "what": "J14's discrete-feature predicate",
+        "predicate": "the name ends with _in_contact, _heel_strike, _toe_off or _saturated, OR starts with phase_fsm_ or phase_expected_",
+        "resolved_indices_on_the_current_35_names": [11, 12, 13, 17, 18, 19, 20, 21]
+      }
+    ]
+  },
+
+  "everything_else_stands_unchanged": [
+    "version 1: the objective, the four disjoint blocks, the priority order A > B > C > D, the counts and hashes",
+    "version 1: the finite 16-candidate grid, its axes, values and enumeration order",
+    "version 1: seed 123, 200 epochs, batch 128, Adam, no validation split, no early stopping, no retry",
+    "version 1: all eleven hard gates G1 to G11 and every threshold",
+    "version 1: the total ranking order and the fail-closed rule",
+    "version 1: offline gates shortlist and do not certify closed-loop behaviour",
+    "version 2: the minibatch estimator L_M = (N/|M|) * sum coef_i * e_i, with the statistical claim now qualified as stated in wording_amendment_to_v2: unbiased for a uniformly drawn M independent of theta; under the actual random-reshuffling loop what is guaranteed is exact per-row coefficients, exact once-per-epoch coverage, and an exact full-block checkpoint objective at frozen theta",
+    "version 2: the RNG and chunking semantics, 33 batches per epoch, 6600 steps per candidate",
+    "version 2: the rejection of the naive raw-init route, measured at 1.077083e-02",
+    "version 2: the pre-optimizer raw/scaled equivalence check in both kernels"
+  ],
+
+  "go_must_pin": [
+    "v26c_j18_prereg_b_only_constrained_update.json",
+    "v26c_j18_prereg_addendum_v2_minibatch_and_scaling_2026-08-27.json",
+    "v26c_j18_prereg_addendum_v3_scale_absorption_2026-08-27.json",
+    "v26c_j18_dataset_manifest.json",
+    "v26c_j18_provenance_overlay_j8_2026-08-27.json",
+    "v26c_j18_b_only_update.py",
+    "test_v26c_j18_b_only_update.py"
+  ],
+
+  "invariants": {
+    "not_modified": ["J8", "J2", "J7", "J9R1", "J10R1", "the v1 preregistration", "the v2 addendum", "production configuration", "FSM v3", "detector and morphology", "reward", "sigma", "SEA and the C++ plugin", "network architecture"],
+    "sealed_seeds_126_127_128": "not read, not generated, not used",
+    "dirty_worktree": "preserved untouched"
+  },
+
+  "self_consistency": {
+    "contains_no_self_hash": true,
+    "how_to_verify": "construct adversarial float32 weights, divide by 3.5, 55 and 60 and multiply back, and observe that a large fraction are not bit-identical while the network's function on the 4221 rows stays within 1e-06."
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "amendment_id": "rev4c_on_policy_balance_experiment",
+  "date": "2026-08-24",
+  "token": "V26B-REV4C-BALANCE",
+  "kind": "ADDITIVE and IMMUTABLE. One single-variable experiment. rev4b, its addendum, its receipts and its report are NOT mutated",
+
+  "ARCHITECTURAL_FRAMING_BINDING": {
+    "what_the_68_cap_IS": "a CONTROLLED DAgger COLLECTION BUDGET, chosen to restore the July round's on-policy share of 35.23% and thereby isolate the hypothesis that rev4b's 75.82% share caused the closed-loop collapse",
+    "what_the_68_cap_IS_NOT": [
+      "NOT a 'causally valid prefix': the audit established that the July truncation operator compares a PERTURBED trace against the same actor's nominal trace and is inapplicable here, and that the 13/14 figures in the rev4b rollout receipt describe rev4b's own 42-step rollout, not the S1A prefix",
+      "NOT a literal replication of the July incident: July's 68 rows were the ENTIRE trace of a clone that died at step 68; here 68 is a deliberate cut of a 392-row trace",
+      "NOT a promotion of any kind"
+    ],
+    "fidelity_statement": "rev4c is faithful to the July BALANCE and, by construction, NOT faithful to the July OPERATOR (which never truncated a DAgger prefix). It is the mirror image of rev4b, which was operator-faithful and balance-divergent. Neither may be called 'July-faithful' without this qualification",
+    "experiment_type": "single variable: the on-policy share, 75.82% -> 35.23%. Everything else is byte-identical to rev4b"
+  },
+
+  "parents_immutable": {
+    "rev4b": "883ffc9a0217fa6fefcabf820b382717b8ad2e8f7ccd5814461b0bb4218f0f93",
+    "rev4b_addendum_a_corrections": "74f7c50a83877a2005708e95ee911992f301bbe3799f41c823f807dbbb847ce1",
+    "rev4b_fit_receipt": "7f7f10419c84b1a1d03d91082b579551c662ed4d8b579e1a26c79798328f2565",
+    "rev4b_rollout_receipt": "2032c5a9d5ee448cb45cebf65d13b40efeae062a58c8260fb7f4db413978c1b8",
+    "rev4b_audit_report": "19642c2577665d6ac97ea30bdc6fec839ff21efeffd144b5555a51a81ece298a",
+    "rev4a": "014b922a44168c5853bd9e1a9549fae914cf676f6c9f15fc549526014449db6e",
+    "s1a_actor": "8f3e0ce17eff7c741dcf72de6d0fec0c372f9dbc7a9b3119d41c155ec8603e35",
+    "s1a_trace": "6546befcd4a2e26711137a807cd43a797e47abd62500243fe6c015d7abcfcf21"
+  },
+
+  "dataset": {
+    "teacher_corpus_rows": 500,
+    "teacher_corpus": "the BC-IK corpus: obs35 visited by S0D on the frozen nominal trace, labels u_IK AB06 SAME-STEP from the pinned cache 3dd878d4...",
+    "on_policy_prefix_rows": 68,
+    "on_policy_prefix": "the FIRST 68 CONTIGUOUS rows of the frozen S1A nominal rollout (steps 1..68), labels = same-step u_IK at teacher_index = step - 1",
+    "trace_repeat": 4,
+    "aggregate_rows": 772,
+    "on_policy_share": 0.3523316062176166,
+    "july_r1_reference": {"rows": 772, "share": 0.3523316062176166},
+    "operation": "concat(teacher, tile(prefix, 4)); no dedup; the 68 cap is the collection budget, applied BEFORE the July operator",
+    "forbidden_data": "no S0D-actor, L20, A2, W2/W4/W8, L05/L10, A1-A6 or rev4b data; JUL_H0 never init nor label"
+  },
+
+  "init_and_roles": {
+    "init": "EXCLUSIVELY the S1A actor 8f3e0ce1..., which is also the anchor parameter and the collection policy (its frozen rollout is reused; NO new collection)",
+    "logstd": "byte-identical to the S1A placeholder, restored after every optimizer step",
+    "sigma": "UNRESOLVED and never chosen"
+  },
+
+  "july_hyperparameters_verified_and_unchanged": {
+    "epochs": 400, "batch_size": 64, "learning_rate": 0.0003, "validation_fraction": 0.20, "patience": 60,
+    "clip_weight": 1.0, "logstd_weight": 0.1, "anchor_weight": 1e-05, "seed": 123, "trace_repeat": 4,
+    "interpolation_steps": 0, "gradient_clipping": "none",
+    "source": "target_domain_imitation.py:1353-1361 and target_domain_dagger.py:57-67, verified in the rev4b stage"
+  },
+
+  "blocking_preflight_no_write": [
+    "steps 1..68 contiguous",
+    "obs35 exact: each row equals its recorded actor_observation_vector_before, width 35, all finite",
+    "time alignment exact: max |t_S1A - t_corpus| == 0 over the first 68 rows",
+    "labels finite and same-step",
+    "no exact duplicates and no collision carrying a CONFLICTING label",
+    "negative-ankle coverage reported",
+    "on any failure: NO-GO and STOP, no fit"
+  ],
+
+  "tooling_requirements": {
+    "no_hardcoded_actor_names": "the new analyzer must parameterise the actor label; keys such as kinematics_L20 or L20_vs_S0D_same_states are forbidden",
+    "no_foreign_offline_reference_block": "a receipt must never embed another actor's offline constants; the field is forbidden outright",
+    "regression_tests": "must prove both prohibitions on the produced receipt",
+    "rev4b_artifacts": "never mutated"
+  },
+
+  "offline_gates": {
+    "binding": ["integrity invariants (10 keys, clock zero, clock invariance bit-identical, logstd byte-identical to S1A, save/reload exact, no critic)",
+                 "function preservation T1 and T2 <= 1e-5",
+                 "fit convergence: adapted aggregate RMSE strictly lower than the initial one"],
+    "reported_without_invented_thresholds": ["RMSE, Pearson and amplitude ratio per joint on the corpus 500, on the first-68 prefix and on ALL 97 negative-ankle rows of the corpus",
+                                              "negative-window sign coverage",
+                                              "max_abs vs the S0D actor: INFORMATIONAL only",
+                                              "healthy contralateral symmetry: DIAGNOSTIC only"]
+  },
+
+  "closed_loop_stage": {
+    "trigger": "only if every binding offline gate passes",
+    "execution": "exactly ONE deterministic nominal rollout, 500-step horizon, same frozen harness, no retry",
+    "monitored": ["grf_penetration", "phase_timeout stance and swing", "morphology_causal_contract_failure", "resync_count",
+                   "hs_cancelled_count", "events and valid cycles", "raw action clipping", "ankle and knee q with sign and amplitude"]
+  },
+
+  "CRITERIA": {
+    "primary_causal_test": {
+      "measure": "survival in steps",
+      "GO_hypothesis_supported": "> 100 steps",
+      "NO_GO_hypothesis_refuted": "<= 100 steps -> the on-policy over-weighting hypothesis is REFUTED and the single-round DAgger direction is closed",
+      "reference_points": {"rev4b_at_75.82_percent": 42, "july_r1_at_35.23_percent": 45, "july_r2": 356, "S1A_init": 392}
+    },
+    "promotion_requires_ALL_of": ["500/500 completion", "zero critical counters", ">= 2 valid cycles",
+                                   "penetration within the current gate", "the kinematic quality gates"],
+    "no_automatic_promotion": "even if every criterion passes, the candidate is NOT promoted; the architect decides after the audit"
+  },
+
+  "prohibitions": ["no PPO", "no further DAgger round", "no sigma test or choice", "no other candidate", "no retry",
+                    "no new collection", "no promotion", "no production/env/reward/FSM/morphology/SEA/C++ change",
+                    "no mutation of rev4b artifacts"]
+}

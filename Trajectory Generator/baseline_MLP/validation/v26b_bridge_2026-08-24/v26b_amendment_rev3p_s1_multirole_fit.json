@@ -1,0 +1,124 @@
+{
+  "amendment_id": "rev3p_s1_multirole_fit",
+  "date": "2026-08-24",
+  "token": "V26B-S1P-MULTIROLE-FIT",
+  "kind": "ADDITIVE. Supersedes ONLY the mono-role objective of rev3o. rev3l/rev3m/rev3n/rev3o, the rev3o REJECTED artifact and every prior receipt/log/report/tooling remain immutable and are never overwritten",
+  "architect_finding": "independent audit of rev3o PASS: implementation and rejection correct, no checkpoint published. Confirmed architectural cause: the 1e-5 parameter anchor is numerically INERT (weighted contribution ~3.7e-10 vs a data term of 3.9e-3 at epoch 300) and cannot preserve the S0D function under mono-role IK fitting",
+  "parents_immutable": {
+    "rev3l": "7545201df4e5aefb4fdccca9efc1425a9a4dde581a4c20269c0d3fd86aa794d5",
+    "rev3m": "8af3ad654e49e19f5a6d2dbcf128faf5ce424206a5def715d177f7fbda93e0c0",
+    "rev3n": "0677ad577336240b26cf6947e9e3d60d74632a35724f49b5f06bf4bc5aa377e3",
+    "rev3n_pregate_receipt": "923ffc5ca8fb4d3577d9894e90db151a92bad089d3669b38fb9553484e6f2634",
+    "rev3o": "abe463c3d64b4b91a0d5ef83517159bcc6fc417d029be4dd51db9c92a0dfc978",
+    "rev3o_REJECTED_artifact": "a559bd691eb5934f32a820e46e13660f010f0b54e445c82d4f13e485154d558a",
+    "rev3o_tool": "a6d7163ef8089ca9efb5b8b31fe92d2132efa357b1c69d814f6d9531ea845916",
+    "rev3k": "8f34c95ee7c69029e0d3e8715f3e62fe9652533a03e0dd4b8fb7b38114377437"
+  },
+  "init": {
+    "module": "student/S0D_35D_DISTILLED/rl_module",
+    "actor_digest": "481dd0d22919fc1ec04cdb722409b9711caeb61d57449c210aad7386375b764a",
+    "module_state_sha256": "cda6d893138444908b4fcc908dc0045bd0df317ef0f6bbc72f70e84629e14597",
+    "enforcement": "POSITIVE digest enforcement; JUL_H0/R0a/R1/R2G/R2I/S1-rev3o forbidden as init and as labels"
+  },
+  "roles": {
+    "task": {
+      "rows": 380,
+      "obs": "nominal S0D-visited obs35, steps 1-190 and 311-500 (identical to rev3o)",
+      "labels": "same-time AB06 u_IK from the pinned nominal cache 3dd878d4d6d2930d730c1a67f39d6799f20221e7659a435c02d062bfd553d9b0",
+      "excluded_steps": [
+        [
+          191,
+          200
+        ],
+        [
+          201,
+          300
+        ],
+        [
+          301,
+          310
+        ]
+      ]
+    },
+    "preservation_train": {
+      "rows": 14834,
+      "obs": "rev3k S0D split train_idx, unique obs35",
+      "labels": "deterministic mean of the pinned S0D on the SAME obs35 (numpy forward)",
+      "leakage_verified_fail_closed": "zero bitwise overlap with ALL 500 task states AND with the rev3m source holdout; re-checked at every execution and recorded"
+    }
+  },
+  "gates_unchanged": {
+    "G_task": {
+      "metric": "RMSE vs u_IK on the blocked out-of-sample holdout steps 201-300",
+      "max_per_joint": 0.15,
+      "binding": true
+    },
+    "Q1_source_holdout_rev3m": {
+      "rows": 4474,
+      "note": "4480 minus the 6 bitwise-shared, NEVER trained on by either role",
+      "labels": "S0D deterministic mean, same state",
+      "max_per_joint": 0.1,
+      "binding": true
+    },
+    "Q3_invariants": {
+      "binding": true
+    },
+    "T1_T2": {
+      "max": 1e-05,
+      "binding": true
+    },
+    "diagnostics_only": [
+      "full-500 metrics",
+      "train-role RMSE (task and preservation)",
+      "drift vs S0D on the 500 task rows",
+      "parameter shift",
+      "anchor magnitude"
+    ]
+  },
+  "objective": {
+    "form": "L_data = mean_task(row MSE vs u_IK) + beta * mean_pres(row MSE vs S0D mean); plus 1.0 * action-clip penalty on all batch rows; plus 1e-5 * July exact parameter anchor towards theta_S0D",
+    "beta": 1.0,
+    "beta_provenance": "frozen a priori from the documented F2R T1R / V26B preservation recipe (T1R_BETA = 1)",
+    "group_balanced": "per-role means computed SEPARATELY inside each mini-batch drawn from a single deterministic shuffled union of the two roles; neither term is weighted by its row count; a role absent from a batch contributes EXACTLY zero for that batch and the count of such batches is reported (proven T1R mechanism)",
+    "no_target_variance_normalization": true,
+    "no_aux_phase_head": true,
+    "no_masses": true,
+    "anchor_role": "secondary regularizer only; its magnitude is measured and reported, never relied upon for preservation"
+  },
+  "numerics_unchanged": {
+    "epochs": 300,
+    "batch_size": 256,
+    "optimizer": "Adam",
+    "lr": 0.0001,
+    "seed": 2026,
+    "deterministic_algorithms": true,
+    "clock_columns": "re-zeroed after every optimizer step",
+    "logstd": "restored/frozen placeholder, bit-identical to the init",
+    "early_stopping": "none",
+    "model_selection": "none",
+    "recorded": [
+      "optimizer step count",
+      "exact role counts and per-role batch masses",
+      "empty-role batch counts"
+    ]
+  },
+  "publication_policy": {
+    "on_pass": "atomic no-clobber export under the DISTINCT name student/S1P_IK_AB06_MULTIROLE_35D/ + complete receipt",
+    "on_fail": "immutable REJECTED artifact, NO candidate checkpoint, staging/lock cleaned, no threshold/metric/label change, STOP",
+    "never": "overwrite or mutate any rev3o artifact"
+  },
+  "sigma_question": "EXPLICITLY UNRESOLVED: 0.005 is only the frozen serialisation placeholder of the log-std head; no gate reads it; it must NOT be assumed for any later stochastic stage",
+  "prohibitions": [
+    "no rollout",
+    "no DAgger",
+    "no PPO/critic",
+    "no V3",
+    "no morphology fit",
+    "no multistart",
+    "no sigma sweep",
+    "no modification of env/reward/FSM/SEA/C++/production",
+    "no modification of frozen amendments/receipts/logs/reports/tooling",
+    "no retry after a FAIL"
+  ],
+  "next_stage": "any closed-loop evaluation of an S1P checkpoint requires a SEPARATE token, not granted here"
+}
