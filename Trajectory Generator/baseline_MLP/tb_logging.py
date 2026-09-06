@@ -364,6 +364,23 @@ class RewardComponentsCallback(RLlibCallback):
         if isinstance(components, dict):
             for key, value in components.items():
                 self._log(metrics_logger, f"reward/{key}", value)
+            current_reward = _as_finite_float(components.get("reward"))
+            if current_reward is not None:
+                # Update-scoped, unsmoothed totals used only by the terminal
+                # display when RLlib has no completed episode in this batch.
+                # Unlike reward/reward's rolling 100-step window, this covers
+                # every sampled row and is therefore a defensible estimate of
+                # full-horizon return after normalization by the row count.
+                metrics_logger.log_value(
+                    "console/reward_sum_current",
+                    current_reward,
+                    reduce="sum",
+                )
+                metrics_logger.log_value(
+                    "console/reward_count_current",
+                    1.0,
+                    reduce="sum",
+                )
 
         terms = info.get("reward_terms")
         if isinstance(terms, dict):

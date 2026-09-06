@@ -97,6 +97,7 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "primary_split_v25_residual_limits": _opt(_list_float),
         "primary_split_v25_residual_init_seed": _opt(int),
         "freeze_logstd": _to_bool,
+        "fixed_exploration_sigma": _opt(_list_float),
         "freeze_actor": _to_bool,
         "seed": int,
     },

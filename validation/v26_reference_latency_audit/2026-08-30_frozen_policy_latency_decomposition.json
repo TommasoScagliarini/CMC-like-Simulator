@@ -1,0 +1,1167 @@
+{
+  "ok": true,
+  "audit": "v26_frozen_policy_latency_decomposition_v1",
+  "policy_mutated": false,
+  "training_executed": false,
+  "canonical_to_phase": 0.6223299989,
+  "absolute_bounds_rad": {
+    "knee": [
+      -1.5,
+      0.0
+    ],
+    "ankle": [
+      -0.7,
+      0.7
+    ]
+  },
+  "prescribed": {
+    "kinematics": "results/sim_output_kinematics.sto",
+    "events": "results/sim_output_gait_events.csv",
+    "complete_cycles": 4,
+    "mean_landmarks": {
+      "knee": {
+        "value_near_to_rad": -0.8655532934307859,
+        "minimum_rad": -0.9805071117571562,
+        "minimum_phase": 0.685,
+        "maximum_rad": -0.1913334761348911,
+        "maximum_phase": 0.975
+      },
+      "ankle": {
+        "value_near_to_rad": -0.12421099781905852,
+        "minimum_rad": -0.14079843427123917,
+        "minimum_phase": 0.635,
+        "maximum_rad": 0.40620785608679577,
+        "maximum_phase": 0.46
+      }
+    }
+  },
+  "runs": [
+    {
+      "run_dir": "Trajectory Generator/runs/rollout/MLP_ExNovo_V26C_J20_pilot_2026-08-28_best_rollout",
+      "morphology_weight": 0.0025,
+      "steps": 500,
+      "policy_dt_s": 0.010000000000001563,
+      "detected_cycles": 3,
+      "analyzed_complete_cycles": 2,
+      "detected_period_mean_s": 1.5126666666664204,
+      "analyzed_period_mean_s": 1.536000000000037,
+      "morphology_reward_delay_s": 0.04,
+      "governor": {
+        "target_error_rms_rad_mean": {
+          "knee": 0.08367688266110866,
+          "ankle": 0.05453217544062138
+        },
+        "velocity_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "acceleration_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "jerk_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        }
+      },
+      "joints": {
+        "knee": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.04099999999999998,
+              "rmse_rad": 0.16148326788832115,
+              "pearson": 0.9097915974857583,
+              "overlap_samples": 192,
+              "lag_ms_at_detected_period": 62.0193333333232
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.05099999999999999,
+              "rmse_rad": 0.16339428793281913,
+              "pearson": 0.9068112186136338,
+              "overlap_samples": 190,
+              "lag_ms_at_detected_period": 77.14599999998742
+            },
+            "served": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.1691353399882102,
+              "pearson": 0.9104356972566683,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.34266666664053
+            },
+            "actual": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.1686273674207368,
+              "pearson": 0.9139646183104372,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.34266666664053
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 1,
+              "lag_s": 0.010000000000001563,
+              "rmse_rad": 0.016653647869136076,
+              "pearson": 0.9980238964226215,
+              "overlap_samples": 499,
+              "zero_lag_rmse_rad": 0.023329136503216417,
+              "zero_lag_pearson": 0.9958953100403461
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.009619561694315331,
+              "pearson": 0.999262267059654,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.1080402681218124,
+              "zero_lag_pearson": 0.9062476944658332
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.009995569323232728,
+              "pearson": 0.9992846469693627,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.009995569323232728,
+              "zero_lag_pearson": 0.9992846469693627
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 9,
+              "lag_s": 0.09000000000001407,
+              "rmse_rad": 0.016040002656990845,
+              "pearson": 0.998234973087202,
+              "overlap_samples": 491,
+              "zero_lag_rmse_rad": 0.12626543578956634,
+              "zero_lag_pearson": 0.8741676883653424
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.9404415088906559,
+              "minimum_rad": -0.9820536057295706,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15287905599812104,
+              "maximum_phase": 0.085
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.9353245810833055,
+              "minimum_rad": -0.9820536057295706,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15287905599812104,
+              "maximum_phase": 0.085
+            },
+            "served": {
+              "value_near_to_rad": -0.7486772346221562,
+              "minimum_rad": -0.9733550280655222,
+              "minimum_phase": 0.8150000000000001,
+              "maximum_rad": -0.17072145276736234,
+              "maximum_phase": 0.135
+            },
+            "actual": {
+              "value_near_to_rad": -0.7408668992055081,
+              "minimum_rad": -0.9780855153348547,
+              "minimum_phase": 0.8150000000000001,
+              "maximum_rad": -0.16954883789717726,
+              "maximum_phase": 0.13
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.266,
+            "rmse_raw_vs_after_slew_rad": 0.023329136503216417,
+            "mean_abs_change_rad": 0.010044485674046307,
+            "max_abs_change_rad": 0.09614244960249163
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 62.0193333333232,
+            "slew_added": 15.12666666666422,
+            "filter_added": 83.1966666666531,
+            "physical_tracking_added": 0.0
+          }
+        },
+        "ankle": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.017000000000000015,
+              "rmse_rad": 0.05527820399320579,
+              "pearson": 0.9583001129624418,
+              "overlap_samples": 197,
+              "lag_ms_at_detected_period": 25.715333333329166
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.03700000000000003,
+              "rmse_rad": 0.04427059356912722,
+              "pearson": 0.9674228774274768,
+              "overlap_samples": 193,
+              "lag_ms_at_detected_period": 55.968666666657604
+            },
+            "served": {
+              "candidate_advance_phase": 0.08900000000000002,
+              "rmse_rad": 0.06766879854858318,
+              "pearson": 0.9103576452640252,
+              "overlap_samples": 183,
+              "lag_ms_at_detected_period": 134.62733333331144
+            },
+            "actual": {
+              "candidate_advance_phase": 0.08500000000000002,
+              "rmse_rad": 0.06788048415722049,
+              "pearson": 0.9091050681000317,
+              "overlap_samples": 184,
+              "lag_ms_at_detected_period": 128.57666666664576
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 2,
+              "lag_s": 0.020000000000003126,
+              "rmse_rad": 0.026313713105124623,
+              "pearson": 0.986287967595373,
+              "overlap_samples": 498,
+              "zero_lag_rmse_rad": 0.03388802119497255,
+              "zero_lag_pearson": 0.9741358269628857
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.006692086867270793,
+              "pearson": 0.9987882912165867,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.06694066795750604,
+              "zero_lag_pearson": 0.8768844739609862
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.008819486219373172,
+              "pearson": 0.998192959649362,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.008819486219373172,
+              "zero_lag_pearson": 0.998192959649362
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 10,
+              "lag_s": 0.10000000000001563,
+              "rmse_rad": 0.025406732791893805,
+              "pearson": 0.9878260266929869,
+              "overlap_samples": 490,
+              "zero_lag_rmse_rad": 0.09352374250565475,
+              "zero_lag_pearson": 0.7753778065206758
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.12786482144926803,
+              "minimum_rad": -0.1353865926040983,
+              "minimum_phase": 0.64,
+              "maximum_rad": 0.39717719589409506,
+              "maximum_phase": 0.495
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.02199549475642193,
+              "minimum_rad": -0.09727684387219815,
+              "minimum_phase": 0.685,
+              "maximum_rad": 0.39717719589409506,
+              "maximum_phase": 0.495
+            },
+            "served": {
+              "value_near_to_rad": 0.12866588745517432,
+              "minimum_rad": -0.0805464432799808,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.38943170446209496,
+              "maximum_phase": 0.53
+            },
+            "actual": {
+              "value_near_to_rad": 0.12748847044459222,
+              "minimum_rad": -0.08320588080870564,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.3751662815619985,
+              "maximum_phase": 0.52
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.138,
+            "rmse_raw_vs_after_slew_rad": 0.03388802119497255,
+            "mean_abs_change_rad": 0.010422188522736547,
+            "max_abs_change_rad": 0.1672487989067718
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 25.715333333329166,
+            "slew_added": 30.253333333328438,
+            "filter_added": 78.65866666665383,
+            "physical_tracking_added": -6.050666666665677
+          }
+        }
+      }
+    },
+    {
+      "run_dir": "Trajectory Generator/runs/rollout/MLP_ExNovo_V26C_J20_morphology_0p025_50updates_2026-08-28_best_rollout",
+      "morphology_weight": 0.025,
+      "steps": 500,
+      "policy_dt_s": 0.010000000000001563,
+      "detected_cycles": 3,
+      "analyzed_complete_cycles": 2,
+      "detected_period_mean_s": 1.5126666666664204,
+      "analyzed_period_mean_s": 1.5350000000000374,
+      "morphology_reward_delay_s": 0.04,
+      "governor": {
+        "target_error_rms_rad_mean": {
+          "knee": 0.0835714179621931,
+          "ankle": 0.054405177479992635
+        },
+        "velocity_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "acceleration_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "jerk_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        }
+      },
+      "joints": {
+        "knee": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.04099999999999998,
+              "rmse_rad": 0.161779940051725,
+              "pearson": 0.9098724556079533,
+              "overlap_samples": 192,
+              "lag_ms_at_detected_period": 62.0193333333232
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.05099999999999999,
+              "rmse_rad": 0.16367330575127,
+              "pearson": 0.9068536988531043,
+              "overlap_samples": 190,
+              "lag_ms_at_detected_period": 77.14599999998742
+            },
+            "served": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.16933501054997588,
+              "pearson": 0.9105742006545958,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.34266666664053
+            },
+            "actual": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.1688284518033993,
+              "pearson": 0.9140918572079282,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.34266666664053
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 1,
+              "lag_s": 0.010000000000001563,
+              "rmse_rad": 0.016805574074682417,
+              "pearson": 0.9979905416239713,
+              "overlap_samples": 499,
+              "zero_lag_rmse_rad": 0.02357143867884897,
+              "zero_lag_pearson": 0.9958128206660716
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.009611256473651813,
+              "pearson": 0.9992635197537566,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.10798849196792132,
+              "zero_lag_pearson": 0.9063398912136904
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.009928229299658179,
+              "pearson": 0.9992941049363837,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.009928229299658179,
+              "zero_lag_pearson": 0.9992941049363837
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 9,
+              "lag_s": 0.09000000000001407,
+              "rmse_rad": 0.01612042755775882,
+              "pearson": 0.9982215811090219,
+              "overlap_samples": 491,
+              "zero_lag_rmse_rad": 0.12642674127383055,
+              "zero_lag_pearson": 0.8739075073951836
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.9408254033755561,
+              "minimum_rad": -0.9824678710442797,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15263236823439752,
+              "maximum_phase": 0.085
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.9355692621809825,
+              "minimum_rad": -0.9824678710442797,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15263236823439752,
+              "maximum_phase": 0.085
+            },
+            "served": {
+              "value_near_to_rad": -0.7489906008349021,
+              "minimum_rad": -0.9739504391097216,
+              "minimum_phase": 0.8150000000000001,
+              "maximum_rad": -0.1716917922193899,
+              "maximum_phase": 0.135
+            },
+            "actual": {
+              "value_near_to_rad": -0.7412123193788709,
+              "minimum_rad": -0.9786722224434298,
+              "minimum_phase": 0.8150000000000001,
+              "maximum_rad": -0.17059881207025107,
+              "maximum_phase": 0.13
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.276,
+            "rmse_raw_vs_after_slew_rad": 0.02357143867884897,
+            "mean_abs_change_rad": 0.010162675440304213,
+            "max_abs_change_rad": 0.09593551717699267
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 62.0193333333232,
+            "slew_added": 15.12666666666422,
+            "filter_added": 83.1966666666531,
+            "physical_tracking_added": 0.0
+          }
+        },
+        "ankle": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.017000000000000015,
+              "rmse_rad": 0.055041459175165175,
+              "pearson": 0.9588799227475218,
+              "overlap_samples": 197,
+              "lag_ms_at_detected_period": 25.715333333329166
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.03700000000000003,
+              "rmse_rad": 0.04397776332990858,
+              "pearson": 0.9679452280080207,
+              "overlap_samples": 193,
+              "lag_ms_at_detected_period": 55.968666666657604
+            },
+            "served": {
+              "candidate_advance_phase": 0.08900000000000002,
+              "rmse_rad": 0.06738629682477054,
+              "pearson": 0.9110197434409998,
+              "overlap_samples": 183,
+              "lag_ms_at_detected_period": 134.62733333331144
+            },
+            "actual": {
+              "candidate_advance_phase": 0.08500000000000002,
+              "rmse_rad": 0.06761205272044969,
+              "pearson": 0.9097565152309314,
+              "overlap_samples": 184,
+              "lag_ms_at_detected_period": 128.57666666664576
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 2,
+              "lag_s": 0.020000000000003126,
+              "rmse_rad": 0.026578565308530595,
+              "pearson": 0.9859851278777719,
+              "overlap_samples": 498,
+              "zero_lag_rmse_rad": 0.03416043706490244,
+              "zero_lag_pearson": 0.973712366519064
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.006682414128553562,
+              "pearson": 0.9987911454255978,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.06683372890596434,
+              "zero_lag_pearson": 0.8772083685469639
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.008816013237286901,
+              "pearson": 0.9981972253534376,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.008816013237286901,
+              "zero_lag_pearson": 0.9981972253534376
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 10,
+              "lag_s": 0.10000000000001563,
+              "rmse_rad": 0.025672470731242486,
+              "pearson": 0.9875435684009359,
+              "overlap_samples": 490,
+              "zero_lag_rmse_rad": 0.0936161239232675,
+              "zero_lag_pearson": 0.7750085389505963
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.1276937823887741,
+              "minimum_rad": -0.1355157549869315,
+              "minimum_phase": 0.64,
+              "maximum_rad": 0.39657464217570826,
+              "maximum_phase": 0.495
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.021615018419761656,
+              "minimum_rad": -0.09697524955004078,
+              "minimum_phase": 0.6900000000000001,
+              "maximum_rad": 0.39657464217570826,
+              "maximum_phase": 0.495
+            },
+            "served": {
+              "value_near_to_rad": 0.12911357548399616,
+              "minimum_rad": -0.08009573785642429,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.38888275599033656,
+              "maximum_phase": 0.53
+            },
+            "actual": {
+              "value_near_to_rad": 0.12795251902724367,
+              "minimum_rad": -0.08273738341763774,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.3742858768619738,
+              "maximum_phase": 0.52
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.138,
+            "rmse_raw_vs_after_slew_rad": 0.03416043706490244,
+            "mean_abs_change_rad": 0.010459612007881522,
+            "max_abs_change_rad": 0.19543662071224888
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 25.715333333329166,
+            "slew_added": 30.253333333328438,
+            "filter_added": 78.65866666665383,
+            "physical_tracking_added": -6.050666666665677
+          }
+        }
+      }
+    },
+    {
+      "run_dir": "Trajectory Generator/runs/rollout/MLP_ExNovo_V26C_J20_morphology_0p10_50updates_2026-08-28_best_rollout",
+      "morphology_weight": 0.1,
+      "steps": 500,
+      "policy_dt_s": 0.010000000000001563,
+      "detected_cycles": 3,
+      "analyzed_complete_cycles": 2,
+      "detected_period_mean_s": 1.512999999999754,
+      "analyzed_period_mean_s": 1.5365000000000375,
+      "morphology_reward_delay_s": 0.04,
+      "governor": {
+        "target_error_rms_rad_mean": {
+          "knee": 0.08366963996925261,
+          "ankle": 0.05456031981844411
+        },
+        "velocity_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "acceleration_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "jerk_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        }
+      },
+      "joints": {
+        "knee": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.04099999999999998,
+              "rmse_rad": 0.16093432585941175,
+              "pearson": 0.9102808803591647,
+              "overlap_samples": 192,
+              "lag_ms_at_detected_period": 62.03299999998988
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.05099999999999999,
+              "rmse_rad": 0.16292924375788922,
+              "pearson": 0.9071796165142086,
+              "overlap_samples": 190,
+              "lag_ms_at_detected_period": 77.16299999998745
+            },
+            "served": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.16867880784429873,
+              "pearson": 0.910814074940096,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.37799999997392
+            },
+            "actual": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.16815914195710263,
+              "pearson": 0.9143491782487356,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.37799999997392
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 1,
+              "lag_s": 0.010000000000001563,
+              "rmse_rad": 0.016671903374679612,
+              "pearson": 0.998020463983886,
+              "overlap_samples": 499,
+              "zero_lag_rmse_rad": 0.023344550572594273,
+              "zero_lag_pearson": 0.9958921713750616
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.009612464313101013,
+              "pearson": 0.9992638084946333,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.10802341497568146,
+              "zero_lag_pearson": 0.9063345832321904
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.009997835692568728,
+              "pearson": 0.9992848795478304,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.009997835692568728,
+              "zero_lag_pearson": 0.9992848795478304
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 9,
+              "lag_s": 0.09000000000001407,
+              "rmse_rad": 0.016058122611102132,
+              "pearson": 0.9982316430864147,
+              "overlap_samples": 491,
+              "zero_lag_rmse_rad": 0.12625366645467756,
+              "zero_lag_pearson": 0.8742620367418812
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.9400757223198422,
+              "minimum_rad": -0.9817684871740416,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15276787672050302,
+              "maximum_phase": 0.085
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.9347156945860062,
+              "minimum_rad": -0.9817684871740416,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15276787672050302,
+              "maximum_phase": 0.085
+            },
+            "served": {
+              "value_near_to_rad": -0.7480451150176121,
+              "minimum_rad": -0.9732029044829172,
+              "minimum_phase": 0.8150000000000001,
+              "maximum_rad": -0.17055499356281634,
+              "maximum_phase": 0.135
+            },
+            "actual": {
+              "value_near_to_rad": -0.7401869706886752,
+              "minimum_rad": -0.9779426525551091,
+              "minimum_phase": 0.81,
+              "maximum_rad": -0.16939998759191585,
+              "maximum_phase": 0.13
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.266,
+            "rmse_raw_vs_after_slew_rad": 0.023344550572594273,
+            "mean_abs_change_rad": 0.010043966845415859,
+            "max_abs_change_rad": 0.09632781818509795
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 62.03299999998988,
+            "slew_added": 15.129999999997565,
+            "filter_added": 83.21499999998647,
+            "physical_tracking_added": 0.0
+          }
+        },
+        "ankle": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.017000000000000015,
+              "rmse_rad": 0.05517228491793714,
+              "pearson": 0.9583536510403803,
+              "overlap_samples": 197,
+              "lag_ms_at_detected_period": 25.72099999999584
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.03700000000000003,
+              "rmse_rad": 0.044161582906555745,
+              "pearson": 0.967531570935241,
+              "overlap_samples": 193,
+              "lag_ms_at_detected_period": 55.980999999990956
+            },
+            "served": {
+              "candidate_advance_phase": 0.08900000000000002,
+              "rmse_rad": 0.06746636305863478,
+              "pearson": 0.9109109631044651,
+              "overlap_samples": 183,
+              "lag_ms_at_detected_period": 134.65699999997815
+            },
+            "actual": {
+              "candidate_advance_phase": 0.08500000000000002,
+              "rmse_rad": 0.06767200604141156,
+              "pearson": 0.9096864433850876,
+              "overlap_samples": 184,
+              "lag_ms_at_detected_period": 128.60499999997913
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 2,
+              "lag_s": 0.020000000000003126,
+              "rmse_rad": 0.02631047141391038,
+              "pearson": 0.986292651196023,
+              "overlap_samples": 498,
+              "zero_lag_rmse_rad": 0.03386941747932767,
+              "zero_lag_pearson": 0.9741742455413664
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.00669362082156457,
+              "pearson": 0.9987882021812141,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.06696344059480222,
+              "zero_lag_pearson": 0.8768491057127641
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.008819470781394608,
+              "pearson": 0.9981930511959941,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.008819470781394608,
+              "zero_lag_pearson": 0.9981930511959941
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 10,
+              "lag_s": 0.10000000000001563,
+              "rmse_rad": 0.025400453764025135,
+              "pearson": 0.9878327651767568,
+              "overlap_samples": 490,
+              "zero_lag_rmse_rad": 0.09351991511028852,
+              "zero_lag_pearson": 0.775481693824129
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.12773640643806763,
+              "minimum_rad": -0.13538120195906214,
+              "minimum_phase": 0.64,
+              "maximum_rad": 0.3972933012798766,
+              "maximum_phase": 0.495
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.021952341814495235,
+              "minimum_rad": -0.09738286617900299,
+              "minimum_phase": 0.685,
+              "maximum_rad": 0.3972933012798766,
+              "maximum_phase": 0.495
+            },
+            "served": {
+              "value_near_to_rad": 0.1287074611642119,
+              "minimum_rad": -0.08064972264635975,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.38954918231180313,
+              "maximum_phase": 0.53
+            },
+            "actual": {
+              "value_near_to_rad": 0.12751411797078488,
+              "minimum_rad": -0.08329305138188263,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.3753422722205245,
+              "maximum_phase": 0.52
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.138,
+            "rmse_raw_vs_after_slew_rad": 0.03386941747932767,
+            "mean_abs_change_rad": 0.01041271388165188,
+            "max_abs_change_rad": 0.16657348722216336
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 25.72099999999584,
+            "slew_added": 30.259999999995117,
+            "filter_added": 78.6759999999872,
+            "physical_tracking_added": -6.051999999999026
+          }
+        }
+      }
+    },
+    {
+      "run_dir": "Trajectory Generator/runs/rollout/MLP_ExNovo_V26C_J20_morphology_1p05_50updates_2026-08-29_best_rollout",
+      "morphology_weight": 1.05,
+      "steps": 500,
+      "policy_dt_s": 0.010000000000001563,
+      "detected_cycles": 3,
+      "analyzed_complete_cycles": 2,
+      "detected_period_mean_s": 1.512999999999754,
+      "analyzed_period_mean_s": 1.535500000000038,
+      "morphology_reward_delay_s": 0.04,
+      "governor": {
+        "target_error_rms_rad_mean": {
+          "knee": 0.08359780543285109,
+          "ankle": 0.0544392663144553
+        },
+        "velocity_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "acceleration_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        },
+        "jerk_limit_fraction": {
+          "mean": 0.0,
+          "max": 0.0,
+          "nonzero_steps": 0
+        }
+      },
+      "joints": {
+        "knee": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.04099999999999998,
+              "rmse_rad": 0.16139430773505126,
+              "pearson": 0.9100479878725508,
+              "overlap_samples": 192,
+              "lag_ms_at_detected_period": 62.03299999998988
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.05099999999999999,
+              "rmse_rad": 0.16340511387284812,
+              "pearson": 0.9069030566224499,
+              "overlap_samples": 190,
+              "lag_ms_at_detected_period": 77.16299999998745
+            },
+            "served": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.16911462614261782,
+              "pearson": 0.9106041990758529,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.37799999997392
+            },
+            "actual": {
+              "candidate_advance_phase": 0.10599999999999998,
+              "rmse_rad": 0.16859008028666347,
+              "pearson": 0.9141540505302027,
+              "overlap_samples": 179,
+              "lag_ms_at_detected_period": 160.37799999997392
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 1,
+              "lag_s": 0.010000000000001563,
+              "rmse_rad": 0.01667936729587569,
+              "pearson": 0.9980173591650949,
+              "overlap_samples": 499,
+              "zero_lag_rmse_rad": 0.023393112673557672,
+              "zero_lag_pearson": 0.9958709456301857
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.009622817991943424,
+              "pearson": 0.999261422369192,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.1079893505127763,
+              "zero_lag_pearson": 0.9062965176389459
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.009950082159547931,
+              "pearson": 0.9992912898889159,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.009950082159547931,
+              "zero_lag_pearson": 0.9992912898889159
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 9,
+              "lag_s": 0.09000000000001407,
+              "rmse_rad": 0.016049564610002665,
+              "pearson": 0.998232571226823,
+              "overlap_samples": 491,
+              "zero_lag_rmse_rad": 0.12628209697732629,
+              "zero_lag_pearson": 0.8740859152112036
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.9407590545563596,
+              "minimum_rad": -0.9822389861083148,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15281573526546346,
+              "maximum_phase": 0.085
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.9354112437291782,
+              "minimum_rad": -0.9822389861083148,
+              "minimum_phase": 0.67,
+              "maximum_rad": -0.15281573526546346,
+              "maximum_phase": 0.085
+            },
+            "served": {
+              "value_near_to_rad": -0.7488482463097479,
+              "minimum_rad": -0.9734607897176325,
+              "minimum_phase": 0.8150000000000001,
+              "maximum_rad": -0.17182726508513738,
+              "maximum_phase": 0.135
+            },
+            "actual": {
+              "value_near_to_rad": -0.7409982611302763,
+              "minimum_rad": -0.9781734894630605,
+              "minimum_phase": 0.8150000000000001,
+              "maximum_rad": -0.17065505755501742,
+              "maximum_phase": 0.13
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.274,
+            "rmse_raw_vs_after_slew_rad": 0.023393112673557672,
+            "mean_abs_change_rad": 0.010083157076679526,
+            "max_abs_change_rad": 0.0960600666701863
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 62.03299999998988,
+            "slew_added": 15.129999999997565,
+            "filter_added": 83.21499999998647,
+            "physical_tracking_added": 0.0
+          }
+        },
+        "ankle": {
+          "phase_vs_prescribed": {
+            "raw_actor": {
+              "candidate_advance_phase": 0.017000000000000015,
+              "rmse_rad": 0.05485423332863454,
+              "pearson": 0.9590943894949089,
+              "overlap_samples": 197,
+              "lag_ms_at_detected_period": 25.72099999999584
+            },
+            "after_slew": {
+              "candidate_advance_phase": 0.03700000000000003,
+              "rmse_rad": 0.04390487385738452,
+              "pearson": 0.968016537744738,
+              "overlap_samples": 193,
+              "lag_ms_at_detected_period": 55.980999999990956
+            },
+            "served": {
+              "candidate_advance_phase": 0.08900000000000002,
+              "rmse_rad": 0.06734703505181588,
+              "pearson": 0.9111820109388152,
+              "overlap_samples": 183,
+              "lag_ms_at_detected_period": 134.65699999997815
+            },
+            "actual": {
+              "candidate_advance_phase": 0.08500000000000002,
+              "rmse_rad": 0.06755996936960441,
+              "pearson": 0.9099424230695798,
+              "overlap_samples": 184,
+              "lag_ms_at_detected_period": 128.60499999997913
+            }
+          },
+          "wall_clock_stage_lags": {
+            "raw_actor_to_after_slew": {
+              "lag_steps": 2,
+              "lag_s": 0.020000000000003126,
+              "rmse_rad": 0.02626985244715243,
+              "pearson": 0.9863531637832117,
+              "overlap_samples": 498,
+              "zero_lag_rmse_rad": 0.03384475694999779,
+              "zero_lag_pearson": 0.974234347174863
+            },
+            "after_slew_to_served": {
+              "lag_steps": 8,
+              "lag_s": 0.0800000000000125,
+              "rmse_rad": 0.006678318753564043,
+              "pearson": 0.9987950101427713,
+              "overlap_samples": 492,
+              "zero_lag_rmse_rad": 0.06685450401201505,
+              "zero_lag_pearson": 0.8773778713589809
+            },
+            "served_to_actual": {
+              "lag_steps": 0,
+              "lag_s": 0.0,
+              "rmse_rad": 0.008810562325350182,
+              "pearson": 0.998199846154095,
+              "overlap_samples": 500,
+              "zero_lag_rmse_rad": 0.008810562325350182,
+              "zero_lag_pearson": 0.998199846154095
+            },
+            "raw_actor_to_served": {
+              "lag_steps": 10,
+              "lag_s": 0.10000000000001563,
+              "rmse_rad": 0.025364853544217945,
+              "pearson": 0.9878857065487057,
+              "overlap_samples": 490,
+              "zero_lag_rmse_rad": 0.09341001456062996,
+              "zero_lag_pearson": 0.7762338982126703
+            }
+          },
+          "stage_landmarks": {
+            "raw_actor": {
+              "value_near_to_rad": -0.1275613513306134,
+              "minimum_rad": -0.1350804887134574,
+              "minimum_phase": 0.64,
+              "maximum_rad": 0.39721232161023745,
+              "maximum_phase": 0.495
+            },
+            "after_slew": {
+              "value_near_to_rad": -0.022211263185733632,
+              "minimum_rad": -0.09691360431921359,
+              "minimum_phase": 0.685,
+              "maximum_rad": 0.39721232161023745,
+              "maximum_phase": 0.495
+            },
+            "served": {
+              "value_near_to_rad": 0.12843938562622353,
+              "minimum_rad": -0.08033732750489864,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.38956763095437513,
+              "maximum_phase": 0.53
+            },
+            "actual": {
+              "value_near_to_rad": 0.12725683842323174,
+              "minimum_rad": -0.08297527830749074,
+              "minimum_phase": 0.8250000000000001,
+              "maximum_rad": 0.37523203036761765,
+              "maximum_phase": 0.52
+            }
+          },
+          "slew_intervention": {
+            "changed_fraction": 0.136,
+            "rmse_raw_vs_after_slew_rad": 0.03384475694999779,
+            "mean_abs_change_rad": 0.010394126690248948,
+            "max_abs_change_rad": 0.16659670621153555
+          },
+          "incremental_phase_lag_ms": {
+            "actor_already_present": 25.72099999999584,
+            "slew_added": 30.259999999995117,
+            "filter_added": 78.6759999999872,
+            "physical_tracking_added": -6.051999999999026
+          }
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "knee": {
+      "actor_already_present_ms": {
+        "mean": 62.02616666665655,
+        "min": 62.0193333333232,
+        "max": 62.03299999998988
+      },
+      "slew_added_ms": {
+        "mean": 15.128333333330893,
+        "min": 15.12666666666422,
+        "max": 15.129999999997565
+      },
+      "filter_added_ms": {
+        "mean": 83.20583333331979,
+        "min": 83.1966666666531,
+        "max": 83.21499999998647
+      },
+      "physical_tracking_added_ms": {
+        "mean": 0.0,
+        "min": 0.0,
+        "max": 0.0
+      },
+      "direct_wall_clock_lags": {
+        "raw_actor_to_after_slew": {
+          "mean_ms": 10.000000000001563,
+          "min_ms": 10.000000000001563,
+          "max_ms": 10.000000000001563
+        },
+        "after_slew_to_served": {
+          "mean_ms": 80.0000000000125,
+          "min_ms": 80.0000000000125,
+          "max_ms": 80.0000000000125
+        },
+        "served_to_actual": {
+          "mean_ms": 0.0,
+          "min_ms": 0.0,
+          "max_ms": 0.0
+        },
+        "raw_actor_to_served": {
+          "mean_ms": 90.00000000001407,
+          "min_ms": 90.00000000001407,
+          "max_ms": 90.00000000001407
+        }
+      }
+    },
+    "ankle": {
+      "actor_already_present_ms": {
+        "mean": 25.7181666666625,
+        "min": 25.715333333329166,
+        "max": 25.72099999999584
+      },
+      "slew_added_ms": {
+        "mean": 30.256666666661776,
+        "min": 30.253333333328438,
+        "max": 30.259999999995117
+      },
+      "filter_added_ms": {
+        "mean": 78.66733333332051,
+        "min": 78.65866666665383,
+        "max": 78.6759999999872
+      },
+      "physical_tracking_added_ms": {
+        "mean": -6.051333333332352,
+        "min": -6.051999999999026,
+        "max": -6.050666666665677
+      },
+      "direct_wall_clock_lags": {
+        "raw_actor_to_after_slew": {
+          "mean_ms": 20.000000000003126,
+          "min_ms": 20.000000000003126,
+          "max_ms": 20.000000000003126
+        },
+        "after_slew_to_served": {
+          "mean_ms": 80.0000000000125,
+          "min_ms": 80.0000000000125,
+          "max_ms": 80.0000000000125
+        },
+        "served_to_actual": {
+          "mean_ms": 0.0,
+          "min_ms": 0.0,
+          "max_ms": 0.0
+        },
+        "raw_actor_to_served": {
+          "mean_ms": 100.00000000001563,
+          "min_ms": 100.00000000001563,
+          "max_ms": 100.00000000001563
+        }
+      }
+    }
+  },
+  "interpretation_contract": {
+    "positive_phase_advance": "candidate occurs later than prescribed and must be advanced",
+    "wall_clock_lag": "non-negative downstream sample lag minimizing time-domain RMSE",
+    "incremental_phase_lag": "difference of independently optimized phase lags; diagnostic, not additive causal proof"
+  }
+}

@@ -476,18 +476,27 @@ class _TrainingMonitor:
         length: Any,
         steps: Any,
         iter_seconds: float,
+        metric_source: str = "completed_episode",
     ) -> None:
         with self._lock:
             self._iterations_completed = int(iteration)
             self._iterations_completed_this_process += 1
         if self._progress is not None:
+            estimate_marker = (
+                "~" if metric_source == "sampled_batch_projection" else ""
+            )
             self._progress.update(
-                completed=int(iteration), suffix=f"ret {_fmt_metric(ret)}"
+                completed=int(iteration),
+                suffix=(
+                    f"return {_fmt_metric(ret)}{estimate_marker} | "
+                    f"len {_fmt_metric(length)}{estimate_marker}"
+                ),
             )
             self._progress.log(
                 f"[iter {iteration}/{self._total}] return={_fmt_metric(ret)} "
                 f"len={_fmt_metric(length)} steps={_fmt_metric(steps)} "
-                f"time={progress_display.format_hms(iter_seconds)}"
+                f"time={progress_display.format_hms(iter_seconds)} "
+                f"metric_source={metric_source}"
             )
 
     def log_event(self, message: str) -> None:
@@ -694,6 +703,69 @@ def _find_flat_metric(metrics: dict[str, float], *suffixes: str) -> float | None
             if key.endswith(suffix):
                 return value
     return None
+
+
+def _console_episode_metrics(
+    episode_return: Any,
+    episode_length: Any,
+    env_metrics: dict[str, float],
+    *,
+    episode_duration_s: float,
+    segment_duration_s: float,
+) -> dict[str, Any]:
+    """Return always-readable console metrics without falsifying JSONL data.
+
+    RLlib only emits ``episode_return_mean``/``episode_len_mean`` when at least
+    one episode finishes in the current sampling update. Exact multi-start
+    training currently samples 384 steps per runner for a 500-step episode, so
+    some healthy updates contain no completed episode and the native metrics
+    are legitimately absent.
+
+    The permanent scientific fields remain untouched. For the terminal only,
+    use the current reward-component step mean times the configured horizon and
+    mark it explicitly as an estimate. This restores numeric Return/Len without
+    carrying a stale return forward or changing training/checkpoint semantics.
+    """
+    if _finite(episode_return) and _finite(episode_length):
+        return {
+            "episode_return": float(episode_return),
+            "episode_length": float(episode_length),
+            "source": "completed_episode",
+            "estimated": False,
+        }
+
+    reward_sum = _find_flat_metric(env_metrics, "/console/reward_sum_current")
+    reward_count = _find_flat_metric(
+        env_metrics, "/console/reward_count_current"
+    )
+    try:
+        episode_duration_s = float(episode_duration_s)
+        segment_duration_s = float(segment_duration_s)
+        horizon_steps = int(math.ceil(episode_duration_s / segment_duration_s))
+    except (TypeError, ValueError, OverflowError, ZeroDivisionError):
+        horizon_steps = 0
+
+    if (
+        _finite(reward_sum)
+        and _finite(reward_count)
+        and float(reward_count) > 0.0
+        and horizon_steps > 0
+    ):
+        return {
+            "episode_return": (
+                float(reward_sum) / float(reward_count) * horizon_steps
+            ),
+            "episode_length": float(horizon_steps),
+            "source": "sampled_batch_projection",
+            "estimated": True,
+        }
+
+    return {
+        "episode_return": None,
+        "episode_length": None,
+        "source": "unavailable",
+        "estimated": False,
+    }
 
 
 def _kl_update_metrics(learner_metrics: dict[str, float]) -> dict[str, float | None]:
@@ -1219,6 +1291,23 @@ def _optimizer_learning_rates(algo) -> list[Any]:
     return _learner_call_results(algo, _optimizer_learning_rates_on_learner)
 
 
+def _advance_weights_seq_no_on_learner(learner) -> dict[str, int]:
+    """Mark an out-of-band policy edit as a new Learner weight version."""
+    from ray.rllib.utils.metrics import WEIGHTS_SEQ_NO
+
+    state = learner.get_state(components=[])
+    before = int(state.get(WEIGHTS_SEQ_NO, 0) or 0)
+    requested = before + 1
+    learner.set_state({WEIGHTS_SEQ_NO: requested})
+    after = int(learner.get_state(components=[]).get(WEIGHTS_SEQ_NO, 0) or 0)
+    if after != requested:
+        raise RuntimeError(
+            "failed to advance Learner weight sequence number: "
+            f"before={before}, requested={requested}, after={after}"
+        )
+    return {"before": before, "requested": requested, "after": after}
+
+
 def _asymmetric_module_selection(
     args: argparse.Namespace,
     *,
@@ -1635,6 +1724,7 @@ def run(args: argparse.Namespace) -> dict:
     warm_start_raw_transplant_applied = False
     warm_start_report_path: Path | None = None
     warm_start_report: dict[str, Any] | None = None
+    exploration_configuration_report: dict[str, Any] | None = None
     actor_freeze_reference_state: dict[str, Any] | None = None
     actor_freeze_audit: list[dict[str, Any]] = []
     critic_state_audit: list[dict[str, Any]] = []
@@ -1929,6 +2019,135 @@ def run(args: argparse.Namespace) -> dict:
                 "target feature(s) zeroed)."
             )
 
+        if args.fixed_exploration_sigma is not None:
+            import configure_actor_exploration
+            import warm_start
+            from ray.rllib.algorithms.algorithm import (
+                COMPONENT_LEARNER,
+                COMPONENT_LEARNER_GROUP,
+                COMPONENT_RL_MODULE,
+            )
+
+            monitor.set_phase("fixed exploration sigma", args.startup_timeout_s)
+            with _fault_dump_guard(
+                output_dir,
+                "fixed exploration sigma",
+                args.startup_timeout_s,
+            ):
+                source_state = _learner_module_state(algo)
+                configured_state, configuration = (
+                    configure_actor_exploration.configure_constant_std(
+                        source_state,
+                        sigma=args.fixed_exploration_sigma,
+                        action_dim=2,
+                    )
+                )
+                critic_comparison = warm_start.compare_non_actor_states(
+                    source_state,
+                    configured_state,
+                )
+                if not critic_comparison["exact"]:
+                    raise RuntimeError(
+                        "fixed exploration configuration changed the critic: "
+                        f"max_abs_diff={critic_comparison['max_abs_diff']}"
+                    )
+
+                algo.get_module("default_policy").set_state(configured_state)
+                algo.set_state(
+                    {
+                        COMPONENT_LEARNER_GROUP: {
+                            COMPONENT_LEARNER: {
+                                COMPONENT_RL_MODULE: {
+                                    "default_policy": configured_state
+                                }
+                            }
+                        }
+                    }
+                )
+                # The policy edit above is not a gradient update, so RLlib does
+                # not advance its weight version automatically. A restored
+                # EnvRunner can otherwise reject the synchronization as stale.
+                # Advance the Learner version first; this also makes any older
+                # restore-time async sync harmless if it arrives later.
+                weights_sequence_audit = _learner_call_results(
+                    algo,
+                    _advance_weights_seq_no_on_learner,
+                )
+                algo.env_runner_group.sync_weights(
+                    from_worker_or_learner_group=algo.learner_group,
+                    timeout_seconds=args.startup_timeout_s,
+                    inference_only=True,
+                )
+
+                live_state = _learner_module_state(algo)
+                live_comparison = warm_start.compare_actor_states(
+                    configured_state,
+                    live_state,
+                )
+                if not live_comparison["exact"]:
+                    raise RuntimeError(
+                        "live Learner actor differs after fixed exploration "
+                        f"configuration: max_abs_diff={live_comparison['max_abs_diff']}"
+                    )
+
+                runner_states = algo.env_runner_group.foreach_env_runner(
+                    func=lambda runner: runner.get_state(
+                        components=[COMPONENT_RL_MODULE],
+                        inference_only=True,
+                    ),
+                    local_env_runner=True,
+                    timeout_seconds=args.startup_timeout_s,
+                )
+                runner_comparisons = []
+                for index, runner_state in enumerate(runner_states):
+                    runner_actor = warm_start.find_actor_state(runner_state)
+                    if runner_actor is None:
+                        raise RuntimeError(
+                            f"EnvRunner {index} has no actor after sigma sync"
+                        )
+                    comparison = warm_start.compare_actor_states(
+                        configured_state,
+                        runner_actor,
+                    )
+                    runner_comparisons.append(comparison)
+                    if not comparison["exact"]:
+                        raise RuntimeError(
+                            f"EnvRunner {index} actor differs after sigma sync: "
+                            f"max_abs_diff={comparison['max_abs_diff']}"
+                        )
+
+                exploration_configuration_report = {
+                    "ok": True,
+                    "configuration": configuration,
+                    "freeze_logstd": bool(args.freeze_logstd),
+                    "source_actor_digest": warm_start.actor_state_digest(
+                        source_state
+                    ),
+                    "configured_actor_digest": warm_start.actor_state_digest(
+                        configured_state
+                    ),
+                    "critic_preserved": critic_comparison,
+                    "runner_sync_mode": "advanced_weights_seq_no",
+                    "weights_sequence_audit": weights_sequence_audit,
+                    "learner_actor": live_comparison,
+                    "env_runner_count_checked": len(runner_comparisons),
+                    "env_runner_actors_exact": all(
+                        item["exact"] for item in runner_comparisons
+                    ),
+                    "env_runner_actor_digests": [
+                        item["actual_digest"] for item in runner_comparisons
+                    ],
+                }
+                _write_json(
+                    output_dir / "exploration_configuration_report.json",
+                    exploration_configuration_report,
+                )
+            monitor.log_event(
+                "Configured fixed exploration sigma "
+                f"{exploration_configuration_report['configuration']['sigma']} "
+                "and synchronized the Learner and all EnvRunners."
+            )
+
         if args.asymmetric_actor_critic:
             import warm_start
 
@@ -2024,6 +2243,13 @@ def run(args: argparse.Namespace) -> dict:
             env_metrics = _collect_numeric_metrics(
                 result.get("env_runners"), "env_runners"
             )
+            console_episode_metrics = _console_episode_metrics(
+                ret,
+                length,
+                env_metrics,
+                episode_duration_s=args.episode_duration,
+                segment_duration_s=args.segment_duration,
+            )
             kl_update_metrics = _kl_update_metrics(learner_metrics)
             kl_guard_report = _enforce_kl_update_guard(
                 learner_metrics,
@@ -2046,6 +2272,7 @@ def run(args: argparse.Namespace) -> dict:
                 "iteration": iteration,
                 "episode_return_mean": float(ret) if _finite(ret) else None,
                 "episode_len_mean": float(length) if _finite(length) else None,
+                "console_episode_metrics": console_episode_metrics,
                 "num_env_steps_sampled_lifetime": _get_metric(
                     result, "num_env_steps_sampled_lifetime"
                 ),
@@ -2124,10 +2351,11 @@ def run(args: argparse.Namespace) -> dict:
                 print(f"[log] {exc}", flush=True)
             monitor.on_iteration_complete(
                 iteration,
-                row["episode_return_mean"],
-                row["episode_len_mean"],
+                console_episode_metrics["episode_return"],
+                console_episode_metrics["episode_length"],
                 row["num_env_steps_sampled_lifetime"],
                 iter_seconds,
+                console_episode_metrics["source"],
             )
 
             if tb_writer is not None:
@@ -2254,6 +2482,12 @@ def run(args: argparse.Namespace) -> dict:
             else None
         ),
         "freeze_logstd": bool(args.freeze_logstd),
+        "fixed_exploration_sigma": (
+            list(args.fixed_exploration_sigma)
+            if args.fixed_exploration_sigma is not None
+            else None
+        ),
+        "exploration_configuration": exploration_configuration_report,
         "rl_module_kind": str(args.rl_module_kind),
         "primary_split_v25_residual": (
             {
@@ -3548,6 +3782,20 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     p.add_argument(
+        "--fixed-exploration-sigma",
+        type=float,
+        nargs="+",
+        default=None,
+        metavar="SIGMA",
+        help=(
+            "After initialization/restore, set the Gaussian policy to one "
+            "constant positive sigma (broadcast to every action) or one value "
+            "per action. Requires --freeze-logstd; the action mean and critic "
+            "are preserved and the configured policy is synchronized before "
+            "the first sampled batch."
+        ),
+    )
+    p.add_argument(
         "--rl-module-kind",
         choices=(_STANDARD_RL_MODULE_KIND, _V25_RESIDUAL_RL_MODULE_KIND),
         default=_STANDARD_RL_MODULE_KIND,
@@ -4076,12 +4324,38 @@ def _validate_kl_guard_args(args: argparse.Namespace) -> None:
     args.max_minibatch_mean_kl_loss = value
 
 
+def _validate_fixed_exploration_sigma_args(args: argparse.Namespace) -> None:
+    raw = getattr(args, "fixed_exploration_sigma", None)
+    if raw is None:
+        return
+    try:
+        values = [float(value) for value in raw]
+    except (TypeError, ValueError) as exc:
+        raise SystemExit(
+            "--fixed-exploration-sigma must contain one or two positive values"
+        ) from exc
+    if len(values) not in (1, 2):
+        raise SystemExit(
+            "--fixed-exploration-sigma must contain one shared value or two "
+            "action-specific values"
+        )
+    if any(not math.isfinite(value) or value <= 0.0 for value in values):
+        raise SystemExit("--fixed-exploration-sigma values must be finite and > 0")
+    if not bool(getattr(args, "freeze_logstd", False)):
+        raise SystemExit(
+            "--fixed-exploration-sigma requires --freeze-logstd so sigma stays "
+            "fixed throughout training"
+        )
+    args.fixed_exploration_sigma = values
+
+
 def main() -> None:
     args = parse_args()
     _validate_rl_module_args(args)
     _validate_warm_start_args(args)
     _validate_start_sampling_args(args)
     _validate_kl_guard_args(args)
+    _validate_fixed_exploration_sigma_args(args)
     if args.checkpoint_every <= 0:
         raise SystemExit("--checkpoint-every must be >= 1")
     if args.max_consecutive_skips <= 0:

@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "name": "V26C_J20_SIGMA_EXPLORATION_SMOKE_2026-08-31",
+  "purpose": "Measure whether J20 can tolerate more PPO exploration and how much injected action noise survives slew and the C2 reference governor.",
+  "source": {
+    "module": "Trajectory Generator/runs/training/MLP_V26C_J20_critic_rewarm_morphology_split_equal_1p05_2026-08-31_r2/rl_module_last",
+    "feature_manifest": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_actor_feature_manifest_overlay.json",
+    "expected_mean_actor_digest": "d4a13ff742266e9643012a27c57a6ea6b9205b030529d4c7a8af6d874ab26e96",
+    "baseline_sigma": [0.005, 0.005]
+  },
+  "invariants": {
+    "actor_mean_parameters": "byte-identical across all candidates",
+    "checkpoint_source": "read-only",
+    "ppo_updates": 0,
+    "critic_updates": 0,
+    "action_selection": "stochastic_held",
+    "exploration_noise_hold_steps": 1,
+    "policy_dt_s": 0.01,
+    "episode_steps": 500,
+    "episode_start_nominal_s": 1.956870983805102,
+    "episode_start_minus_0p20_s": 1.756870983805102,
+    "episode_start_plus_0p20_s": 2.156870983805102,
+    "hard_penetration_m": 0.028,
+    "diagnostic_penetration_m": 0.025,
+    "soft_penetration_m": 0.02
+  },
+  "deterministic_controls": {
+    "nominal": "rollouts/deterministic_seed123_nominal (fresh run; exactly reproduces J19B cell A dynamics)",
+    "minus_0p20": "../v26c_july_replica_2026-08-26/j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_B_trace.json",
+    "plus_0p20": "../v26c_july_replica_2026-08-26/j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/j19b_cell_C_trace.json",
+    "reuse_basis": "J20 changed only the critic from J19A; the mean actor digest and runtime dynamics are unchanged. The fresh nominal run exactly reproduces J19B cell A penetration and trajectories. Historical cells B/C are therefore reused read-only as paired deterministic controls, avoiding scientifically redundant simulations. Reward totals are not compared across reward-weight revisions."
+  },
+  "candidate_sigmas": {
+    "isotropic": [0.005, 0.0075, 0.01, 0.015, 0.02, 0.03],
+    "joint_ablation": [
+      {"knee": 0.005, "ankle": 0.01},
+      {"knee": 0.01, "ankle": 0.005}
+    ]
+  },
+  "protocol_clarifications": [
+    {
+      "timing": "after deterministic baseline and sigma 0.0075 seed 123; before every higher-sigma result",
+      "reason": "restore the exact pre-existing J3/J19 kinematic gate found during the historical cross-check; the clarification is independent of the observed 0.0075 result, which also passes it",
+      "kinematic_gate": {
+        "ankle_min_rad_max": -0.03,
+        "ankle_amplitude_min_rad": 0.30,
+        "knee_amplitude_min_rad": 0.60,
+        "knee_strictly_flexed": true,
+        "knee_bounds_rad": [-1.5, 0.0],
+        "ankle_bounds_rad": [-0.7, 0.7]
+      },
+      "penetration_inclusivity": "historical binding FAIL is strictly >28 mm; >=25 mm remains diagnostic"
+    }
+  ],
+  "stages": [
+    {
+      "id": "A",
+      "description": "Paired nominal coarse dose response using seed 123 for all isotropic and joint-ablation candidates.",
+      "advance_rule": "Advance isotropic values that complete 500 steps with at least two cycles, pass the inherited J3/J19 kinematic gate, have coherent HS/TO telemetry, no hard penetration, no action clipping, and zero FSM/morphology contract failures. Preserve all failures as evidence."
+    },
+    {
+      "id": "B",
+      "description": "Replicate the highest two plausible isotropic candidates on seeds 124-128, reusing the paired seed-123 result.",
+      "advance_rule": "A value is smoke-eligible only if all six paired seeds 123-128 stay at or below 28 mm (the historical binding failure is >28 mm), complete 500 steps, preserve valid event order, and have zero target FSM counters. The 20 and 25 mm bands remain diagnostics, not rewritten gates."
+    },
+    {
+      "id": "B-anchor",
+      "description": "Replicate sigma 0.010 on seeds 124-125 as a conservative doubled-sigma anchor even if it is not one of the two ceiling candidates.",
+      "advance_rule": "Use this three-seed anchor to distinguish a practical recommendation from the larger ceiling probes; it does not replace the six-seed rule for the ceiling candidates."
+    },
+    {
+      "id": "B-bracket-amendment",
+      "timing": "added immediately after sigma 0.020 seed 127 terminated at step 199; before any additional sigma 0.015 result",
+      "description": "Replicate the intermediate sigma 0.015 on seeds 124-128 because sigma 0.010 passed its anchor battery while sigma 0.020 produced a hard penetration failure.",
+      "advance_rule": "Use the six seeds 123-128 to locate the robustness boundary between 0.010 and 0.020. This adaptive bracket does not weaken any gate and preserves the failed 0.020 rollout as evidence."
+    },
+    {
+      "id": "B-anchor-expansion-amendment",
+      "timing": "added after sigma 0.020 seed 127 exposed a seed-specific hard failure; before sigma 0.010 seeds 126-128 were run",
+      "description": "Expand the practical sigma 0.010 anchor from three to all six seeds 123-128, explicitly including seed 127's adverse random sequence.",
+      "advance_rule": "A practical recommendation requires all six nominal seeds to pass unchanged hard and kinematic gates before the perturbed-start tests."
+    },
+    {
+      "id": "B-baseline-adverse-seed-amendment",
+      "timing": "added after the complete seed-127 dose response at sigma 0.010/0.015/0.020/0.030 was available; before sigma 0.005 seed 127 was run",
+      "description": "Run the current sigma 0.005 on the same adverse seed 127 to quantify the incremental risk caused by raising sigma rather than attributing all of the seed effect to the candidate value.",
+      "advance_rule": "Diagnostic paired control only; it cannot rescue a higher sigma that failed a preregistered hard gate."
+    },
+    {
+      "id": "B-ankle",
+      "description": "Replicate the ankle-focused vector [knee 0.005, ankle 0.010] on seeds 124-125.",
+      "advance_rule": "Use the paired three-seed contrast against isotropic 0.010 to determine whether ankle-focused exploration avoids unnecessary whole-gait perturbation; do not call it robust beyond these three seeds."
+    },
+    {
+      "id": "C",
+      "description": "Run minus/plus 0.20 s starts at seed 123 for the highest smoke-eligible value.",
+      "advance_rule": "Do not recommend a training sigma above the largest value that passes nominal multi-seed and both perturbed starts."
+    },
+    {
+      "id": "C-anchor",
+      "description": "Also run minus/plus 0.20 s starts at seed 123 for isotropic sigma 0.010, the conservative doubled-sigma anchor.",
+      "advance_rule": "A practical recommendation must pass both perturbed starts even when a larger hard-smoke ceiling exists."
+    }
+  ],
+  "measurements": [
+    "realized normalized action-noise RMS",
+    "equivalent raw target noise in radians",
+    "same-state noise surviving target-to-target slew",
+    "served-reference and physical-state divergence from deterministic baseline",
+    "action clipping and slew intervention fractions",
+    "reference-governor hard-limit fractions",
+    "episode return and length",
+    "GRF penetration in 20/25/28 mm bands",
+    "HS, TO and complete cycles",
+    "phase_timeout_stance",
+    "phase_timeout_swing",
+    "morphology_causal_contract_failure",
+    "resync_count",
+    "hs_cancelled_count",
+    "per-joint morphology excursion and loss",
+    "inherited J3/J19 physical kinematic gate and joint ranges"
+  ],
+  "interpretation_rule": "Passing smoke tests establishes an exploration interval for a later PPO pilot, not a trained-policy promotion or deployability claim."
+}

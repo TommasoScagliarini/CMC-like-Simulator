@@ -14,6 +14,8 @@
 #
 # Invarianti intenzionali:
 #   - actor 35D 2x256 tanh, actor sbloccato, logstd congelata
+#   - sigma di esplorazione isotropa fissata a 0.01, qualificata dal pilot
+#     PPO breve e dal successivo training completo da 50 update
 #   - FSM attore v3, detector V26, corridor causale corrente
 #   - exact-start su tre start; 12 EnvRunner e batch 4608 sono necessari per
 #     la ripartizione esatta. Il batch 4096 di J20 era nominal-only e non è
@@ -35,6 +37,8 @@ model:
   primary_split_v25_residual_limits: null
   primary_split_v25_residual_init_seed: null
   freeze_logstd: true
+  fixed_exploration_sigma:
+  - 0.01
   freeze_actor: false
   seed: 123
 

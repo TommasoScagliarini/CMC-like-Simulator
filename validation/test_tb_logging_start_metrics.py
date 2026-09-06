@@ -64,6 +64,23 @@ class StartMetricTests(unittest.TestCase):
             "sum",
         )
 
+    def test_step_logs_unsmoothed_current_reward_sum_and_count(self):
+        logger = _MetricsLogger()
+        callback = tb_logging.RewardComponentsCallback()
+        episode = _Chunk(offset=1.956870983805102, rewards=[1.0])
+        episode.get_infos = lambda index: {
+            "episode_start_offset_s": 1.956870983805102,
+            "reward_components": {"reward": 0.125},
+        }
+
+        callback.on_episode_step(episode=episode, metrics_logger=logger)
+
+        by_key = {key: (value, kwargs) for key, value, kwargs in logger.calls}
+        self.assertEqual(by_key["console/reward_sum_current"][0], 0.125)
+        self.assertEqual(by_key["console/reward_sum_current"][1]["reduce"], "sum")
+        self.assertEqual(by_key["console/reward_count_current"][0], 1.0)
+        self.assertEqual(by_key["console/reward_count_current"][1]["reduce"], "sum")
+
     def test_episode_end_combines_rollout_fragments(self):
         logger = _MetricsLogger()
         callback = tb_logging.RewardComponentsCallback()

@@ -232,6 +232,14 @@ class RewardConfig:
     # phase while using only past valid cycle durations at runtime.
     morphology_phase_mode: str = "legacy_cycle_fraction"
     morphology_weight: float = 0.0
+    # Optional joint-specific effective weights. ``None`` preserves the
+    # historical contract by inheriting ``morphology_weight``. The scalar
+    # morphology loss is defined as 0.5 * (knee_loss + ankle_loss), therefore
+    # the split contract is 0.5 * (knee_weight * knee_loss +
+    # ankle_weight * ankle_loss). Keeping both resolved weights equal to the
+    # legacy weight is reward-equivalent to the historical implementation.
+    morphology_knee_weight: float | None = None
+    morphology_ankle_weight: float | None = None
     morphology_std_multiplier_knee: float = 1.0
     morphology_std_multiplier_ankle: float = 1.0
     morphology_margin_knee_deg: float = 0.0
@@ -282,7 +290,12 @@ class RewardConfig:
         for key, value in data.items():
             if key not in known:
                 continue
-            if isinstance(value, str):
+            if value is None and key in {
+                "morphology_knee_weight",
+                "morphology_ankle_weight",
+            }:
+                kwargs[key] = None
+            elif isinstance(value, str):
                 kwargs[key] = value
             elif isinstance(value, (list, tuple)):
                 kwargs[key] = tuple(float(x) for x in value)
@@ -293,7 +306,9 @@ class RewardConfig:
     def to_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {}
         for key, value in asdict(self).items():
-            if isinstance(value, str):
+            if value is None:
+                out[key] = None
+            elif isinstance(value, str):
                 out[key] = value
             elif isinstance(value, (list, tuple)):
                 out[key] = [float(x) for x in value]
@@ -304,6 +319,47 @@ class RewardConfig:
 
 def _score(loss: float, weight: float) -> float:
     return 1.0 / (1.0 + weight * float(loss))
+
+
+def _resolved_morphology_weights(cfg: RewardConfig) -> tuple[float, float, bool]:
+    """Return effective knee/ankle weights and whether the split is explicit.
+
+    Historical configs specify only ``morphology_weight``. They remain on the
+    exact legacy arithmetic path. Supplying either joint weight opts into the
+    split contract; an omitted joint still inherits the legacy value so a
+    caller can change only the ankle without duplicating the knee setting.
+    """
+    legacy = float(cfg.morphology_weight)
+    if not np.isfinite(legacy) or legacy < 0.0:
+        raise ValueError("morphology_weight must be finite and non-negative")
+    explicit = (
+        cfg.morphology_knee_weight is not None
+        or cfg.morphology_ankle_weight is not None
+    )
+    knee = (
+        legacy
+        if cfg.morphology_knee_weight is None
+        else float(cfg.morphology_knee_weight)
+    )
+    ankle = (
+        legacy
+        if cfg.morphology_ankle_weight is None
+        else float(cfg.morphology_ankle_weight)
+    )
+    if not np.isfinite(knee) or knee < 0.0:
+        raise ValueError(
+            "morphology_knee_weight must be finite and non-negative"
+        )
+    if not np.isfinite(ankle) or ankle < 0.0:
+        raise ValueError(
+            "morphology_ankle_weight must be finite and non-negative"
+        )
+    return float(knee), float(ankle), bool(explicit)
+
+
+def _morphology_effects_requested(cfg: RewardConfig) -> bool:
+    knee, ankle, _explicit = _resolved_morphology_weights(cfg)
+    return bool(knee > 0.0 or ankle > 0.0)
 
 
 def _bounded_square_ratio(value: float, scale: float, cap: float = 25.0) -> float:
@@ -842,21 +898,75 @@ def compute_reward(
     prosthetic_joint_range_term = cfg.prosthetic_joint_range_weight * float(
         reward_terms.get("prosthetic_joint_range_loss", 0.0)
     )
-    morphology_weight = float(cfg.morphology_weight)
-    if not np.isfinite(morphology_weight) or morphology_weight < 0.0:
-        raise ValueError("morphology_weight must be finite and non-negative")
+    morphology_knee_weight, morphology_ankle_weight, morphology_split_explicit = (
+        _resolved_morphology_weights(cfg)
+    )
     morphology_loss_raw = float(reward_terms.get("morphology_loss", 0.0))
     morphology_loss_nonfinite = not np.isfinite(morphology_loss_raw)
-    if morphology_weight == 0.0:
+    morphology_knee_loss_raw = reward_terms.get("morphology_knee_loss", 0.0)
+    morphology_ankle_loss_raw = reward_terms.get("morphology_ankle_loss", 0.0)
+    morphology_knee_loss_nonfinite = False
+    morphology_ankle_loss_nonfinite = False
+    morphology_knee_term = 0.0
+    morphology_ankle_term = 0.0
+    if morphology_knee_weight == 0.0 and morphology_ankle_weight == 0.0:
         # Strict no-effect branch: never evaluate ``0 * morphology_loss``.
         # This preserves reward parity and prevents ``0 * NaN`` propagation.
         morphology_term = 0.0
-    else:
+    elif not morphology_split_explicit:
+        # Historical arithmetic path. Keeping it separate preserves old
+        # checkpoints/configs bit-for-bit, including their NaN guard.
         if morphology_loss_nonfinite:
             raise ValueError(
                 "positive morphology_weight requires a finite morphology_loss"
             )
-        morphology_term = morphology_weight * morphology_loss_raw
+        morphology_term = morphology_knee_weight * morphology_loss_raw
+    else:
+        # Joint-specific path. A disabled joint is deliberately not coerced or
+        # inspected, so 0 * NaN cannot contaminate the enabled contribution.
+        if morphology_knee_weight > 0.0:
+            try:
+                knee_loss = float(morphology_knee_loss_raw)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    "positive morphology_knee_weight requires a finite "
+                    "morphology_knee_loss"
+                ) from exc
+            morphology_knee_loss_nonfinite = not np.isfinite(knee_loss)
+            if morphology_knee_loss_nonfinite:
+                raise ValueError(
+                    "positive morphology_knee_weight requires a finite "
+                    "morphology_knee_loss"
+                )
+            morphology_knee_term = 0.5 * morphology_knee_weight * knee_loss
+        if morphology_ankle_weight > 0.0:
+            try:
+                ankle_loss = float(morphology_ankle_loss_raw)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    "positive morphology_ankle_weight requires a finite "
+                    "morphology_ankle_loss"
+                ) from exc
+            morphology_ankle_loss_nonfinite = not np.isfinite(ankle_loss)
+            if morphology_ankle_loss_nonfinite:
+                raise ValueError(
+                    "positive morphology_ankle_weight requires a finite "
+                    "morphology_ankle_loss"
+                )
+            morphology_ankle_term = 0.5 * morphology_ankle_weight * ankle_loss
+        if (
+            morphology_knee_weight == morphology_ankle_weight
+            and not morphology_loss_nonfinite
+        ):
+            # Equal explicit weights are semantically a split configuration but
+            # retain the legacy scalar arithmetic exactly.
+            morphology_term = morphology_knee_weight * morphology_loss_raw
+        else:
+            morphology_term = morphology_knee_term + morphology_ankle_term
+        if not np.isfinite(morphology_term):
+            raise ValueError(
+                "joint-specific morphology term must be finite"
+            )
     morphology_loss_component = (
         0.0 if morphology_loss_nonfinite else morphology_loss_raw
     )
@@ -1078,6 +1188,17 @@ def compute_reward(
         "prosthetic_joint_range_term": float(prosthetic_joint_range_term),
         "morphology_loss": float(morphology_loss_component),
         "morphology_loss_input_nonfinite": float(morphology_loss_nonfinite),
+        "morphology_split_explicit": float(morphology_split_explicit),
+        "morphology_knee_weight_effective": float(morphology_knee_weight),
+        "morphology_ankle_weight_effective": float(morphology_ankle_weight),
+        "morphology_knee_loss_input_nonfinite": float(
+            morphology_knee_loss_nonfinite
+        ),
+        "morphology_ankle_loss_input_nonfinite": float(
+            morphology_ankle_loss_nonfinite
+        ),
+        "morphology_knee_term": float(morphology_knee_term),
+        "morphology_ankle_term": float(morphology_ankle_term),
         "morphology_loss_mean": float(reward_terms.get("morphology_loss_mean", 0.0)),
         "morphology_inside_score": float(
             reward_terms.get("morphology_inside_score", 0.0)
@@ -1274,7 +1395,7 @@ class RewardShapingWrapper(gym.Wrapper):
                     "non-empty event-warped morphology_profile"
                 )
             effects_requested = (
-                abs(float(self.reward_config.morphology_weight)) > 0.0
+                _morphology_effects_requested(self.reward_config)
                 or float(self.reward_config.morphology_hard_termination_enabled) > 0.0
             )
             if (
@@ -1314,7 +1435,7 @@ class RewardShapingWrapper(gym.Wrapper):
                     "retrospective hard-termination hook"
                 )
             if (
-                float(self.reward_config.morphology_weight) > 0.0
+                _morphology_effects_requested(self.reward_config)
                 and float(self.reward_config.morphology_causal_allow_effects) <= 0.0
             ):
                 raise ValueError(
@@ -2607,7 +2728,7 @@ class RewardShapingWrapper(gym.Wrapper):
                 terms["truncated"] = 0.0
         if (
             self._morphology_phase_mode == CAUSAL_DELAYED_PHASE_MODE
-            and float(self.reward_config.morphology_weight) > 0.0
+            and _morphology_effects_requested(self.reward_config)
             and float(terms.get("morphology_causal_failed_closed", 0.0) or 0.0) > 0.0
         ):
             terminated = True

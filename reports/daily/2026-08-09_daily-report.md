@@ -2,9 +2,10 @@
 
 Instruction check token: CMC_AGENT_OK_2026
 
-## Report utente consolidato
+## Report utente consolidati
 
 - [H0 V11 weighted full-mean — fit PASS, rollout autonomo FAIL](../user/2026-08-09_h0_v11_weighted_full_mean_fail_closed_loop.md)
+- [H0 V12R2 — protocollo execution-ready su macOS arm64](../user/2026-08-09_h0_v12r2_training_readiness.md)
 
 ## Sintesi
 
@@ -28,6 +29,16 @@ prima del finale.
 
 Non sono stati aperti trial protetti o reserve, non e' stato eseguito PPO e
 non e' stato pubblicato alcun comando di warm-start.
+
+Dopo il fallimento terminale V11 e il successivo errore strutturale V12R1, è
+stata inoltre costruita la lineage additiva V12R2. Il protocollo, il design
+audit e l'execution lock hanno raggiunto lo stato
+`PASS_H0_PRIMARY_SPLIT_V12R2_EXECUTION_LOCK`: questo attestava che runtime e
+macchina macOS arm64 erano pronti a consumare una singola esecuzione one-shot,
+non che esistesse già un candidato scientificamente training-ready. Al momento
+fotografato dal report V12R2 il run non era ancora partito; la sua esecuzione
+serale/notturna e i fallimenti successivi sono ricostruiti nel daily del
+2026-08-10.
 
 ## 1. Protocollo V11
 
@@ -224,6 +235,55 @@ execution-locked non e' stato riscritto retroattivamente.
 - corridor training;
 - PPO;
 - claim numerico Windows.
+
+## 8. Readiness V12R2 di fine giornata
+
+V12R2 ha rimosso il rewriter dei literal bytecode che aveva reso incompatibili
+producer e consumer delle chiavi legacy V12R1. La nuova implementazione ha
+mantenuto intenzionalmente il wire format:
+
+```text
+completed_v12_collection_rounds
+v12_dagger_sample_count
+```
+
+La pipeline congelata prevedeva:
+
+- actor standard `35 -> 256 -> 256 -> 2`, critic e PPO fuori scope;
+- corpus seed V11 P3 da 6.000 righe;
+- pure probe autonomo dopo ogni fit P0-P3;
+- labeler osservatore eseguito solo dopo la chiusura del probe;
+- pesatura crescente delle recovery con la penetrazione;
+- conservazione di reset, riga terminale e prefisso dei probe falliti;
+- pubblicazioni no-clobber e binding byte-exact degli artefatti terminali
+  V12R1;
+- readiness fail-closed per sistema operativo, architettura, interprete e
+  plugin.
+
+Il design audit P0 in memoria ha superato tutti i gate:
+
+| Metrica | Osservata | Gate |
+|---|---:|---:|
+| RMSE | `0,0049784962` | `<=0,006` |
+| errore assoluto massimo | `0,0575412363` | `<=0,060` |
+| errore massimo reset | `0,0008472800` | `<=0,003` |
+| fold normalizzazione | `4,1723e-7` | `<=1e-6` |
+
+Freeze, audit e lock hanno chiuso PASS; la suite V12R2 ha ottenuto `62/62`
+prima e dopo il lock. Lo smoke OpenSim reale su macOS ha caricato entrambi i
+plugin, eseguito reset e uno step con esito
+`PASS_ENV_SMOKE (84,) (2,) 5 False False`. Windows è rimasto NO-GO in assenza
+dei due DLL esatti, senza accettare binari storici come sostituti.
+
+### Transizione dei TODO V12R2
+
+Al momento del report restavano aperti esecuzione one-shot, rollout autonomi,
+qualification, `checkpoint_zero`, parità Windows e validazione hardware. La
+one-shot è stata poi consumata nella coda notturna 09→10/08 ed è terminata
+fail-closed; pertanto gli obiettivi scientifici downstream non sono stati
+raggiunti da V12R2 e sono stati trasferiti alle lineage successive. Il daily
+2026-08-10 documenta la transizione V12R2→V12R4; i daily 14–15/08 documentano
+le successive sostituzioni del percorso.
 
 ## TODO completati o superseduti
 
