@@ -1,0 +1,605 @@
+"""TensorBoard logging for the unified-MLP PPO pipeline.
+
+Two pieces, both opt-in from ``train_ppo_mlp.py``:
+
+1. ``RewardComponentsCallback`` (an RLlib ``RLlibCallback``) aggregates the
+   per-step reward components/losses (exposed by ``RewardShapingWrapper`` and the
+   env in ``info``) into env-runner metrics, so they land in
+   ``result["env_runners"]`` once per training iteration.
+2. ``make_tb_writer`` / ``log_result_scalars`` write a flat view of the training
+   ``result`` (env-runner + learner scalars, including the reward components
+   above) to a ``torch.utils.tensorboard.SummaryWriter`` under the run's
+   ``output_dir/tensorboard``.
+
+Kept in its own importable module (not ``__main__``) so the callback class is
+picklable by reference for Ray worker processes.
+"""
+
+from __future__ import annotations
+
+import math
+import sys
+from typing import Any, Iterator, Mapping
+
+from ray.rllib.callbacks.callbacks import RLlibCallback
+
+# Rolling window (in steps) for smoothing reward metrics, matching RLlib's own
+# metric-smoothing convention. ``reduce="mean"`` requires a window or ema_coeff
+# on this Ray version (``clear_on_reduce`` is deprecated).
+_SMOOTHING_WINDOW = 100
+
+# --------------------------------------------------------------------------
+# Training-health telemetry. OBSERVATION ONLY.
+#
+# These counters read the info dict the environment already publishes. They add
+# no key to it, change no reward term, no dynamic, no threshold and no control
+# flow: nothing here can alter a training run's trajectory. Their purpose is that
+# a training run should not be able to hide, behind a healthy-looking return,
+# the FSM and morphology events that the closed-loop qualification stages count
+# explicitly.
+#
+# The field names and the counting rules are taken from the already-validated
+# aggregation in v26c_j1_collect._summarise, so a training run and a closed-loop
+# cell count the same events the same way:
+#   - the timeout side code is 1.0 = stance, 2.0 = swing (prosthetic_phase_fsm
+#     lines 1685-1689 and 1707-1711);
+#   - the per-step timeout and morphology evidence is read from reward_terms,
+#     which always carries it;
+#   - the v3 cumulative counters are read from info["phase_fsm"] and reduced with
+#     MAX, never with the last row, because the v3 cancellation contract can make
+#     valid_hs_count decrease.
+#
+# A row whose telemetry is absent is counted as MISSING, never as zero. A silent
+# 0.0 would turn missing telemetry into a clean bill of health, which is the
+# exact failure mode v26c_j1_collect refuses by raising. observed_rows and
+# missing_telemetry_rows PARTITION the rows: exactly one of the two is 1.0 for
+# any row, so their sum over an iteration is the number of rows seen, and
+# "zero incidents" is only meaningful against a non-zero observed_rows.
+#
+# CONTAINMENT. Because this telemetry exists only to observe, it must never be
+# able to stop what it is observing. Every failure mode it can have - extraction,
+# formatting, the metrics logger, the TensorBoard writer, the JSONL projection -
+# is caught and swallowed at its own boundary, with a diagnostic emitted at most
+# once per category per process. A telemetry bug degrades the telemetry and
+# nothing else.
+# --------------------------------------------------------------------------
+TRAINING_HEALTH_PREFIX = "training_health"
+
+# Categories already reported, so a per-step failure cannot flood the console.
+_HEALTH_WARNED: set[str] = set()
+
+
+def _health_warn_once(category: str, error: BaseException) -> None:
+    """Report a telemetry failure at most once per category. Never raises.
+
+    The warning path is itself guarded: a diagnostic that could throw would
+    reintroduce, one level up, exactly the failure this containment exists to
+    prevent.
+    """
+    try:
+        if category in _HEALTH_WARNED:
+            return
+        _HEALTH_WARNED.add(category)
+        print(
+            "[training_health] observation-only telemetry failed in category %r "
+            "with %s: %s. Training is UNAFFECTED. The affected telemetry will be "
+            "absent rather than wrong, and this is reported once per category."
+            % (category, type(error).__name__, error),
+            file=sys.stderr,
+            flush=True,
+        )
+    except Exception:  # noqa: BLE001 - a diagnostic must never propagate
+        pass
+
+# info["phase_fsm"] keys that must all be finite for a row to count as observed.
+_HEALTH_FSM_KEYS = (
+    "timeout_exceeded",
+    "timeout_side",
+    "resync_event_this_step",
+    "resync_count",
+    "hs_cancelled_count",
+)
+# info["reward_terms"] keys that must all be finite for a row to count as observed.
+_HEALTH_TERM_KEYS = (
+    "phase_timeout_exceeded",
+    "phase_timeout_side",
+    "morphology_causal_failed_closed",
+)
+_TIMEOUT_SIDE_STANCE = 1.0
+_TIMEOUT_SIDE_TOLERANCE = 1e-9
+
+# Every field the JSONL row and TensorBoard publish, in a fixed order. The
+# trainer reports a field that never arrived as None, so "absent" and "zero"
+# stay distinguishable downstream.
+TRAINING_HEALTH_FIELDS = (
+    "observed_rows",
+    "missing_telemetry_rows",
+    "phase_timeout_stance_rows",
+    "morphology_causal_contract_failure_rows",
+    "resync_event_rows",
+    "resync_count_max",
+    "hs_cancelled_count_max",
+    "timeout_side_disagreement_rows",
+)
+
+# Loss terms produced by the env in ``info["reward_terms"]`` worth logging.
+_LOSS_KEYS = (
+    "tracking_loss",
+    "tracking_position_loss",
+    "tracking_velocity_loss",
+    "reference_loss",
+    "reference_position_loss",
+    "bio_loss",
+    "bio_position_loss",
+    "effort_loss",
+    "smoothness_loss",
+    "command_rate_loss",
+    "segment_delta_loss",
+    "segment_knot_delta_loss",
+    "qdot_ref_loss",
+    "qddot_ref_loss",
+    "jerk_ref_loss",
+    "reference_governor_loss",
+    "reference_velocity_limit_fraction",
+    "reference_acceleration_limit_fraction",
+    "reference_jerk_limit_fraction",
+    "u_rate_loss",
+    "saturation_loss",
+    "sea_saturation_loss",
+    "sea_torque_error_loss",
+    "sea_tau_spring_effort_loss",
+    "sea_tau_spring_rate_loss",
+    "sea_motor_speed_loss",
+    "sea_motor_accel_loss",
+    "sea_motor_power_loss",
+    "sea_tau_input_saturation_fraction",
+    "pros_knee_angle_sea_tau_spring_rms_nm",
+    "pros_ankle_angle_sea_tau_spring_rms_nm",
+    "pros_knee_angle_sea_tau_spring_abs_max_nm",
+    "pros_ankle_angle_sea_tau_spring_abs_max_nm",
+    "pros_knee_angle_sea_tau_spring_rate_rms_nm_s",
+    "pros_ankle_angle_sea_tau_spring_rate_rms_nm_s",
+    "pros_knee_angle_sea_tau_spring_rate_abs_max_nm_s",
+    "pros_ankle_angle_sea_tau_spring_rate_abs_max_nm_s",
+    "policy_action_clip_loss",
+    "policy_action_clip_fraction",
+    "policy_action_clip_abs_max",
+    "sound_imitation_loss",
+    "served_imitation_loss",
+    "safety_loss",
+    "contact_load_loss",
+    "contact_overload_loss",
+    "swing_unloading_loss",
+    "grf_slip_loss",
+    "phase_regularity_loss",
+    "phase_event_progress_score",
+    "landing_window_contact_score",
+    "landing_window_active",
+    "invalid_event_loss",
+    "contact_validity_loss",
+    "invalid_event_count",
+    "phase_fsm_state_id",
+    "phase_event_order_loss",
+    "phase_period_loss",
+    "phase_timeout_loss",
+    "phase_stance_timeout_loss",
+    "phase_swing_timeout_loss",
+    "phase_timeout_exceeded",
+    "phase_pending_cycle_credit",
+    "phase_cycle_complete_bonus",
+    "phase_clawback_penalty",
+    "phase_failure_extra_penalty",
+    "phase_cycle_failed_this_step",
+    "phase_stance_fraction_loss",
+    "phase_stance_contact_fraction",
+    "phase_stance_mean_load_bw",
+    "phase_cycle_knee_excursion_rad",
+    "phase_cycle_ankle_excursion_rad",
+    "phase_cycle_rejected_this_step",
+    "reserve_residual_loss",
+    "reserve_norm_loss",
+    "residual_norm_loss",
+    "pelvis_height_loss",
+    "morphology_loss",
+    "morphology_knee_loss",
+    "morphology_ankle_loss",
+    "fsm_morphology_phase",
+    "u_abs_max",
+    "u_saturation_fraction",
+    "terminated",
+    "truncated",
+)
+
+
+def _as_finite_float(value: Any) -> float | None:
+    try:
+        fv = float(value)
+    except (TypeError, ValueError):
+        return None
+    return fv if math.isfinite(fv) else None
+
+
+def training_health_row(info: Mapping[str, Any]) -> dict[str, float]:
+    """The training-health contribution of ONE environment info dict.
+
+    Pure and dependency-free: no RLlib, no torch, no environment. This is the
+    whole counting rule, so it can be unit-tested directly on synthetic infos.
+
+    Returns a mapping from field name to the value this row contributes.
+
+    ``observed_rows`` and ``missing_telemetry_rows`` PARTITION every row:
+    exactly one of them is 1.0 and the other is 0.0, so for any row they sum to
+    1, and over an iteration ``observed_rows + missing_telemetry_rows`` equals
+    the number of rows the callback saw. A row is "observed" only when every
+    required key is present and finite; otherwise it is "missing".
+
+    ``observed_rows`` is therefore NOT a row counter. It counts rows whose
+    telemetry could actually be read, which is the only denominator under which
+    "zero incidents" means anything. Zero incidents over zero observed rows is
+    silence, and this field is what makes that visible instead of reassuring.
+
+    A missing row contributes no zero to any incident counter, so a counter that
+    reads 0 over an iteration means "observed and did not happen", never "never
+    looked". The same distinction survives into the JSONL row, where a field
+    that was never logged is reported as None rather than as 0.0.
+
+    Counting rules, transcribed from the validated aggregation in
+    v26c_j1_collect._summarise so that a training iteration and a closed-loop
+    cell count the same events:
+
+    * a stance timeout is a row with reward_terms.phase_timeout_exceeded > 0 and
+      reward_terms.phase_timeout_side equal to 1.0;
+    * a morphology causal contract failure is a row with
+      reward_terms.morphology_causal_failed_closed > 0;
+    * a resync event is a row with phase_fsm.resync_event_this_step > 0;
+    * resync_count and hs_cancelled_count are the v3 per-episode cumulative
+      counters and are reduced with max, never with the last row.
+
+    ``timeout_side_disagreement_rows`` covers the two anomalies that
+    v26c_j1_collect raises on and that a sampling callback must instead only
+    record: reward_terms and phase_fsm disagreeing about the timeout, and a
+    timeout flagged with a side that is neither stance nor swing.
+    """
+    unobserved = {"observed_rows": 0.0, "missing_telemetry_rows": 1.0}
+    fsm = info.get("phase_fsm") if isinstance(info, Mapping) else None
+    terms = info.get("reward_terms") if isinstance(info, Mapping) else None
+    if not isinstance(fsm, Mapping) or not isinstance(terms, Mapping):
+        return unobserved
+
+    fsm_values = {key: _as_finite_float(fsm.get(key)) for key in _HEALTH_FSM_KEYS}
+    term_values = {key: _as_finite_float(terms.get(key)) for key in _HEALTH_TERM_KEYS}
+    if any(value is None for value in fsm_values.values()) or any(
+        value is None for value in term_values.values()
+    ):
+        return unobserved
+
+    row: dict[str, float] = {"observed_rows": 1.0, "missing_telemetry_rows": 0.0}
+
+    timeout = term_values["phase_timeout_exceeded"]
+    side = term_values["phase_timeout_side"]
+    stance = 0.0
+    disagreement = 0.0
+    if abs(timeout - fsm_values["timeout_exceeded"]) > _TIMEOUT_SIDE_TOLERANCE:
+        disagreement = 1.0
+    if abs(side - fsm_values["timeout_side"]) > _TIMEOUT_SIDE_TOLERANCE:
+        disagreement = 1.0
+    if timeout > 0.0:
+        if abs(side - _TIMEOUT_SIDE_STANCE) <= _TIMEOUT_SIDE_TOLERANCE:
+            stance = 1.0
+        elif abs(side - 2.0) > _TIMEOUT_SIDE_TOLERANCE:
+            # a timeout with a side that is neither stance nor swing
+            disagreement = 1.0
+
+    row["phase_timeout_stance_rows"] = stance
+    row["morphology_causal_contract_failure_rows"] = (
+        1.0 if term_values["morphology_causal_failed_closed"] > 0.0 else 0.0
+    )
+    row["resync_event_rows"] = (
+        1.0 if fsm_values["resync_event_this_step"] > 0.0 else 0.0
+    )
+    row["resync_count_max"] = fsm_values["resync_count"]
+    row["hs_cancelled_count_max"] = fsm_values["hs_cancelled_count"]
+    row["timeout_side_disagreement_rows"] = disagreement
+    return row
+
+
+# How each field is reduced over one training iteration. "sum" and "max" are
+# both cleared once per training result, so every value is per-iteration.
+_TRAINING_HEALTH_REDUCE = {
+    field: ("max" if field.endswith("_max") else "sum")
+    for field in TRAINING_HEALTH_FIELDS
+}
+
+
+def start_offset_metric_label(value: Any) -> str | None:
+    """Return the stable TensorBoard/JSON label used for one start offset."""
+    offset = _as_finite_float(value)
+    if offset is None:
+        return None
+    return f"offset_{offset:.6f}".replace("-", "m").replace(".", "p") + "s"
+
+
+class RewardComponentsCallback(RLlibCallback):
+    """Log reward components + losses as per-iteration env-runner means.
+
+    Reads the last step's ``info`` from the episode: ``reward_components`` (added
+    by ``RewardShapingWrapper``) and ``reward_terms`` (the env's raw losses).
+    Defensive by design: any logging error is swallowed so a metrics bug can
+    never crash sampling.
+    """
+
+    def on_environment_created(self, *, env, env_context, **kwargs) -> None:
+        from unified_MLP.env_factory import assign_episode_start_offset_for_runner
+
+        assign_episode_start_offset_for_runner(env, env_context)
+
+    def on_episode_step(self, *, episode, metrics_logger=None, **kwargs) -> None:
+        if metrics_logger is None:
+            return
+        try:
+            info = episode.get_infos(-1)
+        except Exception:
+            return
+        if not isinstance(info, dict):
+            return
+
+        start_offset = _as_finite_float(info.get("episode_start_offset_s"))
+        if start_offset is not None:
+            offset_label = start_offset_metric_label(start_offset)
+            metrics_logger.log_value(
+                f"episode_start_steps/{offset_label}",
+                1.0,
+                reduce="lifetime_sum",
+            )
+            # Unlike the compatibility counter above, this value is reduced and
+            # cleared once per training result.  It is the source of truth for the
+            # exact per-update multi-start balance guard.
+            metrics_logger.log_value(
+                f"episode_start_steps_current/{offset_label}",
+                1.0,
+                reduce="sum",
+            )
+
+        components = info.get("reward_components")
+        if isinstance(components, dict):
+            for key, value in components.items():
+                self._log(metrics_logger, f"reward/{key}", value)
+            current_reward = _as_finite_float(components.get("reward"))
+            if current_reward is not None:
+                # Update-scoped, unsmoothed totals used only by the terminal
+                # display when RLlib has no completed episode in this batch.
+                # Unlike reward/reward's rolling 100-step window, this covers
+                # every sampled row and is therefore a defensible estimate of
+                # full-horizon return after normalization by the row count.
+                metrics_logger.log_value(
+                    "console/reward_sum_current",
+                    current_reward,
+                    reduce="sum",
+                )
+                metrics_logger.log_value(
+                    "console/reward_count_current",
+                    1.0,
+                    reduce="sum",
+                )
+
+        terms = info.get("reward_terms")
+        if isinstance(terms, dict):
+            for key in _LOSS_KEYS:
+                if key in terms:
+                    self._log(metrics_logger, f"reward_loss/{key}", terms[key])
+            for key, value in terms.items():
+                if (
+                    key.startswith("pros_knee_angle_sea_")
+                    or key.startswith("pros_ankle_angle_sea_")
+                    or "_reference_" in key
+                    or "_tracking_" in key
+                    or "_bio_" in key
+                    or key.endswith("_reward_q_range")
+                    or key.endswith("_reward_qdot_range")
+                    or key.startswith("grf_penetration_")
+                    or key.startswith("grf_ankle_moment_flip_")
+                    or key.startswith("contact_")
+                    or key.startswith("phase_")
+                    or key.startswith("prosthetic_")
+                    or key.startswith("morphology_")
+                    or key.startswith("fsm_morphology_")
+                    or key.startswith("reserve_")
+                    or key.startswith("residual_")
+                    or key.startswith("pelvis_")
+                    or key.endswith("_imitation_loss")
+                    or "_imitation_position_" in key
+                    or "_imitation_velocity_" in key
+                ):
+                    self._log(metrics_logger, f"reward_diagnostic/{key}", value)
+
+        gait = info.get("online_gait")
+        if isinstance(gait, dict):
+            sides = gait.get("sides")
+            if isinstance(sides, dict):
+                for side in ("left", "right"):
+                    side_info = sides.get(side)
+                    if not isinstance(side_info, dict):
+                        continue
+                    for key in (
+                        "normal_force_bw",
+                        "in_contact",
+                        "heel_strike",
+                        "toe_off",
+                        "cycle_duration_s",
+                        "gait_phase",
+                    ):
+                        if key in side_info:
+                            self._log(
+                                metrics_logger,
+                                f"gait/{side}/{key}",
+                                side_info[key],
+                            )
+
+        end_reason = info.get("end_reason")
+        if isinstance(end_reason, str) and end_reason:
+            safe_reason = end_reason.replace(":", "_").replace("/", "_")
+            metrics_logger.log_value(
+                f"episode_end/{safe_reason}",
+                1.0,
+                reduce="lifetime_sum",
+            )
+
+        self._log_training_health(metrics_logger, info)
+
+    def on_episode_end(
+        self,
+        *,
+        episode,
+        prev_episode_chunks=None,
+        metrics_logger=None,
+        **kwargs,
+    ) -> None:
+        """Log completed-episode return and length separately for each start.
+
+        RLlib may split a long episode into multiple rollout fragments.  The
+        callback therefore includes ``prev_episode_chunks`` instead of treating
+        the final chunk as the complete episode.
+        """
+        if metrics_logger is None:
+            return
+        chunks = [*(prev_episode_chunks or []), episode]
+        start_offset = None
+        for chunk in reversed(chunks):
+            try:
+                info = chunk.get_infos(-1)
+            except Exception:
+                continue
+            if isinstance(info, dict):
+                start_offset = _as_finite_float(
+                    info.get("episode_start_offset_s")
+                )
+                if start_offset is not None:
+                    break
+        offset_label = start_offset_metric_label(start_offset)
+        if offset_label is None:
+            return
+
+        try:
+            episode_return = sum(float(chunk.get_return()) for chunk in chunks)
+            episode_length = sum(int(len(chunk)) for chunk in chunks)
+        except Exception:
+            return
+        if not math.isfinite(episode_return) or episode_length <= 0:
+            return
+
+        metrics_logger.log_value(
+            f"episode_start_return_sum/{offset_label}",
+            episode_return,
+            reduce="sum",
+        )
+        metrics_logger.log_value(
+            f"episode_start_length_sum/{offset_label}",
+            float(episode_length),
+            reduce="sum",
+        )
+        metrics_logger.log_value(
+            f"episode_start_episode_count/{offset_label}",
+            1.0,
+            reduce="sum",
+        )
+
+    @staticmethod
+    def _log(metrics_logger, key: str, value: Any) -> None:
+        fv = _as_finite_float(value)
+        if fv is None:
+            return
+        # Rolling-window mean (smoothed like RLlib's own env-runner metrics).
+        metrics_logger.log_value(key, fv, reduce="mean", window=_SMOOTHING_WINDOW)
+
+    @staticmethod
+    def _log_training_health(metrics_logger, info: Mapping[str, Any]) -> None:
+        """Emit the per-iteration training-health counters for one step.
+
+        Observation only. Reads the info dict, writes nothing back into it, and
+        never raises: a telemetry bug must not be able to stop sampling. The
+        refusal to default a missing value is expressed by counting the row as
+        missing, not by throwing.
+
+        The containment is real, not a docstring. Extraction, float conversion
+        and the metrics logger are all inside the guard, so a malformed info, a
+        hostile logger or an unexpected reduce mode degrades the telemetry and
+        leaves sampling untouched.
+        """
+        try:
+            row = training_health_row(info)
+        except Exception as error:  # noqa: BLE001 - containment is the point
+            _health_warn_once("extract", error)
+            return
+        for field, value in row.items():
+            try:
+                metrics_logger.log_value(
+                    f"{TRAINING_HEALTH_PREFIX}/{field}",
+                    float(value),
+                    reduce=_TRAINING_HEALTH_REDUCE[field],
+                )
+            except Exception as error:  # noqa: BLE001 - containment is the point
+                _health_warn_once("log:%s" % field, error)
+
+
+def make_tb_writer(log_dir):
+    """Create a torch TensorBoard SummaryWriter at ``log_dir`` (created if needed)."""
+    from torch.utils.tensorboard import SummaryWriter
+
+    return SummaryWriter(log_dir=str(log_dir))
+
+
+def _iter_scalars(node: Mapping[str, Any], prefix: str = "") -> Iterator[tuple[str, float]]:
+    for key, value in node.items():
+        full = f"{prefix}/{key}" if prefix else str(key)
+        if isinstance(value, Mapping):
+            yield from _iter_scalars(value, full)
+            continue
+        fv = _as_finite_float(value)
+        if fv is not None:
+            yield full, fv
+
+
+def log_result_scalars(writer, result: Mapping[str, Any], step: int) -> int:
+    """Write env-runner + learner scalar metrics from ``result`` at ``step``.
+
+    Returns the number of scalars written. Nested dicts are flattened with ``/``;
+    non-scalar / non-finite values are skipped. The reward components logged by
+    ``RewardComponentsCallback`` (``reward/*`` / ``reward_loss/*``) are promoted to
+    top-level TensorBoard sections; everything else keeps its ``env_runners/`` /
+    ``learners/`` prefix.
+    """
+    written = 0
+    for subtree in ("env_runners", "learners"):
+        node = result.get(subtree)
+        if not isinstance(node, Mapping):
+            continue
+        for key, value in _iter_scalars(node):
+            if (
+                key.startswith("reward/")
+                or key.startswith("reward_loss/")
+                or key.startswith("reward_diagnostic/")
+                or key.startswith("gait/")
+                or key.startswith("episode_end/")
+                or key.startswith("episode_start_steps/")
+                or key.startswith("episode_start_steps_current/")
+                or key.startswith("episode_start_return_sum/")
+                or key.startswith("episode_start_length_sum/")
+                or key.startswith("episode_start_episode_count/")
+                or key.startswith(f"{TRAINING_HEALTH_PREFIX}/")
+            ):
+                tag = key  # dedicated top-level section for reward tuning
+            else:
+                tag = f"{subtree}/{key}"
+            if tag.startswith(f"{TRAINING_HEALTH_PREFIX}/"):
+                # Observation-only telemetry may not take the training loop down
+                # with it. Only these tags take the guarded path, so the failure
+                # behaviour of every pre-existing metric is unchanged.
+                try:
+                    writer.add_scalar(tag, value, step)
+                except Exception as error:  # noqa: BLE001 - containment is the point
+                    _health_warn_once("tensorboard:%s" % tag, error)
+                    continue
+            else:
+                writer.add_scalar(tag, value, step)
+            written += 1
+    return written
