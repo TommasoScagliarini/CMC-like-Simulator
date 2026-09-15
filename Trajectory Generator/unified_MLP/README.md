@@ -41,6 +41,8 @@ sorgenti ammesse per `--init-actor-from`.
   validità degli eventi e timeout restano attivi. Premi task, clawback collegati
   e morphology non contribuiscono durante il pretraining. Metriche dell'obiettivo
   inattivo, anche non finite, non devono influenzare il ritorno.
+  Anche le terminazioni specifiche morphology sono abilitate soltanto in
+  ex-novo; il ledger e la relativa diagnostica restano disponibili in imitazione.
 
 ## Configurazioni riproducibili
 
@@ -92,8 +94,14 @@ sono risolti rispetto alla directory `unified_MLP`.
 Pretraining da pesi nuovi:
 
 ```console
+conda activate envCMC-rllib
 python "Trajectory Generator/unified_MLP/train_ppo_mlp.py" --config configs/pretraining.yaml --output-dir pretraining_v1
 ```
+
+L'interprete selezionato deve appartenere a `envCMC-rllib`: il supervisor
+avvia il child con lo stesso Python. Un errore `ModuleNotFoundError: No module
+named 'ray'` prima dell'inizializzazione richiede di controllare l'ambiente
+usato dal comando, non di riprendere un checkpoint inesistente.
 
 Passaggio diretto all'ex-novo:
 
@@ -142,6 +150,19 @@ nomi e ordine delle feature, classe del modulo, dimensioni e bounds delle azioni
 Il runtime effettivo deve coincidere con lo snapshot del checkpoint, anche usando
 `--config` o `--no-auto-config`: cambiare filtro, detector o fisica genera un
 errore. Restano modificabili start, durata e budget del rollout diagnostico.
+
+Analisi offline del confronto pilot tra checkpoint 3 e 5 del 14 settembre,
+dopo aver prodotto i sei rollout registrati nel relativo manifest:
+
+```console
+python "Trajectory Generator/unified_MLP/validation/compare_pretraining_checkpoints.py"
+python "Trajectory Generator/unified_MLP/validation/plot_pretraining_checkpoints.py"
+```
+
+L'analisi usa solo la libreria standard; i grafici richiedono Matplotlib.
+Gli script accettano `--rollout-root` e `--output-dir` e non avviano training
+o simulazioni. I risultati del pilot con penetrazione 1.0, comprese le
+limitazioni del cammino, sono nella [validazione aggiornata](VALIDATION.md#pilot-concluso-e-confronto-checkpoint-35--14-settembre-2026).
 
 ## Verifica e limiti
 

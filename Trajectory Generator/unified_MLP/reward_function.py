@@ -2821,8 +2821,11 @@ class RewardShapingWrapper(gym.Wrapper):
                 info["end_reason"] = f"phase_timeout:{side_name}"
                 terms["terminated"] = 1.0
                 terms["truncated"] = 0.0
+        # In imitation, morphology is diagnostic only: terminal flags would
+        # otherwise change PPO returns even with every morphology weight zero.
         if (
-            self._morphology_phase_mode == CAUSAL_DELAYED_PHASE_MODE
+            self.reward_config.reward_mode == "ex_novo"
+            and self._morphology_phase_mode == CAUSAL_DELAYED_PHASE_MODE
             and _morphology_effects_requested(self.reward_config)
             and float(terms.get("morphology_causal_failed_closed", 0.0) or 0.0) > 0.0
         ):
@@ -2832,7 +2835,8 @@ class RewardShapingWrapper(gym.Wrapper):
             terms["terminated"] = 1.0
             terms["truncated"] = 0.0
         if (
-            float(self.reward_config.morphology_hard_termination_enabled) > 0.0
+            self.reward_config.reward_mode == "ex_novo"
+            and float(self.reward_config.morphology_hard_termination_enabled) > 0.0
             and float(terms.get("morphology_hard_violation", 0.0) or 0.0) > 0.0
         ):
             current_reason = info.get("end_reason")

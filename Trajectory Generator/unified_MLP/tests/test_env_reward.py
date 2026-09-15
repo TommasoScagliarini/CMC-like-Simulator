@@ -186,3 +186,101 @@ def test_causal_morphology_buffer_is_preserved_in_both_stages(mode):
     assert wrapper._causal_morphology_buffer is not None
     assert wrapper._causal_morphology_buffer.delay_s == 0.04
     assert wrapper.reward_config is cfg
+
+
+class StepResultEnv(DummyEnv):
+    """Native step outcome, independent of the reward wrapper's decisions."""
+
+    def __init__(self, *, terminated=False, truncated=False, reason=None):
+        super().__init__(None)
+        self.terminated = terminated
+        self.truncated = truncated
+        self.reason = reason
+
+    def step(self, action):
+        info = {
+            "reward_terms": {
+                "sound_imitation_loss": 0.11,
+                "served_imitation_loss": 0.07,
+                "terminated": float(self.terminated),
+                "truncated": float(self.truncated),
+            },
+        }
+        if self.reason is not None:
+            info["end_reason"] = self.reason
+        return np.zeros(35, dtype=np.float32), -123.0, self.terminated, self.truncated, info
+
+
+def morphology_step_wrapper(monkeypatch, mode, kind, *, env=None, extra_terms=None):
+    cfg = pilot_reward(mode)
+    if kind == "hard":
+        cfg = replace(
+            cfg,
+            morphology_phase_mode=unified.EXPERIMENTAL_PHASE_MODE,
+            morphology_hard_termination_enabled=1.0,
+            morphology_experimental_allow_effects=1.0,
+        )
+    wrapper = unified.RewardShapingWrapper(env or StepResultEnv(), cfg)
+    key = "morphology_causal_failed_closed" if kind == "causal" else "morphology_hard_violation"
+    task_terms = {key: 1.0, **(extra_terms or {})}
+    # Inject the ledger outcome, keeping the actual wrapper step, scalar reward,
+    # termination arbitration and emitted diagnostics under test.
+    monkeypatch.setattr(wrapper, "_task_reward_terms", lambda info: task_terms)
+    return wrapper, task_terms, key
+
+
+@pytest.mark.parametrize("mode", ["imitation", "ex_novo"])
+@pytest.mark.parametrize("kind", ["causal", "hard"])
+def test_morphology_step_terminations_only_affect_exnovo(monkeypatch, mode, kind):
+    wrapper, task_terms, key = morphology_step_wrapper(monkeypatch, mode, kind)
+    action = np.zeros((1, 2), dtype=np.float32)
+    observation, reward, terminated, truncated, info = wrapper.step(action)
+    assert terminated is (mode == "ex_novo")
+    assert not truncated
+    assert info["reward_terms"][key] == 1.0  # Shadow diagnostics survive gating.
+    assert info["reward_terms"]["terminated"] == float(mode == "ex_novo")
+    if mode == "ex_novo":
+        expected = "morphology_causal_contract_failure" if kind == "causal" else "morphology_hard_violation:completed_segment"
+        assert info["end_reason"] == expected
+    else:
+        assert info.get("end_reason") is None
+        task_terms[key] = 0.0
+        no_failure = wrapper.step(action)
+        np.testing.assert_array_equal(observation, no_failure[0])
+        assert reward == no_failure[1]
+        assert (terminated, truncated) == no_failure[2:4]
+        assert info["reward_components"]["morphology_term"] == 0.0
+
+
+@pytest.mark.parametrize("kind", ["causal", "hard"])
+@pytest.mark.parametrize("reason,terminated,truncated,timeout_side", [
+    ("grf_penetration", True, False, None),
+    ("sea_safety", True, False, None),
+    ("joint_limit", True, False, None),
+    ("episode_time_limit", False, True, None),
+    ("dataset_end", False, True, None),
+    (None, False, False, 1.0),
+    (None, False, False, 2.0),
+])
+def test_imitation_morphology_diagnostics_preserve_other_step_endings(
+    monkeypatch, kind, reason, terminated, truncated, timeout_side,
+):
+    extra = {} if timeout_side is None else {
+        "phase_timeout_exceeded": 1.0,
+        "phase_timeout_side": timeout_side,
+        "phase_timeout_loss": 0.4,
+    }
+    env = StepResultEnv(terminated=terminated, truncated=truncated, reason=reason)
+    wrapper, _, key = morphology_step_wrapper(
+        monkeypatch, "imitation", kind, env=env, extra_terms=extra,
+    )
+    _, reward, actual_terminated, actual_truncated, info = wrapper.step(np.zeros((1, 2)))
+    assert np.isfinite(reward)
+    assert info["reward_terms"][key] == 1.0
+    if timeout_side is not None:
+        terminated, truncated = True, False
+        reason = "phase_timeout:stance" if timeout_side == 1.0 else "phase_timeout:swing"
+    assert (actual_terminated, actual_truncated) == (terminated, truncated)
+    assert info["end_reason"] == reason
+    assert info["reward_terms"]["terminated"] == float(terminated)
+    assert info["reward_terms"]["truncated"] == float(truncated)

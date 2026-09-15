@@ -12,10 +12,124 @@ del ritardo, che resta fuori dalla V1.
 è stato portato da 0.05 a 1.0 su richiesta dell'utente, mentre l'ex-novo resta
 a 0.05. Le prove live descritte qui risalgono al 6 settembre e usavano 0.05
 anche nell'imitazione. I risultati e gli snapshot originali sono conservati;
-nessuna nuova esecuzione dinamica con peso 1.0 è attestata da questo documento.
+quelle prove non attestano il comportamento dinamico con peso 1.0. Il primo
+avvio del preset aggiornato è documentato nella sezione successiva.
 Per questa modifica la suite aggiornata ha superato **82 test in 5.82 s** su
 macOS; sono stati verificati i quattro preset, le soglie 20/28 mm, l'hash della
 configurazione V26 sorgente dell'override e l'assenza di modifiche alla baseline.
+
+## Avvio completo e isolamento delle terminazioni — 14 settembre 2026
+
+Il primo lancio utente di `pretraining_v1_pen1_pilot_2026-09-14` è fallito
+prima del training con `ModuleNotFoundError: No module named 'ray'`: usava
+Python 3.13 dell'ambiente base. Il rilancio usa esplicitamente Python 3.10
+di `envCMC-rllib`, con gli stessi argomenti CLI: `pretraining.yaml`, cinque
+iterazioni e directory dedicata.
+
+Una prima iterazione completa ha verificato 4608 transizioni, 1536 per start,
+12 EnvRunner, 10 epoche/90 minibatch, loss finite e aggiornamento di actor e
+critic. Ha però rilevato una terminazione `morphology_causal_contract_failure`
+in imitazione: il gating della reward scalare non impediva al wrapper di
+impostare il flag terminale usando i coefficienti morphology originali.
+L'episodio interrotto poteva quindi influenzare ritorni e GAE. Il tentativo
+è stato fermato durante l'iterazione 2 e conservato integralmente, incluso
+il checkpoint dell'iterazione 1, in
+[diagnostica del tentativo interrotto](runs/diagnostics/pretraining_v1_pen1_pilot_2026-09-14_morphology_termination_20260914T111005Z/interruption_diagnosis.json).
+Non è un crash spontaneo e non costituisce il risultato del pilot corretto.
+
+La correzione in `unified_MLP/reward_function.py` limita a `ex_novo` le due
+terminazioni morphology: errore del contratto causale e violazione del
+corridoio hard. Ledger, diagnostica e protezioni comuni rimangono attivi.
+Sono state aggiunte 18 regressioni comportamentali del wrapper: prima della
+correzione 11 fallivano; dopo, **100 test dell'intera suite superati in 4.20 s**.
+I test verificano anche che ex-novo mantenga gli effetti morphology e che
+imitazione conservi penetrazione, SEA, limiti, timeout e troncamenti.
+
+Il pilot corretto è ripartito da pesi nuovi, seed 123, senza importare actor
+o optimizer dal tentativo interrotto. Il
+[manifest di lancio](runs/training/pretraining_v1_pen1_pilot_2026-09-14/launch_metadata.json)
+registra interprete, comando, hash del file reward e archivio precedente.
+Alle 13:22 CEST la prima iterazione corretta è completata e la seconda è in
+corso; il processo viene lasciato attivo verso le cinque iterazioni richieste.
+L'[audit di avvio](runs/training/pretraining_v1_pen1_pilot_2026-09-14/startup_verification.json)
+verifica 4608 transizioni reali, 1536 per start, 90 minibatch, loss finite,
+actor e critic aggiornati, checkpoint e milestone dell'iterazione 1 salvati.
+L'export actor è stato ricaricato in un processo nuovo con digest identici,
+schema valido e output di inference finiti. La suite e questo avvio sono
+verifiche su macOS; il pilot non è ancora concluso al momento dell'handoff.
+
+Nel batch corretto restano 18 terminazioni `grf_penetration`, una
+`grf_penetration_hard` e sei timeout swing, senza terminazioni morphology.
+La diagnostica morphology segnala ancora una riga affetta: resta registrata
+senza sostituire la causa fisica di fine episodio. Il confronto ripetuto
+con lo stesso seed trova identico anche il primo aggiornamento actor: in
+questo batch la guardia precedente aveva sovrascritto l'etichetta di una
+terminazione fisica già presente. Non è quindi dimostrata una variazione
+dei ritorni di quel batch; i test di regressione coprono anche il caso in
+cui la morphology sarebbe stata l'unica causa di terminazione.
+
+Questa prova certifica l'avvio e il progresso tecnico, non convergenza o
+qualità del cammino. La causa interna della segnalazione del ledger non è
+identificabile dai contatori aggregati e resta da valutare per l'ex-novo.
+
+## Pilot concluso e confronto checkpoint 3/5 — 14 settembre 2026
+
+Il [pilot corretto](runs/training/pretraining_v1_pen1_pilot_2026-09-14/summary.json)
+ha terminato **5/5 iterazioni**, 23 040 transizioni reali, alle 13:57:56 CEST,
+in circa 46 minuti, senza crash, restart o iterazioni saltate. Il checkpoint
+best è l'iterazione 3 secondo il ritorno aggregato del training; l'ultimo è
+l'iterazione 5. Tale classifica non equivale a una valutazione deterministica
+bilanciata per start: la metrica RLlib dipende dagli episodi completati e
+dalla sua finestra di aggregazione.
+
+Sono stati eseguiti **sei rollout deterministici**, uno per checkpoint/start,
+con seed 123, limite 500 step/5 s, trace e output `.sto`. Tutti terminano con
+`ok=true` e processo child con exit code 0. I due checkpoint hanno configurazioni
+risolte identiche; gli hash degli export sono registrati nel
+[manifest](runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/launch_manifest.json).
+Fisica, detector, filtro, slew limiter e reward imitativa con penetrazione 1.0
+provengono dagli snapshot originali. Non è stato eseguito ulteriore training.
+
+| Start | Durata CP3 / CP5 [s] | RMSE ginocchio CP3 → CP5 [°] | RMSE caviglia CP3 → CP5 [°] | Penetrazione max CP3 → CP5 [mm] |
+|---|---:|---:|---:|---:|
+| Early | 5.00 / 5.00 | 26.33 → 24.97 | 12.96 → 12.27 | 20.26 → 23.98 |
+| Center | 2.80 / 2.80 | 25.65 → 25.27 | 13.03 → 11.30 | 20.36 → 24.86 |
+| Late | 2.83 / 2.83 | 24.61 → 23.63 | 12.62 → 10.75 | 18.71 → 18.77 |
+
+RMSE actual–prescribed sinistro, in gradi, con target e stato allineati allo
+stesso timestamp post-step e ponderazione per durata del passo. Ogni coppia
+ha durata uguale: la finestra comune coincide con i suoi episodi completi.
+Early raggiunge il limite di durata; center e late terminano per timeout swing.
+**Zero heel strike e zero cicli validi in tutti i casi**, un toe-off in ciascun
+center/late. Il periodo online osservato dall'actor resta zero per tutta la
+traccia; i canali online sin/cos restano costanti. Non è quindi entrato in uso
+un clock basato su un periodo misurato.
+
+Il checkpoint 5 migliora moderatamente il tracking angolare in ogni start,
+ma aumenta la penetrazione e non migliora durata o cicli. Il tracking delle
+velocità non migliora uniformemente. La RMSE actual–served è invece
+**0.25–0.29° al ginocchio e 0.16–0.40° alla caviglia**: il movimento segue
+il riferimento dopo filtro, mentre è quel riferimento a restare lontano dal
+prescribed. Nessun clipping delle azioni o saturazione interna `tau_input`.
+
+Questi risultati non mostrano un deterioramento uniforme del checkpoint 5
+rispetto al 3, né un cammino valido per uno dei due. Confermano la mancata
+attivazione del periodo online in questi rollout, senza dimostrare che
+l'assenza dei target nell'actor sia la causa o che altro training non possa
+aiutare. Non costituiscono una verifica della parità con la vecchia baseline.
+
+Artefatti: [tabelle e protocollo completo](runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/comparison.md),
+[metriche JSON](runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/comparison.json),
+[grafici PNG](runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/tracking_angles.png)
+e [PDF](runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/tracking_angles.pdf).
+Le curve actual e served sono quasi sovrapposte; le curve si fermano alla
+terminazione, senza estrapolare il movimento mancante.
+
+L'analizzatore offline ha superato **6 nuovi test**, inclusi allineamento,
+conversione delle unità, pesi temporali, finestre di durata differente,
+aggregazione dei campioni SEA e rifiuto di dati misurati non finiti. I grafici
+sono stati generati e controllati visivamente. Comandi portabili di analisi
+documentati nel README; esecuzione live effettuata solo su macOS arm64.
 
 ## Piattaforma e isolamento
 
