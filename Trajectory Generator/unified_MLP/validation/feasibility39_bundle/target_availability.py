@@ -172,8 +172,19 @@ def _runner_environments(runner):
     root = getattr(runner, "env", None)
     if root is None:
         return []
+    # RLlib wraps SyncVectorEnv in DictInfoToList. Vector wrappers do not
+    # forward `envs`, so unwrap the vector BEFORE looking for its children.
+    root = getattr(root, "unwrapped", root)
     environments = getattr(root, "envs", None)
-    return [getattr(env, "unwrapped", env) for env in (environments if environments is not None else [root])]
+    if environments is None and hasattr(root, "num_envs"):
+        raise ValueError("target availability requires locally accessible vector environments")
+    environments = [getattr(env, "unwrapped", env)
+                    for env in (environments if environments is not None else [root])]
+    if len(environments) != getattr(root, "num_envs", len(environments)):
+        raise ValueError("target availability EnvRunner vector width disagrees with local environments")
+    if any(not hasattr(env, "_target_availability") for env in environments):
+        raise ValueError("target availability controller missing from a sampling environment")
+    return environments
 
 
 def _runner_apply(runner, selected, restore):

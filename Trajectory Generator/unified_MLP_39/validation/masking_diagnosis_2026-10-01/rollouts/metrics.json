@@ -1,0 +1,2910 @@
+{
+  "window_s": [
+    13.19,
+    17.94
+  ],
+  "limits": [
+    "Original three rollouts confound checkpoint adaptation and actor visibility; CP90 was visible, CP112/184 hidden.",
+    "One deterministic nominal start and seed per policy/visibility; no multi-start or robustness claim.",
+    "Same simulation times and recorded targets verified numerically across every included rollout.",
+    "Position/velocity traces are at 100 Hz, physical force and torque at 1000 Hz. No units or sign changes in sources.",
+    "Displayed knee coordinates and spring torques have canonical sign reversal; ankle retains raw sign.",
+    "Excursion is max-min over the common window, not a phase-warped cycle mean.",
+    "Highpass measures are zero-phase 4th-order Butterworth applied to full recorded signal then cropped to common window.",
+    "Early failures have a shorter per-rollout window and omitted lag metrics; visibility pairs are also compared on an identical surviving prefix.",
+    "All reward components are recomputed with the saved configuration and exact per-step clipping, reproducing saved returns."
+  ],
+  "figures": [
+    "plot/10_01_2026_masking_diagnosis/rollout_kinematics_original_three.png",
+    "plot/10_01_2026_masking_diagnosis/rollout_kinematics_cp90_visibility.png",
+    "plot/10_01_2026_masking_diagnosis/rollout_kinematics_cp112_visibility.png",
+    "plot/10_01_2026_masking_diagnosis/rollout_kinematics_cp184_visibility.png",
+    "plot/10_01_2026_masking_diagnosis/rollout_torque_contact_original_three.png",
+    "plot/10_01_2026_masking_diagnosis/rollout_reward_floor_original_three.png"
+  ],
+  "rollouts": {
+    "cp90_visible": {
+      "source": "Trajectory Generator/unified_MLP_39/runs/rollout/unified_MLP_39/runs/rollout/MLP39_LEFT_fresh_best90_2026-09-30_deterministic",
+      "checkpoint": "Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_fresh_best80config_100iter_2026-09-29/rl_module_best",
+      "steps": 500,
+      "episode_return": 301.140037719167,
+      "visible_steps": 500,
+      "window_s": [
+        13.19,
+        17.94
+      ],
+      "common_window_complete": true,
+      "reward": {
+        "full_episode": {
+          "steps": 500,
+          "return": 301.140037719167,
+          "weighted_actual_score": 83.66915412615623,
+          "weighted_served_score": 295.9739323147011,
+          "mixed_imitation_before_penalties": 379.6430864408573,
+          "base_penalties": 78.30023916924722,
+          "base_penalty_components": {
+            "effort_weight": 0.1206454678661592,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 78.17406624954079,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0013834836755788255,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.002576301831105025,
+            "sea_motor_accel_weight": 0.0015582822955936132,
+            "sea_motor_power_weight": 9.384038000222139e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 0.0,
+          "base_clip_low_steps": 0,
+          "reward_base": 301.3428472716101,
+          "additional_penalties": 0.20280955244305687,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.054533077742500886,
+          "oob_term": 0.14827647470054114,
+          "mean_imitation_score": 0.8366915412615622,
+          "mean_served_imitation_score": 0.7399348307867526,
+          "mean_sound_imitation_loss": 0.059110859900748804,
+          "mean_served_imitation_loss": 0.0601526816815862,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 73.7113663796126,
+            "qdot_ref_loss": 0.12139498776349412,
+            "qddot_ref_loss": 0.02960585992813719,
+            "jerk_ref_loss": 3.3656578554877647,
+            "reference_governor_loss": 0.8079229797979798,
+            "u_rate_loss": 0.13811818695081443
+          }
+        },
+        "common_window": {
+          "steps": 476,
+          "return": 284.33980513993095,
+          "weighted_actual_score": 79.38773012166644,
+          "weighted_served_score": 279.94906593421064,
+          "mixed_imitation_before_penalties": 359.3367960558771,
+          "base_penalties": 74.81502375872148,
+          "base_penalty_components": {
+            "effort_weight": 0.10038877028662158,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 74.70998388234857,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0011767041717506024,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0022336269730002236,
+            "sea_motor_accel_weight": 0.0012397083589922875,
+            "sea_motor_power_weight": 1.0665825525508864e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 2.842170943040401e-14,
+          "base_clip_low_steps": 0,
+          "reward_base": 284.5217722971556,
+          "additional_penalties": 0.18196715722467616,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.054533077742500886,
+          "oob_term": 0.1274340794821415,
+          "mean_imitation_score": 0.833904728168765,
+          "mean_served_imitation_score": 0.7351603622221917,
+          "mean_sound_imitation_loss": 0.060331793745469986,
+          "mean_served_imitation_loss": 0.06153932864259231,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 70.45207997887033,
+            "qdot_ref_loss": 0.1159920809769351,
+            "qddot_ref_loss": 0.027533010648334286,
+            "jerk_ref_loss": 3.2103882122841436,
+            "reference_governor_loss": 0.7740319865319865,
+            "u_rate_loss": 0.12995861303682998
+          }
+        },
+        "target_knee_over35deg": {
+          "steps": 112,
+          "return": 52.62708528074237,
+          "weighted_actual_score": 16.348113465385605,
+          "weighted_served_score": 53.28999429669679,
+          "mixed_imitation_before_penalties": 69.6381077620824,
+          "base_penalties": 16.987002012097925,
+          "base_penalty_components": {
+            "effort_weight": 0.014556060773707528,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 16.97131103871843,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0002825607742316906,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0005890873825125895,
+            "sea_motor_accel_weight": 0.00026302088692665407,
+            "sea_motor_power_weight": 2.435621182749903e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": -7.105427357601002e-15,
+          "base_clip_low_steps": 0,
+          "reward_base": 52.65110574998447,
+          "additional_penalties": 0.024020469242096,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.02402046924209633,
+          "mean_imitation_score": 0.7298264939904289,
+          "mean_served_imitation_score": 0.5947544006327766,
+          "mean_sound_imitation_loss": 0.10980297035009878,
+          "mean_served_imitation_loss": 0.11030530345902174,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 15.957364295511992,
+            "qdot_ref_loss": 0.04754441384189721,
+            "qddot_ref_loss": 0.009021684001174196,
+            "jerk_ref_loss": 0.734912153794753,
+            "reference_governor_loss": 0.17800925925925926,
+            "u_rate_loss": 0.04445923230935258
+          }
+        },
+        "target_knee_at_most35deg": {
+          "steps": 364,
+          "return": 231.71271985918858,
+          "weighted_actual_score": 63.03961665628084,
+          "weighted_served_score": 226.65907163751388,
+          "mixed_imitation_before_penalties": 289.6986882937947,
+          "base_penalties": 57.828021746623556,
+          "base_penalty_components": {
+            "effort_weight": 0.08583270951291405,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 57.73867284363013,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.000894143397518912,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0016445395904876342,
+            "sea_motor_accel_weight": 0.0009766874720656333,
+            "sea_motor_power_weight": 8.230204342758961e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": -7.105427357601002e-15,
+          "base_clip_low_steps": 0,
+          "reward_base": 231.87066654717114,
+          "additional_penalties": 0.15794668798255884,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.054533077742500886,
+          "oob_term": 0.10341361024004517,
+          "mean_imitation_score": 0.8659288002236379,
+          "mean_served_imitation_score": 0.7783621965573965,
+          "mean_sound_imitation_loss": 0.04510989325173806,
+          "mean_served_imitation_loss": 0.046534413314460184,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 54.494715683358336,
+            "qdot_ref_loss": 0.06844766713503789,
+            "qddot_ref_loss": 0.01851132664716009,
+            "jerk_ref_loss": 2.4754760584893902,
+            "reference_governor_loss": 0.5960227272727272,
+            "u_rate_loss": 0.0854993807274774
+          }
+        }
+      },
+      "joints": {
+        "knee": {
+          "rmse_actual_target_deg": 6.64131043905326,
+          "rmse_served_target_deg": 6.644277929352197,
+          "rmse_actual_served_deg": 0.17791924742209766,
+          "rmse_actual_target_velocity_deg_s": 41.54200720366792,
+          "rmse_command_target_deg": 17.685890267190405,
+          "corr_actual_target": 0.8999536198562303,
+          "actual_mean_bias_vs_target_deg": 0.9127775406299926,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 6.081044298232315,
+            "best_rmse_delay_s": -0.024999999999999578,
+            "best_lag_rmse_deg": 5.823270587875707,
+            "best_lag_correlation": 0.9215940072768357,
+            "max_correlation_delay_s": -0.020999999999999575,
+            "max_correlation": 0.9218223812564038,
+            "best_rmse_lag_affine_target_gain": 0.7812767918476546,
+            "best_rmse_lag_affine_bias_deg": 5.530898153822181,
+            "best_rmse_lag_affine_residual_rmse_deg": 4.837802797743551,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 9.225625304395432,
+            "max_deg": 50.9397318299681,
+            "excursion_deg": 41.714106525572674,
+            "sd_deg": 11.900682511616015
+          },
+          "served": {
+            "min_deg": 9.246529952123904,
+            "max_deg": 50.89976497803977,
+            "excursion_deg": 41.65323502591586,
+            "sd_deg": 11.916139284870487
+          },
+          "target": {
+            "min_deg": 10.885435612729205,
+            "max_deg": 56.23103635364625,
+            "excursion_deg": 45.34560074091705,
+            "sd_deg": 14.753950513953281
+          },
+          "command": {
+            "min_deg": -0.0,
+            "max_deg": 82.65794785900727,
+            "excursion_deg": 82.65794785900727,
+            "sd_deg": 18.938823612946134
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 13.519999999999706,
+              "target_deg": 56.2267355054663,
+              "actual_deg": 43.70497347994257,
+              "served_deg": 43.97049366883223
+            },
+            {
+              "time_s": 15.179999999998786,
+              "target_deg": 56.228363367413344,
+              "actual_deg": 42.015789151022965,
+              "served_deg": 42.38188046034647
+            },
+            {
+              "time_s": 16.75999999999845,
+              "target_deg": 56.23103635364625,
+              "actual_deg": 50.77727578055935,
+              "served_deg": 50.77875451651466
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            6.02521501677206,
+            4.318525430901768,
+            6.652721000115464,
+            7.556008068841751,
+            8.184362934171112
+          ]
+        },
+        "ankle": {
+          "rmse_actual_target_deg": 3.939610067938611,
+          "rmse_served_target_deg": 4.001139546133511,
+          "rmse_actual_served_deg": 0.258763746992551,
+          "rmse_actual_target_velocity_deg_s": 31.048417164341142,
+          "rmse_command_target_deg": 20.005130102729684,
+          "corr_actual_target": 0.9200747143160085,
+          "actual_mean_bias_vs_target_deg": 1.9695789050635444,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 3.928509092993445,
+            "best_rmse_delay_s": 0.035000000000000475,
+            "best_lag_rmse_deg": 3.5658474451687305,
+            "best_lag_correlation": 0.9328940743016659,
+            "max_correlation_delay_s": 0.03700000000000048,
+            "max_correlation": 0.9329763132507016,
+            "best_rmse_lag_affine_target_gain": 1.0247235768167224,
+            "best_rmse_lag_affine_bias_deg": 1.6673664650023925,
+            "best_rmse_lag_affine_residual_rmse_deg": 3.0560297477664458,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": -4.163823763804581,
+            "max_deg": 26.50759875369889,
+            "excursion_deg": 30.671422517503473,
+            "sd_deg": 8.708889038176078
+          },
+          "served": {
+            "min_deg": -4.168770528310963,
+            "max_deg": 26.53862147290909,
+            "excursion_deg": 30.70739200122005,
+            "sd_deg": 8.793912617579851
+          },
+          "target": {
+            "min_deg": -6.611822123192358,
+            "max_deg": 22.05182918647197,
+            "excursion_deg": 28.663651309664328,
+            "sd_deg": 7.968554237322056
+          },
+          "command": {
+            "min_deg": -40.10704565915762,
+            "max_deg": 40.10704565915762,
+            "excursion_deg": 80.21409131831524,
+            "sd_deg": 20.79663219655793
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 14.819999999998986,
+              "target_deg": 22.05182918647197,
+              "actual_deg": 20.4011569187082,
+              "served_deg": 20.64068482271138
+            },
+            {
+              "time_s": 16.419999999998396,
+              "target_deg": 22.0433349728112,
+              "actual_deg": 26.124071678971628,
+              "served_deg": 26.14377165208524
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            2.8592621776001943,
+            2.537932417474675,
+            2.726261650181882,
+            6.080699491086146,
+            3.9389673447144546
+          ]
+        }
+      },
+      "fsm": {
+        "phase_valid_hs_count": 3,
+        "phase_valid_to_count": 4,
+        "phase_valid_cycle_count": 2,
+        "invalid_event_count": 0,
+        "end_reason": "episode_time_limit"
+      },
+      "completed_cycles": [
+        {
+          "time": 15.619999999998543,
+          "last_period_s": 1.6829999999990672,
+          "last_stance_fraction": 0.3909685086155674,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        },
+        {
+          "time": 17.099999999998502,
+          "last_period_s": 1.4870000000011192,
+          "last_stance_fraction": 0.4001344989909759,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        }
+      ],
+      "action_clipped_fraction": 0.089,
+      "action_clipped_steps": 89,
+      "reference_jerk_limit_fraction_mean": 0.579371212121212,
+      "mean_command_endpoint_step_rad": {
+        "knee": 0.42824724499875294,
+        "ankle": 0.5580759240116528
+      },
+      "torque": {
+        "knee": {
+          "min_nm": -31.87897313,
+          "max_nm": 31.26429569,
+          "rms_nm": 9.370226436986517,
+          "positive_area_nm_s": 19.607064126030018,
+          "negative_area_nm_s": -13.598935700849978,
+          "positive_fraction": 0.5586192380551462,
+          "positive_over8_fraction": 0.18669753736055567,
+          "highpass_rms_nm": {
+            "10": 4.692975159700158,
+            "20": 3.6208070004548794
+          },
+          "highpass_10_peak_frequency_hz": 18.06640625001001,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 13.82186405547424,
+              "residual_after_lowpass_10_rms_nm": 13.819082381959973,
+              "highpass_20_rms_nm": 13.238226257874688,
+              "residual_after_lowpass_20_rms_nm": 13.24015554293302
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 4.5943442957798,
+              "residual_after_lowpass_10_rms_nm": 4.5955102478121885,
+              "highpass_20_rms_nm": 3.5545726924491894,
+              "residual_after_lowpass_20_rms_nm": 3.554527384469324
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 4.26078173971958,
+              "residual_after_lowpass_10_rms_nm": 4.261633745254047,
+              "highpass_20_rms_nm": 3.388214746231644,
+              "residual_after_lowpass_20_rms_nm": 3.3881785548185523
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 1.4462712595355338,
+              "residual_after_lowpass_10_rms_nm": 1.445859686603327,
+              "highpass_20_rms_nm": 0.7827279374685256,
+              "residual_after_lowpass_20_rms_nm": 0.7829102922090818
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.0868005406812479
+        },
+        "ankle": {
+          "min_nm": -21.65297013,
+          "max_nm": 11.44678655,
+          "rms_nm": 6.2425854923860875,
+          "positive_area_nm_s": 2.8798648357449994,
+          "negative_area_nm_s": -14.267404382890001,
+          "positive_fraction": 0.5727215323089876,
+          "positive_over8_fraction": 0.018943380340980847,
+          "highpass_rms_nm": {
+            "10": 0.3081354655986341,
+            "20": 0.22242960455312133
+          },
+          "highpass_10_peak_frequency_hz": 18.554687500010285,
+          "highpass_20_peak_frequency_hz": 48.339843750026795,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 0.4551282907824749,
+              "residual_after_lowpass_10_rms_nm": 0.4550704161378379,
+              "highpass_20_rms_nm": 0.35464580833055437,
+              "residual_after_lowpass_20_rms_nm": 0.3547157826707205
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 0.2958639982882331,
+              "residual_after_lowpass_10_rms_nm": 0.29584911174118206,
+              "highpass_20_rms_nm": 0.19200379926380048,
+              "residual_after_lowpass_20_rms_nm": 0.19200864521013042
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 0.24327017406949153,
+              "residual_after_lowpass_10_rms_nm": 0.2432683873170823,
+              "highpass_20_rms_nm": 0.174868199106454,
+              "residual_after_lowpass_20_rms_nm": 0.1748728022546703
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.155156597776568,
+              "residual_after_lowpass_10_rms_nm": 0.15513510435501998,
+              "highpass_20_rms_nm": 0.06305582991992806,
+              "residual_after_lowpass_20_rms_nm": 0.06307523982608101
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.007252014621303785
+        }
+      },
+      "contact": {
+        "left_normal_impulse_ns": 465.18318628914506,
+        "left_force_max_n": 649.87706876,
+        "left_force_mean_n": 97.9126891943191,
+        "left_contact_fraction": 0.4371711218690802,
+        "left_loaded_over50n_fraction": 0.36708061460745106,
+        "left_penetration_max_mm": 17.523960000000002,
+        "left_penetration_whole_max_mm": 17.523960000000002
+      }
+    },
+    "cp112_hidden": {
+      "source": "Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_LEFT_masking_best112_overall_hidden_2026-10-01",
+      "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_best90_masking_100iter_2026-09-30/stage01_mask25/rl_module_best",
+      "steps": 500,
+      "episode_return": 138.1906026131385,
+      "visible_steps": 0,
+      "window_s": [
+        13.19,
+        17.94
+      ],
+      "common_window_complete": true,
+      "reward": {
+        "full_episode": {
+          "steps": 500,
+          "return": 138.1906026131385,
+          "weighted_actual_score": 55.349554190024335,
+          "weighted_served_score": 169.6755382562544,
+          "mixed_imitation_before_penalties": 225.02509244627873,
+          "base_penalties": 88.2574492057579,
+          "base_penalty_components": {
+            "effort_weight": 0.2610655603176942,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 87.99111833356699,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.001366943445685378,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0022203309745278967,
+            "sea_motor_accel_weight": 0.0016680042609654047,
+            "sea_motor_power_weight": 1.003319204545497e-05,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 4.8429872658699935,
+          "base_clip_low_steps": 68,
+          "reward_base": 141.61063050639083,
+          "additional_penalties": 3.4200278932523247,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 3.0157720174618867,
+          "oob_term": 0.40425587579044076,
+          "mean_imitation_score": 0.5534955419002433,
+          "mean_served_imitation_score": 0.424188845640636,
+          "mean_sound_imitation_loss": 0.35186114939958313,
+          "mean_served_imitation_loss": 0.3491541126197368,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 83.26456920908205,
+            "qdot_ref_loss": 0.014665660213556066,
+            "qddot_ref_loss": 0.021918951693408625,
+            "jerk_ref_loss": 3.670996583298369,
+            "reference_governor_loss": 0.9410669191919191,
+            "u_rate_loss": 0.07790101008766354
+          }
+        },
+        "common_window": {
+          "steps": 476,
+          "return": 122.35207018922702,
+          "weighted_actual_score": 51.16532866710751,
+          "weighted_served_score": 153.71597634121616,
+          "mixed_imitation_before_penalties": 204.88130500832366,
+          "base_penalties": 83.98007392191525,
+          "base_penalty_components": {
+            "effort_weight": 0.1884688515364647,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 83.7871980838135,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0011608086763857826,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.001890028528847105,
+            "sea_motor_accel_weight": 0.001354851651578932,
+            "sea_motor_power_weight": 1.297708484911597e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 4.842987265869979,
+          "base_clip_low_steps": 68,
+          "reward_base": 125.7442183522784,
+          "additional_penalties": 3.392148163051374,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 3.0157720174618867,
+          "oob_term": 0.37637614558947907,
+          "mean_imitation_score": 0.5374509313771797,
+          "mean_served_imitation_score": 0.40366590425739535,
+          "mean_sound_imitation_loss": 0.36764313560086403,
+          "mean_served_imitation_loss": 0.3652558382385746,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 79.28477794552389,
+            "qdot_ref_loss": 0.012873387552036994,
+            "qddot_ref_loss": 0.020232976626596302,
+            "jerk_ref_loss": 3.5032017333838907,
+            "reference_governor_loss": 0.8988741582491583,
+            "u_rate_loss": 0.06723788247792434
+          }
+        },
+        "target_knee_over35deg": {
+          "steps": 112,
+          "return": 3.3997253889461447,
+          "weighted_actual_score": 5.326723664323733,
+          "weighted_served_score": 12.529088395858679,
+          "mixed_imitation_before_penalties": 17.855812060182412,
+          "base_penalties": 19.216505030590913,
+          "base_penalty_components": {
+            "effort_weight": 0.10084589396135989,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 19.114609950914456,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.00027897940694581055,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.00046066469406923585,
+            "sea_motor_accel_weight": 0.0003090625718494862,
+            "sea_motor_power_weight": 4.79042229164116e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 4.835886298830198,
+          "base_clip_low_steps": 66,
+          "reward_base": 3.475193328421698,
+          "additional_penalties": 0.07546793947555308,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.07546793947555311,
+          "mean_imitation_score": 0.2378001635858809,
+          "mean_served_imitation_score": 0.13983357584663705,
+          "mean_sound_imitation_loss": 0.9909696363706474,
+          "mean_served_imitation_loss": 0.9906400919137229,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 18.070713015238418,
+            "qdot_ref_loss": 0.004499941519972186,
+            "qddot_ref_loss": 0.005251850286812307,
+            "jerk_ref_loss": 0.8131499968850512,
+            "reference_governor_loss": 0.1954861111111111,
+            "u_rate_loss": 0.0255090358730905
+          }
+        },
+        "target_knee_at_most35deg": {
+          "steps": 364,
+          "return": 118.95234480028088,
+          "weighted_actual_score": 45.83860500278378,
+          "weighted_served_score": 141.18688794535748,
+          "mixed_imitation_before_penalties": 187.02549294814128,
+          "base_penalties": 64.76356889132434,
+          "base_penalty_components": {
+            "effort_weight": 0.0876229575751048,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 64.67258813289904,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0008818292694399721,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0014293638347778693,
+            "sea_motor_accel_weight": 0.001045789079729446,
+            "sea_motor_power_weight": 8.186662557474808e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 0.0071009670397614855,
+          "base_clip_low_steps": 2,
+          "reward_base": 122.2690250238567,
+          "additional_penalties": 3.3166802235758155,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 3.0157720174618867,
+          "oob_term": 0.30090820611392594,
+          "mean_imitation_score": 0.6296511676206563,
+          "mean_served_imitation_score": 0.48484508222993644,
+          "mean_sound_imitation_loss": 0.17585036613323843,
+          "mean_served_imitation_loss": 0.1728299140308366,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 61.21406493028545,
+            "qdot_ref_loss": 0.008373446032064809,
+            "qddot_ref_loss": 0.014981126339783997,
+            "jerk_ref_loss": 2.690051736498839,
+            "reference_governor_loss": 0.7033880471380471,
+            "u_rate_loss": 0.04172884660483385
+          }
+        }
+      },
+      "joints": {
+        "knee": {
+          "rmse_actual_target_deg": 13.46682166678746,
+          "rmse_served_target_deg": 13.407602974929059,
+          "rmse_actual_served_deg": 0.20206295481483802,
+          "rmse_actual_target_velocity_deg_s": 75.61091269471427,
+          "rmse_command_target_deg": 20.861170364179834,
+          "corr_actual_target": 0.4320730483546136,
+          "actual_mean_bias_vs_target_deg": 0.6914426113663269,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 13.57135795220899,
+            "best_rmse_delay_s": -0.20399999999999974,
+            "best_lag_rmse_deg": 11.197506578295036,
+            "best_lag_correlation": 0.6945623808784503,
+            "max_correlation_delay_s": -0.20399999999999974,
+            "max_correlation": 0.6945623808784503,
+            "best_rmse_lag_affine_target_gain": 0.24224037577366095,
+            "best_rmse_lag_affine_bias_deg": 19.008485765899806,
+            "best_rmse_lag_affine_residual_rmse_deg": 3.4349348426841964,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 16.009266735214545,
+            "max_deg": 35.05094963171258,
+            "excursion_deg": 19.04168289649803,
+            "sd_deg": 4.416210156459382
+          },
+          "served": {
+            "min_deg": 16.091068495809203,
+            "max_deg": 34.928982943703666,
+            "excursion_deg": 18.837914447894462,
+            "sd_deg": 4.46348185290419
+          },
+          "target": {
+            "min_deg": 10.885435612729205,
+            "max_deg": 56.23103635364625,
+            "excursion_deg": 45.34560074091705,
+            "sd_deg": 14.753950513953281
+          },
+          "command": {
+            "min_deg": -0.0,
+            "max_deg": 66.18208187328517,
+            "excursion_deg": 66.18208187328517,
+            "sd_deg": 15.72489975296708
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 13.519999999999706,
+              "target_deg": 56.2267355054663,
+              "actual_deg": 27.717337953829453,
+              "served_deg": 28.745855159806656
+            },
+            {
+              "time_s": 15.179999999998786,
+              "target_deg": 56.228363367413344,
+              "actual_deg": 26.727554750635395,
+              "served_deg": 27.207481407760927
+            },
+            {
+              "time_s": 16.75999999999845,
+              "target_deg": 56.23103635364625,
+              "actual_deg": 30.02621851595515,
+              "served_deg": 30.21522009557316
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            14.380856857111887,
+            9.851318901262117,
+            15.161515177091326,
+            15.95142006387045,
+            8.879752431531978
+          ]
+        },
+        "ankle": {
+          "rmse_actual_target_deg": 10.626367697804339,
+          "rmse_served_target_deg": 10.597170775123514,
+          "rmse_actual_served_deg": 0.4032615306824814,
+          "rmse_actual_target_velocity_deg_s": 61.962749428360084,
+          "rmse_command_target_deg": 28.002804232895684,
+          "corr_actual_target": -0.06629107199394443,
+          "actual_mean_bias_vs_target_deg": 6.616087032222434,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 10.680998030239486,
+            "best_rmse_delay_s": 0.4960000000000009,
+            "best_lag_rmse_deg": 9.621766254759489,
+            "best_lag_correlation": 0.6458988312798524,
+            "max_correlation_delay_s": 0.47300000000000086,
+            "max_correlation": 0.6504529667026594,
+            "best_rmse_lag_affine_target_gain": 0.13723028153668357,
+            "best_rmse_lag_affine_bias_deg": 12.629530516784378,
+            "best_rmse_lag_affine_residual_rmse_deg": 1.3851342236775486,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 9.782367684021512,
+            "max_deg": 18.762148866978798,
+            "excursion_deg": 8.979781182957286,
+            "sd_deg": 1.9065594646243367
+          },
+          "served": {
+            "min_deg": 9.147821765786171,
+            "max_deg": 18.914450132639036,
+            "excursion_deg": 9.766628366852865,
+            "sd_deg": 2.006988997417289
+          },
+          "target": {
+            "min_deg": -6.611822123192358,
+            "max_deg": 22.05182918647197,
+            "excursion_deg": 28.663651309664328,
+            "sd_deg": 7.968554237322056
+          },
+          "command": {
+            "min_deg": -40.10704565915762,
+            "max_deg": 40.10704565915762,
+            "excursion_deg": 80.21409131831524,
+            "sd_deg": 26.56121142818843
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 14.819999999998986,
+              "target_deg": 22.05182918647197,
+              "actual_deg": 13.679252714023185,
+              "served_deg": 13.83662027250028
+            },
+            {
+              "time_s": 16.419999999998396,
+              "target_deg": 22.0433349728112,
+              "actual_deg": 14.278325191030419,
+              "served_deg": 14.302120716325097
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            13.301064666331339,
+            6.0839192602944445,
+            12.44639938649145,
+            10.422533672131575,
+            7.933238539004148
+          ]
+        }
+      },
+      "fsm": {
+        "phase_valid_hs_count": 3,
+        "phase_valid_to_count": 4,
+        "phase_valid_cycle_count": 2,
+        "invalid_event_count": 0,
+        "end_reason": "episode_time_limit"
+      },
+      "completed_cycles": [
+        {
+          "time": 15.559999999998576,
+          "last_period_s": 1.6909999999990628,
+          "last_stance_fraction": 0.7256061502069782,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        },
+        {
+          "time": 17.069999999998497,
+          "last_period_s": 1.5090000000010377,
+          "last_stance_fraction": 0.6633532140488592,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        }
+      ],
+      "action_clipped_fraction": 0.106,
+      "action_clipped_steps": 105,
+      "reference_jerk_limit_fraction_mean": 0.6775681818181818,
+      "mean_command_endpoint_step_rad": {
+        "knee": 0.4589758346936029,
+        "ankle": 0.8293075857083042
+      },
+      "torque": {
+        "knee": {
+          "min_nm": -56.50711243,
+          "max_nm": 16.37549704,
+          "rms_nm": 12.580393960762146,
+          "positive_area_nm_s": 8.125624230390013,
+          "negative_area_nm_s": -33.19002379118004,
+          "positive_fraction": 0.35403073037255317,
+          "positive_over8_fraction": 0.06314460113660282,
+          "highpass_rms_nm": {
+            "10": 3.72144653331485,
+            "20": 3.3676953914575245
+          },
+          "highpass_10_peak_frequency_hz": 49.804687500027605,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 14.425554810725254,
+              "residual_after_lowpass_10_rms_nm": 14.428634101620498,
+              "highpass_20_rms_nm": 14.247440078375705,
+              "residual_after_lowpass_20_rms_nm": 14.245789742601852
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 3.661267420211553,
+              "residual_after_lowpass_10_rms_nm": 3.6639477595924395,
+              "highpass_20_rms_nm": 3.315817792839758,
+              "residual_after_lowpass_20_rms_nm": 3.315861898322126
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 3.473213251129601,
+              "residual_after_lowpass_10_rms_nm": 3.472408364133708,
+              "highpass_20_rms_nm": 3.181328664011342,
+              "residual_after_lowpass_20_rms_nm": 3.1814867387225045
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.8747459321144962,
+              "residual_after_lowpass_10_rms_nm": 0.8842532916022537,
+              "highpass_20_rms_nm": 0.6281737684117076,
+              "residual_after_lowpass_20_rms_nm": 0.6282159300091582
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.1768591258326689
+        },
+        "ankle": {
+          "min_nm": -20.15205958,
+          "max_nm": 20.60337286,
+          "rms_nm": 8.029449145459234,
+          "positive_area_nm_s": 8.410487923989999,
+          "negative_area_nm_s": -17.623751402695014,
+          "positive_fraction": 0.500315723005683,
+          "positive_over8_fraction": 0.09619027573142497,
+          "highpass_rms_nm": {
+            "10": 0.2832205106928516,
+            "20": 0.21910868451551457
+          },
+          "highpass_10_peak_frequency_hz": 49.804687500027605,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 0.4180037705337761,
+              "residual_after_lowpass_10_rms_nm": 0.41797492612242176,
+              "highpass_20_rms_nm": 0.3624683065814404,
+              "residual_after_lowpass_20_rms_nm": 0.3624820105472839
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 0.2519507293698419,
+              "residual_after_lowpass_10_rms_nm": 0.25208337075131176,
+              "highpass_20_rms_nm": 0.18555591562782084,
+              "residual_after_lowpass_20_rms_nm": 0.18554789229272117
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 0.21251494456367265,
+              "residual_after_lowpass_10_rms_nm": 0.21256885445046775,
+              "highpass_20_rms_nm": 0.17097924616495286,
+              "residual_after_lowpass_20_rms_nm": 0.17096214850673283
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.12301947727794477,
+              "residual_after_lowpass_10_rms_nm": 0.12350692769096532,
+              "highpass_20_rms_nm": 0.054680916121665056,
+              "residual_after_lowpass_20_rms_nm": 0.05467162250786927
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.024400225356421897
+        }
+      },
+      "contact": {
+        "left_normal_impulse_ns": 441.1434871401153,
+        "left_force_max_n": 362.96612679,
+        "left_force_mean_n": 92.8813966845885,
+        "left_contact_fraction": 0.6642812039570617,
+        "left_loaded_over50n_fraction": 0.5198905493580299,
+        "left_penetration_max_mm": 17.64346,
+        "left_penetration_whole_max_mm": 17.64346
+      }
+    },
+    "cp184_hidden": {
+      "source": "Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_LEFT_masking_best184_last25_hidden_2026-10-01",
+      "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_best90_masking_100iter_2026-09-30/stage04_mask100/rl_module_best",
+      "steps": 500,
+      "episode_return": 210.42094567973902,
+      "visible_steps": 0,
+      "window_s": [
+        13.19,
+        17.94
+      ],
+      "common_window_complete": true,
+      "reward": {
+        "full_episode": {
+          "steps": 500,
+          "return": 210.42094567973902,
+          "weighted_actual_score": 68.78841960195108,
+          "weighted_served_score": 233.9212244737892,
+          "mixed_imitation_before_penalties": 302.7096440757403,
+          "base_penalties": 96.74192853867171,
+          "base_penalty_components": {
+            "effort_weight": 0.26887562091951284,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 96.46715776927351,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0015161170326986077,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.002487757767511262,
+            "sea_motor_accel_weight": 0.001881335431303089,
+            "sea_motor_power_weight": 9.938247179926477e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 4.97237981646839,
+          "base_clip_low_steps": 67,
+          "reward_base": 210.94009535353698,
+          "additional_penalties": 0.5191496737979548,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.02254706790736477,
+          "oob_term": 0.4966026058906089,
+          "mean_imitation_score": 0.6878841960195107,
+          "mean_served_imitation_score": 0.584803061184473,
+          "mean_sound_imitation_loss": 0.2617809441451255,
+          "mean_served_imitation_loss": 0.2609956566628526,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 91.38246583949761,
+            "qdot_ref_loss": 0.028648291537043846,
+            "qddot_ref_loss": 0.023488608551413097,
+            "jerk_ref_loss": 3.909839121912425,
+            "reference_governor_loss": 1.0559974747474747,
+            "u_rate_loss": 0.06671843302753212
+          }
+        },
+        "common_window": {
+          "steps": 476,
+          "return": 194.0822803146284,
+          "weighted_actual_score": 64.61201593750103,
+          "weighted_served_score": 217.64752689441912,
+          "mixed_imitation_before_penalties": 282.25954283192016,
+          "base_penalties": 92.65324583767422,
+          "base_penalty_components": {
+            "effort_weight": 0.22587340781482076,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 92.422344162936,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0013108902996946381,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.002161365556040296,
+            "sea_motor_accel_weight": 0.0015543835244084725,
+            "sea_motor_power_weight": 1.6275432565762332e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 4.9723798164684325,
+          "base_clip_low_steps": 67,
+          "reward_base": 194.57867681071437,
+          "additional_penalties": 0.49639649608596415,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.02254706790736477,
+          "oob_term": 0.47384942817860515,
+          "mean_imitation_score": 0.6786976464023218,
+          "mean_served_imitation_score": 0.57155337944963,
+          "mean_sound_imitation_loss": 0.2718880883638655,
+          "mean_served_imitation_loss": 0.2712650847859207,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 87.56376250848707,
+            "qdot_ref_loss": 0.027236192561327293,
+            "qddot_ref_loss": 0.022272468589104002,
+            "jerk_ref_loss": 3.734887270861385,
+            "reference_governor_loss": 1.012310606060606,
+            "u_rate_loss": 0.06187511637650193
+          }
+        },
+        "target_knee_over35deg": {
+          "steps": 112,
+          "return": 5.690137408637196,
+          "weighted_actual_score": 6.102795813296404,
+          "weighted_served_score": 14.96315854952841,
+          "mixed_imitation_before_penalties": 21.065954362824815,
+          "base_penalties": 20.23199441562538,
+          "base_penalty_components": {
+            "effort_weight": 0.12122001249704668,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 20.10958508517806,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0003195645976134661,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0005399784201852095,
+            "sea_motor_accel_weight": 0.00032917374526489297,
+            "sea_motor_power_weight": 6.011872111766238e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 4.972379816468447,
+          "base_clip_low_steps": 67,
+          "reward_base": 5.806339763667881,
+          "additional_penalties": 0.11620235503068521,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.11620235503068553,
+          "mean_imitation_score": 0.272446241665018,
+          "mean_served_imitation_score": 0.1669995373831296,
+          "mean_sound_imitation_loss": 0.9197300163195347,
+          "mean_served_imitation_loss": 0.9201011673597729,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 19.015889721591634,
+            "qdot_ref_loss": 0.008824558007014266,
+            "qddot_ref_loss": 0.00589349681322961,
+            "jerk_ref_loss": 0.8271216699960982,
+            "reference_governor_loss": 0.2112584175084175,
+            "u_rate_loss": 0.040597221261665005
+          }
+        },
+        "target_knee_at_most35deg": {
+          "steps": 364,
+          "return": 188.39214290599122,
+          "weighted_actual_score": 58.50922012420463,
+          "weighted_served_score": 202.6843683448907,
+          "mixed_imitation_before_penalties": 261.1935884690953,
+          "base_penalties": 72.42125142204884,
+          "base_penalty_components": {
+            "effort_weight": 0.10465339531777407,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 72.31275907775795,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.000991325702081172,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0016213871358550867,
+            "sea_motor_accel_weight": 0.0012252097791435796,
+            "sea_motor_power_weight": 1.0263560453996095e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 5.684341886080802e-14,
+          "base_clip_low_steps": 0,
+          "reward_base": 188.7723370470465,
+          "additional_penalties": 0.38019414105528426,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.02254706790736477,
+          "oob_term": 0.3576470731479196,
+          "mean_imitation_score": 0.8036980786291844,
+          "mean_served_imitation_score": 0.6960314847008608,
+          "mean_sound_imitation_loss": 0.07255211053135195,
+          "mean_served_imitation_loss": 0.07162321322473557,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 68.54787278689543,
+            "qdot_ref_loss": 0.01841163455431303,
+            "qddot_ref_loss": 0.016378971775874395,
+            "jerk_ref_loss": 2.907765600865287,
+            "reference_governor_loss": 0.8010521885521885,
+            "u_rate_loss": 0.021277895114836923
+          }
+        }
+      },
+      "joints": {
+        "knee": {
+          "rmse_actual_target_deg": 12.429586457067485,
+          "rmse_served_target_deg": 12.356580320066815,
+          "rmse_actual_served_deg": 0.22223156171619854,
+          "rmse_actual_target_velocity_deg_s": 69.7285092913157,
+          "rmse_command_target_deg": 22.307992306265582,
+          "corr_actual_target": 0.5809036825824254,
+          "actual_mean_bias_vs_target_deg": -1.7698051704337774,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 12.132387967796982,
+            "best_rmse_delay_s": -0.14399999999999968,
+            "best_lag_rmse_deg": 10.449395963027301,
+            "best_lag_correlation": 0.713518314256171,
+            "max_correlation_delay_s": -0.09699999999999964,
+            "max_correlation": 0.7291914671916646,
+            "best_rmse_lag_affine_target_gain": 0.31499417723696416,
+            "best_rmse_lag_affine_bias_deg": 14.391099874087015,
+            "best_rmse_lag_affine_residual_rmse_deg": 4.285298218786651,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 11.145192767793217,
+            "max_deg": 32.50627044887054,
+            "excursion_deg": 21.36107768107732,
+            "sd_deg": 5.898742391425286
+          },
+          "served": {
+            "min_deg": 11.070671988853794,
+            "max_deg": 32.588492266099145,
+            "excursion_deg": 21.51782027724535,
+            "sd_deg": 5.931334681437623
+          },
+          "target": {
+            "min_deg": 10.885435612729205,
+            "max_deg": 56.23103635364625,
+            "excursion_deg": 45.34560074091705,
+            "sd_deg": 14.753950513953281
+          },
+          "command": {
+            "min_deg": -0.0,
+            "max_deg": 71.23136239646692,
+            "excursion_deg": 71.23136239646692,
+            "sd_deg": 18.610612268461445
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 13.519999999999706,
+              "target_deg": 56.2267355054663,
+              "actual_deg": 27.072583464105882,
+              "served_deg": 27.9683986322462
+            },
+            {
+              "time_s": 15.179999999998786,
+              "target_deg": 56.228363367413344,
+              "actual_deg": 28.560692146502195,
+              "served_deg": 29.15704620821976
+            },
+            {
+              "time_s": 16.75999999999845,
+              "target_deg": 56.23103635364625,
+              "actual_deg": 31.39710578426841,
+              "served_deg": 31.48815220590468
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            14.560915434135175,
+            7.729873599427687,
+            14.020883072815868,
+            14.341672728810227,
+            8.347460627577894
+          ]
+        },
+        "ankle": {
+          "rmse_actual_target_deg": 8.894476252334195,
+          "rmse_served_target_deg": 8.900056798760147,
+          "rmse_actual_served_deg": 0.3832424270407699,
+          "rmse_actual_target_velocity_deg_s": 62.62744723458889,
+          "rmse_command_target_deg": 25.05214681460129,
+          "corr_actual_target": 0.24795559101952377,
+          "actual_mean_bias_vs_target_deg": 3.841644248753411,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 8.48014808408848,
+            "best_rmse_delay_s": 0.34600000000000075,
+            "best_lag_rmse_deg": 7.191309061181741,
+            "best_lag_correlation": 0.666707740964516,
+            "max_correlation_delay_s": 0.35500000000000076,
+            "max_correlation": 0.6674423124790674,
+            "best_rmse_lag_affine_target_gain": 0.3144996818709791,
+            "best_rmse_lag_affine_bias_deg": 8.296133903503641,
+            "best_rmse_lag_affine_residual_rmse_deg": 2.8727635997304306,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 2.7982360819570173,
+            "max_deg": 20.416174797145768,
+            "excursion_deg": 17.61793871518875,
+            "sd_deg": 4.157497015192126
+          },
+          "served": {
+            "min_deg": 2.981685998440274,
+            "max_deg": 21.03121625643249,
+            "excursion_deg": 18.049530257992217,
+            "sd_deg": 4.2996143206476996
+          },
+          "target": {
+            "min_deg": -6.611822123192358,
+            "max_deg": 22.05182918647197,
+            "excursion_deg": 28.663651309664328,
+            "sd_deg": 7.968554237322056
+          },
+          "command": {
+            "min_deg": -40.10704565915762,
+            "max_deg": 40.10704565915762,
+            "excursion_deg": 80.21409131831524,
+            "sd_deg": 24.47569186171509
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 14.819999999998986,
+              "target_deg": 22.05182918647197,
+              "actual_deg": 12.27592119337872,
+              "served_deg": 12.499626110395916
+            },
+            {
+              "time_s": 16.419999999998396,
+              "target_deg": 22.0433349728112,
+              "actual_deg": 14.688849442225804,
+              "served_deg": 14.823035338659874
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            12.294373771568477,
+            5.461220987038391,
+            8.984477471403077,
+            10.184132424226599,
+            3.931780387444077
+          ]
+        }
+      },
+      "fsm": {
+        "phase_valid_hs_count": 3,
+        "phase_valid_to_count": 3,
+        "phase_valid_cycle_count": 2,
+        "invalid_event_count": 0,
+        "end_reason": "episode_time_limit"
+      },
+      "completed_cycles": [
+        {
+          "time": 15.599999999998554,
+          "last_period_s": 1.7019999999990567,
+          "last_stance_fraction": 0.7203290246768508,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        },
+        {
+          "time": 17.119999999998505,
+          "last_period_s": 1.523000000001133,
+          "last_stance_fraction": 0.7065003282992687,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        }
+      ],
+      "action_clipped_fraction": 0.204,
+      "action_clipped_steps": 197,
+      "reference_jerk_limit_fraction_mean": 0.7603181818181818,
+      "mean_command_endpoint_step_rad": {
+        "knee": 0.5644585552601096,
+        "ankle": 0.7528488694923464
+      },
+      "torque": {
+        "knee": {
+          "min_nm": -59.31752941,
+          "max_nm": 22.85180227,
+          "rms_nm": 13.758848530936747,
+          "positive_area_nm_s": 10.160957773210008,
+          "negative_area_nm_s": -35.70758814129002,
+          "positive_fraction": 0.3763418227741528,
+          "positive_over8_fraction": 0.09092822563670806,
+          "highpass_rms_nm": {
+            "10": 3.7298787301529996,
+            "20": 3.504072068411666
+          },
+          "highpass_10_peak_frequency_hz": 49.804687500027605,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 15.444380047592288,
+              "residual_after_lowpass_10_rms_nm": 15.446326354468367,
+              "highpass_20_rms_nm": 15.323118648429974,
+              "residual_after_lowpass_20_rms_nm": 15.321397931846274
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 3.671704058280139,
+              "residual_after_lowpass_10_rms_nm": 3.6717309546103025,
+              "highpass_20_rms_nm": 3.4526826350515374,
+              "residual_after_lowpass_20_rms_nm": 3.4528596769790387
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 3.5067869573108226,
+              "residual_after_lowpass_10_rms_nm": 3.506415695841072,
+              "highpass_20_rms_nm": 3.317644551650728,
+              "residual_after_lowpass_20_rms_nm": 3.317820019952229
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.7796621537686977,
+              "residual_after_lowpass_10_rms_nm": 0.7799510876207945,
+              "highpass_20_rms_nm": 0.6312539000933396,
+              "residual_after_lowpass_20_rms_nm": 0.6312292700736748
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.1640400414589449
+        },
+        "ankle": {
+          "min_nm": -26.3490115,
+          "max_nm": 10.76339583,
+          "rms_nm": 8.727402503967257,
+          "positive_area_nm_s": 3.4181598988599977,
+          "negative_area_nm_s": -23.308924142765,
+          "positive_fraction": 0.4308566617554199,
+          "positive_over8_fraction": 0.021048200378867607,
+          "highpass_rms_nm": {
+            "10": 0.26508613141157367,
+            "20": 0.21798043555220864
+          },
+          "highpass_10_peak_frequency_hz": 49.804687500027605,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 0.3766124930447786,
+              "residual_after_lowpass_10_rms_nm": 0.3765835377622628,
+              "highpass_20_rms_nm": 0.33528619697721485,
+              "residual_after_lowpass_20_rms_nm": 0.33529822409360066
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 0.23285668298483891,
+              "residual_after_lowpass_10_rms_nm": 0.23286811106349048,
+              "highpass_20_rms_nm": 0.18182689729415763,
+              "residual_after_lowpass_20_rms_nm": 0.1818121099796404
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 0.19960759508083187,
+              "residual_after_lowpass_10_rms_nm": 0.19960131463142372,
+              "highpass_20_rms_nm": 0.16831355345816662,
+              "residual_after_lowpass_20_rms_nm": 0.16829993271472127
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.10667140582702198,
+              "residual_after_lowpass_10_rms_nm": 0.10676004352660119,
+              "highpass_20_rms_nm": 0.0511106170185598,
+              "residual_after_lowpass_20_rms_nm": 0.05111218784637397
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.012372641265024024
+        }
+      },
+      "contact": {
+        "left_normal_impulse_ns": 578.7798279911601,
+        "left_force_max_n": 528.65615147,
+        "left_force_mean_n": 121.83147561446432,
+        "left_contact_fraction": 0.7049042306882761,
+        "left_loaded_over50n_fraction": 0.5443064617975163,
+        "left_penetration_max_mm": 19.19828,
+        "left_penetration_whole_max_mm": 19.19828
+      }
+    },
+    "cp90_hidden": {
+      "source": "Trajectory Generator/unified_MLP_39/runs/rollout/masking_diagnosis_2026-10-01/cp90_hidden",
+      "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_fresh_best80config_100iter_2026-09-29/rl_module_best",
+      "steps": 500,
+      "episode_return": 146.05694931360134,
+      "visible_steps": 0,
+      "window_s": [
+        13.19,
+        17.94
+      ],
+      "common_window_complete": true,
+      "reward": {
+        "full_episode": {
+          "steps": 500,
+          "return": 146.05694931360134,
+          "weighted_actual_score": 58.590622062841696,
+          "weighted_served_score": 182.63638997877166,
+          "mixed_imitation_before_penalties": 241.22701204161336,
+          "base_penalties": 99.55531600548325,
+          "base_penalty_components": {
+            "effort_weight": 0.7336041253868881,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 98.81604038968719,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0014577664728177959,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0023580746869880788,
+            "sea_motor_accel_weight": 0.0018438163394067435,
+            "sea_motor_power_weight": 1.1832909966559028e-05,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 5.317287343335508,
+          "base_clip_low_steps": 74,
+          "reward_base": 146.98898337946562,
+          "additional_penalties": 0.9320340658642863,
+          "grf_penetration_term": 0.00027062382523577143,
+          "grf_ankle_moment_flip_term": 0.7663269848005964,
+          "oob_term": 0.16543645723846245,
+          "mean_imitation_score": 0.5859062206284169,
+          "mean_served_imitation_score": 0.45659097494692913,
+          "mean_sound_imitation_loss": 0.29918987031204347,
+          "mean_served_imitation_loss": 0.29655594357933907,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 93.65343902623422,
+            "qdot_ref_loss": 0.011283889731875827,
+            "qddot_ref_loss": 0.022955821222889472,
+            "jerk_ref_loss": 3.9846636670055844,
+            "reference_governor_loss": 1.0923400673400674,
+            "u_rate_loss": 0.05135791815254049
+          }
+        },
+        "common_window": {
+          "steps": 476,
+          "return": 129.5879283339827,
+          "weighted_actual_score": 54.44403210961841,
+          "weighted_served_score": 166.81133795425768,
+          "mixed_imitation_before_penalties": 221.2553700638761,
+          "base_penalties": 96.06078200330364,
+          "base_penalty_components": {
+            "effort_weight": 0.6563745680790471,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 95.39958937791732,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.001252700954719146,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.002030151838546835,
+            "sea_motor_accel_weight": 0.00153234719576161,
+            "sea_motor_power_weight": 2.857318249143166e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 5.3172873433355505,
+          "base_clip_low_steps": 74,
+          "reward_base": 130.511875403908,
+          "additional_penalties": 0.9239470699253047,
+          "grf_penetration_term": 0.00027062382523577143,
+          "grf_ankle_moment_flip_term": 0.7663269848005964,
+          "oob_term": 0.15734946129947122,
+          "mean_imitation_score": 0.5718910935884287,
+          "mean_served_imitation_score": 0.4380549841235758,
+          "mean_sound_imitation_loss": 0.312007177415022,
+          "mean_served_imitation_loss": 0.309682499346039,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 90.44248852244198,
+            "qdot_ref_loss": 0.009361888313982523,
+            "qddot_ref_loss": 0.02098124386154787,
+            "jerk_ref_loss": 3.8280380221822563,
+            "reference_governor_loss": 1.0576914983164982,
+            "u_rate_loss": 0.04102820280104914
+          }
+        },
+        "target_knee_over35deg": {
+          "steps": 112,
+          "return": 5.5580099960111085,
+          "weighted_actual_score": 6.309154668219378,
+          "weighted_served_score": 15.47558622340341,
+          "mixed_imitation_before_penalties": 21.78474089162279,
+          "base_penalties": 21.472128910061205,
+          "base_penalty_components": {
+            "effort_weight": 0.2037865773836193,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 21.26722310889857,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.00029024233973542335,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.00048347158940725946,
+            "sea_motor_accel_weight": 0.0003447432810816256,
+            "sea_motor_power_weight": 7.665687928282481e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 5.292474251339929,
+          "base_clip_low_steps": 70,
+          "reward_base": 5.605086232901512,
+          "additional_penalties": 0.047076236890403855,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.04707623689040449,
+          "mean_imitation_score": 0.2816586905455079,
+          "mean_served_imitation_score": 0.1727185962433416,
+          "mean_sound_imitation_loss": 0.8346335070082962,
+          "mean_served_imitation_loss": 0.8389108796991352,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 20.127077199393447,
+            "qdot_ref_loss": 0.003650870138236267,
+            "qddot_ref_loss": 0.0051761116432958885,
+            "jerk_ref_loss": 0.8822821768221052,
+            "reference_governor_loss": 0.2300925925925926,
+            "u_rate_loss": 0.018944158308890287
+          }
+        },
+        "target_knee_at_most35deg": {
+          "steps": 364,
+          "return": 124.02991833797157,
+          "weighted_actual_score": 48.13487744139904,
+          "weighted_served_score": 151.33575173085427,
+          "mixed_imitation_before_penalties": 199.47062917225333,
+          "base_penalties": 74.58865309324244,
+          "base_penalty_components": {
+            "effort_weight": 0.45258799069542777,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 74.13236626901875,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0009624586149837226,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0015466802491395757,
+            "sea_motor_accel_weight": 0.0011876039146799845,
+            "sea_motor_power_weight": 2.090749456314918e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 0.02481309199558268,
+          "base_clip_low_steps": 4,
+          "reward_base": 124.90678917100647,
+          "additional_penalties": 0.8768708330349,
+          "grf_penetration_term": 0.00027062382523577143,
+          "grf_ankle_moment_flip_term": 0.7663269848005964,
+          "oob_term": 0.11027322440906673,
+          "mean_imitation_score": 0.661193371447789,
+          "mean_served_imitation_score": 0.5196969496251863,
+          "mean_sound_imitation_loss": 0.1511990760017068,
+          "mean_served_imitation_loss": 0.14684299769893241,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 70.31541132304854,
+            "qdot_ref_loss": 0.005711018175746255,
+            "qddot_ref_loss": 0.015805132218251982,
+            "jerk_ref_loss": 2.9457558453601513,
+            "reference_governor_loss": 0.8275989057239057,
+            "u_rate_loss": 0.022084044492158856
+          }
+        }
+      },
+      "joints": {
+        "knee": {
+          "rmse_actual_target_deg": 13.28361216582551,
+          "rmse_served_target_deg": 13.165184583338991,
+          "rmse_actual_served_deg": 0.2973170060330411,
+          "rmse_actual_target_velocity_deg_s": 74.39843217551284,
+          "rmse_command_target_deg": 23.745773911013348,
+          "corr_actual_target": 0.6462370513126111,
+          "actual_mean_bias_vs_target_deg": 0.36974326636695,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 13.531910703207638,
+            "best_rmse_delay_s": -0.12399999999999967,
+            "best_lag_rmse_deg": 12.708575423234487,
+            "best_lag_correlation": 0.593936370837423,
+            "max_correlation_delay_s": -0.05899999999999961,
+            "max_correlation": 0.6490247606459674,
+            "best_rmse_lag_affine_target_gain": 0.10847953122415172,
+            "best_rmse_lag_affine_bias_deg": 21.6017445009361,
+            "best_rmse_lag_affine_residual_rmse_deg": 2.050556417646424,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 18.14848710590442,
+            "max_deg": 29.701791360568713,
+            "excursion_deg": 11.553304254664294,
+            "sd_deg": 2.4956418883195215
+          },
+          "served": {
+            "min_deg": 18.36235057410127,
+            "max_deg": 30.438386281419568,
+            "excursion_deg": 12.076035707318297,
+            "sd_deg": 2.5667401337555096
+          },
+          "target": {
+            "min_deg": 10.885435612729205,
+            "max_deg": 56.23103635364625,
+            "excursion_deg": 45.34560074091705,
+            "sd_deg": 14.753950513953281
+          },
+          "command": {
+            "min_deg": -0.0,
+            "max_deg": 56.11657723495724,
+            "excursion_deg": 56.11657723495724,
+            "sd_deg": 19.273777240669574
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 13.519999999999706,
+              "target_deg": 56.2267355054663,
+              "actual_deg": 29.48904462830116,
+              "served_deg": 30.26717392949486
+            },
+            {
+              "time_s": 15.179999999998786,
+              "target_deg": 56.228363367413344,
+              "actual_deg": 25.745926793310336,
+              "served_deg": 26.600757411335987
+            },
+            {
+              "time_s": 16.75999999999845,
+              "target_deg": 56.23103635364625,
+              "actual_deg": 27.43834350925465,
+              "served_deg": 28.01407722986795
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            13.801697528767093,
+            8.543292299045355,
+            16.42353308535569,
+            15.40330107263174,
+            8.58283564781099
+          ]
+        },
+        "ankle": {
+          "rmse_actual_target_deg": 9.5480166417635,
+          "rmse_served_target_deg": 9.532810002004913,
+          "rmse_actual_served_deg": 0.3004179184420445,
+          "rmse_actual_target_velocity_deg_s": 60.575922177516716,
+          "rmse_command_target_deg": 21.08251109341381,
+          "corr_actual_target": 0.032943296860172264,
+          "actual_mean_bias_vs_target_deg": 4.944470779407577,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 9.73605821044379,
+            "best_rmse_delay_s": 0.36500000000000077,
+            "best_lag_rmse_deg": 8.707375423073854,
+            "best_lag_correlation": 0.5885210006283055,
+            "max_correlation_delay_s": 0.36500000000000077,
+            "max_correlation": 0.5885210006283055,
+            "best_rmse_lag_affine_target_gain": 0.1480571816738849,
+            "best_rmse_lag_affine_bias_deg": 10.94158784263569,
+            "best_rmse_lag_affine_residual_rmse_deg": 1.674536704559541,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 6.988327259205587,
+            "max_deg": 17.245259474967348,
+            "excursion_deg": 10.256932215761761,
+            "sd_deg": 2.075763216991901
+          },
+          "served": {
+            "min_deg": 6.762798681679997,
+            "max_deg": 17.891390247808676,
+            "excursion_deg": 11.12859156612868,
+            "sd_deg": 2.155511858093182
+          },
+          "target": {
+            "min_deg": -6.611822123192358,
+            "max_deg": 22.05182918647197,
+            "excursion_deg": 28.663651309664328,
+            "sd_deg": 7.968554237322056
+          },
+          "command": {
+            "min_deg": -28.92775641627297,
+            "max_deg": 40.10704565915762,
+            "excursion_deg": 69.03480207543059,
+            "sd_deg": 19.459334929057082
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 14.819999999998986,
+              "target_deg": 22.05182918647197,
+              "actual_deg": 11.575746548729665,
+              "served_deg": 11.767804638001254
+            },
+            {
+              "time_s": 16.419999999998396,
+              "target_deg": 22.0433349728112,
+              "actual_deg": 12.588010465803174,
+              "served_deg": 12.874432741100366
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            9.52331785579829,
+            6.094860921801285,
+            10.865976864678911,
+            11.167547334494264,
+            8.170580267227438
+          ]
+        }
+      },
+      "fsm": {
+        "phase_valid_hs_count": 3,
+        "phase_valid_to_count": 4,
+        "phase_valid_cycle_count": 2,
+        "invalid_event_count": 0,
+        "end_reason": "episode_time_limit"
+      },
+      "completed_cycles": [
+        {
+          "time": 15.56999999999857,
+          "last_period_s": 1.64199999999909,
+          "last_stance_fraction": 0.11875761266747868,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        },
+        {
+          "time": 17.059999999998496,
+          "last_period_s": 1.4950000000010384,
+          "last_stance_fraction": 0.20535117056830543,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        }
+      ],
+      "action_clipped_fraction": 0.095,
+      "action_clipped_steps": 94,
+      "reference_jerk_limit_fraction_mean": 0.7864848484848483,
+      "mean_command_endpoint_step_rad": {
+        "knee": 0.613988316504057,
+        "ankle": 0.6283720905569667
+      },
+      "torque": {
+        "knee": {
+          "min_nm": -68.63647415,
+          "max_nm": 16.52212693,
+          "rms_nm": 23.484956858453163,
+          "positive_area_nm_s": 7.412145790170005,
+          "negative_area_nm_s": -71.10627900597505,
+          "positive_fraction": 0.3001473374026521,
+          "positive_over8_fraction": 0.06882761523889708,
+          "highpass_rms_nm": {
+            "10": 3.4032906106529155,
+            "20": 3.227649770891825
+          },
+          "highpass_10_peak_frequency_hz": 49.804687500027605,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 15.34033958490115,
+              "residual_after_lowpass_10_rms_nm": 15.342402636316928,
+              "highpass_20_rms_nm": 15.265612326654944,
+              "residual_after_lowpass_20_rms_nm": 15.263861910279541
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 3.358704505320392,
+              "residual_after_lowpass_10_rms_nm": 3.3579743748313615,
+              "highpass_20_rms_nm": 3.1873900624976033,
+              "residual_after_lowpass_20_rms_nm": 3.1875543433987072
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 3.2255461007507544,
+              "residual_after_lowpass_10_rms_nm": 3.2246839506382514,
+              "highpass_20_rms_nm": 3.0735165858843114,
+              "residual_after_lowpass_20_rms_nm": 3.0736370092377574
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.7118401178045509,
+              "residual_after_lowpass_10_rms_nm": 0.7127523016622603,
+              "highpass_20_rms_nm": 0.5157093649931731,
+              "residual_after_lowpass_20_rms_nm": 0.5157114924538388
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.2793702736244274
+        },
+        "ankle": {
+          "min_nm": -20.32807706,
+          "max_nm": 17.42311664,
+          "rms_nm": 9.422281696977432,
+          "positive_area_nm_s": 3.2015975914900006,
+          "negative_area_nm_s": -31.826318436780017,
+          "positive_fraction": 0.3117238476110293,
+          "positive_over8_fraction": 0.03199326457587876,
+          "highpass_rms_nm": {
+            "10": 0.2712343683506032,
+            "20": 0.20228765353322573
+          },
+          "highpass_10_peak_frequency_hz": 49.804687500027605,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 0.3599626123034792,
+              "residual_after_lowpass_10_rms_nm": 0.36001819556998504,
+              "highpass_20_rms_nm": 0.28914789001119423,
+              "residual_after_lowpass_20_rms_nm": 0.2891491089367507
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 0.23707822953460986,
+              "residual_after_lowpass_10_rms_nm": 0.23717402825626788,
+              "highpass_20_rms_nm": 0.1617944495015987,
+              "residual_after_lowpass_20_rms_nm": 0.16179396308837127
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 0.1962402267618699,
+              "residual_after_lowpass_10_rms_nm": 0.19625655428784192,
+              "highpass_20_rms_nm": 0.1505621654165073,
+              "residual_after_lowpass_20_rms_nm": 0.15055759676958538
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.12178925449383528,
+              "residual_after_lowpass_10_rms_nm": 0.12192613161424803,
+              "highpass_20_rms_nm": 0.04259928576556191,
+              "residual_after_lowpass_20_rms_nm": 0.04259998868477666
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.019722042544297172
+        }
+      },
+      "contact": {
+        "left_normal_impulse_ns": 749.6786156054304,
+        "left_force_max_n": 417.51486472,
+        "left_force_mean_n": 157.8281193146327,
+        "left_contact_fraction": 0.7436329193853926,
+        "left_loaded_over50n_fraction": 0.686171332351084,
+        "left_penetration_max_mm": 20.07459,
+        "left_penetration_whole_max_mm": 20.07459
+      }
+    },
+    "cp112_visible": {
+      "source": "Trajectory Generator/unified_MLP_39/runs/rollout/masking_diagnosis_2026-10-01/cp112_visible",
+      "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_best90_masking_100iter_2026-09-30/stage01_mask25/rl_module_best",
+      "steps": 500,
+      "episode_return": 273.11794693255774,
+      "visible_steps": 500,
+      "window_s": [
+        13.19,
+        17.94
+      ],
+      "common_window_complete": true,
+      "reward": {
+        "full_episode": {
+          "steps": 500,
+          "return": 273.1179469325578,
+          "weighted_actual_score": 81.09036030300416,
+          "weighted_served_score": 280.21604019976104,
+          "mixed_imitation_before_penalties": 361.3064005027652,
+          "base_penalties": 75.48158648030477,
+          "base_penalty_components": {
+            "effort_weight": 0.14992469440958914,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 75.32647912716203,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0012841939458273516,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0024450914375877446,
+            "sea_motor_accel_weight": 0.0014440339618442086,
+            "sea_motor_power_weight": 9.339387888202686e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 0.0,
+          "base_clip_low_steps": 0,
+          "reward_base": 285.82481402246043,
+          "additional_penalties": 12.70686708990263,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 12.348097656948669,
+          "oob_term": 0.3587694329539762,
+          "mean_imitation_score": 0.8109036030300416,
+          "mean_served_imitation_score": 0.7005401004994025,
+          "mean_sound_imitation_loss": 0.0680006676827602,
+          "mean_served_imitation_loss": 0.06830275601751047,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 70.96887542973786,
+            "qdot_ref_loss": 0.12374868551771134,
+            "qddot_ref_loss": 0.0270974145504715,
+            "jerk_ref_loss": 3.305219863909858,
+            "reference_governor_loss": 0.7734532828282829,
+            "u_rate_loss": 0.128084450617845
+          }
+        },
+        "common_window": {
+          "steps": 476,
+          "return": 256.48274400789273,
+          "weighted_actual_score": 76.75263389883182,
+          "weighted_served_score": 263.9730866663505,
+          "mixed_imitation_before_penalties": 340.7257205651823,
+          "base_penalties": 71.55049784657469,
+          "base_penalty_components": {
+            "effort_weight": 0.1298068653743921,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 71.41639042121386,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0010765256913720846,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0021013920250894896,
+            "sea_motor_accel_weight": 0.0011216159803191825,
+            "sea_motor_power_weight": 1.0262896392896982e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 1.4210854715202004e-14,
+          "base_clip_low_steps": 0,
+          "reward_base": 269.17522271860764,
+          "additional_penalties": 12.692478710714909,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 12.348097656948669,
+          "oob_term": 0.34438105376624184,
+          "mean_imitation_score": 0.8062251459961325,
+          "mean_served_imitation_score": 0.6932066351532313,
+          "mean_sound_imitation_loss": 0.06995553992343781,
+          "mean_served_imitation_loss": 0.0703645313248778,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 67.28520364702223,
+            "qdot_ref_loss": 0.11900530341811758,
+            "qddot_ref_loss": 0.025245939563247485,
+            "jerk_ref_loss": 3.1314616427479214,
+            "reference_governor_loss": 0.7341119528619529,
+            "u_rate_loss": 0.12136193560039348
+          }
+        },
+        "target_knee_over35deg": {
+          "steps": 112,
+          "return": 49.174603272728284,
+          "weighted_actual_score": 15.779212745810879,
+          "weighted_served_score": 50.7298448923647,
+          "mixed_imitation_before_penalties": 66.50905763817558,
+          "base_penalties": 17.289699514914414,
+          "base_penalty_components": {
+            "effort_weight": 0.00801764304646158,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 17.28061415877455,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0002599623537626533,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0005462536717518754,
+            "sea_motor_accel_weight": 0.0002612890080973349,
+            "sea_motor_power_weight": 2.0805979320529732e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 1.0658141036401503e-14,
+          "base_clip_low_steps": 0,
+          "reward_base": 49.21935812326117,
+          "additional_penalties": 0.044754850532889634,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.04475485053289035,
+          "mean_imitation_score": 0.7044291404379857,
+          "mean_served_imitation_score": 0.5661813046022847,
+          "mean_sound_imitation_loss": 0.12516002900916945,
+          "mean_served_imitation_loss": 0.1255751908367099,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 16.27420822062113,
+            "qdot_ref_loss": 0.04366930670370354,
+            "qddot_ref_loss": 0.007529444259173934,
+            "jerk_ref_loss": 0.750014021953929,
+            "reference_governor_loss": 0.17773569023569022,
+            "u_rate_loss": 0.027457475000921144
+          }
+        },
+        "target_knee_at_most35deg": {
+          "steps": 364,
+          "return": 207.30814073516444,
+          "weighted_actual_score": 60.97342115302094,
+          "weighted_served_score": 213.24324177398577,
+          "mixed_imitation_before_penalties": 274.2166629270067,
+          "base_penalties": 54.26079833166027,
+          "base_penalty_components": {
+            "effort_weight": 0.1217892223279305,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 54.13577626243932,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0008165633376094313,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.001555138353337614,
+            "sea_motor_accel_weight": 0.0008603269722218475,
+            "sea_motor_power_weight": 8.18229846084401e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": -1.4210854715202004e-14,
+          "base_clip_low_steps": 0,
+          "reward_base": 219.95586459534644,
+          "additional_penalties": 12.647723860181998,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 12.348097656948669,
+          "oob_term": 0.2996262032333515,
+          "mean_imitation_score": 0.8375469938601776,
+          "mean_served_imitation_score": 0.7322913522458302,
+          "mean_sound_imitation_loss": 0.052969543281674226,
+          "mean_served_imitation_loss": 0.05337663609046793,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 51.0109954264011,
+            "qdot_ref_loss": 0.07533599671441404,
+            "qddot_ref_loss": 0.01771649530407355,
+            "jerk_ref_loss": 2.3814476207939923,
+            "reference_governor_loss": 0.5563762626262626,
+            "u_rate_loss": 0.09390446059947234
+          }
+        }
+      },
+      "joints": {
+        "knee": {
+          "rmse_actual_target_deg": 7.032882984690371,
+          "rmse_served_target_deg": 7.072047370957488,
+          "rmse_actual_served_deg": 0.16759601196922108,
+          "rmse_actual_target_velocity_deg_s": 44.74206488384921,
+          "rmse_command_target_deg": 17.171187394792277,
+          "corr_actual_target": 0.8800102135832631,
+          "actual_mean_bias_vs_target_deg": -0.5972101739145301,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 6.644508086893036,
+            "best_rmse_delay_s": -0.023999999999999577,
+            "best_lag_rmse_deg": 6.43108940247764,
+            "best_lag_correlation": 0.903246980342668,
+            "max_correlation_delay_s": -0.01599999999999957,
+            "max_correlation": 0.9038435052566292,
+            "best_rmse_lag_affine_target_gain": 0.8343792420377335,
+            "best_rmse_lag_affine_bias_deg": 2.6909918303016878,
+            "best_rmse_lag_affine_residual_rmse_deg": 5.8313853230925545,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": 3.630177241970077,
+            "max_deg": 50.41022482965745,
+            "excursion_deg": 46.78004758768738,
+            "sd_deg": 13.000979499850484
+          },
+          "served": {
+            "min_deg": 3.593911498798248,
+            "max_deg": 50.420856019100576,
+            "excursion_deg": 46.82694452030233,
+            "sd_deg": 13.033151999423897
+          },
+          "target": {
+            "min_deg": 10.885435612729205,
+            "max_deg": 56.23103635364625,
+            "excursion_deg": 45.34560074091705,
+            "sd_deg": 14.753950513953281
+          },
+          "command": {
+            "min_deg": -0.0,
+            "max_deg": 80.35801996733616,
+            "excursion_deg": 80.35801996733616,
+            "sd_deg": 18.553622587479328
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 13.519999999999706,
+              "target_deg": 56.2267355054663,
+              "actual_deg": 44.062066015034596,
+              "served_deg": 44.1223082835141
+            },
+            {
+              "time_s": 15.179999999998786,
+              "target_deg": 56.228363367413344,
+              "actual_deg": 42.07558062701725,
+              "served_deg": 42.02765318961127
+            },
+            {
+              "time_s": 16.75999999999845,
+              "target_deg": 56.23103635364625,
+              "actual_deg": 50.106599015388284,
+              "served_deg": 50.29433359491526
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            5.999435181914599,
+            5.7870643778215465,
+            8.625073952072567,
+            6.819064294840414,
+            7.446532783437497
+          ]
+        },
+        "ankle": {
+          "rmse_actual_target_deg": 4.274642666133396,
+          "rmse_served_target_deg": 4.283011366427882,
+          "rmse_actual_served_deg": 0.40201161949648195,
+          "rmse_actual_target_velocity_deg_s": 36.87588580453619,
+          "rmse_command_target_deg": 24.47486110562346,
+          "corr_actual_target": 0.8968160407668794,
+          "actual_mean_bias_vs_target_deg": 1.8870855473008303,
+          "lag": {
+            "fixed_support_s": [
+              13.5,
+              17.49
+            ],
+            "zero_lag_rmse_deg": 4.234496047269575,
+            "best_rmse_delay_s": 0.047000000000000486,
+            "best_lag_rmse_deg": 3.637369352673382,
+            "best_lag_correlation": 0.9235825427685952,
+            "max_correlation_delay_s": 0.05200000000000049,
+            "max_correlation": 0.9238240543966968,
+            "best_rmse_lag_affine_target_gain": 1.0004507076120601,
+            "best_rmse_lag_affine_bias_deg": 1.6846191233166932,
+            "best_rmse_lag_affine_residual_rmse_deg": 3.222223336773462,
+            "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+            "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+          },
+          "actual": {
+            "min_deg": -4.474672076234208,
+            "max_deg": 24.784038082686607,
+            "excursion_deg": 29.258710158920813,
+            "sd_deg": 8.657490641139153
+          },
+          "served": {
+            "min_deg": -4.430390679184547,
+            "max_deg": 24.878854768744723,
+            "excursion_deg": 29.30924544792927,
+            "sd_deg": 8.638552183441895
+          },
+          "target": {
+            "min_deg": -6.611822123192358,
+            "max_deg": 22.05182918647197,
+            "excursion_deg": 28.663651309664328,
+            "sd_deg": 7.968554237322056
+          },
+          "command": {
+            "min_deg": -40.10704565915762,
+            "max_deg": 40.10704565915762,
+            "excursion_deg": 80.21409131831524,
+            "sd_deg": 24.915041037315756
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 14.819999999998986,
+              "target_deg": 22.05182918647197,
+              "actual_deg": 22.140804392763155,
+              "served_deg": 22.177398838788793
+            },
+            {
+              "time_s": 16.419999999998396,
+              "target_deg": 22.0433349728112,
+              "actual_deg": 24.28877082068523,
+              "served_deg": 24.323816521316562
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            3.5981645561167985,
+            2.935037036069692,
+            3.6082134283018927,
+            5.6206879465162505,
+            4.6388836070705555
+          ]
+        }
+      },
+      "fsm": {
+        "phase_valid_hs_count": 3,
+        "phase_valid_to_count": 4,
+        "phase_valid_cycle_count": 2,
+        "invalid_event_count": 0,
+        "end_reason": "episode_time_limit"
+      },
+      "completed_cycles": [
+        {
+          "time": 15.669999999998515,
+          "last_period_s": 1.7199999999990467,
+          "last_stance_fraction": 0.3598837209302326,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        },
+        {
+          "time": 17.0899999999985,
+          "last_period_s": 1.4240000000011293,
+          "last_stance_fraction": 0.4051966292132279,
+          "cycle_knee_excursion_rad": 0.0,
+          "cycle_ankle_excursion_rad": 0.0
+        }
+      ],
+      "action_clipped_fraction": 0.145,
+      "action_clipped_steps": 138,
+      "reference_jerk_limit_fraction_mean": 0.55625,
+      "mean_command_endpoint_step_rad": {
+        "knee": 0.3894091221711081,
+        "ankle": 0.7004112541317222
+      },
+      "torque": {
+        "knee": {
+          "min_nm": -37.93607309,
+          "max_nm": 32.20555964,
+          "rms_nm": 10.389562502447982,
+          "positive_area_nm_s": 13.828059548489989,
+          "negative_area_nm_s": -21.579757141854962,
+          "positive_fraction": 0.462007998316144,
+          "positive_over8_fraction": 0.11765944011786993,
+          "highpass_rms_nm": {
+            "10": 4.3839876427711335,
+            "20": 3.529600572874358
+          },
+          "highpass_10_peak_frequency_hz": 20.507812500011365,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 13.097042983198369,
+              "residual_after_lowpass_10_rms_nm": 13.099389893292742,
+              "highpass_20_rms_nm": 12.612727739789756,
+              "residual_after_lowpass_20_rms_nm": 12.610402220342607
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 4.296924089660561,
+              "residual_after_lowpass_10_rms_nm": 4.296567044312507,
+              "highpass_20_rms_nm": 3.4635334830664406,
+              "residual_after_lowpass_20_rms_nm": 3.463696326039656
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 4.006096214089603,
+              "residual_after_lowpass_10_rms_nm": 4.005461147594767,
+              "highpass_20_rms_nm": 3.3028165339651374,
+              "residual_after_lowpass_20_rms_nm": 3.3029855764646476
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 1.2886414759423652,
+              "residual_after_lowpass_10_rms_nm": 1.2885976118803675,
+              "highpass_20_rms_nm": 0.7574614243692972,
+              "residual_after_lowpass_20_rms_nm": 0.757424036539349
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.07545098294862268
+        },
+        "ankle": {
+          "min_nm": -15.31895332,
+          "max_nm": 28.94032576,
+          "rms_nm": 8.159703254068372,
+          "positive_area_nm_s": 15.155397257365001,
+          "negative_area_nm_s": -6.9641724149299975,
+          "positive_fraction": 0.7307935171542833,
+          "positive_over8_fraction": 0.14986318669753737,
+          "highpass_rms_nm": {
+            "10": 0.31133400469694694,
+            "20": 0.22044099968019873
+          },
+          "highpass_10_peak_frequency_hz": 11.230468750006224,
+          "highpass_20_peak_frequency_hz": 49.804687500027605,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 0.45546540431302945,
+              "residual_after_lowpass_10_rms_nm": 0.45546921017333053,
+              "highpass_20_rms_nm": 0.3626647775337903,
+              "residual_after_lowpass_20_rms_nm": 0.36266986760212405
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 0.2926385854204943,
+              "residual_after_lowpass_10_rms_nm": 0.29257945881453506,
+              "highpass_20_rms_nm": 0.1898230461706468,
+              "residual_after_lowpass_20_rms_nm": 0.18980758801688916
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 0.238621071147624,
+              "residual_after_lowpass_10_rms_nm": 0.2386173507154635,
+              "highpass_20_rms_nm": 0.1730827914809661,
+              "residual_after_lowpass_20_rms_nm": 0.1730672907842793
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.15623154759715563,
+              "residual_after_lowpass_10_rms_nm": 0.1562096639722983,
+              "highpass_20_rms_nm": 0.061787084445966534,
+              "residual_after_lowpass_20_rms_nm": 0.061789203524843996
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.007534200874982438
+        }
+      },
+      "contact": {
+        "left_normal_impulse_ns": 510.62019450685005,
+        "left_force_max_n": 686.88179376,
+        "left_force_mean_n": 107.4763617340202,
+        "left_contact_fraction": 0.44453799200168387,
+        "left_loaded_over50n_fraction": 0.372974110713534,
+        "left_penetration_max_mm": 18.140810000000002,
+        "left_penetration_whole_max_mm": 18.140810000000002
+      }
+    },
+    "cp184_visible": {
+      "source": "Trajectory Generator/unified_MLP_39/runs/rollout/masking_diagnosis_2026-10-01/cp184_visible",
+      "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_best90_masking_100iter_2026-09-30/stage04_mask100/rl_module_best",
+      "steps": 98,
+      "episode_return": 45.87583132919675,
+      "visible_steps": 98,
+      "window_s": [
+        13.19,
+        13.96
+      ],
+      "common_window_complete": false,
+      "reward": {
+        "full_episode": {
+          "steps": 98,
+          "return": 45.87583132919675,
+          "weighted_actual_score": 14.383929059737875,
+          "weighted_served_score": 47.96403875848288,
+          "mixed_imitation_before_penalties": 62.34796781822075,
+          "base_penalties": 14.384074561380178,
+          "base_penalty_components": {
+            "effort_weight": 0.027655167072073373,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 14.354795291404375,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.00038779972339329956,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0007370854090257944,
+            "sea_motor_accel_weight": 0.0004907686200101104,
+            "sea_motor_power_weight": 8.449151298723685e-06,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 3.552713678800501e-15,
+          "base_clip_low_steps": 0,
+          "reward_base": 47.96389325684058,
+          "additional_penalties": 2.088061927643828,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.08806192764383204,
+          "mean_imitation_score": 0.7338739316192794,
+          "mean_served_imitation_score": 0.6117862086541184,
+          "mean_sound_imitation_loss": 0.11413458783763554,
+          "mean_served_imitation_loss": 0.11456975060132676,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 13.473318457330171,
+            "qdot_ref_loss": 0.037804231527332394,
+            "qddot_ref_loss": 0.007014156869999882,
+            "jerk_ref_loss": 0.6376077701925005,
+            "reference_governor_loss": 0.16275252525252526,
+            "u_rate_loss": 0.03629815023184649
+          }
+        },
+        "common_window": {
+          "steps": 78,
+          "return": 33.35394621224474,
+          "weighted_actual_score": 10.675610583086126,
+          "weighted_served_score": 34.1146585120706,
+          "mixed_imitation_before_penalties": 44.790269095156724,
+          "base_penalties": 11.365125716795452,
+          "base_penalty_components": {
+            "effort_weight": 0.006918587790844004,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 11.35742873548637,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0001886008452229314,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.0004118310036885435,
+            "sea_motor_accel_weight": 0.00017780622719426112,
+            "sea_motor_power_weight": 1.5544213323486045e-07,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 5.329070518200751e-15,
+          "base_clip_low_steps": 0,
+          "reward_base": 33.42514337836128,
+          "additional_penalties": 0.0711971661165336,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.07119716611653241,
+          "mean_imitation_score": 0.6843340117362902,
+          "mean_served_imitation_score": 0.5467092710267725,
+          "mean_sound_imitation_loss": 0.13807149399261942,
+          "mean_served_imitation_loss": 0.13837251285420066,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 10.657300219960094,
+            "qdot_ref_loss": 0.033206342512331025,
+            "qddot_ref_loss": 0.0050971154058779165,
+            "jerk_ref_loss": 0.5039992868328748,
+            "reference_governor_loss": 0.12840909090909092,
+            "u_rate_loss": 0.029416679866099277
+          }
+        },
+        "target_knee_over35deg": {
+          "steps": 38,
+          "return": 11.711214007007127,
+          "weighted_actual_score": 4.55893290858576,
+          "weighted_served_score": 13.352302111462805,
+          "mixed_imitation_before_penalties": 17.911235020048565,
+          "base_penalties": 6.160508384511102,
+          "base_penalty_components": {
+            "effort_weight": 0.004502286298057329,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 6.155540287668876,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 0.0001195360199589766,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.00023420239477937516,
+            "sea_motor_accel_weight": 0.0001119731774854111,
+            "sea_motor_power_weight": 9.895194515543254e-08,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 0.0,
+          "base_clip_low_steps": 0,
+          "reward_base": 11.750726635537463,
+          "additional_penalties": 0.03951262853033555,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.039512628530335936,
+          "mean_imitation_score": 0.5998595932349684,
+          "mean_served_imitation_score": 0.43922046419285543,
+          "mean_sound_imitation_loss": 0.1835259590376701,
+          "mean_served_imitation_loss": 0.18377570009820235,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 5.762563728573583,
+            "qdot_ref_loss": 0.014982024840246827,
+            "qddot_ref_loss": 0.0031669913705395327,
+            "jerk_ref_loss": 0.28182640778337575,
+            "reference_governor_loss": 0.0731060606060606,
+            "u_rate_loss": 0.019895074495068686
+          }
+        },
+        "target_knee_at_most35deg": {
+          "steps": 40,
+          "return": 21.642732205237614,
+          "weighted_actual_score": 6.116677674500366,
+          "weighted_served_score": 20.762356400607796,
+          "mixed_imitation_before_penalties": 26.879034075108162,
+          "base_penalties": 5.204617332284351,
+          "base_penalty_components": {
+            "effort_weight": 0.002416301492786675,
+            "smoothness_weight": 0.0,
+            "saturation_weight": 0.0,
+            "command_rate_weight": 5.2018884478174945,
+            "sea_saturation_weight": 0.0,
+            "sea_torque_error_weight": 6.906482526395482e-05,
+            "sea_tau_spring_effort_weight": 0.0,
+            "sea_tau_spring_rate_weight": 0.0,
+            "sea_motor_speed_weight": 0.00017762860890916833,
+            "sea_motor_accel_weight": 6.583304970885004e-05,
+            "sea_motor_power_weight": 5.649018807942791e-08,
+            "policy_action_clip_weight": 0.0
+          },
+          "base_clip_adjustment": 8.881784197001252e-16,
+          "base_clip_low_steps": 0,
+          "reward_base": 21.674416742823812,
+          "additional_penalties": 0.03168453758619805,
+          "grf_penetration_term": 0.0,
+          "grf_ankle_moment_flip_term": 0.0,
+          "oob_term": 0.031684537586196486,
+          "mean_imitation_score": 0.7645847093125456,
+          "mean_served_imitation_score": 0.6488236375189935,
+          "mean_sound_imitation_loss": 0.09488975219982125,
+          "mean_served_imitation_loss": 0.09523948497239906,
+          "command_rate_subcosts": {
+            "segment_delta_loss": 4.894736491386512,
+            "qdot_ref_loss": 0.018224317672084194,
+            "qddot_ref_loss": 0.0019301240353383833,
+            "jerk_ref_loss": 0.22217287904949903,
+            "reference_governor_loss": 0.055303030303030305,
+            "u_rate_loss": 0.009521605371030589
+          }
+        }
+      },
+      "joints": {
+        "knee": {
+          "rmse_actual_target_deg": 10.904184230887738,
+          "rmse_served_target_deg": 10.89246882816929,
+          "rmse_actual_served_deg": 0.10966612895480136,
+          "rmse_actual_target_velocity_deg_s": 54.73251514082244,
+          "rmse_command_target_deg": 22.884683934750594,
+          "corr_actual_target": 0.9319213719525917,
+          "actual_mean_bias_vs_target_deg": -9.170364195961241,
+          "lag": {
+            "available": false,
+            "reason": "Early termination; fixed lag support and +/-0.5 s search unavailable."
+          },
+          "actual": {
+            "min_deg": 0.07706164266120193,
+            "max_deg": 38.4381087430136,
+            "excursion_deg": 38.3610471003524,
+            "sd_deg": 12.606786578702389
+          },
+          "served": {
+            "min_deg": -0.06111194365992549,
+            "max_deg": 38.48185951974212,
+            "excursion_deg": 38.54297146340205,
+            "sd_deg": 12.625535909020996
+          },
+          "target": {
+            "min_deg": 10.887369882070344,
+            "max_deg": 56.2267355054663,
+            "excursion_deg": 45.339365623395956,
+            "sd_deg": 15.477157438262857
+          },
+          "command": {
+            "min_deg": -0.0,
+            "max_deg": 85.94366926962348,
+            "excursion_deg": 85.94366926962348,
+            "sd_deg": 23.673229058750763
+          },
+          "at_target_peaks": [
+            {
+              "time_s": 13.519999999999706,
+              "target_deg": 56.2267355054663,
+              "actual_deg": 38.35543954839435,
+              "served_deg": 38.48185951974212
+            }
+          ],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            9.866212606865526,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        "ankle": {
+          "rmse_actual_target_deg": 5.658699922966741,
+          "rmse_served_target_deg": 5.67452245115558,
+          "rmse_actual_served_deg": 0.05748115087680062,
+          "rmse_actual_target_velocity_deg_s": 45.10250233764572,
+          "rmse_command_target_deg": 26.91825590070712,
+          "corr_actual_target": 0.8310518372924114,
+          "actual_mean_bias_vs_target_deg": -3.2568238673935745,
+          "lag": {
+            "available": false,
+            "reason": "Early termination; fixed lag support and +/-0.5 s search unavailable."
+          },
+          "actual": {
+            "min_deg": -7.021037462027601,
+            "max_deg": 21.231173459479198,
+            "excursion_deg": 28.252210921506798,
+            "sd_deg": 8.299344722339027
+          },
+          "served": {
+            "min_deg": -7.028342349344929,
+            "max_deg": 21.266856075250637,
+            "excursion_deg": 28.295198424595565,
+            "sd_deg": 8.310506540482438
+          },
+          "target": {
+            "min_deg": -6.611822123192358,
+            "max_deg": 21.49809487181869,
+            "excursion_deg": 28.109916995011048,
+            "sd_deg": 7.222809076858593
+          },
+          "command": {
+            "min_deg": -40.10704565915762,
+            "max_deg": 40.10704565915762,
+            "excursion_deg": 80.21409131831524,
+            "sd_deg": 26.469198638454163
+          },
+          "at_target_peaks": [],
+          "per_elapsed_second_rmse_actual_target_deg": [
+            5.1611502907983215,
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      },
+      "fsm": {
+        "phase_valid_hs_count": 0,
+        "phase_valid_to_count": 1,
+        "phase_valid_cycle_count": 0,
+        "invalid_event_count": 0,
+        "end_reason": "joint_divergence:pros_knee_angle"
+      },
+      "completed_cycles": [],
+      "action_clipped_fraction": 0.22448979591836735,
+      "action_clipped_steps": 43,
+      "reference_jerk_limit_fraction_mean": 0.592764378478664,
+      "mean_command_endpoint_step_rad": {
+        "knee": 0.4150170177298108,
+        "ankle": 0.7001938696413004
+      },
+      "torque": {
+        "knee": {
+          "min_nm": -22.39765306,
+          "max_nm": 17.09594926,
+          "rms_nm": 6.647369259504267,
+          "positive_area_nm_s": 2.2423284324200012,
+          "negative_area_nm_s": -1.6895347205000046,
+          "positive_fraction": 0.62905317769131,
+          "positive_over8_fraction": 0.08430609597924774,
+          "highpass_rms_nm": {
+            "10": 5.499606491663108,
+            "20": 3.7823944847458595
+          },
+          "highpass_10_peak_frequency_hz": 16.86121919585889,
+          "highpass_20_peak_frequency_hz": 23.346303501958463,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 12.97472815700577,
+              "residual_after_lowpass_10_rms_nm": 12.974794146425447,
+              "highpass_20_rms_nm": 11.803038168678324,
+              "residual_after_lowpass_20_rms_nm": 11.802816127504151
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 5.378971501356994,
+              "residual_after_lowpass_10_rms_nm": 5.381792465307335,
+              "highpass_20_rms_nm": 3.7043686784690895,
+              "residual_after_lowpass_20_rms_nm": 3.7044013461252514
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 4.958479583926094,
+              "residual_after_lowpass_10_rms_nm": 4.958498232087598,
+              "highpass_20_rms_nm": 3.5042390735638196,
+              "residual_after_lowpass_20_rms_nm": 3.504241898498943
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 1.788334204957215,
+              "residual_after_lowpass_10_rms_nm": 1.8002219429328064,
+              "highpass_20_rms_nm": 0.9294002333727159,
+              "residual_after_lowpass_20_rms_nm": 0.9295160747821035
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.09859987593276913
+        },
+        "ankle": {
+          "min_nm": -0.49942254,
+          "max_nm": 2.0757186,
+          "rms_nm": 0.6846473359450757,
+          "positive_area_nm_s": 0.4075106035100008,
+          "negative_area_nm_s": -0.0061069134900002,
+          "positive_fraction": 0.9364461738002594,
+          "positive_over8_fraction": 0.0,
+          "highpass_rms_nm": {
+            "10": 0.33570341360641875,
+            "20": 0.23555105411051627
+          },
+          "highpass_10_peak_frequency_hz": 49.28664072635676,
+          "highpass_20_peak_frequency_hz": 49.28664072635676,
+          "controller_channels": {
+            "tau_input_plugin": {
+              "highpass_10_rms_nm": 0.5176674846452434,
+              "residual_after_lowpass_10_rms_nm": 0.5170266839631752,
+              "highpass_20_rms_nm": 0.40801099954192194,
+              "residual_after_lowpass_20_rms_nm": 0.4077891376895603
+            },
+            "tau_ref": {
+              "highpass_10_rms_nm": 0.3247114794129418,
+              "residual_after_lowpass_10_rms_nm": 0.32471915280568814,
+              "highpass_20_rms_nm": 0.20948057859419159,
+              "residual_after_lowpass_20_rms_nm": 0.2093671432150187
+            },
+            "cascade_inner_p_cmd": {
+              "highpass_10_rms_nm": 0.27212320910115295,
+              "residual_after_lowpass_10_rms_nm": 0.2720330754583557,
+              "highpass_20_rms_nm": 0.19043428529981446,
+              "residual_after_lowpass_20_rms_nm": 0.19027603426107395
+            },
+            "cascade_inner_i_cmd": {
+              "highpass_10_rms_nm": 0.16142995956214212,
+              "residual_after_lowpass_10_rms_nm": 0.16159212193388092,
+              "highpass_20_rms_nm": 0.07017881688117314,
+              "residual_after_lowpass_20_rms_nm": 0.0701882639708286
+            }
+          },
+          "highpass20_per_actual_excursion_nm_per_deg": 0.008337437900522139
+        }
+      },
+      "contact": {
+        "left_normal_impulse_ns": 2.786548489209995,
+        "left_force_max_n": 60.57589571,
+        "left_force_mean_n": 3.6142005210894936,
+        "left_contact_fraction": 0.08949416342412451,
+        "left_loaded_over50n_fraction": 0.038910505836575876,
+        "left_penetration_max_mm": 2.00311,
+        "left_penetration_whole_max_mm": 16.23769
+      }
+    }
+  },
+  "paired_prefix_comparisons": {
+    "cp90": {
+      "window_s": [
+        13.19,
+        17.94
+      ],
+      "rollouts": {
+        "cp90_visible": {
+          "steps": 476,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 6.64131043905326,
+              "rmse_served_target_deg": 6.644277929352197,
+              "rmse_actual_served_deg": 0.17791924742209766,
+              "actual_excursion_deg": 41.714106525572674
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 3.939610067938611,
+              "rmse_served_target_deg": 4.001139546133511,
+              "rmse_actual_served_deg": 0.258763746992551,
+              "actual_excursion_deg": 30.671422517503473
+            }
+          },
+          "prefix_return": 284.33980513993095,
+          "prefix_reward_mean": 0.5973525318065777
+        },
+        "cp90_hidden": {
+          "steps": 476,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 13.28361216582551,
+              "rmse_served_target_deg": 13.165184583338991,
+              "rmse_actual_served_deg": 0.2973170060330411,
+              "actual_excursion_deg": 11.553304254664294
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 9.5480166417635,
+              "rmse_served_target_deg": 9.532810002004913,
+              "rmse_actual_served_deg": 0.3004179184420445,
+              "actual_excursion_deg": 10.256932215761761
+            }
+          },
+          "prefix_return": 129.5879283339827,
+          "prefix_reward_mean": 0.2722435469201317
+        }
+      }
+    },
+    "cp112": {
+      "window_s": [
+        13.19,
+        17.94
+      ],
+      "rollouts": {
+        "cp112_visible": {
+          "steps": 476,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 7.032882984690371,
+              "rmse_served_target_deg": 7.072047370957488,
+              "rmse_actual_served_deg": 0.16759601196922108,
+              "actual_excursion_deg": 46.78004758768738
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 4.274642666133396,
+              "rmse_served_target_deg": 4.283011366427882,
+              "rmse_actual_served_deg": 0.40201161949648195,
+              "actual_excursion_deg": 29.258710158920813
+            }
+          },
+          "prefix_return": 256.48274400789273,
+          "prefix_reward_mean": 0.5388292941342284
+        },
+        "cp112_hidden": {
+          "steps": 476,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 13.46682166678746,
+              "rmse_served_target_deg": 13.407602974929059,
+              "rmse_actual_served_deg": 0.20206295481483802,
+              "actual_excursion_deg": 19.04168289649803
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 10.626367697804339,
+              "rmse_served_target_deg": 10.597170775123514,
+              "rmse_actual_served_deg": 0.4032615306824814,
+              "actual_excursion_deg": 8.979781182957286
+            }
+          },
+          "prefix_return": 122.35207018922702,
+          "prefix_reward_mean": 0.25704216426308196
+        },
+        "cp90_visible": {
+          "steps": 476,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 6.64131043905326,
+              "rmse_served_target_deg": 6.644277929352197,
+              "rmse_actual_served_deg": 0.17791924742209766,
+              "actual_excursion_deg": 41.714106525572674
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 3.939610067938611,
+              "rmse_served_target_deg": 4.001139546133511,
+              "rmse_actual_served_deg": 0.258763746992551,
+              "actual_excursion_deg": 30.671422517503473
+            }
+          },
+          "prefix_return": 284.33980513993095,
+          "prefix_reward_mean": 0.5973525318065777
+        }
+      }
+    },
+    "cp184": {
+      "window_s": [
+        13.19,
+        13.96
+      ],
+      "rollouts": {
+        "cp184_visible": {
+          "steps": 78,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 10.904184230887738,
+              "rmse_served_target_deg": 10.89246882816929,
+              "rmse_actual_served_deg": 0.10966612895480136,
+              "actual_excursion_deg": 38.3610471003524
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 5.658699922966741,
+              "rmse_served_target_deg": 5.67452245115558,
+              "rmse_actual_served_deg": 0.05748115087680062,
+              "actual_excursion_deg": 28.252210921506798
+            }
+          },
+          "prefix_return": 33.35394621224474,
+          "prefix_reward_mean": 0.42761469502877875
+        },
+        "cp184_hidden": {
+          "steps": 78,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 16.462429620663737,
+              "rmse_served_target_deg": 16.331445721106146,
+              "rmse_actual_served_deg": 0.3620260617771016,
+              "actual_excursion_deg": 13.220232412173416
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 13.867867987793014,
+              "rmse_served_target_deg": 13.905017701057318,
+              "rmse_actual_served_deg": 0.3077074224264883,
+              "actual_excursion_deg": 13.915926025840122
+            }
+          },
+          "prefix_return": 24.68484347748776,
+          "prefix_reward_mean": 0.3164723522754841
+        },
+        "cp90_visible": {
+          "steps": 78,
+          "joints": {
+            "knee": {
+              "rmse_actual_target_deg": 6.5522358701336865,
+              "rmse_served_target_deg": 6.533985833411658,
+              "rmse_actual_served_deg": 0.1399415737294448,
+              "actual_excursion_deg": 34.993080853969644
+            },
+            "ankle": {
+              "rmse_actual_target_deg": 3.1296664437263564,
+              "rmse_served_target_deg": 3.1482911001338265,
+              "rmse_actual_served_deg": 0.07847362678178511,
+              "actual_excursion_deg": 23.754117699721796
+            }
+          },
+          "prefix_return": 49.65731302629017,
+          "prefix_reward_mean": 0.6366322182857714
+        }
+      }
+    }
+  },
+  "window_sensitivity": {
+    "window_s": [
+      13.15,
+      17.95
+    ],
+    "rollouts": {
+      "cp90_visible": {
+        "rmse_actual_target_deg": {
+          "knee": 6.664474243245013,
+          "ankle": 3.9212712928340454
+        },
+        "ankle_positive_area_nm_s": 2.9236537640599978,
+        "ankle_positive_fraction": 0.5771714226202874,
+        "knee_highpass20_rms_nm": 3.615898823350465
+      },
+      "cp112_hidden": {
+        "rmse_actual_target_deg": {
+          "knee": 13.40390984519484,
+          "ankle": 10.581415627339721
+        },
+        "ankle_positive_area_nm_s": 8.410487923989999,
+        "ankle_positive_fraction": 0.4951051864194959,
+        "knee_highpass20_rms_nm": 3.3615110938964903
+      },
+      "cp184_hidden": {
+        "rmse_actual_target_deg": {
+          "knee": 12.380452978084566,
+          "ankle": 8.857002427516594
+        },
+        "ankle_positive_area_nm_s": 3.4181598988599977,
+        "ankle_positive_fraction": 0.42636950635284315,
+        "knee_highpass20_rms_nm": 3.5007201951821414
+      },
+      "cp90_hidden": {
+        "rmse_actual_target_deg": {
+          "knee": 13.221520212859742,
+          "ankle": 9.509092972109473
+        },
+        "ankle_positive_area_nm_s": 3.2015975914900014,
+        "ankle_positive_fraction": 0.30847740054155387,
+        "knee_highpass20_rms_nm": 3.2274162407178473
+      },
+      "cp112_visible": {
+        "rmse_actual_target_deg": {
+          "knee": 7.041776825222506,
+          "ankle": 4.252909968100649
+        },
+        "ankle_positive_area_nm_s": 15.18818847659,
+        "ankle_positive_fraction": 0.7335971672568214,
+        "knee_highpass20_rms_nm": 3.521009738796271
+      }
+    }
+  }
+}

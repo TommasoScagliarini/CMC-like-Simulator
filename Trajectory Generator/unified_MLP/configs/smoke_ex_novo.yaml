@@ -46,7 +46,6 @@ simulation:
   grf_penetration_penalty_threshold_m: 0.02
   grf_penetration_termination_m: 0.028
   action_mode: absolute
-  max_delta_rad: 0.35
   pros_knee_target_slew_rate_limit_rad_s: 2.5
   pros_ankle_target_slew_rate_limit_rad_s: 2.0
   pros_ref_governor: true
@@ -68,25 +67,13 @@ simulation:
   reward_reference_range_floor: 0.05
   reward_reference_velocity_range_floor: 0.1
 grf:
-  grf_mode: online_sensor
-  online_grf_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json
-  online_grf_detector_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json
-  binary_phase_detector_profile: validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json
-  phase_fsm_input_mode: legacy_events
   phase_sensor_on_threshold_n: 5.0
   phase_sensor_off_threshold_n: 2.0
   phase_sensor_dwell_s: 0.03
   detector_sample_dt_s: 0.001
-  event_contract_id: legacy_events_v1
-  binary_phase_fsm_mode: binary_active
   binary_phase_debounce_s: 0.005
-  binary_phase_invalid_event_policy: reject_continue
-  binary_phase_actor_fsm_version: v3
-  binary_phase_event_contract_id: binary_point_v25+heel_qualified_fsm_v2
-  online_grf_observation: true
   online_grf_applied_side:
   - left
-  disable_prescribed_grf_side: []
 supervision:
   iteration_timeout_s: 3600.0
   sample_timeout_s: 3000.0

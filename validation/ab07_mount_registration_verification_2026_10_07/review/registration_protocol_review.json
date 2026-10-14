@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-07T11:19:52.148284+00:00",
+  "status": "protocol_review_predeclared_no_variants_executed_by_reviewer",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "question": "Are AB07 extra17.579129859mm physically necessary for fixed hardware, or conditionally required by the AB06 donor-relative calibration target?",
+  "scope": "Conceptual and repository-source review before reading any new variant results; no Claude or inference accessed, no native/solver/FK executed by reviewer. Existing input sources are read only.",
+  "facts": {
+    "healthy_shank_ratio_AB07_over_AB06": 0.8974402304400867,
+    "donor_AB06_mount_length_m": 0.43,
+    "AB07_anatomical_mount_length_m": 0.38589929908923726,
+    "AB07_registered_mount_length_m": 0.4034784289483052,
+    "extra_length_m": 0.017579129859067955,
+    "registered_ratio_AB07_over_AB06": 0.9383219277867563,
+    "static_ankle_calibration_shift_deg": 4.730648501276871,
+    "static_shift_applies_to_runtime_coordinate_zero": false
+  },
+  "protocol_2x2": {
+    "variables": {
+      "mount_length_m": [
+        0.38589929908923726,
+        0.4034784289483052
+      ],
+      "static_ankle_calibration_shift_deg": [
+        0.0,
+        4.730648501276871
+      ]
+    },
+    "case_definition": "Modify only AB07 anatomical-model distal parent-mount Y and the ankle column in its complete original static calibration motion. Recalibrate the same12 left markers, then solve a fresh whole-trial marker IK in every case. A case is the resulting model plus its own full IK; no reused current/pre-ground IK or mixed pose/model cells.",
+    "constant_sources": [
+      "Own raw healthy anatomy and current anatomical base hip/proximal fit",
+      "All static biological/knee poses, acquisition clocks and raw static/dynamic TRC",
+      "Donor SEA/muscle/hardware/mass/inertia values; joint axes/defaults/ranges",
+      "Marker identities/remap rule and calibration stride1/all-overlap averaging",
+      "Solver Python/backend/version, Inf constraints, accuracy1e-5, all28markers weight1, no coordinate file",
+      "Full dynamic acquisition, measured GRF and fixed contact/binary profiles",
+      "Full-trial 6Hz/order4/resample1ms preprocessing and frozen3primarycycles"
+    ],
+    "guards": [
+      "Dedicated absent case folders; no operational promotion or old-artifact edits",
+      "Input and executable source hashes before/after; full model/static-motion mutation whitelist",
+      "Model/marker/TRC/IK actual-setup hash bindings, complete21-coordinate finite output and coverage",
+      "Registered long/+angle endpoint reproduces current full model/IK semantically/numerically; compare hashes with metadata differences explained",
+      "Short/zero endpoint is freshly prepared under the same current recipe; archived pre-registration provenance is comparison evidence only",
+      "Downstream native1ms+exactHS/TO/nextHS common grid; preserve original event timestamps; never phase-retime to improve contact"
+    ]
+  },
+  "estimands": {
+    "end_to_end_response": "Within-AB07 effect of each calibration choice and interaction on new whole-IK poses, ankle center, fixed-profile reference contact and marker residuals. Interventions include downstream free-marker fitting and IK response, not isolated geometric displacement.",
+    "conditional_effects": "Report long−short at each fixed angle, plus angle+−zero at each fixed length; interaction=(long,+−short,+)−(long,0−short,0). No single unique contribution split without an additional allocation convention.",
+    "metrics": [
+      "Own healthy functional ankle-center and anatomical length departures",
+      "STL minimum clearance and foot pitch at static poses and dynamic stance, with plane specified",
+      "Per-sphere signed raw depth versus positive penetration, force and impulse; basis07 separated",
+      "Stance/swing and full frozen-cycle duration-weighted force/impulse",
+      "Signed/per-marker fit residuals and native unfiltered IK errors reported separately from filtered reference FK"
+    ],
+    "interpretation": "These are conditional direct-reference/calibration effects, not causal percentages of the saved dynamics, nor demonstrations that matching measured healthy GRF qualifies prosthetic hardware."
+  },
+  "registration_identifiability": {
+    "equations": "alpha solves median donor STL pitch; deltaY solves median[h_subject(alpha)+slope_i*deltaY] = median donor clearance. With positive slopes, the second root is unique for that alpha and target.",
+    "inference": "Uniqueness establishes the solution to the chosen donor benchmark. It does not identify a measured physical ankle position, hardware mounting requirement or floor. These2 target constraints consume the2 adjustable degrees of freedom and can override the preceding anatomical length ratio.",
+    "free_marker_problem": "Static marker fitting freely estimates local coordinates. Moving the mount or rotating the calibration foot also moves its inferred marker offsets; in-sample marker agreement cannot independently identify the hardware origin or prove length necessary. Whole dynamic marker IK can reveal conditioning/generalization but remains derived from these offsets.",
+    "anatomy_requirement": "If final healthy-relative shank proportion must be preserved, fixing short length is a legitimate hard constraint. The current long registered value departs from that requirement by design; whether this is an acceptable hardware adaptation needs a separately defined physical criterion."
+  },
+  "plane_origin_invariance": {
+    "status": "symbolic_from_current_source_not_a_new_native_test",
+    "assumptions": "Same plane normal and common origin change applied to both subject-before and donor-target; all poses and STL fixed.",
+    "proof": "For origin o→o+d, every height h_i→h_i−n·d and target median h_D→median h_D−n·d. Pitch atan2(n·R eX,n·R eY) and slope n·R_tibia eY do not involve origin. Thus median[h_i(alpha)+s_i deltaY]−h_D is unchanged for every deltaY, so alpha and the unique root are unchanged.",
+    "limitation": "Changing normal, donor pose/pitch, reference geometry, or shifting only one side is a different intervention. This invariance does not certify either absolute plane as a physical floor and does not apply to moving the force plane alone."
+  },
+  "bounded_discriminants": [
+    {
+      "test": "Own subject static assembly constraints",
+      "supports": "Compare functional healthy joint centers, contralateral chain and static marker observations in one acquisition frame, with explicit uncertainties and articulated versus rigid-foot geometry.",
+      "does_not_support": "Generic healthy visual foot mesh, heel/toe marker heights or donor clearance alone cannot certify physical prosthetic shoe/sole/floor."
+    },
+    {
+      "test": "Anatomical-length-preserving alternative",
+      "supports": "At short length, assess feasible foot/calibration orientation under a declared independent sole/floor/contact criterion and unchanged biological poses. Report residual donor pitch/clearance separately instead of forcing both donor targets.",
+      "does_not_support": "A different arbitrary plane or donor pitch yielding lower force is not independent evidence of a correct assembly. No tuning to measured GRF or free pelvis translation permitted."
+    },
+    {
+      "test": "Need criterion",
+      "supports": "Extra length is physically supported only if short-length assembly cannot satisfy independently justified hardware/ground/joint-center constraints within allowed orientation/uncertainty, while the long assembly can.",
+      "does_not_support": "Failure to satisfy both donor-derived pitch/clearance targets at short length proves incompatibility with that benchmark only."
+    },
+    {
+      "test": "Conditional sensitivity",
+      "supports": "The2x2 establishes whether length, static marker orientation, or their interaction drives the reference-force difference under the same raw source and profile.",
+      "does_not_support": "Force closer to healthy GRF or good marker RMS does not choose a physically correct mount; sphere contact patches are empirical and differ from STL hardware."
+    }
+  ],
+  "decision_classes": {
+    "donor_target_necessity": "Proven by current solver constraints, conditional on donor target and fixed source poses; physical need remains unproved.",
+    "verified_preservation_conflict": "Final shank ratio differs from the anatomical-fit ratio. It is a protocol/design conflict if the final ratio is a required invariant.",
+    "physical_error": "Requires an independently anchored geometric or assembly constraint violated beyond uncertainty; not solely reference-force mismatch.",
+    "necessary_adaptation": "Requires independent evidence that fixed hardware cannot meet those valid constraints at anatomy-preserving length, plus acceptable mounting change.",
+    "not_identified": "Retain explicit uncertainty if data constrain only virtual anatomical markers, donor benchmark and empirical contact."
+  },
+  "next_review": "Peer review variants/prepare_mount_variants.py and protocol when published; constraints FK output when available. No case runner invoked by this reviewer.",
+  "inputs_integrity": {
+    "protected_source_count": 27,
+    "all_unchanged": true,
+    "source_fingerprints": {
+      "AGENTS.md": "528ad5c3fd510cfe4d571bcb2b0a2c410d2bc99205a76cda95f5b7a573e6bbe6",
+      "Geometry/AM_foot_l.STL": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9",
+      "Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/selection.json": "5e9ec212f4b04ed83cfbfcc5856f6ddb9a1c026677122b60e6507fd4904af61a",
+      "config.py": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "kinematics_interpolator.py": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede",
+      "model_loader.py": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+      "models/AB06-raw/osimxml/AB06.osim": "7b6e44e26ff77c2a59653da590eed30c38a392555b9431c580e8be7042311539",
+      "models/AB07-raw/osimxml/ab07.osim": "151ca215fa3c60023a8f8d894a2661a86260fa88e32b239a225844bf4080feaf",
+      "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+      "plugins/libOnlineGRFContact.dylib": "5597a59a5368825fd207753b59291e72240c1ece3aa5280804f1e9b9c7d6a2b3",
+      "plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b",
+      "scripts/run_opensim_sea_pipeline.py": "6118073f53267a57058615ac303b41a4475d8c68230205909ddcb5af706a5599",
+      "tools/build_abx_seasea_pipeline.py": "0b9eb51b0dc482b39b0b8ef3565f019481fe3048f3d97727f09ee06ac230c711",
+      "tools/calibrate_ab06_seasea_markers.py": "49f9b6d2edbfb5b5e096a9420500b0d9faa8b269c948bccf8b4370a08323e05f",
+      "tools/fit_seasea_subject.py": "d942f045f7eae11ccab0e9a1f4ba2a1fed090bc6c114145431079a51d0fa86e8",
+      "tools/online_grf_contact/OnlineGRFSphereHalfSpaceForce.cpp": "e0022a37268b60b51f68a588ceb7c951e0a8e37d1cd0e0016135a458a0cf919a",
+      "tools/register_seasea_ground.py": "3b6b8acd8d5adbae0eb17b05aba7492f0920e5fc841ea7d48fdd52583ccdb64d",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA-raw/data/converted/static/static01/static01_ik_dataset_ab06_seasea.mot": "cb66e6fc9c1b26bf751b9a4d0aa67c6af0d518b2f96b6afac9d4ea722cd250c4",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA-raw/osimxml/AB07_SEASEA_anatomical.osim": "1a54126bd3d9fde21710af55c5bcb202e56e6dd5e764810459d667ca260f63e2",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA-raw/osimxml/AB07_SEASEA_marker_calibrated.osim": "6ea6dd779ecf88b69bc0cb940ed9e2d5225bb986a2d6f986920096ba574cc245",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA-raw/osimxml/AB07_SEASEA_static_ground_registered.mot": "47d87d2ac94f58103cc7a04f0289e587e975ecda0fa18601e704b611e5b14b31",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA_Threadmill/data/AB07_SEASEA_GRF_FullSpan.mot": "3236c7d42dea853d8a47a9244fb9e6ad30853000373fc36744cfc2bba8d829ee",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA_Threadmill/pipeline_report.json": "7ba4a29aec6eaa1502d5a3120186a61f7a4461eb1b5b5cae3cfcfd21b7c456b4",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/results/AB07/ab07_seasea_treadmill_treadmill_01_01_ik/02_ik/IK_full_10p360_153p415.mot": "7f497b28c9c9483b042d6b84fbc4d9d897cfd6191eb63015599734b484f3e15a",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/results/AB07/abx_reference_px9nj2m0/donor_model/AB06_SEASEA_stiff321_500_pi.osim": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1",
+      "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/results/AB07/abx_reference_px9nj2m0/static_motion/static_01_ik_dataset_ab06_seasea.mot": "ea4d8b0718f692ecaa0529239295041b021ba16be223eea812a546ce306d0087",
+      "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2"
+    }
+  }
+}

@@ -19,7 +19,7 @@ from dataclasses import fields, replace
 from pathlib import Path
 from typing import Any, Mapping
 
-from unified_MLP import _bootstrap
+from unified_MLP import _bootstrap, training_config
 from unified_MLP._bootstrap import ensure_sim_paths
 
 ensure_sim_paths()
@@ -37,11 +37,6 @@ from unified_MLP.env import (
 from unified_MLP import reward_function  # noqa: E402
 
 ENV_NAME = "cmc_unified_traj_env"
-DEFAULT_NETWORK_GRF_MODE = "online_sensor"
-DEFAULT_NETWORK_ONLINE_GRF_PROFILE = (
-    "online_grf_profiles/"
-    "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
-)
 
 _CMC_ENV_FIELDS = {f.name for f in fields(CMCEnvConfig)}
 
@@ -154,21 +149,13 @@ def _resolve_setup_xml(value: Any) -> Any:
 def build_env_config(env_config: Mapping[str, Any] | None) -> CMCEnvConfig:
     """Build a CMCEnvConfig from an RLlib-style dict (unknown keys ignored)."""
     raw = dict(env_config or {})
+    for key, value in training_config.grf_env_defaults().items():
+        raw.setdefault(key, value)
     for key, value in ENV_INVARIANTS.items():
         raw.setdefault(key, value)
-    raw.setdefault("online_grf_applied_sides", ["left"])
     assigned_start = _episode_start_offset_for_runner(env_config)
     if assigned_start is not None:
         raw["episode_start_offset_s"] = assigned_start
-    raw.setdefault("grf_mode", DEFAULT_NETWORK_GRF_MODE)
-    raw.setdefault(
-        "online_grf_profile_file",
-        DEFAULT_NETWORK_ONLINE_GRF_PROFILE,
-    )
-    raw.setdefault(
-        "include_online_grf_observation",
-        raw["grf_mode"] != "prescribed",
-    )
     # RLlib injects bookkeeping keys (worker_index, vector_index, ...): drop them.
     kwargs = {k: v for k, v in raw.items() if k in _CMC_ENV_FIELDS}
     if "setup_xml_path" in kwargs:

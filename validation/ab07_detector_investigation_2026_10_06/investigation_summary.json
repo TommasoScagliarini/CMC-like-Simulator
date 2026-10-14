@@ -1,0 +1,355 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-06",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "indagine_completata; qualifica fisica AB07 e correzione operativa ancora aperte",
+  "scope": "Analisi offline delle pose salvate e di riferimento con OpenSim nativo, ricostruzione rigida dai marker, replay degli eventi e verifica di risultati storici. Nessun nuovo rollout, integrazione dinamica, policy o training.",
+  "diagnosi": {
+    "risultato_principale": "Gli eventi mancanti nascono da contatti geometrici del tallone quasi sempre assenti sul modello AB07 preparato. La logica V26 e la consegna degli eventi interpretano fedelmente i bit ricevuti.",
+    "logica_generica_profilo_geometrico": "Il codice del detector non usa identita del soggetto. Punti locali e piano congelati furono selezionati su AB06; questo non costituisce qualifica su tutti i modelli.",
+    "registrazione_marker_hardware_piano": "Con piede distale, punti e piano comuni, la posa statica AB07 porta entrambi i punti sopra il piano del detector. AB06 porta il tallone sotto. Il divario persiste usando una posa rigida libera del piede ricostruita dai marker.",
+    "limite_fitting_attuale": "Il fitting anatomico delle due quote di montaggio e la calibrazione libera dei marker possono ridurre il residuo marker senza garantire la coerenza fisica fra piede protesico e piano. La preparazione precedente non includeva una qualifica esplicita di questo contatto.",
+    "causa_fisica_non_univoca": "Il divario osservato combina differenti altezze dei marker nello statico e differente associazione locale marker-piede. Non e stato isolato un unico errore di datum, anatomia, montaggio o calibrazione, ne una correzione numerica validata.",
+    "riferimento_servito": "La cinematica servita dopo il governor cambia ulteriormente la geometria del tallone: il controfattuale con sola caviglia servita elimina tutti i contatti del tallone. Questa e una verifica di pose, non una dimostrazione dinamica che il governor causi da solo il problema.",
+    "deficit_grf_ab06": "La sottostima delle GRF online era gia documentata su AB06. Il rapporto AB07 del 24.71% non dimostra una nuova causa specifica di AB07 e i protocolli storici non sono equivalenti al test AB07."
+  },
+  "evidenze": {
+    "parita_traccia_pose": {
+      "common_sensor_samples": 9009,
+      "mismatch_count": 0,
+      "mismatches": [],
+      "reset_baseline_matches_pose": true,
+      "unavailable_final_pose_time_s": 19.370000000000992,
+      "pose_and_trace_grid_counts": {
+        "heel_pose": 235,
+        "heel_trace": 235,
+        "toe_pose": 2663,
+        "toe_trace": 2664
+      },
+      "endpoint_explains_one_toe_sample": true
+    },
+    "parita_replay_eventi_originali": {
+      "status": "PASS",
+      "samples": 9010,
+      "events": 4,
+      "exact_event_dictionary_parity": true,
+      "scope": "Replays the original 10 ms delivery batches, no OpenSim integration"
+    },
+    "intervalli_tallone_on": [
+      {
+        "start_s": 13.269,
+        "last_on_sample_s": 13.371,
+        "samples": 103,
+        "sample_span_s": 0.102,
+        "bin_duration_s": 0.103
+      },
+      {
+        "start_s": 14.908,
+        "last_on_sample_s": 15.039,
+        "samples": 132,
+        "sample_span_s": 0.131,
+        "bin_duration_s": 0.132
+      }
+    ],
+    "debounce_s": 0.005,
+    "confronto_statico_clearance_mm": {
+      "native_pose": {
+        "left_heel": {
+          "AB06_mmean_signed_clearance_mm": -14.371128342499295,
+          "AB07_mmean_signed_clearance_mm": 7.457569994997377,
+          "AB07_mminus_AB06_mmean_signed_clearance_mm": 21.82869833749667
+        },
+        "left_toe": {
+          "AB06_mmean_signed_clearance_mm": 7.7414236908629075,
+          "AB07_mmean_signed_clearance_mm": 13.247208685383178,
+          "AB07_mminus_AB06_mmean_signed_clearance_mm": 5.505784994520272
+        }
+      },
+      "all_five": {
+        "left_heel": {
+          "AB06_mmean_signed_clearance_mm": -14.37156130557316,
+          "AB07_mmean_signed_clearance_mm": 7.457604779246481,
+          "AB07_mminus_AB06_mmean_signed_clearance_mm": 21.82916608481964
+        },
+        "left_toe": {
+          "AB06_mmean_signed_clearance_mm": 7.737371465023371,
+          "AB07_mmean_signed_clearance_mm": 13.246961837469671,
+          "AB07_mminus_AB06_mmean_signed_clearance_mm": 5.509590372446301
+        }
+      },
+      "four_calcaneus_markers": {
+        "left_heel": {
+          "AB06_mmean_signed_clearance_mm": -14.371364256213344,
+          "AB07_mmean_signed_clearance_mm": 7.4576420288765215,
+          "AB07_mminus_AB06_mmean_signed_clearance_mm": 21.829006285089868
+        },
+        "left_toe": {
+          "AB06_mmean_signed_clearance_mm": 7.737208198198829,
+          "AB07_mmean_signed_clearance_mm": 13.246962622608873,
+          "AB07_mminus_AB06_mmean_signed_clearance_mm": 5.509754424410045
+        }
+      }
+    },
+    "scomposizione_divario_statico": {
+      "native_pose": {
+        "left_heel": {
+          "AB07_minus_AB06_mean_sensor_ground_y_m": 0.021828698337496674,
+          "AB07_minus_AB06_mean_measured_L_Heel_ground_y_m": 0.013191701438582188,
+          "AB07_minus_AB06_mean_marker_fit_bias_y_m": 1.297981639587709e-06,
+          "AB07_minus_AB06_mean_projected_local_gap_y_m": 0.008635698917274903
+        },
+        "left_toe": {
+          "AB07_minus_AB06_mean_sensor_ground_y_m": 0.005505784994520271,
+          "AB07_minus_AB06_mean_measured_L_Heel_ground_y_m": 0.013191701438582188,
+          "AB07_minus_AB06_mean_marker_fit_bias_y_m": 1.297981639587709e-06,
+          "AB07_minus_AB06_mean_projected_local_gap_y_m": -0.0076872144257015005
+        }
+      },
+      "all_five": {
+        "left_heel": {
+          "AB07_minus_AB06_mean_sensor_ground_y_m": 0.021829166084819645,
+          "AB07_minus_AB06_mean_measured_L_Heel_ground_y_m": 0.013191701438582188,
+          "AB07_minus_AB06_mean_marker_fit_bias_y_m": 4.3548143247381576e-07,
+          "AB07_minus_AB06_mean_projected_local_gap_y_m": 0.00863702916480498
+        },
+        "left_toe": {
+          "AB07_minus_AB06_mean_sensor_ground_y_m": 0.005509590372446301,
+          "AB07_minus_AB06_mean_measured_L_Heel_ground_y_m": 0.013191701438582188,
+          "AB07_minus_AB06_mean_marker_fit_bias_y_m": 4.3548143247381576e-07,
+          "AB07_minus_AB06_mean_projected_local_gap_y_m": -0.007682546547568356
+        }
+      },
+      "four_calcaneus_markers": {
+        "left_heel": {
+          "AB07_minus_AB06_mean_sensor_ground_y_m": 0.021829006285089866,
+          "AB07_minus_AB06_mean_measured_L_Heel_ground_y_m": 0.013191701438582188,
+          "AB07_minus_AB06_mean_marker_fit_bias_y_m": 1.6489068162002555e-07,
+          "AB07_minus_AB06_mean_projected_local_gap_y_m": 0.00863713995582606
+        },
+        "left_toe": {
+          "AB07_minus_AB06_mean_sensor_ground_y_m": 0.005509754424410044,
+          "AB07_minus_AB06_mean_measured_L_Heel_ground_y_m": 0.013191701438582188,
+          "AB07_minus_AB06_mean_marker_fit_bias_y_m": 1.6489068162002555e-07,
+          "AB07_minus_AB06_mean_projected_local_gap_y_m": -0.0076821119048537615
+        }
+      }
+    },
+    "intera_acquisizione_ik_non_filtrata": {
+      "AB06": {
+        "pose_count": 28612,
+        "time_range_s": [
+          11.99,
+          155.045
+        ],
+        "loaded_definition": "measured left vertical GRF >20 N; nominal healthy support only",
+        "heel_contact_fraction_during_nominal_support": 0.597931583134447,
+        "any_contact_fraction_during_nominal_support": 0.9470697427738001,
+        "heel_median_clearance_during_nominal_support_mm": -3.1435495460546083
+      },
+      "AB07": {
+        "pose_count": 28612,
+        "time_range_s": [
+          10.36,
+          153.415
+        ],
+        "loaded_definition": "measured left vertical GRF >20 N; nominal healthy support only",
+        "heel_contact_fraction_during_nominal_support": 0.01284990669154892,
+        "any_contact_fraction_during_nominal_support": 0.19813383097840576,
+        "heel_median_clearance_during_nominal_support_mm": 10.073792961723356
+      }
+    },
+    "casi_pose_9010_campioni": {
+      "AB06_new_ik_filtered": {
+        "heel_contact_fraction": 0.6166481687014428,
+        "any_contact_fraction": 0.7338512763596005,
+        "v26_events": {
+          "heel_strike": 5,
+          "toe_off": 5
+        }
+      },
+      "AB07_new_ik_raw": {
+        "heel_contact_fraction": 0.030965593784683686,
+        "any_contact_fraction": 0.09900110987791343,
+        "v26_events": {
+          "heel_strike": 4,
+          "toe_off": 4
+        }
+      },
+      "AB07_new_ik_filtered": {
+        "heel_contact_fraction": 0.029078801331853497,
+        "any_contact_fraction": 0.09456159822419534,
+        "v26_events": {
+          "heel_strike": 2,
+          "toe_off": 2
+        }
+      },
+      "AB07_healthy_remapped_on_fitted_prosthesis": {
+        "heel_contact_fraction": 0.15749167591564928,
+        "any_contact_fraction": 0.16526082130965594,
+        "v26_events": {
+          "heel_strike": 6,
+          "toe_off": 5
+        }
+      },
+      "AB07_actual_prescribed": {
+        "heel_contact_fraction": 0.08423973362930078,
+        "any_contact_fraction": 0.16537180910099888,
+        "v26_events": {
+          "heel_strike": 4,
+          "toe_off": 4
+        }
+      },
+      "AB07_actual_v26": {
+        "heel_contact_fraction": 0.026082130965593784,
+        "any_contact_fraction": 0.3084350721420644,
+        "v26_events": {
+          "heel_strike": 2,
+          "toe_off": 2
+        }
+      },
+      "AB07_served_v26": {
+        "heel_contact_fraction": 0.0293007769145394,
+        "any_contact_fraction": 0.31143174250832406,
+        "v26_events": {
+          "heel_strike": 2,
+          "toe_off": 2
+        }
+      },
+      "AB07_counterfactual_served_knee": {
+        "heel_contact_fraction": 0.1099889012208657,
+        "any_contact_fraction": 0.22896781354051055,
+        "v26_events": {
+          "heel_strike": 6,
+          "toe_off": 5
+        }
+      },
+      "AB07_counterfactual_served_ankle": {
+        "heel_contact_fraction": 0.0,
+        "any_contact_fraction": 0.21176470588235294,
+        "v26_events": {
+          "heel_strike": 0,
+          "toe_off": 0
+        }
+      },
+      "AB07_counterfactual_served_knee_ankle": {
+        "heel_contact_fraction": 0.0293007769145394,
+        "any_contact_fraction": 0.31143174250832406,
+        "v26_events": {
+          "heel_strike": 2,
+          "toe_off": 2
+        }
+      },
+      "AB07_counterfactual_donor_mounts": {
+        "heel_contact_fraction": 0.8056603773584906,
+        "any_contact_fraction": 1.0,
+        "v26_events": {
+          "heel_strike": 0,
+          "toe_off": 0
+        }
+      }
+    },
+    "ab06_grf_storiche": {
+      "policy_ratio_range_reported": [
+        0.212,
+        0.362
+      ],
+      "policy_ratio_median_reported": 0.291,
+      "cmc_hybrid_ratio_recomputed": 0.8686077061247967,
+      "primary_profile_alias_byte_identical": true,
+      "policy_scope": "Valori dal report storico del 22 giugno; rapporto prescribed/hybrid ricalcolato dai file STO esistenti.",
+      "ab07_ratio_comparability": "24.71% misurato ai 901 confini a 10 ms; differenze di soggetto, riferimento, governor, durata e campionamento impediscono una attribuzione causale diretta."
+    }
+  },
+  "verifiche": {
+    "fonti": {
+      "detector_geometry_analysis.json": {
+        "strict_json_valid": true,
+        "fingerprint_entries_verified": 28,
+        "all_source_fingerprints_match": true
+      },
+      "marker_geometry_audit.json": {
+        "strict_json_valid": true,
+        "fingerprint_entries_verified": 16,
+        "all_source_fingerprints_match": true
+      },
+      "detector_trace_audit.json": {
+        "strict_json_valid": true,
+        "fingerprint_entries_verified": 4,
+        "all_source_fingerprints_match": true
+      },
+      "ab06_grf_history.json": {
+        "strict_json_valid": true,
+        "fingerprint_entries_verified": 9,
+        "all_source_fingerprints_match": true
+      },
+      "stance_comparison_and_plot_receipt.json": {
+        "strict_json_valid": true,
+        "fingerprint_entries_verified": 4,
+        "all_source_fingerprints_match": true
+      }
+    },
+    "production_sampler_parity": {
+      "cases": 13,
+      "poses_per_case": 13,
+      "points_per_pose": 2,
+      "clearance_tolerance_m": 1e-12,
+      "all_pass": true
+    },
+    "parametri_e_codice_operativi": {
+      "all_20_original_control_fingerprints_unchanged": true,
+      "all_additional_protected_fingerprints_unchanged": true
+    },
+    "fonti_marker_invariate": true,
+    "grafico_ispezionato_visivamente": true
+  },
+  "prossimo_intervento_indicato": {
+    "priorita": "Qualificare la registrazione dei marker sul piede protesico e la coerenza con il piano fisico durante la preparazione/fitting, poi rieseguire IK e validare i contatti con lo stesso detector.",
+    "invarianti": "Conservare SEA, catena di controllo, semantica HS/TO e parametri condivisi. Nessuna regolazione per-soggetto delle soglie proposta da questa indagine.",
+    "non_applicato": "Nessuna modifica a modello, marker, piano, soglie, SEA, controller, governor, FSM o profili operativi.",
+    "controfattuale_mount_ab06": "Il ripristino delle quote donor solo su una copia temporanea produce contatto continuo e penetrazioni marcate; non e una soluzione proposta."
+  },
+  "artefatti": [
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/detector_geometry_analysis.json",
+      "sha256": "178f08f34239e7657cabbe0b13c6c7bebf1e082a64dbe46a22e1b7fc3d1967a9"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/marker_geometry_audit.json",
+      "sha256": "597233ce5a1d112d2c818da357c0aed98636dedd9ed6ba008936a8b5e7a0242c"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/detector_trace_audit.json",
+      "sha256": "cb687d0e52fc3c5b2f1258a47b110d985e1a5f0e5b66964f02ba78769d8f5ff9"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/ab06_grf_history.json",
+      "sha256": "bf5762305186062731bd660a1c084f8f623755e01d1b7a373b9b512f6f0a8547"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stance_comparison_and_plot_receipt.json",
+      "sha256": "6512ea625202b964769167d54b505e18813a94082d8b49468eba33a56da8f0ac"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/sensor_pose_comparison.csv",
+      "sha256": "a4519ab3f964da7ebcc26204da09dfdfb604cf0c85ce305a1674f31fc2b1dadf"
+    },
+    {
+      "path": "plot/AB07_detector_investigation_2026_10_06/01_sensor_clearance_and_nominal_support.png",
+      "sha256": "bf0786edb9f854e3b896656a83e3f501c96e7a2d098aa1399074813a6108becf"
+    }
+  ],
+  "script_diagnostici": [
+    {
+      "path": "Trajectory Generator/validation/AB07/investigate_detector_geometry.py",
+      "sha256": "b1042b1adc2f3f60992bd69f8a361ee3ab9925865bf95d00247de23dbaf873a4"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/audit_marker_geometry.py",
+      "sha256": "bfe736a4cae47676fcb476cf48e311fade19256147c2996c7b979a7bb2f7d465"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/render_detector_investigation.py",
+      "sha256": "482f1c29746bf75c6d5ed2d4304379cf739aafd00e6b896b51f61c0d9a8a8c11"
+    }
+  ]
+}

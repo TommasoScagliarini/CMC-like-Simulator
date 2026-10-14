@@ -1,0 +1,306 @@
+{
+  "method": "Offline replay of recorded commands through the source reference filter; no policy/environment/physical rollout",
+  "limitations": [
+    "Alternative commands do not update physical state or the recorded policy observations.",
+    "Teacher playback uses the known target at each segment endpoint (10 ms horizon); it is an oracle command experiment.",
+    "Target-vs-slew exceedance refers to endpoint rates, not a strict speed bound on the filtered reference.",
+    "The control interval is 1 ms; equivalence with recorded references is checked numerically."
+  ],
+  "source_sha256": "5c58049570f7ea50a62595266f37d2eaa51b6d7812c2e95645995406d968f7a6",
+  "script_sha256": "3c46306999200df21d5517668587763b2bff299910f5216f11153bb2fd824d47",
+  "runs": {
+    "unified39_best54": {
+      "trace": "unified_MLP_39/runs/rollout/MLP39_left_phase_best_iter54_center_2026-09-18/rollout_policy_trace.json",
+      "trace_sha256": "8c5868cee1b7779cbd2ab2c220384f4a7f15b1921ad68218aba86238e92a6871",
+      "reset_sha256": "ab162f9cbe61ee8bd384cf27f477d3bc734d22d39b697f84dcb33de777c134c7",
+      "training_config_sha256": "cf360877f672aed031337542555dbe810b5b74cf0ed105f2dd390d8838d243e5",
+      "steps": 500,
+      "target_rate_above_proposed_slew_fraction": {
+        "pros_knee_angle": 0.168,
+        "pros_ankle_angle": 0.078
+      },
+      "target_velocity_abs_max_rad_s": {
+        "pros_knee_angle": 3.386403731331471,
+        "pros_ankle_angle": 3.2148590484472614
+      },
+      "scenarios": {
+        "recorded_commands_recorded_slew": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 14.09136154646609,
+              "served_min_deg": -24.932473593262227,
+              "served_max_deg": -10.007563011580139,
+              "served_excursion_deg": 14.924910581682086,
+              "served_velocity_abs_max_rad_s": 1.0648278971947833,
+              "endpoint_slew_clipped_fraction": 0.792
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 8.591634323173935,
+              "served_min_deg": -2.3353536279532228,
+              "served_max_deg": 19.97984603393377,
+              "served_excursion_deg": 22.315199661886993,
+              "served_velocity_abs_max_rad_s": 1.4361283778166127,
+              "endpoint_slew_clipped_fraction": 0.748
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.0,
+            "jerk_limit_fraction": 0.0
+          }
+        },
+        "recorded_commands_slew_disabled": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 14.481031931815933,
+              "served_min_deg": -25.78710076593362,
+              "served_max_deg": -10.022245325338965,
+              "served_excursion_deg": 15.764855440594657,
+              "served_velocity_abs_max_rad_s": 2.2668557794180404,
+              "endpoint_slew_clipped_fraction": 0.0
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 8.219621021623242,
+              "served_min_deg": -3.700880371469532,
+              "served_max_deg": 21.91917124289477,
+              "served_excursion_deg": 25.620051614364304,
+              "served_velocity_abs_max_rad_s": 2.452297808530238,
+              "endpoint_slew_clipped_fraction": 0.0
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.005068181818181818,
+            "jerk_limit_fraction": 0.05028030303030303
+          }
+        },
+        "recorded_commands_slew_2p5_2p0": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 14.09136154646609,
+              "served_min_deg": -24.932473593262227,
+              "served_max_deg": -10.007563011580139,
+              "served_excursion_deg": 14.924910581682086,
+              "served_velocity_abs_max_rad_s": 1.0648278971947833,
+              "endpoint_slew_clipped_fraction": 0.792
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 8.591634323173935,
+              "served_min_deg": -2.3353536279532228,
+              "served_max_deg": 19.97984603393377,
+              "served_excursion_deg": 22.315199661886993,
+              "served_velocity_abs_max_rad_s": 1.4361283778166127,
+              "endpoint_slew_clipped_fraction": 0.748
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.0,
+            "jerk_limit_fraction": 0.0
+          }
+        },
+        "oracle_teacher_endpoints_slew_disabled": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 6.283665926870404,
+              "served_min_deg": -56.19568278547736,
+              "served_max_deg": -10.006759642748206,
+              "served_excursion_deg": 46.18892314272915,
+              "served_velocity_abs_max_rad_s": 3.366479829588329,
+              "endpoint_slew_clipped_fraction": 0.0
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 4.207471159234385,
+              "served_min_deg": -6.7707145547711285,
+              "served_max_deg": 21.888747755622806,
+              "served_excursion_deg": 28.659462310393934,
+              "served_velocity_abs_max_rad_s": 2.9701040029599897,
+              "endpoint_slew_clipped_fraction": 0.0
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.0,
+            "jerk_limit_fraction": 0.0
+          }
+        },
+        "oracle_teacher_endpoints_slew_2p5_2p0": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 7.03608097502122,
+              "served_min_deg": -56.18066517924767,
+              "served_max_deg": -10.006759642748206,
+              "served_excursion_deg": 46.17390553649946,
+              "served_velocity_abs_max_rad_s": 2.689936935019403,
+              "endpoint_slew_clipped_fraction": 0.242
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 4.661128269320359,
+              "served_min_deg": -5.5863154829199155,
+              "served_max_deg": 21.888747755622806,
+              "served_excursion_deg": 27.47506323854272,
+              "served_velocity_abs_max_rad_s": 2.118831849461598,
+              "endpoint_slew_clipped_fraction": 0.114
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.0,
+            "jerk_limit_fraction": 0.0
+          }
+        }
+      },
+      "recorded_replay_max_abs_error_rad": {
+        "pros_knee_angle": 1.48827392076889e-08,
+        "pros_ankle_angle": 1.4852001017917615e-08
+      }
+    },
+    "v26_best87": {
+      "trace": "runs/rollout/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter_rollout/rollout_policy_trace.json",
+      "trace_sha256": "3dd96c517e58dcf1ff2c43798026c5a51b8eaefda17b99e10648d2e357855f1c",
+      "reset_sha256": "4938aa612a749cb8bc9c81e99331567ed27cd756f69b653baa335ed0606765dd",
+      "training_config_sha256": "aaf84cfd5be75672d003af6139cb0e977667f2b207fbfda91971a145e4586086",
+      "steps": 500,
+      "target_rate_above_proposed_slew_fraction": {
+        "pros_knee_angle": 0.23,
+        "pros_ankle_angle": 0.032
+      },
+      "target_velocity_abs_max_rad_s": {
+        "pros_knee_angle": 4.235774914584974,
+        "pros_ankle_angle": 2.2202182812484836
+      },
+      "scenarios": {
+        "recorded_commands_recorded_slew": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 6.934559969239103,
+              "served_min_deg": -64.04555360748486,
+              "served_max_deg": -6.662766403782208,
+              "served_excursion_deg": 57.382787203702655,
+              "served_velocity_abs_max_rad_s": 3.6174579433667793,
+              "endpoint_slew_clipped_fraction": 0.0
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 1.4341725741462104,
+              "served_min_deg": 4.27578451648269,
+              "served_max_deg": 25.069897116485095,
+              "served_excursion_deg": 20.794112600002407,
+              "served_velocity_abs_max_rad_s": 2.0224635813410887,
+              "endpoint_slew_clipped_fraction": 0.0
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.002742424242424243,
+            "jerk_limit_fraction": 0.369719696969697
+          }
+        },
+        "recorded_commands_slew_disabled": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 6.934559969239103,
+              "served_min_deg": -64.04555360748486,
+              "served_max_deg": -6.662766403782208,
+              "served_excursion_deg": 57.382787203702655,
+              "served_velocity_abs_max_rad_s": 3.6174579433667793,
+              "endpoint_slew_clipped_fraction": 0.0
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 1.4341725741462104,
+              "served_min_deg": 4.27578451648269,
+              "served_max_deg": 25.069897116485095,
+              "served_excursion_deg": 20.794112600002407,
+              "served_velocity_abs_max_rad_s": 2.0224635813410887,
+              "endpoint_slew_clipped_fraction": 0.0
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.002742424242424243,
+            "jerk_limit_fraction": 0.369719696969697
+          }
+        },
+        "recorded_commands_slew_2p5_2p0": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 11.370317167599186,
+              "served_min_deg": -55.056614461706125,
+              "served_max_deg": -8.737144225241833,
+              "served_excursion_deg": 46.31947023646429,
+              "served_velocity_abs_max_rad_s": 2.727375165180384,
+              "endpoint_slew_clipped_fraction": 0.936
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 3.351518488646353,
+              "served_min_deg": 7.52444844952536,
+              "served_max_deg": 24.32262906374743,
+              "served_excursion_deg": 16.79818061422207,
+              "served_velocity_abs_max_rad_s": 1.6680009197618098,
+              "endpoint_slew_clipped_fraction": 0.916
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.0,
+            "jerk_limit_fraction": 0.0
+          }
+        },
+        "oracle_teacher_endpoints_slew_disabled": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 7.765708515541726,
+              "served_min_deg": -64.25778783810345,
+              "served_max_deg": -10.732144855040914,
+              "served_excursion_deg": 53.525642983062546,
+              "served_velocity_abs_max_rad_s": 4.2278732013652105,
+              "endpoint_slew_clipped_fraction": 0.0
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 3.09030112941423,
+              "served_min_deg": 5.274483009824831,
+              "served_max_deg": 25.19811598514439,
+              "served_excursion_deg": 19.92363297531956,
+              "served_velocity_abs_max_rad_s": 2.0041602329464636,
+              "endpoint_slew_clipped_fraction": 0.0
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.0,
+            "jerk_limit_fraction": 0.0
+          }
+        },
+        "oracle_teacher_endpoints_slew_2p5_2p0": {
+          "joints": {
+            "pros_knee_angle": {
+              "served_to_target_rmse_deg": 10.274685744770816,
+              "served_min_deg": -61.78018894179719,
+              "served_max_deg": -10.976311337356956,
+              "served_excursion_deg": 50.80387760444024,
+              "served_velocity_abs_max_rad_s": 2.8717461712552432,
+              "endpoint_slew_clipped_fraction": 0.348
+            },
+            "pros_ankle_angle": {
+              "served_to_target_rmse_deg": 3.1069226615825634,
+              "served_min_deg": 5.274490440846824,
+              "served_max_deg": 25.212429081047723,
+              "served_excursion_deg": 19.937938640200898,
+              "served_velocity_abs_max_rad_s": 1.963970876730499,
+              "endpoint_slew_clipped_fraction": 0.046
+            }
+          },
+          "governor_mean_limit_fraction": {
+            "velocity_limit_fraction": 0.0,
+            "acceleration_limit_fraction": 0.0,
+            "jerk_limit_fraction": 0.0
+          }
+        }
+      },
+      "recorded_replay_max_abs_error_rad": {
+        "pros_knee_angle": 0.0,
+        "pros_ankle_angle": 1.1102230246251565e-16
+      }
+    }
+  },
+  "recorded_replay_validation_pass": true
+}

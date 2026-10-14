@@ -138,15 +138,6 @@ def _oracle_action(env: CMCLikeProsthesisTrajectoryEnv, target_t: float) -> np.n
     mode = env.env_cfg.action_mode.lower()
     if mode == "raw":
         return values
-    if mode == "delta":
-        action = np.empty_like(values)
-        for i, time_value in enumerate(future):
-            q_base, _, _ = env.base_kin.get(float(time_value))
-            for j, coord_name in enumerate(env.cfg.pros_coords):
-                action[i, j] = (
-                    values[i, j] - q_base[coord_name]
-                ) / env._delta_scale[j]
-        return np.clip(action, -1.0, 1.0)
     if mode != "absolute":
         raise ValueError(f"Unsupported action_mode: {env.env_cfg.action_mode}")
 

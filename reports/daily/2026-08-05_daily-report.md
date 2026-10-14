@@ -271,3 +271,39 @@ H0.
 - [ ] Validare detector con rumore/delay realistici e ground truth localizzata,
       portare la GRF online a stato production-ready mantenendola separata dai
       sensori e valutare la deflessione SEA iniziale coerente con la coppia.
+
+<!-- reconciled-report-todos-2026-10-05:start -->
+## TODO riconciliati e propagati — integrazione del 5 ottobre 2026
+
+Ricostruzione documentale dello stato a questa data. Le voci sotto precisano i TODO storici ripetuti nelle sezioni precedenti: una nuova esecuzione o un PASS su un altro ramo non chiude il debito originario. Le attività condizionate restano proposte; questa integrazione non avvia esperimenti. Le chiusure riportano una fonte esplicita.
+
+### Attività aperte
+
+- [ ] Riferimento storico al TODO giugno sulla scelta warm-start: luglio ha usato il 23 giugno grfsoft, non il 24 giugno. — [fonte 2026-08-25, riga 40](../user/2026-08-25_ricostruzione_storica_architetture_actor_e_tentativi_rete_larga.md).
+- [ ] Solo dopo tale freeze, eseguire prima le sei coppie A/B e, se tutte passano, i sei casi C. — [fonte 2026-08-05, riga 144](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md).
+- [ ] Mantenere H0_sep, trial protetti, corridor positivo e PPO chiusi fino ai gate rispettivi. — [fonte 2026-08-05, riga 232](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md).
+- [ ] Revisionare e congelare con nuova autorità il percorso H0: la necessità ora evidenziata è adattare l'actor pre-split alla semantica della GRF primaria, prima di poter valutare separatamente l'attivazione V25/V20. — [fonte 2026-08-05, riga 226](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md).
+- [ ] Mantenere corridor, reward positivo e PPO chiusi fino ai rispettivi gate. — [fonte 2026-08-05, riga 147](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md).
+- [ ] Eseguire la prova A/B bit-exact prevista dal protocollo congelato, prima con V20 disabilitata e poi in shadow. — [fonte 2026-08-05, riga 226](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md).
+- [ ] Solo dopo il gate H0 decidere l'apertura one-shot dei trial protetti 05/06. — [fonte 2026-08-05, riga 146](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md).
+- [ ] Eseguire il caso C `binary_active` soltanto dopo il PASS A/B e con le autorità previste dal protocollo. — [fonte 2026-08-05, riga 228](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md).
+- [ ] Definire un nuovo gate baseline A per il candidato adattato e un nuovo percorso A/B/C soltanto dopo avere ottenuto una baseline valida. — [fonte 2026-08-05, riga 229](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md).
+- [ ] Mantenere B, C, H0_sep, trial 05/06, corridor positivo e PPO chiusi fino ai rispettivi gate. — [fonte 2026-08-05, riga 231](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md).
+
+### Chiusure documentate e consolidamento retrospettivo
+
+- [x] Mantenere corridor, morphology reward positivo e PPO chiusi fino ai gate successivi. — [fonte 2026-08-04, riga 218](../user/2026-08-04_detector_v24_v25_clearance_e_sweep_reach.md). **Chiuso:** Execution-unlock e primo riferimento A eseguiti; arresto ERROR_H0_REFERENCE. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Congelare un receipt separato di execution-unlock; solo dopo quel gate eseguire i casi H0 A/B/C, senza aprire 05/06. — [fonte 2026-08-04, riga 215](../user/2026-08-04_detector_v24_v25_clearance_e_sweep_reach.md). **Chiuso:** Execution-unlock e primo riferimento A eseguiti; arresto ERROR_H0_REFERENCE. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Non riutilizzare questo stage one-shot e non trasformare l'ERROR in PASS o FAIL scientifico. — [fonte 2026-08-04, riga 131](../user/2026-08-04_trial08_v21_one_shot_error_terminale.md). **Chiuso:** Stage consumati preservati e routing primaria/detector separato mantenuto. ([evidenza](2026-08-05_daily-report.md)).
+- [x] **DA FARE:** integrare V25 in shadow e completare il gate H0 prima di aprire 05/06. Vedere `2026-08-04_detector_v24_v25_clearance_e_sweep_reach.md`. — [fonte 2026-08-04, riga 179](../user/2026-08-04_trial08_v23_fail_gap_geometrico_12ms.md). **Chiuso:** Prerequisiti V25 shadow/adapter/journal/gate H0 completati; riferimento A fallisce e consuma il ramo. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Solo dopo il gate H0, decidere l'apertura one-shot dei trial protetti 05/06. — [fonte 2026-08-04, riga 217](../user/2026-08-04_detector_v24_v25_clearance_e_sweep_reach.md). **Chiuso:** Execution-unlock e primo riferimento A eseguiti; arresto ERROR_H0_REFERENCE. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Prima di H0, attestare la compatibilità tra modello replay SHA `98cfcbc4...` e modello runtime SHA `33e67d84...`, implementare il target contract V21 e chiarire matrice dei 12 casi e semantica di `invalid_event_count`. — [fonte 2026-08-04, riga 140](../user/2026-08-04_trial08_v21_one_shot_error_terminale.md). **Superato:** I TODO geometrici V19/V21 non sono più attivi: lineage autorevole V25/V20. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Implementare e testare i prerequisiti ancora chiusi: journal V25 di A, replay B, adapter V20 -> `ProstheticPhaseFSM` e modalità active C, bootstrap partial-stance, driver/comparatore bit-exact, tape stocastico, mapping delle tracce SEA e destinazioni no-clobber. — [fonte 2026-08-04, riga 211](../user/2026-08-04_detector_v24_v25_clearance_e_sweep_reach.md). **Chiuso:** Prerequisiti V25 shadow/adapter/journal/gate H0 completati; riferimento A fallisce e consuma il ramo. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Produrre un nuovo receipt no-clobber con hash runtime aggiornati, destinazioni output e comparator esatti prima di qualsiasi rollout H0. — [fonte 2026-08-05, riga 230](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md). **Chiuso:** Layout, preflight, receipt e suite129/129 PASS documentati. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Non ripristinare il detector analogico come sorgente delle feature continue: violerebbe `primary_grf_split_v1` e la separazione primaria/detector. — [fonte 2026-08-05, riga 224](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md). **Chiuso:** Stage consumati preservati e routing primaria/detector separato mantenuto. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Eseguire un preflight full-environment senza update per verificare esplicitamente i layout actor/full 35/84, dtype `float32` e assenza di campi V25/V20 nell'osservazione. — [fonte 2026-08-05, riga 223](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md). **Chiuso:** Layout, preflight, receipt e suite129/129 PASS documentati. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Non rilanciare o modificare la matrice A/B/C appena consumata. — [fonte 2026-08-05, riga 223](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md). **Chiuso:** Stage consumati preservati e routing primaria/detector separato mantenuto. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Implementare e testare i nove prerequisiti elencati nel lock corretto. — [fonte 2026-08-05, riga 141](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md). **Chiuso:** Layout, preflight, receipt e suite129/129 PASS documentati. ([evidenza](2026-08-05_daily-report.md)).
+- [x] Congelare un receipt separato di execution-unlock con codice, destinazioni e comparator esatti. — [fonte 2026-08-05, riga 142](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md). **Chiuso:** Layout, preflight, receipt e suite129/129 PASS documentati. ([evidenza](2026-08-05_daily-report.md)).
+
+<!-- reconciled-report-todos-2026-10-05:end -->

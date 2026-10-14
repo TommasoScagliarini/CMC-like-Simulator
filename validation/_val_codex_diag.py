@@ -40,21 +40,22 @@ def termination_semantics() -> None:
     """Show the env labels the end-of-window as a Gymnasium truncation."""
     sys.path.insert(0, str(REPO / "Trajectory Generator"))
     from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
+    from prescribed_action import prescribed_action
 
     env = CMCLikeProsthesisTrajectoryEnv(CMCEnvConfig(
         setup_xml_path=str(REPO / "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml"),
         segment_duration=0.005, episode_duration=0.01, policy_knots=3,
-        action_mode="delta", rebuild_model_on_reset=False, fail_fast=False,
+        action_mode="raw", rebuild_model_on_reset=False, fail_fast=False,
     ))
     obs, info = env.reset(seed=0)
     last = None
     for _ in range(5):
-        a = np.zeros((3, 2), dtype=np.float32)  # zero action = stay near IK
+        a = prescribed_action(env)
         obs, reward, terminated, truncated, info = env.step(a)
         last = (terminated, truncated, info.get("time"))
         if terminated or truncated:
             break
-    print("== env termination semantics (zero-action episode to its end) ==")
+    print("== env termination semantics (prescribed episode to its end) ==")
     print(f"  final step: terminated={last[0]} truncated={last[1]} t={last[2]:.4f}")
     print("  -> reaching the planned horizon sets truncated=True (a TIME LIMIT),")
     print("     while unsafe task states are reported as terminated=True.")

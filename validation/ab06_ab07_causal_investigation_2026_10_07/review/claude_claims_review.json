@@ -1,0 +1,194 @@
+{
+  "created_utc": "2026-10-07T09:20:50.883698+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "completed_scientific_review_with_material_corrections",
+  "scope": "Visible turn1_response.txt only, compared with current saved aggregate evidence. No thinking/JSONL/private reasoning read, no FK/dynamics/inference, no external actions or input changes. Only this assigned review JSON written.",
+  "sources": {
+    "claude_visible_response": {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/claude/turn1_response.txt",
+      "sha256": "a336f9115f298f1ba25877c77add288a49c80efec7474b75af9d6add51038713"
+    },
+    "factorial": {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/model/factorial_geometry_fk.json",
+      "sha256": "b5b484f99663c6f2d1b4438f54ced6fc0cd1898dfc6d178acb9d82aa2da6ca6b"
+    },
+    "factorial_protocol": {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/model/protocol.json",
+      "sha256": "d541fe6879215f5702433015710aa809a419ba298e1dbb6fb7d1b90aa08eef90"
+    },
+    "vertical_budget": {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/alternative/vertical_impulse_audit.json",
+      "sha256": "342465f2ef70562d0f13ea3dd14d3318ada5edf002b5ae3959b72b738c1b0b69"
+    },
+    "contact_replay": {
+      "path": "validation/ab06_ab07_preparation_vs_model_2026_10_07/contact_replay.json",
+      "sha256": "95dc63bc2a49466954e8fc7f1be27c26872117a07f8f1772ddc2a195fba25dff"
+    },
+    "ankle_probe": {
+      "path": "validation/ab06_ab07_preparation_vs_model_2026_10_07/contact_preparation_probe.json",
+      "sha256": "8af0ca086483f6f0d87334a67939795c115cf5fed5a9189772cb1ecbc1a18de0"
+    },
+    "scale_transfer": {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/alternative/contact_scale_transfer.json",
+      "sha256": "11eb9f5c963c2ff665bebb31468686dd116b794fbcbf819b57d3befce2b4b821"
+    },
+    "observed_pair": {
+      "path": "validation/ab06_ab07_preparation_vs_model_2026_10_07/observed_pair_summary.json",
+      "sha256": "a3ef206a461fc22b7c7c314b55b27ce3b1644d5c1e2f19777d059e2db7879874"
+    }
+  },
+  "overall_assessment": "Useful sensitivity, phase-budget and external-validity cautions; valid denominator algebra after unit correction. Mass-impossibility, dynamics/reserves-nondiscrimination, unique phase/bias attribution and preparation-variance statements overreach current evidence.",
+  "claims": [
+    {
+      "id": "algebra_and_units",
+      "verdict": "valid identity; mislabeled quantities",
+      "claim": "The1.642 discrepancy ratio factors into1.271 measuredA/measuredB and1.292 simulatedB/simulatedA, described as time integrals.",
+      "correction": "These numerical factors use mean forces, not impulses. The identity is exact if both factors use a consistent quantity; it is a denominator decomposition, not a physical or causal decomposition.",
+      "evidence": {
+        "relative_within_subject_discrepancy_ratio": 1.6424386197372935,
+        "simulated_mean_B_over_A": 1.2922118613204674,
+        "simulated_impulse_B_over_A": 1.276965766396835,
+        "measured_mean_A_over_B": 1.271028899285092,
+        "measured_impulse_A_over_B": 1.286204112089629
+      },
+      "severity": "medium"
+    },
+    {
+      "id": "mass_free_law",
+      "verdict": "incorrect general conclusion; valid conditional statement",
+      "claim": "A mass-free contact law cannot produce the lower measured force of B and current setup excludes mass-dependent penetration by construction.",
+      "correction": "At identical station locations/velocities and material, the direct force law returns identical force; that limited conditional statement is true. Physical contact laws routinely respond to mass indirectly through equilibrium and attained motion. The paired run integrates dynamics, so masses and recruitment can influence q/qdot and penetration despite strong tracking and reserves. The frozen law can also produce lower B force through different geometry/motion, as the archived B replay does.",
+      "evidence": {
+        "mass_or_BW_direct_input": false,
+        "current_A_filtered_mean_N": 275.93062449056686,
+        "archived_B_matched_pre_geometry_pre_reference_mean_N": 22.239855215944388
+      },
+      "severity": "high"
+    },
+    {
+      "id": "common_dynamics_and_reserves",
+      "verdict": "unsupported inference from similar scalar ratios",
+      "claim": "Similar rollout/replay ratios prove dynamics and reserves do not discriminate A/B and add a common tracking penetration.",
+      "correction": "The ratios describe a similar percentage change in one integrated contact response. They do not isolate mass, recruitment, phase, SEA tracking or externally supplied pelvis support. Reserves differ substantially and have opposite signs. The force balance identifies their operational role without identifying the original cause of the profile mismatch.",
+      "evidence": {
+        "actual_over_filtered_A": 1.1843436323784409,
+        "actual_over_filtered_B": 1.1710700189529544,
+        "pelvis_vertical_reserve_mean_A_N": 60.276473645321,
+        "pelvis_vertical_reserve_mean_B_N": -131.7622575166087,
+        "pelvis_vertical_reserve_impulse_A_Ns": 280.7698072759157,
+        "pelvis_vertical_reserve_impulse_B_Ns": -606.5116197029918
+      },
+      "severity": "high"
+    },
+    {
+      "id": "vertical_budget_forecast",
+      "verdict": "missing measured-total-load assumption; completed audit supersedes forecast",
+      "claim": "Required left impulse equals measured left except for COM velocity change; predicted deficits are about\u2212244Ns/+549Ns.",
+      "correction": "The exact requirement is mgT+DeltaP\u2212Jright. Equality with measured left additionally requires the two measured plate impulses to equal mgT+DeltaP. They do not exactly satisfy that relation here. The final momentum audit already measures support and COM drift; forecast sim-minus-measured values are not reserve impulses.",
+      "evidence": {
+        "measured_total_minus_required_total_A_Ns": -37.03700376326829,
+        "measured_total_minus_required_total_B_Ns": 57.4019981881589,
+        "actual_momentum_change_A_Ns": -0.5963239941852811,
+        "actual_momentum_change_B_Ns": -1.4161897708955566,
+        "actual_contact_plus_reserve_closure_A_Ns": -0.008007253731607822,
+        "actual_contact_plus_reserve_closure_B_Ns": -0.06573904624374882
+      },
+      "severity": "high"
+    },
+    {
+      "id": "hybrid_factorial",
+      "verdict": "valid feasibility caution; dismisses a valid controlled diagnostic",
+      "claim": "Off-diagonal geometry/reference cases only measure incompatibility, not causes.",
+      "correction": "Hybrid poses are not validated bodies or dynamic predictions, and their huge penetrations cannot be interpreted as observed subject loads. They remain valid controlled interventions on the known deterministic FK/contact function: exactly specified geometry is varied while q/qdot and contact law stay fixed. Such effects are causal within that diagnostic function, not causal percentages of subject anatomy, total preparation or attained dynamics.",
+      "evidence": "Whole left-chain equivalence outside A/M is checked, own filtered endpoints reproduce exactly, q/qdot assignments remain exact, and force/penetration have separate C++ parity. A is only hip parent translation; M includes anatomical fitting and registration; Q remains composite.",
+      "severity": "medium"
+    },
+    {
+      "id": "preparation_lineage",
+      "verdict": "understates demonstrated saved-stage effect; correct nonadditivity caution",
+      "claim": "Pre/post2x2 is a sample of preparation variance and only diagonal cells are coherent.",
+      "correction": "The two diagonals represent actual archived/current preparation outputs under the same frozen law and nominal windows. Their difference establishes the direct response change across this particular saved stage, not a stochastic variance estimate. Crossed geometry/reference cases are explicitly diagnostic and identify conditional effects/interactions. The full saved stage markedly increases force even though the current reference motion attenuates it at fixed current geometry; the ankle-only probe is only a partial motion intervention.",
+      "evidence": {
+        "matched_pre_stage_mean_N": 22.239855215944388,
+        "matched_current_stage_mean_N": 356.5608258682743,
+        "conditional_effects_N": {
+          "geometry_current_minus_pre_at_pre_reference_n": 414.96240364831067,
+          "geometry_current_minus_pre_at_current_reference_n": 356.5325878523821,
+          "full_reference_current_minus_pre_at_pre_geometry_n": -22.211617200052153,
+          "full_reference_current_minus_pre_at_current_geometry_n": -80.64143299598072,
+          "interaction_n": -58.429815795928576,
+          "matched_current_minus_archived_mean_force_n": 334.32097065232995
+        },
+        "ankle_only_current_over_pre_ankle_ratio": 0.795374523884989
+      },
+      "severity": "high"
+    },
+    {
+      "id": "millimetres_and_tolerance",
+      "verdict": "useful sensitivity scale; unproven uncertainty bound",
+      "claim": "Dividing cycle-mean error by dominant-sphere stiffness gives a few millimetres within the tolerance of preparation knobs.",
+      "correction": "N/(N/m) is a valid dimensional equivalence, but a local sphere depth change active through only part of stance is not a uniform whole-cycle mean-force change. Other spheres and switching contribute. Intentional corrections17.6mm/24.3mm/4.7degrees are parameter magnitudes, not measured uncertainties or allowable error tolerances. Existing fixed\u00b11mm plane sensitivities are the directly evaluated response; no anatomical non-identifiability bound follows without independent plausible uncertainty limits.",
+      "evidence": {
+        "filtered_A_plane_plus1mm_mean_force_change_N": 35.06565522610299,
+        "filtered_B_plane_plus1mm_mean_force_change_N": 37.98203852402588
+      },
+      "severity": "medium"
+    },
+    {
+      "id": "sole_ground_assumptions",
+      "verdict": "missing hardware/contact and measurement assumptions",
+      "claim": "Perfect healthy sole registration implies similar stance forces; swing force or signed bias uniquely identifies preparation rather than anatomy or gait.",
+      "correction": "The virtual hardware is rigid and differs from the measured healthy foot; all eight primary spheres are disjoint from the display STL, and the force plane is24.3mm below the static/binary plane. The virtual STL stays above the primary force plane in the current windows despite sphere loading. Sole-at-ground assumptions therefore do not identify this empirical force basis. Measured threshold-defined HS/TO also allow boundary uncertainty. Large off-phase loading and signed residuals are informative but not unique causes; orientation, fixed hardware geometry, marker/IK bias and contact-law calibration can all contribute.",
+      "evidence": {
+        "B_current_filtered_mesh_min_clearance_primary_plane_m": 0.013827669244006585,
+        "A_current_filtered_mesh_min_clearance_primary_plane_m": 0.014278728495567368,
+        "all_primary_spheres_disjoint_from_mesh": true,
+        "force_to_static_plane_difference_m": 0.02432477786038483
+      },
+      "severity": "medium"
+    },
+    {
+      "id": "force_area_and_validation",
+      "verdict": "largely valid with scope qualifications",
+      "claim": "Integrated depth matters more than maximum penetration; profile is unqualified; signed marker residuals, phase budgets and independent hardware data help.",
+      "correction": "These are useful recommendations. Exact spring-area identity applies to the dominant undamped exponent1 sphere using smoothed penetration; other spheres include dissipation. Healthy GRF remains a valid explicit benchmark target, while it is not independent prosthetic hardware truth. Marker-based percent accuracy is a quantitative uncertainty question, not categorically impossible. Constant/variable cross-trial bias does not uniquely identify mass/registration versus law shape.",
+      "evidence": {
+        "common_amplitude_fit_first_A_cycle_later_A_error_percent": 4.801021000980943,
+        "same_frozen_scalar_B_error_percent": 69.51956013640354,
+        "profile_status_note": "Short calibration smoke; rerun full calibration before production."
+      },
+      "severity": "medium"
+    },
+    {
+      "id": "identifiability_scope",
+      "verdict": "too categorical about all experiments on existing data",
+      "claim": "No experiment on the existing A/B data can change the inability to attribute anatomy.",
+      "correction": "Existing data cannot establish a population-level or hardware-valid intrinsic anatomical explanation. Controlled source interventions and saved preparation lineage can nevertheless identify computational mechanisms and reject specific alternatives, without new subject data. The distinction is between deterministic pipeline attribution and external biological validity, not all evidence versus no evidence.",
+      "severity": "medium"
+    }
+  ],
+  "recommendation": {
+    "current_decisive_attribution": [
+      "No unit/frame/storage or normalization error has been demonstrated. The shared profile response to prepared geometry/motion already creates an absolute B>A force gap before dynamics; BW alone cannot explain it.",
+      "The saved ground-registration stage changes matched FK force from22.24 to356.56N. Distal mounting increases the direct response at fixed reference; current full IK and ankle-only changes attenuate response at fixed final geometry. These are demonstrated pipeline response effects, not proof that the donor-static registration correction is erroneous or total-preparation percentages.",
+      "The AB06-derived empirical contact basis is not qualified as a transferable hardware law. A single A-derived amplitude correction worsens B while fitting later A approximately; it cannot supply a common scalar explanation.",
+      "Prescribed tracking attains near-perfect global momentum closure by large signed external pelvis support, upward for A and downward for B. This is operationally discriminating and prevents stable kinematics from validating prosthetic contact dynamics.",
+      "Intrinsic anatomy/mass, complete preparation and dynamically attained force remain intertwined; no unique causal shares are justified."
+    ],
+    "next_feasible_discriminator": [
+      "First incorporate the independent phase budget and signed marker residual audits already assigned to other agents; do not duplicate them.",
+      "If needed, use existing baseline contact-centre NPZ plus known local sphere positions to reconstruct rigid foot pose algebraically and split sphere worldheight into foot-origin height versus orientation terms. Relate these to dominant-sphere stance depth and marker signed bias. This requires no new FK or dynamic rollout and tests the overly simple vertical-offset versus gait dichotomy.",
+      "For any claim of physical registration error, obtain an independent floor/sole convention or uncertainty bound; for hardware-force attribution, obtain load-deflection/contact measurements. Do not tune B stiffness/offset to its target as validation."
+    ],
+    "avoid": [
+      "Do not label the measured-force denominator as a causal mass share.",
+      "Do not call a hybrid FK result a feasible subject load or use its percentage as a dynamics cause.",
+      "Do not equate intentional preparation corrections with uncertainty tolerances.",
+      "Do not interpret scalar rollout/replay similarity as proof of identical reserve/recruitment mechanisms."
+    ]
+  },
+  "source_integrity": {
+    "all_unchanged": true,
+    "reviewed_source_count": 8
+  }
+}

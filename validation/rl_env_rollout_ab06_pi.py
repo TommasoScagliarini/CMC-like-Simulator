@@ -54,7 +54,7 @@ def _make_env(
             segment_duration=segment_duration,
             episode_duration=episode_duration,
             policy_knots=1,
-            action_mode="delta",
+            action_mode="absolute",
             random_init=False,
             rebuild_model_on_reset=rebuild_model_on_reset,
             record_outputs=False,

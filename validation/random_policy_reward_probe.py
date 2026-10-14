@@ -148,7 +148,6 @@ def _env_config(
         ),
         "policy_knots": int(flat.get("policy_knots", 1)),
         "action_mode": str(flat.get("action_mode", "absolute")),
-        "max_delta_rad": float(flat.get("max_delta_rad", 0.35)),
         "enable_pros_ref_governor": bool(flat.get("pros_ref_governor", True)),
         "pros_ref_model": str(
             flat.get("pros_ref_model", "butterworth3_jerk_limited")

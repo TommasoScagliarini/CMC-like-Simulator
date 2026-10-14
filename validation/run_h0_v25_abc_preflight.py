@@ -242,7 +242,6 @@ def build_env_config(
         "episode_start_offset_s": float(condition["offset_s"]),
         "policy_knots": int(simulation["policy_knots"]),
         "action_mode": simulation["action_mode"],
-        "max_delta_rad": float(simulation["max_delta_rad"]),
         "target_slew_rate_limit_rad_s": {
             "pros_knee_angle": float(
                 simulation["pros_knee_target_slew_rate_limit_rad_s"]

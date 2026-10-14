@@ -1,18 +1,14 @@
-# Unified MLP V1: full configuration; provenance below and in provenance.json.
+# Unified MLP V1: configuration with validated GRF defaults; provenance below and in provenance.json.
 model:
   num_hidden_layers: 2
   dim_hidden_layers: 256
   fcnet_activation: tanh
   asymmetric_actor_critic: true
-  rl_module_kind: standard
-  primary_split_v25_residual_input_mean: null
-  primary_split_v25_residual_input_std: null
-  primary_split_v25_residual_limits: null
-  primary_split_v25_residual_init_seed: null
   freeze_logstd: false
   fixed_exploration_sigma: null
   freeze_actor: false
   seed: 123
+  
 ppo:
   train_batch_size: 4608
   minibatch_size: 512
@@ -21,19 +17,19 @@ ppo:
   gamma: 0.99
   lam: 0.9
   clip_param: 0.2
-  kl_coeff: 0.2
-  kl_target: 0.01
   vf_clip_param: 10.0
   vf_loss_coeff: 1.0
+
 parallelism:
   num_env_runners: 12
   ray_num_cpus: 13
   exact_start_sampling: true
+
 simulation:
   setup_xml: models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml
   segment_duration: 0.01
   episode_duration: 5.0
-  iterations: 40
+  iterations: 100
   policy_knots: 1
   random_init: false
   episode_start_offset_s: 1.956870983805102
@@ -44,10 +40,10 @@ simulation:
   step_wall_timeout_s: 60.0
   grf_penetration_penalty_threshold_m: 0.02
   grf_penetration_termination_m: 0.028
-  action_mode: absolute
-  max_delta_rad: 0.35
+  
   pros_knee_target_slew_rate_limit_rad_s: 2.5
   pros_ankle_target_slew_rate_limit_rad_s: 2.0
+
   pros_ref_governor: true
   pros_ref_model: butterworth3_jerk_limited
   pros_ref_cutoff_hz: 4.0
@@ -57,35 +53,26 @@ simulation:
   pros_ankle_ref_acceleration_limit_rad_s2: 55.0
   pros_knee_ref_jerk_limit_rad_s3: 3000.0
   pros_ankle_ref_jerk_limit_rad_s3: 2750.0
+
   gait_clock_enable: false
   actor_cyclic_phase_only: true
   include_reference_state_observation: true
-  include_controller_state_observation: true
-  include_controller_diagnostic_observation: false
-  deployable_minimal_observation: false
-  imitation_initialize_to_target: false
+  # include_controller_state_observation: true
+  # include_controller_diagnostic_observation: false
+  # deployable_minimal_observation: false
+  # imitation_initialize_to_target: false
   reward_reference_range_floor: 0.05
   reward_reference_velocity_range_floor: 0.1
+
 grf:
-  grf_mode: online_sensor
-  online_grf_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json
-  online_grf_detector_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json
-  binary_phase_detector_profile: validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json
-  phase_fsm_input_mode: legacy_events
   phase_sensor_on_threshold_n: 5.0
   phase_sensor_off_threshold_n: 2.0
   phase_sensor_dwell_s: 0.03
   detector_sample_dt_s: 0.001
-  event_contract_id: legacy_events_v1
-  binary_phase_fsm_mode: binary_active
   binary_phase_debounce_s: 0.005
-  binary_phase_invalid_event_policy: reject_continue
-  binary_phase_actor_fsm_version: v3
-  binary_phase_event_contract_id: binary_point_v25+heel_qualified_fsm_v2
-  online_grf_observation: true
   online_grf_applied_side:
   - left
-  disable_prescribed_grf_side: []
+
 supervision:
   iteration_timeout_s: 3600.0
   sample_timeout_s: 3000.0
@@ -94,14 +81,15 @@ supervision:
   cleanup_timeout_s: 60.0
   max_consecutive_skips: 1
   max_consecutive_crash_restarts: 1
-  child_self_timeout: true
+
   checkpoint_every: 1
   retain_iteration_checkpoints: true
-  max_minibatch_mean_kl_loss: null
+
 logging:
   tensorboard: true
   progress: true
   verbose_workers: false
+
 reward:
   tracking_weight: 8.0
   reference_weight: 6.0
@@ -242,10 +230,12 @@ reward:
   blend_served_imitation: 0.8
   blend_imitation: 0.2
   blend_imitation_tracking: 0
+
 run:
   output_dir: null
   resume_from: null
   init_actor_from: null
+
 provenance:
   schema_version: unified_mlp_v1
   baseline_commit: 8ef48f914898fff8431cf8d164554448dbe35947

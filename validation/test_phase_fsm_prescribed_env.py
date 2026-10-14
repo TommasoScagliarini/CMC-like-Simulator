@@ -60,8 +60,7 @@ def main() -> int:
             episode_duration=2.4,
             episode_start_offset_s=1.8,
             policy_knots=1,
-            action_mode="delta",
-            max_delta_rad=0.0,
+            action_mode="raw",
             grf_mode="online_sensor",
             online_grf_profile_file=(
                 "online_grf_profiles/"
@@ -109,9 +108,9 @@ def main() -> int:
 
         final_info = info
         if os.environ.get("CMC_FULL_FSM_PRESCRIBED_TEST") == "1":
-            action = np.zeros(env.action_space.shape, dtype=np.float32)
+            from prescribed_action import prescribed_action
             for _ in range(140):
-                obs, reward, terminated, truncated, final_info = env.step(action)
+                obs, reward, terminated, truncated, final_info = env.step(prescribed_action(env))
                 fsm = final_info.get("phase_fsm", {})
                 if float(fsm.get("valid_cycle_count", 0.0) or 0.0) >= 1.0:
                     break

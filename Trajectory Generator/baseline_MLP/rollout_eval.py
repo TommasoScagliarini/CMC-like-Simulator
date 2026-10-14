@@ -470,7 +470,6 @@ def run(args: argparse.Namespace) -> dict:
         "episode_start_offset_s": args.episode_start_offset_s,
         "policy_knots": args.policy_knots,
         "action_mode": args.action_mode,
-        "max_delta_rad": args.max_delta_rad,
         "target_slew_rate_limit_rad_s": {
             "pros_knee_angle": args.pros_knee_target_slew_rate_limit_rad_s,
             "pros_ankle_angle": args.pros_ankle_target_slew_rate_limit_rad_s,
@@ -1146,15 +1145,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--policy-knots", type=int, default=3)
     p.add_argument(
         "--action-mode",
-        choices=["absolute", "delta", "raw"],
+        choices=["absolute", "raw"],
         default="absolute",
         help=(
             "Must match the checkpoint's training action mode. 'absolute' "
-            "(default): absolute prosthetic trajectory; 'delta': offset from "
-            "prescribed IK; 'raw': raw radians."
+            "(default): absolute prosthetic trajectory; 'raw': absolute radians "
+            "for diagnostics."
         ),
     )
-    p.add_argument("--max-delta-rad", type=float, default=0.35)
     p.add_argument(
         "--pros-knee-target-slew-rate-limit-rad-s",
         type=float,
@@ -1464,6 +1462,8 @@ def parse_args() -> argparse.Namespace:
     valid_dests = {action.dest for action in p._actions}
     p.set_defaults(**{k: v for k, v in layered_defaults.items() if k in valid_dests})
     args = p.parse_args()
+    if args.action_mode not in {"absolute", "raw"}:
+        p.error("action_mode must be absolute (or raw for diagnostics)")
     if args.checkpoint is None:
         message = (
             str(default_checkpoint_error)

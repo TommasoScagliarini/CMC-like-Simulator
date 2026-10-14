@@ -3,13 +3,15 @@ from dataclasses import asdict, replace
 from pathlib import Path
 from types import SimpleNamespace
 import re
+import sys
+from unittest.mock import patch
 
 import gymnasium as gym
 import numpy as np
 import pytest
 import yaml
 
-from unified_MLP import env_factory, reward_function as unified
+from unified_MLP import env_factory, reward_function as unified, train_ppo_mlp, training_config
 from unified_MLP.env import (
     CLOCK_FEATURES, TARGET_COORDINATES, UnifiedProsthesisEnv,
 )
@@ -166,6 +168,23 @@ def test_factory_has_one_actor_and_reset_contract(monkeypatch):
     assert not stages[0].unwrapped.env_cfg.include_imitation_target_observation
     assert not stages[0].unwrapped.env_cfg.imitation_initialize_to_target
     assert env_factory.ENV_NAME != "cmc_traj_env"
+
+
+def test_factory_grf_defaults_match_training_without_explicit_grf_options():
+    path = Path(__file__).resolve().parents[1] / "configs" / "ex_novo.yaml"
+    with patch.object(sys, "argv", ["train_ppo_mlp", "--config", str(path)]):
+        args = train_ppo_mlp.parse_args()
+    cfg = env_factory.build_env_config({})
+    aliases = {
+        "online_grf_profile": "online_grf_profile_file",
+        "online_grf_detector_profile": "online_grf_detector_profile_file",
+        "binary_phase_detector_profile": "binary_phase_detector_profile_file",
+        "online_grf_observation": "include_online_grf_observation",
+        "online_grf_applied_side": "online_grf_applied_sides",
+        "disable_prescribed_grf_side": "prescribed_grf_disabled_sides",
+    }
+    for key in training_config.SECTION_MAP["grf"]:
+        assert getattr(cfg, aliases.get(key, key)) == getattr(args, key), key
 
 
 @pytest.mark.parametrize("override", [

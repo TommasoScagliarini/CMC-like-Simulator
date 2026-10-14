@@ -1,0 +1,109 @@
+{
+  "created_utc": "2026-10-07T09:29:27.986814+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "PASS_read_only_scientific_and_code_review",
+  "scope": "All309 phase-helper and278 marker-helper source lines, savedJSON and input parsers read; algebra/schema/hash checks on saved arrays only. No helpers/main, FK, integration, IK solving or input changes. Only this assigned review JSON written.",
+  "reviewed_artifacts": [
+    {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/alternative/phase_contact_budget.py",
+      "sha256": "44476253732fd0c47e744ec3923d0b7924e22cbc01e47db7028fb5141e1358b1"
+    },
+    {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/alternative/phase_contact_budget.json",
+      "sha256": "88a087bbf1347c479caf12158fdc2ea925b58c6a721bfe7d769525deb6ae95fa"
+    },
+    {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/model/signed_marker_vertical_audit.py",
+      "sha256": "b2d98ae487da636679133bf682745aef0baf971adb1ea96f981c73105cc8d04b"
+    },
+    {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/model/signed_marker_vertical_audit.json",
+      "sha256": "285029cd0420e09f8b0409456cc82de18a736766f279524790b1218a61a48862"
+    },
+    {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+    },
+    {
+      "path": "tools/calibrate_ab06_seasea_markers.py",
+      "sha256": "49f9b6d2edbfb5b5e096a9420500b0d9faa8b269c948bccf8b4370a08323e05f"
+    },
+    {
+      "path": "Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/selection.json",
+      "sha256": "5e9ec212f4b04ed83cfbfcc5856f6ddb9a1c026677122b60e6507fd4904af61a"
+    },
+    {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/model/baseline_AB06.npz",
+      "sha256": "a751e1f7006c0fbdb45c0c3027c82b5e89751b9e2e21d11390d78057098772cc"
+    },
+    {
+      "path": "validation/ab06_ab07_causal_investigation_2026_10_07/model/baseline_AB07.npz",
+      "sha256": "b43dff97fcb076371731e58e9bec873bad759fb8a935e71775d0b754a8bd3d88"
+    }
+  ],
+  "phase_budget": {
+    "status": "PASS",
+    "checks": [
+      "Frozen own three primary cycles at full precision, native1ms source grid plus exactHS/TO/nextHS; no online FSM/binary phase substitution.",
+      "Finite aligned NPZ schema and hashes bound to reviewed factorial exports; all7 exact primary knots present.",
+      "Force[N], impulse[N s], depth[m] and optional BW reporting consistent. Actual per-sphere geometry absent stays null, and maximum-any-sphere penetration is named distinctly.",
+      "Analytical basis07 matches production: exponent1, dissipation0, vertical residualY0, vertical plane. K*smoothPositive(rawdepth)*smoothPositive(1) includes the tiny constant damping smoothing.",
+      "Independent saved-centre evaluation reproduces reported basis07 impulses within1e-8Ns, without FK.",
+      "Total=stance+swing, mean=impulse/duration, and mean=fstance*Fstance+(1-fstance)*Fswing checked independently.",
+      "Symmetric intensity/duration/swing terms sum exactly to measured mean-force difference; these terms are explicitly algebraic, not causal percentages.",
+      "Twenty stance phase bins are descriptive and duration-weighted across cycles; normalized phase does not change principal impulse or event scoring.",
+      "Threshold>20N intervals retain source support and censored endpoints; they are force crossings, not accepted/revoked FSM heel strikes."
+    ],
+    "scientific_limits": [
+      "Force in measured healthy-limb swing is temporal incompatibility relative to the chosen oracle, not a unique preparation error, anatomical cause or measured prosthetic hardware fault.",
+      "B has shorter nominal stance than A, so a larger stance duration does not explain B higher force. Higher stance intensity dominates the algebraic mean-force difference; actual B also has larger swing force.",
+      "Raw-depth differences have mean8.492mm and residualRMS7.081mm with strong late-stance variation; they are not a perfect constant shift and do not uniquely discriminate registration versus gait.",
+      "Actual and filtered mean ratios alone cannot establish a common dynamic mechanism: actual swing impulse fractions differ materially from the filtered pose replay.",
+      "Interpolated actual measured denominators differ slightly from official paired metrics; official observed percentages remain authoritative."
+    ]
+  },
+  "signed_marker_budget": {
+    "status": "PASS",
+    "checks": [
+      "Raw TRC units scale exactly once to metres in parse_trc; residual summaries convert to mm. Sign is predicted groundY minus measuredY.",
+      "Healthy original23 coordinate model/reference, including left subtalar/MTP, versus current prepared21 coordinate model/reference; explicit coordinate schema equality and no silent q adjustments.",
+      "Both dynamic references use recorded full-trial6Hz4th-order zero-phase preprocessing; same frozen HS/TO events define marker stance/swing.",
+      "Dynamic marker sampling is native5ms with exact inserted phase boundaries, clearly distinct from native1ms force budget; time-weighted statistics pool durations.",
+      "Static healthy original MAT IK and prepared saved calibration motion are matched to converted TRC by row; AB06 doubled converted static time is preserved without interpolation across different clocks.",
+      "MotionData.values includes the time column, so enumerate(labels) for prepared static splines uses correct data indices.",
+      "Static small residuals are explicitly training-data agreement, not independent validation. No experimental static GRF table is available.",
+      "Sole clearance uses fixed virtual STL and its explicit primary/binary planes; the marker constructions differ between healthy tibia/calcn frames and virtual foot_l."
+    ],
+    "scientific_limits": [
+      "Current B mean signed markerY is positive and small; the five-marker pattern does not support a uniform downward marker bias. Individual marker residuals remain mixed and free remapped calibration may hide hardware pose differences.",
+      "Virtual sole below binary plane in B is an observed geometric relation, not a demonstrated physical floor or registration error. The primary force plane differs from the static/binary plane.",
+      "Healthy and remapped virtual markers are not physically equivalent sole samples. Marker fit cannot independently qualify hardware surface contact or force generalization.",
+      "Neither signed marker bias nor phase-budget intensity yields unique anatomy/preparation percentages or physical hardware validity."
+    ]
+  },
+  "independent_algebra_checks": {
+    "AB06": {
+      "basis07_Ns_independent_saved_array_evaluation": 305.0538081042083,
+      "basis07_Ns_absolute_error_vs_phase": 0.0,
+      "filtered_swing_impulse_fraction": 0.00025323284839669956,
+      "actual_swing_impulse_fraction": 0.0008757000924751655,
+      "marker_healthy_stance_mean_Y_mm": 1.6033907384231139,
+      "marker_prepared_stance_mean_Y_mm": 2.015531604134868
+    },
+    "AB07": {
+      "basis07_Ns_independent_saved_array_evaluation": 677.3407919821282,
+      "basis07_Ns_absolute_error_vs_phase": 0.0,
+      "filtered_swing_impulse_fraction": 0.0033415613954061846,
+      "actual_swing_impulse_fraction": 0.037590085107729404,
+      "marker_healthy_stance_mean_Y_mm": -0.15786002339477917,
+      "marker_prepared_stance_mean_Y_mm": 0.6867429711241473
+    }
+  },
+  "integrity": {
+    "status": "PASS",
+    "union_protected_input_count": 160,
+    "phase_protected_count": 23,
+    "marker_protected_count": 157,
+    "all_current_protected_hashes_match": true
+  }
+}

@@ -118,7 +118,6 @@ CORE_ENV_TO_CONFIG: dict[str, tuple[str, str]] = {
     "episode_start_offset_s": ("simulation", "episode_start_offset_s"),
     "policy_knots": ("simulation", "policy_knots"),
     "action_mode": ("simulation", "action_mode"),
-    "max_delta_rad": ("simulation", "max_delta_rad"),
     "pros_ref_model": ("simulation", "pros_ref_model"),
     "pros_ref_lpf_cutoff_hz": ("simulation", "pros_ref_cutoff_hz"),
     "enable_pros_ref_governor": ("simulation", "pros_ref_governor"),
@@ -257,7 +256,6 @@ def build_full_env_config(cfg: Mapping[str, Any], *, output_dir: Path | None = N
         "episode_start_offset_s": float(sim["episode_start_offset_s"]),
         "policy_knots": int(sim["policy_knots"]),
         "action_mode": str(sim["action_mode"]),
-        "max_delta_rad": float(sim["max_delta_rad"]),
         # --- target slew and reference governor ---------------------------------------------
         "target_slew_rate_limit_rad_s": {
             "pros_knee_angle": float(sim["pros_knee_target_slew_rate_limit_rad_s"]),

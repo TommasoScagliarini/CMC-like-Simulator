@@ -194,7 +194,6 @@ def _config_contract(
         ("simulation", "segment_duration"),
         ("simulation", "policy_knots"),
         ("simulation", "action_mode"),
-        ("simulation", "max_delta_rad"),
         ("simulation", "pros_ref_governor"),
         ("simulation", "pros_ref_model"),
         ("simulation", "pros_ref_cutoff_hz"),

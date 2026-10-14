@@ -234,3 +234,14 @@ Il claim numerico resta macOS arm64.
 - [ ] Eseguire prove piu' lunghe su trial, velocita' e soggetti differenti
   prima di dichiarare generalizzazione o deployment.
 - [ ] Valutare una deflessione SEA iniziale coerente con la coppia richiesta.
+
+<!-- reconciled-report-todos-2026-10-05:start -->
+## TODO riconciliati e propagati — integrazione del 5 ottobre 2026
+
+Ricostruzione documentale dello stato a questa data. Le voci sotto precisano i TODO storici ripetuti nelle sezioni precedenti: una nuova esecuzione o un PASS su un altro ramo non chiude il debito originario. Le attività condizionate restano proposte; questa integrazione non avvia esperimenti. Le chiusure riportano una fonte esplicita.
+
+### Attività aperte
+
+- [ ] Riferimento storico al TODO giugno sulla scelta warm-start: luglio ha usato il 23 giugno grfsoft, non il 24 giugno. — [fonte 2026-08-25, riga 40](../user/2026-08-25_ricostruzione_storica_architetture_actor_e_tentativi_rete_larga.md).
+
+<!-- reconciled-report-todos-2026-10-05:end -->

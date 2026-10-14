@@ -1,0 +1,966 @@
+{
+  "schema": "rl_learning_audit_learner_analysis_v1",
+  "probe": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/boundary_replay_v2/corrected_boundary/ppo_audit",
+  "real_rows": 4096,
+  "masked_rows": 14,
+  "config": {
+    "normalize_actions": true,
+    "clip_actions": false,
+    "batch_mode": "truncate_episodes",
+    "rollout_fragment_length": "auto",
+    "train_batch_size": 4096,
+    "minibatch_size": 512,
+    "num_epochs": 10,
+    "gamma": 0.99,
+    "lambda_": 0.9,
+    "clip_param": 0.2,
+    "kl_coeff": 0.2,
+    "kl_target": 0.01,
+    "vf_clip_param": 10.0,
+    "vf_loss_coeff": 1.0,
+    "shuffle_batch_per_epoch": true,
+    "num_env_runners": 13,
+    "seed": 123
+  },
+  "initial_policy_replay": {
+    "batched_inference_size": 512,
+    "comparison_rows": 4096,
+    "batched_vs_stored_logits_max_abs_error": 2.1457672119140625e-06,
+    "rowwise_vs_stored_logits_max_abs_error": 0.0,
+    "batched_vs_rowwise_logits_max_abs_error": 2.1457672119140625e-06,
+    "rowwise_ratio_max_abs_deviation_from_one": 0.0,
+    "rowwise_logp_error": {
+      "count": 4096,
+      "nonfinite_count": 0,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "p05": 0.0,
+      "p50": 0.0,
+      "p95": 0.0
+    },
+    "rowwise_logits_bit_exact": true,
+    "rowwise_logits_allclose_rtol1e_5_atol1e_5": true,
+    "batched_vs_rowwise_value_max_abs_error": 7.62939453125e-06,
+    "numerical_note": "Sampler has one environment per runner; batched GEMM can round differently from single-row inference. Both comparisons use the whole batch."
+  },
+  "snapshots": {
+    "before": {
+      "rows_real": 4096,
+      "ratio": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 1.000000008920324,
+        "std": 8.42569164648484e-07,
+        "min": 0.9999921321868896,
+        "max": 1.0000090599060059,
+        "p05": 0.9999988079071045,
+        "p50": 1.0,
+        "p95": 1.0000011920928955
+      },
+      "logp_delta": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 5.73345459997654e-09,
+        "std": 8.407633377776719e-07,
+        "min": -7.867813110351562e-06,
+        "max": 9.059906005859375e-06,
+        "p05": -1.1920928955078125e-06,
+        "p50": 0.0,
+        "p95": 1.1920928955078125e-06
+      },
+      "initial_ratio_max_abs_deviation_from_one": 9.059906005859375e-06,
+      "kl_old_to_current": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 1.0610956557854934e-13,
+        "std": 1.6884261894024762e-13,
+        "min": 0.0,
+        "max": 2.6716406864579767e-12,
+        "p05": 0.0,
+        "p50": 5.684341886080802e-14,
+        "p95": 3.979039320256561e-13
+      },
+      "entropy": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 1.7483921533275861,
+        "std": 1.287366115415316,
+        "min": -1.0166281461715698,
+        "max": 7.671541213989258,
+        "p05": -0.15117543935775757,
+        "p50": 1.6777122616767883,
+        "p95": 3.9434115290641785
+      },
+      "ratio_outside_clip_fraction": 0.0,
+      "surrogate_actually_clipped_fraction": 0.0,
+      "policy_loss_fixed_advantages": -0.036340631544589996,
+      "unclipped_surrogate_mean": 0.036340631544589996,
+      "critic_fixed_gae_targets": {
+        "error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 0.11708259489387274,
+          "std": 2.711860418752276,
+          "min": -4.6518402099609375,
+          "max": 45.295162200927734,
+          "p05": -2.0231428146362305,
+          "p50": -0.16654396057128906,
+          "p95": 2.406327247619629
+        },
+        "squared_error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 7.367895246310603,
+          "std": 85.12781497992161,
+          "min": 3.079185262322426e-08,
+          "max": 2051.651611328125,
+          "p05": 0.008059231098741293,
+          "p50": 0.7432931959629059,
+          "p95": 7.452019929885864
+        },
+        "rmse": 2.7143867015838623,
+        "capped_mse": 1.7002301216125488,
+        "cap_fraction": 0.026611328125,
+        "explained_variance": 0.7632122039794922,
+        "target_variance": 31.05813217163086
+      },
+      "total_objective_fixed_coefficients": 1.6638894900679906,
+      "objective_coefficients": {
+        "kl": 0.30000001192092896,
+        "entropy": 0.0,
+        "vf_loss": 1.0,
+        "vf_cap": 10.0
+      },
+      "advantage_probability_alignment": {
+        "mean_advantage_times_delta_logp": -1.09221085509148e-08,
+        "correlation_advantage_delta_logp": -0.016987420511121187,
+        "fraction_matching_sign_nonzero_advantages": 0.4130859375,
+        "positive_advantage_logp_delta": {
+          "count": 2555,
+          "nonfinite_count": 0,
+          "mean": 2.7061208586870107e-09,
+          "std": 8.569376118215597e-07,
+          "min": -7.867813110351562e-06,
+          "max": 9.059906005859375e-06,
+          "p05": -1.1920928955078125e-06,
+          "p50": 0.0,
+          "p95": 1.1920928955078125e-06
+        },
+        "negative_advantage_logp_delta": {
+          "count": 1541,
+          "nonfinite_count": 0,
+          "mean": 1.0752817162594805e-08,
+          "std": 8.132127972050344e-07,
+          "min": -5.125999450683594e-06,
+          "max": 7.152557373046875e-06,
+          "p05": -1.0728836059570312e-06,
+          "p50": 0.0,
+          "p95": 1.1920928955078125e-06
+        }
+      },
+      "actor_same_observations": {
+        "mean_delta_rms_per_joint": [
+          2.1593311316792096e-07,
+          2.395546516709146e-07
+        ],
+        "mean_delta_max_abs_per_joint": [
+          2.1457672119140625e-06,
+          1.6689300537109375e-06
+        ],
+        "deterministic_clipped_mean_delta_rms_per_joint": [
+          1.3373934848459612e-07,
+          1.4480210097644886e-07
+        ],
+        "mean_delta_over_old_sigma_rms_per_joint": [
+          4.0783072563499445e-07,
+          5.352228527044645e-07
+        ],
+        "sigma_mean_per_joint": [
+          0.732617974281311,
+          0.7938993573188782
+        ],
+        "sigma_ratio_to_old_mean_per_joint": [
+          1.0,
+          1.0
+        ],
+        "logstd_delta_max_abs_per_joint": [
+          1.430511474609375e-06,
+          1.430511474609375e-06
+        ],
+        "joint_order": [
+          "knee",
+          "ankle"
+        ],
+        "action_units": "normalized; deterministic clipping is a same-state diagnostic"
+      }
+    },
+    "minibatch_000008": {
+      "rows_real": 4096,
+      "ratio": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 0.9982651123937103,
+        "std": 0.13139232226216258,
+        "min": 0.390359491109848,
+        "max": 2.623042583465576,
+        "p05": 0.7934129238128662,
+        "p50": 0.9999754428863525,
+        "p95": 1.197520524263382
+      },
+      "logp_delta": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": -0.010301416717993561,
+        "std": 0.13200004377718996,
+        "min": -0.9406871795654297,
+        "max": 0.9643349647521973,
+        "p05": -0.23141151666641235,
+        "p50": -2.4557113647460938e-05,
+        "p95": 0.18025317788124084
+      },
+      "initial_ratio_max_abs_deviation_from_one": 1.6230425834655762,
+      "kl_old_to_current": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 0.007934363873005168,
+        "std": 0.00846245318322692,
+        "min": 9.043258614838123e-06,
+        "max": 0.07662862539291382,
+        "p05": 0.0008807947742752731,
+        "p50": 0.005310738924890757,
+        "p95": 0.02515909681096673
+      },
+      "entropy": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 1.7415895816811826,
+        "std": 1.2788817392284793,
+        "min": -0.9929217100143433,
+        "max": 7.639277458190918,
+        "p05": -0.14224490523338318,
+        "p50": 1.676990807056427,
+        "p95": 3.9188687205314636
+      },
+      "ratio_outside_clip_fraction": 0.10302734375,
+      "surrogate_actually_clipped_fraction": 0.055908203125,
+      "policy_loss_fixed_advantages": -0.038265522569417953,
+      "unclipped_surrogate_mean": 0.04092929884791374,
+      "critic_fixed_gae_targets": {
+        "error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 0.3280707970261574,
+          "std": 2.7020039569314487,
+          "min": -4.418918609619141,
+          "max": 45.62165832519531,
+          "p05": -1.7596502304077148,
+          "p50": 0.06877517700195312,
+          "p95": 2.579167366027832
+        },
+        "squared_error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 7.4084558671115275,
+          "std": 86.48892870489178,
+          "min": 5.960464477539063e-08,
+          "max": 2081.335693359375,
+          "p05": 0.007097175344824791,
+          "p50": 0.6516880095005035,
+          "p95": 7.29210090637207
+        },
+        "rmse": 2.7218477725982666,
+        "capped_mse": 1.6264771223068237,
+        "cap_fraction": 0.027587890625,
+        "explained_variance": 0.7649303078651428,
+        "target_variance": 31.05813217163086
+      },
+      "total_objective_fixed_coefficients": 1.5905919088996572,
+      "objective_coefficients": {
+        "kl": 0.30000001192092896,
+        "entropy": 0.0,
+        "vf_loss": 1.0,
+        "vf_cap": 10.0
+      },
+      "advantage_probability_alignment": {
+        "mean_advantage_times_delta_logp": 0.004306404385715723,
+        "correlation_advantage_delta_logp": 0.04550200493451991,
+        "fraction_matching_sign_nonzero_advantages": 0.502197265625,
+        "positive_advantage_logp_delta": {
+          "count": 2555,
+          "nonfinite_count": 0,
+          "mean": -0.007122877257677441,
+          "std": 0.13132992238418642,
+          "min": -0.9406871795654297,
+          "max": 0.9643349647521973,
+          "p05": -0.2237940788269043,
+          "p50": 0.0003591775894165039,
+          "p95": 0.18639169931411725
+        },
+        "negative_advantage_logp_delta": {
+          "count": 1541,
+          "nonfinite_count": 0,
+          "mean": -0.015571480521437876,
+          "std": 0.13293631981035792,
+          "min": -0.9009385108947754,
+          "max": 0.691478967666626,
+          "p05": -0.24598312377929688,
+          "p50": -0.0006937980651855469,
+          "p95": 0.1698586344718933
+        }
+      },
+      "actor_same_observations": {
+        "mean_delta_rms_per_joint": [
+          0.04492506384849548,
+          0.014185145497322083
+        ],
+        "mean_delta_max_abs_per_joint": [
+          0.0692766010761261,
+          0.04092639684677124
+        ],
+        "deterministic_clipped_mean_delta_rms_per_joint": [
+          0.03975208103656769,
+          0.011862609535455704
+        ],
+        "mean_delta_over_old_sigma_rms_per_joint": [
+          0.10907109826803207,
+          0.032668888568878174
+        ],
+        "sigma_mean_per_joint": [
+          0.7321732640266418,
+          0.7885161638259888
+        ],
+        "sigma_ratio_to_old_mean_per_joint": [
+          0.9980812668800354,
+          0.9958013892173767
+        ],
+        "logstd_delta_max_abs_per_joint": [
+          0.017784953117370605,
+          0.0957866907119751
+        ],
+        "joint_order": [
+          "knee",
+          "ankle"
+        ],
+        "action_units": "normalized; deterministic clipping is a same-state diagnostic"
+      }
+    },
+    "first_pass": {
+      "rows_real": 4096,
+      "ratio": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 0.9987696160678752,
+        "std": 0.1451666556328868,
+        "min": 0.30130288004875183,
+        "max": 2.936049461364746,
+        "p05": 0.7783263474702835,
+        "p50": 1.0007458329200745,
+        "p95": 1.2209898233413696
+      },
+      "logp_delta": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": -0.011542527565325145,
+        "std": 0.14489931867280975,
+        "min": -1.1996393203735352,
+        "max": 1.0770649909973145,
+        "p05": -0.2506093680858612,
+        "p50": 0.0007455348968505859,
+        "p95": 0.19966185092926025
+      },
+      "initial_ratio_max_abs_deviation_from_one": 1.936049461364746,
+      "kl_old_to_current": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 0.00960254681424999,
+        "std": 0.010925909565974038,
+        "min": 1.580838579684496e-05,
+        "max": 0.10617376863956451,
+        "p05": 0.0013108612038195133,
+        "p50": 0.005960877984762192,
+        "p95": 0.030987757723778486
+      },
+      "entropy": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 1.7400044396199519,
+        "std": 1.275011144069613,
+        "min": -0.9896478652954102,
+        "max": 7.630656719207764,
+        "p05": -0.13963347673416138,
+        "p50": 1.672196388244629,
+        "p95": 3.9182945489883423
+      },
+      "ratio_outside_clip_fraction": 0.121826171875,
+      "surrogate_actually_clipped_fraction": 0.06591796875,
+      "policy_loss_fixed_advantages": -0.03843044117093086,
+      "unclipped_surrogate_mean": 0.04175342991948128,
+      "critic_fixed_gae_targets": {
+        "error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 0.3699634801596403,
+          "std": 2.700643654121517,
+          "min": -4.3565826416015625,
+          "max": 45.620784759521484,
+          "p05": -1.714228630065918,
+          "p50": 0.11381912231445312,
+          "p95": 2.6191282272338867
+        },
+        "squared_error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 7.430349103412656,
+          "std": 86.69144544813274,
+          "min": 1.0762596502900124e-07,
+          "max": 2081.256103515625,
+          "p05": 0.007315966067835689,
+          "p50": 0.6475925743579865,
+          "p95": 7.3952940702438354
+        },
+        "rmse": 2.7258665561676025,
+        "capped_mse": 1.6303176879882812,
+        "cap_fraction": 0.0283203125,
+        "explained_variance": 0.7651669383049011,
+        "target_variance": 31.05813217163086
+      },
+      "total_objective_fixed_coefficients": 1.59476801093939,
+      "objective_coefficients": {
+        "kl": 0.30000001192092896,
+        "entropy": 0.0,
+        "vf_loss": 1.0,
+        "vf_cap": 10.0
+      },
+      "advantage_probability_alignment": {
+        "mean_advantage_times_delta_logp": 0.004974839277565479,
+        "correlation_advantage_delta_logp": 0.047770163814591544,
+        "fraction_matching_sign_nonzero_advantages": 0.505615234375,
+        "positive_advantage_logp_delta": {
+          "count": 2555,
+          "nonfinite_count": 0,
+          "mean": -0.008134711931829583,
+          "std": 0.14613968189690468,
+          "min": -1.1996393203735352,
+          "max": 1.0770649909973145,
+          "p05": -0.2420693039894104,
+          "p50": 0.0013656318187713623,
+          "p95": 0.21188637018203732
+        },
+        "negative_advantage_logp_delta": {
+          "count": 1541,
+          "nonfinite_count": 0,
+          "mean": -0.01719273453714939,
+          "std": 0.14263975435510265,
+          "min": -0.9800732135772705,
+          "max": 0.8121196031570435,
+          "p05": -0.25773191452026367,
+          "p50": -0.0009398460388183594,
+          "p95": 0.18639707565307617
+        }
+      },
+      "actor_same_observations": {
+        "mean_delta_rms_per_joint": [
+          0.049697745591402054,
+          0.013015590608119965
+        ],
+        "mean_delta_max_abs_per_joint": [
+          0.07728192210197449,
+          0.03559303283691406
+        ],
+        "deterministic_clipped_mean_delta_rms_per_joint": [
+          0.04411476105451584,
+          0.011590446345508099
+        ],
+        "mean_delta_over_old_sigma_rms_per_joint": [
+          0.12137763202190399,
+          0.03460989147424698
+        ],
+        "sigma_mean_per_joint": [
+          0.7329248785972595,
+          0.7856606245040894
+        ],
+        "sigma_ratio_to_old_mean_per_joint": [
+          0.9976944327354431,
+          0.994690477848053
+        ],
+        "logstd_delta_max_abs_per_joint": [
+          0.04452627897262573,
+          0.09298980236053467
+        ],
+        "joint_order": [
+          "knee",
+          "ankle"
+        ],
+        "action_units": "normalized; deterministic clipping is a same-state diagnostic"
+      }
+    },
+    "final": {
+      "rows_real": 4096,
+      "ratio": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 1.0041089791993727,
+        "std": 0.14075867962082345,
+        "min": 0.3487982749938965,
+        "max": 2.467503309249878,
+        "p05": 0.7833761870861053,
+        "p50": 1.00546395778656,
+        "p95": 1.2097073793411255
+      },
+      "logp_delta": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": -0.005675190273905173,
+        "std": 0.1413397905541672,
+        "min": -1.0532615184783936,
+        "max": 0.9032068252563477,
+        "p05": -0.2441422939300537,
+        "p50": 0.005449056625366211,
+        "p95": 0.19037851691246033
+      },
+      "initial_ratio_max_abs_deviation_from_one": 1.467503309249878,
+      "kl_old_to_current": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 0.009844131892729369,
+        "std": 0.011426722423925634,
+        "min": 8.217271897592582e-06,
+        "max": 0.11457377672195435,
+        "p05": 0.0010083100642077625,
+        "p50": 0.0062092263251543045,
+        "p95": 0.03240316454321146
+      },
+      "entropy": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 1.7268035559391137,
+        "std": 1.2752257756849974,
+        "min": -1.004507303237915,
+        "max": 7.542614459991455,
+        "p05": -0.16272678971290588,
+        "p50": 1.6590150594711304,
+        "p95": 3.8956520557403564
+      },
+      "ratio_outside_clip_fraction": 0.112060546875,
+      "surrogate_actually_clipped_fraction": 0.07568359375,
+      "policy_loss_fixed_advantages": -0.04863804951310158,
+      "unclipped_surrogate_mean": 0.05377516895532608,
+      "critic_fixed_gae_targets": {
+        "error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 0.22511231992393732,
+          "std": 2.6517877932810854,
+          "min": -4.934940338134766,
+          "max": 45.21152877807617,
+          "p05": -1.7052907943725586,
+          "p50": -0.04625511169433594,
+          "p95": 2.3178844451904297
+        },
+        "squared_error": {
+          "count": 4096,
+          "nonfinite_count": 0,
+          "mean": 7.082654002489026,
+          "std": 84.90474175930328,
+          "min": 3.3620744943618774e-07,
+          "max": 2044.082275390625,
+          "p05": 0.004316408536396921,
+          "p50": 0.5701475739479065,
+          "p95": 6.33320677280426
+        },
+        "rmse": 2.661325454711914,
+        "capped_mse": 1.4273064136505127,
+        "cap_fraction": 0.023193359375,
+        "explained_variance": 0.7735865712165833,
+        "target_variance": 31.05813217163086
+      },
+      "total_objective_fixed_coefficients": 1.3816216037850872,
+      "objective_coefficients": {
+        "kl": 0.30000001192092896,
+        "entropy": 0.0,
+        "vf_loss": 1.0,
+        "vf_cap": 10.0
+      },
+      "advantage_probability_alignment": {
+        "mean_advantage_times_delta_logp": 0.01824703998863697,
+        "correlation_advantage_delta_logp": 0.16753169191106895,
+        "fraction_matching_sign_nonzero_advantages": 0.557373046875,
+        "positive_advantage_logp_delta": {
+          "count": 2555,
+          "nonfinite_count": 0,
+          "mean": 0.011012774425943304,
+          "std": 0.13549863354630293,
+          "min": -1.0532615184783936,
+          "max": 0.9032068252563477,
+          "p05": -0.20102936029434204,
+          "p50": 0.014436721801757812,
+          "p95": 0.20734174847602832
+        },
+        "negative_advantage_logp_delta": {
+          "count": 1541,
+          "nonfinite_count": 0,
+          "mean": -0.03334407399104525,
+          "std": 0.1463924007899057,
+          "min": -0.9777989387512207,
+          "max": 0.5119132995605469,
+          "p05": -0.310274600982666,
+          "p50": -0.011992037296295166,
+          "p95": 0.14869356155395508
+        }
+      },
+      "actor_same_observations": {
+        "mean_delta_rms_per_joint": [
+          0.044800471514463425,
+          0.029214512556791306
+        ],
+        "mean_delta_max_abs_per_joint": [
+          0.12303498387336731,
+          0.09075087308883667
+        ],
+        "deterministic_clipped_mean_delta_rms_per_joint": [
+          0.034749072045087814,
+          0.02522369474172592
+        ],
+        "mean_delta_over_old_sigma_rms_per_joint": [
+          0.08999843150377274,
+          0.08084036409854889
+        ],
+        "sigma_mean_per_joint": [
+          0.7356616258621216,
+          0.7700600028038025
+        ],
+        "sigma_ratio_to_old_mean_per_joint": [
+          0.9940920472145081,
+          0.9854938387870789
+        ],
+        "logstd_delta_max_abs_per_joint": [
+          0.1479487270116806,
+          0.2078571319580078
+        ],
+        "joint_order": [
+          "knee",
+          "ankle"
+        ],
+        "action_units": "normalized; deterministic clipping is a same-state diagnostic"
+      }
+    }
+  },
+  "snapshot_boundaries": {
+    "before": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/boundary_replay_v2/corrected_boundary/ppo_audit/snapshots/before",
+      "minibatches_completed": 0,
+      "rows_seen": {},
+      "scalars": {
+        "kl_coeff": {
+          "default_policy": 0.30000001192092896
+        },
+        "optimizer_lrs": {
+          "default_policy_default_optimizer": [
+            0.0001
+          ]
+        },
+        "entropy_coeff": {
+          "default_policy": 0.0
+        }
+      }
+    },
+    "minibatch_000008": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/boundary_replay_v2/corrected_boundary/ppo_audit/snapshots/minibatch_000008",
+      "minibatches_completed": 8,
+      "rows_seen": {
+        "default_policy": 4096
+      },
+      "scalars": {
+        "kl_coeff": {
+          "default_policy": 0.30000001192092896
+        },
+        "optimizer_lrs": {
+          "default_policy_default_optimizer": [
+            0.0001
+          ]
+        },
+        "entropy_coeff": {
+          "default_policy": 0.0
+        }
+      }
+    },
+    "first_pass": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/boundary_replay_v2/corrected_boundary/ppo_audit/snapshots/first_pass",
+      "minibatches_completed": 9,
+      "rows_seen": {
+        "default_policy": 4608
+      },
+      "scalars": {
+        "kl_coeff": {
+          "default_policy": 0.30000001192092896
+        },
+        "optimizer_lrs": {
+          "default_policy_default_optimizer": [
+            0.0001
+          ]
+        },
+        "entropy_coeff": {
+          "default_policy": 0.0
+        }
+      },
+      "exact_epoch_boundary": false,
+      "note": "First optimizer step after all rows have been consumed; may include rows of the next pass"
+    },
+    "final": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/boundary_replay_v2/corrected_boundary/ppo_audit/snapshots/final",
+      "minibatches_completed": 81,
+      "rows_seen": {
+        "default_policy": 41472
+      },
+      "scalars": {
+        "kl_coeff": {
+          "default_policy": 0.30000001192092896
+        },
+        "optimizer_lrs": {
+          "default_policy_default_optimizer": [
+            0.0001
+          ]
+        },
+        "entropy_coeff": {
+          "default_policy": 0.0
+        }
+      },
+      "note": "After original PPO after_gradient_based_update, including normal adaptive KL update"
+    }
+  },
+  "boundaries": {
+    "episode_chunks": 14,
+    "original_transition_count": 4096,
+    "terminated_chunks": 2,
+    "truncated_chunks": 0,
+    "unfinished_fragments": 12,
+    "chunks_starting_at_episode_reset": 14,
+    "complete_episodes_in_batch": 2,
+    "full_true_terminal_episodes_in_batch": 2,
+    "expected_observation_shape": [
+      4110,
+      88
+    ],
+    "batch_observation_shape": [
+      4110,
+      88
+    ],
+    "episode_to_batch_order_exact": true,
+    "observation_max_abs_error": 0.0,
+    "normalization_note": "Stock GAE standardizes all elongated rows, then PPO loss masks bootstrap rows.",
+    "return_note": "An unfinished/truncated fragment supports bootstrapped targets, not an observed infinite-horizon return.",
+    "mask_boundaries_all_correct": true,
+    "independent_real_target_max_abs_error": 1.9553254020365785e-06,
+    "independent_raw_advantages": {
+      "count": 4096,
+      "nonfinite_count": 0,
+      "mean": -0.11708259012533367,
+      "std": 2.7118604343362884,
+      "min": -45.29516213342548,
+      "max": 4.651840932801394,
+      "p05": -2.406326782541204,
+      "p50": 0.16654505406350942,
+      "p95": 2.0231414509744896
+    },
+    "actual_vs_independent_targets_and_real_normalization_max_abs_difference": 3.7128546260960142,
+    "actual_vs_stock_targets_real_rows_only_normalization_max_abs_difference": 3.7128543853759766,
+    "same_critic_vs_independent_real_targets": {
+      "error": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 0.11708259012533376,
+        "std": 2.7118604343362884,
+        "min": -4.651840932801392,
+        "max": 45.29516213342548,
+        "p05": -2.0231414509744905,
+        "p50": -0.1665450540635085,
+        "p95": 2.4063267825412016
+      },
+      "squared_error": {
+        "count": 4096,
+        "nonfinite_count": 0,
+        "mean": 7.36789534822906,
+        "std": 85.1278158390484,
+        "min": 3.090259101407402e-08,
+        "max": 2051.6517126933013,
+        "p05": 0.008059438245951022,
+        "p50": 0.7432936649268196,
+        "p95": 7.452024143406723
+      },
+      "rmse": 2.7143867351998794,
+      "capped_mse": 1.700230141892121,
+      "cap_fraction": 0.026611328125,
+      "explained_variance": 0.7632121863429394,
+      "target_variance": 31.058131335971794
+    },
+    "independent_minus_stock_real_targets": {
+      "count": 4096,
+      "nonfinite_count": 0,
+      "mean": 4.884954348145787e-09,
+      "std": 1.101570826794847e-06,
+      "min": -1.954079678512244e-06,
+      "max": 1.9553254020365785e-06,
+      "p05": -1.7212288305756829e-06,
+      "p50": 2.605715820891419e-08,
+      "p95": 1.7116651029880359e-06
+    },
+    "target_difference_fraction_above_1": 0.0
+  },
+  "heldout": [],
+  "training_performed": false,
+  "physical_simulations_performed": false,
+  "scope": "One fixed on-policy batch; policy likelihood on raw sampled actions, not clipped commands",
+  "boundary_correction": {
+    "real_rows": 4096,
+    "masked_rows": 14,
+    "masked_targets_unchanged": true,
+    "real_target_max_abs_change": 56.358917236328125,
+    "real_advantage_sign_change_fraction": 0.239990234375,
+    "normalization": "Same stock convention: standardize target-minus-V over ALL elongated rows, including masked rows",
+    "scope": "Correct real-row TD-lambda targets only; retain original flags, masks, raw actions/logp, rewards, observations and masked-row targets",
+    "upstream_relation": "Isolated boundary correction, not a wholesale backport of upstream connector/normalization changes",
+    "extra_value_forwards": 0
+  },
+  "native_pipeline_bootstrap_reproducer": {
+    "unfinished_fragment": {
+      "known_values_at_observations": [
+        2.0,
+        3.0,
+        4.0
+      ],
+      "rewards": [
+        1.0,
+        2.0
+      ],
+      "stock_targets_real": [
+        3.0789999961853027,
+        2.0
+      ],
+      "ordinary_td_lambda_targets_real": [
+        6.60736,
+        5.96
+      ],
+      "target_max_abs_difference": 3.96,
+      "terminateds_after_connectors": [
+        false,
+        false,
+        true
+      ],
+      "truncateds_after_connectors": [
+        false,
+        false,
+        true
+      ],
+      "loss_mask": [
+        true,
+        true,
+        false
+      ],
+      "no_training_or_simulation": true
+    },
+    "time_truncation": {
+      "known_values_at_observations": [
+        2.0,
+        3.0,
+        4.0
+      ],
+      "rewards": [
+        1.0,
+        2.0
+      ],
+      "stock_targets_real": [
+        3.0789999961853027,
+        2.0
+      ],
+      "ordinary_td_lambda_targets_real": [
+        6.60736,
+        5.96
+      ],
+      "target_max_abs_difference": 3.96,
+      "terminateds_after_connectors": [
+        false,
+        false,
+        true
+      ],
+      "truncateds_after_connectors": [
+        false,
+        false,
+        true
+      ],
+      "loss_mask": [
+        true,
+        true,
+        false
+      ],
+      "no_training_or_simulation": true
+    },
+    "true_termination": {
+      "known_values_at_observations": [
+        2.0,
+        3.0,
+        4.0
+      ],
+      "rewards": [
+        1.0,
+        2.0
+      ],
+      "stock_targets_real": [
+        2.7820000648498535,
+        2.0
+      ],
+      "ordinary_td_lambda_targets_real": [
+        3.079,
+        2.0
+      ],
+      "target_max_abs_difference": 0.29699993515014667,
+      "terminateds_after_connectors": [
+        false,
+        true,
+        true
+      ],
+      "truncateds_after_connectors": [
+        false,
+        false,
+        false
+      ],
+      "loss_mask": [
+        true,
+        true,
+        false
+      ],
+      "no_training_or_simulation": true
+    }
+  },
+  "optimizer_trajectory": {
+    "minibatches": 81,
+    "parameters": [
+      "pi.1.bias",
+      "pi.1.weight",
+      "pi_encoder.0.bias",
+      "pi_encoder.0.weight",
+      "pi_encoder.2.bias",
+      "pi_encoder.2.weight",
+      "vf.bias",
+      "vf.weight",
+      "vf_encoder.0.bias",
+      "vf_encoder.0.weight",
+      "vf_encoder.2.bias",
+      "vf_encoder.2.weight"
+    ],
+    "nonfinite_gradient_elements": 0,
+    "parameter_update_l2_distribution": {
+      "count": 972,
+      "nonfinite_count": 0,
+      "mean": 0.0014277884581784792,
+      "std": 0.0019258442794096494,
+      "min": 3.2782554626464844e-07,
+      "max": 0.009600024670362473,
+      "p05": 1.1110305786132815e-05,
+      "p50": 0.0003625281678978354,
+      "p95": 0.005582716013304884
+    },
+    "note": "Actual optimizer deltas; gradient norms are those remaining after original gradient processing and step."
+  }
+}

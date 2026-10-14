@@ -1,0 +1,84 @@
+TNT — confronto con Claude e decisioni adottate, 2026-10-13
+CMC_AGENT_OK_2026
+
+Claude e' stato invocato dal terminale con claude-opus-5-5, effort max,
+senza fallback. claude/claude_receipt.json registra comando, hash del prompt,
+modello restituito, tempi e return code 0. La risposta integrale e' in
+claude/claude_response.txt. Sono stati forniti il paper, sorgenti pertinenti e
+risultati aggregati autorizzati; non pesi, dataset grezzi o credenziali.
+Claude ha revisionato codice/metodologia del primo replay; non ha eseguito i
+test e non ha verificato indipendentemente i nuovi rollout dinamici.
+
+Punti confermati e verificati localmente
+
+1. Le equazioni e le transizioni dello stimatore letterale corrispondono al
+   paper. INVALID e' una diagnostica esplicita del caso T_bm >= T_em, non
+   una recovery. I test di parita' streaming/batch e quelli delle leggi di
+   aggiornamento sono in checks.json.
+2. Con durate costanti il guadagno della ricorrenza letterale e' -D_e/D_m.
+   Con durate variabili contano sequenza dei rapporti e cambi del punto fisso.
+   Un singolo rapporto maggiore di uno non prova divergenza: AB07 offre
+   proprio un controesempio numerico completo nel fixed_scan.
+3. La prima taratura non era rappresentativa dell'intera registrazione.
+   Un risultato negativo con quei parametri non smentisce il paper, ne'
+   dimostra che TNT sia inadatto a generare cinematica.
+4. Una curva fissa separa il problema del timing da quello dell'ampiezza.
+   Il TNT puo' migliorare la sincronizzazione senza riprodurre variazioni
+   di forma presenti nelle prescribed, particolarmente visibili alla caviglia.
+
+Correzioni della valutazione
+
+evaluation_audit.py aggiunge una valutazione separata, preservando replay,
+bundle, controller e output originali. Richiede late_to_stance per dichiarare
+completo uno swing, calcola continuita' sui campioni/pair validi, riporta la
+copertura, confronta PFD sul medesimo prefisso e segnala stati lunghi/cicli
+persi. Congela inoltre la durata PFD del primo esperimento. Le soglie di
+associazione temporale e di dwell sono diagnostiche, non limiti clinici.
+I risultati corretti sono in evaluation_audit.json e nel testo associato.
+Non interpretare le metriche null dei vecchi score come continuita' perfetta.
+
+Estensioni dichiarate al paper
+
+Il ramo blend usa v_new = 0.75*v_previous + 0.25*v_paper; alpha=0.25 e' stato
+dichiarato senza ottimizzarlo sugli errori dei target. Il ramo duration usa
+v_new = T_em/(D_e+D_m). Entrambi conservano soglie e mappatura middle, ma
+modificano Eq. 7 e quindi NON sono TNT letterale. La loro stabilita' locale
+non e' una prova di robustezza globale. Il test di pausa in early mostra
+che anche queste modifiche richiedono una gestione esplicita dell'arresto.
+
+Il generatore usa curve PCHIP per ginocchio e caviglia, ricavate dai primi
+40 secondi e congelate. Durante la stance interna usa un timer basato sulla
+durata precedente. Anche questo e' un ampliamento del paper: il suo TNT
+rimane a zero in stance, il paper usa una caviglia passiva e una diversa
+strategia di ginocchio in stance. Non e' una replica della Fourier Eq. 9.
+Gli stati chiamati stance/swing nel TNT non sono misure di HS/TO o scarico.
+
+Proposte di Claude non assunte come risultati
+
+- Guardie T_cap, rate minimo, uscita su massimo della coscia, soglie adattive
+  e progressione di stance dalla coscia richiedono ulteriori esperimenti.
+  Non sono state inserite silenziosamente nello stimatore.
+- I gate numerici proposti da Claude sono suggerimenti progettuali, non
+  criteri clinici validati e non sono stati applicati retroattivamente per
+  promuovere un esperimento a qualifica.
+- La modalita' Impedence del plugin corrente applica una coppia ideale:
+  non equivale automaticamente alla cedevolezza di stance del paper.
+  Plugin, comando SEA e controllore operativo non sono stati modificati.
+- Il diverso zero dell'angolo puo' spiegare differenze nella soglia sigma,
+  ma non dimostra che sia l'unica causa; rho dipende dall'escursione.
+- Una riscalatura sintetica del tempo non dimostra adattamento a vere
+  variazioni di velocita', che possono cambiare anche l'escursione angolare.
+
+Interpretazione del test dinamico
+
+Il confronto eseguito e' tra TNT-blend e playback prescribed come controllo
+ingegneristico, entrambi con identici limiti, governor e SEA. Non e' un
+confronto dinamico TNT contro PFD, e non dimostra un vantaggio TNT sul timing.
+I 3 secondi sono nel tratto di calibrazione AB06; contengono un solo ciclo
+completo fra minimi della coscia effettiva. Reserve e tracking biologico
+restano attivi: la riuscita della catena non dimostra deambulazione autonoma.
+Le GRF restano nella fisica, nei controlli di interruzione del simulatore e
+nelle diagnostiche; non entrano nello stimatore o nei riferimenti TNT.
+
+Tutti i risultati AB06/AB07 sono esplorativi su registrazioni gia' esaminate.
+Una nuova conferma richiede trial non usati per scegliere parametri o varianti.

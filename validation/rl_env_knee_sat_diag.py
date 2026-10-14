@@ -72,7 +72,7 @@ def main():
             segment_duration=SEG,
             episode_duration=EPISODE,
             policy_knots=1,
-            action_mode="delta",
+            action_mode="absolute",
             random_init=False,
             rebuild_model_on_reset=False,
             record_outputs=False,

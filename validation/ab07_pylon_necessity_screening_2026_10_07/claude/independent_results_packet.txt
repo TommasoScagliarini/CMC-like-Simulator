@@ -1,0 +1,170 @@
+Osservazioni aggregate finali, senza conclusioni del team locale.
+Continua il tuo audit indipendente iniziato in questa sessione. Il team non ha ancora letto alcun tuo testo visibile. Non ci sono sorgenti, dati per campione, credenziali o accesso ai file in questa capsule.
+
+Ambito: verificare la necessita' dell'allungamento del montaggio distale AB07, distinguendo requisito anatomico, requisito condizionato dalla preparazione, comportamento del banco e identificazione del montaggio fisico reale.
+Proporzione dai modelli: AB06 shank sano465.480598772mm, mount430mm; AB07 shank sano417.741015827mm. L0=385.89929908923726mm; L1 attuale403.4784289483052mm; delta17.57912985906795mm.
+I17 modelli AB07 differiscono solo nelle12posizioni dei marker calibrati e nel soloY del frame parent della caviglia protesica. Tutti3049altri campi XML sono ESATTAMENTE identici: masse, localCOM, inerzie, jointframes/axes, defaults/ranges, ForceSet/SEA, mesh/rendering. Varia la distanza di montaggio; non si ricostruisce massa/inerzia di hardware diverso. WorldCOM puo' cambiare con mount/IK.
+Ogni cella usa nuova calibrazione dei12marker e propria fullIK28612righe10.36-153.415s, stesso solver. Quattro endpoint riprendono byte-esattamente le preparazioni precedenti. Le tre pose aggiuntive -2/-5/-10deg aL0 sono congelate prima dei loro output, motivate dalla verifica geometrica. Nessun adattamento dei profili o dei guadagni ai risultati.
+Offsetstatico significa convenzione di calibrazione dei marker del piede e proprio riferimento IK. Non e' modifica di jointzero/default/range. Non identifica di per se' un montaggio fisico osservato: i dati sono del soggetto sano, non marker hardware indipendenti su una protesi realmente montata.
+
+Geometria isolata: su436pose statiche, L0 con ginocchio raw invariato raggiunge la frontiera di contatto delle sfere primarie in436/436, con variazione caviglia mediana-1.655589deg (range-1.841047..-1.578260deg), entro limiti originali del modello. Clearance raw sfere primarie L0+1.622242mm, L1-15.861616mm. L1 rimane gia' intersecante questa frontiera per tutto il range caviglia con ginocchio raw. Toccare la frontiera non significa sostenere il peso.
+Distinguere: geometriaSTL, sfereforza virtuali, punti detector. Piano primaryY=-9.503954760mm; piano binaryY=+14.8208231mm; COPdataset codificatoY=0. RawCOPY e' gia'0, conversione preservaXYZ/scaling. Non e' stata identificata nei file analizzati una calibrazione indipendente piano/piattaforma->frame dei marker; questo non dimostra che Y0 sia errato. Non trattare la mesh ossea destra come suola/marker hardware omologo.
+Registrazione attuale copia due target del donorAB06: pitchstatico7.050422788deg e clearanceSTL-2.136415973mm rispetto allo stesso piano benchmark. AB07pre pitch2.319774287deg e clearance23.418364525mm. Perturbando solo il targetdonor clearance di+/-5mm, l'estensione calcolata diventa circa12.551819/22.606581mm; pitchdonor+/-2deg produce circa14.215478/20.994493mm. Traslare lo STESSO piano per entrambi cancella, non e' prova di confusione fra piani.
+Anklecenter meanstance: sanoAB06 51.957585699mm, sanoAB07 61.230211526mm; prostheticAB06 79.863156401mm. AB07proporzionaleoffset0 89.138814963mm, attuale71.813162275mm. Il contrasto sano include anatomia e marcia/posa, non una misura isolata dell'anatomia.
+
+Contratto dinamico uguale per tutti: forward integration rk4_bypass1ms, azione originale prescribed_action derivata dalla propriaIK filtrata produzione6Hz/order4, muscoli/reserve e cascade esistenti, SEA plugin NONimpedance con molle reali, nessuna rete caricata. LeftGRF virtuale calcolata dallo stato reale; rightGRF misurata prescritta. Kknee321/Kankle500Nm/rad, Fopt100/250Nm, stessi guadagni e clamp motore500Nm. Non sono posizioni imposte tramite vincoli.
+Finestre: AB07 reset12.591740519774012s, trecicli14.087704688172044->18.69078019047619s, durata4.603075502304145s. AB06 reset15.615960838108348s, primary17.163967985977223->21.822001050884474s. AB07 episode6.11s (emendamento prima di ogni output:6.10nonbrackettava l'ultimoHS nel recorderprestep); AB06episode6.21s. Setuporiginaleorizzonte9s preservato, nessuna finestra sostituita daultimooutput.
+Le medie e gli impulsi confrontabili qui sono sui trecicli congelati, non sull'interoepisode. ReserveY positiva spinge versoalto, negativa tiraversobasso. Absoluteimpulse evita cancellazioni; generalizedwork=integrale reserve_y*qdot_pelvis_y. Il carico sinistro richiesto e' mgT+mdeltaVcom-Iright, non la GRF sperimentale sinistra come groundtruth di una protesi reale. Bilancio: Ileft+Iright+Ireserve_y-mgT=mdeltaVcom. Measuredleft e' del sano ed e' solo diagnostica.
+NA indica nessun aggregato dei trecicli, anche se esiste osservazione parziale; le interruzioni sono risultati, senza retune/rerun. La soglia grf_penetration e' quella gia' catturata28mm, non un nuovo criterio clinico. max_recorded_penetration e' un massimo di campioni esportati, non necessariamente lo snapshot terminale.
+
+case,mount_mm,static_reference_offset_deg,status,end_reason,observed_episode_s,fully_observed_primary_cycles,three_cycle_coverage,max_recorded_penetration_mm,left_mean_N,left_required_by_momentum_N,reserve_y_mean_N,reserve_y_RMS_N,reserve_y_positive_Ns,reserve_y_negative_Ns,reserve_y_absolute_Ns,reserve_y_absolute_work_J,knee_tracking_RMS_deg,ankle_tracking_RMS_deg,pelvis_y_tracking_RMS_mm,left_impulse_Ns,healthy_measured_left_impulse_Ns,swing_impulse_fraction,momentum_closure_Ns
+P0_A0,385.8993,0,completed,episode_time_limit,6.11,3,complete,10.22549,79.036191,285.79216,206.75745,290.8882,986.67763,-34.957489,1021.6351,42.759099,0.1558027,0.15823023,0.22213334,363.80955,1373.0096,0.017410934,0.0067957305
+P4_A1,403.47843,4.7306485,completed,episode_time_limit,6.11,3,complete,21.35862,417.55769,285.80969,-131.76226,224.18263,89.097702,-695.60932,784.70702,33.9466,0.52784257,0.51227084,0.3716311,1922.0496,1373.0096,0.037590085,-0.065600633
+AB06_control,430,0,completed,episode_time_limit,6.21,3,complete,22.96653,326.79668,387.07486,60.276473,120.6889,345.51269,-64.74288,410.25557,15.272993,0.51990233,0.44669584,0.26981894,1522.2297,1765.9706,0.00087570009,-0.0079881607
+P0_A1,385.8993,4.7306485,completed,episode_time_limit,6.11,3,complete,5.18431,13.577975,285.79171,272.21506,364.92793,1267.7953,-14.768873,1282.5642,55.514443,0.11732537,0.094728993,0.28506728,62.500443,1373.0096,0.0021868531,0.0061047393
+P1_A0,390,0,completed,episode_time_limit,6.11,3,complete,14.15711,167.35912,285.79508,118.43734,201.06734,629.61589,-84.439888,714.05578,28.649196,0.20582008,0.25172495,0.1892658,770.36667,1373.0096,0.025918704,0.0063433301
+P1_A1,390,4.7306485,completed,episode_time_limit,6.11,3,complete,9.14016,60.790015,285.79389,225.00512,313.84994,1067.1607,-31.445123,1098.6058,46.14568,0.14136978,0.15270225,0.23383633,279.82103,1373.0096,0.024582644,0.0057391026
+P2_A0,395,0,completed,episode_time_limit,6.11,3,complete,18.77331,289.98226,285.79628,-4.184749,147.66615,222.2677,-241.53042,463.79812,18.631987,0.29891617,0.37491194,0.25291017,1334.8102,1373.0096,0.031353829,0.0056843448
+P2_A1,395,4.7306485,completed,episode_time_limit,6.11,3,complete,14.27032,166.41688,285.79651,119.37987,205.55377,642.49407,-92.979534,735.4736,29.532813,0.20081432,0.2606552,0.19017412,766.02947,1373.0096,0.032988256,0.0011033592
+P3_A0,400,0,completed,episode_time_limit,6.11,3,complete,22.57156,414.94003,285.79916,-129.13948,222.88469,94.24415,-688.68291,782.92706,33.712787,0.65469373,0.49176523,0.38089238,1910.0003,1373.0096,0.032500293,0.0064019205
+P3_A1,400,4.7306485,completed,episode_time_limit,6.11,3,complete,19.03856,304.85818,285.80328,-19.062545,152.66237,201.37137,-289.1177,490.48907,19.494591,0.3000439,0.39288492,0.26265645,1403.2852,1373.0096,0.036435062,-0.035159001
+P4_A0,403.47843,0,completed,episode_time_limit,6.11,3,complete,25.97174,506.62628,285.80426,-220.82318,315.6206,64.124767,-1080.5905,1144.7153,49.745611,1.0997353,0.56819716,0.47169041,2332.039,1373.0096,0.032563272,-0.00535651
+P5_A0,408,0,interrupted,grf_penetration,0.4,0,unavailable,28.01547,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+P5_A1,408,4.7306485,completed,episode_time_limit,6.11,3,complete,24.12283,565.59022,285.82139,-279.78815,370.48658,23.707699,-1311.5937,1335.3014,57.412458,1.2094722,0.67894577,0.49025383,2603.4545,1373.0096,0.039765917,-0.088913411
+P6_A0,413,0,interrupted,grf_penetration,0.33,0,unavailable,28.45215,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+P6_A1,413,4.7306485,interrupted,grf_penetration,3.43,1,partial,28.13662,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+P0_M2,385.8993,-2,completed,episode_time_limit,6.11,3,complete,12.17196,120.57735,285.79188,165.21593,245.10677,813.6083,-53.106895,866.7152,35.66378,0.18106409,0.1982949,0.20127466,555.02666,1373.0096,0.019074405,0.006468925
+P0_M5,385.8993,-5,completed,episode_time_limit,6.11,3,complete,15.1384,186.48467,285.79228,99.308609,181.08732,545.48457,-88.359545,633.84412,25.208018,0.2262296,0.253802,0.19160678,858.40303,1373.0096,0.020042808,0.0046317305
+P0_M10,385.8993,-10,completed,episode_time_limit,6.11,3,complete,21.69601,291.59439,285.79232,-5.8007593,137.69376,202.66331,-229.36465,432.02796,18.047615,0.35409255,0.31015698,0.24875972,1342.231,1373.0096,0.019745233,0.0060441298
+
+Riferimento cinematico puroFK (forza sulla IK, distinto dai rollout effettivi sopra):
+P0_A0: FKmeanN=22.239855; left12markerRMSmm=6.2564827; anklecenterYmm=89.138815
+P0_A1: FKmeanN=0.01861679; left12markerRMSmm=6.2565987; anklecenterYmm=89.13921
+P1_A0: FKmeanN=83.825335; left12markerRMSmm=6.2295965; anklecenterYmm=85.09988
+P1_A1: FKmeanN=12.921765; left12markerRMSmm=6.2295338; anklecenterYmm=85.100065
+P2_A0: FKmeanN=196.37914; left12markerRMSmm=6.1997929; anklecenterYmm=80.17337
+P2_A1: FKmeanN=87.242303; left12markerRMSmm=6.199691; anklecenterYmm=80.17345
+P3_A0: FKmeanN=332.50625; left12markerRMSmm=6.1731315; anklecenterYmm=75.243694
+P3_A1: FKmeanN=233.30006; left12markerRMSmm=6.1730479; anklecenterYmm=75.243624
+P4_A0: FKmeanN=444.72805; left12markerRMSmm=6.1562453; anklecenterYmm=71.813107
+P4_A1: FKmeanN=356.56083; left12markerRMSmm=6.1562017; anklecenterYmm=71.813162
+P5_A0: FKmeanN=611.57355; left12markerRMSmm=6.1368992; anklecenterYmm=67.352391
+P5_A1: FKmeanN=535.12636; left12markerRMSmm=6.1367724; anklecenterYmm=67.352455
+P6_A0: FKmeanN=817.00644; left12markerRMSmm=6.1179647; anklecenterYmm=62.417834
+P6_A1: FKmeanN=750.51306; left12markerRMSmm=6.1179551; anklecenterYmm=62.417743
+
+Controlli SEA (solo3cicli completi, frazioni percampione):
+P0_A0: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P0_A1: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P1_A0: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P1_A1: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P2_A0: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P2_A1: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P3_A0: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P3_A1: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P4_A0: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P4_A1: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P5_A1: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P0_M2: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P0_M5: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+P0_M10: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+AB06_control: SEA_Knee:identityPASS=True,u_saturation=0,motor500clamp=0; SEA_Ankle:identityPASS=True,u_saturation=0,motor500clamp=0
+
+Fase: originale matchingdiagnostico(HSonset120ms/TOonset180ms), quattroHS/treTO nominalifissi. UltimoHS rightcensored anchenei completi (salvati solo11/3ms dopochiusura). Missing countsphysiological nonpromossi se manca supporto; matchedclosing ancora osservazione ma guardincompleto. BinarygeometryFSM eforza20N sono canali distinti. Segue conteggi aggregati e bias del subset matched originale, inclosingseosservato; biasNAquandozero matches. Missingguardfull e censored sono separati.
+case,channel,event,status,predicted,matched,extra,unmatched_fully_observed,censored_unmatched,bias_ms
+P0_A0,binary_geometry_FSM,heel_strike,fully_observed_primary_window,1,0,1,3,1,NA
+P0_A0,binary_geometry_FSM,toe_off,fully_observed_primary_window,1,1,0,2,0,-26.573239
+P0_A0,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P0_A0,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,28.776899
+P4_A1,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,4,0,0,0,-94.463657
+P4_A1,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,122.12995
+P4_A1,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,7,4,3,0,0,-21.109633
+P4_A1,primary_force_20N_crossings,toe_off,fully_observed_primary_window,6,3,3,0,0,75.563634
+AB06_control,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,4,0,0,0,-34.250114
+AB06_control,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,98.652517
+AB06_control,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,5,3,2,0,1,21.004409
+AB06_control,primary_force_20N_crossings,toe_off,fully_observed_primary_window,5,3,2,0,0,-13.246507
+P0_A1,binary_geometry_FSM,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P0_A1,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,-105.87005
+P0_A1,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,4,0,4,3,1,NA
+P0_A1,primary_force_20N_crossings,toe_off,fully_observed_primary_window,4,3,1,0,0,-79.006989
+P1_A0,binary_geometry_FSM,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P1_A0,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,31.463285
+P1_A0,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P1_A0,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,47.820527
+P1_A1,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,1,3,2,1,70.035832
+P1_A1,binary_geometry_FSM,toe_off,fully_observed_primary_window,4,3,1,0,0,-74.870049
+P1_A1,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P1_A1,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,31.586399
+P2_A0,binary_geometry_FSM,heel_strike,fully_observed_primary_window,6,3,3,0,1,37.728348
+P2_A0,binary_geometry_FSM,toe_off,fully_observed_primary_window,6,3,3,0,0,122.79662
+P2_A0,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P2_A0,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,63.101767
+P2_A1,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,4,0,0,0,-27.963657
+P2_A1,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,-45.536715
+P2_A1,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,4,1,3,3,0,7.6970554
+P2_A1,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,53.741197
+P3_A0,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,4,0,0,0,-53.213657
+P3_A0,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,134.12995
+P3_A0,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,4,2,2,1,1,-9.7703266
+P3_A0,primary_force_20N_crossings,toe_off,fully_observed_primary_window,4,3,1,0,0,72.642434
+P3_A1,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,4,0,0,0,-78.463657
+P3_A1,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,51.796618
+P3_A1,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,6,3,3,1,0,-3.6453549
+P3_A1,primary_force_20N_crossings,toe_off,fully_observed_primary_window,5,3,2,0,0,68.295275
+P4_A0,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,4,0,0,0,-76.713657
+P4_A0,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,140.46328
+P4_A0,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,7,4,3,0,0,57.76255
+P4_A0,primary_force_20N_crossings,toe_off,fully_observed_primary_window,6,3,3,0,0,76.238391
+P5_A0,binary_geometry_FSM,all,unavailable_primary_not_reached_or_not_recorded,NA,NA,NA,NA,NA,NA
+P5_A0,primary_force_20N_crossings,all,unavailable_primary_not_reached_or_not_recorded,NA,NA,NA,NA,NA,NA
+P5_A1,binary_geometry_FSM,heel_strike,fully_observed_primary_window,4,3,1,1,0,-101.98934
+P5_A1,binary_geometry_FSM,toe_off,fully_observed_primary_window,3,3,0,0,0,130.79662
+P5_A1,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,5,4,1,0,0,-48.918123
+P5_A1,primary_force_20N_crossings,toe_off,fully_observed_primary_window,4,3,1,0,0,80.956404
+P6_A0,binary_geometry_FSM,all,unavailable_primary_not_reached_or_not_recorded,NA,NA,NA,NA,NA,NA
+P6_A0,primary_force_20N_crossings,all,unavailable_primary_not_reached_or_not_recorded,NA,NA,NA,NA,NA,NA
+P6_A1,binary_geometry_FSM,heel_strike,partially_observed_primary_window,2,2,0,0,2,-107.46417
+P6_A1,binary_geometry_FSM,toe_off,partially_observed_primary_window,1,1,0,0,2,122.42676
+P6_A1,primary_force_20N_crossings,heel_strike,partially_observed_primary_window,2,1,1,1,2,-112.07048
+P6_A1,primary_force_20N_crossings,toe_off,partially_observed_primary_window,1,1,0,0,2,75.66621
+P0_M2,binary_geometry_FSM,heel_strike,fully_observed_primary_window,1,0,1,3,1,NA
+P0_M2,binary_geometry_FSM,toe_off,fully_observed_primary_window,1,1,0,2,0,-33.573239
+P0_M2,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P0_M2,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,36.26267
+P0_M5,binary_geometry_FSM,heel_strike,fully_observed_primary_window,1,0,1,3,1,NA
+P0_M5,binary_geometry_FSM,toe_off,fully_observed_primary_window,1,1,0,2,0,107.42676
+P0_M5,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P0_M5,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,43.579686
+P0_M10,binary_geometry_FSM,heel_strike,fully_observed_primary_window,0,0,0,3,1,NA
+P0_M10,binary_geometry_FSM,toe_off,fully_observed_primary_window,0,0,0,3,0,NA
+P0_M10,primary_force_20N_crossings,heel_strike,fully_observed_primary_window,3,0,3,3,1,NA
+P0_M10,primary_force_20N_crossings,toe_off,fully_observed_primary_window,3,3,0,0,0,50.41932
+
+P0_M10: tre onsetforza20N, uno durante ciascuno dei primi trecicli, sono tardivi rispetto al rispettivoHSsano (media149.925ms, range138.681-166.069ms); originale matcher120ms li lascia unmatched. Sono eventi osservati tardivi, non assenza di contatto. Tutti3controlliL0negativi completano la fisica ma nessun ciclo actorFSM valido: M2/M5 emettono solo1HS/1TO, M10zeroHS/TO. Questo e' un tradeoff di timing/percezione, non un nuovo gate o nuova dichiarazionePASS.
+
+Validazione: nessuna modifica ai683input originali/protocollati. P4_A1 tutti17STO decodificati esattamenteuguali al prefisso del vecchio paired. AB06 stesso prefisso comune6200righe, scarti ultimi10campioni di controlli/muscoli e9di stati per endpoint-0.700ps che causa ceil dei substeps governor11->10. Il test di esattaidentita' globale restaFALSE; primarydeltaIleft=0.0Ns, deltaIreserve_y=-1.42379099e-6Ns, deltaWsigned=+1.48110054e-7J. Nessuna modifica runtime per renderloPASS.
+Tutte le identita' SEA/finitezza vengono verificate sui campioni registrati. Le simulazioni completate possono comunque essere sostenute dalle reserve; questo non valida il montaggio reale.
+
+Fornisci ora, indipendentemente dal team locale, il tuo verdetto in italiano (massimo1100parole): cosa e' dimostrato circa l'esatto+17.579mm, cosa circa qualsiasi allungamento aposa attuale fissata, cosa circa alternative aL0, e cosa non e' identificabile sul montaggio fisico/anatomia. Usa numeri e limiti dei test, conserva tutte le interruzioni. Non scegliere una lunghezza clinicamente corretta o normale senza misure indipendenti. Indica separatamente eventuali cause ancora non identificate e la correzione del metodo di preparazione giustificata da questi dati.
+
+Journalactor, contatori SECONDARI di tuttoepisode osservato(inclusostartup), non prova di carico o verita fisiologica:
+case,HS_count,TO_count,valid_cycles,invalid,resync,cancelled_HS
+P0_A0,2.0,2.0,1.0,0.0,0.0,0.0
+P4_A1,4.0,4.0,3.0,0.0,0.0,0.0
+AB06_control,4.0,4.0,3.0,0.0,0.0,0.0
+P0_A1,4.0,4.0,3.0,0.0,0.0,0.0
+P1_A0,4.0,4.0,3.0,0.0,0.0,0.0
+P1_A1,4.0,5.0,2.0,1.0,1.0,0.0
+P2_A0,5.0,7.0,3.0,3.0,2.0,1.0
+P2_A1,4.0,4.0,3.0,0.0,0.0,0.0
+P3_A0,4.0,4.0,3.0,0.0,0.0,0.0
+P3_A1,4.0,4.0,3.0,0.0,0.0,0.0
+P4_A0,4.0,4.0,3.0,0.0,0.0,0.0
+P5_A0,0.0,0.0,0.0,0.0,0.0,0.0
+P5_A1,4.0,4.0,3.0,0.0,0.0,0.0
+P6_A0,0.0,0.0,0.0,0.0,0.0,0.0
+P6_A1,2.0,2.0,1.0,0.0,0.0,0.0
+P0_M2,1.0,1.0,0.0,0.0,0.0,0.0
+P0_M5,1.0,1.0,0.0,0.0,0.0,0.0
+P0_M10,0.0,0.0,0.0,0.0,0.0,0.0

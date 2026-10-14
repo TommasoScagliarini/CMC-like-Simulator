@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "method": "donor_relative_static_hardware_ground_v1",
+  "sources": {
+    "input_model": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB06_SEASEA-raw/osimxml/AB06_SEASEA_anatomical.osim",
+      "sha256": "e4731c98f29b865324f861af2a6f10722a969a03b5ccd2814d0c44af8eb3ce94"
+    },
+    "input_static_motion": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB06_SEASEA-raw/data/converted/static/static_01/static_01_ik_dataset_ab06_seasea.mot",
+      "sha256": "577b3b565324403eadfcb51356b837aadce47503e75dc6946fa6e7f2886a930f"
+    },
+    "reference_model": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/results/AB06/abx_reference_b65hjs89/donor_model/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "reference_static_motion": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/results/AB06/abx_reference_b65hjs89/static_motion/static_01_ik_dataset_ab06_seasea.mot",
+      "sha256": "ea4d8b0718f692ecaa0529239295041b021ba16be223eea812a546ce306d0087"
+    },
+    "foot_mesh": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry/AM_foot_l.STL",
+      "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"
+    },
+    "plane_profile": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+      "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2"
+    },
+    "script": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/tools/register_seasea_ground.py",
+      "sha256": "3b6b8acd8d5adbae0eb17b05aba7492f0920e5fc841ea7d48fdd52583ccdb64d"
+    },
+    "plugin": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+      "sha256": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b"
+    }
+  },
+  "ground": {
+    "origin_m": [
+      0.0,
+      0.0148208231,
+      0.0
+    ],
+    "normal": [
+      0.0,
+      1.0,
+      0.0
+    ]
+  },
+  "reference": {
+    "pose_count": 400,
+    "median_min_stl_clearance_m": -0.002136415973063889,
+    "median_sagittal_pitch_rad": 0.12305309130900244
+  },
+  "subject_before": {
+    "pose_count": 400,
+    "median_min_stl_clearance_m": -0.002136415973063889,
+    "median_sagittal_pitch_rad": 0.12305309130900244,
+    "distal_mount_y_m": -0.43
+  },
+  "subject_after": {
+    "median_min_stl_clearance_m": -0.002136415973063889,
+    "median_sagittal_pitch_rad": 0.12305309130900244,
+    "distal_mount_y_m": -0.43
+  },
+  "adjustments": {
+    "distal_mount_delta_y_m": 0.0,
+    "static_ankle_pose_offset_rad": 0.0,
+    "static_ankle_pose_offset_deg": 0.0
+  },
+  "preserved": [
+    "proximal anatomical mounting",
+    "hip geometry and biological poses",
+    "static knee pose",
+    "fixed foot hardware",
+    "SEA properties",
+    "joint axes/defaults/ranges",
+    "mass/COM/inertia",
+    "markers",
+    "source healthy motion",
+    "detector and force profiles"
+  ],
+  "checks": {
+    "protected_model_xml_unchanged": true,
+    "source_files_unchanged": true,
+    "height_residual_m": 0.0,
+    "pitch_residual_rad": 0.0
+  },
+  "limitations": [
+    "Benchmark-relative registration, not a measured physical floor or shoe model.",
+    "STL visual geometry defines the common registration convention, not the online sphere contact law.",
+    "Ankle offset applies only to the static marker-calibration motion, not to runtime commands or joint zero.",
+    "New marker IK and contact/event qualification remain required; matching static geometry alone is insufficient."
+  ],
+  "outputs": {
+    "model": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB06_SEASEA-raw/osimxml/AB06_SEASEA.osim",
+      "sha256": "e4731c98f29b865324f861af2a6f10722a969a03b5ccd2814d0c44af8eb3ce94"
+    },
+    "static_motion": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB06_SEASEA-raw/osimxml/AB06_SEASEA_static_ground_registered.mot",
+      "sha256": "f44652b108b1f8c0858d26af649571478d00a4ce4a73e055c5c9a095f46534fa"
+    }
+  }
+}

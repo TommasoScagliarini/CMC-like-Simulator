@@ -1,0 +1,27 @@
+TNT feasibility: reconciliation with Claude Opus 5.5 / max, 2026-10-13
+The provider receipt verified canonicalModel claude-opus-5-5, successful exit, no permission denials, and --effort max. No fallback was configured. Claude read the supplied paper text and authorized source/configuration files. It did not run simulations or inspect raw datasets/checkpoint weights. Offline FK aggregate numbers were supplied by Codex, not independently reproduced by Claude.
+
+AGREEMENT
+- Published TNT is a four-state swing/pre-swing timing algorithm, not a full-stride phase. It holds T=0 through stance and uses previous-cycle rate in early swing.
+- Its transitions are not observed physical HS/TO. Current detector itself is geometric; downstream force dependencies exist throughout observations, FSM and reward.
+- The active ankle and knee stance require further kinematic state/progression. Published validation uses a passive ankle and three able-bodied users.
+- Exact paper thresholds cannot be directly reused in the inspected AB06/AB07 trajectories under the declared diagnostic angle convention.
+- A no-GRF training contract requires removal of actor/critic force channels, force-gated state logic, force reward terms, and GRF-derived teacher/profile preprocessing under the strong reading.
+- New feature/event contracts, adapted/retrained actor and critic, explicit startup, and independent validation are required.
+
+VALUABLE ADDITIONS VERIFIED IN SOURCE
+- ENV imitation_target at lines2450-2466 falls back to same-time sound-leg kinematics when the periodic target is unavailable. Merely disabling gait_clock_enable silently changes target alignment; this is not a valid no-GRF migration.
+- A geometric no-GRF control branch is useful to separate removing force information from adding TNT. It must audit all remaining force paths; changing two thresholds alone is insufficient.
+- Kinematic geometric event validation may remain privileged in training without providing foot-contact sensors to the actor. This is a hybrid alternative; it does not claim that TNT alone replaces every event/reward mechanism.
+
+CORRECTIONS / QUALIFICATIONS TO CLAUDE RESPONSE
+1 Claude calls the thigh a fixed replay, says it cannot react to the prosthesis, and infers a noncausal sensor from reference sosfiltfilt. Actual biological coordinates are integrated dynamically and muscle/reserve-controlled toward IK (outer_loop.py97-113; simulation_runner.py858-870). Reading actual body orientation is causal. Offline reference filtering does not mean the live measured orientation reads future samples. Strong tracking and a single trial remain confounders; human co-adaptation and robustness across speeds are not demonstrated by these saved rollouts.
+2 The actual left thigh body here is transfemur, not femur_l. Exact body-in-ground FK was used by Codex. Hip angle or pelvis_tilt+hip_flexion is not an equivalent 3D observation.
+3 'Set load thresholds to zero' is only one component of removing GRF. Current adapter still reads/validates primary force/contact (ENV3590-3636), features and force rewards remain, and old teacher/corridor are GRF-derived. The response's later table recognises most of these requirements.
+4 SEA spring torque is internal actuator/proprioceptive information. It may carry indirect information about loading, as do all physical kinematics; user excluded explicit GRF training signals, not all consequences of contact in physics. No new 'no-load-information' requirement is imposed.
+5 A monotonic max/ratchet, theta-stance map, quantile thresholds and T_em tuned to a geometric landing event are design options needing validation, not proven requirements or algorithms specified by the paper. An unqualified ratchet can remove useful backward motion or keep a stalled estimate.
+6 TNT can be evaluated over multiple recorded velocities and subjects in simulation; the present single-condition rollouts cannot establish its speed-adaptation benefit. No inherent impossibility for all simulations is inferred.
+7 Nominal-period/profile-mean discrepancy mentioned by Claude is not treated as a newly established bug here. Different data/windows and phase warping require separate interpretation.
+
+FINAL RECOMMENDATION
+Conditional feasibility for a kinematic-only knee/ankle learning pipeline. Do not directly swap TNT for legacy HS/TO/FSM fields or index a full-stance morphology profile by T=0. First qualify actual-thigh sensing, thresholds, startup and stance information. Compare a no-GRF geometric baseline against TNT actor with the same kinematic-only reward. A full deletion of the geometric/FSM reward infrastructure is a deeper alternative requiring new continuous task rewards. Retain physical contact forces only in plant dynamics, with diagnostics isolated from learning. Rebuild teacher/corridor without GRF if claiming a strictly kinematic training lineage; best47 warm-start retains historical GRF-assisted training provenance.

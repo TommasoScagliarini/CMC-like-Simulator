@@ -1,0 +1,32 @@
+{
+  "created_utc": "2026-10-07T16:44:59.772229+00:00",
+  "status": "prospective_scheduling_addendum_before_candidate_native_start",
+  "change": "Allow process overlap after control was started first; start order remains PYLON400_REFERENCE then STANDING_AB07",
+  "reason": "Reduce wall-clock duration of two independent processes without changing numerical operations or frozen physical inputs",
+  "frozen_dynamic_protocol": {
+    "path": "validation/ab07_standing_geometry_fit_2026_10_07/dynamic_protocol.json",
+    "sha256": "45c8444d4c5161fca5387cfe2932f76f14f67262da9bef3a1e41b7b9b96d7ee3"
+  },
+  "source_review": {
+    "original_runner": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/run_dynamic_screen.py",
+      "sha256": "571310e25cd6b78c212042c055a6fc8597d7667fb6041ccda0685f7910516958"
+    },
+    "monotonic_usage": "Only final receipt elapsed wall time; no physics wall-time deadline",
+    "state_and_module_globals": "Separate operating-system processes; per-case OpenSim model/state/RNG/config/output directory",
+    "native_event_order": "Only per-case numerical time orders matter; prescribed_action/reset/step/close unchanged"
+  },
+  "preserved": [
+    "One physical attempt each",
+    "Seed123",
+    "Same setup9s horizon and episode6.11s",
+    "All profile/SEA/controller/SO/solver/config/OMP options unchanged",
+    "Distinct existing case directories and logs",
+    "Run/analysis protocols immutable",
+    "No outcome-based selection or geometry tuning"
+  ],
+  "candidate_output_existed_before_addendum": false,
+  "candidate_native_results_read_before_addendum": false,
+  "additional_physical_cases": 0,
+  "approval_dependency": "Source peer review and disjoint-output check before starting candidate"
+}

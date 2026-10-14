@@ -60,6 +60,8 @@ def _runtime(config: Mapping[str, Any] | None, label: str) -> dict:
     if not isinstance(config, Mapping):
         raise ValueError(f"{label} resolved runtime configuration is missing")
     simulation = _section(config, "simulation", label)
+    if simulation.get("action_mode") not in {"absolute", "raw"}:
+        raise ValueError(f"{label} simulation.action_mode must be absolute (or diagnostic raw)")
     grf = _section(config, "grf", label)
     model = _section(config, "model", label)
     missing = [key for key in _ARCHITECTURE_KEYS if key not in model]
@@ -76,7 +78,9 @@ def _runtime(config: Mapping[str, Any] | None, label: str) -> dict:
         "model": architecture,
         "simulation": _canonical({
             key: value for key, value in simulation.items()
-            if key not in EXECUTION_ONLY_SIMULATION_KEYS
+            # Old absolute snapshots included this unused parameter.
+            # Ignore it for compatibility; obsolete action modes are rejected above.
+            if key not in EXECUTION_ONLY_SIMULATION_KEYS and key != "max_delta_rad"
         }),
         "grf": _canonical(grf),
     }

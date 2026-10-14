@@ -89,7 +89,7 @@ def _make_env(
             segment_duration=segment_duration,
             policy_knots=1,
             episode_duration=episode_duration,
-            action_mode="delta",
+            action_mode="absolute",
             record_outputs=recorded_output,
             save_outputs_on_close=recorded_output,
             output_dir=RECORDED_OUTPUT_DIR if recorded_output else None,

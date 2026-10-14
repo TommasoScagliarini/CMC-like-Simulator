@@ -1,0 +1,275 @@
+{
+  "schema_version": 1,
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "created_utc": "2026-10-06T20:09:49.565991+00:00",
+  "test": "3: single exploratory deterministic AB07 learned transfer using frozen V26C best47",
+  "outcome": {
+    "completed_requested_duration": true,
+    "runtime_numerical_checks": "PASS",
+    "scientific_interpretation": "Five-second survival and one internally valid cycle are established. The transferred control has tracking/contact limitations and is not a subject-generalization qualification.",
+    "subject_acceptance_gate": "Not asserted; no new AB07 gate adopted."
+  },
+  "run": "Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s",
+  "plots": "plot/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/10_06_2026_1",
+  "execution": {
+    "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/rl_module_best",
+    "checkpoint_iteration": 47,
+    "actor_features": 35,
+    "full_features": 84,
+    "action_selection": "deterministic",
+    "seed": 123,
+    "episode_start_offset_s": 0.0,
+    "requested_time_range_s": [
+      10.36,
+      15.36
+    ],
+    "physical_end_s": 15.359999999997228,
+    "steps": 500,
+    "recorded_samples_1ms": 5000,
+    "end_reason": "episode_time_limit",
+    "terminated": false,
+    "elapsed_wall_time_s": 488.2388501249952,
+    "episode_return": -29.965634071332595
+  },
+  "paired_comparison": {
+    "basis": "Same first 5 s; identical saved 1 ms pre-integration timestamps 10.360\u201315.359 s. SimulatorConfig and subject source hashes match; original native control contracts differ.",
+    "sample_time_range_s": [
+      10.36,
+      15.359
+    ],
+    "results": {
+      "prescribed": {
+        "primary_vertical_impulse_ns": 2217.44848886357,
+        "measured_vertical_impulse_ns": 1491.6494750976503,
+        "vertical_impulse_ratio_to_measured": 1.4865747790501556,
+        "vertical_impulse_error_percent": 48.657477905015554,
+        "vertical_peak_n": 1004.71745662,
+        "vertical_correlation": 0.8643729991079027,
+        "vertical_force_error_rms_n": 220.42556742313525,
+        "contact_f1_at_existing_oracle_threshold": 0.9625413633355394,
+        "primary_left_max_sampled_penetration_m": 0.02135826,
+        "actual_minus_raw_ik_rms_deg": {
+          "pros_knee_angle": 7.629980497584089,
+          "pros_ankle_angle": 3.224833521352447
+        },
+        "actor_fsm_final_counters": {
+          "valid_hs_count": 2.0,
+          "valid_to_count": 3.0,
+          "valid_cycle_count": 1.0,
+          "invalid_event_count": 0.0,
+          "resync_count": 0.0,
+          "hs_cancelled_count": 0.0,
+          "last_period_s": 1.5039999999991664,
+          "last_stance_fraction": 0.7626329787234043
+        },
+        "ordinary_actor_events_retained_after_repairs": [
+          {
+            "event": "toe_off",
+            "event_time_s": 12.221999999998967,
+            "confirmed_time_s": 12.226999999998965,
+            "delivered_time_s": 12.229999999998963
+          },
+          {
+            "event": "heel_strike",
+            "event_time_s": 12.521999999998801,
+            "confirmed_time_s": 12.526999999998798,
+            "delivered_time_s": 12.529999999998797
+          },
+          {
+            "event": "toe_off",
+            "event_time_s": 13.668999999998166,
+            "confirmed_time_s": 13.673999999998163,
+            "delivered_time_s": 13.67999999999816
+          },
+          {
+            "event": "heel_strike",
+            "event_time_s": 14.025999999997968,
+            "confirmed_time_s": 14.030999999997965,
+            "delivered_time_s": 14.03999999999796
+          },
+          {
+            "event": "toe_off",
+            "event_time_s": 15.171999999997333,
+            "confirmed_time_s": 15.17699999999733,
+            "delivered_time_s": 15.179999999997328
+          }
+        ]
+      },
+      "learned": {
+        "primary_vertical_impulse_ns": 1698.4124328972953,
+        "measured_vertical_impulse_ns": 1491.6494750976503,
+        "vertical_impulse_ratio_to_measured": 1.1386136362808088,
+        "vertical_impulse_error_percent": 13.86136362808088,
+        "vertical_peak_n": 1059.56566749,
+        "vertical_correlation": 0.45430497786396806,
+        "vertical_force_error_rms_n": 268.90014449307245,
+        "contact_f1_at_existing_oracle_threshold": 0.8689920351551772,
+        "primary_left_max_sampled_penetration_m": 0.02792908,
+        "actual_minus_raw_ik_rms_deg": {
+          "pros_knee_angle": 15.685339131094668,
+          "pros_ankle_angle": 8.58429323858731
+        },
+        "actor_fsm_final_counters": {
+          "valid_hs_count": 2.0,
+          "valid_to_count": 3.0,
+          "valid_cycle_count": 1.0,
+          "invalid_event_count": 1.0,
+          "resync_count": 0.0,
+          "hs_cancelled_count": 1.0,
+          "last_period_s": 1.4389999999992025,
+          "last_stance_fraction": 0.7213342599027102
+        },
+        "ordinary_actor_events_retained_after_repairs": [
+          {
+            "event": "toe_off",
+            "event_time_s": 11.506999999999364,
+            "confirmed_time_s": 11.511999999999361,
+            "delivered_time_s": 11.519999999999357
+          },
+          {
+            "event": "heel_strike",
+            "event_time_s": 12.61299999999875,
+            "confirmed_time_s": 12.617999999998748,
+            "delivered_time_s": 12.619999999998747
+          },
+          {
+            "event": "toe_off",
+            "event_time_s": 13.650999999998175,
+            "confirmed_time_s": 13.655999999998173,
+            "delivered_time_s": 13.65999999999817
+          },
+          {
+            "event": "heel_strike",
+            "event_time_s": 14.051999999997953,
+            "confirmed_time_s": 14.05699999999795,
+            "delivered_time_s": 14.059999999997949
+          },
+          {
+            "event": "toe_off",
+            "event_time_s": 15.309999999997256,
+            "confirmed_time_s": 15.314999999997253,
+            "delivered_time_s": 15.31999999999725
+          }
+        ]
+      }
+    }
+  },
+  "learned_tracking_rms_vs_served_deg": {
+    "pros_knee_angle": 2.195468517621524,
+    "pros_ankle_angle": 0.6461111585359285
+  },
+  "learned_sea_diagnostics": {
+    "sea_identities_passed": 50,
+    "non_tautological_checks_passed": 6,
+    "actor_clock_checks_passed": 11,
+    "knee_u_exactly_plus_one_samples": 199,
+    "knee_u_exactly_plus_one_sample_duration_s": 0.199,
+    "knee_first_command_clipping_sample_s": 11.942,
+    "knee_last_command_clipping_sample_s": 12.14,
+    "knee_max_unclipped_normalized_command": 2.2786868634,
+    "knee_cascade_i_clamped_flag_samples": 621,
+    "knee_cascade_anti_windup_flag_samples": 202,
+    "plugin_motor_and_integral_clamp_samples": 0,
+    "policy_action_clipped_steps": 2,
+    "semantics": "High-level cascade integral-limit flags, normalized SEA command clipping, plugin clamps and neural action clipping are distinct observations."
+  },
+  "biological_limitations": {
+    "mtp_angle_r_rms_deg": 10.315708154629599,
+    "biological_reserve_vector_norm_rms_nm": 59.94839315587097,
+    "equilibrium_fallback_samples": 69,
+    "note": "These fallback counts concern intermediate recruitment probes; they do not establish failure of final SO. MTP and reserve demand remain scientific limits."
+  },
+  "inherited_generic_validator_failures": [
+    {
+      "status": "FAIL",
+      "name": "pros_knee_angle output vs IK",
+      "detail": "tracking error exceeds stability threshold; max_abs=4.337032e+01 deg, rms=1.568534e+01 deg, mean_abs=1.076720e+01 deg"
+    },
+    {
+      "status": "FAIL",
+      "name": "mtp_angle_r output vs IK",
+      "detail": "tracking error exceeds stability threshold; max_abs=2.404569e+01 deg, rms=1.031571e+01 deg, mean_abs=7.986237e+00 deg"
+    }
+  ],
+  "protocol_deviations_from_training": {
+    "subject": "AB07 ground-registered model and recalculated IK replace AB06 bundle",
+    "episode_start_offset_s": {
+      "training": 1.956870983805102,
+      "evaluation": 0.0,
+      "purpose": "Pair first 5 s with existing AB07 prescribed initial reset; exploratory initial state, not phase-matched AB06 control."
+    },
+    "morphology_profile": "AB06 corridor retained from checkpoint; no AB07 reward retuning",
+    "requested_vs_reference_cycles": "Only one nominal complete HS-HS cycle in the requested 5 s; no two-cycle acceptance requirement adopted."
+  },
+  "comparison_limitations": [
+    "No policy inference, simulator integration, new detector run, saved-pose replay or reward reconstruction is performed.",
+    "The prescribed run uses raw IK actions; best47 uses normalized absolute actions with clock disabled and no privileged target inputs in the actor. The intervention changes this control contract; a difference cannot be uniquely attributed to network weights.",
+    "The exploratory AB07 start offset 0 differs from the training/AB06 central offset 1.956870983805102; this is not a matched-phase cross-subject test.",
+    "1 ms STO physical statistics use pre-integration samples through episode_end minus integration_dt. Earlier 9.01 s qualification impulse used post-step 10 ms boundaries; values across these horizons/time bases are not interchangeable.",
+    "Saved binary data are reported only if present. Analog 10 ms heel/toe contacts are not used to invent binary events or 1 ms boolean occupancy.",
+    "Reference cycle timing includes measured nominal events; internal valid cycle count alone does not validate gait physiology or autonomy.",
+    "Raw IK, served reference and actual trajectories are separate quantities. The frozen AB06 morphology corridor is a reward prior, not a new subject-specific target or acceptance criterion.",
+    "Recruitment norms contain mixed generalized force units; they are comparative diagnostics, not direct scalar joint torque or muscle adequacy certification.",
+    "Returned reward of a prescribed imitation configuration is not compared to the ex-novo learned return, and cross-subject return is not an autonomous qualification score."
+  ],
+  "integrity": {
+    "protected_inputs_checked": 119,
+    "changed_protected_inputs": [],
+    "all_protected_inputs_unchanged": true,
+    "native_rollout_artifacts_checked": 26,
+    "changed_native_rollout_artifacts": [],
+    "all_native_rollout_artifacts_unchanged": true,
+    "scope": "Postprocessing integrity: no training/model/plugin/profile or completed rollout artifacts changed."
+  },
+  "plot_verification": {
+    "status": "PASS",
+    "canonical_png_count": 7,
+    "all_png_sha256_match_review_receipt": true,
+    "all_native_rollout_files_unchanged": {
+      "status": "PASS",
+      "count": 26,
+      "fingerprint_manifest": "Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/rollout_fingerprint_after_execution.json",
+      "manifest_sha256": "9ad2b6bc4b9360d6945afb073408ceba6ecbd661c2a046bd9ee89edc1b0fefd1",
+      "all_sizes_and_hashes_match": true,
+      "file_inventory_matches": true
+    }
+  },
+  "artifact_fingerprints": [
+    {
+      "path": "Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/receipt.json",
+      "sha256": "d81a4a62a3f342a3a998731d85fac0e0a22904c353d9ecf033843bc5f3a304f7"
+    },
+    {
+      "path": "Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/rollout_summary.json",
+      "sha256": "9f6de6e1f36fc5572eb7d9a9b790006a7b5c2c90f24f4df821fe222beb98bdd7"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/execution_manifest.json",
+      "sha256": "5203c33ff3ce191589e5425cbd9c9fe052e487da83e713fcc26705f71f909311"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/execution_result.json",
+      "sha256": "ff12ef6e9b328c564a2080063fc2adfa26630d63ce84edeb96544f4a6e1e108d"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/numerical_verification.json",
+      "sha256": "3886a6288381d27f473e11a4dda3b470b8d7219af0b6da9f0d72def66227be3d"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/comparison_metrics.json",
+      "sha256": "683ec08f725e64638440c3b776bf5066cff81dbb907f5516f230052f0c49af84"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/postprocessing_integrity.json",
+      "sha256": "fb9cf4abac7b5a53352315c3c9afacebb257c994c8045b82457739957a026b82"
+    },
+    {
+      "path": "plot/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/10_06_2026_1/plots_review_receipt.json",
+      "sha256": "464bbdcdf2f081dd1783d72ad0667ee1db0c0840f7c921f1080fab9074daa61e"
+    },
+    {
+      "path": "plot/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/10_06_2026_1/plot_rendering_manifest.json",
+      "sha256": "8498dafa9f2d00491abb27086d137e0488d5573e83de49b5753210f9117889a9"
+    }
+  ]
+}

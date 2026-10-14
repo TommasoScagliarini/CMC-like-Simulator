@@ -1,10 +1,12 @@
 """Checkpoint runtime compatibility, independent of Ray and OpenSim."""
 from copy import deepcopy
 from pathlib import Path
+import sys
+from unittest.mock import patch
 
 import pytest
-import yaml
 
+from unified_MLP import training_config, train_ppo_mlp
 from unified_MLP._bootstrap import REPO_ROOT
 from unified_MLP.runtime_contract import validate_runtime_compatibility
 
@@ -13,7 +15,11 @@ CONFIGS = Path(__file__).resolve().parents[1] / "configs"
 
 
 def config(name="pretraining"):
-    return yaml.safe_load((CONFIGS / f"{name}.yaml").read_text())
+    path = CONFIGS / f"{name}.yaml"
+    with patch.object(sys, "argv", ["train_ppo_mlp", "--config", str(path)]):
+        args = train_ppo_mlp.parse_args()
+    with patch.object(training_config, "_resolve_reward", lambda value: value):
+        return training_config.resolve_values(args, args._cfg_reward)
 
 
 def test_imitation_and_exnovo_presets_are_runtime_compatible():
@@ -21,6 +27,15 @@ def test_imitation_and_exnovo_presets_are_runtime_compatible():
     before = deepcopy((source, target))
     validate_runtime_compatibility(source, target)
     assert (source, target) == before
+
+
+def test_old_absolute_snapshot_ignores_removed_unused_delta_limit():
+    source, target = config(), config()
+    source["simulation"]["max_delta_rad"] = .35
+    validate_runtime_compatibility(source, target)
+    source["simulation"]["action_mode"] = "delta"
+    with pytest.raises(ValueError, match="simulation.action_mode"):
+        validate_runtime_compatibility(source, target)
 
 
 @pytest.mark.parametrize("section,key,value", [

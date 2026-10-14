@@ -22,6 +22,7 @@ for _path in (_PROSTHESIS_ROOT, _TRAJ_GEN_DIR, _REPO_ROOT):
 
 from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 from prosthesis_snn.generator import ReferenceGenerator
+from prosthesis_snn.cmc_checkpoint import require_absolute_reference
 
 
 @dataclass(frozen=True)
@@ -31,7 +32,6 @@ class CMCPolicyRolloutConfig:
     output_dir: str | None = None
     segment_duration: float = 0.01
     episode_duration: float = 0.5
-    max_delta_rad: float = 0.35
     timesteps: int = 100
     seed: int = 123
     device: str = "cpu"
@@ -53,6 +53,7 @@ def run_policy_rollout(config: CMCPolicyRolloutConfig) -> dict[str, Any]:
         raise ValueError(
             "checkpoint must use output_contract='env_action' for env rollout"
         )
+    require_absolute_reference(generator)
     action_shape = generator.cfg.action_shape
 
     env_cfg = CMCEnvConfig(
@@ -60,8 +61,7 @@ def run_policy_rollout(config: CMCPolicyRolloutConfig) -> dict[str, Any]:
         segment_duration=config.segment_duration,
         episode_duration=config.episode_duration,
         policy_knots=action_shape[0],
-        action_mode="delta",
-        max_delta_rad=config.max_delta_rad,
+        action_mode="absolute",
         random_init=False,
         rebuild_model_on_reset=False,
         record_outputs=config.record_outputs,
@@ -181,7 +181,6 @@ def parse_args() -> CMCPolicyRolloutConfig:
     parser.add_argument("--output-dir")
     parser.add_argument("--segment-duration", type=float, default=0.01)
     parser.add_argument("--episode-duration", type=float, default=0.5)
-    parser.add_argument("--max-delta-rad", type=float, default=0.35)
     parser.add_argument("--timesteps", type=int, default=100)
     parser.add_argument("--seed", type=int, default=123)
     parser.add_argument("--device", default="cpu")
@@ -195,7 +194,6 @@ def parse_args() -> CMCPolicyRolloutConfig:
         output_dir=args.output_dir,
         segment_duration=args.segment_duration,
         episode_duration=args.episode_duration,
-        max_delta_rad=args.max_delta_rad,
         timesteps=args.timesteps,
         seed=args.seed,
         device=args.device,

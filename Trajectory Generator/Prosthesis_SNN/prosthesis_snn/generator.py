@@ -35,6 +35,7 @@ class ReferenceGenerator:
         self.output_scale = self._coerce_output_vector(output_scale, default=1.0)
         self.output_offset = self._coerce_output_vector(output_offset, default=0.0)
         self.mem: list[torch.Tensor] | None = None
+        self.checkpoint_metadata: dict[str, Any] = {}
 
     @classmethod
     def from_config_file(
@@ -77,7 +78,9 @@ class ReferenceGenerator:
     def load_checkpoint(self, checkpoint_path: str | Path) -> None:
         checkpoint = torch.load(checkpoint_path, map_location="cpu")
         state_dict = checkpoint
+        self.checkpoint_metadata = {}
         if isinstance(checkpoint, Mapping):
+            self.checkpoint_metadata = dict(checkpoint.get("metadata") or {})
             state_dict = (
                 checkpoint.get("model_state_dict")
                 or checkpoint.get("state_dict")

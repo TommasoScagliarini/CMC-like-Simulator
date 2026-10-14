@@ -1,0 +1,370 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-06",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "procedural_cause_identified; physical_registration_and_corrective_fit_not_yet_validated",
+  "scope": "Indagine parallela con tre subagenti: dati originali e datum, calibrazione/registrazione, profili e revisione indipendente. Root: 256 pose controfattuali statiche, geometria hardware, nuova marker IK su 40 ms statici e parita del sampler. Nessuna simulazione dinamica, rete o pipeline completa.",
+  "diagnosi_causale": {
+    "difetto_identificato": "Il metodo di preparazione non identifica la registrazione del piede protesico rispetto ai piani di contatto in modo indipendente dalla calibrazione libera dei marker. Adattare due lunghezze e ottenere un basso errore marker non garantisce la coerenza del contatto.",
+    "catena": [
+      "Il fitting adatta due quote di montaggio usando i rapporti anatomici rispetto ad AB06, conservando anca del soggetto e hardware distale.",
+      "La calibrazione statica applica alla protesi gli angoli del modello sano copiati per nome, senza risolvere una nuova registrazione dell hardware rispetto al terreno.",
+      "Per quella posa imposta, sposta liberamente i marker locali sul nuovo parent frame fino a riprodurre le misure sane. Il buon residuo certifica i marker e non la quota della protesi.",
+      "La successiva marker IK usa proprio quei marker calibrati e conserva sostanzialmente la quota positiva del sensore tallone AB07; una IK realmente ricalcolata non risolve automaticamente il disallineamento.",
+      "Il detector riceve quindi pochi contatti del tallone e genera i pochi HS coerenti con quei bit. Il replay precedente esclude perdite nella FSM o nella consegna degli eventi."
+    ],
+    "perche_AB06_non_garantisce_AB07": "Il detector usa gli stessi punti nel frame hardware, ma punti virtuali e piano furono qualificati empiricamente su AB06. Il riuso richiede una preparazione geometrica del nuovo modello coerente con quel contratto; la sola equivalenza della procedura marker non la dimostra.",
+    "cause_non_dimostrate": "Nessun unico parametro di lunghezza errato, zero angolare errato o quota fisica del terreno e stato identificato come correzione sufficiente. Il metodo e sotto determinato rispetto a quella registrazione.",
+    "datum": "Il converter non introduce uno shift spaziale. Uno shift globale da solo non spiega il cloud misurato; una componente datum mista ad anatomia/postura/marker placement resta possibile e non quantificata."
+  },
+  "prove_discriminanti": {
+    "nuova_marker_ik_statica": {
+      "AB06": {
+        "samples": 5,
+        "time_range_s": [
+          0.0,
+          0.04
+        ],
+        "mean_all28_marker_rms_mm": 1.5256099999999997,
+        "heel_mean_before_mm": -14.678784186083105,
+        "heel_mean_after_native_ik_mm": -14.297456660395284,
+        "heel_contact_after_native_ik_fraction": 1.0
+      },
+      "AB07": {
+        "samples": 9,
+        "time_range_s": [
+          0.0,
+          0.04
+        ],
+        "mean_all28_marker_rms_mm": 0.3206888888888889,
+        "heel_mean_before_mm": 7.443078876545683,
+        "heel_mean_after_native_ik_mm": 7.529871292298965,
+        "heel_contact_after_native_ik_fraction": 0.0
+      }
+    },
+    "sampler_produzione_sulle_pose_statiche": {
+      "schema_version": 1,
+      "status": "PASS",
+      "scope": "Production sampler on the newly recomputed short static IK and baseline poses only; no integration or policy",
+      "source_receipt": {
+        "path": "validation/ab07_detector_investigation_2026_10_06/stage2/static_ik_replay.json",
+        "sha256": "4f68e29dece94793500d6a51de331708550bf451390505beaf30f44eefe3f2ed"
+      },
+      "detector": {
+        "path": "binary_phase_detector.py",
+        "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6"
+      },
+      "profile": {
+        "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+        "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2"
+      },
+      "cases": {
+        "AB06": {
+          "recomputed_static_ik": {
+            "left_heel": {
+              "samples": 5,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            },
+            "left_toe": {
+              "samples": 5,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            }
+          },
+          "healthy_remap_baseline": {
+            "left_heel": {
+              "samples": 5,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            },
+            "left_toe": {
+              "samples": 5,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            }
+          }
+        },
+        "AB07": {
+          "recomputed_static_ik": {
+            "left_heel": {
+              "samples": 9,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            },
+            "left_toe": {
+              "samples": 9,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            }
+          },
+          "healthy_remap_baseline": {
+            "left_heel": {
+              "samples": 9,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            },
+            "left_toe": {
+              "samples": 9,
+              "max_metric_error_m": 0.0,
+              "contacts_match": true
+            }
+          }
+        }
+      },
+      "pose_count": 28,
+      "points_per_pose": 2,
+      "clearance_tolerance_m": 1e-12,
+      "max_metric_error_m": 0.0
+    },
+    "liberta_di_registrazione": {
+      "AB06": {
+        "identity": {
+          "max_marker_prediction_change_m": 0.0,
+          "mean_foot_marker_rms_mm": 0.5578145036326249,
+          "mean_heel_clearance_mm": -14.371128342499295,
+          "heel_contact_fraction": 1.0
+        },
+        "foot_local_y_plus10mm": {
+          "max_marker_prediction_change_m": 2.220446049250313e-16,
+          "mean_foot_marker_rms_mm": 0.5578145036326267,
+          "mean_heel_clearance_mm": -4.48447162329296,
+          "heel_contact_fraction": 1.0
+        },
+        "foot_local_y_minus10mm": {
+          "max_marker_prediction_change_m": 2.220446049250313e-16,
+          "mean_foot_marker_rms_mm": 0.5578145036326251,
+          "mean_heel_clearance_mm": -24.257785061705633,
+          "heel_contact_fraction": 1.0
+        },
+        "foot_local_pitch_plus5deg": {
+          "max_marker_prediction_change_m": 2.220446049250313e-16,
+          "mean_foot_marker_rms_mm": 0.5578145036326249,
+          "mean_heel_clearance_mm": -18.542972008106897,
+          "heel_contact_fraction": 1.0
+        }
+      },
+      "AB07": {
+        "identity": {
+          "max_marker_prediction_change_m": 0.0,
+          "mean_foot_marker_rms_mm": 0.2662131137585638,
+          "mean_heel_clearance_mm": 7.457569994997377,
+          "heel_contact_fraction": 0.0
+        },
+        "foot_local_y_plus10mm": {
+          "max_marker_prediction_change_m": 4.440892098500626e-16,
+          "mean_foot_marker_rms_mm": 0.26621311375856466,
+          "mean_heel_clearance_mm": 17.430294419865508,
+          "heel_contact_fraction": 0.0
+        },
+        "foot_local_y_minus10mm": {
+          "max_marker_prediction_change_m": 4.440892098500626e-16,
+          "mean_foot_marker_rms_mm": 0.26621311375856493,
+          "mean_heel_clearance_mm": -2.5151544298707464,
+          "heel_contact_fraction": 1.0
+        },
+        "foot_local_pitch_plus5deg": {
+          "max_marker_prediction_change_m": 4.440892098500626e-16,
+          "mean_foot_marker_rms_mm": 0.26621311375856127,
+          "mean_heel_clearance_mm": 2.7729097074827056,
+          "heel_contact_fraction": 0.0
+        }
+      }
+    },
+    "gauge_limit": "Trasporti rigidi diagnostici e ricalibrazione inversa dei cinque marker del piede: possono non essere raggiungibili nella catena articolare esistente. Dimostrano non identificabilita del solo marker fit, non un fit alternativo operativo.",
+    "calibration_reconstruction": "Gli angoli sani completi e le trasformazioni dei frame ricostruiscono i marker locali operativi entro 6.94e-18 m; bias di misura statico micrometrico.",
+    "healthy_axis_diagnostic": {
+      "ankle_axis_difference_deg": 11.72723261939884,
+      "AB06_static_foot_rotation_mismatch_deg": 2.3152142876888053,
+      "AB07_static_foot_rotation_mismatch_deg": 1.51459172299388,
+      "interpretation": "Nessun offset angolare fisso: mismatch nullo con ankle/subtalar azzerati, e mismatch statico piu piccolo in AB07; non identifica una nuova causa unica."
+    },
+    "cross_binding_limit": "Usare su AB07 i marker locali AB06 aumenta i contatti ma peggiora il RMS da2.178 a10.811 mm. Controfattuale discriminante, non correzione da applicare.",
+    "ground_datum_conclusions": [
+      "The13.1917mm LHeel static height difference already exists in raw acquisition tables; our conversion introduces no corresponding spatial shift or axis/unit error.",
+      "A pure uniform vertical translation is inconsistent with the measured distal marker cloud; changed local healthy marker coordinates and subject scaling/posture supply confirmed non-global contributions.",
+      "Physical floor/shoe datum is not certified by local files; COP_Y=0 alone cannot choose a correction or separate a residual global datum component.",
+      "No data/model/profile correction is justified solely by this audit; full healthy-coordinate geometry and physical hardware audits must be combined with these facts."
+    ],
+    "static_factor_partition": {
+      "heel_world_y_m": {
+        "AB07_minus_AB06_m": 0.021860701557081127,
+        "contributions_m": {
+          "pelvis_translation": -0.05974305253050546,
+          "pelvis_orientation": -0.008321484858082463,
+          "hip_angles": 0.0007368136157068726,
+          "knee_angle": 0.003265990534934868,
+          "ankle_angle": 0.003933333702775329,
+          "proximal_mount": 0.01886418233052031,
+          "distal_mount": 0.04382878485940731,
+          "anatomical_hip_frame": 0.019296133902324417
+        },
+        "identity_error_m": 6.245004513516506e-17
+      },
+      "toe_world_y_m": {
+        "AB07_minus_AB06_m": 0.0055298966722333726,
+        "contributions_m": {
+          "pelvis_translation": -0.05974305253050546,
+          "pelvis_orientation": -0.0024543681219536236,
+          "hip_angles": 0.00010080576567553573,
+          "knee_angle": -0.00410559209405186,
+          "ankle_angle": -0.0102569974391832,
+          "proximal_mount": 0.01886418233052031,
+          "distal_mount": 0.04382878485940731,
+          "anatomical_hip_frame": 0.019296133902324417
+        },
+        "identity_error_m": 6.245004513516506e-17
+      },
+      "foot_origin_y_m": {
+        "AB07_minus_AB06_m": 0.017106052819346573,
+        "contributions_m": {
+          "pelvis_translation": -0.05974305253050546,
+          "pelvis_orientation": -0.0069906701260877505,
+          "hip_angles": 0.0006279822258279239,
+          "knee_angle": 0.0012226921578598802,
+          "ankle_angle": 0.0,
+          "proximal_mount": 0.01886418233052031,
+          "distal_mount": 0.04382878485940731,
+          "anatomical_hip_frame": 0.019296133902324417
+        },
+        "identity_error_m": 6.245004513516506e-17
+      }
+    },
+    "partition_limit": "La partizione Shapley su pose medie quantifica differenze fra soggetti; non identifica un valore di fitting sbagliato."
+  },
+  "intervento_indicato_non_eseguito": {
+    "prima": "Definire e qualificare la registrazione del piede hardware sul piano comune durante il fitting statico, usando vincoli geometrici indipendenti dalla libera posizione dei marker.",
+    "poi": "Calibrare i marker rispetto a quella registrazione, ricalcolare la cinematica protesica e qualificare contatti/eventi prima della dinamica e della policy.",
+    "conservare": "Hardware, SEA, controller, governor, semantica HS/TO e parametri comuni. Nessun tuning del detector per AB07 dimostrato necessario.",
+    "da_validare": "Coerenza fra piano fisico/convenzione acquisizione e piani virtuali congelati; scelta fisicamente consistente delle quote e orientazioni di fitting; validita dinamica del modello risultante."
+  },
+  "verifiche": {
+    "receipt_sources": {
+      "ground_datum_audit.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 22,
+        "all_match": true
+      },
+      "profile_ground_contract_audit.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 21,
+        "all_match": true
+      },
+      "static_hardware_decomposition.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 13,
+        "all_match": true
+      },
+      "static_ik_replay.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 16,
+        "all_match": true
+      },
+      "native_static_sampler_parity.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 3,
+        "all_match": true
+      },
+      "static_registration_identifiability.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 22,
+        "all_match": true
+      },
+      "marker_binding_transfer.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 22,
+        "all_match": true
+      },
+      "registration_source_refresh.json": {
+        "strict_json_valid": true,
+        "source_fingerprints_verified": 2,
+        "all_match": true
+      }
+    },
+    "all_original_control_fingerprints_unchanged": true,
+    "original_control_fingerprint_count": 20,
+    "native_static_sampler_parity": "PASS, 28 pose x 2 punti, errore esatto zero"
+  },
+  "artefatti": [
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/ground_datum_audit.json",
+      "sha256": "7f6e25a96e4272115f6e39b1dbffe729529ee57ed1ccedaf01f13e028ea4c6fc"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/profile_ground_contract_audit.json",
+      "sha256": "c52350aae278d8806480efdfb799221c9c4d431a1b59152c7303a85cdf5d1b57"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/static_hardware_decomposition.json",
+      "sha256": "de3dded22af3d7a870bf9744ba578d4de2990f77a45beaff2fe9caf4905ee014"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/static_ik_replay.json",
+      "sha256": "4f68e29dece94793500d6a51de331708550bf451390505beaf30f44eefe3f2ed"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/native_static_sampler_parity.json",
+      "sha256": "aeb7013a27563a61cd695046e31e07f5ddc35ef25ea725227ad9e2b6e38adfeb"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/static_registration_identifiability.json",
+      "sha256": "e8a81aabea616732d5cb2e919e09731e6d4a342bab658f519d75412e17f4b74b"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/marker_binding_transfer.json",
+      "sha256": "699ad6e2e3633ab4035b6d0b79a5dee1925d045dedf00c7d949eb42044efb4d1"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/registration_source_refresh.json",
+      "sha256": "e11295766b34a45d85d8073cb3c859ffbce5c543c7a02c188d83fb419de997d2"
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage2/static_healthy_coordinates.json",
+      "sha256": "4ab696497c5e784e9067445972d16034ec3e9cdf2c94ff4cb34867631d44d4d1"
+    }
+  ],
+  "fonti_di_codice": [
+    {
+      "path": "tools/fit_seasea_subject.py",
+      "sha256": "d942f045f7eae11ccab0e9a1f4ba2a1fed090bc6c114145431079a51d0fa86e8"
+    },
+    {
+      "path": "tools/calibrate_ab06_seasea_markers.py",
+      "sha256": "49f9b6d2edbfb5b5e096a9420500b0d9faa8b269c948bccf8b4370a08323e05f"
+    },
+    {
+      "path": "tools/build_abx_seasea_pipeline.py",
+      "sha256": "e878c70fedc810c3885192607f130ef86eec95151fb00286f167cb415fc1abf0"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/decompose_static_hardware_geometry.py",
+      "sha256": "aabd202f43f490a86dc24078c3bd7d48b53ef030d10f052c35add8a1df4635cf"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/replay_static_marker_ik.py",
+      "sha256": "267dd557c9f0d3d1319b55c52c7449c221b823a8b72716fd6dcc1a2163b12e02"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/audit_registration_identifiability.py",
+      "sha256": "af018ffb54235ec9b8025af1e77e165b1576cf1da7ffcfec7ca25690afb4c767"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/audit_profile_ground_contract.py",
+      "sha256": "69dfd2dda8b7a1df6bb52e6ff782e983304ce4c36db63de095dd41c482fddb75"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB07/audit_ground_datum_raw.m",
+      "sha256": "5a44fe343347eac02fd8c725b9faf24cac4fd450cd5852e5fe2a008c5f62ad17"
+    }
+  ],
+  "documentazione_primaria_consultata": [
+    {
+      "url": "https://www.epic.gatech.edu/opensource-biomechanics-camargo-et-al/",
+      "scope": "Descrizione acquisizione; non trovata quota world numerica del nastro nei passaggi consultati."
+    },
+    {
+      "url": "https://repository.gatech.edu/bitstreams/c4cfef6a-9f89-41d2-b1f6-62dc3155cae4/download",
+      "scope": "Tesi Camargo, cap.3.1-3.2, pp.stampate30-33; nei passaggi consultati non trovata trasformazione world-plate/azzeramento fra sessioni/protocollo calzature."
+    }
+  ]
+}

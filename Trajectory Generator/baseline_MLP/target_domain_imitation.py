@@ -131,7 +131,6 @@ def _resolved_flat_config(config_path: Path) -> tuple[dict[str, Any], dict[str, 
     flat, reward = training_config.to_argparse_defaults(nested)
     defaults: dict[str, Any] = {
         "action_mode": "absolute",
-        "max_delta_rad": 0.35,
         "segment_duration": 0.01,
         "episode_duration": 5.0,
         "episode_start_offset_s": 0.0,
@@ -209,7 +208,6 @@ def build_target_env_config(
         "episode_start_offset_s": float(flat["episode_start_offset_s"]),
         "policy_knots": int(flat["policy_knots"]),
         "action_mode": str(flat["action_mode"]),
-        "max_delta_rad": float(flat["max_delta_rad"]),
         "target_slew_rate_limit_rad_s": {
             "pros_knee_angle": float(flat["pros_knee_target_slew_rate_limit_rad_s"]),
             "pros_ankle_angle": float(flat["pros_ankle_target_slew_rate_limit_rad_s"]),

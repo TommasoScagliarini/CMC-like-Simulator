@@ -1,0 +1,121 @@
+TNT — SCANSIONE PARAMETRI FISSI PAPER-LITERAL, 2026-10-13
+CMC_AGENT_OK_2026
+
+Perimetro
+Replay cinematico offline a100Hz degli stessi143.05s prescribed AB06/AB07 gia
+ispezionati nel test precedente. Niente training, GRF, reward o dinamica.
+Questa e una ricerca esplorativa sull'intera registrazione gia vista: i candidati
+scelti non costituiscono un risultato di generalizzazione su dati indipendenti.
+Il filtro causale6Hz e tutte le transizioni/rate sono quelli del prototipo
+precedente. Nessuna recovery, clipping del rate, monotonic ratchet o soglia
+adattiva. La sola accelerazione numerica omette l'inversa quintica durante lo
+scan, perche essa non entra nei guard o nell'aggiornamento del rate. I migliori
+10 candidati e i2 controlli (paper/primo test) per soggetto sono poi verificati
+contro il replay TNT completo:24 confronti su completamenti/tempoINVALID passati.
+
+Ricerca
+37.962 combinazioni per soggetto:
+ sigma=-10..8deg passo.5; rho=12..40deg passo.5;
+ T_em=.65,.70,.75,.80,.85,.90;
+ v0=0.5,1,1.5 volte 1/(.45*periodo mediano primi25s).
+Criteri: assenza di INVALID, copertura di minimi coscia indipendenti
+(prominence5deg/distanza.5s), transizioni early->middle entro.10s da un minimo,
+assenza di transizioni spurie, durata massima degli stati. Minimi usati solo
+per scoring offline, mai come ingresso al TNT. Non sono HS o TO misurati.
+Criterio preliminare di copertura: almenoNmin-1 minimi coperti,0 spuri,
+nessunINVALID e tutte le permanenze negli stati inferiori a2.5s. La soglia2.5s
+e un criterio diagnostico, non una specifica clinica.
+
+AB07: ESISTE UNA TARATURA FISSA CHE COPRE L'INTERO REPLAY.
+119 minimi indipendenti,119 swing TNT completati,119 minimi abbinati,0 spuri.
+Esempio: sigma=-3deg,rho=28deg,T_em=.70,v0=.705467/s.
+Permanenze massime: stance1.33s,early.30s,middle.45s,late.61s.
+137 combinazioni della griglia coprono tutti119 minimi senzaINVALID;
+196 soddisfano il criterio preliminare meno stringenteNmin-1/dwell2.5s.
+Stesso risultato119/119 anche con v0=.1,.25,.5,1,1.4,2/s.
+v0>=2.8/s produceINVALID al primo minimo con la medesima tripla.
+I rate aggiornati del candidato migliore variano.494..3.450/s: i cambiamenti
+restano fisicamente da qualificare, ma l'estimatore non si blocca.
+
+AB06: LA SCANSIONE FISSA NON TROVA COPERTURA COMPLETA.
+125 minimi indipendenti. Migliore candidato senzaINVALID:
+ sigma=-2deg,rho=26deg,T_em=.70,v0=.703235/s;
+119 minimi abbinati e119 swing completati,0 spuri.
+Permanenze massime: stance5.57s,middle1.98s,late.97s.
+Quindi l'assenza diINVALID da sola nasconde cicli saltati, soprattutto iniziali.
+Una griglia piu fine nel dominio geometrico promettente:
+ sigma=-.5..1deg passo.1,rho=21.5..23.65deg passo.05,
+ T_em=.60..95 passo.05,v0=.1,.5,1,1.5,2/s,
+aggiunge28.160 combinazioni. Nessuna copre tutti125 minimi senzaINVALID.
+Il miglior candidato valido del raffinamento copre90 minimi e resta late28.08s.
+Non e una prova matematica di impossibilita per ogni parametro continuo.
+
+Spiegazione del conflitto
+Per il trigger stance->early intercettare anche i minimi meno estesi servono
+sigma>-.520deg AB06 e sigma>-4.603deg AB07. Le escursioni piu piccole impongono
+rho<23.653deg AB06 e rho<28.095deg AB07 (limiti geometrici offline).
+Nella parte centrale, la stessa sigma puo far iniziare presto l'early mentre
+la stessa rho fa terminare presto il middle, aumentandoDe/Dm e sensibilita.
+AB06: tra7.776 combinazioni della griglia larga che rispettano questi limiti,
+7.739 diventanoINVALID; le37 restanti arrivano al massimo a52 minimi coperti
+per lunghissime permanenze late. E un compromesso concreto sul segnale esaminato.
+AB07 dimostra pero che il compromesso puo avere una soluzione fissa.
+
+De/Dm>1 NON implica da solo fallimento.
+AB07 migliore: rapporto massimo1.429,43.7% dei cicli sopra1, ma replay completo.
+Il prodotto locale massimo di rapporti consecutivi e21.87 (sensibilita
+condizionata a tempi degli eventi fissi). L'esistenza di qualche ciclo non
+contrattivo non prova instabilita globale. Le sequenze e i margini del rate
+contano piu di un vincolo universaleDe<Dm imposto a ogni singolo ciclo.
+
+Controllo con selezione soltanto sui primi40s
+Usando i medesimi criteri geometrici e griglia, e poi applicando il candidato
+senza adattamenti all'intera registrazione:
+ AB06 sigma3,rho23.5,T_em.65,v0.703235 ->INVALID t82.33s assoluti;
+ AB07 sigma2.5,rho28,T_em.90,v01.410935 ->INVALID t53.45s assoluti.
+Anche questa e una risuddivisione diagnostica di dati gia visti. Suggerisce che
+calibrare soltanto il tratto iniziale non rappresenta tutti i regimi presenti.
+
+Interpretazione
+Esito utile positivo perAB07: il TNT letterale con parametri fissi puo
+seguire questa sequenza completa senza rete. Non sono ancora valutati la
+qualita delle traiettorie articolari, rumore, reset in fasi diverse, dinamica,
+transizioni di velocita reali documentate o generalizzazione ad altre prove.
+PerAB06 la griglia testata giustifica valutare una calibrazione dipendente dal
+regime o un aggiornamento del rate modificato, mantenendo queste estensioni
+chiaramente distinte dalle equazioni letterali del paper.
+
+Riproduzione
+ python "Trajectory Generator/validation/tnt_continuation_2026_10_13/fixed_scan/scan_fixed.py"
+ python "Trajectory Generator/validation/tnt_continuation_2026_10_13/fixed_scan/refine_and_sensitivity.py"
+Richiede numpy/scipy/numba. Legge unicamente i CSV cinematici e i risultati
+precedenti. Scrive solo in questa cartella. Nessuna modifica a file operativi.
+
+ESTENSIONE: GENERATORE CINEMATICO AB07 CON PARAMETRI LETTERALI POSITIVI
+Script ab07_literal_generator.py; risultati ab07_literal_generator.json;
+figura root/plot/tnt_continuation_2026_10_13/AB07_literal_generator.png.
+Usa sigma=-3,rho28,T_em.70 e v0=1.410934744/s del precedente protocollo.
+Template ginocchio/caviglia costruiti solo sui primi40s, parametri invariati.
+Il timer di stance resta una estensione esplicita al paper. La scelta dei
+parametri viene dalla scansione dell'intera coscia: il punteggio sui successivi
+103s e esplorativo e non una validazione indipendente della taratura.
+Parita con replay originale e controller streaming: verifiche passate.
+
+Pulito:119/119 minimi e swing,nessunINVALID o stall>2.5s.
+RMSE successivi40s: ginocchio13.8355deg,caviglia6.2872deg.
+PFD con stessa sigma/dati e curve proprie: ginocchio15.3799deg,caviglia7.6400deg.
+L'errore assoluto rimane significativo; la differenza rispetto al PFD non e
+una prova di sufficienza clinica o dinamica. Curve fisse non adattano l'ampiezza.
+
+Stress predefiniti,senza ritarare parametri o template:
+ rumore gaussianosigma.25deg seed11:INVALIDt97.99s,70 swing completati;
+ seed23:119/119,nessunINVALID,RMSE13.7549deg/5.9521deg;
+ seed47:INVALIDt103.67s,75 swing completati;
+ bias-2deg:INVALIDt61.13s,32 swing,late massimo3.34s;
+ bias+2deg:nessunINVALID,116/119 minimi,stance massimo2.56s.
+Tempi assoluti della registrazione,che inizia a10.36s.
+Le metriche dell'intera finestra sono null quando l'estimatore diventaINVALID;
+non si sostituisce il risultato intero con il solo prefisso valido.
+Il candidato letterale positivo sul segnale pulito NON supera questa famiglia
+di stress. Questi segnali sintetici non costituiscono una caratterizzazione
+statistica completa dei sensori reali.

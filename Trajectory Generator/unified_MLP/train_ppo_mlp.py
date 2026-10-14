@@ -46,12 +46,6 @@ from baseline_MLP import start_sampling  # noqa: E402
 from unified_MLP import training_config  # noqa: E402
 
 _DEFAULT_SETUP_XML = r"models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
-_DEFAULT_GRF_MODE = "online_sensor"
-_DEFAULT_ONLINE_GRF_PROFILE = (
-    "online_grf_profiles/"
-    "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
-)
-_DEFAULT_ONLINE_GRF_DETECTOR_PROFILE = None
 _BASELINE_DIR = str(Path(__file__).resolve().parent)
 _SCRIPT_PATH = Path(__file__).resolve()
 _TRAJ_GEN_DIR = _SCRIPT_PATH.parents[1]   # .../Trajectory Generator
@@ -1377,7 +1371,6 @@ def build_config(
         "episode_duration": args.episode_duration,
         "policy_knots": args.policy_knots,
         "action_mode": args.action_mode,
-        "max_delta_rad": args.max_delta_rad,
         "target_slew_rate_limit_rad_s": {
             "pros_knee_angle": args.pros_knee_target_slew_rate_limit_rad_s,
             "pros_ankle_angle": args.pros_ankle_target_slew_rate_limit_rad_s,
@@ -3369,16 +3362,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--policy-knots", type=int, default=3)
     p.add_argument(
         "--action-mode",
-        choices=["absolute", "delta", "raw"],
+        choices=["absolute", "raw"],
         default="absolute",
         help=(
             "Policy output semantics. 'absolute' (default): the policy emits an "
             "ABSOLUTE prosthetic trajectory over the env's absolute_bounds_rad "
-            "(ex-novo generation). 'delta': offset from the prescribed IK "
-            "(imitative). 'raw': raw radians."
+            "(ex-novo generation). 'raw': absolute radians for diagnostics."
         ),
     )
-    p.add_argument("--max-delta-rad", type=float, default=0.35)
     p.add_argument(
         "--pros-knee-target-slew-rate-limit-rad-s",
         type=float,
@@ -3436,7 +3427,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--include-reference-state-observation",
         action=argparse.BooleanOptionalAction,
-        default=False,
+        default=True,
     )
     p.add_argument(
         "--include-controller-state-observation",
@@ -3450,7 +3441,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--include-controller-diagnostic-observation",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
         help=(
             "Also expose derived abs(SEA command) and saturation flags. When "
             "disabled these redundant diagnostics remain critic-only."
@@ -3465,7 +3456,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--imitation-initialize-to-target",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
         help="Initialize served reference directly at the anti-phase target. "
         "Disable for a physically continuous C2 transition from the reset pose.",
     )
@@ -3797,17 +3788,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--grf-mode",
         choices=("prescribed", "online_sensor", "online"),
-        default=_DEFAULT_GRF_MODE,
         help="GRF mode used during training (default: online_sensor).",
     )
     p.add_argument(
         "--online-grf-profile",
-        default=_DEFAULT_ONLINE_GRF_PROFILE,
         help="onlineGRF profile JSON used by online_sensor/online.",
     )
     p.add_argument(
         "--online-grf-detector-profile",
-        default=_DEFAULT_ONLINE_GRF_DETECTOR_PROFILE,
         help=(
             "Optional second onlineGRF profile used only for HS/TO detection. "
             "It is added as sensor-only contact and never applied to dynamics."
@@ -3815,36 +3803,31 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--binary-phase-detector-profile",
-        default=None,
         help=(
-            "Optional force-free V19 heel/toe point profile. It is consumed "
-            "only by the independent binary shadow FSM."
+            "Force-free heel/toe point profile used by the binary phase detector."
         ),
     )
     p.add_argument(
         "--phase-fsm-input-mode",
         choices=("legacy_events", "shadow", "two_sensor"),
-        default="legacy_events",
         help=(
             "Input source for the existing prosthetic phase FSM. 'shadow' "
             "records heel/toe candidates while legacy events remain active."
         ),
     )
-    p.add_argument("--phase-sensor-on-threshold-n", type=float, default=5.0)
-    p.add_argument("--phase-sensor-off-threshold-n", type=float, default=2.0)
-    p.add_argument("--phase-sensor-dwell-s", type=float, default=0.03)
-    p.add_argument("--detector-sample-dt-s", type=float, default=0.001)
-    p.add_argument("--event-contract-id", default="legacy_events_v1")
+    p.add_argument("--phase-sensor-on-threshold-n", type=float)
+    p.add_argument("--phase-sensor-off-threshold-n", type=float)
+    p.add_argument("--phase-sensor-dwell-s", type=float)
+    p.add_argument("--detector-sample-dt-s", type=float)
+    p.add_argument("--event-contract-id")
     p.add_argument(
         "--binary-phase-fsm-mode",
         choices=("disabled", "binary_shadow", "binary_active"),
-        default="disabled",
     )
-    p.add_argument("--binary-phase-debounce-s", type=float, default=0.005)
+    p.add_argument("--binary-phase-debounce-s", type=float)
     p.add_argument(
         "--binary-phase-invalid-event-policy",
         choices=("raise", "terminate", "reject_continue"),
-        default="raise",
         help=(
             "binary_active only: how a behaviour-dependent actor-FSM event "
             "rejection is handled. 'raise' keeps the fail-closed "
@@ -3856,7 +3839,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--binary-phase-actor-fsm-version",
         choices=("v2", "v3"),
-        default="v3",
         help=(
             "Actor-FSM behaviour version: v2 frozen, v3 = resync + bounced-HS "
             "cancellation (design 2026-08-21). Detector contract unchanged."
@@ -3864,7 +3846,6 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--binary-phase-event-contract-id",
-        default="binary_events_disabled_v1",
     )
     p.add_argument(
         "--grf-penetration-penalty-threshold-m",
@@ -3881,7 +3862,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--online-grf-observation",
         action=argparse.BooleanOptionalAction,
-        default=True,
         help="Expose normalized online GRF, gait events, and heel-strike phase "
         "to the policy observation (default: on). Use --no-online-grf-observation "
         "with legacy checkpoints.",
@@ -3902,7 +3882,6 @@ def parse_args() -> argparse.Namespace:
         "--disable-prescribed-grf-side",
         nargs="*",
         choices=("left", "right"),
-        default=[],
         help="Diagnostic opt-in: keep prescribed GRF as an oracle but remove the "
         "selected side(s)' ExternalForce from model dynamics. Space-separated, "
         "e.g. --disable-prescribed-grf-side left right.",
@@ -3911,7 +3890,6 @@ def parse_args() -> argparse.Namespace:
         "--online-grf-applied-side",
         nargs="*",
         choices=("left", "right"),
-        default=[],
         help="Hybrid GRF: APPLY the online contact (not just sense it) on the "
         "given side(s) so the prosthetic ankle/knee work against a real ground "
         "reaction; prescribed is auto-disabled there. Space-separated; use 'left' "
@@ -3955,7 +3933,8 @@ def parse_args() -> argparse.Namespace:
         help=argparse.SUPPRESS,
     )
 
-    # Seed argparse defaults from the YAML, then parse (explicit CLI flags win).
+    # Apply validated GRF defaults, then YAML; explicit CLI flags win.
+    p.set_defaults(**training_config.grf_argparse_defaults())
     valid_dests = {action.dest for action in p._actions}
     for dest in sorted(set(cfg_defaults) - valid_dests):
         training_config._warn(f"config maps to unknown argument '{dest}' (ignored)")
@@ -3973,6 +3952,8 @@ def parse_args() -> argparse.Namespace:
             action.help = help_text[action.dest]
     p.set_defaults(update_history=False)
     args = p.parse_args()
+    if args.action_mode not in {"absolute", "raw"}:
+        p.error("action_mode must be absolute (or raw for diagnostics)")
     args._cfg_reward = cfg_reward
     args._cfg_provenance = dict(cfg.get("provenance") or {})
     # Preserve the value selected by the user/YAML before the H0 convenience

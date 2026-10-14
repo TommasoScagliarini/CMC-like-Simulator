@@ -137,8 +137,7 @@ def _run_probe(
             "segment_duration": args.segment_duration,
             "episode_duration": args.episode_duration,
             "policy_knots": args.policy_knots,
-            "action_mode": "delta",
-            "max_delta_rad": args.max_delta_rad,
+            "action_mode": "absolute",
             "random_init": False,
             "fail_fast": True,
             "record_outputs": False,
@@ -312,7 +311,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--segment-duration", type=float, default=0.02)
     parser.add_argument("--episode-duration", type=float, default=0.08)
     parser.add_argument("--policy-knots", type=int, default=3)
-    parser.add_argument("--max-delta-rad", type=float, default=0.35)
     parser.add_argument("--max-steps", type=int, default=4)
     parser.add_argument("--phase-timeout-s", type=float, default=120.0)
     parser.add_argument("--seed", type=int, default=123)

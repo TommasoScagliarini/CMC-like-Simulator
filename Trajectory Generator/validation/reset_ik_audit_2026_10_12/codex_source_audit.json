@@ -1,0 +1,66 @@
+{
+  "sealed_utc": "2026-10-12T16:11:18.454202+00:00",
+  "external_audit_read": false,
+  "native_tests_read": false,
+  "scope": "Independent source audit before reading Claude or new tests",
+  "source_hashes": {
+    "simulation_runner.py": "a81de3f20d7656812e4a1ad4b52374852e3838f5e479ebc6fea95a828ca8f70a",
+    "Trajectory Generator/osim_trj_cmc_like.py": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37",
+    "Trajectory Generator/baseline_MLP/env_factory.py": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+    "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py": "5084786c8e6312de2d37744bf327b907ed52ff92cc6e3686b36bd1bde6d21a0f",
+    "Trajectory Generator/baseline_MLP/reward_function.py": "57c7a72d0c815bc6a77d0db6025bfaf5e77f9df6648de7d283527a84d67f96ee",
+    "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml": "765acb0fb79a2262bde77be8086c7642dff25406b8f854052cb332cc5986002e"
+  },
+  "findings": [
+    {
+      "id": "C1",
+      "finding": "q/qdot are read from active kinematics at reset; no prosthetic policy segment exists then, hence base IK when imitation_initialize_to_target false.",
+      "evidence": [
+        "Trajectory Generator/osim_trj_cmc_like.py:2536-2608",
+        "simulation_runner.py:335-400"
+      ]
+    },
+    {
+      "id": "C2",
+      "finding": "Resolved best47 training config has three start offsets, not one globally. Worker assignment cycles over those choices and is fixed per runner; seeds do not alter time when random_init false. Effective historical counts must be independently verified.",
+      "evidence": [
+        "training_cfg.resolved.yaml simulation/episode_start_offset_choices_s and random_init",
+        "Trajectory Generator/baseline_MLP/env_factory.py:52-111"
+      ]
+    },
+    {
+      "id": "C3",
+      "finding": "Motor angles match joint angles, motor speeds match joint speeds, spring initially has zero deflection, plugin extra states and controls reset; biological muscle activation/fiber and controller/SO memory reset too.",
+      "evidence": [
+        "simulation_runner.py:335-400",
+        "simulation_runner.py:1730-1857"
+      ]
+    },
+    {
+      "id": "C4",
+      "finding": "Actor only reads35 prefix; ex_novo omits4 imitation-target features and gait clock disabled. Actor served-ref/previous endpoint initially inherit IK and later follow policy/governor memory.",
+      "evidence": [
+        "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py:110-155",
+        "Trajectory Generator/baseline_MLP/env_factory.py:190-194",
+        "Trajectory Generator/osim_trj_cmc_like.py:2939-3130"
+      ]
+    },
+    {
+      "id": "C5",
+      "finding": "Full system still uses biological IK tracking continuously, prescribed sound-side GRF and privileged critic biological IK. Thus initial IK is not the sole prescribed dependency of training/plant. Direct prescribed prosthetic waveform reward is disabled by blend_reference=0 in snapshot; bio score can still carry IK support objective.",
+      "evidence": [
+        "Trajectory Generator/osim_trj_cmc_like.py:453-460",
+        "Trajectory Generator/osim_trj_cmc_like.py:3090-3117",
+        "Trajectory Generator/baseline_MLP/reward_function.py:984-1005",
+        "training_cfg.resolved.yaml grf and reward blend fields"
+      ]
+    },
+    {
+      "id": "C6",
+      "finding": "Narrow reset support can limit start/recovery coverage. Frozen-policy failures or success measure dependence/generalization, not causal learning loss; fixed-vs-expanded PPO comparison needed for attribution.",
+      "evidence": [
+        "PROTOCOL.md"
+      ]
+    }
+  ]
+}

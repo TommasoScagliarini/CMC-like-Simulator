@@ -1,0 +1,236 @@
+# Revisione indipendente del replay TNT senza training
+
+**Ambito.** Ho letto le parti rilevanti di `tnt_replay.py` (coincidono con il testo fornito) ed `extract_prescribed.py`. Non ho letto dati grezzi né JSON, non ho eseguito nulla e non ho modificato file.
+
+## Verdetto
+
+- **Il nucleo TNT è corretto.** `tnt_replay.py:65-125` segue fedelmente le Eq. 1–8 e la Fig. 2a; non contiene bug.
+- **INVALID assorbente non nasconde nulla.** Con T_bm ≥ T_em il paper letterale produce un rate ≤ 0 e resta in late per sempre. Lo stato INVALID è lo stesso blocco, solo etichettato.
+- **Il fallimento dipende dalle soglie rispetto alla coscia, non dal codice.** Stimato dagli aggregati, D_e/D_m vale ≈1.17 nel test con i parametri auto di AB06. Sullo stesso tratto vale ≈0.45 (AB06) e ≈0.76 (AB07) con le soglie del paper.
+- **I difetti reali sono altrove.** Nel codice di valutazione: continuità TNT mai misurata, confronti su finestre diverse, frammenti INVALID contati come swing, stalli non segnalati. Nella taratura: nessun margine di stabilità o raggiungibilità, due parametri su tre al bordo della griglia, un solo regime.
+- **Formulazione corretta del negativo:** "una taratura su un solo regime lento non si trasferisce". Non "il TNT fallisce su AB06/AB07".
+
+## 1. Implementazione vs paper
+
+**Cosa è conforme**
+- Trigger σ con disuguaglianza stretta.
+- Early con v_{n−1}; passaggio a middle su θ̇>0.
+- Inversa quintica per bisezione (errore ~3·10⁻⁸) ed Eq. 6.
+- Uscita stretta >ρ, Eq. 7, late con Eq. 8, reset a T≥1.
+
+Alcune scelte di convenzione non cambiano la matematica:
+- Nel campione di transizione T viene incrementato prima del test. Quindi nel codice vale esattamente `T_bm = v_{n−1}·D_e`.
+- Filtro causale a 6 Hz, con circa 26 ms di ritardo.
+- Rate iniziale tarato (il paper non lo specifica).
+
+Un caso limite: `dtheta > 0` non richiede un segno negativo precedente. Se si rientra in stance con θ già sotto σ (late troppo lungo), l'early può durare un solo campione, con θ_bm diverso dal minimo. Va contato, non corretto.
+
+**La ricorrenza del rate.** Con g_n = D_e,n/D_m,n e v*_n = T_em/(D_e,n + D_m,n):
+
+```
+v_n − v*_n = −g_n · (v_{n−1} − v*_n)
+```
+
+- **Durate costanti:** guadagno −g, contrattivo solo se g<1, con alternanza di segno. La vostra derivazione è corretta.
+- **Durate variabili:** `e_n = −g_n·(e_{n−1} + v*_{n−1} − v*_n)`. La crescita dipende dal prodotto dei g_n, e i cambi di cadenza fanno da forzante. Un singolo g_n>1 non implica divergenza; un g medio <1 non garantisce validità.
+- **Validità:** `T_bm,n < T_em ⇔ v_{n−1}/v*_n < 1 + 1/g_n`. Vicino al bordo v_n → 0⁺ e il late dura (1−T_em)/v_n.
+  - Lo swing di 11.09 s (AB06, warp 1.25) è lo stesso guasto, visto dall'altro lato del bordo.
+  - La guardia INVALID ne copre quindi solo metà.
+
+**Riscontro dagli aggregati.** È il rapporto tra campioni passati in early e in middle nel test: una stima approssimata, serve il g per ciclo.
+
+| Caso | early / middle | g stimato |
+|---|---|---|
+| AB06, parametri auto | 448 / 384 | ≈1.17 |
+| AB06, soglie paper | 1231 / 2755 | ≈0.45 |
+| AB07, soglie paper | 1342 / 1771 | ≈0.76 |
+| AB07, parametri auto | 3 cicli | non utilizzabile |
+
+Il meccanismo è plausibile:
+- σ è il minimo al p90 più il 5% dell'escursione. Per entrambi i soggetti è il candidato più basso della griglia.
+- Per AB06, ρ vale 0.64 volte l'escursione mediana del regime lento.
+- Nel test la coscia scende più in basso (fino a −18° e −27°). Così l'early si allunga e il middle si accorcia.
+
+**I warp temporali sono un test quasi nullo per lo stimatore.**
+- σ e ρ sono angoli, quindi g e la raggiungibilità non cambiano con una scala uniforme del tempo. Cambiano solo il ritardo del filtro e la discretizzazione.
+- Infatti INVALID cade agli stessi tempi sorgente, entro pochi cicli:
+  - AB06: 77.3 / 83.3 / 76.3 s (warp 1, 0.75, 1.25)
+  - AB07: 53.5 / 55.7 / 53.5 s
+- Non vanno citati né come prova a favore né come prova contro.
+
+Nel replay la coscia è esogena (anello aperto). Nel test dinamico invece segue l'IK solo tramite il tracking e può risentire della protesi, quindi D_e e D_m effettivi possono differire. Il replay è una condizione necessaria, non sufficiente.
+
+**Limiti reali del metodo (non bug)**
+- **L1 – ricorrenza:** quella descritta sopra; il paper non la discute.
+- **L2 – blocchi senza uscita:**
+  - σ mai attraversata: 36.7 s di stance (AB06).
+  - ρ mai raggiunto: 30.5 s di middle (AB07).
+  - T_bm ≥ T_em, oppure v → 0.
+- **L3 – inversa quintica ripida agli estremi.** Non è Lipschitz: `dT/dt = (T_em−T_bm)·θ̇ / (ρ·30x²(1−x)²)`.
+  - La regola del paper (ρ "slightly lower" dell'escursione massima) fa sì che θ̇≈0 all'uscita.
+  - Con ρ≈0.64 dell'escursione, invece, la coscia è ancora veloce. Nell'ultimo campione x può passare da ~0.8 a 1, cioè ΔT fino a ~0.2·(T_em−T_bm) in 10 ms.
+  - Con la pendenza di Eq. 9 vicino a T≈0.8 (≈−220° per unità di T) sarebbero oltre 10° in un campione. Non è mai stato misurato (vedi B2).
+  - Anche l'ingresso in middle è ripido, perché x ∝ (θ−θ_bm)^{1/3}.
+- **L4 – σ è assoluta.** Dipende dallo zero dell'angolo (asse −Y di transfemur e heading del pelvis, `extract_prescribed.py:101-109`).
+  - Il −6° del paper appartiene alla convenzione della loro IMU. Il run con le soglie del paper è quindi una diagnosi di convenzione diversa, non un test del paper.
+  - ρ invece è invariante all'offset.
+- **L5 – inversioni in middle.** T segue le inversioni di θ; nei prefissi validi ne risultano 0.
+- **Provenienza dei dati.** L'estrazione non aggiunge smoothing, ma il filtraggio a monte dell'IK è ignoto (forse a fase zero). La causalità vale dall'estrazione in poi, e l'input è più pulito di una IMU.
+
+**Difetti del codice di valutazione**
+- **B1 – `complete_blocks` (`:186`).** `state > 0` esclude INVALID (−1), quindi uno swing troncato da INVALID finisce dentro la maschera e passa come completo.
+  - Le durate 0.27, 0.17 e 0.14 s in `durations_s` sono frammenti di questo tipo.
+  - Oggi i template non ne risentono, ma verrebbero contaminati da qualsiasi configurazione che fallisca in taratura.
+  - Correzione: richiedere l'evento `late_to_stance` di chiusura.
+- **B2 – `score` (`:285-312`).** I NaN si propagano e tutte le metriche di continuità TNT diventano `null`. La continuità del riferimento TNT non è mai stata misurata. Va calcolata sui campioni validi, insieme a ΔT per campione, separatamente per stato.
+- **B3 – finestre diverse.** Il prefisso valido TNT viene confrontato con la finestra intera del PFD. Il PFD va valutato sulle stesse maschere.
+- **B4 – stalli e cicli persi.** Non ci sono contatori: lo swing di 11.09 s risulta "completato". Servono:
+  - limiti di durata per ciascuno stato;
+  - il conteggio dei minimi indipendenti senza swing, trattati come fallimenti.
+- **B5 – taratura (`:337-361`).**
+  - σ (f=0.05) e T_em (0.85) stanno al bordo della griglia per entrambi i soggetti.
+  - I candidati σ stanno solo sopra il minimo p90, il che spinge verso D_e lunghi.
+  - Con template ricostruiti per ogni candidato, T_em è poco identificabile.
+  - Lo score ignora g, i margini e il rapporto T_bm/T_em.
+  - La selezione usa 15 s, circa 9 cicli lenti di un solo regime. Il test contiene periodi di circa 0.9–1.3 s, contro 1.58 s (dedotti da stance+swing del PFD nei warp).
+- **B6 – baseline PFD.** La sua durata di swing D_sp deriva dagli swing TNT di taratura (`:455`), quindi il baseline cambia con la variante TNT. Va fissato una volta sola, indipendentemente dal TNT.
+
+## 2. Esperimenti minimi senza training
+
+**Regola di trasparenza**
+- Ogni output porta `heldout_status ∈ {pristine, reused_post_hoc, in_sample}`.
+- L'attuale `results.json` resta intatto ed è il risultato primario.
+- AB06/AB07 dopo i 40 s sono sempre post-hoc.
+- "Pristine" vale solo per soggetti o trial mai aperti per il TNT, con config e hash del codice committati prima del primo run.
+
+**E0 – Verifica analitica** (in `check_tnt.py`)
+- Coscia sintetica con g ∈ {0.5, 0.9, 1.1, 1.5}, durate costanti e alternate.
+- Atteso: guadagno misurato −g, e INVALID nel ciclo previsto dal bordo di validità.
+- Warp con filtro spento: atteso eventi identici in tempo scalato.
+
+**E1 – Mappa di fattibilità.** Usa solo la coscia: niente q, niente GRF.
+- Gli istanti degli eventi σ, minimo e ρ non dipendono dal rate (solo l'uscita dal late sì). Quindi g per ciclo si calcola direttamente per qualsiasi (σ, ρ).
+- Per soggetto e per regime (regimi dai minimi indipendenti, solo in valutazione), su una griglia σ×ρ:
+  - % di cicli con σ attraversata e ρ raggiunto con margine ≥2°;
+  - g in mediana, p95 e massimo;
+  - rischio di sforamento del late.
+- Più un replay P completo per ogni punto della griglia.
+- Esito: se nessun (σ, ρ) dà il 100% di raggiungibilità con p95(g) sotto ~0.8 in tutti i regimi, il risultato documentato è "parametri fissi non coprono il dataset".
+- Ipotesi da verificare: la regola stessa del paper su ρ non sembra soddisfacibile insieme nel regime lento e in quello veloce.
+
+**E2 – Soggetto e range**
+- AB06→AB07 e viceversa (non pristine).
+- Leave-one-regime-out.
+- Pristine solo su dati nuovi.
+- Verificare l'affermazione del paper "solo T_em per soggetto".
+
+**E3 – Inizializzazione e partenza arbitraria**
+- initial_rate moltiplicato per 0.5, 1 e 2.
+- 20 offset di partenza per regime, partendo in stance o in early.
+- Metriche: cicli finché |v−v*|/v* < 10%, INVALID, stalli, cicli persi.
+- Il ciclo iniziale di avvio va riportato a parte.
+
+**E4 – Rumore e convenzione**
+- Rumore bianco 0.3° e 1°, offset ±3°, deriva 2°/min, cutoff 4, 6 e 10 Hz, 5 seed fissi.
+- Metriche: oscillazioni del segno di θ̇, σ mancate, guasti.
+- L'offset dovrebbe spostare solo σ: va verificato.
+
+**E5 – Causalità**
+- Invarianza su prefissi e perturbazioni future per ogni nuovo componente (stimatore modificato, guardie, stance, generatore).
+- Controllo delle firme: nessun q o GRF a runtime.
+
+**E6 – Timing.** Solo in valutazione, con eventi ricavati da q.
+- Errore di T=1 rispetto all'estensione di fine swing del ginocchio.
+- Errore del picco del template rispetto al picco misurato, per regime.
+- Serve a separare l'errore di fase dal mismatch di forma: il template viene dal regime lento e il TNT non adatta l'ampiezza.
+- Controllo poco costoso: un timer adattivo senza mappatura in middle (stessa σ, rate dal ciclo precedente) isola il contributo della coscia.
+
+## 3. Modifica del rate (estensione dichiarata, non il TNT del paper)
+
+Tre rami:
+- **P** – paper letterale con INVALID assorbente; è il controllo.
+- **B** – blending.
+- **D** – rate diretto.
+
+σ, ρ, T_em, filtro e mappatura del middle restano identici. Cambia solo il rate usato nel late e nel successivo early.
+
+**Ramo B (blending)**
+- `v_n = (1−α)v_{n−1} + α·v_raw,n`, con `v_raw,n = (T_em − v_{n−1}D_e,n)/D_m,n`.
+- Ne segue `e_n = λ_n·(e_{n−1} + v*_{n−1} − v*_n)`, con `λ_n = 1 − α(1+g_n)`; il punto fisso v* è lo stesso del paper.
+- Stabile se α < 2/(1+g). Senza alternanza se α ≤ 1/(1+g).
+- Regola fissata prima del test: α = 1/(1+ĝ), con ĝ = 1.5 volte il massimo g in taratura.
+  - Con questa α la ricorrenza resta stabile per ogni g < 1+2ĝ, ben oltre il valore tarato. Questo la rende robusta al cambio di regime.
+- Costo: per g < ĝ l'adattamento è più lento, quindi il timing del late resta indietro dopo i cambi di cadenza.
+- Il riallineamento di T a T_em in middle resta istantaneo.
+
+**Ramo D (rate diretto)**
+- `v_n = T_em/(D_e,n + D_m,n)`.
+- Equivale a B con α_n = D_m,n/(D_e,n + D_m,n), cioè λ=0 (convergenza in un solo ciclo).
+- Non ha parametri, l'errore precedente non si propaga e lo stato stazionario coincide con quello del paper.
+
+Compromessi di D:
+- Ridefinisce il rate su early+middle invece che come media del middle. È una deviazione dal paper: va chiamato "TNT-D".
+- La pendenza di T è discontinua al passaggio middle→late; il gradino di velocità va misurato.
+- D_e entra direttamente, ma pesato da 1/(D_e+D_m). Amplifica il jitter di σ meno del 1/D_m del paper, e senza propagazione.
+- Non elimina il vincolo di validità. T_bm,n = v_{n−1}D_e,n dipende ancora dal ciclo precedente, perché l'early resta in anello aperto. Un rallentamento brusco con v_{n−1}/v*_n > 1+1/g_n supera ancora T_em.
+
+**Guardie** (solo nei rami B e D, ciascuna con contatore riportato)
+- **T_bm:** saturare T in early a T_cap < T_em (p95 di T_bm in taratura più margine, al massimo 0.9·T_em). Il riferimento attende θ̇>0, e il rate resta ≥ (T_em−T_cap)/D_m > 0.
+- **Stallo in late:** imporre v ≥ v_min, ricavato dalla durata massima del late in taratura moltiplicata per 2.
+- **ρ irraggiungibile:** uscita sul massimo della coscia (θ̇ ≤ 0 dopo almeno 0.5ρ), con T continuo.
+- **σ mai attraversata:** non si rimedia senza cambiare σ; si contano i cicli persi.
+  - Se E1 mostra che il vincolo dominante è la raggiungibilità, correggere il rate non basta.
+  - In quel caso va dichiarata la dipendenza dal range, oppure va provato un ramo separato con soglie adattive.
+- **Continuità:** misurare il massimo di ΔT e Δq_ref per stato. Mappa lineare in middle o limitatore di rate solo come varianti dichiarate, e solo se il gate fallisce.
+
+## 4. Generatore cinematico e test dinamico breve
+
+**Generatore.** A runtime niente NN, niente q, niente GRF.
+- **Swing:** template di ginocchio e caviglia indicizzati da T, costruiti solo in taratura e congelati. Variante fedele per il ginocchio: Eq. 9 con il segno OpenSim.
+- **Stance**, due opzioni causali:
+  - **(a)** il timer attuale basato sulla stance precedente;
+  - **(b)** progressione della coscia `s = clip((θ_on−θ)/(θ_on−σ), 0, 1)` che non può tornare indietro, con θ_on = massimo di θ dall'ingresso in stance e template di stance ricostruito su s.
+- **Perché (b):** vale 1 quando θ<σ, quindi la continuità al confine è garantita per costruzione, a meno di un campione di moto. Elimina anche il ritardo di un ciclo.
+- **(b) resta un'estensione:** nel paper la stance è un setpoint costante più elasticità (3.7 N·m/deg). Se il plugin SEA (`…impedence_ff`) consente la modalità impedenza, quella è la variante di stance del ginocchio più fedele.
+- **Caviglia attiva:** è un'estensione; il paper usa una Pro-Flex passiva.
+
+**Gate offline**, dichiarati prima:
+- **G1 – stimatore:** 0 INVALID, 0 stalli e 0 cicli persi nella finestra scelta; attivazioni delle guardie riportate.
+- **G2 – continuità:**
+  - nessun gradino superiore a 2° ai confini di stato;
+  - p99.9 di |q̇_ref| e |q̈_ref| entro 1.2 volte l'inviluppo biologico di taratura;
+  - nessuna inversione oltre ε.
+- **G3 – timing:** errore mediano a T=1 inferiore al 5% del ciclo.
+
+Se qualifica un solo regime, il test dinamico si limita a quello e va dichiarato.
+
+**Test dinamico** (circa 10–15 s, al massimo 2 finestre)
+- **Ingresso:** lo stimatore riceve la coscia simulata (anello chiuso), non l'IK registrata.
+- **Rami:**
+  - il ramo TNT che supera i gate (P se lo supera, altrimenti B o D, dichiarati);
+  - un PFD abbinato: stessa σ, stessa stance, stessi guadagni e limiti SEA, stesso stato iniziale e stessa finestra. Ha template propri e D_sp fissato; non va presentato come stessa waveform.
+- **Oracle:** un eventuale playback dell'IK va etichettato "oracle" e non usato come comparatore.
+- **Avvio:** il primo swing è di avvio e va riportato a parte.
+- **Comandi:** guadagni e limiti presi dal baseline SEA esistente, senza ritocchi per singolo ramo. Riportare:
+  - % di saturazione;
+  - coppia e velocità motore di picco;
+  - potenza positiva di picco del ginocchio. La Tabella I del paper (0.74–1.36 W/kg) vale solo come ordine di grandezza.
+- **Esiti:**
+  - caduta o interruzione della simulazione;
+  - stato dello stimatore in anello chiuso;
+  - deviazione della coscia dall'IK;
+  - errore di tracking della protesi;
+  - clearance del piede.
+- **Sostegno fisico:** la corrispondenza di q da sola non lo prova. Servono grandezze lato impianto, usate solo come esito: carichi su residui e riserve, altezza del pelvis, forze di contatto simulate.
+
+## 5. Priorità
+
+1. **Prima di qualsiasi nuova conclusione:** B1–B4, E0, E1.
+2. **Poi:** taratura con vincoli di stabilità e raggiungibilità, E2–E4, rami B e D con guardie, tutto etichettato post-hoc.
+3. **Infine:** generatore con stance basata sulla coscia, gate G1–G3, e solo allora il test dinamico.
+
+**Correzioni da fare nel report**
+- Scrivere: "parametri tarati su un solo regime lento non si trasferiscono".
+- I warp non sono evidenza sullo stimatore.
+- Le soglie del paper falliscono qui per una convenzione d'angolo diversa, non perché il metodo sia falsificato.
+- Il PFD "completa" per costruzione: non ha uno stato che possa fallire.

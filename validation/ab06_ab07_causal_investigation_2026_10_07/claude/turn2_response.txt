@@ -1,0 +1,51 @@
+**Risposte alle tre domande**
+
+1. **Correggo.** Una legge di contatto materiale non deve contenere la massa. La massa entra per equilibrio, cioè tramite la penetrazione che il carico produce. La mia frase valeva solo sotto posa imposta. Il difetto non è la formula ma il canale: qui il tracking con reserve larghe chiude il bilancio al posto del contatto, quindi la penetrazione non è mai determinata dal carico. In più la scala di penetrazione della base, offset di 24.3 mm e rigidezze, codifica la registrazione di A e non una proprietà dell'hardware. I due problemi sono accoppiati: togliere le reserve trasferirebbe l'incompatibilità dal bilancio alla cinematica, perché la base non è qualificata fisicamente.
+
+2. **Concedo** che rapporti actual/FK simili non escludevano la dinamica. Ora il bilancio la caratterizza. La cinematica è sostenuta da reserve di segno opposto, verso l'alto in A e verso il basso in B, con chiusura all'ordine di 1e-2 Ns. È un meccanismo di compensazione confermato: il buon tracking non è evidenza di GRF compatibile col carico. L'origine del gap è separata e precede la dinamica, perché sta già nel FK del riferimento. Lo strato dinamico aggiunge un'inflazione relativa simile in entrambi e un contatto in swing specifico di B, piccolo rispetto alla non chiusura. Gli effetti intra-ciclo di massa, inerzia e reclutamento restano non osservabili finché il bilancio è chiuso dalle reserve.
+
+| | A | B |
+|---|---|---|
+| reserve verticale media, frazione BW | +0.079 | −0.228 |
+| stance mean FK riferimento, N | 401.5 | 535.1 |
+| penetrazione positiva 07 in stance, mm | 4.04 | 9.39 |
+| impulso in swing misurato, FK / actual, Ns | 0.33 / 1.33 | 5.48 / 72.25 |
+| sensibilità al piano FK, N per mm | 34.4 | 37.4 |
+| guadagno comune da A ciclo 1, errore impulso | +4.8% | +69.5% |
+
+3. **Conclusione giustificata:** interazione fra una base empirica non trasferibile e la posa del piede preparato sotto cinematica sana, nascosta nella cinematica e visibile nel bilancio. Non anatomia difettosa, non errore software, non errore di preparazione. Condivido la lettura provvisoria con le precisazioni che seguono.
+
+**Cosa è identificato**
+
+Osservazioni, senza scambi tra soggetti:
+- **L'eccesso di B è intensità** in stance, non durata. La frazione di stance di B è minore di quella di A e lo swing è trascurabile nel riferimento.
+- **Il gap della forza media** è portato dalla sola componente 07. Le altre sette sono quasi invarianti. 07 condivide centro e raggio con 06 ed è una componente della base, non un sito fisico del piede.
+- **La profondità raw di 07** in B supera A di circa 4.5 fino a 5.9 mm nei primi tre quarti dello stance, poi diverge fino a circa 31 mm nell'ultimo bin. Il budget geometrico attribuisce sia la parte quasi costante sia il picco terminale all'altezza dell'origine del footframe, con l'orientazione che compensa in parte.
+- **Un guadagno scalare comune** fissato su A predice A entro il 5% e fallisce su B del 70%. La base non sbaglia di scala, sbaglia nella struttura posa-penetrazione.
+- **Nessun bias uniforme** verso il basso dei marker di B. La suola STL in stance sta 6.2 mm più bassa in B che in A rispetto a entrambi i piani, ma i piani sono costrutti e non misure.
+
+Interventi FK condizionali:
+- **La traslazione dell'hip B** riduce il contatto a M e Q fissati. L'anatomia d'anca come effetto diretto non produce un aumento.
+- **Il montaggio B**, più corto, riduce il contatto a parità di Q.
+- **L'eccesso viaggia con Q_B.** Il riferimento fittato sulla catena preparata di B colloca il footframe più in basso rispetto al piano di forza.
+- **Il lineage di B** ha portato un banco grossolanamente sotto-supportante a un livello di appoggio. È una risposta diretta della preparazione che recupera una mancanza. Non è un errore e non qualifica la base.
+
+Lettura del meccanismo, compatibile con il budget ma non dimostrata: il footframe hardware è rigido, con distanze caviglia-suola e caviglia-punta fisse, e insegue i marker di un piede sano flessibile che non è quel piede. Il riferimento di B tiene l'origine più bassa lungo lo stance e molto più bassa durante il sollevamento del tallone. La base converte questi millimetri in decine di newton per millimetro. Il tracking chiude il resto con le reserve.
+
+**Non identificabile, vincolo mancante, decisione**
+
+Resta non identificabile:
+- **Perché l'origine di B stia più in basso.** Marcia di B, scala del piede e della caviglia di B rispetto all'hardware, oppure offset calibrati footframe-marker. P e R le riassumono insieme, e gli offset sono stati fittati, non misurati.
+- **Quale quota sia corretta** tra A sopra e B sotto il piano statico. Manca una forza statica acquisita e i marker statici sono dati di training.
+- **Il ruolo della massa** per via di equilibrio, finché il bilancio è chiuso dalle reserve.
+
+Il vincolo fisico mancante è uno solo in due forme: forza-deflessione dell'hardware reale, oppure una GRF di un utilizzatore reale dello stesso piede. Senza uno dei due, la base resta un surrogato e le percentuali rispetto al sano restano metriche di benchmark.
+
+Decisione sui risultati:
+- **Chiudere la domanda** anatomia contro preparazione come non identificabile su A e B. Nessun altro run FK la risolve.
+- **Mantenere la registrazione corrente** di B. Nessun revert, nessun retuning della base, nessuna rimozione di 07.
+- **Metrica primaria**: impulso verticale delle reserve con chiusura del bilancio e contributo per componente. Le percentuali rispetto alla GRF sana diventano descrittori del benchmark.
+- **Dichiarare la base** delle otto sfere non trasferibile tra soggetti finché non esistono una qualifica fisica e una posa compatibile col carico.
+- **Correzioni accettate**: 1.292 è un rapporto di medie sul proprio ciclo, il rapporto degli impulsi è 1.277, e l'identità dei rapporti è descrittiva.
+
+Il risultato di B va riportato come incompatibilità del piede virtuale rigido con la cinematica terminale di stance di un soggetto sano, letta attraverso una base calibrata su un altro soggetto, non come difetto di B né della preparazione.

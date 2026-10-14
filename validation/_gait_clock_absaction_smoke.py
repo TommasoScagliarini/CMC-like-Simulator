@@ -200,41 +200,6 @@ def part_b() -> CMCLikeProsthesisTrajectoryEnv:
     return env
 
 
-# ---------------------------------------------------------------------------
-# Part C: delta-mode regression (the imitative path still maps q_base+delta).
-# ---------------------------------------------------------------------------
-def part_c() -> None:
-    print("\n=== Part C: delta-mode regression ===")
-    env = CMCLikeProsthesisTrajectoryEnv(
-        CMCEnvConfig(
-            setup_xml_path=SETUP_XML,
-            segment_duration=0.05,
-            policy_knots=2,
-            action_mode="delta",
-            max_delta_rad=0.35,
-            episode_duration=0.5,
-            grf_mode="prescribed",
-            include_online_grf_observation=False,
-            record_outputs=False,
-            fail_fast=True,
-        )
-    )
-    env.reset(seed=1)
-    pros = list(env.cfg.pros_coords)
-    n = env.env_cfg.policy_knots
-    target_t = min(env.t + env.env_cfg.segment_duration, env._episode_end)
-    times, vals, _ = env._action_to_segment(np.ones((n, 2)), target_t)
-    ok = True
-    for k, tk in enumerate(times[1:]):
-        qb, _, _ = env.base_kin.get(float(tk))
-        for j, c in enumerate(pros):
-            if abs(vals[k + 1, j] - (qb[c] + 0.35)) > 1e-9:
-                ok = False
-    check(ok, "delta action +1 -> q_base(t_k) + 0.35 rad (imitative path intact)")
-    # delta clock features still present (clock is mode-independent).
-    check("gait_phase" in env.observation_feature_names, "delta env also has gait_phase")
-
-
 def part_d() -> None:
     """Reward + action wrapper chain in absolute mode, torch-free.
 
@@ -296,7 +261,6 @@ def part_d() -> None:
 def main() -> int:
     part_a()
     part_b()
-    part_c()
     part_d()
     print("\n=== SUMMARY ===")
     if _FAILS:

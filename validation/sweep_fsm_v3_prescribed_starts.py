@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """L2 — actor-FSM v2 vs v3 on the prescribed (perfect-gait) tape, start sweep.
 
-The policy cannot act (``action_mode="delta"``, ``max_delta_rad=0``): the
-served reference is the AB06 tape and the prescribed GRF drives the
+The commanded reference is the AB06 tape in absolute radians; prescribed GRF drives the
 dynamics, so every FSM outcome is attributable to the FSM, not to a policy.
 Runs each start offset under the binary-active V26 stack with the chain
 hygiene gates, once per FSM version, in a process pool.
@@ -31,7 +30,7 @@ V25_PROFILE = (
 
 def run_one(task: tuple[float, str, float, int]) -> dict:
     offset, version, duration, seed = task
-    import numpy as np
+    from prescribed_action import prescribed_action
     from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 
     cfg = CMCEnvConfig(
@@ -40,8 +39,7 @@ def run_one(task: tuple[float, str, float, int]) -> dict:
         episode_duration=duration,
         episode_start_offset_s=float(offset),
         policy_knots=1,
-        action_mode="delta",
-        max_delta_rad=0.0,
+        action_mode="raw",
         grf_mode="online_sensor",
         online_grf_profile_file=(
             "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
@@ -74,10 +72,9 @@ def run_one(task: tuple[float, str, float, int]) -> dict:
     out = {"offset": float(offset), "version": version}
     try:
         _obs, info = env.reset(seed=seed)
-        action = np.zeros(env.action_space.shape, dtype=np.float32)
         steps, end_reason = 0, None
         while True:
-            _obs, _r, term, trunc, info = env.step(action)
+            _obs, _r, term, trunc, info = env.step(prescribed_action(env))
             steps += 1
             if term or trunc:
                 end_reason = info.get("end_reason")

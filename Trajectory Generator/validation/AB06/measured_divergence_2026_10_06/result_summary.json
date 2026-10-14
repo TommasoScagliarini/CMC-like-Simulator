@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "created_utc": "2026-10-06T21:50:49.201760+00:00",
+  "question": "Historical AB06 divergence from its own measured GRF, distinguishing IK teacher controls from neural policy control",
+  "main_comparison": "Saved AB06 J1 nominal IK teacher, 5 s; same measured-GRF impulse and binary-onset definitions used for AB07 test1. Historical control settings are not identical to AB07 test1.",
+  "IK_guided_controls": {
+    "AB06_J1_nominal_5s": {
+      "episode_window_s": [
+        13.946870983805102,
+        18.946870983804427
+      ],
+      "saved_boundary_window_s": [
+        13.956870983805096,
+        18.946870983804427
+      ],
+      "vertical_impulse_ns": 1550.5010234688777,
+      "measured_vertical_impulse_ns": 1874.1215267533594,
+      "vertical_impulse_difference_percent": -17.267850492337423,
+      "binary_onset_timing": {
+        "heel_strike": {
+          "reference_count": 4,
+          "predicted_count": 3,
+          "matched_count": 3,
+          "false_positives": 0,
+          "false_negatives": 1,
+          "timing_bias_s": -0.026753172861069412,
+          "timing_max_abs_s": 0.03307265619275768
+        },
+        "toe_off": {
+          "reference_count": 3,
+          "predicted_count": 3,
+          "matched_count": 3,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "timing_bias_s": 0.07343955047201689,
+          "timing_max_abs_s": 0.07878818380487473
+        }
+      }
+    },
+    "AB07_test1_full_9p01s": {
+      "episode_window_s": [
+        10.36,
+        19.3699999999974
+      ],
+      "saved_boundary_window_s": [
+        10.369999999999994,
+        19.3699999999974
+      ],
+      "vertical_impulse_ns": 3909.7067725689403,
+      "measured_vertical_impulse_ns": 2749.462127683605,
+      "vertical_impulse_difference_percent": 42.198968052810756,
+      "binary_onset_timing": {
+        "heel_strike": {
+          "reference_count": 5,
+          "predicted_count": 5,
+          "matched_count": 5,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "timing_bias_s": -0.08931144600157595,
+          "timing_max_abs_s": 0.1176271400018507
+        },
+        "toe_off": {
+          "reference_count": 4,
+          "predicted_count": 5,
+          "matched_count": 4,
+          "false_positives": 1,
+          "false_negatives": 0,
+          "timing_bias_s": 0.11847411749824577,
+          "timing_max_abs_s": 0.14069718999781955
+        }
+      }
+    },
+    "AB07_test1_first_5s": {
+      "episode_window_s": [
+        10.36,
+        15.359999999997228
+      ],
+      "saved_boundary_window_s": [
+        10.369999999999994,
+        15.359999999997228
+      ],
+      "vertical_impulse_ns": 2214.3098390066243,
+      "measured_vertical_impulse_ns": 1488.8618469237863,
+      "vertical_impulse_difference_percent": 48.72500383979368,
+      "binary_onset_timing": {
+        "heel_strike": {
+          "reference_count": 2,
+          "predicted_count": 2,
+          "matched_count": 2,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "timing_bias_s": -0.06572260500161597,
+          "timing_max_abs_s": 0.0697405200011989
+        },
+        "toe_off": {
+          "reference_count": 2,
+          "predicted_count": 3,
+          "matched_count": 2,
+          "false_positives": 1,
+          "false_negatives": 0,
+          "timing_bias_s": 0.10670720999774908,
+          "timing_max_abs_s": 0.10772817999816553
+        }
+      }
+    }
+  },
+  "IK_guided_comparison_limitations": [
+    "Subjects, reset phases and full duration differ (AB06 5s versus AB07 9.01s). The AB07 prefix has equal duration, not equal gait phase or identical control settings.",
+    "Both action sources derive from IK and both use left applied online GRF with measured GRF retained as reference. J1 normalized absolute teacher uses slew2.5/2 and exnovo-style FSM thresholds; AB07 test1 uses raw playback with disabled slew and imitation-style FSM thresholds.",
+    "The historical pinned YAML references the same three profile paths. Current profile hashes match AB07 captured inputs, but J1 receipt lacks individual historical profile hash attestation; this is provenance compatibility rather than a claim of bit-identical historical runtime.",
+    "The established binary-FSM onset channel is compared with offline measured-GRF cycle events. Onset, confirmation, delivery, actor acceptance and primary-force crossings remain distinct quantities.",
+    "Oracle GRF events use20N/50ms/300ms production extraction; startup partial events are excluded from nominal complete-cycle reference and unmatched observed events remain explicit.",
+    "All timing tolerances are inherited diagnostic references, not new AB06 or AB07 qualification gates.",
+    "The AB06 learned best47 control is deliberately excluded from this prescribed comparison."
+  ],
+  "separate_learned_AB06_control": {
+    "scope": "AB06 learned V26C best47 deterministic nominal control, seed 123, saved 5 s rollout; this is a neural-policy baseline",
+    "vertical_impulse_difference_percent": -18.439850608309495,
+    "vertical_impulse_ns": 1528.1638347844444,
+    "measured_vertical_impulse_ns": 1873.6648304130454,
+    "recorded_channel_inventory": {
+      "left_force_STO": "5000 pre-integration samples at 1 ms",
+      "actor_journal": "500 original policy trace boundaries at 10 ms, including accepted transitions and repairs",
+      "binary_raw_journal": "not recorded: original trace lacks binary_phase_fsm and runtime sidecar",
+      "binary_boolean_samples_1ms": "not recorded",
+      "binary_active_adapter_delivered_events": "left online_events with v26_source=binary_phase_fsm_v26; transported accepted event subset, not complete raw binary journal",
+      "online_threshold_csv": "independent threshold events; not actor or binary journal"
+    },
+    "onset_matching": {
+      "heel_strike": {
+        "onset_times_s": [
+          15.589870983804191,
+          17.128870983805342,
+          18.676870983807234
+        ],
+        "matching": {
+          "reference_count": 3,
+          "predicted_count": 3,
+          "matched_count": 3,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "timing_bias_s": -0.033753172861077374,
+          "timing_mae_s": 0.033753172861077374,
+          "timing_max_abs_s": 0.04007265619276623,
+          "unmatched_reference": [],
+          "unmatched_predicted": [],
+          "pairs": [
+            {
+              "reference_time_s": 15.61596084,
+              "predicted_time_s": 15.589870983804191,
+              "error_s": -0.02608985619580828,
+              "absolute_error_s": 0.02608985619580828
+            },
+            {
+              "reference_time_s": 17.16396799,
+              "predicted_time_s": 17.128870983805342,
+              "error_s": -0.03509700619465761,
+              "absolute_error_s": 0.03509700619465761
+            },
+            {
+              "reference_time_s": 18.71694364,
+              "predicted_time_s": 18.676870983807234,
+              "error_s": -0.04007265619276623,
+              "absolute_error_s": 0.04007265619276623
+            }
+          ]
+        },
+        "tolerance_s": 0.12
+      },
+      "toe_off": {
+        "onset_times_s": [
+          15.188870983804414,
+          16.712870983804834,
+          18.262870983806728
+        ],
+        "matching": {
+          "reference_count": 3,
+          "predicted_count": 3,
+          "matched_count": 3,
+          "false_positives": 0,
+          "false_negatives": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "timing_bias_s": 0.048439550471991666,
+          "timing_mae_s": 0.048439550471991666,
+          "timing_max_abs_s": 0.062021753804414104,
+          "unmatched_reference": [],
+          "unmatched_predicted": [],
+          "pairs": [
+            {
+              "reference_time_s": 18.22436227,
+              "predicted_time_s": 18.262870983806728,
+              "error_s": 0.03850871380672771,
+              "absolute_error_s": 0.03850871380672771
+            },
+            {
+              "reference_time_s": 16.6680828,
+              "predicted_time_s": 16.712870983804834,
+              "error_s": 0.04478818380483318,
+              "absolute_error_s": 0.04478818380483318
+            },
+            {
+              "reference_time_s": 15.12684923,
+              "predicted_time_s": 15.188870983804414,
+              "error_s": 0.062021753804414104,
+              "absolute_error_s": 0.062021753804414104
+            }
+          ]
+        },
+        "tolerance_s": 0.18
+      }
+    },
+    "time_basis": [
+      13.94687098,
+      18.94587098
+    ]
+  },
+  "new_simulations": 0,
+  "new_policy_inferences": 0,
+  "source_artifacts": [
+    {
+      "path": "Trajectory Generator/validation/AB06/measured_divergence_2026_10_06/prescribed_J1/comparison_metrics.json",
+      "sha256": "4f13122c8cdf5eb867b4faffa968bce8f5accf02cc8c34eb0858249f97bd120b"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB06/measured_divergence_2026_10_06/learned_vs_measured.json",
+      "sha256": "d078711c66437c82e145fc1bdcc6d81dc7e5ef359b69ed48826cfe148de4f077"
+    }
+  ]
+}

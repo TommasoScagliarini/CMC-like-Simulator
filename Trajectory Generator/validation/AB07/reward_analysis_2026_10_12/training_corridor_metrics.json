@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "scope": "Only the additional ex_novo PPO phase of 1-2 September 2026: 50 new updates (logical2-51), or its first 46 updates through best47. This is not the policy's complete training history; excludes inherited J19A/prior actor adaptation, critic warmup/rewarm, and posttraining rollouts.",
+  "run": {
+    "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml",
+    "sha256": "765acb0fb79a2262bde77be8086c7642dff25406b8f854052cb332cc5986002e"
+  },
+  "sources": [
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/train_iterations.jsonl",
+      "sha256": "966f733e89d2e5fa72873739b9389baf90e0e84ed704d82af73f52d0ddd4d4dc"
+    },
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/summary.json",
+      "sha256": "803a954093edb8d759ed61607d55557479441565023a277005594badcd91ca7c"
+    },
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/checkpoint_best_meta.json",
+      "sha256": "4e9cab26bf80f03dbc93956495b542c3d2156e4bf84da101e89fa84c013ccf19"
+    },
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_critic_rewarm_morphology_split_equal_1p05_2026-08-31_r2/summary.json",
+      "sha256": "a70f921e4a5c3b243dea27794939514d6bb2ae12f9e00ae21f87688402508349"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/summary.json",
+      "sha256": "cc24f24819c686d3add51e8face61f35021eb48682454c8c1081193b7cfe115f"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/v26c_j19a_result.json",
+      "sha256": "8982b2fc40e514bed903af0c33e0a4ab3737ebf849a44a232912a816002dc254"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/tb_logging.py",
+      "sha256": "7851b59d9292f8bfbaac3335ba7aa349870a6b52452f518ca8614523402f01ea"
+    },
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/tensorboard/events.out.tfevents.1788295925.MacBook-Pro.local.26034.0",
+      "sha256": "0d29acde2fbf5ad8d11756d61f3b2bb5ad203fb661b48c4672ef6cd122aac7df"
+    }
+  ],
+  "method": {
+    "tensorboard_tags": {
+      "window_morphology_cost_mean": "reward/morphology_term",
+      "window_knee_cost_mean": "reward/morphology_knee_term",
+      "window_ankle_cost_mean": "reward/morphology_ankle_term",
+      "window_reward_mean": "reward/reward",
+      "window_reward_base_mean": "reward/reward_base",
+      "window_morphology_available_mean": "reward/morphology_available",
+      "window_morphology_inside_fraction_mean": "reward/morphology_inside_fraction",
+      "batch_reward_sum_tb": "env_runners/console/reward_sum_current",
+      "batch_sample_count": "env_runners/console/reward_count_current",
+      "completed_episodes": "env_runners/num_episodes"
+    },
+    "tensorboard_step_axis": "num_env_steps_sampled_lifetime, joined exactly to train_iterations.jsonl",
+    "reward_components": "Ray 2.55.1 MeanStats: each EnvRunner retains its last 100 step values; reduce() clears the deque, and distributed merge takes a mean of means. Each update here samples 384 steps per runner across 12 runners. A logged point therefore summarizes the 100-step tails, nominally 1200 of 4608 transitions, not the full batch or complete episodes.",
+    "window_aggregation": "Equal arithmetic mean of the saved per-update tail means. Consecutive update tails do not overlap because reduce() clears the values and each runner samples 384 new steps, exceeding the 100-step window. This is not a moving average across training iterations and not a mean over every training transition.",
+    "nominal_tail_steps_per_runner_per_update": 100,
+    "runner_count": 12,
+    "steps_per_runner_per_update": 384,
+    "nominal_tail_steps_per_update": 1200,
+    "nominal_fraction_of_batch_represented": 0.2604166666666667,
+    "ray_meanstats_evidence": "ray/rllib/utils/metrics/stats/mean.py:17 documents mean-of-means; :52 reduce() calls window_reduce() then _set_values([]). Read-only audit of installed Ray 2.55.1.",
+    "batch_reward": "console/reward_sum_current and reward_count_current are unsmoothed update-scoped counters. TensorBoard stores scalar values with float32 rounding.",
+    "completed_episode_returns": "Summed per_start_metrics episode_return_sum over completed episodes; episode coverage differs from batch coverage and can cross update boundaries.",
+    "morphology_equation": "cost = 2.5*knee_loss + 2.5*ankle_loss; subtract after base reward clipping; values are already weighted costs.",
+    "initial_final_best": "Training telemetry at logical iterations 2, 51 and 47 respectively. Iteration 47 reward/morphology metrics describe sampling before update 47; checkpoint_best logical47 stores parameters after that update. They are not deterministic evaluation results of the saved best47 actor.",
+    "full_training_morphology_total_recoverable": false,
+    "unrecoverable_reason": "No unsmoothed morphology sum/count or complete per-transition training reward trace is retained here. Multiplying the logged 100-step tail means by full batch counts would only extrapolate the unrecorded 284 steps per runner per update.",
+    "do_not_infer": "No causal effect of corridor on learned policy or training performance is identifiable from this one run; requires a controlled training ablation.",
+    "no_new_training_or_simulation": true
+  },
+  "initialization": {
+    "analyzed_phase_started_at": "2026-09-01T22:51:47+02:00",
+    "analyzed_phase_finished_at": "2026-09-02T05:44:26+02:00",
+    "scope_is_complete_policy_training_history": false,
+    "inherited_actor_previously_trained": true,
+    "resume_from": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_V26C_J20_critic_rewarm_morphology_split_equal_1p05_2026-08-31_r2/checkpoint_last",
+    "restored_logical_iteration": 1,
+    "restored_sample_count": 4096,
+    "new_update_count": 50,
+    "best_logical_iteration": 47,
+    "updates_through_best": 46,
+    "best_episode_return_mean": 38.063081113433604,
+    "training_setup": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+    "excluded_prior_stage_provenance": [
+      {
+        "stage": "Critic rewarm, 31 August 2026",
+        "source": {
+          "path": "Trajectory Generator/runs/training/MLP_V26C_J20_critic_rewarm_morphology_split_equal_1p05_2026-08-31_r2/summary.json",
+          "sha256": "a70f921e4a5c3b243dea27794939514d6bb2ae12f9e00ae21f87688402508349"
+        },
+        "initialization_mode": "warm_start_raw",
+        "actor_source": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/rl_module_last",
+        "freeze_actor": true,
+        "iterations_run": 1
+      },
+      {
+        "stage": "J20 critic warmup, 27 August 2026",
+        "source": {
+          "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j20_runs/j20_critic_warmup_v26c_2026-08-27_r1/summary.json",
+          "sha256": "cc24f24819c686d3add51e8face61f35021eb48682454c8c1081193b7cfe115f"
+        },
+        "initialization_mode": "warm_start_raw",
+        "actor_source": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/rl_module",
+        "freeze_actor": true,
+        "iterations_run": 1
+      },
+      {
+        "stage": "J19A actor adaptation and its earlier J18/J8 ancestry",
+        "source": {
+          "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19a_runs/j19a_single_reproduction_v26c_2026-08-27_r1/v26c_j19a_result.json",
+          "sha256": "8982b2fc40e514bed903af0c33e0a4ab3737ebf849a44a232912a816002dc254"
+        },
+        "actor_promoted": true,
+        "best_epoch": 191,
+        "covered_by_current_metrics": false
+      }
+    ]
+  },
+  "all_50_updates": {
+    "logical_iteration_first": 2,
+    "logical_iteration_last": 51,
+    "new_update_count": 50,
+    "new_sample_count": 230400,
+    "all_sample_reward_sum_from_tb": 16306.776657104492,
+    "all_sample_reward_mean_from_tb": 0.07077594035201602,
+    "completed_episode_count": 456,
+    "completed_episode_return_sum_from_json": 16306.687367824577,
+    "mean_of_logged_window_morphology_cost_means": 0.030241809134577125,
+    "mean_of_logged_window_knee_cost_means": 0.005316224593418611,
+    "mean_of_logged_window_ankle_cost_means": 0.024925584382044688,
+    "ankle_share_of_logged_window_cost": 0.8242094337387341,
+    "mean_of_logged_window_reward_means": 0.07220871480647474,
+    "mean_of_logged_window_reward_before_morphology": 0.10245052394105186,
+    "morphology_fraction_of_window_reward_before_morphology": 0.29518452391690747,
+    "logged_window_morphology_cost_mean_min": 0.0,
+    "logged_window_morphology_cost_mean_max": 0.07761014997959137,
+    "full_sample_morphology_cost_sum": null,
+    "full_sample_reward_sum_before_morphology": null
+  },
+  "through_best47": {
+    "logical_iteration_first": 2,
+    "logical_iteration_last": 47,
+    "new_update_count": 46,
+    "new_sample_count": 211968,
+    "all_sample_reward_sum_from_tb": 14992.490356445312,
+    "all_sample_reward_mean_from_tb": 0.07072997035611654,
+    "completed_episode_count": 420,
+    "completed_episode_return_sum_from_json": 15016.180335947234,
+    "mean_of_logged_window_morphology_cost_means": 0.029469355678854656,
+    "mean_of_logged_window_knee_cost_means": 0.004669339793402425,
+    "mean_of_logged_window_ankle_cost_means": 0.02480001575378557,
+    "ankle_share_of_logged_window_cost": 0.8415526971151422,
+    "mean_of_logged_window_reward_means": 0.07241283151138898,
+    "mean_of_logged_window_reward_before_morphology": 0.10188218719024364,
+    "morphology_fraction_of_window_reward_before_morphology": 0.28924934271215447,
+    "logged_window_morphology_cost_mean_min": 0.0,
+    "logged_window_morphology_cost_mean_max": 0.07761014997959137,
+    "full_sample_morphology_cost_sum": null,
+    "full_sample_reward_sum_before_morphology": null
+  },
+  "first_5_updates": {
+    "logical_iteration_first": 2,
+    "logical_iteration_last": 6,
+    "new_update_count": 5,
+    "new_sample_count": 23040,
+    "all_sample_reward_sum_from_tb": 1606.3572540283203,
+    "all_sample_reward_mean_from_tb": 0.06972036692831252,
+    "completed_episode_count": 36,
+    "completed_episode_return_sum_from_json": 1294.098107097454,
+    "mean_of_logged_window_morphology_cost_means": 0.01941319853067398,
+    "mean_of_logged_window_knee_cost_means": 0.0030418154073913683,
+    "mean_of_logged_window_ankle_cost_means": 0.01637138342484832,
+    "ankle_share_of_logged_window_cost": 0.8433120074974035,
+    "mean_of_logged_window_reward_means": 0.10456376522779465,
+    "mean_of_logged_window_reward_before_morphology": 0.12397696375846863,
+    "morphology_fraction_of_window_reward_before_morphology": 0.15658714282190914,
+    "logged_window_morphology_cost_mean_min": 0.016185345128178596,
+    "logged_window_morphology_cost_mean_max": 0.023579776287078857,
+    "full_sample_morphology_cost_sum": null,
+    "full_sample_reward_sum_before_morphology": null
+  },
+  "last_5_updates_through_best47": {
+    "logical_iteration_first": 43,
+    "logical_iteration_last": 47,
+    "new_update_count": 5,
+    "new_sample_count": 23040,
+    "all_sample_reward_sum_from_tb": 1653.3724060058594,
+    "all_sample_reward_mean_from_tb": 0.07176095512178209,
+    "completed_episode_count": 48,
+    "completed_episode_return_sum_from_json": 1707.9915990042084,
+    "mean_of_logged_window_morphology_cost_means": 0.023733548074960708,
+    "mean_of_logged_window_knee_cost_means": 0.0028235205711098386,
+    "mean_of_logged_window_ankle_cost_means": 0.020910027995705606,
+    "ankle_share_of_logged_window_cost": 0.881032533764559,
+    "mean_of_logged_window_reward_means": 0.07001623157411814,
+    "mean_of_logged_window_reward_before_morphology": 0.09374977964907885,
+    "morphology_fraction_of_window_reward_before_morphology": 0.25315844115900177,
+    "logged_window_morphology_cost_mean_min": 0.009924191981554031,
+    "logged_window_morphology_cost_mean_max": 0.043814681470394135,
+    "full_sample_morphology_cost_sum": null,
+    "full_sample_reward_sum_before_morphology": null
+  },
+  "last_5_updates": {
+    "logical_iteration_first": 47,
+    "logical_iteration_last": 51,
+    "new_update_count": 5,
+    "new_sample_count": 23040,
+    "all_sample_reward_sum_from_tb": 1704.664535522461,
+    "all_sample_reward_mean_from_tb": 0.07398717602094014,
+    "completed_episode_count": 48,
+    "completed_episode_return_sum_from_json": 1747.2640052385468,
+    "mean_of_logged_window_morphology_cost_means": 0.03697436712682247,
+    "mean_of_logged_window_knee_cost_means": 0.010235301493958104,
+    "mean_of_logged_window_ankle_cost_means": 0.026739065535366535,
+    "ankle_share_of_logged_window_cost": 0.7231784507264521,
+    "mean_of_logged_window_reward_means": 0.050596012733876705,
+    "mean_of_logged_window_reward_before_morphology": 0.08757037986069918,
+    "morphology_fraction_of_window_reward_before_morphology": 0.42222458307978905,
+    "logged_window_morphology_cost_mean_min": 0.02446064166724682,
+    "logged_window_morphology_cost_mean_max": 0.05949858948588371,
+    "full_sample_morphology_cost_sum": null,
+    "full_sample_reward_sum_before_morphology": null
+  },
+  "selected_iterations": {
+    "initial": {
+      "logical_iteration": 2,
+      "new_update_index": 1,
+      "sampled_steps_lifetime_including_restored": 8704,
+      "source_jsonl_line": 1,
+      "episode_return_mean": null,
+      "episode_length_mean": null,
+      "console_return_source": "sampled_batch_projection",
+      "completed_episode_return_sum_json": 0.0,
+      "window_morphology_cost_mean": 0.019118482246994972,
+      "window_knee_cost_mean": 0.003015693509951234,
+      "window_ankle_cost_mean": 0.016102788969874382,
+      "window_reward_mean": 0.17870014905929565,
+      "window_reward_base_mean": 0.20126047730445862,
+      "window_morphology_available_mean": 1.0,
+      "window_morphology_inside_fraction_mean": 0.9279166460037231,
+      "batch_reward_sum_tb": 254.1042938232422,
+      "batch_sample_count": 4608.0,
+      "completed_episodes": 0.0,
+      "batch_reward_mean_tb": 0.055144160985946655,
+      "window_reward_before_morphology_mean": 0.19781863130629063,
+      "new_sample_count_cumulative": 4608
+    },
+    "best47": {
+      "logical_iteration": 47,
+      "new_update_index": 46,
+      "sampled_steps_lifetime_including_restored": 216064,
+      "source_jsonl_line": 46,
+      "episode_return_mean": 38.063081113433604,
+      "episode_length_mean": 500.0,
+      "console_return_source": "completed_episode",
+      "completed_episode_return_sum_json": 456.75697336120334,
+      "window_morphology_cost_mean": 0.028371740132570267,
+      "window_knee_cost_mean": 0.0001549082953715697,
+      "window_ankle_cost_mean": 0.028216833248734474,
+      "window_reward_mean": -0.02646542713046074,
+      "window_reward_base_mean": 0.001970049226656556,
+      "window_morphology_available_mean": 0.6608333587646484,
+      "window_morphology_inside_fraction_mean": 0.5945833325386047,
+      "batch_reward_sum_tb": 390.37823486328125,
+      "batch_sample_count": 4608.0,
+      "completed_episodes": 12.0,
+      "batch_reward_mean_tb": 0.08471749888526069,
+      "window_reward_before_morphology_mean": 0.0019063130021095276,
+      "new_sample_count_cumulative": 211968
+    },
+    "final": {
+      "logical_iteration": 51,
+      "new_update_index": 50,
+      "sampled_steps_lifetime_including_restored": 234496,
+      "source_jsonl_line": 50,
+      "episode_return_mean": 37.32672976278996,
+      "episode_length_mean": 500.0,
+      "console_return_source": "completed_episode",
+      "completed_episode_return_sum_json": 447.9207571534795,
+      "window_morphology_cost_mean": 0.02446064166724682,
+      "window_knee_cost_mean": 0.0009958739392459393,
+      "window_ankle_cost_mean": 0.023464767262339592,
+      "window_reward_mean": -0.006688316352665424,
+      "window_reward_base_mean": 0.01806037873029709,
+      "window_morphology_available_mean": 0.8983333110809326,
+      "window_morphology_inside_fraction_mean": 0.8316666483879089,
+      "batch_reward_sum_tb": 374.7183837890625,
+      "batch_sample_count": 4608.0,
+      "completed_episodes": 12.0,
+      "batch_reward_mean_tb": 0.08131909370422363,
+      "window_reward_before_morphology_mean": 0.017772325314581394,
+      "new_sample_count_cumulative": 230400
+    }
+  },
+  "validation": {
+    "history_equals_summary_history": true,
+    "all_batches_have_4608_rows": true,
+    "morphology_split_max_abs_discrepancy_tb": 5.587935447692871e-09,
+    "max_window_cost_logical_iteration": 40,
+    "min_window_cost_logical_iteration": 26
+  }
+}

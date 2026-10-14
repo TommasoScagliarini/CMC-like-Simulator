@@ -130,6 +130,8 @@ Bug storici su scaling PD e baseline molla documentati in [[DIVERGENZA_BUGFIXES]
   training deve vivere dentro `Trajectory Generator/`. Non aggiungere logica di
   rete nel root del simulatore salvo richiesta esplicita.
 - Questo progetto deve essere adatto sia per Windows x86 che per MacOS arm 64, ogni modifica al codice deve essere consistente per entrambi gli OS. 
+- Salvare i sette plot canonici nella cartella `plot/` del root del repository,
+  in una sottocartella dedicata al rollout; non salvarli dentro le cartelle dei run.
 - Quando viene inserito il comando `start_day` leggi il contesto del progetto indficato in questo file `AGENTS.md` e i daily report presenti nella cartella `reports/daily/`
 - Quando viene inserito il comando `create_report`, scrivi in `reports/user/` un report Markdown.
 - Il titolo del report deve avere il formato:

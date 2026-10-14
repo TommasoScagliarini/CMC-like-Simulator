@@ -4,8 +4,8 @@ By default the probe keeps the dynamics prescribed and derives the reward
 contact/phase inputs from the prescribed GRF file.  The ``training_like``
 dynamics contract instead uses the same online-GRF application/disabled-side
 lists as the training YAML.  In both modes the prosthesis command is a
-zero-delta action around the prescribed IK trajectory, so the reward is tested
-on a known walking reference rather than on a learned policy.
+direct playback of the prescribed IK trajectory in absolute radians. The reward
+is tested on a known walking reference.
 
 Default window: 12.99 s -> 17.99 s.
 """
@@ -46,6 +46,7 @@ _bootstrap.ensure_sim_paths()
 import reward_function  # noqa: E402
 import training_config  # noqa: E402
 from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv  # noqa: E402
+from prescribed_action import prescribed_action  # noqa: E402
 from prosthetic_phase_fsm import ProstheticPhaseFSM, ProstheticPhaseFSMConfig  # noqa: E402
 
 
@@ -479,7 +480,7 @@ class PrescribedGRFRewardInputWrapper(gym.Wrapper):
         out["prescribed_reward_input"] = {
             "enabled": True,
             "grf_source": "prescribed_external_loads",
-            "kinematics_source": "prescribed_ik_zero_delta",
+            "kinematics_source": "prescribed_ik_absolute_radians",
             "slip_speed_source": "disabled_no_prescribed_slip_measure",
         }
         self._last_probe_time = time_s
@@ -526,8 +527,7 @@ def _build_env(
             episode_duration=float(args.end_time - args.start_time),
             episode_start_offset_s=float(args.start_time - setup_t_start),
             policy_knots=int(args.policy_knots or flat.get("policy_knots", 1)),
-            action_mode="delta",
-            max_delta_rad=0.0,
+            action_mode="raw",
             enable_pros_ref_governor=bool(flat.get("pros_ref_governor", True)),
             pros_ref_model=str(flat.get("pros_ref_model", "butterworth3_jerk_limited")),
             pros_ref_lpf_cutoff_hz=float(flat.get("pros_ref_cutoff_hz", 4.0)),
@@ -765,9 +765,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         final_info = reset_info
         oracle_cycles = _oracle_left_cycles(base)
         max_steps = int(math.ceil((args.end_time - args.start_time) / base.env_cfg.segment_duration)) + 2
-        action = np.zeros(base.action_space.shape, dtype=np.float32)
         for step in range(1, max_steps + 1):
-            _, reward, terminated, truncated, info = env.step(action)
+            _, reward, terminated, truncated, info = env.step(prescribed_action(base))
             final_info = info
             rewards.append(float(reward))
             trace_rows.append(
@@ -822,8 +821,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "prescribed_grf_disabled_sides": list(
                 getattr(base.cfg, "prescribed_grf_disabled_sides", [])
             ),
-            "action_mode": "delta",
-            "max_delta_rad": 0.0,
+            "action_mode": "raw",
             "grf_penetration_penalty_threshold_m": float(
                 base.env_cfg.grf_penetration_penalty_threshold_m
             ),

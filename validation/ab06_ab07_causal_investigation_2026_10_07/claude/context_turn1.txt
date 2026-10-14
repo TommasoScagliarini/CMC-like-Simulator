@@ -1,0 +1,54 @@
+We are collaborating as scientific/engineering peers on this OpenSim project. The user explicitly requests that Codex collaborate with Claude Code, model Fable 5.1 and effort max, to establish why AB07 differs from AB06: intrinsic anatomy, preparation of the virtual prosthesis, or another mechanism. A prior descriptive audit is insufficient. Help design and interpret discriminating interventions, challenge assumptions, and identify demonstrable causes. Respond in Italian; use precise file/line evidence and distinguish direct conditional effects from total dynamic causality.
+
+Workspace: /Users/tommy/Documents/CMC-like-Simulator - Claude
+Read AGENTS.md and CLAUDE.md first. Instruction check token: CMC_AGENT_OK_2026.
+You have read-only tools. Do not edit any source/bundle/profile/plugin/checkpoint or run commands. Codex will run agreed isolated experiments. No training. Do not send messages outside this collaboration. We will resume this same chat with results.
+
+The simulator uses Python high-level cascaded SEA control and a native non-impedance spring/motor PI plugin. Do not alter SEA semantics. Current paired reference test uses prescribed prosthetic knee/ankle IK action, not the neural policy. Left online contact is applied; right measured GRF is applied; other contact/detector instances are sensor-only. Biological motion is tracked using muscles plus residual reserves.
+
+Key source files:
+- tools/build_abx_seasea_pipeline.py (graft_bodyset, graft_jointset, graft_forceset, mass_preserving_targets)
+- tools/fit_seasea_subject.py
+- tools/register_seasea_ground.py
+- tools/calibrate_ab06_seasea_markers.py
+- kinematics_interpolator.py, online_grf.py, tools/online_grf_contact/OnlineGRFSphereHalfSpaceForce.cpp
+- Trajectory Generator/osim_trj_cmc_like.py, simulation_runner.py, inverse_dynamics.py
+- models/AB06-raw/osimxml/AB06.osim and models/AB07-raw/osimxml/ab07.osim
+- models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim and corresponding AB07 model
+
+Prior audit directory: validation/ab06_ab07_preparation_vs_model_2026_10_07
+Start with attribution_findings.json, contact_replay.json, contact_preparation_probe.json, model_preservation_audit.json, data_preparation_audit_final.json. Helpers beside these JSONs are reproducible and verified. Read only relevant sections of large artifacts.
+
+Matched paired test: Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07
+Selection/protocol frozen before runs: 9 s from measured left HS, one startup cycle excluded, then three complete measured nominal cycles. Both original treadmill trials are 0.5 m/s. Same runtime/controller/contact/detector settings, own model/IK/right measured loading. Native 1 ms outputs:
+results/AB06_paired_prescribed_HS_9s_2026_10_07/sim_outputs
+results/AB07_paired_prescribed_HS_9s_2026_10_07/sim_outputs
+AB06 terminal callback failed only after complete physical integration due a ~1.13 ps floating grid rounding guard; all three primary cycles are fully observed. Preserve that original failed receipt, do not call both runtimes normal-completed.
+
+Primary results:
+AB06 mass78.09885033kg, BW765.88809N; measured impulse1765.970535Ns, simulated1522.229724Ns (-13.8021%), mean measured379.124N/sim326.797N; geometric HSbias-34.25ms, TObias+98.65ms.
+AB07 mass58.80765053kg, BW576.70605N; measured1373.005710Ns, simulated1922.049592Ns (+39.9885%), mean measured298.280N/sim417.558N; HSbias-94.46ms, TObias+122.13ms.
+Percentage errors use each subject's own measured left GRF and own three frozen cycles. BW cancels from that ratio. Healthy recorded GRF is the reference of a virtual-prosthesis benchmark, not measured force on this virtual hardware.
+
+Confirmed preparation/source facts:
+- Seven retained biological bodies, subject hips and19 common coordinates preserve own healthy physical fields exactly.49 muscles preserve own healthy,27 proximal-left muscles are copied from AB06 donor in BOTH subjects; this common convention creates larger fiber/tendon mismatch vs original healthy in AB07 (~16% median vs3.6% in AB06).
+- Total healthy body mass is retained; transfemur takes own healthy femur mass and remaining amputated mass is apportioned over donor distal bodies; donor COM retained, donor inertias scaled by mass ratio. Not identified physical hardware mass.
+- SEA properties/control/plugin binaries are identical.
+- AB07 mounting adapts upper/shank lengths to anatomy. Static hardware registration extends distal mount by17.579130mm from-0.385899299 to-0.403478429m (AB06-0.43m); static ankle calibration+4.7306485deg. Refit12 left markers and rerun genuine28,612-frame OpenSim marker IK. No runtime manual angle shift or changed jointzero/range.
+- Dynamic current-minus-pre-ground IK on same three cycles: ankle mean+5.097918deg, knee-0.135645deg, pelvis_ty-0.040531mm.
+- Original MAT→TRC/GRF dynamic clocks/axes/sides/units match; IK AB07 source/model/TRC hashes match. Primary marker RMS AB078.695mm vs AB069.415mm, so poorer marker fitting is not evidenced. Historical static AB06 converted clock×2 is a real legacy bug, but rows/poses align and registration uses median poses, not velocities.
+
+Contact findings:
+- Shared AB06 sparse empirical primary basis:8 left spheres on foot_l with exponent1, different fixed stiffnesses, no mass/BW input. All are distinct from display STL. Static registration uses binary/STL plane y+0.0148208231m; primary force plane y-0.00950395476m, shared offset24.324778mm. Matching static STL does not validate the empirical applied force geometry.
+- The very stiff undamped left_basis_07 (k23586.8494N/m) dominates AB07-minus-AB06 mean force; larger max penetration is NOT required. Spheres/mesh geometry identical in both bundles.
+- Read-only FK replay on own final model/current full-trial production filtered IK6Hz gives mean force AB06275.931N and AB07356.561N (+29.22% absolute AB07/AB06), impulses1285.294/1641.276Ns, own measured biases-27.22%/+19.54%. Raw IK shows similar ratio1.2833; actual replay1.2777. Thus the difference exists without running dynamics. Actual force reproduces saved native output within0.000471N; direct law vs native plugin parity near1e-13N.
+- An already completed isolated diagnostic intervention: keep FINAL AB07 geometry and all current filtered coordinates except replace ONLY ankle q AND qdot by the full-trial filtered archived PRE-ground ankle. Impulse INCREASES from1641.276Ns to2063.526Ns; current preparation-associated ankle change REDUCES impulse20.46% relative to that hybrid. It is incorrect to blame that sole ankle rotation for excess. This is not total preparation effect: mount/other coordinates stay final and hybrid is not a dynamically valid alternate preparation.
+- Original replay includes exact TO grid knots, shifting measured AB07 impulse by0.003869Ns vs canonical paired grid; retain canonical paired percentages for actual outcome. Pitch diagnostic is elevation of frame X axis, not the static-registration pitch formula under roll. Probe clarifies mixed C++ record error units.
+
+Task for this first turn:
+1. Independently assess strongest hypotheses and overlooked mechanisms. In particular distinguish anatomy from subject-specific gait/IK, preparation from empirical contact transfer, and dynamic body/reserve compensation from direct contact geometry.
+2. Propose the smallest scientifically interpretable factorial/interventions (pose/FK first, then dynamic only if needed) that identify which parameter block generates the gap. We can make explicit isolated model XML copies but cannot call an incompatible frozen IK a physically qualified model.
+3. Suggest a concrete diagnostic allowing an anatomy/preparation attribution rather than merely repeating that current tests confound both. Tell us what is identifiable and what genuinely needs independent physical measurements. Avoid fitting a profile on these evaluation cycles and then calling it validation.
+4. Challenge any numerical/semantic conclusion above that is not warranted by sources. No invented acceptance gates. Read code where it changes the interpretation.
+
+Codex is concurrently preparing isolated geometry factorization and checking alternative gait/contact causes. Please give a concise ranked plan plus precise source evidence; then we will send experiment results for a second collaborative turn.

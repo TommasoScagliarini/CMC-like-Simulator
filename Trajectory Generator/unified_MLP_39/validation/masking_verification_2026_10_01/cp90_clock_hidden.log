@@ -1,0 +1,558 @@
+
+
+****************************************************************
+[DEBUG] >>> SYSTEM ALERT: IL PLUGIN E' STATO CARICATO IN MEMORIA.
+[DEBUG] >>> INIZIO REGISTRAZIONE OGGETTI...
+[DEBUG] >>> SEA: registered.
+****************************************************************
+
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[info] Loaded model AB06_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot (nr=143056 nc=19)
+[info] .. assuming rotations in Degrees..
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 143056 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [11.990, 155.045] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.2258 rad
+[Runner] SEA_Ankle motor_angle = 0.3421 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+⠙ | rollout | [░░░░░░░░░░░░░░░░░░░░░░░░] |   0.0% | iter 0/500 | elapsed 0:00:00 | reset 0:00:00
+[Runner] SEA_Knee motor_angle = -0.2258 rad
+[Runner] SEA_Ankle motor_angle = 0.3421 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Recruit t=12.990] muscle_share=0.361  capable_share=1.000  |tau_m|=64.98  |tau_res|=115.21  act>thr=0.45  |u_res|=1.152
+[Recruit t=13.040] muscle_share=0.126  capable_share=1.000  |tau_m|=51.20  |tau_res|=354.50  act>thr=0.47  |u_res|=3.545
+[Recruit t=13.090] muscle_share=0.105  capable_share=1.000  |tau_m|=55.02  |tau_res|=470.51  act>thr=0.46  |u_res|=4.705
+[Recruit t=13.140] muscle_share=0.040  capable_share=1.000  |tau_m|=30.53  |tau_res|=742.15  act>thr=0.43  |u_res|=7.422
+[Recruit t=13.190] muscle_share=0.097  capable_share=1.000  |tau_m|=69.36  |tau_res|=648.98  act>thr=0.49  |u_res|=6.490
+[Recruit t=13.240] muscle_share=0.078  capable_share=1.000  |tau_m|=49.52  |tau_res|=583.85  act>thr=0.47  |u_res|=5.839
+[Recruit t=13.290] muscle_share=0.098  capable_share=1.000  |tau_m|=53.64  |tau_res|=494.75  act>thr=0.34  |u_res|=4.948
+⠸ | rollout | [█░░░░░░░░░░░░░░░░░░░░░░░] |   6.2% | iter 31/500 | elapsed 0:00:30 | ETA 0:07:36 | step 31 0:00:01 | reward 0.76
+[Recruit t=13.340] muscle_share=0.141  capable_share=0.343  |tau_m|=55.26  |tau_res|=337.39  act>thr=1.00  |u_res|=3.374
+[Recruit t=13.390] muscle_share=0.208  capable_share=0.321  |tau_m|=60.91  |tau_res|=231.47  act>thr=1.00  |u_res|=2.315
+[Recruit t=13.440] muscle_share=0.236  capable_share=0.284  |tau_m|=66.55  |tau_res|=215.53  act>thr=1.00  |u_res|=2.155
+[Recruit t=13.490] muscle_share=0.227  capable_share=0.287  |tau_m|=66.53  |tau_res|=226.27  act>thr=1.00  |u_res|=2.263
+[Recruit t=13.540] muscle_share=0.249  capable_share=0.315  |tau_m|=66.24  |tau_res|=199.47  act>thr=1.00  |u_res|=1.995
+⠴ | rollout | [███░░░░░░░░░░░░░░░░░░░░░] |  11.4% | iter 57/500 | elapsed 0:01:01 | ETA 0:07:54 | step 57 0:00:01 | reward 0.4225
+[Recruit t=13.590] muscle_share=0.288  capable_share=0.347  |tau_m|=68.39  |tau_res|=168.92  act>thr=1.00  |u_res|=1.689
+[Recruit t=13.640] muscle_share=0.301  capable_share=0.411  |tau_m|=68.08  |tau_res|=157.82  act>thr=1.00  |u_res|=1.578
+[Recruit t=13.690] muscle_share=0.534  capable_share=1.000  |tau_m|=111.83  |tau_res|=97.40  act>thr=0.43  |u_res|=0.974
+[Recruit t=13.740] muscle_share=0.482  capable_share=1.000  |tau_m|=104.37  |tau_res|=112.26  act>thr=0.50  |u_res|=1.123
+[Recruit t=13.790] muscle_share=0.563  capable_share=1.000  |tau_m|=104.42  |tau_res|=81.03  act>thr=0.50  |u_res|=0.810
+⠙ | rollout | [████░░░░░░░░░░░░░░░░░░░░] |  17.0% | iter 85/500 | elapsed 0:01:31 | ETA 0:07:25 | step 85 0:00:01 | reward 0.3157
+[Recruit t=13.840] muscle_share=0.549  capable_share=1.000  |tau_m|=118.64  |tau_res|=97.30  act>thr=0.47  |u_res|=0.973
+[Recruit t=13.890] muscle_share=0.630  capable_share=1.000  |tau_m|=123.72  |tau_res|=72.76  act>thr=0.41  |u_res|=0.728
+[Recruit t=13.940] muscle_share=0.632  capable_share=1.000  |tau_m|=136.01  |tau_res|=79.15  act>thr=0.49  |u_res|=0.791
+[Recruit t=13.990] muscle_share=0.777  capable_share=1.000  |tau_m|=130.98  |tau_res|=37.53  act>thr=0.41  |u_res|=0.375
+[Recruit t=14.040] muscle_share=0.379  capable_share=1.000  |tau_m|=112.38  |tau_res|=184.50  act>thr=0.38  |u_res|=1.845
+[Recruit t=14.090] muscle_share=0.218  capable_share=1.000  |tau_m|=89.79  |tau_res|=322.88  act>thr=0.43  |u_res|=3.229
+[Recruit t=14.140] muscle_share=0.170  capable_share=1.000  |tau_m|=70.27  |tau_res|=343.93  act>thr=0.49  |u_res|=3.439
+⠴ | rollout | [██████░░░░░░░░░░░░░░░░░░] |  23.4% | iter 117/500 | elapsed 0:02:02 | ETA 0:06:39 | step 117 0:00:01 | reward 0.4967
+[Recruit t=14.190] muscle_share=0.117  capable_share=1.000  |tau_m|=55.07  |tau_res|=417.03  act>thr=0.47  |u_res|=4.170
+[Recruit t=14.240] muscle_share=0.101  capable_share=1.000  |tau_m|=58.64  |tau_res|=521.39  act>thr=0.51  |u_res|=5.214
+[Recruit t=14.290] muscle_share=0.083  capable_share=1.000  |tau_m|=51.45  |tau_res|=565.43  act>thr=0.46  |u_res|=5.654
+[Recruit t=14.340] muscle_share=0.070  capable_share=1.000  |tau_m|=45.03  |tau_res|=594.13  act>thr=0.49  |u_res|=5.941
+[Recruit t=14.390] muscle_share=0.061  capable_share=1.000  |tau_m|=41.00  |tau_res|=628.03  act>thr=0.43  |u_res|=6.280
+[Recruit t=14.440] muscle_share=0.040  capable_share=1.000  |tau_m|=30.18  |tau_res|=717.06  act>thr=0.42  |u_res|=7.171
+⠏ | rollout | [███████░░░░░░░░░░░░░░░░░] |  29.8% | iter 149/500 | elapsed 0:02:32 | ETA 0:05:58 | step 149 0:00:01 | reward 0.2745
+[Recruit t=14.490] muscle_share=0.040  capable_share=1.000  |tau_m|=30.63  |tau_res|=739.94  act>thr=0.42  |u_res|=7.399
+[Recruit t=14.540] muscle_share=0.032  capable_share=1.000  |tau_m|=24.86  |tau_res|=764.20  act>thr=0.41  |u_res|=7.642
+[Recruit t=14.590] muscle_share=0.036  capable_share=1.000  |tau_m|=28.63  |tau_res|=771.39  act>thr=0.39  |u_res|=7.714
+[Recruit t=14.640] muscle_share=0.024  capable_share=1.000  |tau_m|=18.82  |tau_res|=761.35  act>thr=0.42  |u_res|=7.614
+[Recruit t=14.690] muscle_share=0.033  capable_share=1.000  |tau_m|=24.04  |tau_res|=708.55  act>thr=0.34  |u_res|=7.086
+[Recruit t=14.740] muscle_share=0.033  capable_share=1.000  |tau_m|=25.56  |tau_res|=749.91  act>thr=0.42  |u_res|=7.499
+[Recruit t=14.790] muscle_share=0.037  capable_share=1.000  |tau_m|=27.84  |tau_res|=734.60  act>thr=0.33  |u_res|=7.346
+⠸ | rollout | [█████████░░░░░░░░░░░░░░░] |  36.2% | iter 181/500 | elapsed 0:03:03 | ETA 0:05:23 | step 181 0:00:01 | reward 0.3182
+[Recruit t=14.840] muscle_share=0.053  capable_share=1.000  |tau_m|=35.44  |tau_res|=638.78  act>thr=0.37  |u_res|=6.388
+[Recruit t=14.890] muscle_share=0.087  capable_share=1.000  |tau_m|=49.64  |tau_res|=518.63  act>thr=0.42  |u_res|=5.186
+[Recruit t=14.940] muscle_share=0.130  capable_share=1.000  |tau_m|=61.17  |tau_res|=409.37  act>thr=0.30  |u_res|=4.094
+[Recruit t=14.990] muscle_share=0.269  capable_share=1.000  |tau_m|=85.60  |tau_res|=232.15  act>thr=0.46  |u_res|=2.321
+[Recruit t=15.040] muscle_share=0.353  capable_share=1.000  |tau_m|=89.86  |tau_res|=164.88  act>thr=0.45  |u_res|=1.649
+[Recruit t=15.090] muscle_share=0.459  capable_share=1.000  |tau_m|=96.98  |tau_res|=114.48  act>thr=0.47  |u_res|=1.145
+⠴ | rollout | [██████████░░░░░░░░░░░░░░] |  42.4% | iter 212/500 | elapsed 0:03:34 | ETA 0:04:50 | step 212 0:00:01 | reward 0.3538
+[Recruit t=15.140] muscle_share=0.446  capable_share=1.000  |tau_m|=98.51  |tau_res|=122.34  act>thr=0.45  |u_res|=1.223
+[Recruit t=15.190] muscle_share=0.493  capable_share=1.000  |tau_m|=97.34  |tau_res|=100.14  act>thr=0.49  |u_res|=1.001
+[Recruit t=15.240] muscle_share=0.491  capable_share=1.000  |tau_m|=95.68  |tau_res|=99.05  act>thr=0.47  |u_res|=0.990
+[Recruit t=15.290] muscle_share=0.521  capable_share=1.000  |tau_m|=101.19  |tau_res|=93.03  act>thr=0.49  |u_res|=0.930
+[Recruit t=15.340] muscle_share=0.446  capable_share=1.000  |tau_m|=109.78  |tau_res|=136.36  act>thr=0.47  |u_res|=1.364
+[Recruit t=15.390] muscle_share=0.522  capable_share=1.000  |tau_m|=106.36  |tau_res|=97.50  act>thr=0.45  |u_res|=0.975
+⠧ | rollout | [████████████░░░░░░░░░░░░] |  48.6% | iter 243/500 | elapsed 0:04:04 | ETA 0:04:18 | step 243 0:00:01 | reward 0.3051
+[Recruit t=15.440] muscle_share=0.549  capable_share=1.000  |tau_m|=105.25  |tau_res|=86.44  act>thr=0.43  |u_res|=0.864
+[Recruit t=15.490] muscle_share=0.657  capable_share=1.000  |tau_m|=111.84  |tau_res|=58.46  act>thr=0.38  |u_res|=0.585
+[Recruit t=15.540] muscle_share=0.588  capable_share=1.000  |tau_m|=119.51  |tau_res|=83.74  act>thr=0.34  |u_res|=0.837
+[Recruit t=15.590] muscle_share=0.502  capable_share=1.000  |tau_m|=124.26  |tau_res|=123.26  act>thr=0.38  |u_res|=1.233
+[Recruit t=15.640] muscle_share=0.434  capable_share=0.532  |tau_m|=109.90  |tau_res|=143.30  act>thr=1.00  |u_res|=1.433
+[Recruit t=15.690] muscle_share=0.400  capable_share=0.487  |tau_m|=101.58  |tau_res|=152.68  act>thr=1.00  |u_res|=1.527
+⠴ | rollout | [█████████████░░░░░░░░░░░] |  54.4% | iter 272/500 | elapsed 0:04:35 | ETA 0:03:50 | step 272 0:00:01 | reward 0.1575
+[Recruit t=15.740] muscle_share=0.217  capable_share=0.450  |tau_m|=74.88  |tau_res|=270.05  act>thr=1.00  |u_res|=2.700
+[Recruit t=15.790] muscle_share=0.158  capable_share=1.000  |tau_m|=71.17  |tau_res|=378.00  act>thr=0.47  |u_res|=3.780
+[Recruit t=15.840] muscle_share=0.093  capable_share=1.000  |tau_m|=47.46  |tau_res|=463.10  act>thr=0.49  |u_res|=4.631
+[Recruit t=15.890] muscle_share=0.097  capable_share=1.000  |tau_m|=59.44  |tau_res|=556.54  act>thr=0.50  |u_res|=5.565
+[Recruit t=15.940] muscle_share=0.096  capable_share=1.000  |tau_m|=65.43  |tau_res|=616.58  act>thr=0.42  |u_res|=6.166
+[Recruit t=15.990] muscle_share=0.082  capable_share=1.000  |tau_m|=52.07  |tau_res|=579.81  act>thr=0.46  |u_res|=5.798
+⠴ | rollout | [██████████████░░░░░░░░░░] |  60.4% | iter 302/500 | elapsed 0:05:05 | ETA 0:03:20 | step 302 0:00:01 | reward 0.3597
+[Recruit t=16.040] muscle_share=0.079  capable_share=1.000  |tau_m|=46.35  |tau_res|=542.68  act>thr=0.42  |u_res|=5.427
+[Recruit t=16.090] muscle_share=0.076  capable_share=1.000  |tau_m|=44.65  |tau_res|=545.56  act>thr=0.49  |u_res|=5.456
+[Recruit t=16.140] muscle_share=0.080  capable_share=1.000  |tau_m|=46.32  |tau_res|=532.34  act>thr=0.47  |u_res|=5.323
+[Recruit t=16.190] muscle_share=0.077  capable_share=1.000  |tau_m|=44.19  |tau_res|=530.93  act>thr=0.50  |u_res|=5.309
+[Recruit t=16.240] muscle_share=0.089  capable_share=1.000  |tau_m|=44.00  |tau_res|=452.79  act>thr=0.45  |u_res|=4.528
+[Recruit t=16.290] muscle_share=0.087  capable_share=1.000  |tau_m|=34.84  |tau_res|=364.22  act>thr=0.50  |u_res|=3.642
+⠏ | rollout | [████████████████░░░░░░░░] |  66.8% | iter 334/500 | elapsed 0:05:36 | ETA 0:02:47 | step 334 0:00:01 | reward 0.5006
+[Recruit t=16.340] muscle_share=0.134  capable_share=1.000  |tau_m|=51.84  |tau_res|=336.17  act>thr=0.45  |u_res|=3.362
+[Recruit t=16.390] muscle_share=0.130  capable_share=1.000  |tau_m|=58.94  |tau_res|=394.15  act>thr=0.41  |u_res|=3.941
+[Recruit t=16.440] muscle_share=0.146  capable_share=0.328  |tau_m|=61.72  |tau_res|=361.94  act>thr=1.00  |u_res|=3.619
+[Recruit t=16.490] muscle_share=0.202  capable_share=1.000  |tau_m|=88.19  |tau_res|=347.41  act>thr=0.49  |u_res|=3.474
+[Recruit t=16.540] muscle_share=0.184  capable_share=1.000  |tau_m|=75.03  |tau_res|=333.01  act>thr=0.45  |u_res|=3.330
+[Recruit t=16.590] muscle_share=0.304  capable_share=0.998  |tau_m|=91.83  |tau_res|=210.59  act>thr=0.47  |u_res|=2.106
+⠴ | rollout | [█████████████████░░░░░░░] |  72.4% | iter 362/500 | elapsed 0:06:06 | ETA 0:02:20 | step 362 0:00:01 | reward 0.4292
+[Recruit t=16.640] muscle_share=0.251  capable_share=0.315  |tau_m|=52.00  |tau_res|=154.77  act>thr=1.00  |u_res|=1.548
+[Recruit t=16.690] muscle_share=0.199  capable_share=0.300  |tau_m|=52.77  |tau_res|=212.06  act>thr=1.00  |u_res|=2.121
+[Recruit t=16.740] muscle_share=0.221  capable_share=0.316  |tau_m|=52.61  |tau_res|=185.77  act>thr=1.00  |u_res|=1.858
+[Recruit t=16.790] muscle_share=0.472  capable_share=1.000  |tau_m|=98.33  |tau_res|=109.86  act>thr=0.46  |u_res|=1.099
+[Recruit t=16.840] muscle_share=0.549  capable_share=1.000  |tau_m|=99.88  |tau_res|=82.09  act>thr=0.49  |u_res|=0.821
+⠸ | rollout | [███████████████████░░░░░] |  77.2% | iter 386/500 | elapsed 0:06:36 | ETA 0:01:57 | step 386 0:00:01 | reward 0.6095
+[Recruit t=16.890] muscle_share=0.468  capable_share=1.000  |tau_m|=103.74  |tau_res|=118.01  act>thr=0.46  |u_res|=1.180
+[Recruit t=16.940] muscle_share=0.475  capable_share=1.000  |tau_m|=101.05  |tau_res|=111.73  act>thr=0.50  |u_res|=1.117
+[Recruit t=16.990] muscle_share=0.480  capable_share=1.000  |tau_m|=98.67  |tau_res|=106.70  act>thr=0.47  |u_res|=1.067
+[Recruit t=17.040] muscle_share=0.553  capable_share=1.000  |tau_m|=96.20  |tau_res|=77.61  act>thr=0.41  |u_res|=0.776
+[Recruit t=17.090] muscle_share=0.468  capable_share=1.000  |tau_m|=105.01  |tau_res|=119.19  act>thr=0.37  |u_res|=1.192
+[Recruit t=17.140] muscle_share=0.423  capable_share=1.000  |tau_m|=116.57  |tau_res|=159.17  act>thr=0.42  |u_res|=1.592
+⠴ | rollout | [████████████████████░░░░] |  83.4% | iter 417/500 | elapsed 0:07:07 | ETA 0:01:25 | step 417 0:00:01 | reward 0.0709
+[Recruit t=17.190] muscle_share=0.528  capable_share=1.000  |tau_m|=124.02  |tau_res|=110.84  act>thr=0.42  |u_res|=1.108
+[Recruit t=17.240] muscle_share=0.536  capable_share=1.000  |tau_m|=115.18  |tau_res|=99.65  act>thr=0.46  |u_res|=0.997
+[Recruit t=17.290] muscle_share=0.290  capable_share=1.000  |tau_m|=94.21  |tau_res|=230.62  act>thr=0.45  |u_res|=2.306
+[Recruit t=17.340] muscle_share=0.180  capable_share=1.000  |tau_m|=69.47  |tau_res|=316.90  act>thr=0.43  |u_res|=3.169
+[Recruit t=17.390] muscle_share=0.122  capable_share=1.000  |tau_m|=60.36  |tau_res|=432.55  act>thr=0.49  |u_res|=4.326
+[Recruit t=17.440] muscle_share=0.080  capable_share=1.000  |tau_m|=47.64  |tau_res|=549.93  act>thr=0.45  |u_res|=5.499
+⠧ | rollout | [██████████████████████░░] |  89.6% | iter 448/500 | elapsed 0:07:38 | ETA 0:00:53 | step 448 0:00:01 | reward 0.3444
+[Recruit t=17.490] muscle_share=0.076  capable_share=1.000  |tau_m|=53.70  |tau_res|=651.07  act>thr=0.43  |u_res|=6.511
+[Recruit t=17.540] muscle_share=0.078  capable_share=1.000  |tau_m|=54.08  |tau_res|=637.77  act>thr=0.42  |u_res|=6.378
+[Recruit t=17.590] muscle_share=0.066  capable_share=1.000  |tau_m|=40.36  |tau_res|=567.83  act>thr=0.46  |u_res|=5.678
+[Recruit t=17.640] muscle_share=0.096  capable_share=1.000  |tau_m|=56.50  |tau_res|=533.17  act>thr=0.47  |u_res|=5.332
+[Recruit t=17.690] muscle_share=0.173  capable_share=1.000  |tau_m|=161.33  |tau_res|=772.43  act>thr=0.46  |u_res|=7.724
+[Recruit t=17.740] muscle_share=0.139  capable_share=1.000  |tau_m|=120.81  |tau_res|=750.93  act>thr=0.42  |u_res|=7.509
+⠏ | rollout | [███████████████████████░] |  95.8% | iter 479/500 | elapsed 0:08:08 | ETA 0:00:21 | step 479 0:00:01 | reward 0.4863
+[Recruit t=17.790] muscle_share=0.110  capable_share=1.000  |tau_m|=71.22  |tau_res|=578.02  act>thr=0.39  |u_res|=5.780
+[Recruit t=17.840] muscle_share=0.065  capable_share=1.000  |tau_m|=40.21  |tau_res|=580.27  act>thr=0.45  |u_res|=5.803
+[Recruit t=17.890] muscle_share=0.065  capable_share=1.000  |tau_m|=41.75  |tau_res|=601.54  act>thr=0.43  |u_res|=6.015
+[Recruit t=17.940] muscle_share=0.056  capable_share=1.000  |tau_m|=40.35  |tau_res|=684.00  act>thr=0.38  |u_res|=6.840
+Rollout done: 500 steps, return 201.9, terminated=False truncated=True (episode_time_limit)
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs/rollout_episode_gait_events_online.csv (14 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/sim_outputs
+{
+  "ok": true,
+  "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_fresh_best80config_100iter_2026-09-29/rl_module_best",
+  "action_mode": "absolute",
+  "action_selection": "deterministic",
+  "action_seed": 123,
+  "exploration_noise_hold_steps": 1,
+  "exploration_noise_hold_duration_s": 0.01,
+  "exploration_noise_realized_rms": null,
+  "exploration_std_mean": null,
+  "setup_xml_path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+  "episode_start_offset_s": 1.0,
+  "imitation_initialize_to_target": false,
+  "steps": 500,
+  "episode_return": 201.9105054509231,
+  "reward_mean": 0.4038210109018462,
+  "reward_min": -0.25027535384201144,
+  "reward_max": 0.934868389614969,
+  "action_abs_max": 1.7107794284820557,
+  "applied_action_abs_max": 1.0,
+  "action_clipped_steps": 100,
+  "action_clipped_fraction": 0.1,
+  "pelvis_ty_min": 0.9521642327308655,
+  "grf_penetration_max_m": 0.01691506077357566,
+  "grf_penetration_samples": 500,
+  "reserve_norm_max_nm": 889.1222004722963,
+  "reserve_norm_samples": 500,
+  "residual_norm_max_nm": 5.6221453754674185e-09,
+  "residual_norm_samples": 500,
+  "phase_valid_hs_count": 3,
+  "phase_valid_to_count": 4,
+  "phase_valid_cycle_count": 2,
+  "invalid_event_count": 0,
+  "morphology_settled_segments": 0,
+  "morphology_settled_samples": 0,
+  "morphology_discarded_segments": 0,
+  "morphology_discarded_samples": 0,
+  "end_reason": "episode_time_limit",
+  "terminated": false,
+  "truncated": true,
+  "action_shape": [
+    2
+  ],
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u",
+    "prescribed_left_knee_q_scaled",
+    "prescribed_left_knee_qdot_scaled",
+    "prescribed_left_ankle_q_scaled",
+    "prescribed_left_ankle_qdot_scaled"
+  ],
+  "observation_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u",
+    "prescribed_left_knee_q_scaled",
+    "prescribed_left_knee_qdot_scaled",
+    "prescribed_left_ankle_q_scaled",
+    "prescribed_left_ankle_qdot_scaled",
+    "pros_knee_angle_sea_u_abs",
+    "pros_knee_angle_sea_u_saturated",
+    "pros_ankle_angle_sea_u_abs",
+    "pros_ankle_angle_sea_u_saturated",
+    "pros_knee_angle_target",
+    "pros_knee_angle_target_vel",
+    "pros_knee_angle_tracking_error",
+    "pros_ankle_angle_target",
+    "pros_ankle_angle_target_vel",
+    "pros_ankle_angle_tracking_error",
+    "pelvis_tx",
+    "pelvis_tx_vel",
+    "pelvis_tx_kin_ref",
+    "pelvis_ty",
+    "pelvis_ty_vel",
+    "pelvis_ty_kin_ref",
+    "pelvis_tz",
+    "pelvis_tz_vel",
+    "pelvis_tz_kin_ref",
+    "pelvis_tilt",
+    "pelvis_tilt_vel",
+    "pelvis_tilt_kin_ref",
+    "pelvis_list",
+    "pelvis_list_vel",
+    "pelvis_list_kin_ref",
+    "pelvis_rotation",
+    "pelvis_rotation_vel",
+    "pelvis_rotation_kin_ref",
+    "hip_flexion_r",
+    "hip_flexion_r_vel",
+    "hip_flexion_r_kin_ref",
+    "knee_angle_r",
+    "knee_angle_r_vel",
+    "knee_angle_r_kin_ref",
+    "ankle_angle_r",
+    "ankle_angle_r_vel",
+    "ankle_angle_r_kin_ref",
+    "hip_flexion_l",
+    "hip_flexion_l_vel",
+    "hip_flexion_l_kin_ref",
+    "hip_adduction_l",
+    "hip_adduction_l_vel",
+    "hip_adduction_l_kin_ref",
+    "online_right_normal_grf_bw",
+    "online_right_in_contact",
+    "online_right_heel_strike",
+    "online_right_toe_off",
+    "online_right_gait_phase",
+    "online_right_cycle_duration_s"
+  ],
+  "n_actor": 39,
+  "n_observation": 88,
+  "record_outputs": true,
+  "record_policy_trace": true,
+  "grf_mode": "online_sensor",
+  "online_grf_profile_file": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json",
+  "online_grf_detector_profile_file": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+  "binary_phase_detector_profile_file": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+  "phase_fsm_input_mode": "legacy_events",
+  "phase_sensor_on_threshold_n": 5.0,
+  "phase_sensor_off_threshold_n": 2.0,
+  "phase_sensor_dwell_s": 0.03,
+  "detector_sample_dt_s": 0.001,
+  "event_contract_id": "legacy_events_v1",
+  "binary_phase_fsm_mode": "binary_active",
+  "binary_phase_debounce_s": 0.005,
+  "binary_phase_event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+  "online_grf_observation": true,
+  "gait_clock_enable": false,
+  "deployable_minimal_observation": false,
+  "include_controller_state_observation": true,
+  "include_controller_diagnostic_observation": false,
+  "critic_privileged_observation": true,
+  "prescribed_grf_disabled_sides": [],
+  "online_grf_applied_sides": [
+    "left"
+  ],
+  "grf_penetration_penalty_threshold_m": 0.02,
+  "grf_penetration_termination_m": 0.028,
+  "reward_config": {
+    "tracking_weight": 8.0,
+    "reference_weight": 6.0,
+    "bio_weight": 2.0,
+    "effort_weight": 0.05,
+    "smoothness_weight": 0.02,
+    "saturation_weight": 0.1,
+    "command_rate_weight": 0.05,
+    "segment_delta_weight": 0.0,
+    "qdot_ref_weight": 0.0,
+    "qddot_ref_weight": 0.0,
+    "jerk_ref_weight": 0.0,
+    "reference_governor_weight": 0.0,
+    "u_rate_weight": 0.0,
+    "sea_saturation_weight": 0.1,
+    "sea_torque_error_weight": 0.01,
+    "sea_tau_spring_effort_weight": 0.0,
+    "sea_tau_spring_rate_weight": 0.0,
+    "sea_motor_speed_weight": 0.01,
+    "sea_motor_accel_weight": 0.005,
+    "sea_motor_power_weight": 0.005,
+    "policy_action_clip_weight": 0.0,
+    "safety_weight": 2.0,
+    "grf_penetration_weight": 2.0,
+    "grf_ankle_moment_flip_weight": 0.1,
+    "grf_ankle_moment_flip_tau_tol_nm": 8.0,
+    "grf_ankle_moment_flip_force_threshold_n": 50.0,
+    "ankle_positive_torque_weight": 0.0,
+    "ankle_positive_torque_scale_nm": 30.0,
+    "knee_torque_rate_weight": 0.0,
+    "knee_torque_rate_scale_nm_s": 1000.0,
+    "knee_kinematic_jerk_weight": 0.0,
+    "ankle_kinematic_jerk_weight": 0.0,
+    "kinematic_jerk_scale_rad_s3": 1000.0,
+    "blend_contact_load": 0.0,
+    "blend_contact_support_to": 0.0,
+    "blend_phase_regular": 0.0,
+    "blend_phase_event_progress": 0.0,
+    "blend_landing_window_contact": 0.0,
+    "contact_load_target_bw": 0.65,
+    "contact_load_max_bw": 1.35,
+    "contact_load_confidence_full_bw": 0.0,
+    "contact_load_dense_evidence_limit_bw_s": 0.0,
+    "contact_load_penetration_full_reward_m": 0.01,
+    "contact_load_penetration_zero_reward_m": 0.012,
+    "contact_support_to_window_start_s": 0.0,
+    "contact_support_to_window_end_s": 0.0,
+    "contact_support_failure_clawback_weight": 0.0,
+    "prosthetic_stance_phase_end": 0.62,
+    "swing_unloading_weight": 0.0,
+    "swing_unloading_force_tol_bw": 0.08,
+    "contact_overload_weight": 0.0,
+    "grf_slip_weight": 0.0,
+    "grf_slip_speed_scale_m_s": 0.5,
+    "phase_regularity_weight": 4.0,
+    "phase_event_order_weight": 1.0,
+    "phase_period_weight": 1.0,
+    "phase_period_nominal_s": 1.58,
+    "phase_period_soft_margin_s": 0.25,
+    "phase_period_hard_min_s": 0.9,
+    "phase_period_hard_max_s": 2.2,
+    "phase_periodicity_weight": 0.5,
+    "phase_periodicity_scale_s": 0.2,
+    "phase_period_min_s": 0.6,
+    "phase_period_max_s": 1.6,
+    "phase_stance_fraction_weight": 0.5,
+    "phase_stance_fraction_min": 0.35,
+    "phase_stance_fraction_max": 0.8,
+    "phase_timeout_weight": 0.5,
+    "phase_stance_timeout_s": 1.45,
+    "phase_swing_timeout_s": 0.9,
+    "phase_timeout_scale_s": 0.2,
+    "phase_timeout_penalty_weight": 0.0,
+    "phase_stance_hard_timeout_s": 2.2,
+    "phase_swing_hard_timeout_s": 2.6,
+    "phase_min_stance_duration_s": 0.05,
+    "phase_min_swing_duration_s": 0.2,
+    "phase_landing_window_start_s": 0.55,
+    "phase_landing_window_end_s": 1.1,
+    "phase_invalid_event_weight": 0.0,
+    "phase_contact_validity_weight": 0.0,
+    "phase_min_stance_contact_fraction": 0.0,
+    "phase_min_stance_load_bw_s": 0.0,
+    "phase_min_cycle_knee_excursion_rad": 0.0,
+    "phase_hs_event_credit": 0.1,
+    "phase_to_event_credit": 0.2,
+    "phase_cycle_complete_bonus": 0.7,
+    "phase_failure_extra_penalty": 0.05,
+    "phase_clawback_penalty_weight": 0.0,
+    "reserve_residual_weight": 0.0,
+    "reserve_norm_scale_nm": 500.0,
+    "residual_norm_scale_nm": 100.0,
+    "pelvis_height_weight": 0.0,
+    "pelvis_height_min_m": 0.75,
+    "pelvis_height_scale_m": 0.1,
+    "blend_tracking": 0.25,
+    "blend_reference": 0.55,
+    "blend_bio": 0.2,
+    "clip_low": 0.0,
+    "clip_high": 1.0,
+    "oob_weight": 2.0,
+    "oob_q_min": [
+      -1.4,
+      -0.6
+    ],
+    "oob_q_max": [
+      0.0,
+      0.6
+    ],
+    "prosthetic_joint_range_weight": 0.0,
+    "prosthetic_joint_q_min": [
+      -1.4,
+      -0.6
+    ],
+    "prosthetic_joint_q_max": [
+      0.0,
+      0.6
+    ],
+    "morphology_profile": "",
+    "morphology_phase_mode": "legacy_cycle_fraction",
+    "morphology_weight": 0.0,
+    "morphology_knee_weight": null,
+    "morphology_ankle_weight": null,
+    "morphology_std_multiplier_knee": 1.0,
+    "morphology_std_multiplier_ankle": 1.0,
+    "morphology_margin_knee_deg": 0.0,
+    "morphology_margin_ankle_deg": 0.0,
+    "morphology_completed_segment_max_samples": 4096.0,
+    "morphology_hard_q_min": [
+      -1.4,
+      -0.6
+    ],
+    "morphology_hard_q_max": [
+      0.0,
+      0.6
+    ],
+    "morphology_hard_termination_enabled": 0.0,
+    "morphology_experimental_allow_effects": 0.0,
+    "morphology_reward_delay_s": 0.04,
+    "morphology_max_delivery_latency_s": 0.01,
+    "morphology_causal_max_samples": 4096.0,
+    "morphology_causal_event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+    "morphology_causal_allow_effects": 0.0,
+    "reward_mode": "imitation",
+    "imitation_weight": 4.0,
+    "served_imitation_weight": 8.0,
+    "imitation_knee_position_weight": 1.0,
+    "imitation_ankle_position_weight": 2.0,
+    "imitation_knee_velocity_weight": 0.02,
+    "imitation_ankle_velocity_weight": 0.04,
+    "blend_served_imitation": 0.8,
+    "blend_imitation": 0.2,
+    "blend_imitation_tracking": 0.0
+  },
+  "summary_path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/masking_verification_2026-10-01/cp90_clock_hidden/rollout_summary.json"
+}

@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "completed_utc": "2026-10-06T16:55:04.368220+00:00",
+  "status": "PASS_preparation_and_artifact_checks",
+  "subject": "AB08",
+  "command": [
+    "/opt/anaconda3/envs/envCMC-like/bin/python",
+    "tools/build_abx_seasea_pipeline.py",
+    "--subject",
+    "AB08",
+    "--bundle-dir",
+    "models/AB08_SEASEA_Threadmill",
+    "--model-stem",
+    "AB08_SEASEA_stiff321_500_pi",
+    "--matlab-nojvm",
+    "--skip-smoke-test"
+  ],
+  "exit_code": 0,
+  "checks": {
+    "execution_pass": true,
+    "input_audit_pass": true,
+    "native_static_and_artifact_audit_pass": true
+  },
+  "evidence": {
+    "execution_before.json": {
+      "path": "validation/ab08_preparation_2026_10_06/execution_before.json",
+      "sha256": "d84d7aaec780fd0f99e9fea4869ea5b8d04d6da7cb07a7929039ea35d2605d06"
+    },
+    "execution_after.json": {
+      "path": "validation/ab08_preparation_2026_10_06/execution_after.json",
+      "sha256": "8296f8a75dee85f92d2c4aebf67aa95381b5b068ed0add1b9e22e0cabecebd13"
+    },
+    "input_audit.json": {
+      "path": "validation/ab08_preparation_2026_10_06/input_audit.json",
+      "sha256": "b339b99612cf15efd8dfaff94a281336f1f2965eb9c1e6d5e09ce20e124eb0cd"
+    },
+    "post_build_audit.json": {
+      "path": "validation/ab08_preparation_2026_10_06/post_build_audit.json",
+      "sha256": "b18f13d41b3f754a9db390ccd3828f60e9d23dd0b711bba9cd31c97d890ba9e3"
+    }
+  },
+  "IK": {
+    "rows": 28580,
+    "columns": 22,
+    "time_range_s": [
+      8.63,
+      151.525
+    ],
+    "dt_s": {
+      "count": 28579,
+      "mean": 0.004999999999999999,
+      "median": 0.0049999999999954525,
+      "min": 0.0049999999999954525,
+      "p95": 0.005000000000009663,
+      "max": 0.005000000000023874
+    },
+    "finite": true,
+    "matches_all_TRC_samples": true,
+    "marker_errors": {
+      "marker_error_RMS": {
+        "count": 28580,
+        "mean": 0.011997963090972709,
+        "median": 0.011925965,
+        "min": 0.00552751,
+        "p95": 0.014784391499999999,
+        "max": 0.0299167
+      },
+      "marker_error_max": {
+        "count": 28580,
+        "mean": 0.019918701634009797,
+        "median": 0.019364390000000002,
+        "min": 0.00863652,
+        "p95": 0.026486676499999997,
+        "max": 0.11493075
+      }
+    },
+    "real_marker_IK_distinct_from_healthy_remap": true
+  },
+  "peak_single_marker_error_from_native_ik_log": {
+    "zero_based_frame": 9601,
+    "time_s": 56.635,
+    "max_marker_error_m": 0.11493075243413821,
+    "marker": "R_Thigh_Upper"
+  },
+  "frames_with_single_marker_error_gt_50mm": 68,
+  "frames_with_single_marker_error_gt_100mm": 5,
+  "qualification": "Preparation and artifact consistency verified; marker diagnostics reported without a new quality acceptance threshold. No dynamic rollout, V26 contact/event replay, online GRF qualification, network evaluation or training performed."
+}

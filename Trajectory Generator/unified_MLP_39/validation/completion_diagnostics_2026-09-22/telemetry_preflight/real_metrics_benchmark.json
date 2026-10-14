@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "source_trace": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_diagnostics_2026-09-22_iter40/noise_1_seed_123/rollout_policy_trace.json",
+  "source_trace_sha256": "ace4b1f02042b7b63c83f249cd5f05dab6f5c61ed5135cec8de6037cc429d1b8",
+  "observer_source_sha256": "805ccf7495e300b8522758b8ccf512b6741d54fcc75f4603783e54901220386f",
+  "uses_real_rllib_metrics_logger": true,
+  "reward_term_count": 334,
+  "reward_component_count": 147,
+  "trials": [
+    {
+      "enabled": false,
+      "steps": 500,
+      "callback_cpu_s": 0.4576209999999996,
+      "callback_wall_s": 0.46033241134136915,
+      "metrics_reduce_cpu_s": 0.008353000000000055,
+      "metrics_reduce_wall_s": 0.008389874827116728,
+      "observer_metrics": null
+    },
+    {
+      "enabled": true,
+      "steps": 500,
+      "callback_cpu_s": 0.49948800000000215,
+      "callback_wall_s": 0.502444944344461,
+      "metrics_reduce_cpu_s": 0.008000000000000007,
+      "metrics_reduce_wall_s": 0.008054375182837248,
+      "observer_metrics": {
+        "observed_steps": 500,
+        "policy_distribution_rows": 500,
+        "episodes_written": 1
+      }
+    },
+    {
+      "enabled": true,
+      "steps": 500,
+      "callback_cpu_s": 0.5138080000000071,
+      "callback_wall_s": 0.5184058765880764,
+      "metrics_reduce_cpu_s": 0.008040999999999965,
+      "metrics_reduce_wall_s": 0.008074874989688396,
+      "observer_metrics": {
+        "observed_steps": 500,
+        "policy_distribution_rows": 500,
+        "episodes_written": 1
+      }
+    },
+    {
+      "enabled": false,
+      "steps": 500,
+      "callback_cpu_s": 0.497239000000004,
+      "callback_wall_s": 0.5005295537412167,
+      "metrics_reduce_cpu_s": 0.00834299999999999,
+      "metrics_reduce_wall_s": 0.008400540798902512,
+      "observer_metrics": null
+    }
+  ],
+  "mean_total_callback_and_reduce_cpu_s": {
+    "False": 0.4857780000000018,
+    "True": 0.5146685000000046
+  },
+  "incremental_cpu_seconds_per_500_steps": 0.028890500000002817,
+  "incremental_cpu_microseconds_per_step": 57.78100000000563,
+  "limits": [
+    "Benchmark uses real recorded reward terms/FSM/actions and recomputes scalar components outside timing; no simulation or policy forward.",
+    "Critic-only observation padding and online gait fields are synthetic API payload reconstruction; this is a callback cost benchmark, not another physics validation.",
+    "Includes real MetricsLogger.log_value and one reduce; TensorBoard disk writes remain iteration-scoped and are outside this benchmark.",
+    "Measured CPU delta is local and noisy. It cannot guarantee zero slowdown under different Ray/process/disk loads.",
+    "Latest observer includes whole-episode policy-version aggregation added after the physical A/B observer process was imported."
+  ]
+}

@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "created_utc": "2026-10-06T18:16:38.669788+00:00",
+  "status": "historical_AB06_control_reproduced_in_saved_physical_channels_with_narrow_diagnostic_trace_differences",
+  "scope": "Single deterministic central AB06 5 s control of native V26C ex-novo best47; no AB07 policy transfer run and no autonomous qualification",
+  "baseline": "Trajectory Generator/runs/rollout/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-02_best_rollout",
+  "current": "Trajectory Generator/runs/rollout/MLP_V26C_best47_AB06_control_2026_10_06_5s",
+  "checkpoint": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/rl_module_best",
+  "checkpoint_logical_iteration": 47,
+  "contract": {
+    "actor_dimension": 35,
+    "full_observation_dimension": 84,
+    "actor_and_full_feature_order_equal": true,
+    "seed": 123,
+    "reset_start_offset_s": 1.956870983805102,
+    "episode_start_s": 13.946870983805102,
+    "episode_end_s": 18.946870983805102,
+    "policy_segment_s": 0.01,
+    "integration_step_s": 0.001,
+    "action_mode": "absolute",
+    "action_selection": "deterministic",
+    "imitation_initialize_to_target": false,
+    "gait_clock_enable": false
+  },
+  "harness_review": {
+    "conclusion": "No extra inference/reset/step or numeric transform is introduced by the observer.",
+    "evidence": "The harness imports the original evaluator by its source path, calls its original parse_args and run; original inference-stack loading precedes the original NumPy/Torch seed calls; the original factory is invoked once with the original env_config. Metadata reads occur after factory construction, before evaluator reset/inference.",
+    "supervision_difference": "The harness does not append the redundant checkpoint argument that run_supervised appends; the authorized explicit checkpoint is already on both parent and worker command lines."
+  },
+  "historical_reproduction": {
+    "protocol_fields_equal": 36,
+    "summary_metrics_equal": 27,
+    "reset_recorded_leaves_equal": 29,
+    "policy_steps_equal": 500,
+    "physical_trace_channels_exactly_equal": [
+      "time",
+      "raw_policy_action",
+      "applied_policy_action",
+      "actor_observation_before",
+      "actor_observation_vector_before",
+      "policy_segment_times",
+      "policy_segment_values",
+      "policy_segment_derivatives",
+      "imitation_target_q",
+      "imitation_target_qdot",
+      "prosthetic_state",
+      "reference_governor_diagnostics",
+      "phase_fsm",
+      "detector_sensors",
+      "legacy_online_events",
+      "online_events",
+      "morphology_completed_segments",
+      "morphology_ledger_diagnostics",
+      "morphology_causal_diagnostics"
+    ],
+    "actor_observation_values_exactly_equal": 17500,
+    "raw_policy_action_values_exactly_equal": 1000,
+    "actor_vector_mapping_consistent": true,
+    "sto_files_byte_identical": {
+      "rollout_episode_activations.sto": true,
+      "rollout_episode_kinematics.sto": true,
+      "rollout_episode_kinematics_reference.sto": true,
+      "rollout_episode_muscle_forces.sto": true,
+      "rollout_episode_online_grf.sto": true,
+      "rollout_episode_power.sto": true,
+      "rollout_episode_recruitment.sto": true,
+      "rollout_episode_reserve_controls.sto": true,
+      "rollout_episode_reserve_torques.sto": true,
+      "rollout_episode_sea_controls.sto": true,
+      "rollout_episode_sea_derivatives.sto": true,
+      "rollout_episode_sea_diagnostics.sto": true,
+      "rollout_episode_sea_states.sto": true,
+      "rollout_episode_sea_torques.sto": true,
+      "rollout_episode_so_torque_diagnostics.sto": true,
+      "rollout_episode_states.sto": true,
+      "rollout_episode_tau_bio.sto": true
+    },
+    "sto_rows_per_file": 5000,
+    "sto_same_columns_order_metadata_and_recorded_values": true,
+    "event_csv_files_byte_identical": {
+      "rollout_episode_gait_events.csv": true,
+      "rollout_episode_gait_events_online.csv": true
+    },
+    "event_csv_contract_note": "The 8-row prescribed event CSV covers setup reference cycles; the 14-row online threshold CSV and 3 HS/3 TO actor FSM counts describe separate contracts. Equality does not merge their definitions.",
+    "first_physical_difference": null,
+    "scalars": {
+      "steps": 500,
+      "episode_return": 27.423920791319738,
+      "reward_mean": 0.05484784158263947,
+      "reward_min": -0.5080994188695911,
+      "reward_max": 1.0,
+      "phase_valid_hs_count": 3,
+      "phase_valid_to_count": 3,
+      "phase_valid_cycle_count": 2,
+      "invalid_event_count": 0,
+      "grf_penetration_max_m": 0.024627298182665364,
+      "end_reason": "episode_time_limit",
+      "terminated": false,
+      "truncated": true
+    }
+  },
+  "trace_differences": {
+    "current_only_reward_diagnostic_fields": [
+      "grf_hard_contact_available",
+      "pros_ankle_angle_sea_tau_spring_positive_max_nm",
+      "pros_ankle_angle_sea_tau_spring_positive_mean_nm",
+      "pros_ankle_angle_sea_tau_spring_positive_sample_count",
+      "pros_ankle_angle_sea_tau_spring_positive_sum_nm",
+      "pros_knee_angle_sea_tau_spring_positive_max_nm",
+      "pros_knee_angle_sea_tau_spring_positive_mean_nm",
+      "pros_knee_angle_sea_tau_spring_positive_sample_count",
+      "pros_knee_angle_sea_tau_spring_positive_sum_nm",
+      "segment_completed"
+    ],
+    "historical_only_reward_fields": [],
+    "changed_common_reward_fields": {
+      "grf_ankle_moment_flip_tau_nm": {
+        "leaf_comparisons": 160,
+        "different_recorded_values": 160,
+        "missing_leaves": 0,
+        "numeric_comparisons": 160,
+        "numeric_max_abs_difference": 7.105427357601002e-15,
+        "numeric_rms_difference": 2.8583276307028945e-15,
+        "first_exact_difference": {
+          "step": 6,
+          "historical_time": 14.006870983805069,
+          "current_time": 14.006870983805069,
+          "field": "grf_ankle_moment_flip_tau_nm",
+          "historical": -2.09930162007333e-07,
+          "current": -2.0993016200733036e-07,
+          "delta": 2.6469779601696886e-21
+        },
+        "first_numeric_difference_above_diagnostic_scale": {
+          "1e-12": null,
+          "1e-09": null,
+          "1e-06": null,
+          "0.001": null
+        },
+        "first_difference_samples": [
+          {
+            "step": 6,
+            "historical_time": 14.006870983805069,
+            "current_time": 14.006870983805069,
+            "field": "grf_ankle_moment_flip_tau_nm",
+            "historical": -2.09930162007333e-07,
+            "current": -2.0993016200733036e-07,
+            "delta": 2.6469779601696886e-21
+          },
+          {
+            "step": 10,
+            "historical_time": 14.046870983805047,
+            "current_time": 14.046870983805047,
+            "field": "grf_ankle_moment_flip_tau_nm",
+            "historical": 1.5754109247369853e-05,
+            "current": 1.575410924736985e-05,
+            "delta": -3.3881317890172014e-21
+          },
+          {
+            "step": 11,
+            "historical_time": 14.056870983805041,
+            "current_time": 14.056870983805041,
+            "field": "grf_ankle_moment_flip_tau_nm",
+            "historical": 2.8184278278553575e-05,
+            "current": 2.8184278278553568e-05,
+            "delta": -6.776263578034403e-21
+          },
+          {
+            "step": 12,
+            "historical_time": 14.066870983805035,
+            "current_time": 14.066870983805035,
+            "field": "grf_ankle_moment_flip_tau_nm",
+            "historical": 0.01084426540096457,
+            "current": 0.010844265400964573,
+            "delta": 3.469446951953614e-18
+          },
+          {
+            "step": 21,
+            "historical_time": 14.156870983804986,
+            "current_time": 14.156870983804986,
+            "field": "grf_ankle_moment_flip_tau_nm",
+            "historical": 14.902261957821104,
+            "current": 14.902261957821105,
+            "delta": 1.7763568394002505e-15
+          }
+        ]
+      }
+    },
+    "interpretation": "The only changed common diagnostic is grf_ankle_moment_flip_tau_nm at 160 steps, first at step 6, max 7.105427357601002e-15 Nm. This difference has no observed effect on saved actions, actor inputs, phase, trajectories, physical STOs, other common reward terms or returned episode reward. The code-level cause is not established by this saved-data audit.",
+    "new_field_values": "grf_hard_contact_available is 0 and segment_completed is 1 throughout; eight positive spring-torque statistics add reporting detail.",
+    "numeric_reporting_scales_are_gates": false
+  },
+  "integrity_and_runtime": {
+    "subprocess_returncode": 0,
+    "elapsed_wall_time_s": 480.8922620000012,
+    "protected_files_checked": 91,
+    "changed_protected_files": [],
+    "receipt_source_fingerprints_rechecked": 15,
+    "all_receipt_source_fingerprints_unchanged": true,
+    "completed_requested_duration": true,
+    "independent_saved_data_numerical_verification": {
+      "rollout_script_ok": true,
+      "completed_requested_episode": true,
+      "end_reason": "episode_time_limit",
+      "terminated": false,
+      "truncated": true,
+      "output_rows": 5000,
+      "expected_episode_duration_s": 5.0,
+      "all_sto_finite": true,
+      "all_sto_same_time_grid": true,
+      "all_sto_dt_matches_captured_config": true,
+      "all_sto_cover_requested_episode_samples": true,
+      "source_fingerprints_all_match_receipt": true,
+      "all_sea_identity_checks_pass": true,
+      "policy_trace_numeric_values_finite": true,
+      "rollout_summary_nonfinite_paths": [],
+      "policy_steps_match_summary": true,
+      "feature_order_matches_historical": true,
+      "summary_actor_feature_order_matches_receipt": true,
+      "summary_full_feature_order_matches_receipt": true,
+      "policy_trace_covers_requested_segment_end_times": true,
+      "active_and_threshold_event_timestamp_issue_count": 0,
+      "trace_final_time_matches_receipt": true,
+      "legacy_validator_counts": {
+        "WARN": 9,
+        "PASS": 36,
+        "FAIL": 1
+      },
+      "scientific_note": "Finiteness, consistent SEA dynamics and completed duration are runtime checks. Raw IK tracking, MTP drift, biological reserve demand and gait-event quality remain distinct scientific questions; generic validator tracking thresholds are not a subject-specific acceptance criterion."
+    }
+  },
+  "scientific_limits": [
+    "Exact reproduction of this central 5 s/seed123 rollout confirms the observed checkpoint/runtime control path; it does not establish robustness over reset offsets, seeds, longer horizons or subject transfer.",
+    "The saved trace records the actor 35D prefix. Full 84D feature names/order match, but full privileged values are not saved per step.",
+    "No per-step returned reward was saved in either policy trace; only returned episode reward/mean/min/max and separate reward_terms can be compared.",
+    "Historical source fingerprints are absent. Present source integrity and exact saved-data reproduction support runtime compatibility without proving historical source-byte identity.",
+    "Native finiteness/SEA identities/coverage pass. The generic validator still has the historical MTP-right tracking diagnostic FAIL (max 30.60374 deg, RMS 14.67653 deg), plus nine warnings; identical physical files show these are reproduced baseline properties, not a new regression. These generic thresholds are not subject-specific acceptance gates.",
+    "Penetration 24.627298 mm remains above the configured 20 mm soft penalty threshold and below the 28 mm termination threshold. The historical behavior is reproduced; physical adequacy is a separate question.",
+    "No policy, observation normalization, clock-neutralizer, morphology corridor, model, IK, GRF profile, SEA command semantics or plugin was changed by this comparison."
+  ],
+  "recommendation": "Use this documented historical AB06 reproduction as the control for the next separately authorized AB07 best47 transfer test with frozen checkpoint and explicit subject/protocol receipt; maintain separate numerical, event-timing, load/morphology and autonomy conclusions.",
+  "source_files": [
+    {
+      "path": "Trajectory Generator/validation/AB06/v26c_best47_control_2026_10_06/comparison_metrics_final.json",
+      "sha256": "f4ac2b134801c84f93f00c2658b07d88d1d5b957decb884c6512faa03a66b54f"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB06/v26c_best47_control_2026_10_06/numerical_verification.json",
+      "sha256": "65c162be29c29e7fbf034280193a74e35241cbdaf5b13a1bab8a7bc284476969"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB06/v26c_best47_control_2026_10_06/execution_result.json",
+      "sha256": "f00443813f8609ada2409188b0bf9d27738be9c5085e7bfc445a87c2f53ea7ec"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB06/v26c_best47_control_2026_10_06/run_control.py",
+      "sha256": "5bab89e4725301d4caf46c02f717ed4ef957360f09b64045fc3f82da61ca34b1"
+    },
+    {
+      "path": "Trajectory Generator/validation/AB06/v26c_best47_control_2026_10_06/compare_control.py",
+      "sha256": "bca0c3bd0b603ab2fb2f6b4ff9c9df9716e6c6a2a4b228406663da07959392f1"
+    }
+  ]
+}

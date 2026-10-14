@@ -179,6 +179,7 @@ class ToolConfig:
     legacy_rra_tasks: Path | None = None
     dry_run: bool = False
     skip_scaling: bool = False
+    ik_only: bool = False
     full_time_range: tuple[float, float] = FULL_TIME_RANGE
     rra_time_range: tuple[float, float] = RRA_TIME_RANGE
     external_force_specs: tuple[tuple[str, str, str, str, str], ...] = ()
@@ -908,7 +909,8 @@ tool_class = tool_map.get(tool_node.tag)
 if tool_class is None:
     raise RuntimeError(f"Unsupported OpenSim tool {{tool_node.tag!r}} in {{setup_xml}}")
 tool = tool_class(setup_xml)
-tool.run()
+if tool.run() is False:
+    raise RuntimeError(f"OpenSim tool returned failure for {{setup_xml}}")
 """
         cmd = [sys.executable, "-c", runner]
     started = time.perf_counter()
@@ -930,8 +932,17 @@ tool.run()
     return CommandResult(completed.returncode, completed.stdout, elapsed)
 
 
-def parse_ik_marker_error_files(directory: Path) -> tuple[float | None, float | None]:
-    candidates = list(directory.glob("*marker_errors*.sto")) + list(directory.glob("*_ik_marker_errors.sto"))
+def parse_ik_marker_error_files(
+    directory: Path, motion_stem: str | None = None,
+) -> tuple[float | None, float | None]:
+    if motion_stem is not None:
+        candidates = [
+            directory / f"{motion_stem}_ik_marker_errors.sto",
+            directory / f"{motion_stem}_marker_errors.sto",
+        ]
+        candidates = [candidate for candidate in candidates if candidate.is_file()]
+    else:
+        candidates = sorted(directory.glob("*marker_errors*.sto"))
     if not candidates:
         return None, None
     return parse_marker_error_sto(candidates[0])
@@ -1178,7 +1189,7 @@ def run_scale_candidate_worker(args: tuple[ToolConfig, Path, Path, Path, Path, l
         candidate.notes.append(f"Scale quality IK failed with code {ik_result.returncode}")
         return candidate
 
-    rms, max_error = parse_ik_marker_error_files(ik_dir)
+    rms, max_error = parse_ik_marker_error_files(ik_dir, "scale_quality_ik")
     candidate.rms_marker_error_m = rms
     candidate.max_marker_error_m = max_error
     candidate.status = "ok"
@@ -1536,9 +1547,48 @@ def run_pipeline(cfg: ToolConfig, paths: Paths, run_smoke: bool) -> int:
         cfg.full_time_range[0],
         cfg.full_time_range[1],
     )
+    if cfg.ik_only and not cfg.dry_run:
+        # A successful command must produce this run's motion, not reuse an
+        # output from an earlier attempt in the same pipeline directory.
+        for old_output in (paths.ik_dir / full_ik_motion, full_ik_results / full_ik_motion):
+            if old_output.is_file():
+                old_output.unlink()
     full_ik_result = run_opensim_tool(full_ik_setup, paths.ik_dir, cfg, "ik_full")
     if full_ik_result.returncode != 0:
         raise RuntimeError("Full IK failed; inspect 02_ik/ik_full.log")
+
+    if cfg.ik_only:
+        full_kinematics = None
+        marker_rms, marker_max = None, None
+        if not cfg.dry_run:
+            full_kinematics = find_generated_file(paths.ik_dir, full_ik_results, full_ik_motion)
+            destination = paths.ik_dir / full_kinematics.name
+            if full_kinematics.resolve() != destination.resolve():
+                shutil.copy2(full_kinematics, destination)
+            full_kinematics = destination
+            marker_rms, marker_max = parse_ik_marker_error_files(
+                full_ik_results, Path(full_ik_motion).stem
+            )
+        write_report(
+            paths.pipeline_root / "pipeline_report.md",
+            scale_candidates,
+            selected_scale,
+            [],
+            None,
+            None,
+            None,
+        )
+        with (paths.pipeline_root / "pipeline_report.md").open("a", encoding="utf-8") as handle:
+            handle.write("\n## IK-only result\n\n")
+            handle.write(f"Mode: {'dry run' if cfg.dry_run else 'executed OpenSim marker IK'}\n")
+            handle.write(f"IK model: {scaled_model}\n")
+            handle.write(f"Marker TRC: {copied['trc']}\n")
+            handle.write(f"IK output: {full_kinematics if full_kinematics else 'not produced (dry run)'}\n")
+            handle.write(f"Maximum frame marker RMS: {marker_rms} m\n")
+            handle.write(f"Maximum marker error: {marker_max} m\n")
+            handle.write("ID, RRA and simulator smoke were not requested.\n")
+        print(f"[pipeline] IK-only {'dry run' if cfg.dry_run else 'complete'}: {full_kinematics}")
+        return 0
 
     rra_ik_setup = paths.ik_dir / f"IK_rra_window_{rra_label}_setup.xml"
     rra_ik_results = paths.ik_dir / "rra_window"
@@ -1746,6 +1796,11 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument("--skip-smoke-test", action="store_true")
+    parser.add_argument(
+        "--ik-only",
+        action="store_true",
+        help="Stop after the full marker IK; do not run ID, RRA or the simulator.",
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser.parse_args()
 
@@ -1771,6 +1826,7 @@ def main() -> int:
         else None,
         dry_run=args.dry_run,
         skip_scaling=auto_skip_scaling,
+        ik_only=args.ik_only,
         full_time_range=tuple(args.full_time_range),
         rra_time_range=tuple(args.rra_time_range),
         external_force_specs=tuple(args.external_force),

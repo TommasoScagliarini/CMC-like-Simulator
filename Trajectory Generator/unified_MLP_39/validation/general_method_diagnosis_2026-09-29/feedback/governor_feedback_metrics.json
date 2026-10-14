@@ -1,0 +1,352 @@
+{
+  "method": "Raw output: J_mu(next recorded state),memory @ d(next accepted endpoint + served q,qdot,qddot)/d(raw action current). Applied output: Dclip(mu_next) @ raw matrix; reported separately in normalized action units.",
+  "scope": "One step partial controller-memory feedback, with physical/SEA/contact/FSM/clock observations frozen to recorded next values. The exact governor, clipping and local state at each segment are included. Not a complete closed-loop Jacobian or stability test.",
+  "initialization": "First segment excluded to avoid initial observed qddot vs governor acceleration-zero reset difference.",
+  "policies": {
+    "LEFT_best80": {
+      "production_replay_verification": {
+        "trace_max_abs_error_q_v_a": [
+          2.9601312845350947e-08,
+          2.7440438477022155e-08,
+          1.1861629323206557e-07,
+          1.1758891549362716e-07,
+          1.9002892344133215e-06,
+          1.8893531503749728e-06
+        ],
+        "sto_max_abs_error_q_v": [
+          4.9985281469488996e-09,
+          4.9985346443963364e-09,
+          5.059201002577396e-09,
+          5.046004725173248e-09
+        ],
+        "action_mapping_verified": true,
+        "reset_q": [
+          -0.2257699263227882,
+          0.3420621490728574
+        ],
+        "reset_v": [
+          -0.025858258121854143,
+          0.4299230359007116
+        ],
+        "governor_initial_acceleration": [
+          0.0,
+          0.0
+        ],
+        "slew_enabled": [
+          false,
+          false
+        ]
+      },
+      "one_step_reset_replay_max_abs_error": 5.373479439185758e-09,
+      "samples": 479,
+      "action_central_difference_steps": [
+        0.0001,
+        5e-05
+      ],
+      "spectral_norm": {
+        "mean": 2.055023831416969,
+        "median": 1.741998352424519,
+        "p95": 5.385384448982475,
+        "max": 9.021886847154827
+      },
+      "spectral_radius": {
+        "mean": 1.4444418946067117,
+        "median": 1.0220005590203831,
+        "p95": 4.447500590214923,
+        "max": 7.544096153963377
+      },
+      "fraction_norm_above_one": 0.5887265135699373,
+      "fraction_radius_above_one": 0.5052192066805845,
+      "matrix_mean": [
+        [
+          -0.1787453655845594,
+          -0.314880201577176
+        ],
+        [
+          0.3082826551904621,
+          -0.7438883305837212
+        ]
+      ],
+      "halving_delta_matrix_difference_rms": 0.0003817180104960657,
+      "halving_delta_matrix_difference_max": 0.015808170823444545,
+      "nonlinear_composed_response_max_abs_error": 1.367858101819885e-07,
+      "contribution_spectral_norm_mean": {
+        "endpoint": 0.10190426891831163,
+        "q": 0.00011354318953002024,
+        "qdot": 0.08672331279000041,
+        "qddot": 2.003747420709267
+      },
+      "raw_next_mean_output": "Top-level spectral statistics refer to raw next Gaussian mean, before output clipping.",
+      "applied_next_action": {
+        "definition": "Dclip(mean_next) @ raw_next_mean_matrix, normalized command clipped to [-1,1]; zero local derivative outside bounds, unit derivative inside. No samples exactly on boundary.",
+        "spectral_norm": {
+          "mean": 1.913875327929585,
+          "median": 1.5344597165896332,
+          "p95": 5.281497685974778,
+          "max": 9.021886847154827
+        },
+        "spectral_radius": {
+          "mean": 1.3339838434908087,
+          "median": 0.815278595861784,
+          "p95": 4.321557790689054,
+          "max": 7.544096153963377
+        },
+        "fraction_norm_above_one": 0.5720250521920668,
+        "fraction_radius_above_one": 0.46764091858037576,
+        "matrix_mean": [
+          [
+            -0.20081088481517056,
+            -0.2584650946172663
+          ],
+          [
+            0.29733659078688635,
+            -0.7058588202234884
+          ]
+        ],
+        "next_command_clip_fraction_by_joint": [
+          0.12734864300626306,
+          0.08350730688935282
+        ],
+        "halving_delta_matrix_difference_rms": 0.0003817180040053857,
+        "halving_delta_matrix_difference_max": 0.015808170823444545,
+        "nonlinear_composed_response_max_abs_error": 1.0824102622593464e-07,
+        "contribution_spectral_norm_mean": {
+          "endpoint": 0.0967768088208397,
+          "q": 0.00010744969633671002,
+          "qdot": 0.0804579556168794,
+          "qddot": 1.8640504832341263
+        }
+      }
+    },
+    "RIGHT_last60": {
+      "production_replay_verification": {
+        "trace_max_abs_error_q_v_a": [
+          2.9388217082093604e-08,
+          1.4886269217306847e-08,
+          1.1804244737234626e-07,
+          5.6253883107260094e-08,
+          1.8115918649641571e-06,
+          1.6245254244040552e-06
+        ],
+        "sto_max_abs_error_q_v": [
+          4.998575386938597e-09,
+          5.000049208003787e-09,
+          5.030333705136059e-09,
+          5.0310053345548056e-09
+        ],
+        "action_mapping_verified": true,
+        "reset_q": [
+          -0.2257699263227882,
+          0.3420621490728574
+        ],
+        "reset_v": [
+          -0.025858258121854143,
+          0.4299230359007116
+        ],
+        "governor_initial_acceleration": [
+          0.0,
+          0.0
+        ],
+        "slew_enabled": [
+          false,
+          false
+        ]
+      },
+      "one_step_reset_replay_max_abs_error": 5.373479439185758e-09,
+      "samples": 479,
+      "action_central_difference_steps": [
+        0.0001,
+        5e-05
+      ],
+      "spectral_norm": {
+        "mean": 2.0580524498896793,
+        "median": 2.0058737777666313,
+        "p95": 4.91024411176049,
+        "max": 7.027030829742169
+      },
+      "spectral_radius": {
+        "mean": 1.6523930533481301,
+        "median": 1.4841918355813353,
+        "p95": 4.3062720120161595,
+        "max": 6.774429338415671
+      },
+      "fraction_norm_above_one": 0.6993736951983298,
+      "fraction_radius_above_one": 0.5845511482254697,
+      "matrix_mean": [
+        [
+          -0.8169492510760822,
+          0.09358641055865556
+        ],
+        [
+          0.11800202395719647,
+          -0.7781264432760512
+        ]
+      ],
+      "halving_delta_matrix_difference_rms": 0.002143741293601516,
+      "halving_delta_matrix_difference_max": 0.07708835029883335,
+      "nonlinear_composed_response_max_abs_error": 1.0176264641610308e-07,
+      "contribution_spectral_norm_mean": {
+        "endpoint": 0.07144189945843789,
+        "q": 0.00014879859452607657,
+        "qdot": 0.07614219847897968,
+        "qddot": 2.0288825592567514
+      },
+      "raw_next_mean_output": "Top-level spectral statistics refer to raw next Gaussian mean, before output clipping.",
+      "applied_next_action": {
+        "definition": "Dclip(mean_next) @ raw_next_mean_matrix, normalized command clipped to [-1,1]; zero local derivative outside bounds, unit derivative inside. No samples exactly on boundary.",
+        "spectral_norm": {
+          "mean": 2.0113657424161997,
+          "median": 1.9267447502829196,
+          "p95": 4.825005106918406,
+          "max": 7.027030829742169
+        },
+        "spectral_radius": {
+          "mean": 1.6317587294577083,
+          "median": 1.4436981064051437,
+          "p95": 4.272041657907407,
+          "max": 6.774429338415671
+        },
+        "fraction_norm_above_one": 0.6910229645093946,
+        "fraction_radius_above_one": 0.5782881002087683,
+        "matrix_mean": [
+          [
+            -0.7954058830351884,
+            0.03641391932729607
+          ],
+          [
+            0.11796370896153947,
+            -0.773296147564856
+          ]
+        ],
+        "next_command_clip_fraction_by_joint": [
+          0.07724425887265135,
+          0.008350730688935281
+        ],
+        "halving_delta_matrix_difference_rms": 0.002143741293371885,
+        "halving_delta_matrix_difference_max": 0.07708835029883335,
+        "nonlinear_composed_response_max_abs_error": 1.0176264641610308e-07,
+        "contribution_spectral_norm_mean": {
+          "endpoint": 0.06998580703397424,
+          "q": 0.0001479646424936113,
+          "qdot": 0.07496342887308008,
+          "qddot": 1.9828061827960277
+        }
+      }
+    },
+    "V26_best87": {
+      "production_replay_verification": {
+        "trace_max_abs_error_q_v_a": [
+          1.8762769116165146e-14,
+          1.0769163338864018e-14,
+          3.197442310920451e-13,
+          2.9309887850104133e-13,
+          1.5990764268281055e-11,
+          1.4658496638730867e-11
+        ],
+        "sto_max_abs_error_q_v": [
+          5.000260205889617e-09,
+          4.998941760536724e-09,
+          5.05032982101028e-09,
+          5.043445217012277e-09
+        ],
+        "action_mapping_verified": true,
+        "reset_q": [
+          -0.2257699263227882,
+          0.3420621490728574
+        ],
+        "reset_v": [
+          -0.025858258121854143,
+          0.4299230359007116
+        ],
+        "governor_initial_acceleration": [
+          0.0,
+          0.0
+        ],
+        "slew_enabled": [
+          false,
+          false
+        ]
+      },
+      "one_step_reset_replay_max_abs_error": 1.0746958878371515e-08,
+      "samples": 479,
+      "action_central_difference_steps": [
+        0.0001,
+        5e-05
+      ],
+      "spectral_norm": {
+        "mean": 2.4884383685789953,
+        "median": 2.4071002046694656,
+        "p95": 5.2620432075663315,
+        "max": 8.31667174793827
+      },
+      "spectral_radius": {
+        "mean": 1.9835908594971956,
+        "median": 1.7811380793258635,
+        "p95": 5.049612896369006,
+        "max": 7.362258341187797
+      },
+      "fraction_norm_above_one": 0.7807933194154488,
+      "fraction_radius_above_one": 0.6743215031315241,
+      "matrix_mean": [
+        [
+          -1.0034003689695594,
+          -0.192609673767916
+        ],
+        [
+          0.3791006839596023,
+          -0.9906356911991723
+        ]
+      ],
+      "halving_delta_matrix_difference_rms": 0.0017808811920765485,
+      "halving_delta_matrix_difference_max": 0.05346847512912575,
+      "nonlinear_composed_response_max_abs_error": 6.844489835315903e-08,
+      "contribution_spectral_norm_mean": {
+        "endpoint": 0.10824268277617718,
+        "q": 0.0003487343443394837,
+        "qdot": 0.14258472319109658,
+        "qddot": 2.3816753153022234
+      },
+      "raw_next_mean_output": "Top-level spectral statistics refer to raw next Gaussian mean, before output clipping.",
+      "applied_next_action": {
+        "definition": "Dclip(mean_next) @ raw_next_mean_matrix, normalized command clipped to [-1,1]; zero local derivative outside bounds, unit derivative inside. No samples exactly on boundary.",
+        "spectral_norm": {
+          "mean": 2.4176383200243174,
+          "median": 2.3569033564136497,
+          "p95": 5.2620432075663315,
+          "max": 8.31667174793827
+        },
+        "spectral_radius": {
+          "mean": 1.935275029499148,
+          "median": 1.7319624929763886,
+          "p95": 5.0501854092991065,
+          "max": 7.362258341187797
+        },
+        "fraction_norm_above_one": 0.7620041753653445,
+        "fraction_radius_above_one": 0.6534446764091858,
+        "matrix_mean": [
+          [
+            -0.9165235064552077,
+            -0.15777444782365865
+          ],
+          [
+            0.37798760961104483,
+            -0.9810698221601675
+          ]
+        ],
+        "next_command_clip_fraction_by_joint": [
+          0.09812108559498957,
+          0.0041753653444676405
+        ],
+        "halving_delta_matrix_difference_rms": 0.001694731286814807,
+        "halving_delta_matrix_difference_max": 0.05346847512912575,
+        "nonlinear_composed_response_max_abs_error": 6.844489835315903e-08,
+        "contribution_spectral_norm_mean": {
+          "endpoint": 0.10738340032651891,
+          "q": 0.0003463439539423886,
+          "qdot": 0.14031059577905508,
+          "qddot": 2.3120737947957055
+        }
+      }
+    }
+  }
+}

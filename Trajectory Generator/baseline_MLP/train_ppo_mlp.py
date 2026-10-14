@@ -1366,7 +1366,6 @@ def build_config(
         "episode_duration": args.episode_duration,
         "policy_knots": args.policy_knots,
         "action_mode": args.action_mode,
-        "max_delta_rad": args.max_delta_rad,
         "target_slew_rate_limit_rad_s": {
             "pros_knee_angle": args.pros_knee_target_slew_rate_limit_rad_s,
             "pros_ankle_angle": args.pros_ankle_target_slew_rate_limit_rad_s,
@@ -3506,16 +3505,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--policy-knots", type=int, default=3)
     p.add_argument(
         "--action-mode",
-        choices=["absolute", "delta", "raw"],
+        choices=["absolute", "raw"],
         default="absolute",
         help=(
             "Policy output semantics. 'absolute' (default): the policy emits an "
             "ABSOLUTE prosthetic trajectory over the env's absolute_bounds_rad "
-            "(ex-novo generation). 'delta': offset from the prescribed IK "
-            "(imitative). 'raw': raw radians."
+            "(ex-novo generation). 'raw': absolute radians for diagnostics."
         ),
     )
-    p.add_argument("--max-delta-rad", type=float, default=0.35)
     p.add_argument(
         "--pros-knee-target-slew-rate-limit-rad-s",
         type=float,
@@ -4098,6 +4095,8 @@ def parse_args() -> argparse.Namespace:
         training_config._warn(f"config maps to unknown argument '{dest}' (ignored)")
     p.set_defaults(**{k: v for k, v in cfg_defaults.items() if k in valid_dests})
     args = p.parse_args()
+    if args.action_mode not in {"absolute", "raw"}:
+        p.error("action_mode must be absolute (or raw for diagnostics)")
     args._cfg_reward = cfg_reward
     # Preserve the value selected by the user/YAML before the H0 convenience
     # preset maps onto the general full-checkpoint resume mechanism. Worker

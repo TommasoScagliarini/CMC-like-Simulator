@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-06",
+  "scope": "Default ABx preparation CLI and actual main/build routing tested with all fit/MATLAB/calibration/IK/subprocess actions mocked; existing native registration checks are position-only, no integration or operational changes",
+  "source_sha256": {
+    "tools/build_abx_seasea_pipeline.py": "0b9eb51b0dc482b39b0b8ef3565f019481fe3048f3d97727f09ee06ac230c711",
+    "tools/register_seasea_ground.py": "3b6b8acd8d5adbae0eb17b05aba7492f0920e5fc841ea7d48fdd52583ccdb64d",
+    "validation/test_abx_default_ground_registration.py": "82ec4f7896c4c758885527ab3d25100c1640458df51f432196031f5e2271953e",
+    "validation/test_ground_registration.py": "581b1a458de26370efbb573e9ad66a709c4a20f0b6fe38e7d29af29d6b2f2f23",
+    "validation/test_seasea_subject_fitting.py": "45dc601333fe481d256880fdd9ddb92710f183ce5498cda4cef952ca5d0630c3",
+    "validation/test_abx_pipeline_preparation.py": "65998d2841af01586b38ad4a2968a1ebf8ecbd1128f3feb5e297236d6d807a74"
+  },
+  "source_sha256_before_tests": {
+    "tools/build_abx_seasea_pipeline.py": "0b9eb51b0dc482b39b0b8ef3565f019481fe3048f3d97727f09ee06ac230c711",
+    "tools/register_seasea_ground.py": "3b6b8acd8d5adbae0eb17b05aba7492f0920e5fc841ea7d48fdd52583ccdb64d",
+    "validation/test_abx_default_ground_registration.py": "82ec4f7896c4c758885527ab3d25100c1640458df51f432196031f5e2271953e",
+    "validation/test_ground_registration.py": "581b1a458de26370efbb573e9ad66a709c4a20f0b6fe38e7d29af29d6b2f2f23",
+    "validation/test_seasea_subject_fitting.py": "45dc601333fe481d256880fdd9ddb92710f183ce5498cda4cef952ca5d0630c3",
+    "validation/test_abx_pipeline_preparation.py": "65998d2841af01586b38ad4a2968a1ebf8ecbd1128f3feb5e297236d6d807a74"
+  },
+  "sources_unchanged_during_tests": true,
+  "test_modules": [
+    "validation.test_abx_default_ground_registration",
+    "validation.test_ground_registration",
+    "validation.test_seasea_subject_fitting",
+    "validation.test_abx_pipeline_preparation"
+  ],
+  "tests_run": 43,
+  "passed": 43,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "elapsed_s": 1.8483259580025333,
+  "success": true,
+  "reproduction_command": "/opt/anaconda3/envs/envCMC-like/bin/python -B -m unittest validation.test_abx_default_ground_registration validation.test_ground_registration validation.test_seasea_subject_fitting validation.test_abx_pipeline_preparation -v",
+  "default_contract": {
+    "reference_donor": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+    "reference_healthy_model": "AB06-raw/osimxml/AB06.osim or ab06.osim under selected models-dir",
+    "reference_static_motion": "AB06_SEASEA-raw/data/converted/static/static_01/static_01_ik_dataset_ab06_seasea.mot under selected models-dir",
+    "plane": "Existing frozen selected V25 common profile at repository root",
+    "mandatory": [
+      "Anatomical fitting",
+      "Static hardware ground registration before marker calibration",
+      "Fresh OpenSim marker IK"
+    ],
+    "custom_donor": "Requires both explicit matching healthy and static references; no automatic AB06 fallback",
+    "batch_snapshot": "One SHA-verified donor/healthy/static reference snapshot per build, shared by all subjects before any conversion; original rewrites cannot alter later subject references",
+    "failure_behaviour": "Missing common inputs fail before build/native execution; registration failure stops before calibration/IK; IK failure stops before bundle with no dataset fallback"
+  },
+  "new_test_count": 14,
+  "new_coverage": [
+    "Defaults shared by AB06, AB07, AB08",
+    "Custom models-dir and healthy filename case on case-sensitive/insensitive filesystem",
+    "Exact PI donor with no legacy fallback",
+    "Explicit filepath overrides preserved",
+    "Custom donor coherent references required",
+    "Skip IK always rejected",
+    "Resolved required preparation fields in preflight with no snapshot/native operations",
+    "Missing common input rejection in preflight and build",
+    "Independent snapshot hashes, role bytes and persistent manifest; original mutation leaves snapshots unchanged",
+    "All-subjects main freezes once, shares exact references across AB06/07/08 despite AB06 original mutations",
+    "Real main routing ground before calibration and fresh IK, failure propagation",
+    "Programmatic guard before mutation"
+  ],
+  "failure_details": []
+}

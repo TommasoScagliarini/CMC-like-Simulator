@@ -5,12 +5,17 @@ This is the single public entrypoint for reconstructing the workflow that was
 first developed for AB06. It keeps the heavy domain-specific readers in MATLAB
 because EPIC .mat files are MATLAB table/MCOS files, and it reuses the existing
 OpenSim preparation pipeline when an OpenSim IK/RRA diagnostic pass is needed.
+
+Every build fits the fixed prosthesis hardware to the subject, registers its
+static foot pose to the common AB06 benchmark before marker calibration, and
+computes fresh marker IK. Shared reference files are selected by default.
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import re
@@ -18,6 +23,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
@@ -29,6 +35,10 @@ from xml.etree import ElementTree as ET
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODELS_DIR = REPO_ROOT / "models"
 DEFAULT_RESULTS_DIR = REPO_ROOT / "results"
+DEFAULT_GROUND_PLANE_PROFILE = REPO_ROOT / (
+    "validation/binary_phase_detector_v25_geometry_runs/"
+    "2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json"
+)
 TASKS_WITH_GRF = {"treadmill", "levelground", "ramp", "stair"}
 TASK_CHOICES = ("treadmill", "levelground", "ramp", "stair")
 
@@ -94,6 +104,8 @@ class BuildReport:
     raw_dir: str = ""
     session_dir: str = ""
     healthy_model: str = ""
+    donor_model: str = ""
+    plugin: str = ""
     graft_model: str = ""
     calibrated_model: str = ""
     bundle_dir: str = ""
@@ -101,6 +113,14 @@ class BuildReport:
     converted_static_dir: str = ""
     converted_trial_dir: str = ""
     ik_source: str = ""
+    ik_method: str = ""
+    ik_computed_source: str = ""
+    ik_provenance: dict[str, object] = field(default_factory=dict)
+    prosthesis_fit: dict[str, object] = field(default_factory=dict)
+    anatomical_model: str = ""
+    static_calibration_motion: str = ""
+    ground_registration: dict[str, object] = field(default_factory=dict)
+    preparation_references: dict[str, object] = field(default_factory=dict)
     grf_source: str = ""
     healthy_overlay_dir: str = ""
     pipeline_root: str = ""
@@ -254,16 +274,50 @@ def require_file(path: Path, label: str) -> Path:
 
 
 def default_donor_model(models_dir: Path) -> Path:
-    candidates = [
-        models_dir / "AB06_SEASEA-raw" / "osimxml" / "AB06_SEASEA.osim",
-        models_dir / "AB06_SEASEA-raw" / "osimxml" / "AB06_SEASEA_marker_calibrated.osim",
-        models_dir / "AB06_SEASEA_Threadmill" / "AB06_SEASEA.osim",
-        models_dir / "SEASEA" / "Adjusted_SEASEA - Copia_tuned.osim",
-    ]
-    found = choose_first_existing(candidates)
-    if found is None:
-        raise FileNotFoundError("Could not find a donor SEASEA model.")
-    return found
+    # No fallback to raw/legacy donors with different SEA properties.
+    return models_dir / "AB06_SEASEA_Threadmill" / "AB06_SEASEA_stiff321_500_pi.osim"
+
+
+def default_fit_reference_model(models_dir: Path) -> Path:
+    directory = models_dir / "AB06-raw" / "osimxml"
+    candidates = [directory / "AB06.osim", directory / "ab06.osim"]
+    return choose_first_existing(candidates) or candidates[0]
+
+
+def default_ground_reference_motion(models_dir: Path) -> Path:
+    return (models_dir / "AB06_SEASEA-raw" / "data" / "converted" / "static"
+            / "static_01" / "static_01_ik_dataset_ab06_seasea.mot")
+
+
+def freeze_preparation_references(args: argparse.Namespace, donor_model: Path) -> Path:
+    """Keep one donor/healthy/static reference set stable throughout a build.
+
+    Preparing AB06 itself can regenerate the original static motion or donor
+    bundle. Every subject must use the same reference bytes captured before
+    any conversion, including in --all-subjects runs.
+    """
+    sources = {"donor_model": donor_model, "healthy_model": args.fit_reference_model,
+               "static_motion": args.ground_reference_motion}
+    args.results_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_dir = Path(tempfile.mkdtemp(prefix="abx_reference_", dir=args.results_dir))
+    entries = {}
+    for role, source in sources.items():
+        before = hashlib.sha256(source.read_bytes()).hexdigest()
+        target = snapshot_dir / role / source.name
+        target.parent.mkdir(parents=True)
+        shutil.copy2(source, target)
+        if (hashlib.sha256(target.read_bytes()).hexdigest() != before or
+                hashlib.sha256(source.read_bytes()).hexdigest() != before):
+            raise RuntimeError(f"Preparation reference changed while being captured: {source}")
+        entries[role] = {"source_file": repo_relative(source), "snapshot_file": repo_relative(target), "sha256": before}
+    manifest = snapshot_dir / "manifest.json"
+    payload = {"schema_version": 1, "method": "one_reference_snapshot_per_build",
+               "created_at": datetime.now().isoformat(timespec="seconds"), "inputs": entries}
+    manifest.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    args.preparation_references = {"manifest": repo_relative(manifest), **payload}
+    args.fit_reference_model = snapshot_dir / "healthy_model" / sources["healthy_model"].name
+    args.ground_reference_motion = snapshot_dir / "static_motion" / sources["static_motion"].name
+    return snapshot_dir / "donor_model" / donor_model.name
 
 
 def default_plugin() -> Path:
@@ -509,11 +563,14 @@ def graft_seasea_model(
     healthy_model: Path,
     donor_model: Path,
     output_model: Path,
+    fit_reference_model: Path | None = None,
+    fit_report: dict[str, object] | None = None,
 ) -> tuple[float, float, float, list[str]]:
     base_tree = ET.parse(healthy_model)
     donor_tree = ET.parse(donor_model)
     base_model = find_model(base_tree.getroot())
     donor = find_model(donor_tree.getroot())
+    subject_healthy = deepcopy(base_model) if fit_reference_model else None
 
     mass_before = total_model_mass(base_model)
     base_model.attrib["name"] = f"{subject}_SEASEA"
@@ -521,6 +578,15 @@ def graft_seasea_model(
     graft_jointset(base_model, donor)
     removed_forces = graft_forceset(base_model, donor)
     graft_markers(base_model)
+    if fit_reference_model is not None:
+        if __package__:
+            from .fit_seasea_subject import fit_seasea_subject
+        else:
+            from fit_seasea_subject import fit_seasea_subject
+        reference_healthy = find_model(ET.parse(fit_reference_model).getroot())
+        fitted = fit_seasea_subject(base_model, subject_healthy, reference_healthy, donor)
+        if fit_report is not None:
+            fit_report.update(fitted)
     mass_after = total_model_mass(base_model)
 
     output_model.parent.mkdir(parents=True, exist_ok=True)
@@ -559,6 +625,7 @@ def run_matlab_convert(
     model_file: Path,
     target_model: str,
     log_path: Path,
+    nojvm: bool = False,
 ) -> None:
     batch = (
         f"cd({matlab_quote(REPO_ROOT)}); "
@@ -574,7 +641,11 @@ def run_matlab_convert(
         f"'IdTemplate',{matlab_quote(REPO_ROOT / 'models' / 'AB06_SEASEA-raw' / 'osimxml' / 'idsetup.xml')}"
         "); disp(summary)"
     )
-    code = run_logged([matlab, "-batch", batch], log_path)
+    cmd = [matlab]
+    if nojvm:
+        cmd.append("-nojvm")
+    cmd.extend(["-batch", batch])
+    code = run_logged(cmd, log_path)
     if code != 0:
         raise RuntimeError(f"MATLAB conversion failed for {task}/{trial}; see {log_path}")
 
@@ -587,6 +658,7 @@ def run_matlab_healthy_overlay(
     trial: str,
     output_dir: Path,
     log_path: Path,
+    nojvm: bool = False,
 ) -> bool:
     if not (subject_root / task / "id" / f"{trial}.mat").is_file():
         return False
@@ -601,7 +673,11 @@ def run_matlab_healthy_overlay(
         f"'OutputDir',{matlab_quote(output_dir)}"
         "); disp(summary)"
     )
-    code = run_logged([matlab, "-batch", batch], log_path)
+    cmd = [matlab]
+    if nojvm:
+        cmd.append("-nojvm")
+    cmd.extend(["-batch", batch])
+    code = run_logged(cmd, log_path)
     if code != 0:
         raise RuntimeError(f"Healthy overlay export failed for {task}/{trial}; see {log_path}")
     return True
@@ -651,6 +727,28 @@ def run_marker_calibration(
     code = run_logged(cmd, log_path)
     if code != 0:
         raise RuntimeError(f"Marker calibration failed; see {log_path}")
+
+
+def run_ground_registration(
+    python_exe: str, model: Path, static_motion: Path, reference_model: Path,
+    reference_motion: Path, foot_mesh: Path, plane_profile: Path,
+    output_model: Path, output_static_motion: Path, report_path: Path,
+    plugin: Path, log_path: Path,
+) -> dict[str, object]:
+    """Run hardware registration before marker placement, in native Python."""
+    cmd = [python_exe, str(REPO_ROOT / "tools" / "register_seasea_ground.py")]
+    for flag, value in (
+        ("model", model), ("static-motion", static_motion), ("reference-model", reference_model),
+        ("reference-motion", reference_motion), ("foot-mesh", foot_mesh), ("plane-profile", plane_profile),
+        ("output-model", output_model), ("output-static-motion", output_static_motion),
+        ("report", report_path), ("plugin", plugin),
+    ):
+        cmd.extend(["--" + flag, str(value)])
+    cmd.append("--force")  # Parent overwrite policy has already authorized these outputs.
+    code = run_logged(cmd, log_path)
+    if code != 0:
+        raise RuntimeError(f"Static hardware ground registration failed; see {log_path}")
+    return json.loads(report_path.read_text(encoding="utf-8"))
 
 
 def mean_marker_errors(report_csv: Path) -> tuple[float | None, float | None]:
@@ -703,9 +801,9 @@ def run_ik_pipeline(
     plugin: Path,
     full_range: tuple[float, float],
     log_path: Path,
-) -> Path | None:
+    opensim_cmd: Path | None = None,
+) -> Path:
     start, end = full_range
-    rra_end = min(end, start + 0.5)
     cmd = [
         python_exe,
         str(REPO_ROOT / "scripts" / "run_opensim_sea_pipeline.py"),
@@ -726,19 +824,19 @@ def run_ik_pipeline(
         "--full-time-range",
         f"{start:.10g}",
         f"{end:.10g}",
-        "--rra-time-range",
-        f"{start:.10g}",
-        f"{rra_end:.10g}",
         "--skip-smoke-test",
-        "--dry-run",
+        "--ik-only",
     ]
+    if opensim_cmd is not None:
+        cmd.extend(["--opensim-cmd", str(opensim_cmd)])
     code = run_logged(cmd, log_path)
     if code != 0:
-        return None
+        raise RuntimeError(f"OpenSim marker IK failed with code {code}; see {log_path}")
     label = range_label(start, end)
     candidates = sorted((pipeline_root / "02_ik").glob(f"**/IK_full_{label}.mot"))
-    candidates += sorted((pipeline_root / "02_ik").glob("**/IK_full*.mot"))
-    return candidates[0] if candidates else None
+    if not candidates:
+        raise FileNotFoundError(f"OpenSim IK produced no IK_full_{label}.mot; see {log_path}")
+    return candidates[0]
 
 
 def run_rra_pipeline(
@@ -751,6 +849,7 @@ def run_rra_pipeline(
     plugin: Path,
     full_range: tuple[float, float],
     log_path: Path,
+    opensim_cmd: Path | None = None,
 ) -> bool:
     start, end = full_range
     rra_end = min(end, start + 6.0)
@@ -779,6 +878,8 @@ def run_rra_pipeline(
         f"{rra_end:.10g}",
         "--skip-smoke-test",
     ]
+    if opensim_cmd is not None:
+        cmd.extend(["--opensim-cmd", str(opensim_cmd)])
     return run_logged(cmd, log_path) == 0
 
 
@@ -845,15 +946,17 @@ def build_bundle(
     bundle_dir: Path,
     setup_start: float,
     setup_end: float,
+    model_stem: str | None = None,
 ) -> dict[str, Path]:
     data_dir = bundle_dir / "data"
-    model_out = bundle_dir / f"{subject}_SEASEA.osim"
+    model_stem = model_stem or f"{subject}_SEASEA"
+    model_out = bundle_dir / f"{model_stem}.osim"
     ik_out = data_dir / f"IK_results_{subject}_SEASEA.mot"
     grf_out = data_dir / f"{subject}_SEASEA_GRF_FullSpan.mot"
     external_out = data_dir / "ExternalForces.xml"
     actuators_out = data_dir / "CMC_Actuators.xml"
     tasks_out = data_dir / "CMC_Tasks - modified Kp_Kv.xml"
-    setup_out = bundle_dir / f"{subject}_SEASEA_setup.xml"
+    setup_out = bundle_dir / f"{model_stem}_setup.xml"
 
     bundle_dir.mkdir(parents=True, exist_ok=True)
     copy_required(calibrated_model, model_out)
@@ -909,12 +1012,17 @@ def write_report_files(report: BuildReport, bundle_dir: Path) -> None:
         f"- Task/trial: `{report.task}/{report.trial}`",
         f"- Static trial: `{report.static_trial}`",
         f"- Healthy model: `{report.healthy_model}`",
+        f"- Donor model: `{report.donor_model}`",
+        f"- SEA plugin: `{report.plugin}`",
+        f"- Frozen preparation references: `{report.preparation_references.get('manifest', 'not_recorded')}`",
         "",
         "## Outputs",
         "",
         f"- Bundle: `{report.bundle_dir}`",
         f"- Setup: `{report.setup_xml}`",
         f"- Kinematics: `{report.ik_source}`",
+        f"- IK method: `{report.ik_method}`",
+        f"- Original IK output: `{report.ik_computed_source}`",
         f"- GRF: `{report.grf_source}`",
         "",
         "## Diagnostics",
@@ -924,6 +1032,8 @@ def write_report_files(report: BuildReport, bundle_dir: Path) -> None:
         f"- Removed left mass: `{report.removed_left_mass_kg}` kg",
         f"- Marker old mean error: `{report.marker_old_mean_error_m}` m",
         f"- Marker calibrated RMS: `{report.marker_new_fit_rms_m}` m",
+        f"- Static calibration motion: `{report.static_calibration_motion}`",
+        f"- Ground registration: `{report.ground_registration.get('method', 'not_requested')}`",
         f"- Kinematics range: `{report.kinematics_time_range}` s",
         f"- GRF range: `{report.grf_time_range}` s",
         f"- Smoke return code: `{report.smoke_returncode}`",
@@ -993,12 +1103,16 @@ def ensure_overwrite_policy(paths: Iterable[Path], force: bool) -> None:
 
 
 def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_model: Path, plugin: Path, support_data: Path) -> BuildReport:
+    if args.skip_opensim_ik:
+        raise ValueError("Ground registration requires a new marker IK; --skip-opensim-ik cannot be used.")
+    if any(value is None for value in (args.fit_reference_model, args.ground_reference_motion, args.ground_plane_profile)):
+        raise ValueError("Every build requires anatomical and static ground registration references.")
     subject = discovery.subject
     task = discovery.operating_trial.task
     trial = discovery.operating_trial.trial
     task_title = task[:1].upper() + task[1:]
     raw_out = args.output_models_dir / f"{subject}_SEASEA-raw"
-    bundle_dir = args.output_models_dir / f"{subject}_SEASEA_{task_title}"
+    bundle_dir = args.bundle_dir or args.output_models_dir / f"{subject}_SEASEA_{task_title}"
     results_prefix = f"{subject.lower()}_seasea_{task}_{trial}"
     logs_dir = args.results_dir / results_prefix / "logs"
 
@@ -1010,19 +1124,26 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
         raw_dir=repo_relative(discovery.raw_dir),
         session_dir=repo_relative(discovery.session_dir),
         healthy_model=repo_relative(discovery.healthy_model),
+        donor_model=repo_relative(donor_model),
+        plugin=repo_relative(plugin),
         bundle_dir=repo_relative(bundle_dir),
+        preparation_references=getattr(args, "preparation_references", {}),
     )
 
     ensure_overwrite_policy(
         [
             raw_out / "osimxml" / f"{subject}_SEASEA.osim",
             raw_out / "osimxml" / f"{subject}_SEASEA_marker_calibrated.osim",
+            raw_out / "osimxml" / f"{subject}_SEASEA_anatomical.osim",
+            raw_out / "osimxml" / f"{subject}_SEASEA_static_ground_registered.mot",
+            raw_out / "osimxml" / f"{subject}_SEASEA_ground_registration.json",
             bundle_dir,
         ],
         args.force,
     )
 
     graft_model = raw_out / "osimxml" / f"{subject}_SEASEA.osim"
+    anatomical_model = graft_model.with_name(f"{subject}_SEASEA_anatomical.osim")
     calibrated_model = raw_out / "osimxml" / f"{subject}_SEASEA_marker_calibrated.osim"
     marker_report = calibrated_model.with_suffix(".marker_calibration.csv")
     converted_root = raw_out / "data" / "converted"
@@ -1031,9 +1152,12 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
         subject,
         discovery.healthy_model,
         donor_model,
-        graft_model,
+        anatomical_model,
+        fit_reference_model=args.fit_reference_model,
+        fit_report=report.prosthesis_fit,
     )
     report.graft_model = repo_relative(graft_model)
+    report.anatomical_model = repo_relative(anatomical_model)
     report.mass_before_kg = mass_before
     report.mass_after_kg = mass_after
     report.removed_left_mass_kg = removed_mass
@@ -1045,9 +1169,10 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
         "static",
         discovery.static_trial.trial,
         converted_root,
-        graft_model,
+        anatomical_model,
         f"{subject}_SEASEA",
         logs_dir / "convert_static.log",
+        nojvm=args.matlab_nojvm,
     )
     run_matlab_convert(
         args.matlab,
@@ -1055,9 +1180,10 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
         task,
         trial,
         converted_root,
-        graft_model,
+        anatomical_model,
         f"{subject}_SEASEA",
         logs_dir / "convert_trial.log",
+        nojvm=args.matlab_nojvm,
     )
 
     static_files = converted_trial_files(converted_root, "static", discovery.static_trial.trial)
@@ -1065,11 +1191,21 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
     report.converted_static_dir = repo_relative(static_files["dir"])
     report.converted_trial_dir = repo_relative(trial_files["dir"])
 
+    calibration_motion = raw_out / "osimxml" / f"{subject}_SEASEA_static_ground_registered.mot"
+    report.ground_registration = run_ground_registration(
+        args.python, anatomical_model, static_files["ik_dataset"], donor_model,
+        args.ground_reference_motion, args.foot_mesh, args.ground_plane_profile,
+        graft_model, calibration_motion,
+        raw_out / "osimxml" / f"{subject}_SEASEA_ground_registration.json",
+        plugin, logs_dir / "ground_registration.log",
+    )
+    report.static_calibration_motion = repo_relative(calibration_motion)
+
     run_marker_calibration(
         args.python,
         graft_model,
         static_files["trc"],
-        static_files["ik_dataset"],
+        calibration_motion,
         calibrated_model,
         marker_report,
         plugin,
@@ -1085,25 +1221,39 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
     report.kinematics_time_range = [kinematics_range[0], kinematics_range[1]]
     report.grf_time_range = [grf_range[0], grf_range[1]]
 
-    ik_source = trial_files["ik_dataset"]
-    if not args.skip_opensim_ik:
-        ik_pipeline_root = args.results_dir / f"{results_prefix}_ik"
-        report.pipeline_root = repo_relative(ik_pipeline_root)
-        open_ik = run_ik_pipeline(
-            args.python,
-            ik_pipeline_root,
-            calibrated_model,
-            trial_files["trc"],
-            trial_files["grf"],
-            support_data,
-            plugin,
-            kinematics_range,
-            logs_dir / "opensim_ik_pipeline.log",
-        )
-        if open_ik is not None:
-            ik_source = open_ik
-        else:
-            report.notes.append("OpenSim IK dry-run failed or did not produce IK_full*.mot; using converted dataset IK.")
+    ik_pipeline_root = args.results_dir / f"{results_prefix}_ik"
+    report.pipeline_root = repo_relative(ik_pipeline_root)
+    ik_source = run_ik_pipeline(
+        args.python,
+        ik_pipeline_root,
+        calibrated_model,
+        trial_files["trc"],
+        trial_files["grf"],
+        support_data,
+        plugin,
+        kinematics_range,
+        logs_dir / "opensim_ik_pipeline.log",
+        opensim_cmd=args.opensim_cmd,
+    )
+    report.ik_method = "opensim_marker_ik"
+    report.ik_computed_source = repo_relative(ik_source)
+    report.ik_provenance = {
+        "method": report.ik_method,
+        "source_file": repo_relative(ik_source),
+        "source_sha256": hashlib.sha256(ik_source.read_bytes()).hexdigest(),
+        "model_file": repo_relative(calibrated_model),
+        "model_sha256": hashlib.sha256(calibrated_model.read_bytes()).hexdigest(),
+        "marker_file": repo_relative(trial_files["trc"]),
+        "marker_sha256": hashlib.sha256(trial_files["trc"].read_bytes()).hexdigest(),
+        "time_range": list(read_time_range(ik_source)),
+    }
+    solved_range = read_time_range(ik_source)
+    if any(abs(actual - requested) > 1e-7 for actual, requested in zip(solved_range, kinematics_range)):
+        raise ValueError(f"IK output range {solved_range} does not cover requested range {kinematics_range}.")
+    if grf_range[0] > solved_range[0] + 1e-7 or grf_range[1] < solved_range[1] - 1e-7:
+        raise ValueError(f"GRF range {grf_range} does not cover IK range {solved_range}.")
+    report.kinematics_time_range = list(solved_range)
+    kinematics_range = solved_range
 
     if args.run_rra:
         rra_root = args.results_dir / f"{results_prefix}_rra"
@@ -1118,6 +1268,7 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
             plugin,
             kinematics_range,
             logs_dir / "rra_pipeline.log",
+            opensim_cmd=args.opensim_cmd,
         )
         report.notes.append("RRA diagnostic completed." if ok else "RRA diagnostic failed; see logs.")
 
@@ -1133,10 +1284,16 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
         bundle_dir,
         setup_start,
         setup_end,
+        model_stem=args.model_stem,
     )
     report.setup_xml = repo_relative(bundle_files["setup"])
     report.ik_source = repo_relative(bundle_files["kinematics"])
     report.grf_source = repo_relative(bundle_files["grf"])
+    fitting_dir = bundle_dir / "data" / "fitting"
+    fitting_dir.mkdir(parents=True, exist_ok=True)
+    copy_required(calibration_motion, fitting_dir / calibration_motion.name)
+    (fitting_dir / "ground_registration.json").write_text(
+        json.dumps(report.ground_registration, indent=2, allow_nan=False) + "\n", encoding="utf-8")
 
     healthy_dir = bundle_dir / "data" / "healthy"
     exported_healthy = run_matlab_healthy_overlay(
@@ -1147,6 +1304,7 @@ def build_subject(discovery: SubjectDiscovery, args: argparse.Namespace, donor_m
         trial,
         healthy_dir,
         logs_dir / "healthy_overlay.log",
+        nojvm=args.matlab_nojvm,
     )
     if exported_healthy:
         report.healthy_overlay_dir = repo_relative(healthy_dir)
@@ -1186,27 +1344,53 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--static-trial", default="auto")
     parser.add_argument("--models-dir", type=Path, default=DEFAULT_MODELS_DIR)
     parser.add_argument("--output-models-dir", type=Path, default=DEFAULT_MODELS_DIR)
+    parser.add_argument("--bundle-dir", type=Path, help="Explicit operational bundle directory (single subject only).")
+    parser.add_argument("--model-stem", help="Operational model/setup basename without extensions (single subject only).")
     parser.add_argument("--results-dir", type=Path, default=DEFAULT_RESULTS_DIR)
-    parser.add_argument("--donor-model", type=Path)
+    parser.add_argument("--donor-model", type=Path, help="Default: current AB06 PI321/500 operational model under --models-dir; custom donors require matching healthy/static references.")
+    parser.add_argument("--fit-reference-model", type=Path, help="Healthy model corresponding to the donor; default: AB06 healthy model under --models-dir.")
+    parser.add_argument("--ground-reference-motion", type=Path, help="Donor static registration motion; default: converted AB06 static_01 under --models-dir.")
+    parser.add_argument("--ground-plane-profile", type=Path, default=DEFAULT_GROUND_PLANE_PROFILE, help="Common registration plane; default: frozen selected V25 profile. Never modified.")
+    parser.add_argument("--foot-mesh", type=Path, default=REPO_ROOT / "Geometry" / "AM_foot_l.STL", help="Unscaled fixed foot STL used for hardware ground registration.")
     parser.add_argument("--support-data", type=Path, default=DEFAULT_MODELS_DIR / "SEASEA" / "data")
     parser.add_argument("--plugin", type=Path, default=default_plugin())
     parser.add_argument("--matlab", default=default_matlab())
+    parser.add_argument("--matlab-nojvm", action="store_true", help="Run MATLAB conversion and healthy overlay without the JVM.")
     parser.add_argument("--python", default=sys.executable, help="Python executable with OpenSim available for calibration/pipeline/smoke.")
+    parser.add_argument("--opensim-cmd", type=Path, help="Optional native OpenSim CLI forwarded to IK/RRA; otherwise the runner selects CLI/Python.")
     parser.add_argument("--side", choices=("left",), default="left")
     parser.add_argument("--run-rra", action="store_true")
-    parser.add_argument("--skip-opensim-ik", action="store_true", help="Use converted dataset IK instead of an OpenSim IK dry-run.")
+    parser.add_argument("--skip-opensim-ik", action="store_true", help="Unsupported: registered hardware always requires a fresh marker IK.")
     parser.add_argument("--skip-smoke-test", action="store_true")
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--default-duration", type=float, default=9.01, help="Default setup duration from trial start.")
     parser.add_argument("--smoke-duration", type=float, default=0.03, help="Short simulator smoke-test duration.")
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.all_subjects and (args.bundle_dir or args.model_stem):
+        parser.error("--bundle-dir and --model-stem require a single --subject.")
+    if args.model_stem and (Path(args.model_stem).name != args.model_stem or "/" in args.model_stem or "\\" in args.model_stem or args.model_stem.endswith(".osim")):
+        parser.error("--model-stem must be a basename without a directory or .osim extension.")
+    if args.skip_opensim_ik:
+        parser.error("Ground registration changes the fitted model/markers and requires a new marker IK; --skip-opensim-ik cannot be used.")
+    if args.donor_model and args.donor_model.resolve() != default_donor_model(args.models_dir).resolve():
+        if args.fit_reference_model is None or args.ground_reference_motion is None:
+            parser.error("A custom donor requires explicit --fit-reference-model and --ground-reference-motion matching that donor.")
+    args.fit_reference_model = args.fit_reference_model or default_fit_reference_model(args.models_dir)
+    args.ground_reference_motion = args.ground_reference_motion or default_ground_reference_motion(args.models_dir)
+    return args
 
 
 def main() -> int:
     args = parse_args()
     args.models_dir = args.models_dir.resolve()
     args.output_models_dir = args.output_models_dir.resolve()
+    args.bundle_dir = args.bundle_dir.resolve() if args.bundle_dir else None
+    args.fit_reference_model = args.fit_reference_model.resolve() if args.fit_reference_model else None
+    args.ground_reference_motion = args.ground_reference_motion.resolve() if args.ground_reference_motion else None
+    args.ground_plane_profile = args.ground_plane_profile.resolve() if args.ground_plane_profile else None
+    args.foot_mesh = args.foot_mesh.resolve()
+    args.opensim_cmd = args.opensim_cmd.resolve() if args.opensim_cmd else None
     args.results_dir = args.results_dir.resolve()
     args.support_data = args.support_data.resolve()
     args.plugin = args.plugin.resolve()
@@ -1221,19 +1405,43 @@ def main() -> int:
         for subject in subjects
     ]
 
+    # All preparation references are required even in discovery-only preflight.
+    if args.fit_reference_model:
+        require_file(args.fit_reference_model, "Healthy fitting reference model")
+    if args.ground_reference_motion:
+        require_file(args.ground_reference_motion, "Donor static registration motion")
+        require_file(args.ground_plane_profile, "Shared ground registration profile")
+        require_file(args.foot_mesh, "Fixed foot hardware STL")
+    require_file(donor_model, "Donor SEASEA model")
+
     if args.validate_only:
         payload = [
             validate_discovery(discovery, donor_model, args.plugin, args.matlab, args.python, args.support_data)
             for discovery in discoveries
         ]
+        for item in payload:
+            item["preparation"] = {
+                "anatomical_fitting_required": True,
+                "ground_registration_required": True,
+                "reference_donor": repo_relative(donor_model),
+                "reference_healthy_model": repo_relative(args.fit_reference_model),
+                "reference_static_motion": repo_relative(args.ground_reference_motion),
+                "ground_plane_profile": repo_relative(args.ground_plane_profile),
+                "foot_mesh": repo_relative(args.foot_mesh),
+                "ik_method": "opensim_marker_ik",
+                "dataset_ik_fallback": False,
+            }
         print(json.dumps(payload[0] if len(payload) == 1 else payload, indent=2))
         return 0
 
-    require_file(donor_model, "Donor SEASEA model")
     require_file(args.plugin, "SEA plugin")
     require_python_opensim(args.python)
+    if args.opensim_cmd:
+        require_file(args.opensim_cmd, "OpenSim CLI")
     if not args.support_data.is_dir():
         raise FileNotFoundError(f"Support data directory not found: {args.support_data}")
+
+    donor_model = freeze_preparation_references(args, donor_model)
 
     failures = 0
     reports: list[BuildReport] = []
@@ -1241,7 +1449,9 @@ def main() -> int:
         try:
             report = build_subject(discovery, args, donor_model, args.plugin, args.support_data)
             reports.append(report)
-            print(f"[build_abx] Complete: {report.subject} -> {report.bundle_dir}")
+            if report.status != "complete":
+                failures += 1
+            print(f"[build_abx] {report.status}: {report.subject} -> {report.bundle_dir}")
         except Exception as exc:
             failures += 1
             print(f"[build_abx] ERROR for {discovery.subject}: {exc}", file=sys.stderr)

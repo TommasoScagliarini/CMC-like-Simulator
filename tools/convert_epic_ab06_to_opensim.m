@@ -800,30 +800,82 @@ out = lower(regexprep(char(string(value)), '[^A-Za-z0-9]', ''));
 end
 
 function time = extractTimeVector(payload, raw, nRows, cond, defaultRate)
-timeCandidates = {'time', 'Time', 'times', 'seconds', 'sec', 't'};
+% EPIC stores the acquisition timestamps in the table's Header column.
+% Conditions describe trial bounds (often on the force-plate lattice), not
+% the marker/IK sample clock. Never reconstruct that clock when Header exists.
+timeCandidates = {'Header', 'time', 'Time', 'times', 'seconds', 'sec', 't'};
+[hasHeader, headerValue] = findHeaderTimeMember(payload);
+if ~hasHeader
+    [hasHeader, headerValue] = findHeaderTimeMember(raw);
+end
+if hasHeader
+    if istableLike(headerValue) && width(headerValue) == 1
+        headerValue = headerValue{:, 1};
+    end
+    if iscell(headerValue)
+        headerValue = cell2mat(headerValue);
+    end
+    if ~(isnumeric(headerValue) || isduration(headerValue) || isdatetime(headerValue)) ...
+            || ~isvector(headerValue)
+        error('convert_epic_ab06_to_opensim:invalidTimeVector', ...
+            'Header must contain a numeric or time-like acquisition vector.');
+    end
+    time = convertTimeLike(headerValue);
+    time = validateTimeVector(time, nRows, 'Header');
+    return;
+end
 
 if istimetableLike(payload)
-    try
-        rowTimes = payload.Properties.RowTimes;
-        time = convertTimeLike(rowTimes);
-        if numel(time) == nRows
-            time = time(:);
-            return;
-        end
-    catch
-    end
+    time = convertTimeLike(payload.Properties.RowTimes);
+    time = validateTimeVector(time, nRows, 'timetable RowTimes');
+    return;
 end
 
 time = extractNamedVector(payload, raw, timeCandidates, nRows);
 if ~isempty(time)
-    time = time(:);
+    time = validateTimeVector(time, nRows, 'explicit timestamps');
     return;
 end
 
 if isfinite(cond.Start) && isfinite(cond.End) && nRows > 1
     time = linspace(cond.Start, cond.End, nRows).';
 else
+    if ~isfinite(defaultRate) || defaultRate <= 0
+        error('convert_epic_ab06_to_opensim:invalidTimeVector', ...
+            'Default acquisition rate must be finite and positive.');
+    end
     time = ((0:nRows - 1).' ./ defaultRate);
+end
+time = validateTimeVector(time, nRows, 'fallback timestamps');
+end
+
+function [found, value] = findHeaderTimeMember(data)
+found = false;
+value = [];
+members = namedMembers(data);
+idx = findName({members.Name}, 'Header');
+if idx > 0
+    found = true;
+    value = members(idx).Value;
+    return;
+end
+for iMember = 1:numel(members)
+    if isContainerLike(members(iMember).Value)
+        [found, value] = findHeaderTimeMember(members(iMember).Value);
+        if found
+            return;
+        end
+    end
+end
+end
+
+function time = validateTimeVector(time, nRows, source)
+time = time(:);
+if numel(time) ~= nRows || ~isreal(time) || any(~isfinite(time)) ...
+        || any(diff(time) <= 0)
+    error('convert_epic_ab06_to_opensim:invalidTimeVector', ...
+        '%s timestamps must match %d rows, be finite, real and strictly increasing.', ...
+        source, nRows);
 end
 end
 
@@ -963,10 +1015,13 @@ end
 end
 
 function timeRange = chooseTimeRange(cond, fallbackTime)
+timeRange = [fallbackTime(1), fallbackTime(end)];
 if isfinite(cond.Start) && isfinite(cond.End)
-    timeRange = [cond.Start, cond.End];
-else
-    timeRange = [fallbackTime(1), fallbackTime(end)];
+    timeRange = [max(cond.Start, timeRange(1)), min(cond.End, timeRange(2))];
+    if timeRange(2) <= timeRange(1)
+        error('convert_epic_ab06_to_opensim:emptyTimeRange', ...
+            'Condition range and marker acquisition range have no positive overlap.');
+    end
 end
 end
 

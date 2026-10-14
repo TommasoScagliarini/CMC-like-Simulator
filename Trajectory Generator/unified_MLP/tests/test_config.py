@@ -12,10 +12,12 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
+import yaml
+
 TRAJECTORY_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(TRAJECTORY_ROOT))
 
-from unified_MLP import rollout_eval, training_config
+from unified_MLP import rollout_eval, training_config, train_ppo_mlp
 
 UNIFIED_ROOT = TRAJECTORY_ROOT / 'unified_MLP'
 CONFIG_ROOT = UNIFIED_ROOT / 'configs'
@@ -23,7 +25,14 @@ REPO_ROOT = TRAJECTORY_ROOT.parent
 
 
 def preset(name):
-    return training_config.load(CONFIG_ROOT / f'{name}.yaml')
+    path = CONFIG_ROOT / f'{name}.yaml'
+    cfg = training_config.load(path)
+    with patch.object(sys, 'argv', ['train_ppo_mlp', '--config', str(path)]):
+        args = train_ppo_mlp.parse_args()
+    for section in ('model', 'ppo', 'simulation', 'grf'):
+        for key in training_config.SECTION_MAP[section]:
+            cfg[section].setdefault(key, getattr(args, key))
+    return cfg
 
 
 class UnifiedPresetTests(unittest.TestCase):
@@ -36,6 +45,7 @@ class UnifiedPresetTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), metadata['ex_novo_source_sha256'])
         expected = training_config.load(source)
         expected['simulation']['iterations'] = 50
+        expected['simulation'].pop('max_delta_rad', None)
         expected['run'] = {'output_dir': None, 'resume_from': None, 'init_actor_from': None}
         actual = copy.deepcopy(cfg)
         actual.pop('provenance')
@@ -103,7 +113,7 @@ class UnifiedPresetTests(unittest.TestCase):
             export = Path(tmp) / 'rl_module_last'
             export.mkdir()
             (Path(tmp) / training_config.RESOLVED_CONFIG_NAME).write_text(
-                (CONFIG_ROOT / 'ex_novo.yaml').read_text(), encoding='utf-8'
+                yaml.safe_dump(preset('ex_novo')), encoding='utf-8'
             )
             argv = ['rollout_eval.py', '--checkpoint', str(export), '--output-dir', 'parser_test',
                     '--episode-start-offset-s', '1.756870983805102']
@@ -121,7 +131,7 @@ class UnifiedPresetTests(unittest.TestCase):
             export = Path(tmp) / 'rl_module_last'
             export.mkdir()
             (Path(tmp) / training_config.RESOLVED_CONFIG_NAME).write_text(
-                (CONFIG_ROOT / 'ex_novo.yaml').read_text(), encoding='utf-8'
+                yaml.safe_dump(preset('ex_novo')), encoding='utf-8'
             )
             argv = ['rollout_eval.py', '--checkpoint', str(export), '--output-dir', 'parser_test',
                     '--episode-start-offset-s', '1.756870983805102', '--episode-duration', '0.2',
@@ -139,7 +149,7 @@ class UnifiedPresetTests(unittest.TestCase):
             export = Path(tmp) / 'rl_module_last'
             export.mkdir()
             (Path(tmp) / training_config.RESOLVED_CONFIG_NAME).write_text(
-                (CONFIG_ROOT / 'ex_novo.yaml').read_text(), encoding='utf-8'
+                yaml.safe_dump(preset('ex_novo')), encoding='utf-8'
             )
             argv = ['rollout_eval.py', '--checkpoint', str(export), '--output-dir', 'parser_test',
                     '--no-auto-config', '--config', str(CONFIG_ROOT / 'ex_novo.yaml'),
@@ -148,6 +158,33 @@ class UnifiedPresetTests(unittest.TestCase):
                 args = rollout_eval.parse_args()
             with patch.object(training_config, '_resolve_reward', lambda value: value):
                 with self.assertRaisesRegex(ValueError, 'pros_ref_cutoff_hz'):
+                    rollout_eval._validate_checkpoint_runtime(export, args, args._cfg_reward)
+
+    def test_partial_grf_yaml_preserves_snapshot_values_and_cli_precedence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            export = Path(tmp) / 'rl_module_last'
+            export.mkdir()
+            saved = preset('ex_novo')
+            saved['grf']['online_grf_profile'] = 'online_grf_profiles/saved.json'
+            saved['grf']['online_grf_detector_profile'] = None
+            (Path(tmp) / training_config.RESOLVED_CONFIG_NAME).write_text(
+                yaml.safe_dump(saved), encoding='utf-8'
+            )
+            overrides = Path(tmp) / 'overrides.yaml'
+            overrides.write_text('grf:\n  phase_sensor_on_threshold_n: 5.0\n', encoding='utf-8')
+            argv = ['rollout_eval.py', '--checkpoint', str(export), '--config', str(overrides),
+                    '--output-dir', 'parser_test']
+            with patch.object(sys, 'argv', argv):
+                args = rollout_eval.parse_args()
+            self.assertEqual(args.online_grf_profile, saved['grf']['online_grf_profile'])
+            self.assertIsNone(args.online_grf_detector_profile)
+            with patch.object(training_config, '_resolve_reward', lambda value: value):
+                rollout_eval._validate_checkpoint_runtime(export, args, args._cfg_reward)
+            with patch.object(sys, 'argv', argv + ['--online-grf-profile', 'cli.json']):
+                args = rollout_eval.parse_args()
+            self.assertEqual(args.online_grf_profile, 'cli.json')
+            with patch.object(training_config, '_resolve_reward', lambda value: value):
+                with self.assertRaisesRegex(ValueError, 'grf.online_grf_profile'):
                     rollout_eval._validate_checkpoint_runtime(export, args, args._cfg_reward)
 
     def test_rollout_without_snapshot_or_explicit_config_fails_closed(self):

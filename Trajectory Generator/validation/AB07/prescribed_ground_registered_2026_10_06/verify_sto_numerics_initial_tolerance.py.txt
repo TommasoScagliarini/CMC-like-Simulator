@@ -1,0 +1,471 @@
+"""Read-only numerical audit of the finalized AB07 prescribed rollout.
+
+Uses the effective configuration captured by qualify_prescribed_v26.py, never
+the current default controller settings. Writes one diagnostic JSON artifact;
+does not load a policy, run dynamics, alter simulator inputs, or make plots.
+"""
+
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+from dataclasses import asdict, fields
+from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
+import sys
+from xml.etree import ElementTree as ET
+
+import numpy as np
+
+
+REPO = Path(__file__).resolve().parents[4]
+ARTIFACT_DIR = Path(__file__).resolve().parent
+DEFAULT_SESSION = REPO / "results" / "ab07_v26_ground_registered_prescribed_9p01s_2026_10_06_r1"
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def resolve_input(raw: str) -> Path:
+    """Resolve a receipt path, including a receipt copied between operating systems."""
+    normalized = raw.replace("\\", "/")
+    direct = Path(normalized)
+    if direct.is_file():
+        return direct.resolve()
+    if not direct.is_absolute() and (REPO / direct).is_file():
+        return (REPO / direct).resolve()
+    # Receipts intentionally retain the original absolute workspace path.
+    for marker in ("/models/", "/Trajectory Generator/", "/online_grf_profiles/", "/validation/"):
+        if marker in normalized:
+            candidate = REPO / marker.strip("/") / normalized.split(marker, 1)[1]
+            if candidate.is_file():
+                return candidate.resolve()
+    candidate = REPO / direct.name
+    if candidate.is_file():
+        return candidate.resolve()
+    raise FileNotFoundError(raw)
+
+
+def metrics(values: np.ndarray) -> dict:
+    array = np.asarray(values, dtype=float).reshape(-1)
+    finite = array[np.isfinite(array)]
+    result = {"samples": int(array.size), "finite_samples": int(finite.size)}
+    if finite.size:
+        result.update(
+            min=float(np.min(finite)), max=float(np.max(finite)),
+            max_abs=float(np.max(np.abs(finite))),
+            rms=float(np.sqrt(np.mean(finite * finite))),
+            mean=float(np.mean(finite)), mean_abs=float(np.mean(np.abs(finite))),
+            p95_abs=float(np.percentile(np.abs(finite), 95)),
+        )
+    return result
+
+
+def mask_stats(mask: np.ndarray, dt: float) -> dict:
+    mask = np.asarray(mask, dtype=bool)
+    count = int(np.count_nonzero(mask))
+    longest = current = 0
+    for active in mask:
+        current = current + 1 if active else 0
+        longest = max(longest, current)
+    return {
+        "samples": count, "fraction": count / max(1, mask.size),
+        "sample_count_times_dt_s": count * dt,
+        "longest_contiguous_samples": longest,
+        "longest_sample_count_times_dt_s": longest * dt,
+    }
+
+
+def xml_sea_properties(path: Path, names: list[str], validator) -> dict:
+    props = validator.parse_sea_props(path, names)
+    tree = ET.parse(path)
+    for element in tree.getroot().iter():
+        if validator.xml_local_name(element.tag) != "SeriesElasticActuator":
+            continue
+        name = element.attrib.get("name")
+        if name not in props:
+            continue
+        values = {validator.xml_local_name(c.tag): (c.text or "").strip() for c in element}
+        # Require explicit PI properties in this donor model; do not invent defaults.
+        props[name].update(
+            Ki=float(values["Ki"]),
+            integral_torque_limit=float(values["integral_torque_limit"]),
+            impedance=values["Impedence"].lower() == "true",
+            Kd_Imp=float(values.get("Kd_Imp", values["Kd"])),
+        )
+    return props
+
+
+def series_on(table, column: str, time: np.ndarray) -> np.ndarray:
+    if table is None or column not in table.index:
+        raise ValueError(f"Required channel unavailable: {column}")
+    if len(table.time) == len(time) and np.array_equal(table.time, time):
+        return table.data[:, table.index[column]]
+    if time[0] < table.time[0] - 1e-8 or time[-1] > table.time[-1] + 1e-8:
+        raise ValueError(f"Channel does not cover requested time range: {column}")
+    return np.interp(time, table.time, table.data[:, table.index[column]])
+
+
+def identity(observed: np.ndarray, expected: np.ndarray, tolerance: float, unit: str) -> dict:
+    error = observed - expected
+    result = metrics(error)
+    result.update(
+        unit=unit, tolerance_max_abs=tolerance,
+        passed=bool(np.all(np.isfinite(error)) and np.max(np.abs(error)) <= tolerance),
+    )
+    return result
+
+
+def audit_tables(tables: dict, cfg, anchor_time: np.ndarray) -> dict:
+    result = {}
+    expected_rows = int(round((cfg.t_end - cfg.t_start) / cfg.integration_dt))
+    expected_time = cfg.t_start + np.arange(expected_rows) * cfg.integration_dt
+    for suffix, table in tables.items():
+        if table is None:
+            result[suffix] = {"present": False}
+            continue
+        time = table.time
+        diffs = np.diff(time)
+        nonfinite = {}
+        for column in table.columns:
+            values = table.data[:, table.index[column]]
+            missing = int(np.count_nonzero(~np.isfinite(values)))
+            if missing:
+                nonfinite[column] = {
+                    "count": missing, "all_samples": missing == len(time),
+                    "nan": int(np.count_nonzero(np.isnan(values))),
+                    "infinity": int(np.count_nonzero(np.isinf(values))),
+                }
+        result[suffix] = {
+            "present": True, "file": str(table.path.relative_to(REPO)),
+            "sha256": sha256(table.path), "rows": len(time), "columns": len(table.columns),
+            "in_degrees": table.in_degrees,
+            "time_start_s": float(time[0]), "time_end_s": float(time[-1]),
+            "time_finite": bool(np.all(np.isfinite(time))),
+            "strictly_increasing": bool(np.all(diffs > 0)),
+            "dt_min_s": float(np.min(diffs)), "dt_max_s": float(np.max(diffs)),
+            "sample_dt_matches_receipt": bool(np.allclose(diffs, cfg.integration_dt, atol=1e-8, rtol=0)),
+            "expected_integration_rows": expected_rows,
+            "covers_requested_preintegration_samples": bool(len(time) == expected_rows and np.allclose(time, expected_time, atol=1e-8, rtol=0)),
+            "same_time_grid_as_kinematics": bool(np.array_equal(time, anchor_time)),
+            "start_offset_from_requested_s": float(time[0] - cfg.t_start),
+            "end_offset_from_requested_s": float(time[-1] - cfg.t_end),
+            "all_values_finite": not nonfinite, "nonfinite_columns": nonfinite,
+        }
+    return result
+
+
+def tracking_audit(cfg, tables, raw, validator) -> dict:
+    actual = tables["kinematics"]
+    served = tables["kinematics_reference"]
+    time = actual.time
+    result = {}
+    for coord in actual.columns:
+        actual_values = actual.data[:, actual.index[coord]]
+        factor = 1.0 if coord in cfg.translation_coords else 180.0 / np.pi
+        unit = "m" if coord in cfg.translation_coords else "deg"
+        entry = {"unit": unit, "actual": metrics(actual_values * factor)}
+        raw_series = validator.ref_series(raw, coord, cfg)
+        if raw_series is not None:
+            raw_t, raw_values, raw_name = raw_series
+            raw_i = np.interp(time, raw_t, raw_values)
+            entry["actual_minus_new_raw_ik"] = metrics((actual_values - raw_i) * factor)
+            entry["raw_ik_column"] = raw_name
+            entry["raw_ik_covers_output"] = bool(raw_t[0] <= time[0] and raw_t[-1] >= time[-1])
+        served_values = series_on(served, f"{coord}_q_ref", time)
+        entry["actual_minus_served"] = metrics((actual_values - served_values) * factor)
+        if raw_series is not None:
+            entry["served_minus_new_raw_ik"] = metrics((served_values - raw_i) * factor)
+        actual_speed = series_on(tables["states"], f"{coord}_qdot", time)
+        served_speed = series_on(served, f"{coord}_qdot_ref", time)
+        entry["actual_speed_minus_served_speed"] = metrics((actual_speed - served_speed) * factor)
+        entry["speed_unit"] = f"{unit}/s"
+        result[coord] = entry
+    return {
+        "raw_ik_interpolation": "linear at the 1 ms output timestamps, as in validate_sim_results.py",
+        "served_reference": "recorded q_ref and qdot_ref actually supplied to the simulator",
+        "coordinates": result,
+    }
+
+
+def sea_audit(cfg, tables, props: dict) -> dict:
+    time = tables["kinematics"].time
+    result = {}
+    for name, coord in ((cfg.sea_knee_name, cfg.pros_coords[0]), (cfg.sea_ankle_name, cfg.pros_coords[1])):
+        p = props[name]
+        q = series_on(tables["states"], f"{coord}_q", time)
+        qdot = series_on(tables["states"], f"{coord}_qdot", time)
+        theta = series_on(tables["sea_states"], f"{name}_motor_angle", time)
+        omega = series_on(tables["sea_states"], f"{name}_motor_speed", time)
+        xi = series_on(tables["sea_states"], f"{name}_torque_error_integral", time)
+        u = series_on(tables["sea_controls"], coord, time)
+        spring = series_on(tables["sea_torques"], f"{name}_tau_spring", time)
+        motor = series_on(tables["sea_torques"], f"{name}_tau_motor", time)
+        diag = lambda field: series_on(tables["sea_diagnostics"], f"{name}_{field}", time)
+        spring_recomputed = p["K"] * (theta - q)
+        tau_ref = p["F_opt"] * u
+        error = tau_ref - spring_recomputed
+        integral_unclamped = p["Ki"] * xi
+        integral = np.clip(integral_unclamped, -p["integral_torque_limit"], p["integral_torque_limit"])
+        if p["impedance"]:
+            raw = spring_recomputed + p["Bm"] * omega + p["Kp"] * (q + tau_ref / p["K"] - theta) + p["Kd_Imp"] * (qdot - omega)
+            xi_dot_expected = np.zeros_like(error)
+        else:
+            raw = tau_ref + p["Kp"] * error + integral - p["Kd"] * omega
+            freeze = (((integral_unclamped >= p["integral_torque_limit"]) & (error > 0)) |
+                      ((integral_unclamped <= -p["integral_torque_limit"]) & (error < 0)) |
+                      ((raw >= 500.0) & (error > 0)) | ((raw <= -500.0) & (error < 0)))
+            xi_dot_expected = np.where(freeze, 0.0, error)
+        clamped = np.clip(raw, -500.0, 500.0)
+        plugin = diag("tau_input_plugin")
+        python = diag("tau_input_python")
+        angle_dot = series_on(tables["sea_derivatives"], f"{name}_motor_angle_dot", time)
+        speed_dot = series_on(tables["sea_derivatives"], f"{name}_motor_speed_dot", time)
+        xi_dot = series_on(tables["sea_derivatives"], f"{name}_torque_error_integral_dot", time)
+        acceleration = (plugin - spring_recomputed - p["Bm"] * omega) / p["Jm"]
+        checks = {
+            "spring_from_motor_and_joint_angles": identity(spring, spring_recomputed, 1e-5, "Nm"),
+            "tau_ref_from_normalized_control": identity(diag("tau_ref"), tau_ref, 1e-5, "Nm"),
+            "raw_PI_from_states_controls_and_model": identity(diag("tau_input_raw"), raw, 1e-4, "Nm"),
+            "python_torque_equals_clamped_independent_law": identity(python, clamped, 1e-4, "Nm"),
+            "plugin_torque_equals_clamped_independent_law": identity(plugin, clamped, 1e-4, "Nm"),
+            "plugin_minus_python": identity(plugin, python, 1e-4, "Nm"),
+            "stored_plugin_minus_python": identity(diag("tau_input_plugin_minus_python"), plugin - python, 1e-7, "Nm"),
+            "motor_torque_matches_plugin_output": identity(motor, plugin, 1e-7, "Nm"),
+            "angle_derivative_equals_motor_speed": identity(angle_dot, omega, 1e-7, "rad/s"),
+            "speed_derivative_equals_rotor_dynamics": identity(speed_dot, acceleration, 1e-3, "rad/s^2"),
+            "angle_derivative_matches_plugin_output": identity(angle_dot, diag("motor_angle_dot_plugin"), 1e-7, "rad/s"),
+            "speed_derivative_matches_plugin_output": identity(speed_dot, diag("motor_speed_dot_plugin"), 1e-7, "rad/s^2"),
+            "integral_derivative_equals_error_with_antiwindup": identity(xi_dot, xi_dot_expected, 1e-5, "Nm"),
+            "stored_integral_torque": identity(diag("inner_integral_torque"), integral, 1e-5, "Nm"),
+            "reported_motor_inertia_matches_model": identity(diag("motor_inertia"), np.full_like(time, p["Jm"]), 1e-8, "kg*m^2"),
+            "reported_motor_damping_matches_model": identity(diag("motor_damping"), np.full_like(time, p["Bm"]), 1e-8, "Nm*s/rad"),
+            "reported_spring_stiffness_matches_model": identity(diag("spring_stiffness"), np.full_like(time, p["K"]), 1e-8, "Nm/rad"),
+        }
+        if cfg.sea_outer_controller_mode == "cascade" and abs(cfg.T_control - cfg.integration_dt) < 1e-12:
+            q_ref = series_on(tables["kinematics_reference"], f"{coord}_q_ref", time)
+            qdot_ref = series_on(tables["kinematics_reference"], f"{coord}_qdot_ref", time)
+            velocity_ref = qdot_ref + cfg.sea_cascade_kp_outer[coord] * (q_ref - q)
+            velocity_error = velocity_ref - qdot
+            cascade_p = cfg.sea_cascade_kp_inner[coord] * velocity_error
+            cascade_i = np.clip(cfg.sea_cascade_ki_inner[coord] * diag("cascade_xi_v"), -cfg.sea_cascade_inner_i_torque_limit[coord], cfg.sea_cascade_inner_i_torque_limit[coord])
+            outer_cmd = (cascade_p + cascade_i) * diag("sea_feasibility_scale")
+            checks.update({
+                "outer_mode_matches_effective_cascade_config": identity(diag("outer_controller_mode_id"), np.full_like(time, 2.0), 0.0, "mode id"),
+                "cascade_velocity_reference_from_served_reference": identity(diag("cascade_qdot_ref"), velocity_ref, 1e-5, "rad/s"),
+                "cascade_velocity_error_from_states": identity(diag("cascade_velocity_error"), velocity_error, 1e-5, "rad/s"),
+                "cascade_proportional_torque_from_effective_config": identity(diag("cascade_inner_p_cmd"), cascade_p, 1e-4, "Nm"),
+                "cascade_integral_torque_from_effective_config": identity(diag("cascade_inner_i_cmd"), cascade_i, 1e-5, "Nm"),
+                "outer_command_from_cascade_PI": identity(diag("tau_cmd_raw"), outer_cmd, 1e-4, "Nm"),
+            })
+            if cfg.sea_u_lpf_cutoff_hz[coord] == 0.0:
+                checks["normalized_command_from_cascade_PI_and_Fopt"] = identity(u, np.clip(outer_cmd / p["F_opt"], -1.0, 1.0), 1e-6, "normalized control")
+        clamp_mask = np.abs(plugin) >= 500.0 - 1e-7
+        checks["stored_motor_clamp_flag"] = identity(diag("tau_input_saturated"), clamp_mask.astype(float), 0.0, "boolean")
+        result[name] = {
+            "coordinate": coord, "model_properties": p, "identities": checks,
+            "all_identity_checks_pass": all(c["passed"] for c in checks.values()),
+            "tau_ref_minus_spring_Nm": metrics(tau_ref - spring),
+            "motor_angle_minus_algebraic_equilibrium_rad": metrics(theta - (q + tau_ref / p["K"])),
+            "motor_speed_minus_joint_speed_rad_s": metrics(omega - qdot),
+            "tau_spring_Nm": metrics(spring), "tau_motor_Nm": metrics(plugin),
+            "control": metrics(u), "control_bound_violations": int(np.count_nonzero(np.abs(u) > 1.0 + 1e-8)),
+            "normalized_control_saturation": mask_stats(np.abs(u) >= 0.999, cfg.integration_dt),
+            "motor_torque_clamp": mask_stats(clamp_mask, cfg.integration_dt),
+            "motor_torque_bound_violations": int(np.count_nonzero(np.abs(plugin) > 500.0 + 1e-7)),
+            "inner_integral_torque_clamp": mask_stats(np.abs(integral_unclamped) >= p["integral_torque_limit"], cfg.integration_dt),
+            "raw_motor_torque_excess_above_500_Nm": metrics(np.maximum(np.abs(raw) - 500.0, 0.0)),
+            "torque_error_integral": metrics(xi), "torque_error_integral_dot": metrics(xi_dot),
+            "outer_controller_mode_ids": sorted(set(diag("outer_controller_mode_id")[np.isfinite(diag("outer_controller_mode_id"))].tolist())),
+        }
+    return result
+
+
+def reserves_and_recruitment(cfg, tables) -> dict:
+    reserves = tables["reserve_torques"]
+    so = tables["so_torque_diagnostics"]
+    controls = tables["reserve_controls"]
+    groups = {name: [] for name in ("pelvis_translations_N", "pelvis_rotations_Nm", "biological_joints_Nm", "prosthetic_joints_Nm")}
+    muscle_capable_joint_reserves = []
+    muscle_incapable_joint_reserves = []
+    per_coord = {}
+    for column in reserves.columns:
+        if not column.endswith("_reserve_torque"):
+            continue
+        coord = column.removesuffix("_reserve_torque")
+        if coord in cfg.translation_coords:
+            group = "pelvis_translations_N"
+        elif coord.startswith("pelvis_"):
+            group = "pelvis_rotations_Nm"
+        elif coord in cfg.pros_coords:
+            group = "prosthetic_joints_Nm"
+        else:
+            group = "biological_joints_Nm"
+        values = reserves.data[:, reserves.index[column]]
+        groups[group].append(values)
+        entry = {"group": group, "unit": "N" if coord in cfg.translation_coords else "Nm", "torque_or_force": metrics(values)}
+        control_name = f"{coord}_reserve_control"
+        if controls is not None and control_name in controls.index:
+            u = series_on(controls, control_name, reserves.time)
+            limit = cfg.unactuated_reserve_u_max if any(coord.startswith(prefix) for prefix in cfg.unactuated_reserve_coord_prefixes) else cfg.reserve_u_max
+            entry["control"] = metrics(u)
+            entry["configured_control_limit"] = limit
+            entry["control_at_limit"] = mask_stats(np.abs(u) >= limit - 1e-7, cfg.integration_dt)
+        capacity_name = f"muscle_row_capacity_{coord}"
+        if capacity_name in so.index:
+            capacity = series_on(so, capacity_name, reserves.time)
+            entry["muscle_row_capacity"] = metrics(capacity)
+            entry["muscle_capable_fraction"] = float(np.mean(capacity > cfg.muscle_row_capacity_threshold))
+            entry["so_contributions"] = {
+                block: metrics(series_on(so, f"{block}_{coord}", reserves.time))
+                for block in ("tau_target", "tau_muscle", "tau_reserve", "tau_delivered", "tau_residual")
+            }
+            target = series_on(so, f"tau_target_{coord}", reserves.time)
+            muscle = series_on(so, f"tau_muscle_{coord}", reserves.time)
+            reserve = series_on(so, f"tau_reserve_{coord}", reserves.time)
+            delivered = series_on(so, f"tau_delivered_{coord}", reserves.time)
+            residual = series_on(so, f"tau_residual_{coord}", reserves.time)
+            entry["so_diagnostic_identities"] = {
+                "delivered_equals_muscle_plus_reserve": identity(delivered, muscle + reserve, 1e-7, entry["unit"]),
+                "residual_equals_target_minus_delivered": identity(residual, target - delivered, 1e-7, entry["unit"]),
+            }
+            if group == "biological_joints_Nm":
+                capable = capacity > cfg.muscle_row_capacity_threshold
+                muscle_capable_joint_reserves.append(np.where(capable, values, 0.0))
+                muscle_incapable_joint_reserves.append(np.where(capable, 0.0, values))
+        per_coord[coord] = entry
+    group_stats = {}
+    for name, arrays in groups.items():
+        if arrays:
+            matrix = np.column_stack(arrays)
+            group_stats[name] = {"coordinate_count": len(arrays), "per_sample_vector_norm": metrics(np.linalg.norm(matrix, axis=1))}
+    for name, arrays in (("muscle_capable_biological_joint_reserve_Nm", muscle_capable_joint_reserves), ("muscle_incapable_biological_joint_reserve_Nm", muscle_incapable_joint_reserves)):
+        if arrays:
+            group_stats[name] = {"per_sample_vector_norm": metrics(np.linalg.norm(np.column_stack(arrays), axis=1))}
+    recruitment = tables["recruitment"]
+    return {
+        "note": "Force and torque norms are kept separate. Biological joint rows are also described by their recorded muscle capacity; pelvis support is not counted as joint reserve recruitment.",
+        "per_coordinate": per_coord, "groups": group_stats,
+        "recruitment_recorded_columns": {
+            name: metrics(recruitment.data[:, recruitment.index[name]]) for name in recruitment.columns
+        },
+        "legacy_recruitment_norm_note": "Recorded tau_*_norm and unactuated_reserve_norm can combine translation force and rotation torque; they are reported as legacy diagnostics, not a uniform Nm quantity.",
+        "so_feasibility_scale": metrics(so.data[:, so.index["feasibility_scale"]]),
+        "so_feasibility_scaled_samples": int(np.count_nonzero(so.data[:, so.index["feasibility_scale"]] < 1.0 - 1e-8)),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--session-dir", type=Path, default=DEFAULT_SESSION)
+    parser.add_argument("--output", type=Path, default=ARTIFACT_DIR / "numerical_verification.json")
+    args = parser.parse_args()
+    session = args.session_dir.resolve()
+    receipt_path = session / "receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if receipt.get("status") == "prepared" or "final_time_s" not in receipt:
+        parser.error("Receipt is not finalized; wait until the rollout has finished writing its outputs.")
+    for path in (REPO, REPO / "Trajectory Generator" / "baseline_MLP"):
+        sys.path.insert(0, str(path))
+    import win_runtime  # noqa: F401: project Windows OpenSim DLL loading shim
+    from config import SimulatorConfig
+    from validation import validate_sim_results as validator
+
+    snapshot = receipt["effective_simulator_config"]
+    expected_keys = {field.name for field in fields(SimulatorConfig)}
+    if set(snapshot) != expected_keys:
+        raise ValueError(f"Effective configuration must be complete: missing={sorted(expected_keys - set(snapshot))}, unknown={sorted(set(snapshot) - expected_keys)}")
+    cfg = SimulatorConfig(**snapshot)
+    outputs = session / "sim_outputs"
+    tables = validator.load_required_tables(outputs, cfg.output_prefix)
+    for suffix in ("kinematics_reference", "reserve_controls", "recruitment", "so_torque_diagnostics"):
+        tables[suffix] = validator.load_table(outputs / f"{cfg.output_prefix}_{suffix}.sto")
+    # Audit every STO, including auxiliary signals, without duplicating event analysis.
+    for path in sorted(outputs.glob(f"{cfg.output_prefix}_*.sto")):
+        suffix = path.stem.removeprefix(f"{cfg.output_prefix}_")
+        if suffix not in tables:
+            tables[suffix] = validator.load_table(path)
+    missing = [name for name, table in tables.items() if table is None]
+    if missing:
+        raise ValueError(f"Required outputs missing: {missing}")
+    fingerprints = {}
+    for name, entry in receipt["source_files"].items():
+        path = resolve_input(entry["path"])
+        actual_hash = sha256(path)
+        fingerprints[name] = {
+            "path": str(path.relative_to(REPO)), "receipt_sha256": entry["sha256"],
+            "current_sha256": actual_hash, "matches_receipt": actual_hash == entry["sha256"],
+        }
+    model_path = resolve_input(snapshot["model_file"])
+    raw_path = resolve_input(snapshot["kinematics_file"])
+    raw = validator.load_table(raw_path)
+    props = xml_sea_properties(model_path, [cfg.sea_knee_name, cfg.sea_ankle_name], validator)
+    legacy_checks = []
+    validator.validate_run_status(outputs, cfg.output_prefix, legacy_checks)
+    validator.validate_sea_tautology(cfg, tables, props, legacy_checks)
+    validator.validate_reserves(cfg, tables, legacy_checks)
+    validator.validate_tracking(cfg, tables, raw, legacy_checks)
+    validator.validate_power_and_controls(cfg, tables, legacy_checks)
+    validator.validate_sea_derivatives(cfg, tables, legacy_checks)
+    validator.validate_sea_interface_diagnostics(cfg, tables, legacy_checks)
+
+    audit = audit_tables(tables, cfg, tables["kinematics"].time)
+    tracking = tracking_audit(cfg, tables, raw, validator)
+    sea = sea_audit(cfg, tables, props)
+    mtp_meta = {}
+    tree = ET.parse(model_path)
+    for element in tree.getroot().iter():
+        name = element.attrib.get("name", "")
+        if validator.xml_local_name(element.tag) == "Coordinate" and "mtp" in name.lower():
+            mtp_meta[name] = {
+                validator.xml_local_name(child.tag): (child.text or "").strip()
+                for child in element if validator.xml_local_name(child.tag) in {"locked", "clamped", "range", "default_value"}
+            }
+    core_names = ("kinematics", "kinematics_reference", "states", "sea_controls", "sea_torques", "sea_states", "sea_derivatives", "reserve_torques", "reserve_controls", "activations", "muscle_forces", "recruitment", "so_torque_diagnostics")
+    summary = {
+        "receipt_completed_requested_duration": bool(receipt.get("completed_requested_duration")),
+        "source_fingerprints_all_match_receipt": all(v["matches_receipt"] for v in fingerprints.values()),
+        "output_rows": len(tables["kinematics"].time),
+        "all_sto_same_time_grid": all(v["same_time_grid_as_kinematics"] for v in audit.values()),
+        "all_sto_dt_matches_receipt": all(v["sample_dt_matches_receipt"] for v in audit.values()),
+        "all_sto_cover_requested_preintegration_samples": all(v["covers_requested_preintegration_samples"] for v in audit.values()),
+        "core_sto_all_values_finite": all(audit[k]["all_values_finite"] for k in core_names if k in audit),
+        "all_sto_values_finite": all(v["all_values_finite"] for v in audit.values()),
+        "sea_independent_identity_checks_all_pass": all(v["all_identity_checks_pass"] for v in sea.values()),
+        "legacy_check_counts": dict(Counter(check.status for check in legacy_checks)),
+        "legacy_tracking_thresholds_are_generic": "validate_sim_results tracking limits are diagnostic stability limits, not a scientific acceptance criterion for AB07 or its served reference.",
+    }
+    result = {
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "diagnostic_script_sha256": sha256(Path(__file__)),
+        "session": str(session.relative_to(REPO)), "receipt_sha256": sha256(receipt_path),
+        "receipt_status": receipt.get("status"), "final_time_s": receipt.get("final_time_s"),
+        "policy_segments": receipt.get("steps"), "summary": summary,
+        "effective_simulator_config": snapshot, "source_fingerprints": fingerprints,
+        "output_table_audit": audit,
+        "new_raw_ik": {"path": str(raw_path.relative_to(REPO)), "sha256": sha256(raw_path), "in_degrees": raw.in_degrees, "time_start_s": float(raw.time[0]), "time_end_s": float(raw.time[-1])},
+        "tracking": tracking, "SEA": sea,
+        "MTP_separate": {"model_coordinate_metadata": mtp_meta, "tracking": {k: v for k, v in tracking["coordinates"].items() if "mtp" in k.lower()}},
+        "reserves_and_recruitment": reserves_and_recruitment(cfg, tables),
+        "reused_validator": {"path": "validation/validate_sim_results.py", "sha256": sha256(REPO / "validation" / "validate_sim_results.py"), "checks": [asdict(check) for check in legacy_checks]},
+        "scope": "Read-only finalized STO audit. No policy or training; no new dynamics; no simulator, model, IK, controller or plugin edits; no plots or gait-event analysis.",
+        "identity_tolerance_note": "Tolerances account for STO text rounding: 1e-5 Nm for spring reconstruction, 1e-4 Nm for PI reconstruction, 1e-3 rad/s^2 for rotor dynamics (Jm=0.01 magnifies rounded angle error).",
+        "time_coverage_note": "SimulationRunner records the state before each 1 ms integration step. A complete 9.01 s rollout therefore has 9010 samples over [t_start, t_end), with the final sample at t_end - 0.001 s; the receipt records the integrated final time.",
+    }
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = args.output.with_suffix(args.output.suffix + ".tmp")
+    temporary.write_text(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
+    temporary.replace(args.output)
+    print(json.dumps({"output": str(args.output), "summary": summary}, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,293 @@
+{
+  "audit_date": "2026-10-12",
+  "scope": "offline historical artifact audit and current IK reconstruction only",
+  "run": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01",
+  "best_logical_iteration": 47,
+  "new_ppo_updates": 50,
+  "logical_iterations": [
+    2,
+    51
+  ],
+  "restored_logical_iteration": 1,
+  "new_ppo_transitions_total": 230400,
+  "best47_prefix_new_updates": 46,
+  "best47_prefix_transitions_per_offset": 70656,
+  "random_init": false,
+  "imitation_initialize_to_target": false,
+  "per_offset": [
+    {
+      "offset_s": 1.756870983805102,
+      "metric_label": "offset_1p756871s",
+      "absolute_reset_time_s_inferred_from_current_setup": 13.746870983805103,
+      "new_ppo_transitions": 76800,
+      "transitions_per_update": 1536,
+      "observed_completed_episode_count": 152,
+      "runners_assigned_from_current_sampler": [
+        1,
+        4,
+        7,
+        10
+      ],
+      "final_lifetime_transitions": 76800.0,
+      "current_ik_reconstruction_prosthetic": {
+        "pros_knee_angle": {
+          "q_rad": -0.6354898847072702,
+          "qdot_rad_s": 4.010993005968824
+        },
+        "pros_ankle_angle": {
+          "q_rad": -0.003850961923172281,
+          "qdot_rad_s": 0.3024634669642508
+        }
+      }
+    },
+    {
+      "offset_s": 1.956870983805102,
+      "metric_label": "offset_1p956871s",
+      "absolute_reset_time_s_inferred_from_current_setup": 13.946870983805102,
+      "new_ppo_transitions": 76800,
+      "transitions_per_update": 1536,
+      "observed_completed_episode_count": 152,
+      "runners_assigned_from_current_sampler": [
+        2,
+        5,
+        8,
+        11
+      ],
+      "final_lifetime_transitions": 80896.0,
+      "current_ik_reconstruction_prosthetic": {
+        "pros_knee_angle": {
+          "q_rad": -0.17419569397105578,
+          "qdot_rad_s": -0.041778514888717325
+        },
+        "pros_ankle_angle": {
+          "q_rad": 0.05182407135735228,
+          "qdot_rad_s": -0.7165320661766673
+        }
+      }
+    },
+    {
+      "offset_s": 2.156870983805102,
+      "metric_label": "offset_2p156871s",
+      "absolute_reset_time_s_inferred_from_current_setup": 14.146870983805101,
+      "new_ppo_transitions": 76800,
+      "transitions_per_update": 1536,
+      "observed_completed_episode_count": 152,
+      "runners_assigned_from_current_sampler": [
+        3,
+        6,
+        9,
+        12
+      ],
+      "final_lifetime_transitions": 76800.0,
+      "current_ik_reconstruction_prosthetic": {
+        "pros_knee_angle": {
+          "q_rad": -0.23804791708724776,
+          "qdot_rad_s": -0.09213499664648725
+        },
+        "pros_ankle_angle": {
+          "q_rad": 0.04245472691200367,
+          "qdot_rad_s": 0.744276659176056
+        }
+      }
+    }
+  ],
+  "summary_history_equal_to_jsonl": true,
+  "condition_balance_passes": 50,
+  "learner_batch_balance_passes": 50,
+  "interleaved_max_start_run_length_values": [
+    1.0
+  ],
+  "inherited_nominal_lifetime_steps": 4096,
+  "reset_semantics": "Current reset draws a uniform time only if random_init; otherwise fixed assigned offset is clamped to t_end-duration. It sets coordinate q/qdot from IK, SEA motor angle/speed from joint q/qdot, resets controller/SO/FSM memory, and applies no reset q/qdot noise.",
+  "runtime_file_scan": {
+    "runtime_manifest_files": [],
+    "progress_csv_files": []
+  },
+  "current_ik_preprocessing": {
+    "filter": "zero-phase Butterworth",
+    "cutoff_hz": 6.0,
+    "order": 4,
+    "resample_dt_s": 0.001,
+    "numpy": "2.2.6",
+    "scipy": "1.15.2",
+    "historically_attested": false
+  },
+  "historical_j19": [
+    {
+      "source": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/v26c_j19b_closed_loop_receipt.json",
+      "sha256": "789c57ca293ae7d5f578d4b3cae4e9aec599fa3edf4ce87239ad5fc8a7b1b509",
+      "aggregate_pass": true,
+      "cells": [
+        {
+          "id": "A",
+          "mode": "deterministic",
+          "seed": 123,
+          "offset_s": 1.956870983805102,
+          "actual_reset_time_s": 13.946870983805102,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": null
+        },
+        {
+          "id": "B",
+          "mode": "deterministic",
+          "seed": 123,
+          "offset_s": 1.756870983805102,
+          "actual_reset_time_s": 13.746870983805103,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": null
+        },
+        {
+          "id": "C",
+          "mode": "deterministic",
+          "seed": 123,
+          "offset_s": 2.156870983805102,
+          "actual_reset_time_s": 14.146870983805101,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": null
+        },
+        {
+          "id": "D",
+          "mode": "stochastic_held",
+          "seed": 123,
+          "offset_s": 1.956870983805102,
+          "actual_reset_time_s": 13.946870983805102,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": 0.005
+        },
+        {
+          "id": "E",
+          "mode": "stochastic_held",
+          "seed": 124,
+          "offset_s": 1.956870983805102,
+          "actual_reset_time_s": 13.946870983805102,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": 0.005
+        },
+        {
+          "id": "F",
+          "mode": "stochastic_held",
+          "seed": 125,
+          "offset_s": 1.956870983805102,
+          "actual_reset_time_s": 13.946870983805102,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": 0.005
+        }
+      ],
+      "scope": "historical J19 actor qualification, not a present best47 reset test"
+    },
+    {
+      "source": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1/v26c_j19c_heldout_g_i_receipt.json",
+      "sha256": "4224f0201eeccc8ccec911635b5bc18a82e38fb27eeb878457d004d28cb17ffc",
+      "aggregate_pass": true,
+      "cells": [
+        {
+          "id": "G",
+          "mode": "stochastic_held",
+          "seed": 126,
+          "offset_s": 1.956870983805102,
+          "actual_reset_time_s": 13.946870983805102,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": 0.005
+        },
+        {
+          "id": "H",
+          "mode": "stochastic_held",
+          "seed": 127,
+          "offset_s": 1.956870983805102,
+          "actual_reset_time_s": 13.946870983805102,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": 0.005
+        },
+        {
+          "id": "I",
+          "mode": "stochastic_held",
+          "seed": 128,
+          "offset_s": 1.956870983805102,
+          "actual_reset_time_s": 13.946870983805102,
+          "steps": 500,
+          "behavioural_pass": true,
+          "sigma": 0.005
+        }
+      ],
+      "scope": "historical J19 actor qualification, not a present best47 reset test"
+    }
+  ],
+  "limitations": [
+    "The training run contains aggregated offset/episode statistics, not a persisted per-reset q/qdot/seed/time series. Reset counts and state equality across successive episodes cannot be proved from transition counts alone.",
+    "Recorded completed episodes are end-callback counts, not the count of reset() calls: initial and final unfinished episodes differ, and historical per-runner episode IDs are absent.",
+    "No runtime_manifest/progress.csv/result.json/reset telemetry file was found under the run. Summary/history, resolved YAML, and per-iteration guards are the authoritative available evidence.",
+    "Current setup/IK/config and current sampler/reset source are SHA-pinned here, but their identity with files executed in September is not independently pinned by the inspected run metadata. Reconstructed q/qdot are current-file expectations, not historical measured reset states.",
+    "Sampling interleaving decorrelates condition order in minibatches, not the physical reset state. Three fixed IK times span 0.4s of one AB06 trajectory; this is not broad initial-state randomization or statistical independence.",
+    "Historical J19 qualification used an earlier actor and sigma0.005/held noise where declared; it does not establish robustness of the PPO best47 actor today."
+  ],
+  "sources": [
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/summary.json",
+      "sha256": "803a954093edb8d759ed61607d55557479441565023a277005594badcd91ca7c"
+    },
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/train_iterations.jsonl",
+      "sha256": "966f733e89d2e5fa72873739b9389baf90e0e84ed704d82af73f52d0ddd4d4dc"
+    },
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml",
+      "sha256": "765acb0fb79a2262bde77be8086c7642dff25406b8f854052cb332cc5986002e"
+    },
+    {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/checkpoint_best_meta.json",
+      "sha256": "4e9cab26bf80f03dbc93956495b542c3d2156e4bf84da101e89fa84c013ccf19"
+    },
+    {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+      "sha256": "5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931"
+    },
+    {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    {
+      "path": "kinematics_interpolator.py",
+      "sha256": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede"
+    },
+    {
+      "path": "config.py",
+      "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3"
+    },
+    {
+      "path": "simulation_runner.py",
+      "sha256": "a81de3f20d7656812e4a1ad4b52374852e3838f5e479ebc6fea95a828ca8f70a"
+    },
+    {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+      "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/tb_logging.py",
+      "sha256": "7851b59d9292f8bfbaac3335ba7aa349870a6b52452f518ca8614523402f01ea"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/train_ppo_mlp.py",
+      "sha256": "e2fbdaec8602439925616891bf2b160d0c42b6718982066732fdff036b5e91e2"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19b_runs/j19b_closed_loop_v26c_2026-08-27_r1/v26c_j19b_closed_loop_receipt.json",
+      "sha256": "789c57ca293ae7d5f578d4b3cae4e9aec599fa3edf4ce87239ad5fc8a7b1b509"
+    },
+    {
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/j19c_runs/j19c_heldout_g_i_v26c_2026-08-27_r1/v26c_j19c_heldout_g_i_receipt.json",
+      "sha256": "4224f0201eeccc8ccec911635b5bc18a82e38fb27eeb878457d004d28cb17ffc"
+    }
+  ]
+}

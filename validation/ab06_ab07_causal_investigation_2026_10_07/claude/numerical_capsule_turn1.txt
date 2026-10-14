@@ -1,0 +1,28 @@
+Collaborazione scientifica richiesta dall'utente tra Codex e Claude Fable5.1, effortmax. Tutto il contesto qui sotto e' una selezione di risultati numerici, equazioni e descrizioni astratte. Non accedere a file, repository, servizi o strumenti; non modificare niente. Aiutaci a disegnare e interpretare esperimenti discriminanti. Rispondi in italiano. Riprenderemo questa conversazione con i risultati.
+
+Problema: due modelli muscoloscheletrici, A e B, derivano da soggetti sani diversi. In ciascuno una catena protesica virtuale sostituisce la gamba sinistra. Massa totale del proprio modello sano preservata, con massa amputata redistribuita nei corpi protesici; COM donor conservati e inerzie donor scalate per massa. Geometria/muscoli biologici conservati dal soggetto salvo27 muscoli prossimali sinistri identici donor in entrambi. Hardware protesico e parametri SEA identici. Due montaggi longitudinali protesici adattati al soggetto e marker sinistri calibrati sullo statico; IK da marker ricalcolata. Simulazione con tracking biologico muscolare e reserve, SEA insegue target IK al ginocchio/caviglia. GRF destra sperimentale applicata, sinistra calcolata online. Nessuna rete neurale nel confronto causale corrente.
+
+Confronto su3cicli nominali interi da GRFmisurata, dopo1startup, identici criteri, velocita'treadmill0.5m/s. I soggetti hanno tempi/cadenze propri. Dati misurati appartengono al sano, non a una protesi reale.
+A: massa78.09885kg, BW765.888N, durata3cicli4.658033s, Ileftmisurata1765.9705Ns, simulata1522.2297Ns(-13.802%), meanmisurata379.124N/sim326.797N.
+B: massa58.80765kg, BW576.706N, durata4.603076s, Ileftmisurata1373.0057Ns, simulata1922.0496Ns(+39.988%), meanmisurata298.280N/sim417.558N.
+Percentuali rispetto alla propria GRFmisurata negli stessi cicli; BW cancella dal rapporto. Modello biologico conservato, assi/lati/clock/unitadinamiche dei convertiti verificati. Residuo marker B non peggiore A. Nessuna modifica inattesa ai parametri SEA.
+
+Contatto comune:8sfere sul footframe rigido. Materiali calibrati su stati di A, base empirica non coincidente col mesh hardware. Per ogni sfera:
+d=r-dot(c-plane_origin,n), dplus=.5*(d+sqrt(d*d+eps*eps)); vrel=station_velocity-ground_velocity; d_dot=-dot(vrel,n)
+Fn=k*dplus^p*positive(1+c_d*d_dot); p=1 per tutte8, eps=1e-5m, diversi k; c_d0 o3. Verticale=SommaFn. Nessuna massa/BW come ingresso della legge. Piano statico mesh/detector e piano forza differiscono di24.3248mm, in entrambi.
+Una sfera rigida non smorzata k23586.85N/m domina la maggior forza di B. Bnon ha maggiore penetrazione massima. Matching mesh statico non qualifica la legge empirica di forza.
+
+Replay FK della legge sulla propria geometria finale e IKfiltrata di produzione(fulltrial6Hz), senza dinamica:
+A I1285.294Ns, mean275.931N (-27.219% vsmeasured)
+B I1641.276Ns, mean356.561N (+19.539% vsmeasured)
+RatioB/Amean1.2922, simile1.2777 delle pose realidelrollout. IKrawratio1.2833; filtrare cambiaimpulsoA-.693%,B-.0057%. Actualreplay riproduceforceSTO entro0.000471N; nativepluginparity1e-13N. Il maggiorecarico gia' presente nella risposta a geometria/pose, non richiede errori del solver dinamico.
+
+Lineage preparazioneB: montaggio distale anatomico0.3858993m allungato17.57913mm→0.4034784m per registrazione staticahardware; A0.43m. Calibrazione statica caviglia+4.73065deg, refitmarker e nuovaIK. Nei3cicli current-minus-pre-ground anklemean+5.09792deg, kneemean-.13565deg,pelvis_tymean-.04053mm.
+Probe gia'eseguito: geometria Bfinale e tutti currentfilteredq/qdot, cambia SOLO ankleq/qdot alle versioni pre-ground filtrate. I cresce1641.276→2063.526Ns, mean356.561→448.293N. Dunque currentankle attenua20.46% rispetto a questoibrido, non origina maggiorecarico. Non e' totalprep: mounting/altrereference fissi, nessuna dinamica, non variantefisicamentequalificata.
+
+Nuovi esperimenti locali gia'avviati da Codex:
+1) Factorial8casi A_geometry×M_mount×Q_motion. A_geometry=healthyhip/pelvis attachmentA oB; M_mount=2montaggi finaliA oB; Q_motion=tuttecoordinate/velocita' IKfiltrateA oB nei rispettivicicli senza timewarp. Intera catena FK verificata: altre differenze effective di sorgente sono0*scale. Profilo comune fisso, copieXML isolate. Endpoints riproducono replayA/B. Riportiamo effetti condizionati e interazioni, non percentuali causali; Q combina naturalegait, marker/IK, fase/finestra; M deriva anche dall'anatomia.
+2) Factorial2×2 Bgeometriapre/postground×interaIKpre/postground. Misura effetto complessivo del lineage registrazione salvato sulla risposta di forza, non totalpreparation dal modello healthy, non dinamica compatibile dei4ibridi.
+3) Bilancio verticale sui3cicli dalle pose FK/COM e deltaCOMverticalvelocity endpoints: Ileftrequired=m*g*T+m*(vCOM_y(end)-vCOM_y(start))-Irightmeasured. Confrontare con measuredleft e onlinecontact, e seutile healthy vsvirtualprosthesis. Le grandi reserve possono compensare incompatibilita'reference/contact. No seconde derivate noisy.
+
+Ti chiediamo una critica indipendente del disegno e un prossimo discriminante piccolo ma decisivo. L'utente vuole sapere se causa e'anatomia B, preparazione, oaltro: non basta ripeterecheconfounded. Distingui anatomia da cinematica soggetto, totalpreparation da singoloblocco, generalizzazione della base contatto da errore software, dinamica/reserve da forzageometrica. Quali risultati permettono un'attribuzione convincente? Cosa richiede necessariamente dati fisici indipendenti? Non proporre fit sullo stesso test comevalidazione. Non inventare dati, soglie o causalshare. Userautorizza collaborazione suquesta sola capsule.

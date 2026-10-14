@@ -1,0 +1,404 @@
+--- before/simulation_runner.py
++++ simulation_runner.py
+@@ -115,7 +115,29 @@
+     as a clean MDP termination (``grf_penetration_hard``) instead of a
+     worker-fatal fault; subclassing ``FloatingPointError`` keeps every legacy
+     catch site behaviourally identical.
++
++    Optional metadata preserves the measured contact that triggered the guard.
++    The snapshot describes an aborted integration substep, not a completed
++    control segment. Legacy callers may continue to pass only exception args.
+     """
++
++    def __init__(
++        self,
++        *args,
++        time_s: float | None = None,
++        side: str | None = None,
++        penetration_m: float | None = None,
++        limit_m: float | None = None,
++        online_grf: dict | None = None,
++    ):
++        super().__init__(*args)
++        self.time_s = None if time_s is None else float(time_s)
++        self.side = side
++        self.penetration_m = (
++            None if penetration_m is None else float(penetration_m)
++        )
++        self.limit_m = None if limit_m is None else float(limit_m)
++        self.online_grf = copy.deepcopy(online_grf)
+ 
+ 
+ class PhaseSensorSamplingError(RuntimeError):
+@@ -1640,7 +1662,12 @@
+                 if penetration > max_penetration:
+                     raise OnlineGRFPenetrationLimitExceeded(
+                         f"Online GRF penetration exceeds {max_penetration:g} m "
+-                        f"at t={t:.4f} for {side}: {penetration:.6f} m."
++                        f"at t={t:.4f} for {side}: {penetration:.6f} m.",
++                        time_s=t,
++                        side=side,
++                        penetration_m=penetration,
++                        limit_m=max_penetration,
++                        online_grf=self._online_grf_info(grf),
+                     )
+ 
+         events = []
+--- before/Trajectory Generator/osim_trj_cmc_like.py
++++ Trajectory Generator/osim_trj_cmc_like.py
+@@ -1842,6 +1842,7 @@
+         failure_traceback = ""
+         wall_timeout = False
+         penetration_hard = False
++        terminal_contact = None
+         step_info: dict = {}
+ 
+         try:
+@@ -1875,6 +1876,7 @@
+             penetration_hard = True
+             failure = exc
+             failure_traceback = traceback.format_exc()
++            terminal_contact = self._hard_penetration_contact(exc)
+         except Exception as exc:  # Native OpenSim faults cannot always be caught.
+             if self.env_cfg.fail_fast:
+                 raise
+@@ -1892,6 +1894,13 @@
+             # Preserve the historical disabled/shadow ordering exactly.
+             self._update_phase_fsm(require_primary_sample=failure is None)
+             self._update_binary_phase_fsm(require_batch=failure is None)
++        if terminal_contact is not None and terminal_contact["available"]:
++            # The guard measured a real primary contact inside an unfinished
++            # segment. Restore it only AFTER the failure path has skipped the
++            # FSM transport: it must not masquerade as a complete sensor batch.
++            # Keep the logical policy boundary self.t; the physical sample has
++            # its own explicit timestamp in terminal_contact.
++            self._online_grf = copy.deepcopy(terminal_contact["online_grf"])
+         obs, obs_dict = self._get_observation()
+         reward, reward_terms = self._get_reward(obs_dict)
+         unsafe_reason = self._unsafe_end_reason(obs_dict)
+@@ -1912,7 +1921,13 @@
+             getattr(self, "_binary_phase_invalid_event_terminal", False)
+         )
+         self._binary_phase_invalid_event_terminal = False
+-        if unsafe_reason is not None:
++        if penetration_hard:
++            # Recovering the contact now also makes the ordinary 28 mm check
++            # true. Preserve the reason for the interrupted 30 mm segment.
++            terminated = True
++            truncated = False
++            end_reason = "grf_penetration_hard"
++        elif unsafe_reason is not None:
+             terminated = True
+             truncated = False
+             end_reason = unsafe_reason
+@@ -1923,10 +1938,6 @@
+             terminated = True
+             truncated = False
+             end_reason = "invalid_binary_event"
+-        elif penetration_hard:
+-            terminated = True
+-            truncated = False
+-            end_reason = "grf_penetration_hard"
+         elif wall_timeout:
+             terminated = False
+             truncated = True
+@@ -1974,7 +1985,13 @@
+             25.0,
+             (penetration_excess_m / penetration_scale_m) ** 2,
+         )
+-        ankle_moment_terms = self._grf_ankle_moment_flip_terms()
++        ankle_moment_terms = (
++            self._grf_ankle_moment_flip_terms(
++                sample_time_s=terminal_contact["time_s"],
++            )
++            if terminal_contact is not None and terminal_contact["available"]
++            else self._grf_ankle_moment_flip_terms()
++        )
+         if penetration_loss:
+             reward = float(
+                 reward
+@@ -1983,6 +2000,10 @@
+         reward_terms.update(
+             {
+                 "safety_loss": float(safety_loss),
++                "segment_completed": float(failure is None),
++                "grf_hard_contact_available": float(
++                    terminal_contact is not None and terminal_contact["available"]
++                ),
+                 "grf_penetration_m": float(penetration_m),
+                 "grf_penetration_excess_m": float(penetration_excess_m),
+                 "grf_penetration_scale_m": float(penetration_scale_m),
+@@ -1997,6 +2018,7 @@
+         info = {
+             "time": self.t,
+             "target_time": target_t,
++            "segment_completed": failure is None,
+             "episode_start_offset_s": float(
+                 self._episode_start - self.cfg.t_start
+             ),
+@@ -2030,6 +2052,8 @@
+         }
+         info.update(self._online_info_payload())
+         info.update(self._binary_phase_info_payload())
++        if terminal_contact is not None:
++            info["terminal_contact"] = terminal_contact
+         if failure is not None:
+             info["failure"] = f"{type(failure).__name__}: {failure}"
+             info["failure_traceback"] = failure_traceback
+@@ -4395,6 +4419,45 @@
+                 values.append(float(grf_side.get("penetration", 0.0)))
+         return max(values) if values else 0.0
+ 
++    @staticmethod
++    def _hard_penetration_contact(
++        exc: OnlineGRFPenetrationLimitExceeded,
++    ) -> dict:
++        """Transport the measured guard sample without manufacturing one.
++
++        Message-only legacy exceptions remain clean terminal events. Structured
++        samples must be finite and self-consistent; parsing the error string or
++        substituting a configured limit would not recover a physical sample.
++        """
++        result = {"source": "hard_penetration_guard", "available": False}
++        snapshot = getattr(exc, "online_grf", None)
++        if snapshot is None:
++            result["unavailable_reason"] = "legacy_exception_without_contact_sample"
++            return result
++        if not isinstance(snapshot, Mapping):
++            raise ValueError("Hard penetration guard contact must be a mapping")
++        side = getattr(exc, "side", None)
++        side_data = snapshot.get(side)
++        if side not in ("left", "right") or not isinstance(side_data, Mapping):
++            raise ValueError("Hard penetration guard requires its measured contact side")
++        try:
++            sample_time = float(exc.time_s)
++            measured = float(exc.penetration_m)
++            limit = float(exc.limit_m)
++            recorded = float(side_data["penetration"])
++        except (KeyError, TypeError, ValueError) as error:
++            raise ValueError("Hard penetration guard contact metadata is incomplete") from error
++        if (not np.all(np.isfinite([sample_time, measured, limit, recorded]))
++                or limit < 0.0 or measured <= limit
++                or abs(recorded - measured) > 1e-12):
++            raise ValueError("Hard penetration guard contact metadata is inconsistent")
++        result.update(
++            available=True, time_s=sample_time, side=side,
++            penetration_m=measured, limit_m=limit,
++            online_grf=copy.deepcopy(dict(snapshot)),
++        )
++        return result
++
+     def _prosthetic_ankle_center_axis_ground(
+         self,
+     ) -> tuple[np.ndarray, np.ndarray] | None:
+@@ -4422,7 +4485,9 @@
+         except Exception:
+             return None
+ 
+-    def _grf_ankle_moment_flip_terms(self) -> dict[str, float]:
++    def _grf_ankle_moment_flip_terms(
++        self, *, sample_time_s: float | None = None,
++    ) -> dict[str, float]:
+         """Loss for online GRF moment with the wrong sign about the pros ankle.
+ 
+         tau_GRF_about_ankle = ankle_axis . (M_ground - ankle_center x F)
+@@ -4446,6 +4511,16 @@
+             "grf_ankle_moment_flip_raw_loss_nm2": 0.0,
+             "grf_ankle_moment_flip_loss": 0.0,
+         }
++        if sample_time_s is not None:
++            # Never project a recovered wrench onto geometry from a different
++            # instant. The normal runner guard leaves its state at sample time.
++            try:
++                state_time = float(self.runner.state.getTime())
++            except (AttributeError, RuntimeError, TypeError, ValueError):
++                return terms
++            if (not np.isfinite(state_time)
++                    or abs(state_time - sample_time_s) > 1e-9):
++                return terms
+         applied_sides = {
+             str(side).strip().lower()
+             for side in getattr(self.cfg, "online_grf_applied_sides", [])
+--- before/Trajectory Generator/unified_MLP_39/rollout_eval.py
++++ Trajectory Generator/unified_MLP_39/rollout_eval.py
+@@ -799,6 +799,8 @@
+                     {
+                         "step": int(steps),
+                         "time": float(info.get("time", float("nan"))),
++                        "segment_completed": info.get("segment_completed"),
++                        "terminal_contact": _jsonable(info.get("terminal_contact")),
+                         "raw_policy_action": np.asarray(
+                             raw_action, dtype=float
+                         ).tolist(),
+--- before/Trajectory Generator/unified_MLP_39/episode_telemetry.py
++++ Trajectory Generator/unified_MLP_39/episode_telemetry.py
+@@ -31,7 +31,9 @@
+     "valid_hs_count", "valid_to_count", "fsm_behaviour_version",
+ )
+ TERM_KEYS = (
++    "segment_completed", "grf_hard_contact_available",
+     "grf_penetration_m", "grf_penetration_loss", "grf_ankle_moment_flip_loss",
++    "grf_ankle_moment_flip_available",
+     "grf_ankle_moment_flip_excess_nm", "grf_ankle_moment_nm",
+     "grf_ankle_moment_flip_tau_nm", "grf_ankle_moment_flip_force_n",
+     "grf_ankle_moment_flip_cop_z_minus_ankle_z_m",
+@@ -46,6 +48,9 @@
+ )
+ JOINT_SUFFIXES = ("", "_vel", "_served_ref", "_served_ref_vel", "_served_ref_accel",
+                   "_previous_endpoint", "_sea_u")
++TERMINAL_CONTACT_KEYS = (
++    "available", "unavailable_reason", "source", "time_s", "side", "penetration_m", "limit_m", "online_grf",
++)
+ 
+ 
+ def _number(value: Any) -> float | None:
+@@ -87,6 +92,9 @@
+     missing_steps: int = 0
+     missing_rows: int = 0
+     distribution_rows: int = 0
++    completed_segment_rows: int = 0
++    partial_segment_rows: int = 0
++    unknown_segment_rows: int = 0
+     reward_sum: float = 0.0
+     peaks: dict = field(default_factory=dict)
+     event_counts: dict = field(default_factory=lambda: {
+@@ -214,11 +222,18 @@
+         if "weights_seq_no" not in outputs:
+             outputs["weights_seq_no"] = _number(getattr(env_runner, "_weights_seq_no", None))
+         sides = info.get("online_gait", {}).get("sides", {})
++        completed = _number(info.get("segment_completed", terms.get("segment_completed")))
+         row = {
+             "episode_step": int(episode.t),
+             "before_time_s": _number(episode.get_infos(-2).get("time")),
+             "time_s": _number(info.get("time")),
+             "target_time_s": _number(info.get("target_time")),
++            # A hard guard can interrupt a 10 ms segment at an integration
++            # substep. Keep the policy boundary time and contact time separate.
++            # Missing legacy status remains unknown rather than inventing a
++            # completed or partial segment for archived infos.
++            "segment_completed": bool(completed) if completed in (0.0, 1.0) else None,
++            "terminal_contact": _select(info.get("terminal_contact"), TERMINAL_CONTACT_KEYS),
+             "episode_start_offset_s": _number(info.get("episode_start_offset_s")),
+             "raw_policy_action": raw_action,
+             "policy_outputs": outputs,
+@@ -243,6 +258,11 @@
+             ("target_q", row["imitation_target"].get("q")), ("reward", row["reward"]),
+             ("actor_observation_before", actor_before if len(actor_before) == 39 else None),
+         ) if value is None]
++        terminal = row["terminal_contact"]
++        if terminal.get("available") and terminal.get("source") == "hard_penetration_guard":
++            for key in ("time_s", "penetration_m"):
++                if _number(terminal.get(key)) is None:
++                    row["missing_fields"].append("terminal_contact_" + key)
+         return row
+ 
+     @staticmethod
+@@ -250,6 +270,23 @@
+         if row["reward"] is not None:
+             state.reward_sum += row["reward"]
+         terms, fsm = row["reward_terms"], row["phase_fsm"]
++        completed = row.get("segment_completed")
++        if completed is True:
++            state.completed_segment_rows += 1
++        elif completed is False:
++            state.partial_segment_rows += 1
++        else:
++            state.unknown_segment_rows += 1
++        terminal = row.get("terminal_contact") or {}
++        hard_contact = bool(terminal.get("available")) and terminal.get("source") == "hard_penetration_guard"
++        snapshot = terminal.get("online_grf") or {}
++        snapshot_left = snapshot.get("left") or {}
++        contact_available = completed is not False or hard_contact
++        moment_available = _number(terms.get("grf_ankle_moment_flip_available"))
++        # Legacy complete rows did not serialize availability. Preserve them;
++        # new unavailable diagnostics and partial rows are never measurements.
++        moment_available = moment_available > 0 if moment_available is not None else completed is not False
++        moment_available = moment_available and contact_available
+         version = _number(row["policy_outputs"].get("weights_seq_no"))
+         versions = state.policy_versions
+         if version is None:
+@@ -264,23 +301,36 @@
+             versions["min"] = min(versions["min"], version)
+             versions["max"] = max(versions["max"], version)
+         maxima = {
+-            "penetration_m": terms.get("grf_penetration_m"),
+-            "normal_force_n": row["left_contact"].get("normal_force_n"),
+-            "moment_flip_loss": terms.get("grf_ankle_moment_flip_loss"),
++            "penetration_m": (terminal.get("penetration_m") if hard_contact else terms.get("grf_penetration_m")) if contact_available else None,
++            # Use the explicitly timestamped primary snapshot for hard-contact
++            # peaks; the FSM phase beside that force still belongs to the boundary.
++            "normal_force_n": (snapshot_left.get("normal_force") if hard_contact else row["left_contact"].get("normal_force_n")) if contact_available else None,
++            "moment_flip_loss": terms.get("grf_ankle_moment_flip_loss") if moment_available else None,
+             "resync_count": fsm.get("resync_count"),
+             "hs_cancelled_count": fsm.get("hs_cancelled_count"),
+         }
+         for name, value in maxima.items():
+             value = _number(value)
+             if value is not None and (name not in state.peaks or value > state.peaks[name]["value"]):
++                measured_contact = name in ("penetration_m", "normal_force_n", "moment_flip_loss") and hard_contact
+                 state.peaks[name] = {"value": value, "episode_step": row["episode_step"],
+-                                     "time_s": row["time_s"], "phase_fsm_state": fsm.get("state_name")}
+-        moment = _number(terms.get("grf_ankle_moment_flip_tau_nm"))
++                                     "time_s": _number(terminal.get("time_s")) if measured_contact else row["time_s"],
++                                     "phase_fsm_state": fsm.get("state_name")}
++                if measured_contact:
++                    state.peaks[name].update(source="hard_penetration_guard",
++                        segment_completed=completed, policy_boundary_time_s=row["time_s"],
++                        phase_fsm_time_s=row["time_s"])
++        moment = _number(terms.get("grf_ankle_moment_flip_tau_nm")) if moment_available else None
+         if moment is not None and ("ankle_moment_min_nm" not in state.peaks or moment < state.peaks["ankle_moment_min_nm"]["value"]):
+             state.peaks["ankle_moment_min_nm"] = {
+                 "value": moment, "episode_step": row["episode_step"],
+-                "time_s": row["time_s"], "phase_fsm_state": fsm.get("state_name"),
++                "time_s": _number(terminal.get("time_s")) if hard_contact else row["time_s"],
++                "phase_fsm_state": fsm.get("state_name"),
+             }
++            if hard_contact:
++                state.peaks["ankle_moment_min_nm"].update(source="hard_penetration_guard",
++                    segment_completed=completed, policy_boundary_time_s=row["time_s"],
++                    phase_fsm_time_s=row["time_s"])
+         flags = {
+             "resync_rows": fsm.get("resync_event_this_step"),
+             "invalid_event_rows": fsm.get("invalid_event_this_step"),
+@@ -297,12 +347,21 @@
+         if cancelled > state.hs_cancel_count:
+             state.last_hs_cancel = {"episode_step": row["episode_step"], "time_s": row["time_s"]}
+         state.hs_cancel_count = cancelled
++        # Partial hard-terminal infos carry a contact snapshot, not a completed
++        # policy segment. Their q/target pair must not add a kinematic sample.
++        # Reward/outcome and the measured terminal penetration remain counted.
++        if completed is False:
++            return
+         target_q = row["imitation_target"].get("q") or {}
+         for joint in JOINTS:
+             q, target = _number(row["joints"].get(joint)), _number(target_q.get(joint))
+             if q is not None and target is not None:
+-                acc = state.joint_errors.setdefault(joint, {"count": 0, "sum_squared_rad2": 0.0})
++                acc = state.joint_errors.setdefault(joint, {
++                    "count": 0, "sum_squared_rad2": 0.0,
++                    "completed_segment_count": 0, "unknown_segment_count": 0,
++                })
+                 acc["count"] += 1
++                acc["completed_segment_count" if completed is True else "unknown_segment_count"] += 1
+                 acc["sum_squared_rad2"] += (q - target) ** 2
+ 
+     def finish(self, episode, *, env_runner=None, env_index=0, metrics_logger=None,
+@@ -340,6 +399,9 @@
+                                      timestep - state.observed_steps),
+                 "rows_with_missing_fields": state.missing_rows,
+                 "policy_distribution_rows": state.distribution_rows,
++                "completed_segment_rows": state.completed_segment_rows,
++                "partial_segment_rows": state.partial_segment_rows,
++                "unknown_segment_rows": state.unknown_segment_rows,
+                 "partial_episode": state.first_t != 1,
+                 "terminated": bool(episode.is_terminated), "truncated": bool(episode.is_truncated),
+                 "end_reason": episode.get_infos(-1).get("end_reason"),
+@@ -347,6 +409,8 @@
+                 "observed_reward_sum": state.reward_sum,
+                 "episode_start_offset_s": state.tail[-1]["episode_start_offset_s"] if state.tail else None,
+                 "last_time_s": state.tail[-1]["time_s"] if state.tail else None,
++                "terminal_contact_time_s": (_number(state.tail[-1].get("terminal_contact", {}).get("time_s"))
++                    if state.tail and state.tail[-1].get("terminal_contact", {}).get("available") else None),
+                 "peaks": state.peaks, "event_counts": state.event_counts,
+                 "last_resync": state.last_resync, "last_hs_cancel": state.last_hs_cancel,
+                 "joint_error_accumulators": state.joint_errors,

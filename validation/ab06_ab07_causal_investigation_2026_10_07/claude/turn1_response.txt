@@ -1,0 +1,92 @@
+**In breve.** Con i soli dati di A e B non si può attribuire la discrepanza all'anatomia di B, e nessun esperimento sugli stessi dati cambierà questo fatto. La forza sinistra simulata è una lettura quasi deterministica della posa del footframe rispetto a un piano registrato, con guadagno di decine di newton per millimetro e senza massa in ingresso. Con esperimenti piccoli si possono però decidere due cose: se l'eccesso di B ha la firma di una registrazione verticale della catena oppure quella di una cinematica di marcia, e se la dinamica aggiunge qualcosa oltre a un fattore comune. L'anatomia in senso proprio richiede dati indipendenti.
+
+## Cosa dicono già i numeri
+
+**Fattorizzazione esatta** della discrepanza relativa B rispetto ad A, dal replay FK:
+
+| Termine | Valore | Significato |
+|---|---|---|
+| (simB/misB) / (simA/misA) | 1.642 | discrepanza relativa osservata |
+| misA / misB | 1.271 | ciò che la legge non può riprodurre a parità di penetrazione: nessuna massa in ingresso, e la penetrazione è imposta dalla registrazione, non dall'equilibrio |
+| simB / simA | 1.292 | rapporto degli integrali nel tempo della penetrazione: ciò che la cinematica registrata di B fa in più di A |
+| BW_A / BW_B | 1.328 | contesto |
+
+Non è una quota causale. È un'identità che separa un limite costruttivo della legge da un effetto cinematico. Il primo termine resterebbe anche se B camminasse esattamente come A.
+
+**Fattore dinamico** rollout/replay: A 1.184, B 1.171. Sono praticamente uguali. La dinamica e le reserve non discriminano A da B; aggiungono una penetrazione extra comune, da inseguimento imperfetto.
+
+**Millimetri equivalenti** sulla sfera dominante, lineare e non smorzata:
+
+| Discrepanza media sul ciclo | N | mm equivalenti |
+|---|---|---|
+| A, deficit replay | 103.2 | 4.4 |
+| B, eccesso replay | 58.3 | 2.5 |
+| B, eccesso dell'ibrido caviglia pre-ground | 91.7 | 3.9 |
+
+| Pomello di preparazione | Entità |
+|---|---|
+| allungamento montaggio B | 17.6 mm |
+| offset piano forza vs piano statico | 24.3 mm |
+| calibrazione caviglia B | 4.7 gradi |
+
+I pomelli di preparazione sono un ordine di grandezza più grandi dell'equivalente verticale di tutta la discrepanza. Da qui la non identificabilità anatomia contro preparazione senza vincoli indipendenti sulla registrazione.
+
+**Chiusura verticale.** Con cinematica inseguita e piastra destra imposta, l'impulso sinistro richiesto dal bilancio coincide col misurato a meno del termine di velocità del COM. La non chiusura che residui, reserve o deriva del COM devono assorbire è quindi, in attesa dell'esperimento 3:
+
+| Soggetto | Non chiusura attesa | Forza media equivalente |
+|---|---|---|
+| B | +549 Ns | +119 N, circa 0.21 BW |
+| A | −244 Ns | −52 N, circa 0.07 BW |
+
+L'esperimento 3 così com'è ricava questa identità. L'informazione sta nel dove finisce la non chiusura.
+
+## Critica del disegno
+
+**Fattoriale 8 celle.** Q è relativo al modello su cui l'IK è stata risolta. Le celle fuori diagonale sono ibridi non registrati: il piede galleggia o affonda per la traslazione pelvica di un altro corpo. Effetti principali e interazioni misurano incompatibilità, non cause.
+
+- **Lettura utile:** con chi viaggia l'eccesso, G, M o Q. Se viaggia con Q, resta da separare marcia, registrazione IK e finestra, con il test di fase descritto sotto.
+- **Miglioramento:** separare in Q gli angoli articolari, adimensionali e trasferibili, dalla traslazione della pelvi, che è registrazione. Ri-registrare la verticale della pelvi con una regola definita sul trial statico, mai sulla forza.
+- **Budget di catena esatto** sulle sole celle diagonali: la differenza di quota di ogni sfera scomposta sequenzialmente lungo pelvi, coscia, montaggio e piede. È additivo per costruzione e non richiede ibridi.
+
+**2×2 pre/post ground.** Va bene come un campione di varianza di preparazione. Solo le due celle diagonali sono auto-coerenti. Gli effetti dei singoli blocchi non sono additivi perché l'IK viene rifittata dopo ciascuno: la preparazione totale si misura come dispersione di ri-preparazioni end-to-end, non come somma di blocchi.
+
+**Bilancio.** Aggiungere l'impulso verticale dei residui pelvici e la deriva della velocità verticale del COM dagli stati del rollout. Il confronto richiesto contro misurato sinistro serve come verifica di coerenza delle piastre, non del modello.
+
+**Metriche.** L'impulso su cicli interi è robusto alla fase ma nasconde dove sta l'eccesso. Con esponente unitario l'impulso di ogni sfera è k per l'area sotto la penetrazione nel tempo, quindi il massimo di penetrazione è un riassunto povero. Il residuo RMS dei marker non dice nulla sul bias verticale con segno dei marker del piede.
+
+**Base di contatto.** La base non riproduce nemmeno A. A contro B confronta due errori di una legge non qualificata, e il cambio di segno non implica una causa in B. Inoltre il guadagno della legge moltiplica il rumore dei marker: nessuna registrazione basata su marker può vincolare la forza a livello percentuale.
+
+## Discriminante proposto e attribuzione
+
+**Argomento di principio.** Durante lo stance la suola reale di un sano sta a terra. A registrazione perfetta, la legge darebbe forze di stance simili in A e B, modulate solo da frazione di stance e angolo del piede. Un rapporto 1.29 sugli integrali richiede quindi una frazione di stance molto diversa, un ingaggio diverso delle sfere per angolo del piede, oppure una suola virtuale che in B sta sotto il pavimento. Il test seguente distingue questi tre casi.
+
+**Test principale: budget di fase e altezza del piede.** Solo FK, nessuna dinamica, nessun refit.
+
+1. Spezzare la forza di replay di ciascun soggetto con gli eventi di contatto sinistro misurati dello stesso soggetto: impulso in stance misurata, impulso in swing misurata, ritardo di inizio e fine contatto simulato rispetto al misurato, frazione di stance misurata A contro B. Ogni impulso durante lo swing misurato è un artefatto della catena virtuale, perché il piede reale era in aria.
+2. Posizione verticale con segno della suola virtuale e delle sfere rispetto ai marker misurati del piede sinistro lungo il ciclo, con gli offset costanti fissati dal solo statico. Riportare bias medio in stance e clearance minima in swing, A contro B. Residui RMS uguali sono compatibili con bias verticali opposti.
+3. Profondità della sfera dominante in percentuale di stance, A contro B. Uno shift costante è firma di registrazione. Una differenza concentrata a heel strike, toe off o nella durata del foot flat è firma di marcia o di geometria del piede hardware rispetto alla marcia.
+4. Impulsi dei tre cicli separati, per variabilità intra-soggetto e trend di startup.
+5. Replay statico: forza della legge sulla posa statica di ciascun soggetto contro la forza statica misurata dello stesso. È la baseline a marcia zero di registrazione e cecità alla massa.
+
+**Lettura dei risultati.**
+
+- **Impulso in swing** o contatto anticipato/ritardato in B, con suola virtuale sotto i marker in stance: registrazione della catena, cioè preparazione. Non anatomia, non marcia.
+- **Swing pulito,** tempi coincidenti, nessun bias con segno, ma foot flat più profondo o più lungo in B: la differenza sta in come il moto misurato del piede di B interagisce con la geometria fissa del piede hardware. Anatomia e marcia restano un unico fattore con n pari a 1.
+- **Residui del rollout** pari a contatto meno richiesto in entrambi: la dinamica non discrimina e la simulazione è una lettura cinematica. Deriva del COM grande invece: inseguimento troppo lasco, e il fattore dinamico va riesaminato.
+
+**Test di identificabilità.** Sensibilità del replay alla registrazione, con perturbazioni unitarie: offset piano, lunghezza montaggio con IK rifatta, angolo caviglia con refit marker. Riportare Ns per millimetro e per grado, per soggetto. Non è un fit. Se lo span delle perturbazioni plausibili copre la differenza A meno B, l'attribuzione anatomica è indecidibile su questi dati.
+
+**Preparazione totale ed errore software.** Ri-preparare A con la procedura esatta di B e viceversa, o con frame statici alternativi validi. La non riproducibilità segnala errore procedurale; la dispersione è la varianza di preparazione. La parità replay contro plugin esclude già errori nel percorso della forza; il rischio residuo sta negli ingressi di registrazione, e si manifesterebbe come bias verticale sistematico in un solo soggetto nel punto 2.
+
+**Se esistono altri trial.** Predizione cross-trial a legge congelata su altri cicli o velocità. Bias costante per soggetto indica registrazione e massa; bias variabile indica forma della legge.
+
+**Richiede dati fisici indipendenti.**
+
+- Forza contro deflessione del piede hardware reale su piastra: qualifica rigidezza, esponente e smorzamento, e dà senso fisico all'offset del piano. Senza, la legge è un surrogato e non ci si aspetta trasferimento tra soggetti.
+- Penetrazione dipendente dalla massa: serve una dinamica diretta coerente con residui piccoli, o prove di carico fisiche. Il setup attuale la esclude per costruzione.
+- Verità di riferimento: GRF di un utilizzatore reale dell'hardware. Le percentuali rispetto al sano non sono errori di modello in senso proprio.
+- Anatomia: più soggetti, per vedere se il bias scala con l'inverso della massa, la lunghezza della coscia o il montaggio; oppure manipolazioni intra-soggetto misurate.
+
+**Da non fare.** Rifittare rigidezze o offset su B. Riscalare per BW e chiamarla validazione. Leggere gli effetti principali del fattoriale come quote causali. Usare celle ibride come prove su B.
+
+**Recap.** La dinamica è un fattore comune ad A e B. La discrepanza equivale a pochi millimetri nella posa registrata del piede, dentro la tolleranza dei pomelli di preparazione, e la legge senza massa non può comunque produrre la forza più bassa di B. Il prossimo passo è il budget di fase e altezza del piede con i marker misurati come riferimento, più l'impulso dei residui dal rollout. L'anatomia richiede altri soggetti o dati fisici.

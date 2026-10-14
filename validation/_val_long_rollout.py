@@ -23,6 +23,7 @@ import numpy as np
 
 from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 from prosthesis_snn.generator import ReferenceGenerator
+from prosthesis_snn.cmc_checkpoint import require_absolute_reference
 
 
 def main() -> None:
@@ -35,6 +36,7 @@ def main() -> None:
     args = ap.parse_args()
 
     gen = ReferenceGenerator.from_checkpoint(args.checkpoint, device="cpu")
+    require_absolute_reference(gen)
     action_shape = gen.cfg.action_shape
 
     env = CMCLikeProsthesisTrajectoryEnv(CMCEnvConfig(
@@ -42,8 +44,7 @@ def main() -> None:
         segment_duration=args.segment_duration,
         episode_duration=args.episode_duration,
         policy_knots=action_shape[0],
-        action_mode="delta",
-        max_delta_rad=0.35,
+        action_mode="absolute",
         rebuild_model_on_reset=False,
         record_outputs=False,
         fail_fast=False,

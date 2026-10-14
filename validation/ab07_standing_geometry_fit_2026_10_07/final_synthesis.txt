@@ -1,0 +1,119 @@
+AB07: calibrazione anatomica statica, preparazione e confronto con tibia_pylon 400 mm
+2026-10-07 — Sintesi locale dei risultati e del confronto con Claude Fable 5.1, effortmax.
+
+Esito: la variante nuova rispetta ginocchio e appoggio geometrico del piede nella posa statica scelta. Il suo test dinamico si interrompe dopo 0,16 s per il superamento del limite superiore del ginocchio. Il riferimento 400 mm completa 6,11 s. Le prestazioni sui tre cicli e il detector sono misurabili solo nel riferimento; il confronto diretto tra varianti è limitato ai primi 159 ms osservati da entrambe. La calibrazione del detector è rimasta identica.
+
+Criterio di costruzione e dimensioni
+
+Il riferimento sano AB07 è la mediana delle 23 coordinate delle 436 righe del file statico originale, non una nuova posa ideale con tutte le articolazioni a zero. Le 19 coordinate biologiche e il bacino sono preservati. La quota del ginocchio sano è 474,955700 mm. Il suolo della calibrazione è il piano Y=0 codificato nel modello: questo risultato è condizionato a tale piano e non dimostra una quota del pavimento misurata indipendentemente o un equilibrio statico sotto carico.
+
+Il piede comune AM_foot_l.STL è identico per tutti i casi. Essendo una superficie curva, «appoggio completo» è stato verificato con quattro regioni plantari: tallone e avampiede, ciascuno sul lato mediale e laterale. La variante finale ha tre vertici a terra non allineati, nessuna penetrazione della mesh e il quarto minimo regionale a 0,000845 mm, entro la tolleranza geometrica fissata di 0,01 mm. Non è una misura di pressione plantare.
+
+Per collegare i componenti mantenendo la quota del ginocchio: tibia_pylon 433,966724 mm; traslazioneY dell’attacco osseo_parent −185,770409 mm; orientazioneX del medesimo attacco −3,318315°. Gli altri offset sono preservati. La rotazione riguarda il montaggio dell’intera protesi e non il detector o gli assi interni SEA. La traslazione osseo_parent non è la lunghezza del corpo osseo_pylon: il collegamento interno osseo_pylon→ginocchio di 205 mm rimane invariato. Sono state dimensionate le distanze cinematiche dei giunti; mesh strutturali, masse, centri di massa e inerzie non sono stati rifabbricati o riscalati.
+
+La mappatura statica della caviglia usa un offset −3,976520°, con caviglia protesica 3,106664° per la posa sana 7,083184°. Il ginocchio protesico mantiene la posa sana −7,045167° e la stessa altezza. La soluzione geometrica è stata decisa senza leggere reserve, eventi o output dinamici.
+
+Controllo 400 mm: nella stessa posa statica di riferimento il ginocchio è a 472,552432 mm e la mesh resta sopra Y=0: minimo tallone 16,018148 mm, avampiede 44,333093 mm. La sua mappatura caviglia usa invece +4,730649°. La stabilità del banco con 400 mm non dimostra quindi che questa sia la lunghezza anatomica corretta secondo il criterio richiesto.
+
+È conservata anche una soluzione intermedia solo tallone/avampiede:432,914561 mm, orientazione superiore 0°, offset caviglia −3,606419°. Aveva appoggio mediale, ma gap laterali 3,111808 e 4,924960 mm. Per soddisfare l’appoggio su entrambi i lati è stata aggiunta la variante finale a quattro regioni mediante un protocollo geometrico supplementare congelato prima della sua preparazione e simulazione.
+
+Pipeline e test effettivamente eseguiti
+
+Ogni variante usa la propria preparazione coerente: file statico originale con sole due coordinate protesiche mappate; calibrazione dei 12 marker con gli helper originali; nuova IK completa su 28612 pose da 10,360 a 153,415 s con TRC e supporti GRF originali. La registrazione automatica al suolo derivata dal donatore è stata esclusa per preservare i vincoli del fit. Scaling, RRA e ID originali non sono stati rieseguiti. Per 400 mm modello, statico e IK della preparazione fresca riproducono byte per byte il riferimento storicoP3_A1.
+
+Il test è una simulazione forward CMC-like con riferimento protesico dalla IK propria del caso, azione prescribed_action e SEA fisico non-impedance. Non è un rollout della rete. Biologia muscle-driven con reserve residuali, forza di contatto virtuale applicata al lato sinistro e GRF misurata prescritta al destro; configurazione e contratto comuni conservati. Seed 123, reset 12,591740519774 s, integrazione 1 ms, passo di controllo 10 ms, setup 9 s, episodio richiesto 6,11 s. Guardie immutate: ginocchio[-2,0]rad, caviglia[-0,9,+0,9]rad e penetrazione 28 mm. Il guard di tempo reale originale 60 s per segmento è rimasto attivo.
+
+La variante finale esegue 16 passi di controllo e si arresta a 0,16 s con joint_divergence:pros_knee_angle, ginocchio finale +0,002520282 rad=+0,144401°. Non è un timeout o un arresto per penetrazione: profondità massima cammino 24,32755 mm. La variante intermedia si arresta allo stesso limite articolare dopo 17 passi,0,17 s,+0,397352°. Non sono stati fatti tentativi dinamici con limiti, forze o detector ritoccati.
+
+Il riferimento 400 mm completa 611 passi,6,11 s. I17 file STO, il CSV eventi e tutte le 611 righe della trace coincidono byte per byte conP3_A1, senza campi esclusi. Gli istanti finali di stato, runner e ambiente coincidono con il termine richiesto.
+
+Reserve: confronto diretto sull’avvio comune
+
+Finestra comune 12.59174052–12.75074052 s, durata 0.159 s,160 campioni. La simulazione termina dopo 0,16 s ma registra lo stato prima di ogni sottopasso: il supporto effettivamente salvato della variante finale è 0,159 s. Il tempo di integrazione e il supporto dei dati non sono intercambiabili.
+
+Caso	Reserve pelvis_ty media[N]	RMS[N]	Impulso assoluto[Ns]	Lavoro assoluto[J]	Forza sinistra media[N]
+400 mm	+194.073908	204.996058	30.857751	1.793594	0.977464
+432,915 mm /2 regioni	-663.826746	690.989311	105.548453	3.704580	862.723931
+433,967 mm /4 regioni	-712.483595	741.127958	113.284892	5.116226	913.783454
+
+Il segno negativo della reserve pelvis_ty indica una forza verso il basso. La nuova variante produce un carico sinistro elevato già all’avvio, mentre 400 mm in questa stessa fase iniziale ha quasi assenza di contatto sinistro e reserve verso l’alto. RMS, impulso e lavoro mostrano maggiore assistenza richiesta dalla variante calibrata nell’avvio. Questo non è un confronto tra tre cicli stazionari e non va extrapolato a un’intera camminata.
+
+Reserve nel riferimento 400 mm sui tre cicli primari
+
+Finestra congelata 14.087704688172–18.690780190476 s, durata 4.603075502304 s. Per pelvis_ty: media-19.062545 N; RMS152.662372 N; impulso assoluto 490.489072 Ns; lavoro assoluto 19.494591 J. Forza sinistra media 304.858184 N, richiesta dal bilancio del moto 285.803278 N. RMS tracking ginocchio 0.300044°, caviglia 0.392885°.
+
+DOF biologico	Unita forza/coppia	Media	RMS	Lavoro assoluto[J]
+pelvis_tilt	Nm	+3.585813	29.127876	25.761495
+pelvis_list	Nm	-20.584735	43.986238	32.613465
+pelvis_rotation	Nm	+5.752675	24.475767	15.042491
+pelvis_tx	N	-3.736974	43.884067	21.461000
+pelvis_ty	N	-19.062545	152.662372	19.494591
+pelvis_tz	N	+2.868899	31.230271	7.209251
+hip_flexion_r	Nm	+3.261793	8.239632	9.238839
+hip_adduction_r	Nm	-4.006675	10.628477	10.086596
+hip_rotation_r	Nm	+8.167547	25.834701	33.633504
+knee_angle_r	Nm	-1.855368	8.219180	20.378752
+ankle_angle_r	Nm	+2.918703	10.848951	20.363838
+subtalar_angle_r	Nm	+2.075437	9.326253	14.065583
+mtp_angle_r	Nm	+0.011255	0.047230	0.161164
+hip_flexion_l	Nm	+7.970423	21.476355	26.154186
+hip_adduction_l	Nm	-0.873056	11.361359	13.182219
+hip_rotation_l	Nm	+1.141715	3.329623	2.085481
+lumbar_extension	Nm	-1.291806	6.508898	0.233871
+lumbar_bending	Nm	-0.140174	9.130693	0.237118
+lumbar_rotation	Nm	-0.076237	1.218225	0.044567
+
+Le forzeN e le coppieNm sono tenute separate: non si usa una somma di norme con unità miste. Le reserve di ciascun DOF e il loro lavoro sono conservate nei metrics.json. Le varianti nuove non hanno nessun dato nella finestra primaria, che inizia 14,087704688172 s: valori primari mancanti non sono zeri.
+
+Detector: calibrazione identica, evidenza distinta per canale e clock
+
+Per 400 mm la FSM completa 3 cicli validi,0 invalidi,0 resync e 0 HS annullati; nell’intero episodio sono registrati 4 HS e 4 TO. Nella finestra primaria gli onset binari e quelli conservati dall’actor accoppiano 4 HS/4 e 3 TO/3, senza candidati extra; rispetto agli eventi nominali da GRF sanaAB07 a 20 N, bias medio HS −78,463657 ms e TO +51,796618 ms. L’ultimo HS è osservato e accoppiato, ma il suo margine completo di matching oltre il bordo destro non è osservabile: non è una validazione completa dell’evento di chiusura.
+
+Le tolleranze originali onset sono HS120 ms/TO180 ms; confirmed HS50 ms/TO80 ms; delivered HS60 ms/TO90 ms. Con i rispettivi criteri originali, sia confirmed sia delivered accoppiano soltanto 1 HS/4 e 1 TO/3. La chiusura di tre cicli FSM non certifica quindi l’accuratezza temporale di tutti i clock. Gli attraversamenti della forza reale sinistra a 20 N danno 6 HS/5 TO,3 HS e 3 TO accoppiati,3 HS e 2 TO extra e 1 HS nominale completamente osservato non accoppiato. Il loro bias è HS −3,645355 ms e TO +68,295275 ms: sono un altro canale, non gli eventi del detector binario.
+
+Per entrambe le varianti nuove tutti i canali primari sono unavailable: l’integrazione termina prima del primo HS nominale dei tre cicli. I contatori FSM rimasti a zero nell’avvio non dimostrano che il detector non funzioni. È un esito dinamico interrotto che impedisce di valutarne le prestazioni. Nessuna soglia, piano, FSM, algoritmo o calibrazione del detector è stata modificata.
+
+Limiti SEA effettivamente registrati
+
+Caso	Campioni	|u|>=0,999	Clipping effettivo comando	Clamp motore 500 Nm	Picco |spring|[Nm]
+400 mm	6110	0	0	0	68.225191
+2 regioni	170	130	127	3	105.990710
+4 regioni	160	118	117	2	107.367746
+
+F_opt del ginocchio 100 Nm limita il riferimento tau_ref=uF_opt; il clamp 500 Nm riguarda invece l’ingresso del rotore. Nella variante finale 118/160 campioni hanno|u|>=0,999 e 117/160 sono realmente clippati a −1, con richiesta non limitata massima 222,647467 Nm. Il clamp del rotore compare solo in 2 campioni da 1 ms. La coppia della molla può superare temporaneamente 100 Nm. CavigliaF_opt 250 Nm: nessun comando al limite o clamp del rotore nei tre casi. Questo prova che il ginocchio incontra il limite di comando nell’avvio nuovo, ma non prova da solo la causa del sovraccarico.
+
+Geometria di contatto: dato aggiuntivo e limite causale
+
+La mesh STL e le sfere che generano la GRF sono rappresentazioni diverse. Applicando solamente le trasformazioni statiche salvate alle 8 sfere sinistre del profilo di forza invariato, con piano forza Y=−9,50395476 mm, si ricavano profondità geometriche positive:400 mm 2/8,max 7,429890 mm;2 regioni 8/8,max 46,174436 mm;4 regioni 8/8,max 47,380967 mm. Le profondità medie sono rispettivamente 1,857473/31,216845/37,737863 mm. Si tratta di algebra geometrica, senza calcolare forze, effettuare nuove IK/FK o integrare nuovamente.
+
+Questa verifica, aggiunta dopo i test e dichiarata tale, individua una concreta incompatibilità tra l’appoggio imposto alla mesh e la geometria di contatto usata dal banco. Il valore statico 47,38 mm non è il massimo cammino 24,33 mm e non è la causa già dimostrata dell’arresto: il reset dinamico è su un fotogramma di cammino, non sulla posa statica. Resta da isolare l’interazione fra montaggio, riferimento IK, contatto virtuale e controllo. Un confronto con una stessa IK può isolare una componente meccanica, ma non sostituisce la preparazione coerente di ogni modello.
+
+Confronto indipendente con Claude e sintesi
+
+Codex ha sigillato le proprie conclusioni complete prima di leggere qualsiasi conclusione visibile di Claude. Claude è stato avviato dal terminale in una chat isolata con modello effettivo claude-fable-5-1, effortmax e nessun tool. Gli sono stati inviati soltanto capsule numeriche e risultati aggregati nel limite esplicitamente autorizzato; non sorgenti, serie temporali grezze, credenziali, accesso ai file o conclusioni locali. La collaborazione è un audit indipendente dei numeri, non una seconda esecuzione OpenSim da parte di Claude.
+
+Concordiamo sulla validità dei vincoli statici dichiarati, sull’arresto precoce delle due varianti nuove, sulla riproducibilità del 400 mm e sull’impossibilità di giudicare i loro detector sui tre cicli. L’audit iniziale di Claude aveva ipotizzato forza statica nulla dal solo piano sotto la mesh: le profondità delle 8 sfere, comunicate dopo come aggregati, smentiscono quell’inferenza. L’audit finale non aveva ricevuto la telemetria dei limiti SEA e la indicava non registrata: l’integrazione numerica successiva fornisce invece i conteggi reali e distingue il limite del comando 100 Nm dal clamp motore 500 Nm. I testi visibili sono conservati per verificare il confronto.
+
+Nell’integrazione finale Claude conferma il clipping del comando ginocchio in circa tre quarti dei campioni e il breve clamp separato del rotore. Concordiamo che è un dato registrato, ma non una prova che il limite sia l’origine del problema: può essere una risposta al carico elevato. La sua formulazione «100 Nm alla molla» va intesa come limite del riferimento, non come limite rigido della coppia elastica effettiva. Non adottiamo la proposta di aumentare F_opt o di riallineare le sfere senza una controprova causale: tali modifiche non sono state eseguite.
+
+La lunghezza circa 434 mm deriva dai vincoli geometrici espliciti su AB07 e dal piano Y=0 scelto, non da una scelta a posteriori per migliorare reserve o detector. Il test non dimostra che sia anatomicamente necessaria in assoluto o che questo montaggio sia già dinamicamente qualificato. La variante 400 mm funziona nel banco esistente ma non rispetta quell’appoggio statico. Il peggioramento introdotto dal nuovo pacchetto di preparazione non può essere imputato automaticamente all’anatomia: stesso soggetto e stessa biologia, ma geometria, mapping protesico, marker e IK coerente cambiano insieme. Il problema residuo verificato è nell’interazione del nuovo montaggio con il banco; il peso causale di ciascuna componente rimane da dimostrare. La calibrazione del detector resta un vincolo fisso.
+
+Verifiche, conservazione e limiti documentali
+
+Peer review finalePASS: 903 sorgenti/artefatti protetti invariati;273 combinazioni DOF/finestra controllate per unità, segni, impulso e lavoro;21 plot canonici nelle cartelleplot/ del root, tutti ispezionati visivamente. Controllo indipendente della quadraturaRMS nel prefisso comune: errore massimo 0 N. Fonte numerica principaleanalysis/lean_numeric_summary.json, con metrics/phase originali e receipt di tutti i casi.
+
+Sono conservati i tentativi tecnici precedenti: lettura scalaMesh opzionale corretta, salvataggio JSON parziale ricostruito da blocchi completi e verificato, definizione del guard di tempo reale corretta nella versione 2 dell’addendum di sovrapposizione, due stop del parser di inventario prima della scrittura. Non sono retry dinamici né modifica dei risultati. Nessun sorgente di produzione, pluginC ++, semantica SEA, profilo di contatto o detector è stato modificato.
+
+Precisazione dell’audit esterno: una costante riassuntiva del packet finale indicava genericamente 50 ms per confirmed/delivered; i campi numerici di ciascun evento, inviati nello stesso packet, conservavano i corretti 50/80/60/90 ms. Questa sintesi usa esclusivamente quei criteri originali per evento, senza introdurre una nuova soglia.
+
+Artefatti principali
+Modello finale:full_support_preparation/cases/STANDING_FOURROI_AB07/AB07_SEASEA_marker_calibrated.osim
+IK finale:full_support_preparation/cases/STANDING_FOURROI_AB07/pipeline/02_ik/IK_full_10p360_153p415.mot
+Geometria:geometry/four_roi_support/fit_receipt.json
+Risultati:analysis/lean_numeric_summary.json eanalysis/<case>/metrics.json
+Eventi:analysis/phase/<case>/phase_metrics.json
+Run finale:full_support_dynamics/STANDING_FOURROI_AB07/run/receipt.json
+Run400:dynamics/PYLON400_REFERENCE/run/receipt.json
+Plot:../../plot/AB07_standing_geometry_fit_2026_10_07/
+Figura montaggio:../../plot/AB07_standing_geometry_fit_2026_10_07/calibration_geometry_v3.png
+Audit Claude:claude/geometry_audit_visible.txt,claude/final_results_audit_visible.txt,claude/SEA_supplement_audit_visible.txt

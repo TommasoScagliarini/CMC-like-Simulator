@@ -1,0 +1,49 @@
+{
+  "created_utc": "2026-10-07T13:42:36.022062+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "PASS_final_V2_source_parser_and_plot_metadata_review",
+  "sources": {
+    "final_helper": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/analyze_dynamic_screen_v2.py",
+      "sha256": "3b7ee1837cdc5eef71a0d6197803d1502aed2a82b248d88a7a3d433ef01a4254"
+    },
+    "final_protocol": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/analysis_protocol_v2.json",
+      "sha256": "880ee8e0c4697e248981587060f6cfa36db88e0cfb62f90041043692a9929dff"
+    },
+    "original_helper_unchanged": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/analyze_dynamic_screen.py",
+      "sha256": "cc7ae9da15ac8baede0b91f13764faafeca912efc5d6388ccf99d5e7828c3abc"
+    },
+    "original_frozen_protocol_unchanged": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/analysis_protocol.json",
+      "sha256": "20efb9fa6ceeb31518a7d6f422a9768ba74012a313804e3e7b06f43263147ee7"
+    },
+    "prior_review_unchanged": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/review/dynamic_postprocessor_peer_review.json",
+      "sha256": "7895304900d1177a586a1e46e6698c38ca20377c58090a7e56e1d1ab0c440a46"
+    },
+    "failed_diagnostic_attempt_receipt": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/attempt_01/failure_receipt.json",
+      "sha256": "1238531dd1130d40d1dedce262c1978dc8b37ff76683dd629f0a739bdda9ba46"
+    }
+  },
+  "old_pre_review_to_original_freeze_delta": [
+    "implementation_frozen_utc",
+    "peer_review_status",
+    "status"
+  ],
+  "source_bindings_current_hash_match": true,
+  "source_bindings_count": 23,
+  "changes_from_original": [
+    "Separate V2 helper and protocol filenames; old files restored byte-exact.",
+    "Source_table uses immutable balance.storage whitespace/TAB parser only for source measuredGRF and own fullIK.",
+    "Preserves inDegrees header and column order into validator.Table; no scaling, filtering, crop or scientific quantity change.",
+    "Render subtitles at .943/.921 and figures03/04 explicitly label measuredGRF reference phase; only cosmetic figure changes."
+  ],
+  "timing": "Original attempt consumed finalized native tables/prefix and seven sparse COM poses before source-parser failure; no metricsJSON/PNG were written. V2 review does not claim zero prior data consumption; attempt log and receipt preserved.",
+  "scientific_and_runtime_contracts_unchanged": true,
+  "review_scope": "Read source diff, storage contract, metadata and hashes; no helper execution, own FK, IK, integration, numerical run parsing or new Claude content.",
+  "parser_validation": "Frozen storage parser checks unique time+channel schema, column width, finite values and strictly increasing source time; header conversion occurs once through rawIK ref_series. Native output parser and SEA identities unchanged.",
+  "blockers": []
+}

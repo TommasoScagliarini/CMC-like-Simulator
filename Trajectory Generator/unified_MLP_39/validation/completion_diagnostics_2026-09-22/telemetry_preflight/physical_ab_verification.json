@@ -1,0 +1,81 @@
+{
+  "passed": true,
+  "baseline": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_diagnostics_2026-09-22_iter40/noise_1_seed_123",
+  "observer_on": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_telemetry_ab_2026-09-22",
+  "steps": 500,
+  "full_trace_values_exactly_equal": true,
+  "full_trace_files_sha256_equal": true,
+  "full_trace_first_mismatch_steps": [],
+  "full_summary_exactly_equal": true,
+  "summary_differences": {},
+  "common_noise_keys": [
+    "learned_std",
+    "standard_normal",
+    "step"
+  ],
+  "all_common_noise_values_exactly_equal": true,
+  "on_only_noise_keys": [
+    "action_dist_inputs"
+  ],
+  "on_logits_reconstructed_from_recorded_mean_std_max_abs_delta": 6.048767592359283e-08,
+  "logits_reconstruction_tolerance": 2e-07,
+  "noise_files_sha256_equal": false,
+  "sink_coverage_checks": {
+    "one_terminal_record": true,
+    "every_transition_observed": true,
+    "no_missing_steps": true,
+    "no_missing_fields": true,
+    "initial_episode_present": true,
+    "every_distribution_observed": true,
+    "outcome_matches": true,
+    "terminal_flags_match": true,
+    "tail_bounded_and_at_end": true,
+    "tail_matches_full_rollout_trace": true,
+    "penetration_peak_matches_full_episode": true,
+    "return_agrees_with_numpy_sum": true,
+    "observer_reports_no_errors": true
+  },
+  "sink_tail_first_differences": [],
+  "sink_observed_reward_sum_vs_numpy_sum_abs_delta": 1.7053025658242404e-13,
+  "sink_metrics": {
+    "observed_steps": 500,
+    "policy_distribution_rows": 500,
+    "episodes_written": 1
+  },
+  "physical_outcome": {
+    "steps": 500,
+    "end_reason": "episode_time_limit",
+    "episode_return": 243.47689987287714,
+    "grf_penetration_max_m": 0.021223243436274596,
+    "action_clipped_fraction": 0.317
+  },
+  "cost": {
+    "observer_wall_seconds": 0.046083330642431974,
+    "observer_mean_microseconds": 92.16666128486395,
+    "observer_max_microseconds": 2765.1661075651646,
+    "observer_fraction_of_on_run_wall": 8.490517604681592e-05,
+    "observer_percent_of_on_run_wall": 0.008490517604681593,
+    "measured_observer_under_1_percent": true,
+    "off_run_wall_seconds": 509.5130116250366,
+    "on_run_wall_seconds": 542.7623236658983,
+    "telemetry_bytes": 194243,
+    "limits": [
+      "Observer timer includes observe/finish and terminal JSON writing; excludes construction/add_env_step of the diagnostic SingleAgentEpisode wrapper.",
+      "The diagnostic wrapper retains a complete episode for the API adapter; real training already retains its episodes and observer itself holds only 50 tail rows.",
+      "OFF/ON runs may overlap other diagnostics; wall-duration subtraction is not an isolated total overhead estimate.",
+      "This tests one physical episode and the sink API; actual Ray callback wiring/worker propagation still requires first-training-batch checks.",
+      "Baseline noise records predate action_dist_inputs logging. Compare the three common fields exactly; ON logits are also reconstructed from trace mean and learned std, allowing inversion of float32 exp.",
+      "Whole-episode policy_versions aggregation was added after the ON process imported its observer; its no-side-effect check is covered by the subsequent offline tests and real-MetricsLogger benchmark."
+    ]
+  },
+  "input_sha256": {
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_diagnostics_2026-09-22_iter40/noise_1_seed_123/rollout_summary.json": "94e3aca62cee823846746e8a05581758a8b00cd7d6976063ac063e19d65c62a1",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_diagnostics_2026-09-22_iter40/noise_1_seed_123/rollout_policy_trace.json": "ace4b1f02042b7b63c83f249cd5f05dab6f5c61ed5135cec8de6037cc429d1b8",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_diagnostics_2026-09-22_iter40/noise_1_seed_123/noise_diagnostic.json": "dd1dc357b5cf4a0fd75dbbca415f219f1d66b26041e3fbf6773a2cd559589ec9",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_diagnostics_2026-09-22_iter40/noise_1_seed_123/paired_noise_draws.json": "0a21bf7b36f066aa427f7cbc4ecaa89ea9a48963736eb7b84964f57835a3b928",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_telemetry_ab_2026-09-22/rollout_summary.json": "94e3aca62cee823846746e8a05581758a8b00cd7d6976063ac063e19d65c62a1",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_telemetry_ab_2026-09-22/rollout_policy_trace.json": "ace4b1f02042b7b63c83f249cd5f05dab6f5c61ed5135cec8de6037cc429d1b8",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_telemetry_ab_2026-09-22/noise_diagnostic.json": "63f5391d0be5ed1d3d8cd4bf25710f1888ad36a8a4b6af0fee8b1374baed3e69",
+    "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/completion_telemetry_ab_2026-09-22/paired_noise_draws.json": "164eaff59a3ecabff615fc4161f81b794fd60744e16e1e8c632d52c3b7f7a4f3"
+  }
+}

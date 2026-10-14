@@ -1,0 +1,184 @@
+{
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "PASS",
+  "scope": "XML fitting and marker-IK setup contracts, saved native marker-error statistics only; no solver/dynamics/policy",
+  "sources": {
+    "healthy": {
+      "path": "models/AB08-raw/osimxml/AB08.osim",
+      "sha256": "466c7fbd80a99158b3caecf582623762e0bec42e25a466f553ce8f7eb3f368c2"
+    },
+    "anatomical": {
+      "path": "models/AB08_SEASEA-raw/osimxml/AB08_SEASEA_anatomical.osim",
+      "sha256": "e256f23865a932131749a513066e8ae16f920e90cbe39c39b8d69bf7073407dc"
+    },
+    "registered": {
+      "path": "models/AB08_SEASEA-raw/osimxml/AB08_SEASEA.osim",
+      "sha256": "28915adfb6606e6116ddb8fb3d117d708171b12202c070ebad743dc0774f1b9e"
+    },
+    "calibrated": {
+      "path": "models/AB08_SEASEA_Threadmill/AB08_SEASEA_stiff321_500_pi.osim",
+      "sha256": "901e101e7432075cf15502f096d40ffa0c6eaa79d5209f17006c2e8427de5593"
+    },
+    "donor": {
+      "path": "results/abx_reference_rrmf81lr/donor_model/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    }
+  },
+  "checks": {
+    "biological_bodies_exactly_preserved": true,
+    "biological_joints_exactly_preserved": true,
+    "subject_hip_preserved_except_transfemur_rename": true,
+    "all_16_nonprosthetic_markers_preserved": true,
+    "right_and_torso_muscle_physics_preserved": true,
+    "sea_exactly_matches_AB06": true,
+    "osseo_hardware_axes_and_ranges_preserved": true,
+    "pros_knee_hardware_axes_and_ranges_preserved": true,
+    "pros_ankle_hardware_axes_and_ranges_preserved": true,
+    "28_marker_tasks_match_model": true,
+    "all_tasks_active_unit_weight": true,
+    "no_coordinate_tracking_constraints": true,
+    "AB08_static_used_for_marker_calibration": true
+  },
+  "biological_bodies_preserved": [
+    "calcn_r",
+    "femur_r",
+    "pelvis",
+    "talus_r",
+    "tibia_r",
+    "toes_r",
+    "torso"
+  ],
+  "biological_joints_preserved": [
+    "ankle_r",
+    "back",
+    "ground_pelvis",
+    "hip_r",
+    "knee_r",
+    "mtp_r",
+    "subtalar_r"
+  ],
+  "nonprosthetic_markers_preserved": [
+    "L_ASIS",
+    "L_PSIS",
+    "R_ASIS",
+    "R_Ankle_Lat",
+    "R_Heel",
+    "R_Knee_Lat",
+    "R_PSIS",
+    "R_Shank_Front",
+    "R_Shank_Rear",
+    "R_Shank_Upper",
+    "R_Thigh_Front",
+    "R_Thigh_Rear",
+    "R_Thigh_Upper",
+    "R_Toe_Lat",
+    "R_Toe_Med",
+    "R_Toe_Tip"
+  ],
+  "right_and_torso_muscle_physics_preserved": [
+    "add_brev_r",
+    "add_long_r",
+    "add_mag1_r",
+    "add_mag2_r",
+    "add_mag3_r",
+    "bifemlh_r",
+    "bifemsh_r",
+    "ercspn_l",
+    "ercspn_r",
+    "ext_dig_r",
+    "ext_hal_r",
+    "extobl_l",
+    "extobl_r",
+    "flex_dig_r",
+    "flex_hal_r",
+    "gem_r",
+    "glut_max1_r",
+    "glut_max2_r",
+    "glut_max3_r",
+    "glut_med1_r",
+    "glut_med2_r",
+    "glut_med3_r",
+    "glut_min1_r",
+    "glut_min2_r",
+    "glut_min3_r",
+    "grac_r",
+    "iliacus_r",
+    "intobl_l",
+    "intobl_r",
+    "lat_gas_r",
+    "med_gas_r",
+    "pect_r",
+    "per_brev_r",
+    "per_long_r",
+    "per_tert_r",
+    "peri_r",
+    "psoas_r",
+    "quad_fem_r",
+    "rect_fem_r",
+    "sar_r",
+    "semimem_r",
+    "semiten_r",
+    "soleus_r",
+    "tfl_r",
+    "tib_ant_r",
+    "tib_post_r",
+    "vas_int_r",
+    "vas_lat_r",
+    "vas_med_r"
+  ],
+  "static_calibrated_markers": [
+    "L_Thigh_Upper",
+    "L_Thigh_Front",
+    "L_Thigh_Rear",
+    "L_Knee_Lat",
+    "L_Shank_Upper",
+    "L_Shank_Front",
+    "L_Shank_Rear",
+    "L_Ankle_Lat",
+    "L_Heel",
+    "L_Toe_Lat",
+    "L_Toe_Med",
+    "L_Toe_Tip"
+  ],
+  "IK": {
+    "task_count": 28,
+    "weight": 1.0,
+    "accuracy": "1e-05",
+    "constraint_weight": "Inf",
+    "coordinate_file": ""
+  },
+  "full_trial_comparison": {
+    "AB08": {
+      "file": "results/ab08_seasea_treadmill_treadmill_01_01_ik/02_ik/full/IK_full_8p630_151p525_ik_marker_errors.sto",
+      "rows": 28580,
+      "mean_frame_rms_mm": 11.997963090972709,
+      "median_frame_rms_mm": 11.925965,
+      "p95_frame_rms_mm": 14.784391499999998,
+      "max_frame_rms_mm": 29.916700000000002,
+      "max_single_marker_error_mm": 114.93075,
+      "max_single_marker_error_time_s": 56.635
+    },
+    "AB07_ground_registered": {
+      "file": "results/ab07_ground_registered_2026_10_06/ab07_seasea_treadmill_treadmill_01_01_ik/02_ik/full/IK_full_10p360_153p415_ik_marker_errors.sto",
+      "rows": 28612,
+      "mean_frame_rms_mm": 10.379906725150287,
+      "median_frame_rms_mm": 10.64125,
+      "p95_frame_rms_mm": 12.7207075,
+      "max_frame_rms_mm": 28.794819999999998,
+      "max_single_marker_error_mm": 120.59757,
+      "max_single_marker_error_time_s": 85.43
+    }
+  },
+  "static_calibration_mean_local_fit_rms_mm": 0.19870635133422418,
+  "interpretation": [
+    "AB08 static marker fitting and registered hardware use subject-specific AB08 data, with AB06 used only as shared geometric/hardware reference.",
+    "R_Thigh_Upper belongs to the unchanged healthy right femur and is outside the 12-marker static prosthetic calibration.",
+    "AB08 mean frame RMS is about 1.62 mm above corrected AB07, but its maximum single-marker error is lower than corrected AB07; global mean and isolated peak measure different things.",
+    "Static local-fit RMS does not certify gait marker fit: the same calibration samples estimate the marker locations, and prosthetic PinJoint topology differs from healthy knee/ankle/foot kinematics."
+  ],
+  "limitations": [
+    "No full-trial AB06 native marker-error companion exists in the local repository; no direct AB06 full-trial numerical comparison inferred.",
+    "This audit proves preparation/setup contracts, not clinical acceptability of 12 mm mean or 115 mm isolated peak.",
+    "Left proximal muscles are grafted from AB06 donor by the existing builder convention; this does not determine marker IK residuals because IK does not recruit muscles."
+  ]
+}

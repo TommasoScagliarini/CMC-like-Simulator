@@ -1,0 +1,70 @@
+{
+  "created_utc": "2026-10-07T13:32:43.119529+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "PASS_source_units_grid_and_failure_review_before_consuming_results",
+  "sources": {
+    "helper": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/analyze_dynamic_screen.py",
+      "sha256": "cc7ae9da15ac8baede0b91f13764faafeca912efc5d6388ccf99d5e7828c3abc"
+    },
+    "analysis_protocol": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/analysis_protocol.json",
+      "sha256": "20efb9fa6ceeb31518a7d6f422a9768ba74012a313804e3e7b06f43263147ee7"
+    },
+    "bindings": {
+      "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/verify_sto_numerics.py": "3371161d7c028d61ef7274f2a5c6367ed894c4d0da12f7f629ffba002f7eae15",
+      "Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/verify_transfer_rollout_numerics.py": "4dfb1aff3ff82ac92cafc99cbdc75893bb1e8dbd832368bb325b7f620c69bf4c",
+      "validation/ab06_ab07_causal_investigation_2026_10_07/alternative/vertical_impulse_audit.py": "0692e0ba95a1343012b2187b9826efb8592031d6ba530893313ed46637e0c55c",
+      "Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/render_prescribed_plots.py": "fc648fd393666aa17addf9c242ca30d335cb76318a278ebd1f78f5cb4b575261",
+      "plot/plotter.py": "4963ca4194e762ccdb2bf0f7fdcb5a03e5ade9b722c3d04ba66d948d5ef562d8",
+      "Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/selection.json": "5e9ec212f4b04ed83cfbfcc5856f6ddb9a1c026677122b60e6507fd4904af61a",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamic_protocol.json": "2586cfbc43ab337ad05cca45ea04f753abf1871882db6ceb1c8c428099311199",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/analyze_dynamic_screen.py": "cc7ae9da15ac8baede0b91f13764faafeca912efc5d6388ccf99d5e7828c3abc",
+      "kinematics_interpolator.py": "424d352a461b424ed8f7e318513a85b75d3a6fb1a00155eab1e885e9d3fd4ede",
+      "validation/validate_sim_results.py": "16bf4e0581cd48146f6c7cd47e46c6fc6167e26caad1b18c709a0abf5d00101d",
+      "model_loader.py": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+      "config.py": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "output.py": "7b03d1031202976fd011288e031f8796364eb35c34d1ed8838f8eff971318acb",
+      "path_resolver.py": "2a61b8c54ab68c228ea55a6e28b6334ac0a9539da79f86e9a5ef2970bc937a1d",
+      "setup_io.py": "9d24df7b272ad6550c2897151b019b53d665a61a715217eeeb6dfbe54a6ae6e3",
+      "static_optimization.py": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+      "AGENTS.md": "528ad5c3fd510cfe4d571bcb2b0a2c410d2bc99205a76cda95f5b7a573e6bbe6",
+      "models/AB06_SEASEA_Threadmill/data/healthy/AB06_treadmill_01_01_Kinematics_q.sto": "720a77404a11c287dfa6fa56fe498eacdae1527d720ff6b460e6999a89c17796",
+      "models/AB06_SEASEA_Threadmill/data/healthy/AB06_treadmill_01_01_Actuation_force.sto": "94dc6b6a9d70b8ad0e6fc7bda6504b15aed0b828ab1b881101dcd822b6203027",
+      "models/AB07_SEASEA_Threadmill/data/healthy/AB07_treadmill_01_01_Kinematics_q.sto": "233f29dc2000ecc23aa16369e874074cbec611f56207e26c7c1f479ac38eef01",
+      "models/AB07_SEASEA_Threadmill/data/healthy/AB07_treadmill_01_01_Actuation_force.sto": "c7a4cf9d2aac38e1713e0d2a88813f09ee965be6723989bcd9e144cc019f1a80",
+      "Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/primary_gait_events_AB06.csv": "01bb590e42cc85203caee465ee5f4a26d3aac4a59c593ed6d74ddfe757b66a0b",
+      "Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/primary_gait_events_AB07.csv": "ff2759801d9c50b63ce0eb84adc199f0585d553c1b44b4c4cadca12dab3f90d5"
+    }
+  },
+  "verified_dynamic_sources": {
+    "count": 683,
+    "all_unchanged": true
+  },
+  "review_scope": "Read source and schema, stdlib fingerprint and AST only; no analyzer main, own FK, numerical output consumption, integration, solver or new Claude content.",
+  "checks": {
+    "time_grid": "Actual episode bounds from receipt used for expected STO lattice; original cfg9s reference horizon retained. Every primary integral uses native timestamps plus all covered exact frozen HS/TO and explicit window endpoints.",
+    "partial_outputs": "Finalized failed/interrupted states retained; missing/empty numerics and failed startup/reset produce unavailable result without invented actual times or new FK. Actual fullthreecycles status is distinct from runtime completion.",
+    "tracking": "Actual, served, source raw and wholetrial filtered references separated. Actual saved qdot used, rotations reported deg/deg_per_s and translationsm/m_per_s; raw IK degree conversion occurs once via validator.ref_series.",
+    "power": "Reserve generalized force/torque times saved actual coordinate speed. TranslationN\u00d7m_per_s and rotationalNm\u00d7rad_per_s produceW, integratedJ and J_per_kg. Pelvisreservepower uses pelvis_ty speed, not COMspeed.",
+    "impulses": "Signed/positive/negative/absolute impulses byDOF remain Ns or Nm*s; no mixednorm physical gate. Cancellation shown separately.",
+    "force_closure": "Applied onlineleft plus measuredright plus actual pelvis_ty reserve minusweight matches endpoint actual COMmomentum. Seven covered VelocityFK poses use fullsaved q/qdot, unclampedassignment, roottranslation/unitvirtualwork guard; no Dynamic/Acceleration realization.",
+    "prefix": "Both controlcases compare all available native tablevalues/columns/time exactly with oldphysicalprefix. Success requiresnonempty availablecount and requirednative inventory, never vacuous all[]. OldfailedAB06status899callback remains unchanged.",
+    "trace": "Existing binary/FSM callbacktransport andaccepted transitions are observational; no new detector/event oracle, and nominal measuredcycles do not imply actor validcycles.",
+    "runtime_metadata": "Reads final_info.end_reason, final_failure and close_error; historical/source failures remain visible.",
+    "SEA": "Same frozen numericalidentity helpers with actualXML/effectivecfg; allnative and primarynative sample scopes; no nonlinear identity evaluatedon interpolated HS/TO states. Command clipping, rotor torque clamp and biological ranges retain separate semantics.",
+    "canonicalplots": "Seven rootplot files byexplicitcase, strict savedservedref, samefullrecorded nominalcycles acrossactual/healthy/raw supports; no MLP/latestsetup inference."
+  },
+  "noncausal_interpretation": [
+    "PerDOF muscle/reserve absolutegeneralizedimpulse shares are local observed effort ratios, not causal shares of gait or anatomy.",
+    "Numerical closure is internal forcebudget consistency, not externally validated GRF or hardwarefitting.",
+    "Completion with goodtracking can be reserve assisted; reference hypothetical support and actual reserve are distinct.",
+    "Finite-grid parameter sweep and three fixed anglecontrols cannot prove unique optimum, universal dynamic impossibility or clinical necessity."
+  ],
+  "blockers": [],
+  "remaining_required_verification": [
+    "Inspect finalized actualprefixes/config/coverage and case metrics before interpreting actual outcomes.",
+    "Render aggregate scientificfigures only from finalall18 boundstatistics; missing three-cycle cases remain explicit.",
+    "Independent visualreview and figureinput/output hashes before final receipt status."
+  ]
+}

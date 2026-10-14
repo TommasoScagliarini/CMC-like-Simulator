@@ -1,0 +1,3553 @@
+{
+  "created_utc": "2026-10-07T14:18:54.770854+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "finalized_descriptive_phase_diagnostics",
+  "case_id": "AB06_control",
+  "case": {
+    "id": "AB06_control",
+    "subject": "AB06",
+    "preparation": null,
+    "model": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "IK": {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "length_mm": 430.0,
+    "static_ankle_offset_deg": 0.0,
+    "duration_s": 6.21,
+    "prepared_receipt": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/prepared_receipt.json",
+      "sha256": "59545b66af9f1b7d2bda7d5c78d542d7fca69ea0efee1a5a2495de0ecef6d2af"
+    }
+  },
+  "subject": "AB06",
+  "phase_protocol": {
+    "path": "validation/ab07_pylon_necessity_screening_2026_10_07/phase_timing/phase_timing_protocol_v2.json",
+    "sha256": "50075ad200dabd3820026b6bae1a98e04ab91839d03b357677fb4e5b7e27bab2"
+  },
+  "dynamic_protocol": {
+    "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamic_protocol.json",
+    "sha256": "2586cfbc43ab337ad05cca45ea04f753abf1871882db6ceb1c8c428099311199"
+  },
+  "receipt": {
+    "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/receipt.json",
+    "sha256": "f69fdc28de361503b50146aa1ec1c8d72c8d1b3b49b5de5054e200094d92741d"
+  },
+  "runtime_status": "completed",
+  "close_error": null,
+  "primary_reference": {
+    "cycles": [
+      {
+        "hs_s": 17.163967985977223,
+        "to_s": 18.22436226395682,
+        "next_hs_s": 18.716943642178773,
+        "period_s": 1.55297565620155,
+        "stance_s": 1.0603942779795972,
+        "stance_fraction": 0.6828144882665025
+      },
+      {
+        "hs_s": 18.716943642178773,
+        "to_s": 19.777666676391547,
+        "next_hs_s": 20.287931128580603,
+        "period_s": 1.5709874864018296,
+        "stance_s": 1.0607230342127743,
+        "stance_fraction": 0.6751950880539738
+      },
+      {
+        "hs_s": 20.287931128580603,
+        "to_s": 21.3668960232229,
+        "next_hs_s": 21.822001050884474,
+        "period_s": 1.5340699223038712,
+        "stance_s": 1.0789648946422972,
+        "stance_fraction": 0.7033348864710836
+      }
+    ],
+    "events_s": {
+      "heel_strike": [
+        17.163967985977223,
+        18.716943642178773,
+        20.287931128580603,
+        21.822001050884474
+      ],
+      "toe_off": [
+        18.22436226395682,
+        19.777666676391547,
+        21.3668960232229
+      ]
+    },
+    "window_s": [
+      17.163967985977223,
+      21.822001050884474
+    ],
+    "threshold_N": 20.0
+  },
+  "primary_channels": {
+    "binary_geometry_FSM": {
+      "source_channel": "binary_geometry_FSM",
+      "scope": "primary",
+      "reference_events_s": {
+        "heel_strike": [
+          17.163967985977223,
+          18.716943642178773,
+          20.287931128580603,
+          21.822001050884474
+        ],
+        "toe_off": [
+          18.22436226395682,
+          19.777666676391547,
+          21.3668960232229
+        ]
+      },
+      "nominal_analysis_window_s": [
+        17.163967985977223,
+        21.822001050884474
+      ],
+      "saved_support_s": [
+        15.616960838108348,
+        21.825960838115254
+      ],
+      "new_gate_used": false,
+      "status": "fully_observed_primary_window",
+      "comparison": {
+        "heel_strike": {
+          "reference_times_s": [
+            17.163967985977223,
+            18.716943642178773,
+            20.287931128580603,
+            21.822001050884474
+          ],
+          "observed_candidate_window_s": [
+            16.983967985977223,
+            22.002001050884473
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                17.13396083810952,
+                18.674960838111403,
+                20.256960838113336,
+                21.787960838115207
+              ],
+              "tolerance_s": 0.12,
+              "matching": {
+                "reference_count": 4,
+                "predicted_count": 4,
+                "matched_count": 4,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": -0.03425011379290144,
+                "timing_mae_s": 0.03425011379290144,
+                "timing_max_abs_s": 0.04198280406736998,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.13396083810952,
+                    "error_s": -0.03000714786770331,
+                    "absolute_error_s": 0.03000714786770331
+                  },
+                  {
+                    "reference_time_s": 20.287931128580603,
+                    "predicted_time_s": 20.256960838113336,
+                    "error_s": -0.03097029046726618,
+                    "absolute_error_s": 0.03097029046726618
+                  },
+                  {
+                    "reference_time_s": 21.822001050884474,
+                    "predicted_time_s": 21.787960838115207,
+                    "error_s": -0.034040212769266276,
+                    "absolute_error_s": 0.034040212769266276
+                  },
+                  {
+                    "reference_time_s": 18.716943642178773,
+                    "predicted_time_s": 18.674960838111403,
+                    "error_s": -0.04198280406736998,
+                    "absolute_error_s": 0.04198280406736998
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223,
+                18.716943642178773,
+                20.287931128580603
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                17.138960838109526,
+                18.67996083811141,
+                20.261960838113342,
+                21.792960838115214
+              ],
+              "tolerance_s": 0.05,
+              "matching": {
+                "reference_count": 4,
+                "predicted_count": 4,
+                "matched_count": 4,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": -0.029250113792895327,
+                "timing_mae_s": 0.029250113792895327,
+                "timing_max_abs_s": 0.03698280406736387,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.138960838109526,
+                    "error_s": -0.0250071478676972,
+                    "absolute_error_s": 0.0250071478676972
+                  },
+                  {
+                    "reference_time_s": 20.287931128580603,
+                    "predicted_time_s": 20.261960838113342,
+                    "error_s": -0.02597029046726007,
+                    "absolute_error_s": 0.02597029046726007
+                  },
+                  {
+                    "reference_time_s": 21.822001050884474,
+                    "predicted_time_s": 21.792960838115214,
+                    "error_s": -0.029040212769260165,
+                    "absolute_error_s": 0.029040212769260165
+                  },
+                  {
+                    "reference_time_s": 18.716943642178773,
+                    "predicted_time_s": 18.67996083811141,
+                    "error_s": -0.03698280406736387,
+                    "absolute_error_s": 0.03698280406736387
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223,
+                18.716943642178773,
+                20.287931128580603
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                17.145960838108316,
+                18.685960838108556,
+                20.265960838108803,
+                21.795960838109043
+              ],
+              "tolerance_s": 0.06,
+              "matching": {
+                "reference_count": 4,
+                "predicted_count": 4,
+                "matched_count": 4,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": -0.02425011379658848,
+                "timing_mae_s": 0.02425011379658848,
+                "timing_max_abs_s": 0.030982804070216474,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.145960838108316,
+                    "error_s": -0.018007147868907225,
+                    "absolute_error_s": 0.018007147868907225
+                  },
+                  {
+                    "reference_time_s": 20.287931128580603,
+                    "predicted_time_s": 20.265960838108803,
+                    "error_s": -0.021970290471799103,
+                    "absolute_error_s": 0.021970290471799103
+                  },
+                  {
+                    "reference_time_s": 21.822001050884474,
+                    "predicted_time_s": 21.795960838109043,
+                    "error_s": -0.026040212775431115,
+                    "absolute_error_s": 0.026040212775431115
+                  },
+                  {
+                    "reference_time_s": 18.716943642178773,
+                    "predicted_time_s": 18.685960838108556,
+                    "error_s": -0.030982804070216474,
+                    "absolute_error_s": 0.030982804070216474
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223,
+                18.716943642178773,
+                20.287931128580603
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": []
+        },
+        "toe_off": {
+          "reference_times_s": [
+            18.22436226395682,
+            19.777666676391547,
+            21.3668960232229
+          ],
+          "observed_candidate_window_s": [
+            16.983967985977223,
+            22.002001050884473
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                18.325960838110976,
+                19.893960838112893,
+                21.44496083811479
+              ],
+              "tolerance_s": 0.18,
+              "matching": {
+                "reference_count": 3,
+                "predicted_count": 3,
+                "matched_count": 3,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": 0.09865251692246346,
+                "timing_mae_s": 0.09865251692246346,
+                "timing_max_abs_s": 0.11629416172134555,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 21.3668960232229,
+                    "predicted_time_s": 21.44496083811479,
+                    "error_s": 0.07806481489188855,
+                    "absolute_error_s": 0.07806481489188855
+                  },
+                  {
+                    "reference_time_s": 18.22436226395682,
+                    "predicted_time_s": 18.325960838110976,
+                    "error_s": 0.1015985741541563,
+                    "absolute_error_s": 0.1015985741541563
+                  },
+                  {
+                    "reference_time_s": 19.777666676391547,
+                    "predicted_time_s": 19.893960838112893,
+                    "error_s": 0.11629416172134555,
+                    "absolute_error_s": 0.11629416172134555
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                18.330960838110983,
+                19.8989608381129,
+                21.449960838114794
+              ],
+              "tolerance_s": 0.08,
+              "matching": {
+                "reference_count": 3,
+                "predicted_count": 3,
+                "matched_count": 0,
+                "false_positives": 3,
+                "false_negatives": 3,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "timing_bias_s": null,
+                "timing_mae_s": null,
+                "timing_max_abs_s": null,
+                "unmatched_reference": [
+                  18.22436226395682,
+                  19.777666676391547,
+                  21.3668960232229
+                ],
+                "unmatched_predicted": [
+                  18.330960838110983,
+                  19.8989608381129,
+                  21.449960838114794
+                ],
+                "pairs": []
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                18.3359608381085,
+                19.905960838108747,
+                21.45596083810899
+              ],
+              "tolerance_s": 0.09,
+              "matching": {
+                "reference_count": 3,
+                "predicted_count": 3,
+                "matched_count": 1,
+                "false_positives": 2,
+                "false_negatives": 2,
+                "precision": 0.3333333333333333,
+                "recall": 0.3333333333333333,
+                "f1": 0.3333333333333333,
+                "timing_bias_s": 0.08906481488608975,
+                "timing_mae_s": 0.08906481488608975,
+                "timing_max_abs_s": 0.08906481488608975,
+                "unmatched_reference": [
+                  18.22436226395682,
+                  19.777666676391547
+                ],
+                "unmatched_predicted": [
+                  18.3359608381085,
+                  19.905960838108747
+                ],
+                "pairs": [
+                  {
+                    "reference_time_s": 21.3668960232229,
+                    "predicted_time_s": 21.45596083810899,
+                    "error_s": 0.08906481488608975,
+                    "absolute_error_s": 0.08906481488608975
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "side": "left",
+              "event": "toe_off",
+              "time": 16.754960838109056,
+              "event_time_s": 16.754960838109056,
+              "confirmed_time_s": 16.759960838109063,
+              "confirmed_time": 16.759960838109063,
+              "delivered_time_s": 16.765960838108256,
+              "source": "binary_phase_fsm_v26",
+              "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+              "semantic": "functional_final_contact",
+              "onset_contact_state": "AIR",
+              "confirmed_contact_state": "AIR",
+              "startup_partial_stance": true
+            }
+          ]
+        }
+      }
+    },
+    "actor_retained_after_HS_repairs": {
+      "source_channel": "actor_retained_after_HS_repairs",
+      "scope": "primary",
+      "reference_events_s": {
+        "heel_strike": [
+          17.163967985977223,
+          18.716943642178773,
+          20.287931128580603,
+          21.822001050884474
+        ],
+        "toe_off": [
+          18.22436226395682,
+          19.777666676391547,
+          21.3668960232229
+        ]
+      },
+      "nominal_analysis_window_s": [
+        17.163967985977223,
+        21.822001050884474
+      ],
+      "saved_support_s": [
+        15.625960838108343,
+        21.825960838108347
+      ],
+      "new_gate_used": false,
+      "status": "fully_observed_primary_window",
+      "comparison": {
+        "heel_strike": {
+          "reference_times_s": [
+            17.163967985977223,
+            18.716943642178773,
+            20.287931128580603,
+            21.822001050884474
+          ],
+          "observed_candidate_window_s": [
+            16.983967985977223,
+            22.002001050884473
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                17.13396083810952,
+                18.674960838111403,
+                20.256960838113336,
+                21.787960838115207
+              ],
+              "tolerance_s": 0.12,
+              "matching": {
+                "reference_count": 4,
+                "predicted_count": 4,
+                "matched_count": 4,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": -0.03425011379290144,
+                "timing_mae_s": 0.03425011379290144,
+                "timing_max_abs_s": 0.04198280406736998,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.13396083810952,
+                    "error_s": -0.03000714786770331,
+                    "absolute_error_s": 0.03000714786770331
+                  },
+                  {
+                    "reference_time_s": 20.287931128580603,
+                    "predicted_time_s": 20.256960838113336,
+                    "error_s": -0.03097029046726618,
+                    "absolute_error_s": 0.03097029046726618
+                  },
+                  {
+                    "reference_time_s": 21.822001050884474,
+                    "predicted_time_s": 21.787960838115207,
+                    "error_s": -0.034040212769266276,
+                    "absolute_error_s": 0.034040212769266276
+                  },
+                  {
+                    "reference_time_s": 18.716943642178773,
+                    "predicted_time_s": 18.674960838111403,
+                    "error_s": -0.04198280406736998,
+                    "absolute_error_s": 0.04198280406736998
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223,
+                18.716943642178773,
+                20.287931128580603
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                17.138960838109526,
+                18.67996083811141,
+                20.261960838113342,
+                21.792960838115214
+              ],
+              "tolerance_s": 0.05,
+              "matching": {
+                "reference_count": 4,
+                "predicted_count": 4,
+                "matched_count": 4,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": -0.029250113792895327,
+                "timing_mae_s": 0.029250113792895327,
+                "timing_max_abs_s": 0.03698280406736387,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.138960838109526,
+                    "error_s": -0.0250071478676972,
+                    "absolute_error_s": 0.0250071478676972
+                  },
+                  {
+                    "reference_time_s": 20.287931128580603,
+                    "predicted_time_s": 20.261960838113342,
+                    "error_s": -0.02597029046726007,
+                    "absolute_error_s": 0.02597029046726007
+                  },
+                  {
+                    "reference_time_s": 21.822001050884474,
+                    "predicted_time_s": 21.792960838115214,
+                    "error_s": -0.029040212769260165,
+                    "absolute_error_s": 0.029040212769260165
+                  },
+                  {
+                    "reference_time_s": 18.716943642178773,
+                    "predicted_time_s": 18.67996083811141,
+                    "error_s": -0.03698280406736387,
+                    "absolute_error_s": 0.03698280406736387
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223,
+                18.716943642178773,
+                20.287931128580603
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                17.145960838108316,
+                18.685960838108556,
+                20.265960838108803,
+                21.795960838109043
+              ],
+              "tolerance_s": 0.06,
+              "matching": {
+                "reference_count": 4,
+                "predicted_count": 4,
+                "matched_count": 4,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": -0.02425011379658848,
+                "timing_mae_s": 0.02425011379658848,
+                "timing_max_abs_s": 0.030982804070216474,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.145960838108316,
+                    "error_s": -0.018007147868907225,
+                    "absolute_error_s": 0.018007147868907225
+                  },
+                  {
+                    "reference_time_s": 20.287931128580603,
+                    "predicted_time_s": 20.265960838108803,
+                    "error_s": -0.021970290471799103,
+                    "absolute_error_s": 0.021970290471799103
+                  },
+                  {
+                    "reference_time_s": 21.822001050884474,
+                    "predicted_time_s": 21.795960838109043,
+                    "error_s": -0.026040212775431115,
+                    "absolute_error_s": 0.026040212775431115
+                  },
+                  {
+                    "reference_time_s": 18.716943642178773,
+                    "predicted_time_s": 18.685960838108556,
+                    "error_s": -0.030982804070216474,
+                    "absolute_error_s": 0.030982804070216474
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223,
+                18.716943642178773,
+                20.287931128580603
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": []
+        },
+        "toe_off": {
+          "reference_times_s": [
+            18.22436226395682,
+            19.777666676391547,
+            21.3668960232229
+          ],
+          "observed_candidate_window_s": [
+            16.983967985977223,
+            22.002001050884473
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                18.325960838110976,
+                19.893960838112893,
+                21.44496083811479
+              ],
+              "tolerance_s": 0.18,
+              "matching": {
+                "reference_count": 3,
+                "predicted_count": 3,
+                "matched_count": 3,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": 0.09865251692246346,
+                "timing_mae_s": 0.09865251692246346,
+                "timing_max_abs_s": 0.11629416172134555,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 21.3668960232229,
+                    "predicted_time_s": 21.44496083811479,
+                    "error_s": 0.07806481489188855,
+                    "absolute_error_s": 0.07806481489188855
+                  },
+                  {
+                    "reference_time_s": 18.22436226395682,
+                    "predicted_time_s": 18.325960838110976,
+                    "error_s": 0.1015985741541563,
+                    "absolute_error_s": 0.1015985741541563
+                  },
+                  {
+                    "reference_time_s": 19.777666676391547,
+                    "predicted_time_s": 19.893960838112893,
+                    "error_s": 0.11629416172134555,
+                    "absolute_error_s": 0.11629416172134555
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                18.330960838110983,
+                19.8989608381129,
+                21.449960838114794
+              ],
+              "tolerance_s": 0.08,
+              "matching": {
+                "reference_count": 3,
+                "predicted_count": 3,
+                "matched_count": 0,
+                "false_positives": 3,
+                "false_negatives": 3,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "timing_bias_s": null,
+                "timing_mae_s": null,
+                "timing_max_abs_s": null,
+                "unmatched_reference": [
+                  18.22436226395682,
+                  19.777666676391547,
+                  21.3668960232229
+                ],
+                "unmatched_predicted": [
+                  18.330960838110983,
+                  19.8989608381129,
+                  21.449960838114794
+                ],
+                "pairs": []
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                18.3359608381085,
+                19.905960838108747,
+                21.45596083810899
+              ],
+              "tolerance_s": 0.09,
+              "matching": {
+                "reference_count": 3,
+                "predicted_count": 3,
+                "matched_count": 1,
+                "false_positives": 2,
+                "false_negatives": 2,
+                "precision": 0.3333333333333333,
+                "recall": 0.3333333333333333,
+                "f1": 0.3333333333333333,
+                "timing_bias_s": 0.08906481488608975,
+                "timing_mae_s": 0.08906481488608975,
+                "timing_max_abs_s": 0.08906481488608975,
+                "unmatched_reference": [
+                  18.22436226395682,
+                  19.777666676391547
+                ],
+                "unmatched_predicted": [
+                  18.3359608381085,
+                  19.905960838108747
+                ],
+                "pairs": [
+                  {
+                    "reference_time_s": 21.3668960232229,
+                    "predicted_time_s": 21.45596083810899,
+                    "error_s": 0.08906481488608975,
+                    "absolute_error_s": 0.08906481488608975
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "event": "toe_off",
+              "event_time_s": 16.754960838109056,
+              "confirmed_time_s": 16.759960838109063,
+              "delivered_time_s": 16.765960838108256,
+              "from_state_id": 1.0,
+              "to_state_id": 2.0,
+              "closed_segment_type": "stance",
+              "segment_start_time_s": 15.615960838108348,
+              "segment_end_time_s": 16.754960838109056,
+              "segment_valid": 0.0,
+              "anchor_geometry_valid": 0.0,
+              "opens_segment_type": "swing",
+              "cycle_valid": -1.0,
+              "cycle_reject_reason": ""
+            }
+          ]
+        }
+      }
+    },
+    "primary_force_20N_crossings": {
+      "source_channel": "primary_force_20N_crossings",
+      "scope": "primary",
+      "reference_events_s": {
+        "heel_strike": [
+          17.163967985977223,
+          18.716943642178773,
+          20.287931128580603,
+          21.822001050884474
+        ],
+        "toe_off": [
+          18.22436226395682,
+          19.777666676391547,
+          21.3668960232229
+        ]
+      },
+      "nominal_analysis_window_s": [
+        17.163967985977223,
+        21.822001050884474
+      ],
+      "saved_support_s": [
+        15.61596084,
+        21.82496084
+      ],
+      "new_gate_used": false,
+      "status": "fully_observed_primary_window",
+      "comparison": {
+        "heel_strike": {
+          "reference_times_s": [
+            17.163967985977223,
+            18.716943642178773,
+            20.287931128580603,
+            21.822001050884474
+          ],
+          "observed_candidate_window_s": [
+            16.983967985977223,
+            22.002001050884473
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                17.189800160988774,
+                17.293055611650036,
+                18.75914253934427,
+                18.82520460014791,
+                20.28291328266052
+              ],
+              "tolerance_s": 0.12,
+              "matching": {
+                "reference_count": 4,
+                "predicted_count": 5,
+                "matched_count": 3,
+                "false_positives": 2,
+                "false_negatives": 1,
+                "precision": 0.6,
+                "recall": 0.75,
+                "f1": 0.6666666666666665,
+                "timing_bias_s": 0.021004408752322234,
+                "timing_mae_s": 0.024349639365710846,
+                "timing_max_abs_s": 0.042198897165498295,
+                "unmatched_reference": [
+                  21.822001050884474
+                ],
+                "unmatched_predicted": [
+                  17.293055611650036,
+                  18.82520460014791
+                ],
+                "pairs": [
+                  {
+                    "reference_time_s": 20.287931128580603,
+                    "predicted_time_s": 20.28291328266052,
+                    "error_s": -0.0050178459200829195,
+                    "absolute_error_s": 0.0050178459200829195
+                  },
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.189800160988774,
+                    "error_s": 0.025832175011551328,
+                    "absolute_error_s": 0.025832175011551328
+                  },
+                  {
+                    "reference_time_s": 18.716943642178773,
+                    "predicted_time_s": 18.75914253934427,
+                    "error_s": 0.042198897165498295,
+                    "absolute_error_s": 0.042198897165498295
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [
+                21.822001050884474
+              ],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223,
+                18.716943642178773,
+                20.287931128580603
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "event": "heel_strike",
+              "event_time_s": 15.731270200086277,
+              "confirmed_time_s": 15.731270200086277,
+              "delivered_time_s": 15.731270200086277,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            }
+          ],
+          "note": "Raw force crossings have no binary confirmation/delivery clocks; only interpolated force onset."
+        },
+        "toe_off": {
+          "reference_times_s": [
+            18.22436226395682,
+            19.777666676391547,
+            21.3668960232229
+          ],
+          "observed_candidate_window_s": [
+            16.983967985977223,
+            22.002001050884473
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                17.273037518931908,
+                18.20804595199159,
+                18.789340999359414,
+                19.792953966633437,
+                21.328185522633753
+              ],
+              "tolerance_s": 0.18,
+              "matching": {
+                "reference_count": 3,
+                "predicted_count": 5,
+                "matched_count": 3,
+                "false_positives": 2,
+                "false_negatives": 0,
+                "precision": 0.6,
+                "recall": 1.0,
+                "f1": 0.7499999999999999,
+                "timing_bias_s": -0.013246507437495817,
+                "timing_mae_s": 0.02343803426542242,
+                "timing_max_abs_s": 0.038710500589147046,
+                "unmatched_reference": [],
+                "unmatched_predicted": [
+                  17.273037518931908,
+                  18.789340999359414
+                ],
+                "pairs": [
+                  {
+                    "reference_time_s": 19.777666676391547,
+                    "predicted_time_s": 19.792953966633437,
+                    "error_s": 0.015287290241889906,
+                    "absolute_error_s": 0.015287290241889906
+                  },
+                  {
+                    "reference_time_s": 18.22436226395682,
+                    "predicted_time_s": 18.20804595199159,
+                    "error_s": -0.016316311965230312,
+                    "absolute_error_s": 0.016316311965230312
+                  },
+                  {
+                    "reference_time_s": 21.3668960232229,
+                    "predicted_time_s": 21.328185522633753,
+                    "error_s": -0.038710500589147046,
+                    "absolute_error_s": 0.038710500589147046
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                18.22436226395682,
+                19.777666676391547,
+                21.3668960232229
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "event": "toe_off",
+              "event_time_s": 16.647074750254358,
+              "confirmed_time_s": 16.647074750254358,
+              "delivered_time_s": 16.647074750254358,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            }
+          ],
+          "note": "Raw force crossings have no binary confirmation/delivery clocks; only interpolated force onset."
+        }
+      }
+    }
+  },
+  "startup_channels_secondary": {
+    "binary_geometry_FSM": {
+      "source_channel": "binary_geometry_FSM",
+      "scope": "startup_secondary",
+      "reference_events_s": {
+        "heel_strike": [
+          15.615960838108348,
+          17.163967985977223
+        ],
+        "toe_off": [
+          16.668082795989378
+        ]
+      },
+      "nominal_analysis_window_s": [
+        15.615960838108348,
+        17.163967985977223
+      ],
+      "saved_support_s": [
+        15.616960838108348,
+        21.825960838115254
+      ],
+      "new_gate_used": false,
+      "status": "partially_observed_startup_window",
+      "comparison": {
+        "heel_strike": {
+          "reference_times_s": [
+            15.615960838108348,
+            17.163967985977223
+          ],
+          "observed_candidate_window_s": [
+            15.435960838108349,
+            17.343967985977223
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                17.13396083810952
+              ],
+              "tolerance_s": 0.12,
+              "matching": {
+                "reference_count": 2,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1": 0.6666666666666666,
+                "timing_bias_s": -0.03000714786770331,
+                "timing_mae_s": 0.03000714786770331,
+                "timing_max_abs_s": 0.03000714786770331,
+                "unmatched_reference": [
+                  15.615960838108348
+                ],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.13396083810952,
+                    "error_s": -0.03000714786770331,
+                    "absolute_error_s": 0.03000714786770331
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [
+                15.615960838108348
+              ],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                17.138960838109526
+              ],
+              "tolerance_s": 0.05,
+              "matching": {
+                "reference_count": 2,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1": 0.6666666666666666,
+                "timing_bias_s": -0.0250071478676972,
+                "timing_mae_s": 0.0250071478676972,
+                "timing_max_abs_s": 0.0250071478676972,
+                "unmatched_reference": [
+                  15.615960838108348
+                ],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.138960838109526,
+                    "error_s": -0.0250071478676972,
+                    "absolute_error_s": 0.0250071478676972
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [
+                15.615960838108348
+              ],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                17.145960838108316
+              ],
+              "tolerance_s": 0.06,
+              "matching": {
+                "reference_count": 2,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1": 0.6666666666666666,
+                "timing_bias_s": -0.018007147868907225,
+                "timing_mae_s": 0.018007147868907225,
+                "timing_max_abs_s": 0.018007147868907225,
+                "unmatched_reference": [
+                  15.615960838108348
+                ],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.145960838108316,
+                    "error_s": -0.018007147868907225,
+                    "absolute_error_s": 0.018007147868907225
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [
+                15.615960838108348
+              ],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "side": "left",
+              "event": "heel_strike",
+              "time": 18.674960838111403,
+              "event_time_s": 18.674960838111403,
+              "confirmed_time_s": 18.67996083811141,
+              "confirmed_time": 18.67996083811141,
+              "delivered_time_s": 18.685960838108556,
+              "source": "binary_phase_fsm_v26",
+              "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+              "semantic": "heel_qualified_initial_contact",
+              "onset_contact_state": "HEEL",
+              "confirmed_contact_state": "HEEL",
+              "landing_sensor": "heel",
+              "contact_leader": "heel",
+              "hs_semantics": "first_stable_heel_contact"
+            },
+            {
+              "side": "left",
+              "event": "heel_strike",
+              "time": 20.256960838113336,
+              "event_time_s": 20.256960838113336,
+              "confirmed_time_s": 20.261960838113342,
+              "confirmed_time": 20.261960838113342,
+              "delivered_time_s": 20.265960838108803,
+              "source": "binary_phase_fsm_v26",
+              "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+              "semantic": "heel_qualified_initial_contact",
+              "onset_contact_state": "HEEL",
+              "confirmed_contact_state": "HEEL",
+              "landing_sensor": "heel",
+              "contact_leader": "heel",
+              "hs_semantics": "first_stable_heel_contact"
+            },
+            {
+              "side": "left",
+              "event": "heel_strike",
+              "time": 21.787960838115207,
+              "event_time_s": 21.787960838115207,
+              "confirmed_time_s": 21.792960838115214,
+              "confirmed_time": 21.792960838115214,
+              "delivered_time_s": 21.795960838109043,
+              "source": "binary_phase_fsm_v26",
+              "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+              "semantic": "heel_qualified_initial_contact",
+              "onset_contact_state": "HEEL",
+              "confirmed_contact_state": "HEEL",
+              "landing_sensor": "heel",
+              "contact_leader": "heel",
+              "hs_semantics": "first_stable_heel_contact"
+            }
+          ]
+        },
+        "toe_off": {
+          "reference_times_s": [
+            16.668082795989378
+          ],
+          "observed_candidate_window_s": [
+            15.435960838108349,
+            17.343967985977223
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                16.754960838109056
+              ],
+              "tolerance_s": 0.18,
+              "matching": {
+                "reference_count": 1,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": 0.08687804211967887,
+                "timing_mae_s": 0.08687804211967887,
+                "timing_max_abs_s": 0.08687804211967887,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 16.668082795989378,
+                    "predicted_time_s": 16.754960838109056,
+                    "error_s": 0.08687804211967887,
+                    "absolute_error_s": 0.08687804211967887
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                16.668082795989378
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                16.759960838109063
+              ],
+              "tolerance_s": 0.08,
+              "matching": {
+                "reference_count": 1,
+                "predicted_count": 1,
+                "matched_count": 0,
+                "false_positives": 1,
+                "false_negatives": 1,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "timing_bias_s": null,
+                "timing_mae_s": null,
+                "timing_max_abs_s": null,
+                "unmatched_reference": [
+                  16.668082795989378
+                ],
+                "unmatched_predicted": [
+                  16.759960838109063
+                ],
+                "pairs": []
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                16.668082795989378
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                16.668082795989378
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                16.765960838108256
+              ],
+              "tolerance_s": 0.09,
+              "matching": {
+                "reference_count": 1,
+                "predicted_count": 1,
+                "matched_count": 0,
+                "false_positives": 1,
+                "false_negatives": 1,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "timing_bias_s": null,
+                "timing_mae_s": null,
+                "timing_max_abs_s": null,
+                "unmatched_reference": [
+                  16.668082795989378
+                ],
+                "unmatched_predicted": [
+                  16.765960838108256
+                ],
+                "pairs": []
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                16.668082795989378
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                16.668082795989378
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "side": "left",
+              "event": "toe_off",
+              "time": 18.325960838110976,
+              "event_time_s": 18.325960838110976,
+              "confirmed_time_s": 18.330960838110983,
+              "confirmed_time": 18.330960838110983,
+              "delivered_time_s": 18.3359608381085,
+              "source": "binary_phase_fsm_v26",
+              "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+              "semantic": "functional_final_contact",
+              "onset_contact_state": "AIR",
+              "confirmed_contact_state": "AIR",
+              "startup_partial_stance": false
+            },
+            {
+              "side": "left",
+              "event": "toe_off",
+              "time": 19.893960838112893,
+              "event_time_s": 19.893960838112893,
+              "confirmed_time_s": 19.8989608381129,
+              "confirmed_time": 19.8989608381129,
+              "delivered_time_s": 19.905960838108747,
+              "source": "binary_phase_fsm_v26",
+              "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+              "semantic": "functional_final_contact",
+              "onset_contact_state": "AIR",
+              "confirmed_contact_state": "AIR",
+              "startup_partial_stance": false
+            },
+            {
+              "side": "left",
+              "event": "toe_off",
+              "time": 21.44496083811479,
+              "event_time_s": 21.44496083811479,
+              "confirmed_time_s": 21.449960838114794,
+              "confirmed_time": 21.449960838114794,
+              "delivered_time_s": 21.45596083810899,
+              "source": "binary_phase_fsm_v26",
+              "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+              "semantic": "functional_final_contact",
+              "onset_contact_state": "AIR",
+              "confirmed_contact_state": "AIR",
+              "startup_partial_stance": false
+            }
+          ]
+        }
+      }
+    },
+    "actor_retained_after_HS_repairs": {
+      "source_channel": "actor_retained_after_HS_repairs",
+      "scope": "startup_secondary",
+      "reference_events_s": {
+        "heel_strike": [
+          15.615960838108348,
+          17.163967985977223
+        ],
+        "toe_off": [
+          16.668082795989378
+        ]
+      },
+      "nominal_analysis_window_s": [
+        15.615960838108348,
+        17.163967985977223
+      ],
+      "saved_support_s": [
+        15.625960838108343,
+        21.825960838108347
+      ],
+      "new_gate_used": false,
+      "status": "partially_observed_startup_window",
+      "comparison": {
+        "heel_strike": {
+          "reference_times_s": [
+            15.615960838108348,
+            17.163967985977223
+          ],
+          "observed_candidate_window_s": [
+            15.435960838108349,
+            17.343967985977223
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                17.13396083810952
+              ],
+              "tolerance_s": 0.12,
+              "matching": {
+                "reference_count": 2,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1": 0.6666666666666666,
+                "timing_bias_s": -0.03000714786770331,
+                "timing_mae_s": 0.03000714786770331,
+                "timing_max_abs_s": 0.03000714786770331,
+                "unmatched_reference": [
+                  15.615960838108348
+                ],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.13396083810952,
+                    "error_s": -0.03000714786770331,
+                    "absolute_error_s": 0.03000714786770331
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [
+                15.615960838108348
+              ],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                17.138960838109526
+              ],
+              "tolerance_s": 0.05,
+              "matching": {
+                "reference_count": 2,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1": 0.6666666666666666,
+                "timing_bias_s": -0.0250071478676972,
+                "timing_mae_s": 0.0250071478676972,
+                "timing_max_abs_s": 0.0250071478676972,
+                "unmatched_reference": [
+                  15.615960838108348
+                ],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.138960838109526,
+                    "error_s": -0.0250071478676972,
+                    "absolute_error_s": 0.0250071478676972
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [
+                15.615960838108348
+              ],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                17.145960838108316
+              ],
+              "tolerance_s": 0.06,
+              "matching": {
+                "reference_count": 2,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "precision": 1.0,
+                "recall": 0.5,
+                "f1": 0.6666666666666666,
+                "timing_bias_s": -0.018007147868907225,
+                "timing_mae_s": 0.018007147868907225,
+                "timing_max_abs_s": 0.018007147868907225,
+                "unmatched_reference": [
+                  15.615960838108348
+                ],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.145960838108316,
+                    "error_s": -0.018007147868907225,
+                    "absolute_error_s": 0.018007147868907225
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [
+                15.615960838108348
+              ],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "event": "heel_strike",
+              "event_time_s": 18.674960838111403,
+              "confirmed_time_s": 18.67996083811141,
+              "delivered_time_s": 18.685960838108556,
+              "from_state_id": 2.0,
+              "to_state_id": 1.0,
+              "closed_segment_type": "swing",
+              "segment_start_time_s": 18.325960838110976,
+              "segment_end_time_s": 18.674960838111403,
+              "segment_valid": 1.0,
+              "anchor_geometry_valid": 1.0,
+              "opens_segment_type": "stance",
+              "cycle_valid": 1.0,
+              "cycle_reject_reason": ""
+            },
+            {
+              "event": "heel_strike",
+              "event_time_s": 20.256960838113336,
+              "confirmed_time_s": 20.261960838113342,
+              "delivered_time_s": 20.265960838108803,
+              "from_state_id": 2.0,
+              "to_state_id": 1.0,
+              "closed_segment_type": "swing",
+              "segment_start_time_s": 19.893960838112893,
+              "segment_end_time_s": 20.256960838113336,
+              "segment_valid": 1.0,
+              "anchor_geometry_valid": 1.0,
+              "opens_segment_type": "stance",
+              "cycle_valid": 1.0,
+              "cycle_reject_reason": ""
+            },
+            {
+              "event": "heel_strike",
+              "event_time_s": 21.787960838115207,
+              "confirmed_time_s": 21.792960838115214,
+              "delivered_time_s": 21.795960838109043,
+              "from_state_id": 2.0,
+              "to_state_id": 1.0,
+              "closed_segment_type": "swing",
+              "segment_start_time_s": 21.44496083811479,
+              "segment_end_time_s": 21.787960838115207,
+              "segment_valid": 1.0,
+              "anchor_geometry_valid": 1.0,
+              "opens_segment_type": "stance",
+              "cycle_valid": 1.0,
+              "cycle_reject_reason": ""
+            }
+          ]
+        },
+        "toe_off": {
+          "reference_times_s": [
+            16.668082795989378
+          ],
+          "observed_candidate_window_s": [
+            15.435960838108349,
+            17.343967985977223
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                16.754960838109056
+              ],
+              "tolerance_s": 0.18,
+              "matching": {
+                "reference_count": 1,
+                "predicted_count": 1,
+                "matched_count": 1,
+                "false_positives": 0,
+                "false_negatives": 0,
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "timing_bias_s": 0.08687804211967887,
+                "timing_mae_s": 0.08687804211967887,
+                "timing_max_abs_s": 0.08687804211967887,
+                "unmatched_reference": [],
+                "unmatched_predicted": [],
+                "pairs": [
+                  {
+                    "reference_time_s": 16.668082795989378,
+                    "predicted_time_s": 16.754960838109056,
+                    "error_s": 0.08687804211967887,
+                    "absolute_error_s": 0.08687804211967887
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                16.668082795989378
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "confirmed": {
+              "observed_times_s": [
+                16.759960838109063
+              ],
+              "tolerance_s": 0.08,
+              "matching": {
+                "reference_count": 1,
+                "predicted_count": 1,
+                "matched_count": 0,
+                "false_positives": 1,
+                "false_negatives": 1,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "timing_bias_s": null,
+                "timing_mae_s": null,
+                "timing_max_abs_s": null,
+                "unmatched_reference": [
+                  16.668082795989378
+                ],
+                "unmatched_predicted": [
+                  16.759960838109063
+                ],
+                "pairs": []
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                16.668082795989378
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                16.668082795989378
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            },
+            "delivered": {
+              "observed_times_s": [
+                16.765960838108256
+              ],
+              "tolerance_s": 0.09,
+              "matching": {
+                "reference_count": 1,
+                "predicted_count": 1,
+                "matched_count": 0,
+                "false_positives": 1,
+                "false_negatives": 1,
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1": 0.0,
+                "timing_bias_s": null,
+                "timing_mae_s": null,
+                "timing_max_abs_s": null,
+                "unmatched_reference": [
+                  16.668082795989378
+                ],
+                "unmatched_predicted": [
+                  16.765960838108256
+                ],
+                "pairs": []
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [
+                16.668082795989378
+              ],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                16.668082795989378
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "event": "toe_off",
+              "event_time_s": 18.325960838110976,
+              "confirmed_time_s": 18.330960838110983,
+              "delivered_time_s": 18.3359608381085,
+              "from_state_id": 1.0,
+              "to_state_id": 2.0,
+              "closed_segment_type": "stance",
+              "segment_start_time_s": 17.13396083810952,
+              "segment_end_time_s": 18.325960838110976,
+              "segment_valid": 1.0,
+              "anchor_geometry_valid": 1.0,
+              "opens_segment_type": "swing",
+              "cycle_valid": -1.0,
+              "cycle_reject_reason": ""
+            },
+            {
+              "event": "toe_off",
+              "event_time_s": 19.893960838112893,
+              "confirmed_time_s": 19.8989608381129,
+              "delivered_time_s": 19.905960838108747,
+              "from_state_id": 1.0,
+              "to_state_id": 2.0,
+              "closed_segment_type": "stance",
+              "segment_start_time_s": 18.674960838111403,
+              "segment_end_time_s": 19.893960838112893,
+              "segment_valid": 1.0,
+              "anchor_geometry_valid": 1.0,
+              "opens_segment_type": "swing",
+              "cycle_valid": -1.0,
+              "cycle_reject_reason": ""
+            },
+            {
+              "event": "toe_off",
+              "event_time_s": 21.44496083811479,
+              "confirmed_time_s": 21.449960838114794,
+              "delivered_time_s": 21.45596083810899,
+              "from_state_id": 1.0,
+              "to_state_id": 2.0,
+              "closed_segment_type": "stance",
+              "segment_start_time_s": 20.256960838113336,
+              "segment_end_time_s": 21.44496083811479,
+              "segment_valid": 1.0,
+              "anchor_geometry_valid": 1.0,
+              "opens_segment_type": "swing",
+              "cycle_valid": -1.0,
+              "cycle_reject_reason": ""
+            }
+          ]
+        }
+      }
+    },
+    "primary_force_20N_crossings": {
+      "source_channel": "primary_force_20N_crossings",
+      "scope": "startup_secondary",
+      "reference_events_s": {
+        "heel_strike": [
+          15.615960838108348,
+          17.163967985977223
+        ],
+        "toe_off": [
+          16.668082795989378
+        ]
+      },
+      "nominal_analysis_window_s": [
+        15.615960838108348,
+        17.163967985977223
+      ],
+      "saved_support_s": [
+        15.61596084,
+        21.82496084
+      ],
+      "new_gate_used": false,
+      "status": "partially_observed_startup_window",
+      "comparison": {
+        "heel_strike": {
+          "reference_times_s": [
+            15.615960838108348,
+            17.163967985977223
+          ],
+          "observed_candidate_window_s": [
+            15.435960838108349,
+            17.343967985977223
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                15.731270200086277,
+                17.189800160988774,
+                17.293055611650036
+              ],
+              "tolerance_s": 0.12,
+              "matching": {
+                "reference_count": 2,
+                "predicted_count": 3,
+                "matched_count": 2,
+                "false_positives": 1,
+                "false_negatives": 0,
+                "precision": 0.6666666666666666,
+                "recall": 1.0,
+                "f1": 0.8,
+                "timing_bias_s": 0.07057076849473987,
+                "timing_mae_s": 0.07057076849473987,
+                "timing_max_abs_s": 0.1153093619779284,
+                "unmatched_reference": [],
+                "unmatched_predicted": [
+                  17.293055611650036
+                ],
+                "pairs": [
+                  {
+                    "reference_time_s": 17.163967985977223,
+                    "predicted_time_s": 17.189800160988774,
+                    "error_s": 0.025832175011551328,
+                    "absolute_error_s": 0.025832175011551328
+                  },
+                  {
+                    "reference_time_s": 15.615960838108348,
+                    "predicted_time_s": 15.731270200086277,
+                    "error_s": 0.1153093619779284,
+                    "absolute_error_s": 0.1153093619779284
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                17.163967985977223
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "event": "heel_strike",
+              "event_time_s": 18.75914253934427,
+              "confirmed_time_s": 18.75914253934427,
+              "delivered_time_s": 18.75914253934427,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            },
+            {
+              "event": "heel_strike",
+              "event_time_s": 18.82520460014791,
+              "confirmed_time_s": 18.82520460014791,
+              "delivered_time_s": 18.82520460014791,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            },
+            {
+              "event": "heel_strike",
+              "event_time_s": 20.28291328266052,
+              "confirmed_time_s": 20.28291328266052,
+              "delivered_time_s": 20.28291328266052,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            }
+          ],
+          "note": "Raw force crossings have no binary confirmation/delivery clocks; only interpolated force onset."
+        },
+        "toe_off": {
+          "reference_times_s": [
+            16.668082795989378
+          ],
+          "observed_candidate_window_s": [
+            15.435960838108349,
+            17.343967985977223
+          ],
+          "candidate_window_note": "Inherited maximum onset reference tolerance is used only as a boundary buffer, never as a new acceptance gate.",
+          "channels": {
+            "onset": {
+              "observed_times_s": [
+                16.647074750254358,
+                17.273037518931908
+              ],
+              "tolerance_s": 0.18,
+              "matching": {
+                "reference_count": 1,
+                "predicted_count": 2,
+                "matched_count": 1,
+                "false_positives": 1,
+                "false_negatives": 0,
+                "precision": 0.5,
+                "recall": 1.0,
+                "f1": 0.6666666666666666,
+                "timing_bias_s": -0.021008045735019465,
+                "timing_mae_s": 0.021008045735019465,
+                "timing_max_abs_s": 0.021008045735019465,
+                "unmatched_reference": [],
+                "unmatched_predicted": [
+                  17.273037518931908
+                ],
+                "pairs": [
+                  {
+                    "reference_time_s": 16.668082795989378,
+                    "predicted_time_s": 16.647074750254358,
+                    "error_s": -0.021008045735019465,
+                    "absolute_error_s": 0.021008045735019465
+                  }
+                ]
+              },
+              "unmatched_reference_fully_observed_matching_guard_s": [],
+              "unmatched_reference_censored_or_unknown_s": [],
+              "fully_observed_reference_matching_guard_s": [
+                16.668082795989378
+              ],
+              "interpretation": "Original full-reference matcher counts are descriptive. References without full saved±tolerance support remain censored/unknown, not physiological misses; matched observed events remain reported."
+            }
+          },
+          "outside_analysis_boundary_buffer_events": [
+            {
+              "event": "toe_off",
+              "event_time_s": 18.20804595199159,
+              "confirmed_time_s": 18.20804595199159,
+              "delivered_time_s": 18.20804595199159,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            },
+            {
+              "event": "toe_off",
+              "event_time_s": 18.789340999359414,
+              "confirmed_time_s": 18.789340999359414,
+              "delivered_time_s": 18.789340999359414,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            },
+            {
+              "event": "toe_off",
+              "event_time_s": 19.792953966633437,
+              "confirmed_time_s": 19.792953966633437,
+              "delivered_time_s": 19.792953966633437,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            },
+            {
+              "event": "toe_off",
+              "event_time_s": 21.328185522633753,
+              "confirmed_time_s": 21.328185522633753,
+              "delivered_time_s": 21.328185522633753,
+              "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+            }
+          ],
+          "note": "Raw force crossings have no binary confirmation/delivery clocks; only interpolated force onset."
+        }
+      }
+    }
+  },
+  "observed_full_episode_journal_secondary": {
+    "last_counters": {
+      "valid_hs_count": 4.0,
+      "valid_to_count": 4.0,
+      "valid_cycle_count": 3.0,
+      "invalid_event_count": 0.0,
+      "resync_count": 0.0,
+      "hs_cancelled_count": 0.0,
+      "last_period_s": 1.531000000001871,
+      "last_stance_fraction": 0.7759634225996082
+    },
+    "timeout_flag_nonzero_saved_steps": [],
+    "accepted_transitions": [
+      {
+        "event": "toe_off",
+        "event_time_s": 16.754960838109056,
+        "confirmed_time_s": 16.759960838109063,
+        "delivered_time_s": 16.765960838108256,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 15.615960838108348,
+        "segment_end_time_s": 16.754960838109056,
+        "segment_valid": 0.0,
+        "anchor_geometry_valid": 0.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 17.13396083810952,
+        "confirmed_time_s": 17.138960838109526,
+        "delivered_time_s": 17.145960838108316,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 16.754960838109056,
+        "segment_end_time_s": 17.13396083810952,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "toe_off",
+        "event_time_s": 18.325960838110976,
+        "confirmed_time_s": 18.330960838110983,
+        "delivered_time_s": 18.3359608381085,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 17.13396083810952,
+        "segment_end_time_s": 18.325960838110976,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 18.674960838111403,
+        "confirmed_time_s": 18.67996083811141,
+        "delivered_time_s": 18.685960838108556,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 18.325960838110976,
+        "segment_end_time_s": 18.674960838111403,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "toe_off",
+        "event_time_s": 19.893960838112893,
+        "confirmed_time_s": 19.8989608381129,
+        "delivered_time_s": 19.905960838108747,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 18.674960838111403,
+        "segment_end_time_s": 19.893960838112893,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 20.256960838113336,
+        "confirmed_time_s": 20.261960838113342,
+        "delivered_time_s": 20.265960838108803,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 19.893960838112893,
+        "segment_end_time_s": 20.256960838113336,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "toe_off",
+        "event_time_s": 21.44496083811479,
+        "confirmed_time_s": 21.449960838114794,
+        "delivered_time_s": 21.45596083810899,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 20.256960838113336,
+        "segment_end_time_s": 21.44496083811479,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 21.787960838115207,
+        "confirmed_time_s": 21.792960838115214,
+        "delivered_time_s": 21.795960838109043,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 21.44496083811479,
+        "segment_end_time_s": 21.787960838115207,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      }
+    ],
+    "heel_strike_cancellations": [],
+    "previously_accepted_heel_strikes_revoked": [],
+    "ordinary_actor_events_retained_after_repairs": [
+      {
+        "event": "toe_off",
+        "event_time_s": 16.754960838109056,
+        "confirmed_time_s": 16.759960838109063,
+        "delivered_time_s": 16.765960838108256,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 15.615960838108348,
+        "segment_end_time_s": 16.754960838109056,
+        "segment_valid": 0.0,
+        "anchor_geometry_valid": 0.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 17.13396083810952,
+        "confirmed_time_s": 17.138960838109526,
+        "delivered_time_s": 17.145960838108316,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 16.754960838109056,
+        "segment_end_time_s": 17.13396083810952,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "toe_off",
+        "event_time_s": 18.325960838110976,
+        "confirmed_time_s": 18.330960838110983,
+        "delivered_time_s": 18.3359608381085,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 17.13396083810952,
+        "segment_end_time_s": 18.325960838110976,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 18.674960838111403,
+        "confirmed_time_s": 18.67996083811141,
+        "delivered_time_s": 18.685960838108556,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 18.325960838110976,
+        "segment_end_time_s": 18.674960838111403,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "toe_off",
+        "event_time_s": 19.893960838112893,
+        "confirmed_time_s": 19.8989608381129,
+        "delivered_time_s": 19.905960838108747,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 18.674960838111403,
+        "segment_end_time_s": 19.893960838112893,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 20.256960838113336,
+        "confirmed_time_s": 20.261960838113342,
+        "delivered_time_s": 20.265960838108803,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 19.893960838112893,
+        "segment_end_time_s": 20.256960838113336,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "toe_off",
+        "event_time_s": 21.44496083811479,
+        "confirmed_time_s": 21.449960838114794,
+        "delivered_time_s": 21.45596083810899,
+        "from_state_id": 1.0,
+        "to_state_id": 2.0,
+        "closed_segment_type": "stance",
+        "segment_start_time_s": 20.256960838113336,
+        "segment_end_time_s": 21.44496083811479,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "swing",
+        "cycle_valid": -1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 21.787960838115207,
+        "confirmed_time_s": 21.792960838115214,
+        "delivered_time_s": 21.795960838109043,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 21.44496083811479,
+        "segment_end_time_s": 21.787960838115207,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      }
+    ],
+    "invalid_resync_or_rejection_journal": [],
+    "historically_marked_valid_cycle_closures": [
+      {
+        "event": "heel_strike",
+        "event_time_s": 18.674960838111403,
+        "confirmed_time_s": 18.67996083811141,
+        "delivered_time_s": 18.685960838108556,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 18.325960838110976,
+        "segment_end_time_s": 18.674960838111403,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 20.256960838113336,
+        "confirmed_time_s": 20.261960838113342,
+        "delivered_time_s": 20.265960838108803,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 19.893960838112893,
+        "segment_end_time_s": 20.256960838113336,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      },
+      {
+        "event": "heel_strike",
+        "event_time_s": 21.787960838115207,
+        "confirmed_time_s": 21.792960838115214,
+        "delivered_time_s": 21.795960838109043,
+        "from_state_id": 2.0,
+        "to_state_id": 1.0,
+        "closed_segment_type": "swing",
+        "segment_start_time_s": 21.44496083811479,
+        "segment_end_time_s": 21.787960838115207,
+        "segment_valid": 1.0,
+        "anchor_geometry_valid": 1.0,
+        "opens_segment_type": "stance",
+        "cycle_valid": 1.0,
+        "cycle_reject_reason": ""
+      }
+    ],
+    "closed_segments": {
+      "startup_partial_stance": [
+        {
+          "event": "toe_off",
+          "event_time_s": 16.754960838109056,
+          "confirmed_time_s": 16.759960838109063,
+          "delivered_time_s": 16.765960838108256,
+          "from_state_id": 1.0,
+          "to_state_id": 2.0,
+          "closed_segment_type": "stance",
+          "segment_start_time_s": 15.615960838108348,
+          "segment_end_time_s": 16.754960838109056,
+          "segment_valid": 0.0,
+          "anchor_geometry_valid": 0.0,
+          "opens_segment_type": "swing",
+          "cycle_valid": -1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 1.1390000000007081
+        }
+      ],
+      "anchored_valid_stance": [
+        {
+          "event": "toe_off",
+          "event_time_s": 18.325960838110976,
+          "confirmed_time_s": 18.330960838110983,
+          "delivered_time_s": 18.3359608381085,
+          "from_state_id": 1.0,
+          "to_state_id": 2.0,
+          "closed_segment_type": "stance",
+          "segment_start_time_s": 17.13396083810952,
+          "segment_end_time_s": 18.325960838110976,
+          "segment_valid": 1.0,
+          "anchor_geometry_valid": 1.0,
+          "opens_segment_type": "swing",
+          "cycle_valid": -1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 1.1920000000014568
+        },
+        {
+          "event": "toe_off",
+          "event_time_s": 19.893960838112893,
+          "confirmed_time_s": 19.8989608381129,
+          "delivered_time_s": 19.905960838108747,
+          "from_state_id": 1.0,
+          "to_state_id": 2.0,
+          "closed_segment_type": "stance",
+          "segment_start_time_s": 18.674960838111403,
+          "segment_end_time_s": 19.893960838112893,
+          "segment_valid": 1.0,
+          "anchor_geometry_valid": 1.0,
+          "opens_segment_type": "swing",
+          "cycle_valid": -1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 1.2190000000014898
+        },
+        {
+          "event": "toe_off",
+          "event_time_s": 21.44496083811479,
+          "confirmed_time_s": 21.449960838114794,
+          "delivered_time_s": 21.45596083810899,
+          "from_state_id": 1.0,
+          "to_state_id": 2.0,
+          "closed_segment_type": "stance",
+          "segment_start_time_s": 20.256960838113336,
+          "segment_end_time_s": 21.44496083811479,
+          "segment_valid": 1.0,
+          "anchor_geometry_valid": 1.0,
+          "opens_segment_type": "swing",
+          "cycle_valid": -1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 1.188000000001452
+        }
+      ],
+      "other_stance": [],
+      "swing": [
+        {
+          "event": "heel_strike",
+          "event_time_s": 17.13396083810952,
+          "confirmed_time_s": 17.138960838109526,
+          "delivered_time_s": 17.145960838108316,
+          "from_state_id": 2.0,
+          "to_state_id": 1.0,
+          "closed_segment_type": "swing",
+          "segment_start_time_s": 16.754960838109056,
+          "segment_end_time_s": 17.13396083810952,
+          "segment_valid": 1.0,
+          "anchor_geometry_valid": 1.0,
+          "opens_segment_type": "stance",
+          "cycle_valid": -1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 0.3790000000004632
+        },
+        {
+          "event": "heel_strike",
+          "event_time_s": 18.674960838111403,
+          "confirmed_time_s": 18.67996083811141,
+          "delivered_time_s": 18.685960838108556,
+          "from_state_id": 2.0,
+          "to_state_id": 1.0,
+          "closed_segment_type": "swing",
+          "segment_start_time_s": 18.325960838110976,
+          "segment_end_time_s": 18.674960838111403,
+          "segment_valid": 1.0,
+          "anchor_geometry_valid": 1.0,
+          "opens_segment_type": "stance",
+          "cycle_valid": 1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 0.3490000000004265
+        },
+        {
+          "event": "heel_strike",
+          "event_time_s": 20.256960838113336,
+          "confirmed_time_s": 20.261960838113342,
+          "delivered_time_s": 20.265960838108803,
+          "from_state_id": 2.0,
+          "to_state_id": 1.0,
+          "closed_segment_type": "swing",
+          "segment_start_time_s": 19.893960838112893,
+          "segment_end_time_s": 20.256960838113336,
+          "segment_valid": 1.0,
+          "anchor_geometry_valid": 1.0,
+          "opens_segment_type": "stance",
+          "cycle_valid": 1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 0.36300000000044363
+        },
+        {
+          "event": "heel_strike",
+          "event_time_s": 21.787960838115207,
+          "confirmed_time_s": 21.792960838115214,
+          "delivered_time_s": 21.795960838109043,
+          "from_state_id": 2.0,
+          "to_state_id": 1.0,
+          "closed_segment_type": "swing",
+          "segment_start_time_s": 21.44496083811479,
+          "segment_end_time_s": 21.787960838115207,
+          "segment_valid": 1.0,
+          "anchor_geometry_valid": 1.0,
+          "opens_segment_type": "stance",
+          "cycle_valid": 1.0,
+          "cycle_reject_reason": "",
+          "duration_s": 0.3430000000004192
+        }
+      ],
+      "cancelled_hs_repairs": []
+    },
+    "segment_duration_s": {
+      "startup_partial_stance": {
+        "count": 1,
+        "min": 1.1390000000007081,
+        "max": 1.1390000000007081,
+        "mean": 1.1390000000007081,
+        "rms": 1.1390000000007081
+      },
+      "anchored_valid_stance": {
+        "count": 3,
+        "min": 1.188000000001452,
+        "max": 1.2190000000014898,
+        "mean": 1.1996666666681328,
+        "rms": 1.1997456674938172
+      },
+      "other_stance": null,
+      "swing": {
+        "count": 4,
+        "min": 0.3430000000004192,
+        "max": 0.3790000000004632,
+        "mean": 0.35850000000043813,
+        "rms": 0.35876872773461543
+      }
+    },
+    "event_matching": {
+      "actor_historically_accepted": {
+        "heel_strike": {
+          "onset_times_s": [
+            17.13396083810952,
+            18.674960838111403,
+            20.256960838113336,
+            21.787960838115207
+          ],
+          "confirmed_times_s": [
+            17.138960838109526,
+            18.67996083811141,
+            20.261960838113342,
+            21.792960838115214
+          ],
+          "delivered_times_s": [
+            17.145960838108316,
+            18.685960838108556,
+            20.265960838108803,
+            21.795960838109043
+          ],
+          "onset_holdout_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.03425011379290144,
+            "timing_mae_s": 0.03425011379290144,
+            "timing_max_abs_s": 0.04198280406736998,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.13396083810952,
+                "error_s": -0.03000714786770331,
+                "absolute_error_s": 0.03000714786770331
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.256960838113336,
+                "error_s": -0.03097029046726618,
+                "absolute_error_s": 0.03097029046726618
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.787960838115207,
+                "error_s": -0.034040212769266276,
+                "absolute_error_s": 0.034040212769266276
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.674960838111403,
+                "error_s": -0.04198280406736998,
+                "absolute_error_s": 0.04198280406736998
+              }
+            ]
+          },
+          "confirmed_v26_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.029250113792895327,
+            "timing_mae_s": 0.029250113792895327,
+            "timing_max_abs_s": 0.03698280406736387,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.138960838109526,
+                "error_s": -0.0250071478676972,
+                "absolute_error_s": 0.0250071478676972
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.261960838113342,
+                "error_s": -0.02597029046726007,
+                "absolute_error_s": 0.02597029046726007
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.792960838115214,
+                "error_s": -0.029040212769260165,
+                "absolute_error_s": 0.029040212769260165
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.67996083811141,
+                "error_s": -0.03698280406736387,
+                "absolute_error_s": 0.03698280406736387
+              }
+            ]
+          },
+          "delivered_v26_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.02425011379658848,
+            "timing_mae_s": 0.02425011379658848,
+            "timing_max_abs_s": 0.030982804070216474,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.145960838108316,
+                "error_s": -0.018007147868907225,
+                "absolute_error_s": 0.018007147868907225
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.265960838108803,
+                "error_s": -0.021970290471799103,
+                "absolute_error_s": 0.021970290471799103
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.795960838109043,
+                "error_s": -0.026040212775431115,
+                "absolute_error_s": 0.026040212775431115
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.685960838108556,
+                "error_s": -0.030982804070216474,
+                "absolute_error_s": 0.030982804070216474
+              }
+            ]
+          }
+        },
+        "toe_off": {
+          "onset_times_s": [
+            16.754960838109056,
+            18.325960838110976,
+            19.893960838112893,
+            21.44496083811479
+          ],
+          "confirmed_times_s": [
+            16.759960838109063,
+            18.330960838110983,
+            19.8989608381129,
+            21.449960838114794
+          ],
+          "delivered_times_s": [
+            16.765960838108256,
+            18.3359608381085,
+            19.905960838108747,
+            21.45596083810899
+          ],
+          "onset_holdout_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "timing_bias_s": 0.09570889822176731,
+            "timing_mae_s": 0.09570889822176731,
+            "timing_max_abs_s": 0.11629416172134555,
+            "unmatched_reference": [],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 21.3668960232229,
+                "predicted_time_s": 21.44496083811479,
+                "error_s": 0.07806481489188855,
+                "absolute_error_s": 0.07806481489188855
+              },
+              {
+                "reference_time_s": 16.668082795989378,
+                "predicted_time_s": 16.754960838109056,
+                "error_s": 0.08687804211967887,
+                "absolute_error_s": 0.08687804211967887
+              },
+              {
+                "reference_time_s": 18.22436226395682,
+                "predicted_time_s": 18.325960838110976,
+                "error_s": 0.1015985741541563,
+                "absolute_error_s": 0.1015985741541563
+              },
+              {
+                "reference_time_s": 19.777666676391547,
+                "predicted_time_s": 19.893960838112893,
+                "error_s": 0.11629416172134555,
+                "absolute_error_s": 0.11629416172134555
+              }
+            ]
+          },
+          "confirmed_v26_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 0,
+            "false_positives": 4,
+            "false_negatives": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "timing_bias_s": null,
+            "timing_mae_s": null,
+            "timing_max_abs_s": null,
+            "unmatched_reference": [
+              16.668082795989378,
+              18.22436226395682,
+              19.777666676391547,
+              21.3668960232229
+            ],
+            "unmatched_predicted": [
+              16.759960838109063,
+              18.330960838110983,
+              19.8989608381129,
+              21.449960838114794
+            ],
+            "pairs": []
+          },
+          "delivered_v26_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 1,
+            "false_positives": 3,
+            "false_negatives": 3,
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1": 0.25,
+            "timing_bias_s": 0.08906481488608975,
+            "timing_mae_s": 0.08906481488608975,
+            "timing_max_abs_s": 0.08906481488608975,
+            "unmatched_reference": [
+              16.668082795989378,
+              18.22436226395682,
+              19.777666676391547
+            ],
+            "unmatched_predicted": [
+              16.765960838108256,
+              18.3359608381085,
+              19.905960838108747
+            ],
+            "pairs": [
+              {
+                "reference_time_s": 21.3668960232229,
+                "predicted_time_s": 21.45596083810899,
+                "error_s": 0.08906481488608975,
+                "absolute_error_s": 0.08906481488608975
+              }
+            ]
+          }
+        }
+      },
+      "actor_retained_after_repairs": {
+        "heel_strike": {
+          "onset_times_s": [
+            17.13396083810952,
+            18.674960838111403,
+            20.256960838113336,
+            21.787960838115207
+          ],
+          "confirmed_times_s": [
+            17.138960838109526,
+            18.67996083811141,
+            20.261960838113342,
+            21.792960838115214
+          ],
+          "delivered_times_s": [
+            17.145960838108316,
+            18.685960838108556,
+            20.265960838108803,
+            21.795960838109043
+          ],
+          "onset_holdout_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.03425011379290144,
+            "timing_mae_s": 0.03425011379290144,
+            "timing_max_abs_s": 0.04198280406736998,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.13396083810952,
+                "error_s": -0.03000714786770331,
+                "absolute_error_s": 0.03000714786770331
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.256960838113336,
+                "error_s": -0.03097029046726618,
+                "absolute_error_s": 0.03097029046726618
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.787960838115207,
+                "error_s": -0.034040212769266276,
+                "absolute_error_s": 0.034040212769266276
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.674960838111403,
+                "error_s": -0.04198280406736998,
+                "absolute_error_s": 0.04198280406736998
+              }
+            ]
+          },
+          "confirmed_v26_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.029250113792895327,
+            "timing_mae_s": 0.029250113792895327,
+            "timing_max_abs_s": 0.03698280406736387,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.138960838109526,
+                "error_s": -0.0250071478676972,
+                "absolute_error_s": 0.0250071478676972
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.261960838113342,
+                "error_s": -0.02597029046726007,
+                "absolute_error_s": 0.02597029046726007
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.792960838115214,
+                "error_s": -0.029040212769260165,
+                "absolute_error_s": 0.029040212769260165
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.67996083811141,
+                "error_s": -0.03698280406736387,
+                "absolute_error_s": 0.03698280406736387
+              }
+            ]
+          },
+          "delivered_v26_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.02425011379658848,
+            "timing_mae_s": 0.02425011379658848,
+            "timing_max_abs_s": 0.030982804070216474,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.145960838108316,
+                "error_s": -0.018007147868907225,
+                "absolute_error_s": 0.018007147868907225
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.265960838108803,
+                "error_s": -0.021970290471799103,
+                "absolute_error_s": 0.021970290471799103
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.795960838109043,
+                "error_s": -0.026040212775431115,
+                "absolute_error_s": 0.026040212775431115
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.685960838108556,
+                "error_s": -0.030982804070216474,
+                "absolute_error_s": 0.030982804070216474
+              }
+            ]
+          }
+        },
+        "toe_off": {
+          "onset_times_s": [
+            16.754960838109056,
+            18.325960838110976,
+            19.893960838112893,
+            21.44496083811479
+          ],
+          "confirmed_times_s": [
+            16.759960838109063,
+            18.330960838110983,
+            19.8989608381129,
+            21.449960838114794
+          ],
+          "delivered_times_s": [
+            16.765960838108256,
+            18.3359608381085,
+            19.905960838108747,
+            21.45596083810899
+          ],
+          "onset_holdout_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "timing_bias_s": 0.09570889822176731,
+            "timing_mae_s": 0.09570889822176731,
+            "timing_max_abs_s": 0.11629416172134555,
+            "unmatched_reference": [],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 21.3668960232229,
+                "predicted_time_s": 21.44496083811479,
+                "error_s": 0.07806481489188855,
+                "absolute_error_s": 0.07806481489188855
+              },
+              {
+                "reference_time_s": 16.668082795989378,
+                "predicted_time_s": 16.754960838109056,
+                "error_s": 0.08687804211967887,
+                "absolute_error_s": 0.08687804211967887
+              },
+              {
+                "reference_time_s": 18.22436226395682,
+                "predicted_time_s": 18.325960838110976,
+                "error_s": 0.1015985741541563,
+                "absolute_error_s": 0.1015985741541563
+              },
+              {
+                "reference_time_s": 19.777666676391547,
+                "predicted_time_s": 19.893960838112893,
+                "error_s": 0.11629416172134555,
+                "absolute_error_s": 0.11629416172134555
+              }
+            ]
+          },
+          "confirmed_v26_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 0,
+            "false_positives": 4,
+            "false_negatives": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "timing_bias_s": null,
+            "timing_mae_s": null,
+            "timing_max_abs_s": null,
+            "unmatched_reference": [
+              16.668082795989378,
+              18.22436226395682,
+              19.777666676391547,
+              21.3668960232229
+            ],
+            "unmatched_predicted": [
+              16.759960838109063,
+              18.330960838110983,
+              19.8989608381129,
+              21.449960838114794
+            ],
+            "pairs": []
+          },
+          "delivered_v26_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 1,
+            "false_positives": 3,
+            "false_negatives": 3,
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1": 0.25,
+            "timing_bias_s": 0.08906481488608975,
+            "timing_mae_s": 0.08906481488608975,
+            "timing_max_abs_s": 0.08906481488608975,
+            "unmatched_reference": [
+              16.668082795989378,
+              18.22436226395682,
+              19.777666676391547
+            ],
+            "unmatched_predicted": [
+              16.765960838108256,
+              18.3359608381085,
+              19.905960838108747
+            ],
+            "pairs": [
+              {
+                "reference_time_s": 21.3668960232229,
+                "predicted_time_s": 21.45596083810899,
+                "error_s": 0.08906481488608975,
+                "absolute_error_s": 0.08906481488608975
+              }
+            ]
+          }
+        }
+      },
+      "binary": {
+        "heel_strike": {
+          "onset_times_s": [
+            17.13396083810952,
+            18.674960838111403,
+            20.256960838113336,
+            21.787960838115207
+          ],
+          "confirmed_times_s": [
+            17.138960838109526,
+            18.67996083811141,
+            20.261960838113342,
+            21.792960838115214
+          ],
+          "delivered_times_s": [
+            17.145960838108316,
+            18.685960838108556,
+            20.265960838108803,
+            21.795960838109043
+          ],
+          "onset_holdout_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.03425011379290144,
+            "timing_mae_s": 0.03425011379290144,
+            "timing_max_abs_s": 0.04198280406736998,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.13396083810952,
+                "error_s": -0.03000714786770331,
+                "absolute_error_s": 0.03000714786770331
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.256960838113336,
+                "error_s": -0.03097029046726618,
+                "absolute_error_s": 0.03097029046726618
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.787960838115207,
+                "error_s": -0.034040212769266276,
+                "absolute_error_s": 0.034040212769266276
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.674960838111403,
+                "error_s": -0.04198280406736998,
+                "absolute_error_s": 0.04198280406736998
+              }
+            ]
+          },
+          "confirmed_v26_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.029250113792895327,
+            "timing_mae_s": 0.029250113792895327,
+            "timing_max_abs_s": 0.03698280406736387,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.138960838109526,
+                "error_s": -0.0250071478676972,
+                "absolute_error_s": 0.0250071478676972
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.261960838113342,
+                "error_s": -0.02597029046726007,
+                "absolute_error_s": 0.02597029046726007
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.792960838115214,
+                "error_s": -0.029040212769260165,
+                "absolute_error_s": 0.029040212769260165
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.67996083811141,
+                "error_s": -0.03698280406736387,
+                "absolute_error_s": 0.03698280406736387
+              }
+            ]
+          },
+          "delivered_v26_reference_matching": {
+            "reference_count": 5,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 1,
+            "precision": 1.0,
+            "recall": 0.8,
+            "f1": 0.888888888888889,
+            "timing_bias_s": -0.02425011379658848,
+            "timing_mae_s": 0.02425011379658848,
+            "timing_max_abs_s": 0.030982804070216474,
+            "unmatched_reference": [
+              15.615960838108348
+            ],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 17.163967985977223,
+                "predicted_time_s": 17.145960838108316,
+                "error_s": -0.018007147868907225,
+                "absolute_error_s": 0.018007147868907225
+              },
+              {
+                "reference_time_s": 20.287931128580603,
+                "predicted_time_s": 20.265960838108803,
+                "error_s": -0.021970290471799103,
+                "absolute_error_s": 0.021970290471799103
+              },
+              {
+                "reference_time_s": 21.822001050884474,
+                "predicted_time_s": 21.795960838109043,
+                "error_s": -0.026040212775431115,
+                "absolute_error_s": 0.026040212775431115
+              },
+              {
+                "reference_time_s": 18.716943642178773,
+                "predicted_time_s": 18.685960838108556,
+                "error_s": -0.030982804070216474,
+                "absolute_error_s": 0.030982804070216474
+              }
+            ]
+          }
+        },
+        "toe_off": {
+          "onset_times_s": [
+            16.754960838109056,
+            18.325960838110976,
+            19.893960838112893,
+            21.44496083811479
+          ],
+          "confirmed_times_s": [
+            16.759960838109063,
+            18.330960838110983,
+            19.8989608381129,
+            21.449960838114794
+          ],
+          "delivered_times_s": [
+            16.765960838108256,
+            18.3359608381085,
+            19.905960838108747,
+            21.45596083810899
+          ],
+          "onset_holdout_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 4,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "timing_bias_s": 0.09570889822176731,
+            "timing_mae_s": 0.09570889822176731,
+            "timing_max_abs_s": 0.11629416172134555,
+            "unmatched_reference": [],
+            "unmatched_predicted": [],
+            "pairs": [
+              {
+                "reference_time_s": 21.3668960232229,
+                "predicted_time_s": 21.44496083811479,
+                "error_s": 0.07806481489188855,
+                "absolute_error_s": 0.07806481489188855
+              },
+              {
+                "reference_time_s": 16.668082795989378,
+                "predicted_time_s": 16.754960838109056,
+                "error_s": 0.08687804211967887,
+                "absolute_error_s": 0.08687804211967887
+              },
+              {
+                "reference_time_s": 18.22436226395682,
+                "predicted_time_s": 18.325960838110976,
+                "error_s": 0.1015985741541563,
+                "absolute_error_s": 0.1015985741541563
+              },
+              {
+                "reference_time_s": 19.777666676391547,
+                "predicted_time_s": 19.893960838112893,
+                "error_s": 0.11629416172134555,
+                "absolute_error_s": 0.11629416172134555
+              }
+            ]
+          },
+          "confirmed_v26_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 0,
+            "false_positives": 4,
+            "false_negatives": 4,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "timing_bias_s": null,
+            "timing_mae_s": null,
+            "timing_max_abs_s": null,
+            "unmatched_reference": [
+              16.668082795989378,
+              18.22436226395682,
+              19.777666676391547,
+              21.3668960232229
+            ],
+            "unmatched_predicted": [
+              16.759960838109063,
+              18.330960838110983,
+              19.8989608381129,
+              21.449960838114794
+            ],
+            "pairs": []
+          },
+          "delivered_v26_reference_matching": {
+            "reference_count": 4,
+            "predicted_count": 4,
+            "matched_count": 1,
+            "false_positives": 3,
+            "false_negatives": 3,
+            "precision": 0.25,
+            "recall": 0.25,
+            "f1": 0.25,
+            "timing_bias_s": 0.08906481488608975,
+            "timing_mae_s": 0.08906481488608975,
+            "timing_max_abs_s": 0.08906481488608975,
+            "unmatched_reference": [
+              16.668082795989378,
+              18.22436226395682,
+              19.777666676391547
+            ],
+            "unmatched_predicted": [
+              16.765960838108256,
+              18.3359608381085,
+              19.905960838108747
+            ],
+            "pairs": [
+              {
+                "reference_time_s": 21.3668960232229,
+                "predicted_time_s": 21.45596083810899,
+                "error_s": 0.08906481488608975,
+                "absolute_error_s": 0.08906481488608975
+              }
+            ]
+          }
+        }
+      }
+    },
+    "binary_boolean_contact_1ms": {
+      "status": "recorded",
+      "sample_count": 6210,
+      "heel_contact_fraction": 0.6238325281803543,
+      "toe_contact_fraction": 0.600805152979066,
+      "any_point_contact_fraction": 0.7763285024154589,
+      "first_sample_time_s": 15.616960838108348,
+      "last_sample_time_s": 21.825960838115254
+    },
+    "interpretation": "The historical acceptance journal preserves subsequently revoked HS; the retained-after-repairs matching and final counters are separate. HS cancellation records are repairs rather than physiological zero-duration stances. Actor-valid cycles remain distinct from binary events and agreement with measured contact; an unanchored startup TO remains an explicit extra against the complete-cycle oracle. Secondary observed journal only: before any primary support its reference is startup only. Startup resetHS is initialization; unmatched references beyond saved support are unknown and never physiological failure counts.",
+    "reference_scope": "startup_plus_fixed_primary"
+  },
+  "all_saved_raw_force_crossings": [
+    {
+      "event": "heel_strike",
+      "event_time_s": 15.731270200086277,
+      "confirmed_time_s": 15.731270200086277,
+      "delivered_time_s": 15.731270200086277,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "heel_strike",
+      "event_time_s": 17.189800160988774,
+      "confirmed_time_s": 17.189800160988774,
+      "delivered_time_s": 17.189800160988774,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "heel_strike",
+      "event_time_s": 17.293055611650036,
+      "confirmed_time_s": 17.293055611650036,
+      "delivered_time_s": 17.293055611650036,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "heel_strike",
+      "event_time_s": 18.75914253934427,
+      "confirmed_time_s": 18.75914253934427,
+      "delivered_time_s": 18.75914253934427,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "heel_strike",
+      "event_time_s": 18.82520460014791,
+      "confirmed_time_s": 18.82520460014791,
+      "delivered_time_s": 18.82520460014791,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "heel_strike",
+      "event_time_s": 20.28291328266052,
+      "confirmed_time_s": 20.28291328266052,
+      "delivered_time_s": 20.28291328266052,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "toe_off",
+      "event_time_s": 16.647074750254358,
+      "confirmed_time_s": 16.647074750254358,
+      "delivered_time_s": 16.647074750254358,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "toe_off",
+      "event_time_s": 17.273037518931908,
+      "confirmed_time_s": 17.273037518931908,
+      "delivered_time_s": 17.273037518931908,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "toe_off",
+      "event_time_s": 18.20804595199159,
+      "confirmed_time_s": 18.20804595199159,
+      "delivered_time_s": 18.20804595199159,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "toe_off",
+      "event_time_s": 18.789340999359414,
+      "confirmed_time_s": 18.789340999359414,
+      "delivered_time_s": 18.789340999359414,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "toe_off",
+      "event_time_s": 19.792953966633437,
+      "confirmed_time_s": 19.792953966633437,
+      "delivered_time_s": 19.792953966633437,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    },
+    {
+      "event": "toe_off",
+      "event_time_s": 21.328185522633753,
+      "confirmed_time_s": 21.328185522633753,
+      "delivered_time_s": 21.328185522633753,
+      "source": "Original raw20Nforce crossing; no confirmation or delivery semantics"
+    }
+  ],
+  "raw_force_source": {
+    "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_online_grf.sto",
+    "sha256": "f98fe3cc668c045f39e884c12384fbe021c0fc1d67e1ce6d2ea2ded4cdfc9a74"
+  },
+  "observed_trace_support_s": [
+    15.625960838108343,
+    21.825960838108347
+  ],
+  "swing_impulse_fraction": {
+    "status": "complete_three_cycle_fraction",
+    "source_metrics": {
+      "path": "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics_analysis/AB06_control/metrics.json",
+      "sha256": "5699a6d402c852c8ed53f55472864a0b593cab4248c538f043027b2fbb56352b"
+    },
+    "cycles": [
+      {
+        "cycle": 1,
+        "frozen_cycle": {
+          "hs_s": 17.163967985977223,
+          "to_s": 18.22436226395682,
+          "next_hs_s": 18.716943642178773,
+          "period_s": 1.55297565620155,
+          "stance_s": 1.0603942779795972,
+          "stance_fraction": 0.6828144882665025
+        },
+        "stance": {
+          "status": "complete",
+          "impulse_Ns": 490.5795421867738,
+          "duration_s": 1.0603942779795972
+        },
+        "swing": {
+          "status": "complete",
+          "impulse_Ns": 0.00010301617606281436,
+          "duration_s": 0.4925813782219528
+        },
+        "swing_fraction": 2.099886880145571e-07
+      },
+      {
+        "cycle": 2,
+        "frozen_cycle": {
+          "hs_s": 18.716943642178773,
+          "to_s": 19.777666676391547,
+          "next_hs_s": 20.287931128580603,
+          "period_s": 1.5709874864018296,
+          "stance_s": 1.0607230342127743,
+          "stance_fraction": 0.6751950880539738
+        },
+        "stance": {
+          "status": "complete",
+          "impulse_Ns": 529.8947292804672,
+          "duration_s": 1.0607230342127743
+        },
+        "swing": {
+          "status": "complete",
+          "impulse_Ns": 1.332866944342017,
+          "duration_s": 0.5102644521890554
+        },
+        "swing_fraction": 0.002509031823297755
+      },
+      {
+        "cycle": 3,
+        "frozen_cycle": {
+          "hs_s": 20.287931128580603,
+          "to_s": 21.3668960232229,
+          "next_hs_s": 21.822001050884474,
+          "period_s": 1.5340699223038712,
+          "stance_s": 1.0789648946422972,
+          "stance_fraction": 0.7033348864710836
+        },
+        "stance": {
+          "status": "complete",
+          "impulse_Ns": 500.422435686518,
+          "duration_s": 1.0789648946422972
+        },
+        "swing": {
+          "status": "complete",
+          "impulse_Ns": 4.674943782932372e-05,
+          "duration_s": 0.455105027661574
+        },
+        "swing_fraction": 9.341993909177876e-08
+      }
+    ],
+    "pooled": {
+      "stance_impulse_Ns": 1520.896707153759,
+      "swing_impulse_Ns": 1.3330167099559092,
+      "primary_impulse_Ns": 1522.229723863715,
+      "phase_sum_minus_primary_Ns": 0.0,
+      "swing_fraction_of_primary_impulse": 0.000875700092475171,
+      "definition": "Sum actual force impulses from three exact nominal swing windows / same primary_all impulse, inherited saved-data quadrature; no clamping or recomputation"
+    }
+  },
+  "new_Claude_branch_read": false,
+  "new_native_or_FK": false,
+  "limitations": [
+    "Measured healthy-limb20N nominal events are production references, not ground truth of the virtual prosthetic limb.",
+    "Binary geometry plane/points, empirical force basis/plane and renderedSTL sole are different constructions; timing disagreement does not uniquely identify registration error.",
+    "Actor counters and retained cycle events are algorithmic diagnostics, not independent physiological cycles.",
+    "All inherited tolerances are diagnostic pairing references only; no new acceptance, hardware, subject or gait gate."
+  ],
+  "run_artifacts_unchanged": {
+    "count": 22,
+    "before": {
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/integrity_receipt.json": "ea63f546bd05c03ff046b4ecd1f7f212643165dea17428700941f20e0353cff8",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/receipt.json": "f69fdc28de361503b50146aa1ec1c8d72c8d1b3b49b5de5054e200094d92741d",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_activations.sto": "fdfe7cd2939984665dcdccda30575a974af27fda49535a8500d55802ad5a8610",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_gait_events.csv": "ad8ec2794e245bb746bb1a861b9848d7a06d3a6e4026901f6ac37cf7b6936b92",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_gait_events_online.csv": "d14e6a9bd996a0db5751fcde5cf7407012c9e96bab45f2cfb720794d866dc3a6",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_kinematics.sto": "7b2204a2e923ef8326843b2c94d96bafbdaf7dde97a8bfd54ab2e666ce0ea409",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_kinematics_reference.sto": "ceed655f1b073b20bfd339618db341885aab9cff6d287a676d162ba808036391",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_muscle_forces.sto": "c45e3d4ea207f7a1e637c3774df7e86d06d0d775f45158a041364066b842485f",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_online_grf.sto": "f98fe3cc668c045f39e884c12384fbe021c0fc1d67e1ce6d2ea2ded4cdfc9a74",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_power.sto": "420819c5625583233aac9f64faad97a62485bc821dfb4cf06d75797dea7514f5",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_recruitment.sto": "e9a08ee96aa0f33e8cc4843f145e6f80328c1bda0c9284f960d7ef961ec5d394",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_reserve_controls.sto": "021fe374374c5eaf2da20b4951f346dc59ecac8a935993fed99fa423909382e6",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_reserve_torques.sto": "96b84115a5bf4d66f050b38737ec001f745fd6416e3e3bc62a2ae4a67c7d2ad7",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_controls.sto": "b573b034c6099bf3ae87214f7f7a55679295bbd9a6eea2ac5ffb8add35e77015",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_derivatives.sto": "85095d30e935a42860060238013e07a979d5ef777dd4540f92ae63b814ef46d0",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_diagnostics.sto": "4d477cd99710550d29e038c12f33b621796d90619a5ceee15d9221e559943eaa",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_states.sto": "fabe8697047f663ad67da848539306e3d9db9abff0e4d41f2722d5d809531846",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_torques.sto": "7f60fc590d4adad5f424e1e296027910fac52ab47c139406adcdd7bc2735629c",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_so_torque_diagnostics.sto": "bb9ccb5a7e18061fadadea4e5d2f602f8f95a11f12ac3e394a405f4cb7f7595a",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_states.sto": "54f86b21f4acf4c8af9f1268b229ab9d4601c914feaf6e968e64fbba25ea407d",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_tau_bio.sto": "39524954837db1e5588d2baeaf4a8dbb47fc22a96e35515598ab18d473fc155a",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/trace.jsonl": "10fbc99fb6f270fa3efa65b630b81b66c5373435852570461a42e67e6ff92c59"
+    },
+    "after": {
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/integrity_receipt.json": "ea63f546bd05c03ff046b4ecd1f7f212643165dea17428700941f20e0353cff8",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/receipt.json": "f69fdc28de361503b50146aa1ec1c8d72c8d1b3b49b5de5054e200094d92741d",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_activations.sto": "fdfe7cd2939984665dcdccda30575a974af27fda49535a8500d55802ad5a8610",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_gait_events.csv": "ad8ec2794e245bb746bb1a861b9848d7a06d3a6e4026901f6ac37cf7b6936b92",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_gait_events_online.csv": "d14e6a9bd996a0db5751fcde5cf7407012c9e96bab45f2cfb720794d866dc3a6",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_kinematics.sto": "7b2204a2e923ef8326843b2c94d96bafbdaf7dde97a8bfd54ab2e666ce0ea409",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_kinematics_reference.sto": "ceed655f1b073b20bfd339618db341885aab9cff6d287a676d162ba808036391",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_muscle_forces.sto": "c45e3d4ea207f7a1e637c3774df7e86d06d0d775f45158a041364066b842485f",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_online_grf.sto": "f98fe3cc668c045f39e884c12384fbe021c0fc1d67e1ce6d2ea2ded4cdfc9a74",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_power.sto": "420819c5625583233aac9f64faad97a62485bc821dfb4cf06d75797dea7514f5",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_recruitment.sto": "e9a08ee96aa0f33e8cc4843f145e6f80328c1bda0c9284f960d7ef961ec5d394",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_reserve_controls.sto": "021fe374374c5eaf2da20b4951f346dc59ecac8a935993fed99fa423909382e6",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_reserve_torques.sto": "96b84115a5bf4d66f050b38737ec001f745fd6416e3e3bc62a2ae4a67c7d2ad7",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_controls.sto": "b573b034c6099bf3ae87214f7f7a55679295bbd9a6eea2ac5ffb8add35e77015",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_derivatives.sto": "85095d30e935a42860060238013e07a979d5ef777dd4540f92ae63b814ef46d0",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_diagnostics.sto": "4d477cd99710550d29e038c12f33b621796d90619a5ceee15d9221e559943eaa",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_states.sto": "fabe8697047f663ad67da848539306e3d9db9abff0e4d41f2722d5d809531846",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_sea_torques.sto": "7f60fc590d4adad5f424e1e296027910fac52ab47c139406adcdd7bc2735629c",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_so_torque_diagnostics.sto": "bb9ccb5a7e18061fadadea4e5d2f602f8f95a11f12ac3e394a405f4cb7f7595a",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_states.sto": "54f86b21f4acf4c8af9f1268b229ab9d4601c914feaf6e968e64fbba25ea407d",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/sim_outputs/sim_output_tau_bio.sto": "39524954837db1e5588d2baeaf4a8dbb47fc22a96e35515598ab18d473fc155a",
+      "validation/ab07_pylon_necessity_screening_2026_10_07/dynamics/AB06_control/run/trace.jsonl": "10fbc99fb6f270fa3efa65b630b81b66c5373435852570461a42e67e6ff92c59"
+    },
+    "passed": true
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "created_utc": "2026-10-07T16:38:09.101462+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "PASS_completed_geometric_result_with_explicit_support_scope",
+  "sources": {
+    "completed_receipt": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/fit_geometry_receipt_completed.json",
+      "sha256": "230ea4bf5b985537fe5f5fd2a1ec277743db92dee9f59935b5b3a32a53d236cc",
+      "size_bytes": 20470
+    },
+    "recovery_helper": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/recover_geometry_receipt.py",
+      "sha256": "ae77d4ad9f58d590a91e14c8dcb6172521363068ba8a1f3955b8bfc5564cc154",
+      "size_bytes": 10947
+    },
+    "V2_geometry_protocol": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/geometry_protocol_v2.json",
+      "sha256": "05195374231976098fc3a7066fcfef812ae508aa56aa31d31b8eded373870e13",
+      "size_bytes": 11357
+    },
+    "final_preparation_helper": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/prepare_standing_cases.py",
+      "sha256": "aa012567d26a8e6f8036cb0e78e3353f907c8b5270073c00bf81c9f18e1947f7",
+      "size_bytes": 25992
+    },
+    "dynamic_wrapper": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/run_standing_cases.py",
+      "sha256": "c1ea23fbc185e1a9df7dd7e9aa17e65fa1c479056cdcc0b3c1e5d350ef0f4484",
+      "size_bytes": 10098
+    },
+    "root_scope": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/protocol.json",
+      "sha256": "a044b41bf156d2973b46e53d80f25a10ce03d15476337d3b172a12019e05223e",
+      "size_bytes": 134393
+    }
+  },
+  "checks": {
+    "all_geometry_guards_true": true,
+    "sources_before_after_equal": true,
+    "geometry_sources_current": true,
+    "output_model_current": true,
+    "recovery_no_FK_fit_or_model_writes": true,
+    "original_partial_current": true,
+    "all_orientation_fields_preserved": true
+  },
+  "geometry_source_count": 21,
+  "reviewed_values": {
+    "distal_mount_length_mm": 432.9145612621358,
+    "osseo_mount_y_mm": -186.16339664248065,
+    "static_knee_offset_deg": 0.0,
+    "static_ankle_offset_deg": -3.606418875934369,
+    "healthy_knee_y_mm": 474.95570049639315,
+    "knee_residual_xyz_mm": [
+      15.520961416474854,
+      -5.551115123125783e-14,
+      -32.67668379162036
+    ],
+    "whole_mesh_min_y_m": -3.469446951953614e-17,
+    "foot_pitch_deg": -1.236979938630848,
+    "foot_roll_diagnostic_deg": 3.5496900401147884,
+    "support_vertices_at_tolerance": 2,
+    "native_parity": {
+      "knee_XYZ_max_error_m": 5.551115123125783e-17,
+      "foot_origin_XYZ_max_error_m": 5.551115123125783e-17,
+      "foot_rotation_max_error_dimensionless": 0.0,
+      "coordinate_assignment_max_error_rad_or_m": 0.0
+    }
+  },
+  "independent_interpretation": [
+    "The declared kneeY + heel/forefoot minima + wholemesh no-penetration geometry test passes.",
+    "Remaining3.55deg lateral roll and only2 vertices at geometric tolerance do not establish extended planar/lateral sole support or finite contact patch. This preset is weaker than an unqualified fully-grounded-foot requirement.",
+    "Rigidfoot body axes and a curved visualmesh alone do not identify the physical plantar plane; simply requiring Euler roll0 is not a sufficient replacement.",
+    "Use the descriptive label two-region standing support fit. Any stricter support/assembly intervention requires a prospective separate protocol before its results; do not silently redefine this case.",
+    "Y-only target has15.521mm X and\u221232.677mm Z knee-center residuals; functional/mechanical3D homology is not established.",
+    "Own acquired static pose stays fixed, hardware/mass/axes/profile convention retained; physical floor and clinical necessity remain unidentified."
+  ],
+  "preparation_final_source_review": {
+    "path_separator_normalization": "PASS: resolve source paths rather than compare raw separator strings; SHA/size guards retained",
+    "model_marker_fullIK_reproduction_control": "Predeclared exact semantic/named numeric reproduction gate, byte identity reported independently; no tolerance or retuning."
+  },
+  "new_forward_numeric_or_event_outputs_read": false,
+  "new_Claude_branch_read": false,
+  "reviewer_native_FK_fit_or_integration_calls": 0,
+  "old_artifacts_modified": false
+}

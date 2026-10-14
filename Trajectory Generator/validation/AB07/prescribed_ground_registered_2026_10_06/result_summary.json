@@ -1,0 +1,329 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-06T17:55:11.793997+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "prescribed_completed_contact_cycles_recovered_physical_qualification_open",
+  "scope": {
+    "test": "First updated AB07 prescribed control in frozen V26 runtime",
+    "stage": "left_applied",
+    "seed": 123,
+    "learned_policy_loaded": false,
+    "training_performed": false,
+    "new_native_simulations": 1
+  },
+  "session": "results/ab07_v26_ground_registered_prescribed_9p01s_2026_10_06_r1",
+  "execution": {
+    "duration_s": 9.01,
+    "requested_time_range_s": [
+      10.36,
+      19.369999999999997
+    ],
+    "final_time_s": 19.3699999999974,
+    "steps": 901,
+    "completed_requested_duration": true,
+    "subprocess_returncode": 0,
+    "wall_time_s": 937.5226581249954,
+    "sto_tables": 17,
+    "samples_per_sto": 9010,
+    "sto_dt_s": 0.001
+  },
+  "integrity": {
+    "protected_files_checked": 42,
+    "changed_protected_files": [],
+    "operational_code_or_parameters_modified": false,
+    "model_ik_profiles_modified": false,
+    "pipeline_qualification_manifests_modified": false,
+    "comparison_contract_checks": {
+      "model_matches_prepared_pipeline": true,
+      "ik_matches_prepared_pipeline": true,
+      "frozen_profile_contents_match_historical_run": true,
+      "source_training_config_contents_unchanged": true,
+      "same_requested_time_range": true,
+      "same_diagnostic_stage": true,
+      "same_requested_environment_settings_except_setup_output_dir": true,
+      "same_effective_environment_settings_except_setup_output_dir": true
+    },
+    "diagnostic_scripts_added": true
+  },
+  "numerical_audit": {
+    "all_sto_values_finite": true,
+    "all_sto_same_time_grid": true,
+    "all_sto_dt_matches_receipt": true,
+    "all_sto_cover_requested_preintegration_samples": true,
+    "sea_identity_check_count": 50,
+    "sea_identity_checks_all_pass": true,
+    "precision_note": "The angle_dot versus state-speed identity uses a per-sample bound derived from 8 significant digits in plugin getValueAsString and the two .8f STO roundings; initial fixed 1e-7 results remain visible. Other identities account for rounded inputs: 1e-5 Nm for spring reconstruction, 1e-4 Nm for PI reconstruction, 1e-3 rad/s^2 for rotor dynamics (Jm=0.01 magnifies rounded angle error). Comparisons of derivative STO versus the same plugin output channel retain 1e-7 tolerances.",
+    "generic_validator_counts": {
+      "WARN": 6,
+      "PASS": 39,
+      "FAIL": 1
+    },
+    "generic_validator_limits_note": "validate_sim_results tracking limits are diagnostic stability limits, not a scientific acceptance criterion for AB07 or its served reference."
+  },
+  "actor_events": {
+    "valid_hs_count": {
+      "unit": "count",
+      "baseline": 2.0,
+      "current": 5.0,
+      "delta": 3.0
+    },
+    "valid_to_count": {
+      "unit": "count",
+      "baseline": 2.0,
+      "current": 5.0,
+      "delta": 3.0
+    },
+    "valid_cycle_count": {
+      "unit": "count",
+      "baseline": 1.0,
+      "current": 4.0,
+      "delta": 3.0
+    },
+    "invalid_event_count": {
+      "unit": "count",
+      "baseline": 0.0,
+      "current": 0.0,
+      "delta": 0.0
+    },
+    "resync_count": {
+      "unit": "count",
+      "baseline": 0.0,
+      "current": 0.0,
+      "delta": 0.0
+    },
+    "hs_cancelled_count": {
+      "unit": "count",
+      "baseline": 0.0,
+      "current": 0.0,
+      "delta": 0.0
+    },
+    "timeout_exceeded": {
+      "unit": "boolean_as_number",
+      "baseline": 0.0,
+      "current": 0.0,
+      "delta": 0.0
+    }
+  },
+  "stance": {
+    "method": "Accepted stance transitions with segment_valid=1 and anchor_geometry_valid=1; startup partial stance excluded",
+    "baseline": {
+      "count": 2,
+      "duration_s": [
+        0.17099999999990523,
+        0.13199999999992684
+      ],
+      "median_duration_s": 0.15149999999991604
+    },
+    "current": {
+      "count": 4,
+      "duration_s": [
+        1.1469999999993643,
+        1.1459999999993649,
+        1.3090000000006512,
+        1.2410000000015167
+      ],
+      "median_duration_s": 1.1940000000004405
+    }
+  },
+  "nominal_median_stance_s": 0.9910985349999999,
+  "event_onset_bias_s": {
+    "hs": -0.08931144600157595,
+    "to": 0.11847411749824577,
+    "note": "Signed bias relative to measured support; startup unanchored TO is excluded from paired timing."
+  },
+  "force_at_10ms_boundaries": {
+    "primary_left_contact.vertical_force_n.max": {
+      "unit": "N",
+      "baseline": 332.62423237334707,
+      "current": 1004.6587554712762,
+      "delta": 672.0345230979292
+    },
+    "primary_left_contact.vertical_correlation": {
+      "unit": "correlation",
+      "baseline": 0.6140807008718396,
+      "current": 0.8818799458306633,
+      "delta": 0.2677992449588237
+    },
+    "primary_left_contact.relative_load_diagnostics.vertical_impulse_ratio_to_oracle": {
+      "unit": "ratio",
+      "baseline": 0.2470951766152424,
+      "current": 1.4219896805281076,
+      "delta": 1.174894503912865
+    },
+    "primary_left_contact.relative_load_diagnostics.primary_vertical_impulse_ns": {
+      "unit": "N*s",
+      "baseline": 679.3788300369006,
+      "current": 3909.7067725689403,
+      "delta": 3230.3279425320397
+    },
+    "primary_left_contact.relative_load_diagnostics.prescribed_vertical_impulse_ns": {
+      "unit": "N*s",
+      "baseline": 2749.462127683605,
+      "current": 2749.462127683605,
+      "delta": 0.0
+    }
+  },
+  "penetration_at_10ms_boundaries": {
+    "primary_left_contact.penetration_m.max": {
+      "unit": "m",
+      "baseline": 0.010224403260559229,
+      "current": 0.021358261132282653,
+      "delta": 0.011133857871723425
+    },
+    "primary_left_contact.soft_exceedance_fraction": {
+      "unit": "fraction",
+      "baseline": 0.0,
+      "current": 0.009988901220865706,
+      "delta": 0.009988901220865706
+    },
+    "primary_left_contact.termination_exceedance_fraction": {
+      "unit": "fraction",
+      "baseline": 0.0,
+      "current": 0.0,
+      "delta": 0.0
+    }
+  },
+  "prosthetic_tracking_rms_deg_at_1ms": {
+    "pros_knee_angle": {
+      "actual_minus_served": 0.5510637579233563,
+      "actual_minus_raw_ik": 7.565745678346413
+    },
+    "pros_ankle_angle": {
+      "actual_minus_served": 0.5204717183223053,
+      "actual_minus_raw_ik": 3.349660488018038
+    }
+  },
+  "mtp_right_rms_deg": 11.222308813819991,
+  "mtp_right_max_abs_deg": 28.98819001754998,
+  "reserve_biological_joint_norm_rms_Nm_at_1ms": 51.25291692399154,
+  "equilibrium_failure_diagnostic": {
+    "nonzero_samples": 147,
+    "sum_per_step_counts": 149,
+    "interpretation": {
+      "meaning": "Per-step count of muscle equilibrium attempts for which _safe_compute_equilibrium returned False during minimum-activation baseline preparation and maximum-activation muscle-matrix probing. It is not a final SO solver failure flag.",
+      "handled_fallback": "If computeEquilibrium throws or returns an invalid fiber length, the helper sets that muscle's fiber length to optimalFiberLength and returns False. During a failed maximum-activation probe, high_force is replaced by baseline_force, so that muscle's force gain and matrix column become zero. This is a handled fallback, not evidence that equilibrium was subsequently recovered.",
+      "effective_force_application": "override_actuation",
+      "application_note": "The captured override_actuation mode directly applies baseline_force plus the optimized linearized increment; the additional final-activation equilibrium branch is not used in this rollout.",
+      "limits": "The scalar output does not identify the muscle or separate baseline failures from maximum-activation probe failures. Repeated counts over neighboring timesteps are not distinct affected muscles. A completed rollout and a small SO residual do not establish exact physiological equilibrium for the affected attempts.",
+      "source": {
+        "path": "static_optimization.py",
+        "sha256": "8c4a060f5d1846eafe609fafee0457870006decb4b310eed34232f3140df3a18",
+        "baseline_lines": 331,
+        "matrix_probe_lines": 387,
+        "force_application_lines": 358,
+        "safe_helper_lines": 478,
+        "diagnostic_export_line": 596
+      }
+    }
+  },
+  "conclusion": {
+    "protocol_integrity_checks_pass": true,
+    "requested_duration_completed": true,
+    "contact_and_internal_cycle_recovery_observed": true,
+    "measured_contact_timing_and_loads_qualified": false,
+    "ab07_acceptance_thresholds_newly_adopted": false,
+    "policy_transfer_or_autonomy_tested": false,
+    "bundle_association_changed": false,
+    "rationale": "Recovered four complete actor cycles with no invalid events, resync, cancellations or timeouts. The forward dynamics still extend contact and overestimate the measured left load; binary timing falls outside inherited tight development references. These are observed limitations, not a newly adopted AB07 gate or proof of policy failure."
+  },
+  "interpretation": "Updated geometry and recalculated IK recover four online actor cycles. Load, contact timing and biological MTP still differ from the measured/served references. No AB07 acceptance gate was introduced and no policy transfer verdict is supported by this prescribed test.",
+  "plots": {
+    "folder": "plot/AB07_ground_registered_v26_prescribed_2026_10_06/10_06_2026_1",
+    "count": 7,
+    "canonical_phase_alignment": "Four complete measured-GRF reference cycles; separate from online actor events.",
+    "files": {
+      "01_time_sea_control_reserve.png": {
+        "bytes": 317870,
+        "width": 2100,
+        "height": 1650,
+        "sha256": "a882cd2e4961c4a06e0e99463f1781e169add3d4674ecae994b0f9e59a62ae63"
+      },
+      "02_time_joint_motor_states.png": {
+        "bytes": 463950,
+        "width": 2100,
+        "height": 1950,
+        "sha256": "4207cb0e4b58c92379a4ba47c170419f61d13a961208989317ee96115669e237"
+      },
+      "03_gaitcycle_torque_angle_power.png": {
+        "bytes": 393091,
+        "width": 2100,
+        "height": 1200,
+        "sha256": "9ad43d017a528522160a2b54b3726f8ddbf54297143575946106aeb87c767d6c"
+      },
+      "04_gaitcycle_joint_velocity_power.png": {
+        "bytes": 489723,
+        "width": 2100,
+        "height": 1350,
+        "sha256": "16cb17cb63e717f5cb12bf0a597ce4ce5d31cdc0bd7bedc94c1751b4af10d834"
+      },
+      "05_time_tau_input_tracking_error.png": {
+        "bytes": 229353,
+        "width": 2100,
+        "height": 1500,
+        "sha256": "217b673ec9778e99b4b6b22d253465ccb3e4e33365c004d96ff9352790a38d7d"
+      },
+      "06_time_joint_ref_sea_error.png": {
+        "bytes": 341513,
+        "width": 2100,
+        "height": 1500,
+        "sha256": "1d923dc73604f53f3cd2d9aceefaae78333066f3727be69e69e1178f551ad43b"
+      },
+      "07_prescribed_healthy_ik_actual.png": {
+        "bytes": 548114,
+        "width": 2100,
+        "height": 1500,
+        "sha256": "d23c8be1ad0f795bedaa773d22e11c721512030691e1e3cf0eb6fe4c02399efa"
+      }
+    }
+  },
+  "sources": {
+    "execution_manifest.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/execution_manifest.json",
+      "sha256": "51f682253a31c5836a8b3fb93725ad0ee5f4188817accffe2d7ff551e67505fe"
+    },
+    "execution_result.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/execution_result.json",
+      "sha256": "8ad5157833a28070e78d560f245cf1fb79b0ad8bfee4404e8a8e3faf2cd16eb5"
+    },
+    "comparison_metrics_final.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/comparison_metrics_final.json",
+      "sha256": "9eaecac36a0fc55d0062e53da057e448c67c0c6f6b0be9f170ebdc06f2844aa7"
+    },
+    "scientific_review.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/scientific_review.json",
+      "sha256": "6d7a26adf2e59773979a405abf92b3f4d8fadc05b2e88ff7de087e0041e084e1"
+    },
+    "numerical_verification.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/numerical_verification.json",
+      "sha256": "f86062ec8a9c8d47bbed64402cbc35ac0bfe5767a83907d141215347e08aa4f4"
+    },
+    "diagnostic_tolerance_provenance.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/diagnostic_tolerance_provenance.json",
+      "sha256": "c10c279c167495425ba23c6eb9de31bee12079f0b2ea0e5abda458660bba3819"
+    },
+    "plots_review_receipt.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/plots_review_receipt.json",
+      "sha256": "eff383cb1b96ef01f502ee928c488e81799a2f07f627bbd668d3dde1bca9a96b"
+    },
+    "canonical_plot_rendering_manifest.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/canonical_plot_rendering_manifest.json",
+      "sha256": "4ed90626944fca2c6e9e9b0f0c03c6f4c5ae470afa130ed15586e6d2a60f3ee9"
+    },
+    "prescribed_comparison_receipt.json": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/prescribed_comparison_receipt.json",
+      "sha256": "9a21c84afec2d9eb429f85fd1b9b98e8458e6f0606850c20de4d65b9b1b190d0"
+    },
+    "verify_sto_numerics.py": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/verify_sto_numerics.py",
+      "sha256": "3371161d7c028d61ef7274f2a5c6367ed894c4d0da12f7f629ffba002f7eae15"
+    },
+    "compare_prescribed_runs.py": {
+      "path": "Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/compare_prescribed_runs.py",
+      "sha256": "dadba9850d05619b23430b5d28ff1cce771d4a566cf568d1df10c374385c3752"
+    }
+  },
+  "preflight_attempt": {
+    "path": "results/ab07_v26_ground_registered_prescribed_9p01s_2026_10_06",
+    "outcome": "Launcher refused nonempty output directory before native simulation; audit retained and actual run executed once in _r1."
+  }
+}

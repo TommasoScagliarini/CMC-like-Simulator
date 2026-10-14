@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-06T13:18:43.698553+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "promotion_plan_acceptable_postcopy_integrity_required",
+  "scope": "Read-only review of proposed canonical promotion; no production/model/report writes, OpenSim execution, pipeline or simulation. Only this receipt written.",
+  "reviewed_sources": [
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/artifact_verification_staged.json",
+      "sha256": "79b2b088eb4102d2a9d1637f36f151c0a20498323ec1a09875625456dd1c06bd",
+      "bytes": 3481
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/final_contract_tests.json",
+      "sha256": "5bd5a5e0541913cb29ad123df2b7c5d84f333b9d612c565dca7419569d3c9020",
+      "bytes": 2593
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/fit_contract_review.json",
+      "sha256": "e87881e4a6a127d6853273eb7c4df867c845634b9d255107dd5c1b8d55590a05",
+      "bytes": 7729
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/ik_contact_verification.json",
+      "sha256": "1fa69dedaa035b3a0fcea2e1e4d8ea04f6a6f1dd55745fb2046b3cf086e5fc55",
+      "bytes": 112377
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA_Threadmill/pipeline_report.json",
+      "sha256": "84e3d937ff42e056732c7e83339bb8cd6b66c9c58986b7af3a90818e13b400ea",
+      "bytes": 11076
+    },
+    {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/baseline/archive_manifest.json",
+      "sha256": "d8129fd7a6fe22de3a88392954b01a40146bbc80721b006d27dca1e811841530",
+      "bytes": 33302
+    },
+    {
+      "path": "tools/build_abx_seasea_pipeline.py",
+      "sha256": "8be448bf2a5ab6f0ac20e55f8cb3398911b4347c5d08f467a6a32d7396fb902a",
+      "bytes": 53800
+    }
+  ],
+  "prepromotion_checks": {
+    "staged_setup_resolves_all_four_input_files": true,
+    "staged_setup_window_s": [
+      10.36,
+      19.37
+    ],
+    "external_grf_resolves_relative_to_ExternalLoads": true,
+    "three_staged_model_ik_grf_hashes_match_verification": true,
+    "twelve_staged_artifact_checks_pass": true,
+    "final_29_regression_tests_pass": true,
+    "baseline_model_ik_archive_hashes_preserved": true,
+    "model_contains_no_other_external_file_property": true
+  },
+  "new_artifact_binding": {
+    "model": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA_Threadmill/AB07_SEASEA_stiff321_500_pi.osim",
+      "sha256": "6ea6dd779ecf88b69bc0cb940ed9e2d5225bb986a2d6f986920096ba574cc245"
+    },
+    "ik": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA_Threadmill/data/IK_results_AB07_SEASEA.mot",
+      "sha256": "7f497b28c9c9483b042d6b84fbc4d9d897cfd6191eb63015599734b484f3e15a"
+    },
+    "grf": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA_Threadmill/data/AB07_SEASEA_GRF_FullSpan.mot",
+      "sha256": "8b6c33eeeeaa7b69327bf0f0624dedaf2bdbea3edca6a230ba65d2bfdb39e152"
+    }
+  },
+  "promotion_actions_confirmed_safe": [
+    "Use build_bundle() with staged calibrated model, new IK and new GRF. It copies model/IK/GRF and shared task/reserve XML; regenerates canonical setup and ExternalForces pointing to the GRF basename under data/.",
+    "Copy staged data/fitting and data/healthy explicitly because build_bundle() does not populate these ancillary groups.",
+    "Rewrite only bundle_dir, setup_xml, ik_source, grf_source and healthy_overlay_dir as canonical output paths in the promoted pipeline report. Preserve staged actual graft/calibrated/static/TRC and solver source paths/hashes as original execution provenance.",
+    "Create a new pipeline_verification with preparation/static/saved-pose evidence and dynamic_qualification_pending; do not inherit old prescribed/V26 qualification objects.",
+    "Associate canonical model and IK SHA-256 with unchanged three frozen profile path/hash contracts and saved_pose_validated_dynamic_qualification_pending status.",
+    "Keep original models/AB07_SEASEA-raw unchanged as historical intermediates; new staged intermediates remain provenance sources. Baseline archive maps replaced canonical model/IK sources for old diagnosis receipts."
+  ],
+  "findings": [
+    {
+      "severity": "required_metadata_update",
+      "item": "runtime_profile_association currently contains old qualification_receipt, qualification_analysis, completed_diagnostic_duration_s and not-qualified baseline status. Remove current qualification fields or put them under explicitly named baseline_history with old model/IK hashes; they must not certify the promoted model."
+    },
+    {
+      "severity": "required_path_regeneration",
+      "item": "Do not copy staged setup XML verbatim; its four input paths point to staging. build_bundle() canonical-path regeneration addresses this."
+    },
+    {
+      "severity": "provenance_note",
+      "item": "Ground registration manifest records executed helper SHA256 7bfef234daaa00fc40b1558d0e4289a70ca9e4b6db0b2be77df252c03107ca1c; current/final-tested helper is 3b6b8acd8d5adbae0eb17b05aba7492f0920e5fc841ea7d48fdd52583ccdb64d. Preserve executed hash; separately reference final_contract_tests.json for current source. Do not change old execution hashes to current code."
+    },
+    {
+      "severity": "portability_note",
+      "item": "Ground manifest source/output paths are absolute on the acquisition workspace. They are historical metadata and not runtime setup inputs. Preserve original execution paths, optionally add repository-relative promoted aliases, and keep staged intermediates available. This metadata alone does not attest live Windows execution."
+    },
+    {
+      "severity": "hash_note",
+      "item": "New GRF SHA256 differs from baseline despite numerical-data equality (already checked by staged validator); binding must use new byte hash 8b6c33eeeeaa7b69327bf0f0624dedaf2bdbea3edca6a230ba65d2bfdb39e152, not old 2a1c818c…."
+    },
+    {
+      "severity": "scope_note",
+      "item": "Existing old user-report pipeline_verification links now target a replaced current bundle. Add explicit correction/baseline notice with archive link; do not leave prior run statistics presented as qualification of the promoted model."
+    }
+  ],
+  "postpromotion_minimum_readonly_checks": [
+    "read_setup_xml(canonical_setup): all four inputs resolve to canonical bundle, t_start=10.36 and t_end=19.37.",
+    "Canonical model/IK/GRF SHA256 equal the three staged expected hashes; reserve/task XML equal shared support files.",
+    "ExternalForces datafile/data_source_name equal AB07_SEASEA_GRF_FullSpan.mot and bodies remain foot_l / calcn_r.",
+    "Exactly one operational .osim model in canonical bundle; fitting motion/report and healthy overlay copied with their staged hashes.",
+    "New pipeline_report output paths canonical, solver/calibration provenance staged and resolvable. New association model/IK hash current, three profiles frozen, old dynamic qualification not inherited.",
+    "Archive baseline expected model/IK hashes still match; twenty common controls/plugin fingerprints and three profiles unchanged."
+  ],
+  "remaining_todos": {
+    "AB07-Q01": "Partial: explicit benchmark-relative hardware registration and saved-pose geometry now available; physical datum/contact binding and complete gait qualification remain scoped limitations.",
+    "AB07-Q02": "Open: fresh dynamics on corrected model/IK, same frozen controllers/profiles, must check load/events/stance/cycles/reserve; existing old dynamic run is not applicable.",
+    "AB07-Q03": "Open biological MTP investigation, no new dynamics here.",
+    "AB07-Q04": "Open live Windows verification.",
+    "G09_G10": "Keep open across AB06/AB07/AB08; saved poses for AB07 do not complete the pilot."
+  },
+  "production_edits_performed": false
+}

@@ -1,0 +1,370 @@
+{
+  "schema_version": 1,
+  "scope": "Native inverse kinematics over 0-0.04 s, then position-only production sampling; no forward integration, policy or operational writes",
+  "sources": {
+    "script": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/static_marker_ik_recheck/recheck_static_marker_ik.py",
+      "sha256": "e8f829d2f690c33660d2d3cf345d9932f41a58860fa0d51892acc98200a97d9c"
+    },
+    "model": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA_Threadmill/AB07_SEASEA_stiff321_500_pi.osim",
+      "sha256": "6ea6dd779ecf88b69bc0cb940ed9e2d5225bb986a2d6f986920096ba574cc245"
+    },
+    "static_trc": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA-raw/data/converted/static/static01/static01.trc",
+      "sha256": "22572498c3cc423412638c6569369af49c0ac156e80e5af5daa5f004d4cd3fd5"
+    },
+    "registered_static_motion": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA_Threadmill/data/fitting/AB07_SEASEA_static_ground_registered.mot",
+      "sha256": "47d87d2ac94f58103cc7a04f0289e587e975ecda0fa18601e704b611e5b14b31"
+    },
+    "registration_manifest": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/models/AB07_SEASEA_Threadmill/data/fitting/ground_registration.json",
+      "sha256": "1de50e6f06e46cdd08ebd2aabaad3bd20ff931d7b5c10b172447e713531f5b66"
+    },
+    "binary_profile": {
+      "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+      "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2"
+    },
+    "plugin": {
+      "path": "plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+      "sha256": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b"
+    },
+    "foot_mesh": {
+      "path": "Geometry/AM_foot_l.STL",
+      "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"
+    },
+    "ik_setup_writer": {
+      "path": "scripts/run_opensim_sea_pipeline.py",
+      "sha256": "6118073f53267a57058615ac303b41a4475d8c68230205909ddcb5af706a5599"
+    },
+    "production_binary_sampler": {
+      "path": "binary_phase_detector.py",
+      "sha256": "57a313133e1ce5a675b2699e940226325dfa5b2b895c7eb6b17c0892a94263b6"
+    },
+    "calibration_motion_reader": {
+      "path": "tools/calibrate_ab06_seasea_markers.py",
+      "sha256": "49f9b6d2edbfb5b5e096a9420500b0d9faa8b269c948bccf8b4370a08323e05f"
+    },
+    "stl_reader": {
+      "path": "tools/register_seasea_ground.py",
+      "sha256": "3b6b8acd8d5adbae0eb17b05aba7492f0920e5fc841ea7d48fdd52583ccdb64d"
+    },
+    "previous_static_ik_helper": {
+      "path": "Trajectory Generator/validation/AB07/replay_static_marker_ik.py",
+      "sha256": "267dd557c9f0d3d1319b55c52c7449c221b823a8b72716fd6dcc1a2163b12e02"
+    }
+  },
+  "source_files_unchanged": true,
+  "ik_settings": {
+    "markers": [
+      "R_ASIS",
+      "L_ASIS",
+      "L_PSIS",
+      "R_Thigh_Upper",
+      "R_Thigh_Front",
+      "R_Thigh_Rear",
+      "R_Knee_Lat",
+      "R_Shank_Upper",
+      "R_Shank_Front",
+      "R_Shank_Rear",
+      "R_Ankle_Lat",
+      "R_Heel",
+      "R_Toe_Lat",
+      "R_Toe_Med",
+      "R_Toe_Tip",
+      "L_Thigh_Upper",
+      "L_Thigh_Front",
+      "L_Thigh_Rear",
+      "L_Knee_Lat",
+      "L_Shank_Upper",
+      "L_Shank_Front",
+      "L_Shank_Rear",
+      "L_Ankle_Lat",
+      "L_Heel",
+      "L_Toe_Lat",
+      "L_Toe_Med",
+      "L_Toe_Tip",
+      "R_PSIS"
+    ],
+    "marker_count": 28,
+    "weight": 1.0,
+    "constraint_weight": "Inf",
+    "accuracy": 1e-05,
+    "samples": 9,
+    "time_range_s": [
+      0.0,
+      0.04
+    ]
+  },
+  "ground": {
+    "normal": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "origin": [
+      0.0,
+      0.0148208231,
+      0.0
+    ]
+  },
+  "frozen_points": [
+    {
+      "frame": "/bodyset/foot_l",
+      "location": [
+        -0.059315516055,
+        -0.06316904531668477,
+        0.01716156589300303
+      ],
+      "name": "left_heel"
+    },
+    {
+      "frame": "/bodyset/foot_l",
+      "location": [
+        0.135837908089,
+        -0.06595974250405881,
+        0.005834590883117434
+      ],
+      "name": "left_toe"
+    }
+  ],
+  "registration_target": {
+    "pose_count": 400,
+    "median_min_stl_clearance_m": -0.002136415973063889,
+    "median_sagittal_pitch_rad": 0.12305309130900244
+  },
+  "recomputed_static_ik": {
+    "samples": 9,
+    "time_range_s": [
+      0.0,
+      0.04
+    ],
+    "binary_points": {
+      "left_heel": {
+        "mean_clearance_m": -0.014403203703062854,
+        "min_clearance_m": -0.014421781248518084,
+        "max_clearance_m": -0.014360177981417888,
+        "contact_fraction": 1.0
+      },
+      "left_toe": {
+        "mean_clearance_m": 0.007189042764297277,
+        "min_clearance_m": 0.007142576969129578,
+        "max_clearance_m": 0.007229302414168718,
+        "contact_fraction": 0.0
+      }
+    },
+    "median_min_stl_clearance_m": -0.0020270415731923775,
+    "stl_target_residual_m": 0.00010937439987151153,
+    "median_sagittal_pitch_rad": 0.1219135874409944,
+    "median_sagittal_pitch_deg": 6.985134025668097,
+    "pitch_target_residual_rad": -0.0011395038680080405,
+    "pitch_target_residual_deg": -0.06528876237569314,
+    "production_sampler_parity": {
+      "poses": 9,
+      "points_per_pose": 2,
+      "clearance_max_error_m": 0.0,
+      "contacts_identical": true
+    }
+  },
+  "registered_static_same_short_window": {
+    "samples": 9,
+    "time_range_s": [
+      0.0,
+      0.04
+    ],
+    "binary_points": {
+      "left_heel": {
+        "mean_clearance_m": -0.014493625913467059,
+        "min_clearance_m": -0.014543492621723062,
+        "max_clearance_m": -0.014457023748636536,
+        "contact_fraction": 1.0
+      },
+      "left_toe": {
+        "mean_clearance_m": 0.007202351212617546,
+        "min_clearance_m": 0.007163531975269926,
+        "max_clearance_m": 0.007287539964805639,
+        "contact_fraction": 0.0
+      }
+    },
+    "median_min_stl_clearance_m": -0.002118978652855383,
+    "stl_target_residual_m": 1.74373202085059e-05,
+    "median_sagittal_pitch_rad": 0.12225412769192844,
+    "median_sagittal_pitch_deg": 7.004645544800944,
+    "pitch_target_residual_rad": -0.0007989636170740028,
+    "pitch_target_residual_deg": -0.0457772432428468,
+    "production_sampler_parity": {
+      "poses": 9,
+      "points_per_pose": 2,
+      "clearance_max_error_m": 0.0,
+      "contacts_identical": true
+    }
+  },
+  "registered_static_full": {
+    "samples": 436,
+    "time_range_s": [
+      0.0,
+      2.175
+    ],
+    "binary_points": {
+      "left_heel": {
+        "mean_clearance_m": -0.01447243714584151,
+        "min_clearance_m": -0.014568629025632837,
+        "max_clearance_m": -0.014391967464810107,
+        "contact_fraction": 1.0
+      },
+      "left_toe": {
+        "mean_clearance_m": 0.007359867103710079,
+        "min_clearance_m": 0.007163531975269926,
+        "max_clearance_m": 0.007490447645854955,
+        "contact_fraction": 0.0
+      }
+    },
+    "median_min_stl_clearance_m": -0.0021364159730638908,
+    "stl_target_residual_m": -1.734723475976807e-18,
+    "median_sagittal_pitch_rad": 0.1230530913090025,
+    "median_sagittal_pitch_deg": 7.050422788043793,
+    "pitch_target_residual_rad": 5.551115123125783e-17,
+    "pitch_target_residual_deg": 3.1805546814635168e-15,
+    "production_sampler_parity": {
+      "poses": 436,
+      "points_per_pose": 2,
+      "clearance_max_error_m": 0.0,
+      "contacts_identical": true
+    }
+  },
+  "marker_error_columns": [
+    "time",
+    "total_squared_error",
+    "marker_error_RMS",
+    "marker_error_max"
+  ],
+  "marker_error_column_means": {
+    "total_squared_error": 2.897777777777778e-06,
+    "marker_error_RMS": 0.00032123222222222225,
+    "marker_error_max": 0.0009683200000000002
+  },
+  "marker_error_column_maxima": {
+    "total_squared_error": 3.6e-06,
+    "marker_error_RMS": 0.00035841,
+    "marker_error_max": 0.00102643
+  },
+  "post_solver_vs_registered_short": {
+    "heel_mean_clearance_delta_m": 9.042221040420382e-05,
+    "toe_mean_clearance_delta_m": -1.330844832026871e-05,
+    "median_stl_clearance_delta_m": 9.193707966300563e-05,
+    "median_pitch_delta_deg": -0.019511519132846544,
+    "coordinate_max_absolute_change": {
+      "pelvis_tilt": {
+        "value": 0.03812311000000035,
+        "unit": "deg"
+      },
+      "pelvis_list": {
+        "value": 0.062340799999999974,
+        "unit": "deg"
+      },
+      "pelvis_rotation": {
+        "value": 0.07729243000000019,
+        "unit": "deg"
+      },
+      "pelvis_tx": {
+        "value": 0.0001537400000000133,
+        "unit": "m"
+      },
+      "pelvis_ty": {
+        "value": 5.235999999997354e-05,
+        "unit": "m"
+      },
+      "pelvis_tz": {
+        "value": 0.00011985999999986063,
+        "unit": "m"
+      },
+      "hip_flexion_r": {
+        "value": 0.11143107000000008,
+        "unit": "deg"
+      },
+      "hip_adduction_r": {
+        "value": 0.17608057999999982,
+        "unit": "deg"
+      },
+      "hip_rotation_r": {
+        "value": 0.6209071900000005,
+        "unit": "deg"
+      },
+      "knee_angle_r": {
+        "value": 0.24702163999999982,
+        "unit": "deg"
+      },
+      "ankle_angle_r": {
+        "value": 0.10452053999999933,
+        "unit": "deg"
+      },
+      "subtalar_angle_r": {
+        "value": 0.9470157400000001,
+        "unit": "deg"
+      },
+      "mtp_angle_r": {
+        "value": 0.0,
+        "unit": "deg"
+      },
+      "hip_flexion_l": {
+        "value": 0.09892871999999997,
+        "unit": "deg"
+      },
+      "hip_adduction_l": {
+        "value": 0.12690404999999938,
+        "unit": "deg"
+      },
+      "hip_rotation_l": {
+        "value": 0.4081052800000009,
+        "unit": "deg"
+      },
+      "pros_knee_angle": {
+        "value": 0.16110861000000032,
+        "unit": "deg"
+      },
+      "pros_ankle_angle": {
+        "value": 0.03844712872312961,
+        "unit": "deg"
+      },
+      "lumbar_extension": {
+        "value": 0.0,
+        "unit": "deg"
+      },
+      "lumbar_bending": {
+        "value": 0.0,
+        "unit": "deg"
+      },
+      "lumbar_rotation": {
+        "value": 0.0,
+        "unit": "deg"
+      }
+    }
+  },
+  "outputs": {
+    "setup": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/static_marker_ik_recheck/ik_setup.xml",
+      "sha256": "6b759b334f6d482bae145c374f55da2616e4e18b04b864581dc0d2322eeb9723"
+    },
+    "motion": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/static_marker_ik_recheck/static_marker_ik_0p04s.mot",
+      "sha256": "dbfcbcc89e60518a17ff1f479e90d014003592de8ccd00d6c8e670c84e2282d7"
+    },
+    "marker_errors": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/stage3/static_marker_ik_recheck/static_marker_ik_0p04s_ik_marker_errors.sto",
+      "sha256": "bccb4b1ff076109427500e430410f4bbe8de4469f16928358cf72f01ad49a379"
+    }
+  },
+  "checks": {
+    "nine_static_frames": true,
+    "unchanged_28_marker_weight1_setup": true,
+    "production_sampler_parity": true,
+    "heel_clearance_negative_all_solved_frames": true,
+    "heel_contact_all_solved_frames": true
+  },
+  "limitations": [
+    "The 9 frames are inside the marker-calibration static trial; this corroborates registration consistency, not independent dynamic qualification.",
+    "STL target is an AB06-relative benchmark median over full static windows; a short-window median and marker-IK adjustments can leave small target residuals.",
+    "The frozen binary points/plane are virtual calibrated profiles, not a measured AB07 physical floor."
+  ]
+}

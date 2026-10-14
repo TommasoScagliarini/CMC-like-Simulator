@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "criterion_id": "AB06_RANDOM_POSE_BEST47_GAIT_RECOVERY_V1_2026_10_13",
+  "status": "CRITERIA_FROZEN_BEFORE_NEW_DYNAMIC_OUTCOMES_READ",
+  "new_dynamic_outcomes_read": false,
+  "selected_random_target": 20,
+  "completion": {"steps": 500, "duration_s": 5.0, "duration_tolerance_s": 1e-8, "end_reason": "episode_time_limit", "terminated": false},
+  "minimum_actor_valid_cycles": 2,
+  "first_accepted_hs_deadline_s": 3.0,
+  "first_hs_time_field": "confirmed_time_s",
+  "zero_phase_flags": ["invalid_event_this_step", "cycle_rejected_this_step", "cycle_degraded", "timeout_exceeded", "resync_event_this_step", "phase_cycle_failed_this_step"],
+  "zero_phase_counters": ["invalid_event_count", "resync_count", "hs_cancelled_count"],
+  "left_primary_peak_penetration_strict_upper_m": 0.028,
+  "saved_integration_dt_s": 0.001,
+  "saved_time_tolerance_s": 2e-8,
+  "tracking": {"per_joint_rmse_max_deg": 2.0, "startup_exclusion_s": 0.5, "time_tolerance_s": 1e-8, "joints": ["pros_knee_angle", "pros_ankle_angle"], "raw_units": "rad"},
+  "cyclic_shape": {
+    "cycle_journal": "phase_fsm.accepted_transitions_this_step",
+    "valid_cycle_close": "heel_strike with cycle_valid == 1, paired to the preceding accepted heel_strike and an intervening accepted toe_off",
+    "cycle_interval": "physical event_time_s boundaries; samples within [HS_start,HS_end), with piecewise-linear boundary values included",
+    "excursion_source": "actual saved 1ms kinematics, radians",
+    "per_cycle_excursion_formula": "max(actual_q_in_cycle)-min(actual_q_in_cycle)",
+    "knee_min_excursion_rad": 0.60,
+    "ankle_min_excursion_rad": 0.30,
+    "required_qualifying_cycles": 2,
+    "aggregation_rule": "At least two distinct complete valid cycles EACH pass BOTH joint thresholds. Every cycle is measured and reported. Do not use the full-horizon excursion, max excursion across cycles, or a knee maximum from one cycle and ankle maximum from another. Additional valid cycles may be nonqualifying; invalid/rejected/degraded cycles already fail the zero-event gates."
+  },
+  "technical_classification": {
+    "SegmentWallClockTimeout": "TECHNICAL_CENSORED regardless of the harness physical_guard_censored label",
+    "OnlineGRFPenetrationLimitExceeded": "PHYSICAL_FAILURE",
+    "FloatingPointError_online_grf_force_guard": "PHYSICAL_FAILURE",
+    "other_numerical_exception": "TECHNICAL_CENSORED unless a separately recorded physical guard already failed",
+    "missing_or_inconsistent_measurement_for_completed_run": "POSTPROCESSING_UNRESOLVED, not an invented physical failure",
+    "render_error_with_verifiable_numeric_data": "classification preserved; render issue recorded separately",
+    "unreturned_transition": "Do not invent reward/events/end state for it"
+  },
+  "statistics": {
+    "primary_denominator": "all selected random poses, controls excluded",
+    "success_ci": "exact binomial Clopper-Pearson two-sided95% and one-sided95% lower bound, conditional on geometric eligibility and fixed experimental stack",
+    "unresolved_cases": "Report pessimistic/optimistic success proportion bounds on selected N; no single unconditional CP claim with unresolved technical cases",
+    "replacement_of_physical_failure": false
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "created_utc": "2026-10-07T16:59:06.387284+00:00",
+  "status": "PASS",
+  "review": "Independent source-only review of isolated FOURROI numeric/phase/freezer",
+  "sources": [
+    {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/analysis/analyze_four_roi_comparison.py",
+      "sha256": "1b1b304d070a27231fcd5ecf6a2ef21ba39d06d650c6376ae2b9ff44b7418f1c"
+    },
+    {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/analysis/analyze_four_roi_phase.py",
+      "sha256": "3192f10818ede5acd142db2ad344645a8be2836b38f7c32fdf90321c479178a1"
+    },
+    {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/analysis/freeze_four_roi_analysis.py",
+      "sha256": "2192fe4a116d441bc60c4d000cf7665ee1e2e50b94f7e0c1943651eba4339b35"
+    },
+    {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/analysis/analyze_standing_comparison.py",
+      "sha256": "c02e4f447500f8a6e8119153a41d4633bd7fc58a42f7e4097e05559717543553"
+    },
+    {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/analysis/analyze_standing_phase.py",
+      "sha256": "cca41e88fd4dbc05384be0a4e7dc2d779ae4ae55729c26216e7be211f8ba9be1"
+    }
+  ],
+  "AST_identity": {
+    "numeric": {
+      "unchanged_functions": [
+        "read_json",
+        "sha",
+        "relative",
+        "path",
+        "fingerprint",
+        "check_manifest",
+        "inventory",
+        "exclusive_json",
+        "module",
+        "helpers",
+        "supported",
+        "source_table",
+        "weighted",
+        "signed_integrals",
+        "sparse_com",
+        "tracking",
+        "reserve_metrics",
+        "window_metrics",
+        "prefix_compare",
+        "trace_audit",
+        "render_case"
+      ],
+      "changed_functions": [
+        "analyze",
+        "main"
+      ],
+      "adaptations": "Only isolated FOURROI paths/case selection and provenance/aggregate naming; full diff reviewed without output consumption."
+    },
+    "phase": {
+      "unchanged_functions": [
+        "read",
+        "fp",
+        "write_new",
+        "check",
+        "pure",
+        "helpers",
+        "trace",
+        "assert_events",
+        "compare_channel",
+        "swing_fraction"
+      ],
+      "changed_functions": [
+        "aggregate",
+        "analyze",
+        "freeze",
+        "main"
+      ],
+      "adaptations": "Only isolated FOURROI paths/case selection and provenance/aggregate naming; full diff reviewed without output consumption."
+    }
+  },
+  "checks": {
+    "single_case_source_bound_to_new_dynamic_protocol": true,
+    "new_paths_do_not_overwrite_two_region_or_fresh400": true,
+    "original_scientific_kernels_and_censoring_retained": true,
+    "frozen_nominal_3cycles_threshold20N_no_new_gates": true,
+    "active_receipts_rejected_and_partial_windows_preserved": true,
+    "only_source_hash_JSON_AST_reads_in_this_review": true
+  },
+  "new_forward_numeric_output_read": false,
+  "new_events_read": false,
+  "new_Claude_content_read": false,
+  "integration_IK_FK_imports_or_execution": false,
+  "limits": [
+    "Fresh400 comparison metrics remain separately finalized and bound; the extra consumer does not recompute control.",
+    "Metadata-only input/path differences remain explicit; no new physical success criterion is introduced."
+  ]
+}

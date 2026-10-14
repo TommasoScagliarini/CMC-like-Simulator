@@ -1,0 +1,250 @@
+{
+  "created_utc": "2026-10-07T16:31:17.402633+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "V2_implementation_frozen_after_initial_reader_failure_before_revised_fit",
+  "parser_revision": "Recognize omitted foot Mesh scale_factors as OpenSim default1. Initial healthy/source FK preceded reader error; no support solve/model output existed. Physical contract, root selection and tolerances unchanged.",
+  "method": "own_healthy_raw_static_median_knee_height_and_STL_heel_forefoot_support_v1",
+  "reference": {
+    "selection": "Coordinate-by-coordinate median of all436 own healthy static rows; FK the resulting full23-coordinate pose, not median of centerXYZ from different poses.",
+    "units": "degrees for rotations; meters for pelvis translations",
+    "time": "Median original Header timestamp; no physical integration",
+    "biological_preservation": "All19 shared biological reference coordinates remain exact; knee maps by name, ankle is the sole static angular fit variable; only left subtalar/MTP are absent from graft.",
+    "standing_definition": "Observed acquisition quiet-standing representative, not knee-locked/zero-coordinate construction."
+  },
+  "ground": {
+    "origin_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "normal": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "meaning": "Explicit model/physical benchmark Y=0 assumption; raw COPY=0 is a convention, not independent measured floor elevation.",
+    "healthy_right_or_pelvis_translation": "None. No generic-bone visual minimum shifts source pose.",
+    "actual_primary_and_binary_planes": "Read and disclose separately; both profiles stay byte-frozen."
+  },
+  "support_regions": {
+    "coordinates": "Unscaled fixed foot_l local STL coordinates; X fore-aft, Y up, Z lateral",
+    "heel": "x <= xmin + 0.25*(xmax-xmin)",
+    "forefoot": "x >= xmax - 0.35*(xmax-xmin)",
+    "heel_fraction": 0.25,
+    "forefoot_fraction": 0.35,
+    "fully_supported_definition": "One minimum in each region on Y=0 and no vertex of the entire rigid STL below plane; curved mesh need not have every vertex coplanar.",
+    "limitation": "Two-region support does not certify lateral full-sole flatness, clinical alignment, finite contact patch or supported body weight."
+  },
+  "fit": {
+    "free_XML_scalars": [
+      "osseo parent PhysicalOffsetFrame translation.Y",
+      "pros_ankle parent PhysicalOffsetFrame translation.Y"
+    ],
+    "free_static_scalar": "pros_ankle_angle at reference pose",
+    "allowed_orientation_changes": [],
+    "target_knee": "Healthy knee_l CHILD frame origin Y at full reference pose; XYZ disclosed, X/Z not constrained.",
+    "ankle_target": "No healthy ankle-height constraint; ankle height follows grounded identical prosthetic foot.",
+    "angular_search_grid_count": 4097,
+    "range": "Unchanged pros_ankle coordinate range",
+    "root_choice": "Enumerate endpoint/grid zero and sign-changing Brent roots; reject roots with whole-STL penetration or non-distal mounts, then choose root nearest healthy ankle reference. No force/dynamic outcome enters choice.",
+    "root_search_limit": "Dense brackets do not certify absence of unsampled tangential roots; failure is preserved without silently introducing adapters.",
+    "positive_mount_slopes_required": true,
+    "mounts_must_remain_negative_Y": true
+  },
+  "tolerances": {
+    "geometry_m": 1e-10,
+    "native_parity_m": 1e-11,
+    "rotation_dimensionless": 1e-12,
+    "coordinate_assignment_rad_or_m": 1e-14,
+    "Brent_xtol_rad": 1e-13
+  },
+  "static_calibration_mapping": "For all original rows preserve biological values and Header clock, map knee/ankle by name and add preparedRef - healthyRef; drop only left subtalar/MTP. No donor registration or automatic old+4.73065 degree offset.",
+  "reference_coordinate_maps": {
+    "healthy_deg_m": {
+      "pelvis_tilt": 2.104524015,
+      "pelvis_list": -0.76688405,
+      "pelvis_rotation": 1.62432986,
+      "pelvis_tx": -2.13097819,
+      "pelvis_ty": 0.915389375,
+      "pelvis_tz": -1.716599105,
+      "hip_flexion_r": 0.611606455,
+      "hip_adduction_r": -3.5718954600000004,
+      "hip_rotation_r": -25.947814735,
+      "knee_angle_r": -9.538837055,
+      "ankle_angle_r": 9.55737144,
+      "subtalar_angle_r": -0.00892122,
+      "mtp_angle_r": 0.0,
+      "hip_flexion_l": -0.64491347,
+      "hip_adduction_l": -4.821836155,
+      "hip_rotation_l": -13.456341909999999,
+      "knee_angle_l": -7.04516687,
+      "ankle_angle_l": 7.083184385,
+      "subtalar_angle_l": -0.011648535,
+      "mtp_angle_l": 0.0,
+      "lumbar_extension": 0.0,
+      "lumbar_bending": 0.0,
+      "lumbar_rotation": 0.0
+    },
+    "prepared_before_fit_deg_m": {
+      "pelvis_tilt": 2.104524015,
+      "pelvis_list": -0.76688405,
+      "pelvis_rotation": 1.62432986,
+      "pelvis_tx": -2.13097819,
+      "pelvis_ty": 0.915389375,
+      "pelvis_tz": -1.716599105,
+      "hip_flexion_r": 0.611606455,
+      "hip_adduction_r": -3.5718954600000004,
+      "hip_rotation_r": -25.947814735,
+      "knee_angle_r": -9.538837055,
+      "ankle_angle_r": 9.55737144,
+      "subtalar_angle_r": -0.00892122,
+      "mtp_angle_r": 0.0,
+      "hip_flexion_l": -0.64491347,
+      "hip_adduction_l": -4.821836155,
+      "hip_rotation_l": -13.456341909999999,
+      "pros_knee_angle": -7.04516687,
+      "pros_ankle_angle": 7.083184385,
+      "lumbar_extension": 0.0,
+      "lumbar_bending": 0.0,
+      "lumbar_rotation": 0.0
+    }
+  },
+  "raw_static_metadata": {
+    "wrapper_slot_count": 12,
+    "variable_units_raw": [],
+    "public_name": "data",
+    "trialStarts": null,
+    "trialEnds": null
+  },
+  "preserved": [
+    "All XML except two parent-frame Y scalars",
+    "all orientations/Pin axes",
+    "SEA/controller semantics",
+    "joint defaults/ranges",
+    "hardware mesh/scale",
+    "biological anatomy/muscles",
+    "benchmark masses/COM/inertia",
+    "raw marker/TRC data",
+    "detector/contact profiles"
+  ],
+  "prohibited": [
+    "IK/build in this helper",
+    "donor registration",
+    "native integration",
+    "force fit",
+    "plugin modification",
+    "production or old-audit writes",
+    "new Claude directory reads"
+  ],
+  "sources_before": {
+    "helper": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/fit_standing_geometry_v2.py",
+      "sha256": "1d6a6dc08c660678c9c4a26b17679c15380b87445587d4b074f13d302016e9b9",
+      "size_bytes": 27180
+    },
+    "root_scope_protocol": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/protocol.json",
+      "sha256": "a044b41bf156d2973b46e53d80f25a10ce03d15476337d3b172a12019e05223e",
+      "size_bytes": 134393
+    },
+    "first_helper_preserved": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/fit_standing_geometry.py",
+      "sha256": "9989dd4fefdf1f08df622a21008c4e05d61b80539e00811a34b4e3538b9909ac",
+      "size_bytes": 26694
+    },
+    "first_protocol_preserved": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/geometry_protocol.json",
+      "sha256": "64435d992de105fae2f4cab2bb111429ee677be911d9dc1d219b03f5ebd9e33a",
+      "size_bytes": 10348
+    },
+    "first_reader_failure_preserved": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/fit_geometry_receipt.json",
+      "sha256": "0f594f3d92eeb5b5309d25799df74750439b3a6044bc065cd246cdfb0394afd7",
+      "size_bytes": 692
+    },
+    "AGENTS": {
+      "path": "AGENTS.md",
+      "sha256": "528ad5c3fd510cfe4d571bcb2b0a2c410d2bc99205a76cda95f5b7a573e6bbe6",
+      "size_bytes": 7721
+    },
+    "pure_geometry": {
+      "path": "validation/ab07_mount_registration_verification_2026_10_07/constraints/relative_right_target_supplement.py",
+      "sha256": "d3a435c62dffd98d9386d482b21c2b4df07ed49172bdb6e0eb5bd772c8b340c5",
+      "size_bytes": 14561
+    },
+    "raw_static_decoder": {
+      "path": "validation/ab06_ab07_preparation_vs_model_2026_10_07/data_preparation_audit.py",
+      "sha256": "ff89c2527a0b30c47ff4e592209201d1005d97f51e7085418c433c4a0cd82344",
+      "size_bytes": 23591
+    },
+    "converter": {
+      "path": "tools/convert_epic_ab06_tables.py",
+      "sha256": "015f7e96f4f3dd6a923e3c1115d4f41d07faf1d997419138e11e9d6f9d8433cb",
+      "size_bytes": 62436
+    },
+    "motion_reader_and_marker_calibrator": {
+      "path": "tools/calibrate_ab06_seasea_markers.py",
+      "sha256": "49f9b6d2edbfb5b5e096a9420500b0d9faa8b269c948bccf8b4370a08323e05f",
+      "size_bytes": 11495
+    },
+    "model_loader": {
+      "path": "model_loader.py",
+      "sha256": "401beddc52e2dd8ce4a88208cf5b38b036232cb1bc3ea37704e467852f2ace12",
+      "size_bytes": 58315
+    },
+    "healthy_model": {
+      "path": "models/AB07-raw/osimxml/ab07.osim",
+      "sha256": "151ca215fa3c60023a8f8d894a2661a86260fa88e32b239a225844bf4080feaf",
+      "size_bytes": 625817
+    },
+    "raw_static_IK": {
+      "path": "models/AB07-raw/10_14_18/static/ik/static01.mat",
+      "sha256": "a734cccfc2e227948a8b0f13c7744838dfb98386f7e7abdcb84e8f102de84579",
+      "size_bytes": 54842
+    },
+    "raw_static_markers": {
+      "path": "models/AB07-raw/10_14_18/static/markers/static01.mat",
+      "sha256": "52b5038e49bf8eeef1c9aee69400e9c3ca311aa99da9e356733cab9f72e9f53c",
+      "size_bytes": 97145
+    },
+    "raw_static_TRC": {
+      "path": "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA-raw/data/converted/static/static01/static01.trc",
+      "sha256": "dcdea79f70cbfcc5ccd0e359f71aa203141409ff2598f7fad1a0791cc84e7b4a",
+      "size_bytes": 602153
+    },
+    "raw_remapped_static": {
+      "path": "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA-raw/data/converted/static/static01/static01_ik_dataset_ab06_seasea.mot",
+      "sha256": "cb66e6fc9c1b26bf751b9a4d0aa67c6af0d518b2f96b6afac9d4ea722cd250c4",
+      "size_bytes": 130618
+    },
+    "anatomical_model_before_donor_ground_registration": {
+      "path": "validation/ab06_ab07_independent_attribution_2026_10_07/rebuild/models/AB07_SEASEA-raw/osimxml/AB07_SEASEA_anatomical.osim",
+      "sha256": "1a54126bd3d9fde21710af55c5bcb202e56e6dd5e764810459d667ca260f63e2",
+      "size_bytes": 214862
+    },
+    "fixed_foot_STL": {
+      "path": "Geometry/AM_foot_l.STL",
+      "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9",
+      "size_bytes": 302284
+    },
+    "SEA_plugin_current_platform": {
+      "path": "plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+      "sha256": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b",
+      "size_bytes": 218560
+    },
+    "fixed_primary_contact_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+      "size_bytes": 19412
+    },
+    "fixed_binary_detector_profile": {
+      "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+      "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+      "size_bytes": 670
+    }
+  },
+  "outputs": {
+    "model": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/AB07_SEASEA_standing_fit.osim",
+    "receipt": "validation/ab07_standing_geometry_fit_2026_10_07/geometry/fit_geometry_receipt_v2.json"
+  }
+}

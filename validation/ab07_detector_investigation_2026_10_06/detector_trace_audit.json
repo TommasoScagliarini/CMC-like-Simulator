@@ -1,0 +1,324 @@
+{
+  "schema_version": 2,
+  "status": "diagnostic_review_completed",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "scope": "Independent source and saved-data review only; no integration, tuning, model edit or learned policy",
+  "sources": {
+    "trace": {
+      "path": "results/ab07_v26_left_prescribed_9p01s_2026_10_06/trace.jsonl",
+      "sha256": "9c0fc54dc5eae4f337e3779be4f81e944fe660b1b6390bc3a92bc742a25f6f5a"
+    },
+    "geometry_csv": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/sensor_pose_comparison.csv",
+      "sha256": "a4519ab3f964da7ebcc26204da09dfdfb604cf0c85ce305a1674f31fc2b1dadf"
+    },
+    "geometry_analysis": {
+      "path": "validation/ab07_detector_investigation_2026_10_06/detector_geometry_analysis.json",
+      "sha256": "178f08f34239e7657cabbe0b13c6c7bebf1e082a64dbe46a22e1b7fc3d1967a9"
+    },
+    "geometry_helper": {
+      "path": "Trajectory Generator/validation/AB07/investigate_detector_geometry.py",
+      "sha256": "b1042b1adc2f3f60992bd69f8a361ee3ab9925865bf95d00247de23dbaf873a4"
+    }
+  },
+  "trace_clock": {
+    "baseline_s": 10.36,
+    "policy_rows": 901,
+    "sensor_samples": 9010,
+    "sensor_time_range_s": [
+      10.360999999999999,
+      19.370000000000992
+    ],
+    "sample_dt_s": 0.001,
+    "native_bool_contacts": true
+  },
+  "pose_grid": {
+    "samples": 9010,
+    "time_range_s": [
+      10.36,
+      19.369
+    ],
+    "convention": "preintegration STO: reset baseline through penultimate sensor sample; trace sensor samples are postintegration ticks"
+  },
+  "time_aligned_pose_contact_parity": {
+    "common_sensor_samples": 9009,
+    "mismatch_count": 0,
+    "mismatches": [],
+    "reset_baseline_matches_pose": true,
+    "unavailable_final_pose_time_s": 19.370000000000992,
+    "pose_and_trace_grid_counts": {
+      "heel_pose": 235,
+      "heel_trace": 235,
+      "toe_pose": 2663,
+      "toe_trace": 2664
+    },
+    "endpoint_explains_one_toe_sample": true
+  },
+  "heel_on_runs": [
+    {
+      "start_s": 13.269,
+      "last_on_sample_s": 13.371,
+      "samples": 103,
+      "sample_span_s": 0.102,
+      "bin_duration_s": 0.103
+    },
+    {
+      "start_s": 14.908,
+      "last_on_sample_s": 15.039,
+      "samples": 132,
+      "sample_span_s": 0.131,
+      "bin_duration_s": 0.132
+    }
+  ],
+  "heel_qualified_interpretation": {
+    "on_run_count": 2,
+    "minimum_on_run_samples": 103,
+    "debounce_s": 0.005,
+    "observed_hs_count": 2,
+    "finding": "Only two heel ON episodes; both persist much longer than 5 ms and generate HS. Toe-only contacts do not qualify HS by frozen V26 semantics."
+  },
+  "both_served_vs_all_served": {
+    "max_clearance_difference_m": {
+      "heel_clearance_m": 6.8859324353631735e-09,
+      "toe_clearance_m": 8.42500706699223e-09
+    },
+    "bit_mismatch_count": 0,
+    "finding": "Contact bits identical; clearance differences below 8.5 nanometers, consistent with STO precision. No exact floating-point pose equality claim."
+  },
+  "case_summary": {
+    "AB06_new_ik_filtered": {
+      "heel_fraction": 0.6166481687014428,
+      "toe_fraction": 0.3661487236403996,
+      "heel_min_m": -0.017245465549980125,
+      "v26_event_count": {
+        "heel_strike": 5,
+        "toe_off": 5
+      }
+    },
+    "AB07_new_ik_raw": {
+      "heel_fraction": 0.030965593784683686,
+      "toe_fraction": 0.06803551609322975,
+      "heel_min_m": -0.000699317335314734,
+      "v26_event_count": {
+        "heel_strike": 4,
+        "toe_off": 4
+      }
+    },
+    "AB07_new_ik_filtered": {
+      "heel_fraction": 0.029078801331853497,
+      "toe_fraction": 0.06548279689234185,
+      "heel_min_m": -0.00043386508086067956,
+      "v26_event_count": {
+        "heel_strike": 2,
+        "toe_off": 2
+      }
+    },
+    "AB07_healthy_remapped_on_fitted_prosthesis": {
+      "heel_fraction": 0.15749167591564928,
+      "toe_fraction": 0.00776914539400666,
+      "heel_min_m": -0.00346317433073739,
+      "v26_event_count": {
+        "heel_strike": 6,
+        "toe_off": 5
+      }
+    },
+    "AB07_actual_prescribed": {
+      "heel_fraction": 0.08423973362930078,
+      "toe_fraction": 0.08113207547169811,
+      "heel_min_m": -0.0016574135449342001,
+      "v26_event_count": {
+        "heel_strike": 4,
+        "toe_off": 4
+      }
+    },
+    "AB07_actual_v26": {
+      "heel_fraction": 0.026082130965593784,
+      "toe_fraction": 0.2955604883462819,
+      "heel_min_m": -0.0073887140285238215,
+      "v26_event_count": {
+        "heel_strike": 2,
+        "toe_off": 2
+      }
+    },
+    "AB07_served_v26": {
+      "heel_fraction": 0.0293007769145394,
+      "toe_fraction": 0.29922308546059934,
+      "heel_min_m": -0.0077488717235997765,
+      "v26_event_count": {
+        "heel_strike": 2,
+        "toe_off": 2
+      }
+    },
+    "AB07_counterfactual_served_knee": {
+      "heel_fraction": 0.1099889012208657,
+      "toe_fraction": 0.12253052164261931,
+      "heel_min_m": -0.007226446801141756,
+      "v26_event_count": {
+        "heel_strike": 6,
+        "toe_off": 5
+      }
+    },
+    "AB07_counterfactual_served_ankle": {
+      "heel_fraction": 0.0,
+      "toe_fraction": 0.21176470588235294,
+      "heel_min_m": 0.0014132104037112344,
+      "v26_event_count": {
+        "heel_strike": 0,
+        "toe_off": 0
+      }
+    },
+    "AB07_counterfactual_served_knee_ankle": {
+      "heel_fraction": 0.0293007769145394,
+      "toe_fraction": 0.29922308546059934,
+      "heel_min_m": -0.007748867894251452,
+      "v26_event_count": {
+        "heel_strike": 2,
+        "toe_off": 2
+      }
+    },
+    "AB07_counterfactual_donor_mounts": {
+      "heel_fraction": 0.8056603773584906,
+      "toe_fraction": 0.9447280799112098,
+      "heel_min_m": -0.0627321864275506,
+      "v26_event_count": {
+        "heel_strike": 0,
+        "toe_off": 0
+      }
+    }
+  },
+  "saved_original_trace_event_dictionary_parity": {
+    "status": "PASS",
+    "samples": 9010,
+    "events": 4,
+    "exact_event_dictionary_parity": true,
+    "scope": "Replays the original 10 ms delivery batches, no OpenSim integration"
+  },
+  "source_review": {
+    "coordinate_mapping_by_name": true,
+    "degree_conversion_excludes_pelvis_translations": true,
+    "joint_swap_column_lookup_by_name": true,
+    "full_span_native_200hz_skips_1ms_event_inference": true,
+    "notes": [
+      {
+        "severity": "clock_scope",
+        "source": "Trajectory Generator/validation/AB07/investigate_detector_geometry.py:123",
+        "detail": "Pose-case scalar FSM replay has reset baseline at first STO row and 9009 updates, ending 19.369; delivered_time_s is immediate scalar delivery rather than 10 ms policy-batch delivery. Exact event dictionary parity is separately checked by saved_trace_parity on all 9010 original samples."
+      },
+      {
+        "severity": "causal_scope",
+        "source": "Trajectory Generator/validation/AB07/investigate_detector_geometry.py:276",
+        "detail": "Joint/mount swaps isolate fixed-pose geometry, not dynamically valid gait or uniquely governor-caused changes. Plain versus active also changes left applied GRF from prescribed to online. Healthy remap on fitted prosthesis is not original healthy-model anatomy."
+      }
+    ],
+    "resolved_notes": [
+      {
+        "issue": "Temporary clone model provenance was previously missing",
+        "status": "resolved",
+        "source": "Trajectory Generator/validation/AB07/investigate_detector_geometry.py:289",
+        "geometry_analysis_schema_version": 2,
+        "base_model_sha256": "79770a7ef8da5c784c152547e4970fa62158e57f30b92c6aa8919c4c91bcb9d5",
+        "effective_model_sha256": "58cb9f8297e7151b6fc7cd92a02a2aac53b98ed0346e04408972707b817816c8",
+        "model_field_scope": "base/source model; effective_model_sha256 identifies the evaluated XML"
+      }
+    ]
+  },
+  "limitations": [
+    "This verifies time-aligned contacts from existing geometry CSV; no new independent OpenSim position calculation.",
+    "No new contact/event qualification threshold is adopted. Scalar pose-case delivery timestamps cannot be used as policy-delivery parity."
+  ],
+  "upstream_production_sampler_parity": {
+    "scope": "Metadata/source verification of root-executed pose-only comparison; not rerun by this audit",
+    "cases": {
+      "AB06_new_ik_filtered": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_new_ik_raw": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_new_ik_filtered": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_healthy_remapped_on_fitted_prosthesis": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_actual_prescribed": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_actual_v26": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_served_v26": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_counterfactual_served_knee": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_counterfactual_served_ankle": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_counterfactual_served_knee_ankle": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07_counterfactual_donor_mounts": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      }
+    },
+    "full_span_native_ik": {
+      "AB06": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      },
+      "AB07": {
+        "poses": 13,
+        "points_per_pose": 2,
+        "clearance_tolerance_m": 1e-12,
+        "status": "PASS"
+      }
+    },
+    "source": "Trajectory Generator/validation/AB07/investigate_detector_geometry.py:99"
+  },
+  "metadata_refresh": {
+    "geometry_csv_hash_unchanged": true,
+    "trace_hash_unchanged": true,
+    "case_summary_values_unchanged": true,
+    "upstream_source_hash_matches_current_helper": true,
+    "prior_audit_path": "validation/ab07_pipeline_2026_10_06/detector_trace_audit.json",
+    "current_audit_path": "validation/ab07_detector_investigation_2026_10_06/detector_trace_audit.json",
+    "new_runtime_or_pose_evaluation_performed": false
+  }
+}

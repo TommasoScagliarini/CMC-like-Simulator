@@ -1,0 +1,665 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-07T19:01:24.313576+00:00",
+  "status": "PASS_static_contract_review",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "scope": "Requested/resolved learned input contract versus captured CMC400 input configuration only. No learned runtime outcomes or scientific consumers used for this comparison.",
+  "learned_source": {
+    "path": "Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/execution_manifest.json",
+    "sha256": "630f92386709016990bb437649732635ac6126e063d39cf54ffe09fb2cb679ec",
+    "size_bytes": 35883
+  },
+  "CMC_source": {
+    "path": "validation/ab07_standing_geometry_fit_2026_10_07/dynamics/PYLON400_REFERENCE/run/receipt.json",
+    "sha256": "f2f9ed6283b3de23354456ef3390164f0ec8d38684f6b12b1c85fbf23ebca8ee",
+    "size_bytes": 147315
+  },
+  "CMC_fields_inspected": [
+    "effective_env_config",
+    "effective_simulator_config",
+    "source_files",
+    "action_source"
+  ],
+  "substantial_control_differences": {
+    "action_source": {
+      "learned_requested": "Frozen best47 deterministic inference",
+      "CMC400_captured": "Original prescribed_action from this case's own full IK; unchanged cascade and SEA spring/plugin",
+      "meaning": "The prosthetic raw trajectory comes from the network rather than own full IK.",
+      "source_evidence": "rollout_eval.py:463, prescribed_action.py:8"
+    },
+    "action_mode": {
+      "learned_requested": "absolute",
+      "CMC400_captured": "raw",
+      "meaning": "Learned absolute normalized Box commands versus diagnostic raw absolute-radian IK knots. Both pass through the same served-reference model.",
+      "source_evidence": "rollout_eval.py:472, prescribed_action.py:14"
+    },
+    "gait_clock_enable": {
+      "learned_requested": false,
+      "CMC400_captured": true,
+      "meaning": "The learned checkpoint disables the measured right-HS gait clock; the prescribed diagnostic enables it. This is distinct from retaining the same binary detector.",
+      "source_evidence": "rollout_eval.py:494, osim_trj_cmc_like.py:2243"
+    },
+    "target_slew_rate_limit_rad_s": {
+      "learned_requested": {
+        "pros_knee_angle": 2.5,
+        "pros_ankle_angle": 2.0
+      },
+      "CMC400_captured": {
+        "pros_knee_angle": 0.0,
+        "pros_ankle_angle": 0.0
+      },
+      "meaning": "The learned knee/ankle target increments are limited to 2.5/2.0 rad/s; zero disables this limiter in the prescribed diagnostic.",
+      "source_evidence": "rollout_eval.py:473"
+    },
+    "phase_min_stance_duration_s": {
+      "learned_requested": 0.3,
+      "CMC400_captured": 0.05,
+      "meaning": "Actor-FSM acceptance/credit criteria differ downstream of the unchanged force-free binary point detector; counts/reward are not controlled solely by the network weights.",
+      "source_evidence": "env_factory.py:209-221, osim_trj_cmc_like.py:1549-1564"
+    },
+    "phase_min_swing_duration_s": {
+      "learned_requested": 0.25,
+      "CMC400_captured": 0.2,
+      "meaning": "Actor-FSM acceptance/credit criteria differ downstream of the unchanged force-free binary point detector; counts/reward are not controlled solely by the network weights.",
+      "source_evidence": "env_factory.py:209-221, osim_trj_cmc_like.py:1549-1564"
+    },
+    "phase_landing_window_start_s": {
+      "learned_requested": 0.35,
+      "CMC400_captured": 0.55,
+      "meaning": "Actor-FSM acceptance/credit criteria differ downstream of the unchanged force-free binary point detector; counts/reward are not controlled solely by the network weights.",
+      "source_evidence": "env_factory.py:209-221, osim_trj_cmc_like.py:1549-1564"
+    },
+    "phase_landing_window_end_s": {
+      "learned_requested": 0.85,
+      "CMC400_captured": 1.1,
+      "meaning": "Actor-FSM acceptance/credit criteria differ downstream of the unchanged force-free binary point detector; counts/reward are not controlled solely by the network weights.",
+      "source_evidence": "env_factory.py:209-221, osim_trj_cmc_like.py:1549-1564"
+    },
+    "phase_min_stance_contact_fraction": {
+      "learned_requested": 0.2,
+      "CMC400_captured": 0.0,
+      "meaning": "Actor-FSM acceptance/credit criteria differ downstream of the unchanged force-free binary point detector; counts/reward are not controlled solely by the network weights.",
+      "source_evidence": "env_factory.py:209-221, osim_trj_cmc_like.py:1549-1564"
+    },
+    "phase_min_stance_load_bw_s": {
+      "learned_requested": 0.04,
+      "CMC400_captured": 0.0,
+      "meaning": "Actor-FSM acceptance/credit criteria differ downstream of the unchanged force-free binary point detector; counts/reward are not controlled solely by the network weights.",
+      "source_evidence": "env_factory.py:209-221, osim_trj_cmc_like.py:1549-1564"
+    },
+    "phase_min_cycle_knee_excursion_rad": {
+      "learned_requested": 0.12,
+      "CMC400_captured": 0.0,
+      "meaning": "Actor-FSM acceptance/credit criteria differ downstream of the unchanged force-free binary point detector; counts/reward are not controlled solely by the network weights.",
+      "source_evidence": "env_factory.py:209-221, osim_trj_cmc_like.py:1549-1564"
+    }
+  },
+  "equalities": {
+    "segment_duration": {
+      "passed": true,
+      "value": 0.01,
+      "meaning": "Same requested temporal discretization/duration."
+    },
+    "policy_knots": {
+      "passed": true,
+      "value": 1,
+      "meaning": "Same requested temporal discretization/duration."
+    },
+    "episode_duration": {
+      "passed": true,
+      "value": 6.11,
+      "meaning": "Same requested temporal discretization/duration."
+    },
+    "intended_requested_time_range_s": {
+      "passed": true,
+      "value": [
+        12.591740519774012,
+        18.701740519774013
+      ],
+      "meaning": "Derived solely from setup t_start and requested offsets/duration; this is not an assertion of observed completion."
+    },
+    "grf_mode": {
+      "passed": true,
+      "value": "online_sensor",
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "phase_fsm_input_mode": {
+      "passed": true,
+      "value": "legacy_events",
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "phase_sensor_on_threshold_n": {
+      "passed": true,
+      "value": 5.0,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "phase_sensor_off_threshold_n": {
+      "passed": true,
+      "value": 2.0,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "phase_sensor_dwell_s": {
+      "passed": true,
+      "value": 0.03,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "detector_sample_dt_s": {
+      "passed": true,
+      "value": 0.001,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "event_contract_id": {
+      "passed": true,
+      "value": "legacy_events_v1",
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "binary_phase_fsm_mode": {
+      "passed": true,
+      "value": "binary_active",
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "binary_phase_invalid_event_policy": {
+      "passed": true,
+      "value": "reject_continue",
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "binary_phase_actor_fsm_version": {
+      "passed": true,
+      "value": "v3",
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "binary_phase_debounce_s": {
+      "passed": true,
+      "value": 0.005,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "binary_phase_event_contract_id": {
+      "passed": true,
+      "value": "binary_point_v25+heel_qualified_fsm_v2",
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "grf_penetration_penalty_threshold_m": {
+      "passed": true,
+      "value": 0.02,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "grf_penetration_termination_m": {
+      "passed": true,
+      "value": 0.028,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "imitation_initialize_to_target": {
+      "passed": true,
+      "value": false,
+      "meaning": "Requested learned value equals captured CMC400 input configuration."
+    },
+    "include_online_grf_observation": {
+      "passed": true,
+      "value": true,
+      "meaning": "Same left online force/right measured external force treatment."
+    },
+    "prescribed_grf_disabled_sides": {
+      "passed": true,
+      "value": [],
+      "meaning": "Same left online force/right measured external force treatment."
+    },
+    "online_grf_applied_sides": {
+      "passed": true,
+      "value": [
+        "left"
+      ],
+      "meaning": "Same left online force/right measured external force treatment."
+    },
+    "enable_pros_ref_governor": {
+      "passed": true,
+      "value": true,
+      "meaning": "Same served-reference filtering and governor."
+    },
+    "pros_ref_model": {
+      "passed": true,
+      "value": "butterworth3_jerk_limited",
+      "meaning": "Same served-reference filtering and governor."
+    },
+    "pros_ref_lpf_cutoff_hz": {
+      "passed": true,
+      "value": 4.0,
+      "meaning": "Same served-reference filtering and governor."
+    },
+    "pros_ref_velocity_limit_rad_s": {
+      "passed": true,
+      "value": {
+        "pros_knee_angle": 6.0,
+        "pros_ankle_angle": 3.5
+      },
+      "meaning": "Same derivative limits of the served-reference governor."
+    },
+    "pros_ref_acceleration_limit_rad_s2": {
+      "passed": true,
+      "value": {
+        "pros_knee_angle": 60.0,
+        "pros_ankle_angle": 55.0
+      },
+      "meaning": "Same derivative limits of the served-reference governor."
+    },
+    "pros_ref_jerk_limit_rad_s3": {
+      "passed": true,
+      "value": {
+        "pros_knee_angle": 3000.0,
+        "pros_ankle_angle": 2750.0
+      },
+      "meaning": "Same derivative limits of the served-reference governor."
+    }
+  },
+  "physical_input_identities": {
+    "model": {
+      "passed": true,
+      "same_resolved_path": true,
+      "source": {
+        "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/cases/PYLON400_REFERENCE/AB07_SEASEA_marker_calibrated.osim",
+        "sha256": "687e72046060e38d6864fd6b69ed5980f0c7593d4975de3a5479c58fdfe14bef",
+        "size_bytes": 501386
+      },
+      "CMC_before_binding": "687e72046060e38d6864fd6b69ed5980f0c7593d4975de3a5479c58fdfe14bef",
+      "learned_before_binding": "687e72046060e38d6864fd6b69ed5980f0c7593d4975de3a5479c58fdfe14bef"
+    },
+    "ik": {
+      "passed": true,
+      "same_resolved_path": true,
+      "source": {
+        "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/cases/PYLON400_REFERENCE/pipeline/02_ik/IK_full_10p360_153p415.mot",
+        "sha256": "116aec3d8c00f6457aa1055a7cfd2d27d4a52f1754e85e04f6b74d2a3bf97615",
+        "size_bytes": 10701447
+      },
+      "CMC_before_binding": "116aec3d8c00f6457aa1055a7cfd2d27d4a52f1754e85e04f6b74d2a3bf97615",
+      "learned_before_binding": "116aec3d8c00f6457aa1055a7cfd2d27d4a52f1754e85e04f6b74d2a3bf97615"
+    },
+    "external_loads_xml": {
+      "passed": true,
+      "same_resolved_path": true,
+      "source": {
+        "path": "models/AB07_SEASEA_Threadmill/data/ExternalForces.xml",
+        "sha256": "6fc54a1f8afee500cb0ee570c4bdb36f23fcabf378454ff817407e7c7957a127",
+        "size_bytes": 1195
+      },
+      "CMC_before_binding": "6fc54a1f8afee500cb0ee570c4bdb36f23fcabf378454ff817407e7c7957a127",
+      "learned_before_binding": "6fc54a1f8afee500cb0ee570c4bdb36f23fcabf378454ff817407e7c7957a127"
+    },
+    "reserve_actuators": {
+      "passed": true,
+      "same_resolved_path": true,
+      "source": {
+        "path": "models/AB07_SEASEA_Threadmill/data/CMC_Actuators.xml",
+        "sha256": "238792c0024c405241e4a45b9be88e153660561a02e667aedbd1dd6116df73dd",
+        "size_bytes": 10712
+      },
+      "CMC_before_binding": "238792c0024c405241e4a45b9be88e153660561a02e667aedbd1dd6116df73dd",
+      "learned_before_binding": "238792c0024c405241e4a45b9be88e153660561a02e667aedbd1dd6116df73dd"
+    }
+  },
+  "unchanged_profile_calibrations": {
+    "online_grf_profile": {
+      "passed": true,
+      "same_path_and_bytes": true,
+      "fingerprint": {
+        "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json",
+        "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+        "size_bytes": 19412
+      },
+      "recalibrations_requested": 0,
+      "statement": "Profile calibration is unchanged; this does not imply identical measured events under different trajectories."
+    },
+    "online_grf_detector_profile": {
+      "passed": true,
+      "same_path_and_bytes": true,
+      "fingerprint": {
+        "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+        "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e",
+        "size_bytes": 1347
+      },
+      "recalibrations_requested": 0,
+      "statement": "Profile calibration is unchanged; this does not imply identical measured events under different trajectories."
+    },
+    "binary_phase_detector_profile": {
+      "passed": true,
+      "same_path_and_bytes": true,
+      "fingerprint": {
+        "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+        "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+        "size_bytes": 670
+      },
+      "recalibrations_requested": 0,
+      "statement": "Profile calibration is unchanged; this does not imply identical measured events under different trajectories."
+    }
+  },
+  "SEA_contract": {
+    "status": "same_physical_controller_configuration_expected_from_bound_inputs",
+    "CMC_captured_values": {
+      "sea_knee_name": "SEA_Knee",
+      "sea_ankle_name": "SEA_Ankle",
+      "sea_outer_controller_mode": "cascade",
+      "sea_kp": {
+        "pros_knee_angle": 160,
+        "pros_ankle_angle": 420
+      },
+      "sea_kd": {
+        "pros_knee_angle": 12,
+        "pros_ankle_angle": 1
+      },
+      "sea_ki": {
+        "pros_knee_angle": 20.0,
+        "pros_ankle_angle": 60.0
+      },
+      "sea_integral_limit": {
+        "pros_knee_angle": 0.25,
+        "pros_ankle_angle": 0.25
+      },
+      "sea_integral_leak_s_inv": 0.1,
+      "sea_cascade_kp_outer": {
+        "pros_knee_angle": 18.85,
+        "pros_ankle_angle": 47.125
+      },
+      "sea_cascade_kp_inner": {
+        "pros_knee_angle": 29.2,
+        "pros_ankle_angle": 2.8275
+      },
+      "sea_cascade_ki_inner": {
+        "pros_knee_angle": 1377.0,
+        "pros_ankle_angle": 213.0
+      },
+      "sea_cascade_inner_i_torque_limit": {
+        "pros_knee_angle": 50.0,
+        "pros_ankle_angle": 200.0
+      },
+      "sea_u_lpf_cutoff_hz": {
+        "pros_knee_angle": 0.0,
+        "pros_ankle_angle": 0.0
+      },
+      "sea_forward_mode": "plugin",
+      "sea_stiffness": {
+        "SEA_Knee": 321.0,
+        "SEA_Ankle": 500.0
+      },
+      "enable_sea_feasibility_scaling": false,
+      "sea_feasibility_tau_input_limit": 450.0,
+      "sea_feasibility_u_limit": 0.95,
+      "sea_feasibility_scales": [
+        1.0,
+        0.75,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+        0.0
+      ],
+      "sea_motor_substeps": 5,
+      "sea_motor_max_substeps": 80
+    },
+    "shared_source_bindings": {
+      "simulator_config": {
+        "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/config.py",
+        "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3"
+      },
+      "environment": {
+        "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/osim_trj_cmc_like.py",
+        "sha256": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37"
+      }
+    },
+    "same_setup_all_semantic_fields": true,
+    "same_byte_exact_model": true,
+    "learned_SEA_overrides": [],
+    "proof": "Both invoke the same environment class/base SimulatorConfig; setup copies have identical semantic leaves; only GRF and output overrides are applied in _build_simulator/_apply_grf_overrides. No learned CLI argument changes SEA gains/mode or plugin. This is a static pre-outcome contract proof, not a reading of learned runtime effective configuration.",
+    "source_evidence": [
+      "osim_trj_cmc_like.py:2077-2095",
+      "osim_trj_cmc_like.py:2177-2225",
+      "rollout_eval.py:467-558"
+    ]
+  },
+  "episode_offset_raw_float_difference_s": -4.440892098500626e-16,
+  "interpretation": "Same model, IK, physical calibration and requested time window control physical inputs. Network-vs-IK source, absolute-vs-raw mapping, target slew, gait clock and actor-FSM criteria change together; this comparison does not isolate only network weights. Detector profile equality must not be presented as actor-event acceptance equality.",
+  "timing": "Input fingerprints acquired before this dedicated contract calculation; earlier read-only source/schema inspection already occurred. No prospective-before-launch claim.",
+  "sources_before": {
+    "learned_manifest": {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/execution_manifest.json",
+      "sha256": "630f92386709016990bb437649732635ac6126e063d39cf54ffe09fb2cb679ec",
+      "size_bytes": 35883
+    },
+    "CMC_receipt_input_fields": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/dynamics/PYLON400_REFERENCE/run/receipt.json",
+      "sha256": "f2f9ed6283b3de23354456ef3390164f0ec8d38684f6b12b1c85fbf23ebca8ee",
+      "size_bytes": 147315
+    },
+    "environment": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37",
+      "size_bytes": 201968
+    },
+    "evaluator": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "c2d344ddbcaeae274a99e713ba40d788ec3e174126b6edbf9c310049ce8ce281",
+      "size_bytes": 60471
+    },
+    "factory": {
+      "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+      "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+      "size_bytes": 9701
+    },
+    "base_simulator_config": {
+      "path": "config.py",
+      "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "size_bytes": 17291
+    },
+    "prescribed_action": {
+      "path": "Trajectory Generator/prescribed_action.py",
+      "sha256": "d0fccdfe8087d479966f2682c84f951cb3c5e1bedf3ec6cd838ab7af0c8b5ff3",
+      "size_bytes": 980
+    },
+    "learned_input_source_config": {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml",
+      "sha256": "765acb0fb79a2262bde77be8086c7642dff25406b8f854052cb332cc5986002e",
+      "size_bytes": 7786
+    },
+    "learned_input_simulator_config": {
+      "path": "config.py",
+      "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "size_bytes": 17291
+    },
+    "learned_input_environment": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37",
+      "size_bytes": 201968
+    },
+    "learned_input_evaluator": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "c2d344ddbcaeae274a99e713ba40d788ec3e174126b6edbf9c310049ce8ce281",
+      "size_bytes": 60471
+    },
+    "learned_input_launcher": {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/run_rollout.py",
+      "sha256": "66d7af3f69431f96e70d3e1cc6c22ac0696bd995d78c830944f4229d8ad1fc5e",
+      "size_bytes": 1964
+    },
+    "learned_input_setup": {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/setup.xml",
+      "sha256": "6fe08c028790c561cb2f7a10589249b7d1e17b93dcdb7d6071450c5d9be0bf41",
+      "size_bytes": 754
+    },
+    "learned_input_checkpoint_state": {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/rl_module_best/module_state.pkl",
+      "sha256": "2d1d9b30f2b043f4b3b7b4347c06e9b3aace1c7d089b33e2893930554d84bd7c",
+      "size_bytes": 604772
+    },
+    "learned_input_model": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/cases/PYLON400_REFERENCE/AB07_SEASEA_marker_calibrated.osim",
+      "sha256": "687e72046060e38d6864fd6b69ed5980f0c7593d4975de3a5479c58fdfe14bef",
+      "size_bytes": 501386
+    },
+    "learned_input_ik": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/cases/PYLON400_REFERENCE/pipeline/02_ik/IK_full_10p360_153p415.mot",
+      "sha256": "116aec3d8c00f6457aa1055a7cfd2d27d4a52f1754e85e04f6b74d2a3bf97615",
+      "size_bytes": 10701447
+    },
+    "learned_input_external_loads_xml": {
+      "path": "models/AB07_SEASEA_Threadmill/data/ExternalForces.xml",
+      "sha256": "6fc54a1f8afee500cb0ee570c4bdb36f23fcabf378454ff817407e7c7957a127",
+      "size_bytes": 1195
+    },
+    "learned_input_reserve_actuators": {
+      "path": "models/AB07_SEASEA_Threadmill/data/CMC_Actuators.xml",
+      "sha256": "238792c0024c405241e4a45b9be88e153660561a02e667aedbd1dd6116df73dd",
+      "size_bytes": 10712
+    },
+    "learned_input_online_grf_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+      "size_bytes": 19412
+    },
+    "learned_input_online_grf_detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e",
+      "size_bytes": 1347
+    },
+    "learned_input_binary_phase_detector_profile": {
+      "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+      "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+      "size_bytes": 670
+    },
+    "learned_input_prescribed_grf": {
+      "path": "models/AB07_SEASEA_Threadmill/data/AB07_SEASEA_GRF_FullSpan.mot",
+      "sha256": "8b6c33eeeeaa7b69327bf0f0624dedaf2bdbea3edca6a230ba65d2bfdb39e152",
+      "size_bytes": 36798246
+    },
+    "CMC_setup": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/dynamics/PYLON400_REFERENCE/setup.xml",
+      "sha256": "6fe08c028790c561cb2f7a10589249b7d1e17b93dcdb7d6071450c5d9be0bf41",
+      "size_bytes": 754
+    }
+  },
+  "sources_after": {
+    "learned_manifest": {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/execution_manifest.json",
+      "sha256": "630f92386709016990bb437649732635ac6126e063d39cf54ffe09fb2cb679ec",
+      "size_bytes": 35883
+    },
+    "CMC_receipt_input_fields": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/dynamics/PYLON400_REFERENCE/run/receipt.json",
+      "sha256": "f2f9ed6283b3de23354456ef3390164f0ec8d38684f6b12b1c85fbf23ebca8ee",
+      "size_bytes": 147315
+    },
+    "environment": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37",
+      "size_bytes": 201968
+    },
+    "evaluator": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "c2d344ddbcaeae274a99e713ba40d788ec3e174126b6edbf9c310049ce8ce281",
+      "size_bytes": 60471
+    },
+    "factory": {
+      "path": "Trajectory Generator/baseline_MLP/env_factory.py",
+      "sha256": "a728e07b4343e71ccf515f0ef7947f13735e13c3e39a16a3b5d52ea85d90d559",
+      "size_bytes": 9701
+    },
+    "base_simulator_config": {
+      "path": "config.py",
+      "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "size_bytes": 17291
+    },
+    "prescribed_action": {
+      "path": "Trajectory Generator/prescribed_action.py",
+      "sha256": "d0fccdfe8087d479966f2682c84f951cb3c5e1bedf3ec6cd838ab7af0c8b5ff3",
+      "size_bytes": 980
+    },
+    "learned_input_source_config": {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml",
+      "sha256": "765acb0fb79a2262bde77be8086c7642dff25406b8f854052cb332cc5986002e",
+      "size_bytes": 7786
+    },
+    "learned_input_simulator_config": {
+      "path": "config.py",
+      "sha256": "88c120bdf8249143a78cd19a33a4de34c10d4230a2ad6760b33dec9bb51417e3",
+      "size_bytes": 17291
+    },
+    "learned_input_environment": {
+      "path": "Trajectory Generator/osim_trj_cmc_like.py",
+      "sha256": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37",
+      "size_bytes": 201968
+    },
+    "learned_input_evaluator": {
+      "path": "Trajectory Generator/baseline_MLP/rollout_eval.py",
+      "sha256": "c2d344ddbcaeae274a99e713ba40d788ec3e174126b6edbf9c310049ce8ce281",
+      "size_bytes": 60471
+    },
+    "learned_input_launcher": {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/run_rollout.py",
+      "sha256": "66d7af3f69431f96e70d3e1cc6c22ac0696bd995d78c830944f4229d8ad1fc5e",
+      "size_bytes": 1964
+    },
+    "learned_input_setup": {
+      "path": "Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/setup.xml",
+      "sha256": "6fe08c028790c561cb2f7a10589249b7d1e17b93dcdb7d6071450c5d9be0bf41",
+      "size_bytes": 754
+    },
+    "learned_input_checkpoint_state": {
+      "path": "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/rl_module_best/module_state.pkl",
+      "sha256": "2d1d9b30f2b043f4b3b7b4347c06e9b3aace1c7d089b33e2893930554d84bd7c",
+      "size_bytes": 604772
+    },
+    "learned_input_model": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/cases/PYLON400_REFERENCE/AB07_SEASEA_marker_calibrated.osim",
+      "sha256": "687e72046060e38d6864fd6b69ed5980f0c7593d4975de3a5479c58fdfe14bef",
+      "size_bytes": 501386
+    },
+    "learned_input_ik": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/preparation/cases/PYLON400_REFERENCE/pipeline/02_ik/IK_full_10p360_153p415.mot",
+      "sha256": "116aec3d8c00f6457aa1055a7cfd2d27d4a52f1754e85e04f6b74d2a3bf97615",
+      "size_bytes": 10701447
+    },
+    "learned_input_external_loads_xml": {
+      "path": "models/AB07_SEASEA_Threadmill/data/ExternalForces.xml",
+      "sha256": "6fc54a1f8afee500cb0ee570c4bdb36f23fcabf378454ff817407e7c7957a127",
+      "size_bytes": 1195
+    },
+    "learned_input_reserve_actuators": {
+      "path": "models/AB07_SEASEA_Threadmill/data/CMC_Actuators.xml",
+      "sha256": "238792c0024c405241e4a45b9be88e153660561a02e667aedbd1dd6116df73dd",
+      "size_bytes": 10712
+    },
+    "learned_input_online_grf_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+      "size_bytes": 19412
+    },
+    "learned_input_online_grf_detector_profile": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json",
+      "sha256": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e",
+      "size_bytes": 1347
+    },
+    "learned_input_binary_phase_detector_profile": {
+      "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+      "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+      "size_bytes": 670
+    },
+    "learned_input_prescribed_grf": {
+      "path": "models/AB07_SEASEA_Threadmill/data/AB07_SEASEA_GRF_FullSpan.mot",
+      "sha256": "8b6c33eeeeaa7b69327bf0f0624dedaf2bdbea3edca6a230ba65d2bfdb39e152",
+      "size_bytes": 36798246
+    },
+    "CMC_setup": {
+      "path": "validation/ab07_standing_geometry_fit_2026_10_07/dynamics/PYLON400_REFERENCE/setup.xml",
+      "sha256": "6fe08c028790c561cb2f7a10589249b7d1e17b93dcdb7d6071450c5d9be0bf41",
+      "size_bytes": 754
+    }
+  },
+  "sources_unchanged": true,
+  "new_simulations": 0,
+  "new_FK_IK_calls": 0,
+  "learned_runtime_outcomes_inspected": false,
+  "new_Claude_contents_read": false,
+  "limits": [
+    "Learned values are requested/resolved inputs, not a post-run effective-configuration observation.",
+    "No primary coverage, force, event, reserve, reward or robustness conclusion is derived here.",
+    "Observation/reward-only metadata differences are omitted except actor-FSM thresholds that change event acceptance."
+  ]
+}

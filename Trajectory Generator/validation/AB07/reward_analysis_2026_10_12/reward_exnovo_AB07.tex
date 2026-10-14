@@ -1,0 +1,321 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern,amsmath,amssymb,graphicx,booktabs,longtable,tabularx,array}
+\usepackage[margin=19mm,headheight=14pt]{geometry}
+\usepackage{xcolor,fancyhdr,hyperref}
+\definecolor{blue}{HTML}{245DA8}
+\definecolor{muted}{HTML}{5D6875}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue,pdftitle={Reward function and actor-critic observation spaces},pdfauthor={CMC-like Simulator}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small Reward function and observation spaces}
+\fancyfoot[R]{\thepage}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{2em}
+\graphicspath{{@@GRAPHICS@@/}}
+\newcommand{\titleline}[1]{{\Large\bfseries\color{blue}#1}\par\vspace{3mm}}
+\newcommand{\sub}[1]{\par\medskip{\bfseries #1}\par}
+\newcommand{\clip}{\operatorname{clip}}
+\newcommand{\mean}{\operatorname{mean}}
+\newcommand{\fig}[2]{\begin{center}\includegraphics[width=#2\textwidth]{#1}\end{center}}
+\begin{document}
+
+\titleline{Reward function and observation spaces}
+The policy generates prosthetic knee and ankle references. A reference governor limits their motion before a low-level controller converts them into commands for two series elastic actuators (SEAs). The reward evaluates support, gait rhythm, valid gait events, control effort, physical safety and the shape of the served references.
+
+This document describes the reward formulation and the actor--critic observation contract. Numerical coefficients and thresholds specify the formulation presented here; they are not universal biomechanical constants. The appendix contains mathematical examples and an illustrative recorded episode.
+
+\sub{Reward at each policy step, every 10 ms}
+\begin{equation*}
+\boxed{r_t=\clip_{[0,1]}\!\left(0.10C_t+0.30T_t+0.25G_t+E_t+0.25A_t-P_t\right)
+-Q_t-2.5(M_{k,t}+M_{a,t})}
+\end{equation*}
+\begin{tabularx}{\textwidth}{@{}lX@{}}\toprule
+Symbol & Meaning \\\midrule
+$C_t$ & Initial stance loading, adjusted for ground penetration.\\
+$T_t$ & Quality of a completed support phase, rewarded at a valid toe-off.\\
+$G_t$ & Gait regularity: period, repeatability, stance fraction, phase duration and events.\\
+$E_t$ & Credits for progress through HS--TO--HS and completion of a valid gait cycle.\\
+$A_t$ & Loading during the expected landing window.\\
+$P_t$ & Control, SEA stress and event costs subtracted before clipping.\\
+$Q_t$ & Safety, contact, range, timeout and provisional-credit costs subtracted after clipping.\\
+$M_{k,t},M_{a,t}$ & Morphology corridor losses for the served knee and ankle references.\\\bottomrule
+\end{tabularx}
+
+\sub{Clipping and the sign of the reward}
+Only the first parenthesis is clipped to $[0,1]$. The costs $Q_t$ and the morphology losses are then subtracted, including when the clipped base is already zero. \textbf{The final reward can therefore be negative.} Individual reward curves in the appendix show weighted contributions before the overall clipping operation.
+
+\sub{Conventions}
+$k,a$: prosthetic knee and ankle, on the left side in the observation schema. HS: heel-strike. TO: toe-off. Stance: the support phase; swing: the phase between toe-off and the next heel-strike. FSM: finite-state machine used to validate the event sequence. $u\in[-1,1]$: normalized SEA command. $F_n$: current normal foot force. $BW=mg$: model body weight. $f=F_n/BW$: normalized load. Angles are in radians and times in seconds unless stated otherwise.
+
+\clearpage
+\titleline{Pre-clipping costs: $P_t$}
+\begin{align*}
+P_t={}&0.05L_u+0.02L_{\rm smooth}+0.10L_{{\rm sat},u}+0.05L_{\rm rate}\\
+&+0.10L_{{\rm sat},m}+0.01L_\tau+0.01L_\omega
++0.005L_{\dot\omega}+0.005L_{\rm power}\\
+&+0.25L_{\rm clip}+0.10L_{\rm invalid}+0.10L_{\rm contact}.
+\end{align*}
+These terms discourage unnecessarily demanding or irregular commands. The physical SEA costs summarize the motion within the integrated policy segment and combine the two joints.
+
+\begin{tabularx}{\textwidth}{@{}lX@{}}\toprule
+Loss & Plain-language explanation \\\midrule
+$L_u$ & Discourages large normalized SEA commands.\\
+$L_{\rm smooth}$ & Discourages differences between internal reference nodes within a policy segment. It is zero when a segment has only one node.\\
+$L_{{\rm sat},u}$ & Discourages normalized SEA commands close to their limits, beginning at $|u|=0.98$.\\
+$L_{\rm rate}$ & Combines abrupt reference changes, reference speed, acceleration and jerk, governor interventions, and changes in SEA commands.\\
+$L_{{\rm sat},m}$ & Discourages high motor torque demand and time spent at the motor torque limit.\\
+$L_\tau$ & Penalizes the difference between desired SEA torque and spring torque.\\
+$L_\omega$ & Penalizes high motor speed.\\
+$L_{\dot\omega}$ & Penalizes high motor acceleration.\\
+$L_{\rm power}$ & Penalizes high motor mechanical power magnitude.\\
+$L_{\rm clip}$ & Penalizes policy actions that exceed their allowed bounds and require clipping.\\
+$L_{\rm invalid}$ & Penalizes an invalid gait event in the current step.\\
+$L_{\rm contact}$ & Reserved contact-validity cost; the FSM described here currently supplies zero.\\\bottomrule
+\end{tabularx}
+
+The action-clipping cost concerns the policy's raw action bounds. The SEA command-saturation cost concerns the normalized low-level command $u$. These are different stages of the control pipeline.
+
+\clearpage
+\titleline{Post-clipping costs: $Q_t$}
+\begin{align*}
+Q_t={}&2L_{\rm safety}+0.05L_{\rm pen}+0.05L_{\rm flip}+0.50L_{\rm timeout}\\
+&+C_{\rm FSM}+C_{\rm support}+0.02L_{\rm swing}+0.02L_{\rm overload}\\
+&+2L_{\rm joint}+2L_{\rm band}.
+\end{align*}
+For the normalized squared costs below, $B(x;s)=\min[25,(x/s)^2]$.
+
+\begin{tabularx}{\textwidth}{@{}lX@{}}\toprule
+Term & Meaning \\\midrule
+$L_{\rm safety}$ & An indicator of a physical safety stop. An ordinary time limit does not incur this cost.\\
+$L_{\rm pen}$ & Excess ground penetration: $B(\max(0,p-0.020);0.008)$, with penetration $p$ in metres.\\
+$L_{\rm flip}$ & Discourages an adverse ankle ground-reaction moment: $B(\max(0,-\tau_{\rm GRF}-8);8)$ when $F_n\ge50$ N. The moment is projected onto the ankle axis.\\
+$L_{\rm timeout}$ & Huber losses for stance longer than 1.45 s and swing longer than 0.75 s, using a 0.20 s scale.\\
+$C_{\rm FSM}$ & Recovers outstanding provisional gait-event credits when a cycle fails, with an additional failure cost of 0.05.\\
+$C_{\rm support}$ & Recovers outstanding provisional stance-loading credits when support is not confirmed by a valid toe-off.\\
+$L_{\rm swing}$ & $B(f;0.08)$ during swing; discourages continued loading of the foot.\\
+$L_{\rm overload}$ & $B(\max(0,f-1.35);1.35)$; discourages excessive normal loading.\\
+$L_{\rm joint}$ & Penalizes physical angles outside knee $[-1.3,0]$ and ankle $[-0.6,0.6]$ rad. Distance is divided by the full range width, squared, capped at 25 and averaged across joints.\\
+$L_{\rm band}$ & The same range cost for the commanded reference after the slew limiter, using knee $[-1.25,0]$ and ankle $[-0.6,0.6]$ rad.\\\bottomrule
+\end{tabularx}
+
+\sub{Why event credits are provisional: $C_{\rm FSM}$}
+Heel-strike and toe-off receive credits as they occur, so the policy can be rewarded before a whole cycle is complete. A valid HS--TO--HS cycle confirms these credits and earns a completion bonus. If the cycle fails, its outstanding event credits are withdrawn and a further 0.05 is subtracted. This prevents incomplete event sequences from retaining provisional cycle credits.
+
+\sub{Why loading credits are provisional: $C_{\rm support}$}
+Early stance loading earns provisional credits. A valid toe-off confirms that the support phase was completed and clears the pending balance; it does not award those credits again. If the cycle fails, or the episode ends before a valid toe-off confirms support, the pending loading credits are withdrawn.
+
+Both balances track weighted contributions before clipping. Recovering these credits need not exactly cancel the net reward previously received after clipping and other costs.
+
+\clearpage
+\titleline{The morphology corridor}
+The corridor is a phase-dependent band built offline from reference gait trajectories. Being inside the band incurs no cost: the served reference does not have to follow the mean curve exactly. The quantity assessed is the \textbf{reference served by the governor}, rather than the raw policy action or the physical joint angle.
+\[
+[\ell_j(\phi),h_j(\phi)]=\mu_j(\phi)\pm\bigl(k_j\sigma_j(\phi)+7.5^\circ\bigr),
+\qquad k_k=1.6,\quad k_a=0.6.
+\]
+Here $\mu_j$ and $\sigma_j$ describe the reference trajectories at phase $\phi$. The fixed margin $7.5^\circ$ is 0.130900 rad; all quantities are converted to consistent units.
+
+Let $D(x;[a,b])=\max(a-x,0,x-b)$ denote distance outside an interval. For each sample with a valid causal phase,
+\[
+\lambda_j(s)=\min\left[25,
+\left(\frac{D(q_j^{\rm served}(s);[\ell_j(\phi_s),h_j(\phi_s)])}
+{h_j(\phi_s)-\ell_j(\phi_s)}\right)^2\right].
+\]
+The denominator is the \textbf{full corridor width}. Samples resolved during policy step $t$ form the set $\mathcal R_t$:
+\[
+M_{j,t}=\sum_{s\in\mathcal R_t}\lambda_j(s),\qquad
+\boxed{C_{M,t}=2.5M_{k,t}+2.5M_{a,t}}.
+\]
+The per-joint weights are both 5; averaging across the two joints gives the factor $1/2$ and hence the effective coefficient 2.5 per joint. Resolved sample losses are summed, not averaged over time.
+
+\sub{Causal phase and delayed assessment}
+Corridor phase is anchored to heel-strike and toe-off and uses robust duration estimates from previous cycles. It is distinct from the online phase sine and cosine provided to the actor. Assessment normally uses a 40 ms buffer delay and a 10 ms event-delivery budget.
+
+Before enough cycle history is available, the fallback cycle duration is 1.58 s and the fallback stance fraction is 0.68. Samples without a valid anchor, or with an unresolved transition, are left unassessed. At episode closure, resolvable buffered samples are processed even if newer than 40 ms; unresolved samples are discarded.
+
+A zero morphology cost can therefore mean either ``inside the corridor'' or ``not assessed.'' Availability must be checked to distinguish them.
+
+\sub{Reference shape and physical tracking}
+Accurate SEA tracking of its own reference does not remove a morphology cost. Morphology measures the shape and phase of that reference relative to the corridor. Physical joint tracking requires separate measurements.
+
+\clearpage
+\titleline{Actor observation space: 35 inputs}
+The actor uses local prosthetic measurements, online contact and gait phase, FSM state and control-reference memory. Indices start at zero. The vector is converted directly to \texttt{float32}; there is no general scaler or z-normalization.
+\input{actor_features.tex}
+
+\clearpage
+\titleline{Interpreting the actor inputs}
+\sub{Physical measurements, control memory and phase}
+Joint positions and velocities are ideal encoder measurements in the simulation. Motor angle and motor speed are the SEA states. Foot load is the online normal force divided by body weight. HS/TO events and the FSM summarize contact and the timing of the gait sequence.
+
+For each joint, \texttt{previous\_endpoint} is the last reference endpoint after the slew limiter and before the governor. \texttt{served\_ref}, its speed and acceleration are the references actually delivered by the governor. \texttt{sea\_u} is the most recent normalized SEA command.
+
+\sub{Input transformations}
+\begin{tabularx}{\textwidth}{@{}lX@{}}\toprule
+Group & Transformation \\\midrule
+Angles, speeds, accelerations & Raw SI units: rad, rad/s and rad/s$^2$.\\
+Load & $F_n/(m\,9.80665)$, with no upper clipping of the ratio.\\
+Online phase & $\phi=\clip_{[0,1]}((t-t_{\rm HS})/T)$, followed by sine and cosine. If unavailable, phase defaults to zero.\\
+FSM elapsed times & Stance time divided by 2.2 s; swing time divided by 2.6 s; both clipped to $[0,1.5]$.\\
+Flags & Binary indicators of contact, events and FSM state.\\
+SEA command & $u\in[-1,1]$, already normalized according to the actuator contract.\\\bottomrule
+\end{tabularx}
+
+The first two slots, \texttt{gait\_phase\_sin} and \texttt{gait\_phase\_cos}, are $(0,1)$ when the prescribed clock is disabled. Online left-side phase remains available in its separate slots. Body mass is not an explicit actor input, but it enters the load normalization through $BW$.
+
+\sub{Memory and initialization}
+The actor is a feedforward MLP. It does not use a recurrent network or a stacked observation history. FSM state, the previous endpoint and governor state carry compact information from earlier steps. The PI controller's integral state is not an explicit input; the list of inputs alone does not establish full plant observability.
+
+At reset, initial states and references are obtained from inverse kinematics. During execution, the policy generates prosthetic references and the governor transforms them. A healthy-side target trajectory is not among the actor's 35 inputs.
+
+\clearpage
+\titleline{Critic observation space: 84 inputs}
+The critic estimates the expected return during training. It receives the \textbf{same 35 actor inputs, in the same order}, followed by 49 additional signals. These include prosthetic tracking diagnostics, biological-body kinematics and prescribed references, and sound-side contact information.
+\[
+o_t^{\rm actor}\in\mathbb R^{35},\qquad
+ o_t^{\rm critic}=\bigl[o_t^{\rm actor},\,o_t^{\rm extra}\bigr]\in\mathbb R^{84}.
+\]
+This asymmetric design gives the value estimate additional simulation context while keeping policy actions dependent on the actor prefix. The extra signals are used for value estimation during training; the critic is not required to produce actions during inference.
+
+\sub{The 49 additional inputs}
+\begin{tabularx}{\textwidth}{@{}lrX@{}}\toprule
+Indices & Count & Content \\\midrule
+35--38 & 4 & Per-joint SEA command magnitude and saturation flag.\\
+39--44 & 6 & Served prosthetic references, reference speeds and tracking errors.\\
+45--77 & 33 & Actual position, actual speed and prescribed reference for each of 11 biological coordinates.\\
+78--83 & 6 & Sound-side normal load, contact flag, HS/TO events, online phase and cycle duration.\\\bottomrule
+\end{tabularx}
+
+The additional vector is also stored as \texttt{float32}, with no general scaler. Joint angles and reference angles use radians, angular speeds use rad/s, and pelvis translations use metres and m/s. Normal foot force is divided by $BW$ and flags are binary. Sound-side phase is a direct scalar in $[0,1]$, rather than a sine/cosine pair; its cycle duration is in seconds.
+
+\sub{Interpreting the target fields}
+The prosthetic fields named \texttt{target} and \texttt{target\_vel} contain the served reference and its speed. They are not healthy-side target trajectories. The associated \texttt{tracking\_error} is served reference minus physical joint angle.
+
+Biological fields named \texttt{kin\_ref} instead contain the prescribed reference for the corresponding biological coordinate. The following table lists every extra input; critic indices 0--34 are exactly the actor table above.
+
+\clearpage
+\titleline{Critic input list: additional indices 35--83}
+\input{critic_features.tex}
+
+\clearpage
+\titleline{Appendix A: loading, toe-off support and events}
+\[
+C_t=\clip_{[0,1]}(f/0.20)Q(p),\qquad
+Q(p)=\begin{cases}1&p\le10\text{ mm}\\(12-p)/2&10<p<12\text{ mm}\\0&p\ge12\text{ mm}.\end{cases}
+\]
+In the middle branch, $p$ is expressed in millimetres. The initial loading reward is issued during stance, before episode closure, until the stance impulse reaches 0.04 BW s. It remains provisional until support is confirmed.
+
+\[
+0.30T_t=0.30\,\overline Q\,W(d),\qquad d=t_{\rm TO}-t_{\rm HS},
+\]
+\[
+W(d)=\begin{cases}
+0 & d\le0.30\text{ or }d\ge1.45\\
+(d-0.30)/0.49 & 0.30<d<0.79\\
+1 &0.79\le d\le1.26\\
+(1.45-d)/0.19 &1.26<d<1.45.
+\end{cases}
+\]
+This support contribution is awarded \textbf{once}, in the step where a new valid toe-off completes an observed stance. It is zero in other steps. $\overline Q$ is mean penetration quality over that completed stance.
+\fig{01_supporto_TO.png}{0.95}
+\textbf{Event credits $E_t$.} Valid HS: 0.10; valid TO: 0.20; cycle completion: 0.70. An HS that closes one cycle can also open the next, yielding 0.80 in the same step. A TO that ends an initial partial stance receives no event credit for that incomplete segment. Validation requires at least 0.30 s of stance and 0.25 s of swing, contact during at least 20\% of stance, impulse of 0.04 BW s, and knee excursion of 0.12 rad.
+
+\clearpage
+\titleline{Appendix B: landing and normalized loading}
+\[
+A_t=\clip_{[0,1]}\left(\frac{F_n(t)}{0.65\,BW}\right),\qquad BW=m\,9.80665.
+\]
+Landing reward is active only with contact while the FSM is in swing, between 0.35 and 0.85 s after TO. Its contribution to the base is $0.25A_t$. At $0.325BW$ it provides half credit; at $0.65BW$ it reaches full credit and then saturates.
+
+The factor 0.65 is a reward hyperparameter specifying the load required for full credit.
+\fig{04_carico_e_landing.png}{1.0}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}\toprule
+Signal & Meaning & Behaviour \\\midrule
+$F_n(t)$ & Sum of online physical normal contact forces on the prosthetic foot. & Varies within an episode.\\
+$BW$ & Total model mass times gravitational acceleration. & Constant for a given loaded model.\\
+$F_n/BW$ & Ratio of instantaneous normal force to body weight. & Varies and can exceed 1.\\\bottomrule
+\end{tabularx}
+
+\textbf{Illustrative recorded episode.} A model mass of 58.80765 kg gives $BW=576.70605$ N and $0.65BW=374.85893$ N. The right-hand plot shows measured normal force and these fixed load thresholds for that example. The left-hand curve is the general landing-reward relation.
+
+A physical implementation requires a measured or estimated load and a known body-weight reference. A binary heel/toe detector and the physical normal-force signal are separate channels.
+
+\clearpage
+\titleline{Appendix C: gait regularity}
+\[
+0.25G_t=\begin{cases}0&N_{\rm valid\ cycles}=0\\[1mm]
+\dfrac{0.25}{1+4L_{{\rm reg},t}}&N_{\rm valid\ cycles}>0.
+\end{cases}
+\]
+After the first valid cycle, the contribution is evaluated at every policy step. $T$ and $T_{\rm prev}$ are the latest two completed valid periods; $s$ is the stance fraction of the latest completed cycle. They are retained between events. The elapsed stance and swing times, $t_{\rm st}$ and $t_{\rm sw}$, describe the current phase.
+
+Using the interval distance $D$ defined in the main text, the capped Huber loss is
+\[
+H(z)=\min\left(25,\begin{cases}z^2/2&|z|\le1\\|z|-1/2&|z|>1.\end{cases}\right).
+\]
+\begin{align*}
+L_{\rm reg}={}&I_{\rm invalid}
++H\!\left(\frac{D(T;[1.33,1.83])}{0.25}\right)
++H\!\left(\frac{D(T;[0.90,2.20])}{0.25}\right)\\
+&+0.5H\!\left(\frac{T-T_{\rm prev}}{0.20}\right)
++0.5H\!\left(\frac{D(s;[0.50,0.80])}{0.15}\right)\\
+&+0.5H\!\left(\frac{\max(t_{\rm st}-1.45,0)}{0.20}\right)
++0.5H\!\left(\frac{\max(t_{\rm sw}-0.75,0)}{0.20}\right).
+\end{align*}
+The consecutive-period term is available after two valid periods. $I_{\rm invalid}$ is an indicator for the current step, not a cumulative event count. The wider 0.90--2.20 s band adds a separate loss.
+
+\sub{Numerical example}
+A change from a period of 1.58 s to 1.78 s leaves both periods within the preferred interval, but introduces a difference of 0.20 s:
+\[
+L_{\rm reg}=0.5H(1)=0.25,\qquad
+0.25G=\frac{0.25}{1+4(0.25)}=0.125.
+\]
+The contribution is halved even though the period stays in range. All other losses are zero in this example.
+\begin{center}\begin{tabular}{lrr}\toprule
+Isolated case & $L_{\rm reg}$ & Contribution \\\midrule
+All terms regular & 0 & 0.2500\\
+Period 1.78 s after 1.58 s & 0.25 & 0.1250\\
+Two consecutive periods of 2.08 s & 0.50 & 0.0833\\
+Current swing lasting 0.95 s & 0.25 & 0.1250\\
+Invalid event in the current step & 1 & 0.0500\\\bottomrule
+\end{tabular}\end{center}
+
+\clearpage
+\titleline{Appendix D: regularity curves}
+\fig{02_regolarita.png}{0.98}
+Panels 1--4 isolate individual deviations; panel 5 shows the Huber loss; panel 6 converts the sum of losses into a reward contribution. In panel 1, the previous period equals the current one. The separate post-clipping timeout cost in $Q_t$ is excluded from these curves.
+
+Each plot varies one factor while the other losses are zero. These are mathematical response curves, rather than new simulations or a time trace of one gait cycle.
+
+\clearpage
+\titleline{Appendix E: corridor and served reference}
+\fig{05_corridor_served.png}{1.0}
+This illustrative recorded episode shows the allowed morphology band at each sample's causal phase. The line is the angle reference served to the SEA controller; red points identify references outside the band. Time denotes the physical sample timestamp, whereas the corresponding cost is issued after the buffer delay.
+
+The distance outside the band, divided by its full width, determines the squared sample cost. At the same absolute distance, a narrower band produces a larger cost. The ankle uses $k_a=0.6$ and the knee $k_k=1.6$, with a fixed margin of $7.5^\circ$ on each side.
+
+The initial segment without samples has no valid causal phase. Its absence does not show that the reference remained inside the corridor.
+
+\clearpage
+\titleline{Appendix F: an example of morphology cost}
+The recorded example contains 611 policy steps over 6.11 s. The following values are undiscounted reward sums; costs are aligned to their emission timestamps.
+\begin{center}\begin{tabular}{lr}\toprule
+Quantity & Value \\\midrule
+Recorded return & $-12.5134$\\
+Same-trajectory return with morphology cost removed & $+63.2456$\\
+Total morphology cost & $75.7590$\\
+Knee contribution & $14.9007$ (19.67\%)\\
+Ankle contribution & $60.8583$ (80.33\%)\\
+Steps with nonzero morphology cost & 126 / 611 (20.62\%)\\
+Mean cost per policy step & 0.12399\\
+Maximum cost per policy step & 3.18438\\\bottomrule
+\end{tabular}\end{center}
+\fig{03_impatto_morphology.png}{1.0}
+Of 611 samples, 502 are assessed; the first 109 belong to an initial partial stance without a valid anchor. Of the assessed samples, 126 leave the corridor in at least one joint. The number of penalized policy steps happens to equal the number of out-of-band samples in this example; the two counts need not generally coincide.
+
+The curve without morphology is an \textbf{arithmetic recalculation on the same trajectory}: actions and states are held fixed. It does not predict how the policy or gait would change if trained without the corridor.
+
+\end{document}

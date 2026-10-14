@@ -1,0 +1,443 @@
+{
+  "schema_version": 1,
+  "subject": "AB07",
+  "trial": "treadmill_01_01",
+  "created_utc": "2026-10-06T09:49:23.498190+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "pipeline_executed; qualification_incomplete_for_V26_contact_events",
+  "scope": "Model/data preparation and prescribed diagnostics; duration completion is separate from biomechanical/event qualification",
+  "bundle": "models/AB07_SEASEA_Threadmill",
+  "model": {
+    "file": "AB07_SEASEA_stiff321_500_pi.osim",
+    "mass_kg": 58.80765053000002,
+    "coordinate_count": 21,
+    "muscle_count": 76,
+    "sea_state_count": 6
+  },
+  "preparation": {
+    "status": "complete",
+    "method": "opensim_marker_ik",
+    "full_ik_time_range_s": [
+      10.36,
+      153.415
+    ],
+    "ik_rows": 28612,
+    "prosthesis_fit": "reference_relative_mounting_fixed_hardware_v1",
+    "marker_fit_rms_m": 0.00024937036957675663
+  },
+  "shared_parameters": {
+    "sea_xml_matches_AB06": true,
+    "control_and_plugin_fingerprint_unchanged": true,
+    "all_non_context_SimulatorConfig_fields_unchanged": true,
+    "context_binding_differences": {
+      "model_bundle_dir": {
+        "default": "models/AB06_SEASEA_Threadmill",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill"
+      },
+      "model_file": {
+        "default": "AB06_SEASEA_stiff321_500_pi.osim",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/AB07_SEASEA_stiff321_500_pi.osim"
+      },
+      "kinematics_file": {
+        "default": "data/IK_results_AB06_SEASEA.mot",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/IK_results_AB07_SEASEA.mot"
+      },
+      "external_loads_xml": {
+        "default": "data/ExternalForces.xml",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/ExternalForces.xml"
+      },
+      "grf_mode": {
+        "default": "prescribed",
+        "effective": "online_sensor"
+      },
+      "online_grf_profile_file": {
+        "default": "",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+      },
+      "online_grf_detector_profile_file": {
+        "default": "",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json"
+      },
+      "binary_phase_detector_profile_file": {
+        "default": "",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json"
+      },
+      "online_grf_applied_sides": {
+        "default": [],
+        "effective": [
+          "left"
+        ]
+      },
+      "reserve_actuators_xml": {
+        "default": "data/CMC_Actuators.xml",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/CMC_Actuators.xml"
+      },
+      "output_dir": {
+        "default": "results",
+        "effective": "/Users/tommy/Documents/CMC-like-Simulator - Claude/results/ab07_v26_left_prescribed_9p01s_2026_10_06/sim_outputs"
+      },
+      "t_start": {
+        "default": 11.99,
+        "effective": 10.36
+      },
+      "t_end": {
+        "default": 21.0,
+        "effective": 19.37
+      }
+    },
+    "v26_profile_coefficients_geometry_and_thresholds_unchanged": true,
+    "v26_environment_source_config": {
+      "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/training_cfg.resolved.yaml",
+      "sha256": "aaf84cfd5be75672d003af6139cb0e977667f2b207fbfda91971a145e4586086"
+    },
+    "SEA_plugin_modified": false
+  },
+  "prescribed": {
+    "completed": true,
+    "duration_s": 9.01,
+    "results_dir": "results/AB07_prescribed_2026_10_06",
+    "rows": 9010,
+    "tracking_actual_vs_new_ik": {
+      "pelvis_tilt": {
+        "unit": "deg",
+        "rmse": 0.18005713362235623,
+        "max_abs": 0.8723994523584992
+      },
+      "pelvis_list": {
+        "unit": "deg",
+        "rmse": 0.13104966118564,
+        "max_abs": 0.7757090408084428
+      },
+      "pelvis_rotation": {
+        "unit": "deg",
+        "rmse": 0.11994056780900228,
+        "max_abs": 0.596270382593346
+      },
+      "pelvis_tx": {
+        "unit": "mm",
+        "rmse": 0.22665895911357978,
+        "max_abs": 1.1531199999999444
+      },
+      "pelvis_ty": {
+        "unit": "mm",
+        "rmse": 0.297528606401142,
+        "max_abs": 1.3002099999999928
+      },
+      "pelvis_tz": {
+        "unit": "mm",
+        "rmse": 0.21816732463561309,
+        "max_abs": 1.4878400000000056
+      },
+      "hip_flexion_r": {
+        "unit": "deg",
+        "rmse": 0.20792708529732415,
+        "max_abs": 0.9872918688813961
+      },
+      "hip_adduction_r": {
+        "unit": "deg",
+        "rmse": 0.20364395022358112,
+        "max_abs": 1.051127714331503
+      },
+      "hip_rotation_r": {
+        "unit": "deg",
+        "rmse": 0.5443667310867254,
+        "max_abs": 1.700823790662568
+      },
+      "knee_angle_r": {
+        "unit": "deg",
+        "rmse": 0.24461376779029542,
+        "max_abs": 1.3040732301584708
+      },
+      "ankle_angle_r": {
+        "unit": "deg",
+        "rmse": 2.800639038283457,
+        "max_abs": 7.425899683272474
+      },
+      "subtalar_angle_r": {
+        "unit": "deg",
+        "rmse": 2.7458528692537816,
+        "max_abs": 8.765216941839524
+      },
+      "mtp_angle_r": {
+        "unit": "deg",
+        "rmse": 11.22399781835032,
+        "max_abs": 28.928743354473976
+      },
+      "hip_flexion_l": {
+        "unit": "deg",
+        "rmse": 0.17392638106084854,
+        "max_abs": 1.030017866992555
+      },
+      "hip_adduction_l": {
+        "unit": "deg",
+        "rmse": 0.19992873132599837,
+        "max_abs": 1.0403804345753205
+      },
+      "hip_rotation_l": {
+        "unit": "deg",
+        "rmse": 0.21048540077726813,
+        "max_abs": 1.222601292684752
+      },
+      "pros_knee_angle": {
+        "unit": "deg",
+        "rmse": 0.28084933870095086,
+        "max_abs": 1.630846479476916
+      },
+      "pros_ankle_angle": {
+        "unit": "deg",
+        "rmse": 0.7480716545848174,
+        "max_abs": 3.294702718045949
+      },
+      "lumbar_extension": {
+        "unit": "deg",
+        "rmse": 0.09506809249340475,
+        "max_abs": 0.3165179288485304
+      },
+      "lumbar_bending": {
+        "unit": "deg",
+        "rmse": 0.16182357026539873,
+        "max_abs": 0.36106195967318117
+      },
+      "lumbar_rotation": {
+        "unit": "deg",
+        "rmse": 0.08376672648043285,
+        "max_abs": 0.22120410779733746
+      }
+    },
+    "SEA_validation": {
+      "PASS": 38,
+      "WARN": 7,
+      "FAIL": 1,
+      "failed_coordinate": "mtp_angle_r",
+      "report": "validation/ab07_pipeline_2026_10_06/sea_simulation_validation.md"
+    }
+  },
+  "v26_prescribed": {
+    "completed": true,
+    "duration_s": 9.01,
+    "results_dir": "results/ab07_v26_left_prescribed_9p01s_2026_10_06",
+    "steps": 901,
+    "rows": 9010,
+    "tracking_actual_vs_served_reference": {
+      "pros_knee_angle": {
+        "unit": "deg",
+        "rmse": 0.15061354161404777,
+        "max_abs": 0.7538457276737773
+      },
+      "pros_ankle_angle": {
+        "unit": "deg",
+        "rmse": 0.158605122210827,
+        "max_abs": 0.8628904822852839
+      }
+    },
+    "tracking_actual_vs_raw_ik": {
+      "pelvis_tilt": {
+        "unit": "deg",
+        "rmse": 0.13856247879434933,
+        "max_abs": 0.8956334639088497
+      },
+      "pelvis_list": {
+        "unit": "deg",
+        "rmse": 0.12778389663610515,
+        "max_abs": 0.679032153162634
+      },
+      "pelvis_rotation": {
+        "unit": "deg",
+        "rmse": 0.12439098306920486,
+        "max_abs": 0.5701397713511653
+      },
+      "pelvis_tx": {
+        "unit": "mm",
+        "rmse": 0.22720293261070887,
+        "max_abs": 1.2385999999999058
+      },
+      "pelvis_ty": {
+        "unit": "mm",
+        "rmse": 0.29390517338062905,
+        "max_abs": 1.407220000000052
+      },
+      "pelvis_tz": {
+        "unit": "mm",
+        "rmse": 0.21990714342961457,
+        "max_abs": 1.5511400000000322
+      },
+      "hip_flexion_r": {
+        "unit": "deg",
+        "rmse": 0.21105429085598928,
+        "max_abs": 0.9800470614266201
+      },
+      "hip_adduction_r": {
+        "unit": "deg",
+        "rmse": 0.1616873368465309,
+        "max_abs": 1.0641109379691676
+      },
+      "hip_rotation_r": {
+        "unit": "deg",
+        "rmse": 0.5519418005588398,
+        "max_abs": 1.6804012830129231
+      },
+      "knee_angle_r": {
+        "unit": "deg",
+        "rmse": 0.246643586449286,
+        "max_abs": 1.3094114779357042
+      },
+      "ankle_angle_r": {
+        "unit": "deg",
+        "rmse": 2.805928065573291,
+        "max_abs": 7.443807479159288
+      },
+      "subtalar_angle_r": {
+        "unit": "deg",
+        "rmse": 2.756891168927865,
+        "max_abs": 8.866411601699939
+      },
+      "mtp_angle_r": {
+        "unit": "deg",
+        "rmse": 11.22093599330568,
+        "max_abs": 28.94667005796803
+      },
+      "hip_flexion_l": {
+        "unit": "deg",
+        "rmse": 0.18078700651199078,
+        "max_abs": 1.15934241619588
+      },
+      "hip_adduction_l": {
+        "unit": "deg",
+        "rmse": 0.15603650374358982,
+        "max_abs": 1.0441596641920032
+      },
+      "hip_rotation_l": {
+        "unit": "deg",
+        "rmse": 0.19013171134784276,
+        "max_abs": 1.215467395177578
+      },
+      "pros_knee_angle": {
+        "unit": "deg",
+        "rmse": 7.679476633893755,
+        "max_abs": 23.360288708270843
+      },
+      "pros_ankle_angle": {
+        "unit": "deg",
+        "rmse": 3.6257813171137063,
+        "max_abs": 13.9081072641094
+      },
+      "lumbar_extension": {
+        "unit": "deg",
+        "rmse": 0.09211662805635856,
+        "max_abs": 0.3293166600761627
+      },
+      "lumbar_bending": {
+        "unit": "deg",
+        "rmse": 0.09424410162769581,
+        "max_abs": 0.30867585550657484
+      },
+      "lumbar_rotation": {
+        "unit": "deg",
+        "rmse": 0.087851874782001,
+        "max_abs": 0.25148492727000143
+      }
+    },
+    "contact_events_qualified": false,
+    "actor_cycle_summary": {
+      "nominal_complete_cycle_count": 4,
+      "internal_valid_cycle_count": 1.0,
+      "nominal_stance_duration_s": {
+        "count": 4,
+        "min": 0.9695313,
+        "p05": 0.9708929655,
+        "median": 0.9910985349999999,
+        "p95": 1.0639466020000001,
+        "max": 1.07459812,
+        "mean": 1.0065816225,
+        "rms": 1.0074245191101774
+      },
+      "nominal_stance_fraction": {
+        "count": 4,
+        "min": 0.6480979420783852,
+        "p05": 0.6492643898298079,
+        "median": 0.6603451023573408,
+        "p95": 0.6702737022337388,
+        "max": 0.6712368359879024,
+        "mean": 0.6600062456952422,
+        "rms": 0.6600646024790259
+      },
+      "accepted_stance_duration_s": {
+        "count": 2,
+        "min": 0.13199999999992684,
+        "p05": 0.13394999999992577,
+        "median": 0.15149999999991604,
+        "p95": 0.1690499999999063,
+        "max": 0.17099999999990523,
+        "mean": 0.15149999999991604,
+        "rms": 0.15274979541712694
+      },
+      "interpretation": "internal validity confirms the frozen FSM accepted an HS-TO-HS sequence; it does not validate agreement with measured contact"
+    },
+    "actor_final_counters": {
+      "valid_hs_count": 2.0,
+      "valid_to_count": 2.0,
+      "valid_cycle_count": 1.0,
+      "invalid_event_count": 0.0,
+      "resync_count": 0.0,
+      "hs_cancelled_count": 0.0,
+      "timeout_exceeded": 0.0,
+      "last_stance_fraction": 0.10433190970103721,
+      "last_period_s": 1.6389999999990916
+    },
+    "qualification_analysis": "results/ab07_v26_left_prescribed_9p01s_2026_10_06/qualification_analysis.json"
+  },
+  "known_biological_limit": {
+    "coordinate": "mtp_angle_r",
+    "observed_rmse_deg": 11.22399781835032,
+    "rmse_fail_threshold_deg": 10.0,
+    "observed_max_abs_deg": 28.928743354473976,
+    "max_fail_threshold_deg": 30.0,
+    "baseline_AB06_historical_report": "reports/user/2026-06-14_validazione_simulatore.md",
+    "baseline_AB06_historical_rmse_deg": 13.84244,
+    "historical_comparison_scope": "Different windows/configurations: evidence of a known limit, not a causal improvement comparison",
+    "SO_MTP_residual_zero": true,
+    "MTP_reserve_peak_nm": 1.806871
+  },
+  "remaining_qualification": [
+    "Model/contact geometry and detector references require AB07 qualification before a policy run; preserve common SEA/controllers/FSM laws and thresholds",
+    "The biological MTP tracking limit remains open as in the historical AB06 benchmark"
+  ],
+  "changes": [
+    "Fixed the MATLAB converter to read Header acquisition timestamps and reject malformed time vectors",
+    "Added reproducible ABx fitting, explicit bundle naming and mandatory actual OpenSim IK without silent dataset fallback",
+    "Read the prosthetic ankle center/axis from its fitted PinJoint frame; AB06 pose equivalence verified",
+    "Bound IK marker diagnostics to the exact output MOT companion"
+  ],
+  "checks": {
+    "fitting_tests_passed": 5,
+    "pipeline_tests_passed": 7,
+    "wrapper_preparation_tests_passed": 4,
+    "offline_analysis_tests_passed": 4,
+    "native_ankle_pose_tests_passed": 3,
+    "MATLAB_Header_regression_cases_passed": 11,
+    "online_GRF_plugin_parity_max_error_n": 1.0551257133631364e-12
+  },
+  "artifacts": {
+    "final_artifact_validation": "validation/ab07_pipeline_2026_10_06/final_artifact_validation.json",
+    "initial_control_fingerprint": "validation/ab07_pipeline_2026_10_06/control_fingerprint_before.json",
+    "profile_association": "models/AB07_SEASEA_Threadmill/data/runtime_profile_association.json",
+    "prescribed_plot_dir": "plot/AB07_prescribed_2026_10_06/10_06_2026_1",
+    "v26_plot_dir": "plot/AB07_v26_left_prescribed_2026_10_06/10_06_2026_1",
+    "plot_count_per_stage": 7
+  },
+  "live_environment": {
+    "platform": "Darwin",
+    "machine": "arm64",
+    "python": "3.10.20",
+    "Windows_live_execution_performed": false
+  },
+  "preparation_and_diagnostic_source_sha256": {
+    "tools/build_abx_seasea_pipeline.py": "e878c70fedc810c3885192607f130ef86eec95151fb00286f167cb415fc1abf0",
+    "tools/fit_seasea_subject.py": "d942f045f7eae11ccab0e9a1f4ba2a1fed090bc6c114145431079a51d0fa86e8",
+    "tools/convert_epic_ab06_to_opensim.m": "3348971e8b554a1e02203c7f8f3e6454e9e9e0fe717ce14467d6955769ae1422",
+    "scripts/run_opensim_sea_pipeline.py": "6118073f53267a57058615ac303b41a4475d8c68230205909ddcb5af706a5599",
+    "Trajectory Generator/osim_trj_cmc_like.py": "c6416b7da485ec805e444701b806c5f5fbb71ffc989dee98eea1c253083add37",
+    "Trajectory Generator/validation/AB07/qualify_prescribed_v26.py": "908dec58ae97ebb2c09d8ccf99f1b613ef1c1fa34e300ede657a41cb14e00e73",
+    "Trajectory Generator/validation/AB07/analyze_prescribed_v26.py": "78c7cf1558b407b2d30345f979d06050d943f9ed2dbf4ab077e7822f36e9776b"
+  }
+}

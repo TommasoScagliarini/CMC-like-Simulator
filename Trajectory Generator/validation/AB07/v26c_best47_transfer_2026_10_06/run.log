@@ -1,0 +1,1604 @@
+[training_config] WARNING: unknown config key 'simulation.max_delta_rad' (ignored)
+[training_config] WARNING: unknown config key 'simulation.max_delta_rad' (ignored)
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff
+
+
+****************************************************************
+[DEBUG] >>> SYSTEM ALERT: IL PLUGIN E' STATO CARICATO IN MEMORIA.
+[DEBUG] >>> INIZIO REGISTRAZIONE OGGETTI...
+[DEBUG] >>> SEA: registered.
+****************************************************************
+
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/OnlineGRFContact
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libOnlineGRFContact.dylib
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/AB07_SEASEA_stiff321_500_pi.osim
+[info] Loaded model AB07_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/AB07_SEASEA_stiff321_500_pi.osim
+[ModelLoader] Binary phase detector: 2 points (force-free, geometry-only)
+[ModelLoader] GRF mode         : online_sensor
+[ModelLoader] Prescribed GRF disabled in dynamics for: left
+[ModelLoader] Online GRF APPLIED (hybrid) for: left
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/AB07_SEASEA_GRF_FullSpan.mot
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/AB07_SEASEA_GRF_FullSpan.mot (nr=143057 nc=19)
+[info] .. assuming rotations in Degrees..
+[ModelLoader] GRF Storage loaded: 143057 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> skipped (prescribed GRF disabled for left; storage kept as oracle)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Online GRF      : 20 contacts (hybrid: 8 applied (left), 12 sensor-only)
+[ModelLoader] Online GRF detector: 4 contacts (sensor-only)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB07_SEASEA_Threadmill/data/IK_results_AB07_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28612->143056
+[KinInterp] Ready. 21 coordinates, t in [10.360, 153.415] s, 143056 samples (low-pass 6 Hz, dt=0.001 s).
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.1963 rad
+[Runner] SEA_Ankle motor_angle = 0.2140 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[Runner] SEA_Knee motor_angle = -0.1963 rad
+[Runner] SEA_Ankle motor_angle = 0.2140 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.360] muscle_share=0.173  capable_share=1.000  |tau_m|=44.78  |tau_res|=214.26  act>thr=0.42  |u_res|=2.143
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.410] muscle_share=0.203  capable_share=1.000  |tau_m|=44.54  |tau_res|=175.17  act>thr=0.41  |u_res|=1.752
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.460] muscle_share=0.156  capable_share=1.000  |tau_m|=45.73  |tau_res|=247.68  act>thr=0.42  |u_res|=2.477
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.510] muscle_share=0.168  capable_share=1.000  |tau_m|=48.77  |tau_res|=241.13  act>thr=0.45  |u_res|=2.411
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.560] muscle_share=0.188  capable_share=1.000  |tau_m|=48.65  |tau_res|=210.69  act>thr=0.41  |u_res|=2.107
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.610] muscle_share=0.196  capable_share=1.000  |tau_m|=44.46  |tau_res|=182.56  act>thr=0.42  |u_res|=1.826
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.660] muscle_share=0.194  capable_share=1.000  |tau_m|=44.56  |tau_res|=184.99  act>thr=0.45  |u_res|=1.850
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.710] muscle_share=0.205  capable_share=1.000  |tau_m|=51.96  |tau_res|=201.34  act>thr=0.49  |u_res|=2.013
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.760] muscle_share=0.203  capable_share=1.000  |tau_m|=59.62  |tau_res|=233.83  act>thr=0.47  |u_res|=2.338
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.810] muscle_share=0.175  capable_share=1.000  |tau_m|=59.62  |tau_res|=281.74  act>thr=0.49  |u_res|=2.817
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.860] muscle_share=0.138  capable_share=1.000  |tau_m|=49.18  |tau_res|=306.10  act>thr=0.42  |u_res|=3.061
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.910] muscle_share=0.133  capable_share=1.000  |tau_m|=43.33  |tau_res|=283.28  act>thr=0.46  |u_res|=2.833
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=10.960] muscle_share=0.145  capable_share=1.000  |tau_m|=43.29  |tau_res|=254.58  act>thr=0.46  |u_res|=2.546
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=11.010] muscle_share=0.151  capable_share=1.000  |tau_m|=44.46  |tau_res|=250.26  act>thr=0.50  |u_res|=2.503
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=11.060] muscle_share=0.153  capable_share=1.000  |tau_m|=45.39  |tau_res|=250.65  act>thr=0.47  |u_res|=2.507
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[warning] Thelen2003Muscle initialization: 'peri_l' is at its minimum fiber length of 0.004537597736296762.
+[Recruit t=11.110] muscle_share=0.145  capable_share=1.000  |tau_m|=43.47  |tau_res|=256.18  act>thr=0.39  |u_res|=2.562
+[Recruit t=11.160] muscle_share=0.147  capable_share=1.000  |tau_m|=41.14  |tau_res|=238.75  act>thr=0.41  |u_res|=2.387
+[Recruit t=11.210] muscle_share=0.180  capable_share=1.000  |tau_m|=39.45  |tau_res|=179.56  act>thr=0.45  |u_res|=1.796
+[Recruit t=11.260] muscle_share=0.332  capable_share=1.000  |tau_m|=39.65  |tau_res|=79.94  act>thr=0.45  |u_res|=0.799
+[Recruit t=11.310] muscle_share=0.343  capable_share=1.000  |tau_m|=36.86  |tau_res|=70.48  act>thr=0.42  |u_res|=0.705
+[Recruit t=11.360] muscle_share=0.087  capable_share=1.000  |tau_m|=23.26  |tau_res|=244.58  act>thr=0.32  |u_res|=2.446
+[Recruit t=11.410] muscle_share=0.051  capable_share=1.000  |tau_m|=25.95  |tau_res|=478.48  act>thr=0.39  |u_res|=4.785
+[Recruit t=11.460] muscle_share=0.058  capable_share=1.000  |tau_m|=36.85  |tau_res|=596.13  act>thr=0.39  |u_res|=5.961
+[Recruit t=11.510] muscle_share=0.058  capable_share=1.000  |tau_m|=35.50  |tau_res|=572.85  act>thr=0.39  |u_res|=5.729
+[Recruit t=11.560] muscle_share=0.044  capable_share=1.000  |tau_m|=24.72  |tau_res|=540.72  act>thr=0.34  |u_res|=5.407
+[Recruit t=11.610] muscle_share=0.059  capable_share=1.000  |tau_m|=34.76  |tau_res|=550.99  act>thr=0.34  |u_res|=5.510
+[Recruit t=11.660] muscle_share=0.049  capable_share=1.000  |tau_m|=29.25  |tau_res|=565.39  act>thr=0.37  |u_res|=5.654
+[Recruit t=11.710] muscle_share=0.026  capable_share=1.000  |tau_m|=15.01  |tau_res|=557.32  act>thr=0.34  |u_res|=5.573
+[Recruit t=11.760] muscle_share=0.038  capable_share=1.000  |tau_m|=21.97  |tau_res|=548.95  act>thr=0.42  |u_res|=5.490
+[Recruit t=11.810] muscle_share=0.058  capable_share=1.000  |tau_m|=35.47  |tau_res|=579.41  act>thr=0.46  |u_res|=5.794
+[Recruit t=11.860] muscle_share=0.052  capable_share=1.000  |tau_m|=34.76  |tau_res|=633.72  act>thr=0.41  |u_res|=6.337
+[Recruit t=11.910] muscle_share=0.119  capable_share=1.000  |tau_m|=59.34  |tau_res|=439.97  act>thr=0.41  |u_res|=4.400
+[Recruit t=11.960] muscle_share=0.164  capable_share=0.271  |tau_m|=74.68  |tau_res|=380.60  act>thr=1.00  |u_res|=3.806
+[Recruit t=12.010] muscle_share=0.143  capable_share=0.271  |tau_m|=60.94  |tau_res|=364.25  act>thr=1.00  |u_res|=3.642
+[Recruit t=12.060] muscle_share=0.112  capable_share=0.242  |tau_m|=58.23  |tau_res|=460.78  act>thr=1.00  |u_res|=4.608
+[Recruit t=12.110] muscle_share=0.137  capable_share=0.289  |tau_m|=90.54  |tau_res|=571.07  act>thr=1.00  |u_res|=5.711
+[Recruit t=12.160] muscle_share=0.106  capable_share=0.296  |tau_m|=67.33  |tau_res|=569.33  act>thr=1.00  |u_res|=5.693
+[Recruit t=12.210] muscle_share=0.212  capable_share=1.000  |tau_m|=78.43  |tau_res|=292.03  act>thr=0.46  |u_res|=2.920
+[Recruit t=12.260] muscle_share=0.498  capable_share=1.000  |tau_m|=72.39  |tau_res|=72.87  act>thr=0.46  |u_res|=0.729
+[Recruit t=12.310] muscle_share=0.471  capable_share=1.000  |tau_m|=69.88  |tau_res|=78.57  act>thr=0.46  |u_res|=0.786
+[Recruit t=12.360] muscle_share=0.421  capable_share=1.000  |tau_m|=58.19  |tau_res|=79.95  act>thr=0.47  |u_res|=0.800
+[Recruit t=12.410] muscle_share=0.445  capable_share=1.000  |tau_m|=59.49  |tau_res|=74.32  act>thr=0.38  |u_res|=0.743
+[Recruit t=12.460] muscle_share=0.507  capable_share=1.000  |tau_m|=55.69  |tau_res|=54.16  act>thr=0.42  |u_res|=0.542
+[Recruit t=12.510] muscle_share=0.546  capable_share=1.000  |tau_m|=67.21  |tau_res|=55.93  act>thr=0.38  |u_res|=0.559
+[Recruit t=12.560] muscle_share=0.761  capable_share=1.000  |tau_m|=68.48  |tau_res|=21.50  act>thr=0.41  |u_res|=0.215
+[Recruit t=12.610] muscle_share=0.327  capable_share=0.473  |tau_m|=68.54  |tau_res|=141.02  act>thr=1.00  |u_res|=1.410
+[Recruit t=12.660] muscle_share=0.314  capable_share=0.442  |tau_m|=86.50  |tau_res|=189.09  act>thr=1.00  |u_res|=1.891
+[Recruit t=12.710] muscle_share=0.224  capable_share=0.411  |tau_m|=71.99  |tau_res|=249.41  act>thr=1.00  |u_res|=2.494
+[Recruit t=12.760] muscle_share=0.243  capable_share=0.469  |tau_m|=66.79  |tau_res|=208.28  act>thr=1.00  |u_res|=2.083
+[Recruit t=12.810] muscle_share=0.266  capable_share=1.000  |tau_m|=165.03  |tau_res|=455.51  act>thr=0.47  |u_res|=4.555
+[Recruit t=12.860] muscle_share=0.143  capable_share=1.000  |tau_m|=64.05  |tau_res|=384.30  act>thr=0.51  |u_res|=3.843
+[Recruit t=12.910] muscle_share=0.297  capable_share=1.000  |tau_m|=36.36  |tau_res|=85.96  act>thr=0.45  |u_res|=0.860
+[Recruit t=12.960] muscle_share=0.363  capable_share=1.000  |tau_m|=24.93  |tau_res|=43.75  act>thr=0.42  |u_res|=0.438
+[Recruit t=13.010] muscle_share=0.240  capable_share=1.000  |tau_m|=24.54  |tau_res|=77.62  act>thr=0.46  |u_res|=0.776
+[Recruit t=13.060] muscle_share=0.255  capable_share=1.000  |tau_m|=28.11  |tau_res|=82.19  act>thr=0.50  |u_res|=0.822
+[Recruit t=13.110] muscle_share=0.374  capable_share=1.000  |tau_m|=26.88  |tau_res|=45.00  act>thr=0.49  |u_res|=0.450
+[Recruit t=13.160] muscle_share=0.274  capable_share=1.000  |tau_m|=28.20  |tau_res|=74.61  act>thr=0.45  |u_res|=0.746
+[Recruit t=13.210] muscle_share=0.160  capable_share=1.000  |tau_m|=33.16  |tau_res|=174.30  act>thr=0.41  |u_res|=1.743
+[Recruit t=13.260] muscle_share=0.132  capable_share=1.000  |tau_m|=46.86  |tau_res|=307.33  act>thr=0.46  |u_res|=3.073
+[Recruit t=13.310] muscle_share=0.158  capable_share=1.000  |tau_m|=69.11  |tau_res|=367.67  act>thr=0.45  |u_res|=3.677
+[Recruit t=13.360] muscle_share=0.213  capable_share=1.000  |tau_m|=102.43  |tau_res|=378.26  act>thr=0.53  |u_res|=3.783
+[Recruit t=13.410] muscle_share=0.290  capable_share=1.000  |tau_m|=99.41  |tau_res|=243.28  act>thr=0.50  |u_res|=2.433
+[Recruit t=13.460] muscle_share=0.145  capable_share=0.288  |tau_m|=59.39  |tau_res|=351.26  act>thr=1.00  |u_res|=3.513
+[Recruit t=13.510] muscle_share=0.134  capable_share=0.326  |tau_m|=85.69  |tau_res|=552.22  act>thr=1.00  |u_res|=5.522
+[Recruit t=13.560] muscle_share=0.095  capable_share=0.325  |tau_m|=62.97  |tau_res|=602.05  act>thr=1.00  |u_res|=6.021
+[Recruit t=13.610] muscle_share=0.098  capable_share=0.310  |tau_m|=48.19  |tau_res|=441.55  act>thr=1.00  |u_res|=4.416
+[Recruit t=13.660] muscle_share=0.373  capable_share=1.000  |tau_m|=76.07  |tau_res|=127.99  act>thr=0.45  |u_res|=1.280
+[Recruit t=13.710] muscle_share=0.493  capable_share=1.000  |tau_m|=62.64  |tau_res|=64.49  act>thr=0.47  |u_res|=0.645
+[Recruit t=13.760] muscle_share=0.488  capable_share=1.000  |tau_m|=58.86  |tau_res|=61.84  act>thr=0.47  |u_res|=0.618
+[Recruit t=13.810] muscle_share=0.504  capable_share=1.000  |tau_m|=52.93  |tau_res|=52.01  act>thr=0.38  |u_res|=0.520
+[Recruit t=13.860] muscle_share=0.496  capable_share=1.000  |tau_m|=53.50  |tau_res|=54.30  act>thr=0.41  |u_res|=0.543
+[Recruit t=13.910] muscle_share=0.466  capable_share=1.000  |tau_m|=57.58  |tau_res|=65.90  act>thr=0.38  |u_res|=0.659
+[Recruit t=13.960] muscle_share=0.541  capable_share=1.000  |tau_m|=60.23  |tau_res|=51.11  act>thr=0.36  |u_res|=0.511
+[Recruit t=14.010] muscle_share=0.369  capable_share=0.427  |tau_m|=48.88  |tau_res|=83.43  act>thr=1.00  |u_res|=0.834
+[Recruit t=14.060] muscle_share=0.203  capable_share=0.458  |tau_m|=52.06  |tau_res|=205.02  act>thr=1.00  |u_res|=2.050
+[Recruit t=14.110] muscle_share=0.229  capable_share=0.461  |tau_m|=61.47  |tau_res|=206.58  act>thr=1.00  |u_res|=2.066
+[Recruit t=14.160] muscle_share=0.331  capable_share=0.477  |tau_m|=59.44  |tau_res|=119.99  act>thr=1.00  |u_res|=1.200
+[Recruit t=14.210] muscle_share=0.244  capable_share=0.419  |tau_m|=59.84  |tau_res|=185.65  act>thr=1.00  |u_res|=1.857
+[Recruit t=14.260] muscle_share=0.235  capable_share=0.440  |tau_m|=49.27  |tau_res|=160.79  act>thr=1.00  |u_res|=1.608
+[Recruit t=14.310] muscle_share=0.413  capable_share=1.000  |tau_m|=62.44  |tau_res|=88.85  act>thr=0.46  |u_res|=0.889
+[Recruit t=14.360] muscle_share=0.419  capable_share=1.000  |tau_m|=79.53  |tau_res|=110.48  act>thr=0.50  |u_res|=1.105
+[Recruit t=14.410] muscle_share=0.317  capable_share=1.000  |tau_m|=88.56  |tau_res|=191.07  act>thr=0.46  |u_res|=1.911
+[Recruit t=14.460] muscle_share=0.256  capable_share=1.000  |tau_m|=67.01  |tau_res|=195.00  act>thr=0.49  |u_res|=1.950
+[Recruit t=14.510] muscle_share=0.252  capable_share=1.000  |tau_m|=43.88  |tau_res|=129.94  act>thr=0.51  |u_res|=1.299
+[Recruit t=14.560] muscle_share=0.305  capable_share=1.000  |tau_m|=36.37  |tau_res|=82.96  act>thr=0.47  |u_res|=0.830
+[Recruit t=14.610] muscle_share=0.347  capable_share=1.000  |tau_m|=29.50  |tau_res|=55.62  act>thr=0.39  |u_res|=0.556
+[Recruit t=14.660] muscle_share=0.340  capable_share=1.000  |tau_m|=34.55  |tau_res|=67.07  act>thr=0.39  |u_res|=0.671
+[Recruit t=14.710] muscle_share=0.314  capable_share=1.000  |tau_m|=38.43  |tau_res|=84.08  act>thr=0.38  |u_res|=0.841
+[Recruit t=14.760] muscle_share=0.308  capable_share=1.000  |tau_m|=37.18  |tau_res|=83.72  act>thr=0.45  |u_res|=0.837
+[Recruit t=14.810] muscle_share=0.498  capable_share=1.000  |tau_m|=43.26  |tau_res|=43.67  act>thr=0.45  |u_res|=0.437
+[Recruit t=14.860] muscle_share=0.431  capable_share=1.000  |tau_m|=73.21  |tau_res|=96.77  act>thr=0.50  |u_res|=0.968
+[Recruit t=14.910] muscle_share=0.208  capable_share=0.315  |tau_m|=55.42  |tau_res|=210.61  act>thr=1.00  |u_res|=2.106
+[Recruit t=14.960] muscle_share=0.181  capable_share=0.301  |tau_m|=69.16  |tau_res|=313.87  act>thr=1.00  |u_res|=3.139
+[Recruit t=15.010] muscle_share=0.152  capable_share=0.297  |tau_m|=64.30  |tau_res|=359.43  act>thr=1.00  |u_res|=3.594
+[Recruit t=15.060] muscle_share=0.217  capable_share=1.000  |tau_m|=80.74  |tau_res|=290.70  act>thr=0.46  |u_res|=2.907
+[Recruit t=15.110] muscle_share=0.252  capable_share=1.000  |tau_m|=72.66  |tau_res|=215.38  act>thr=0.46  |u_res|=2.154
+[Recruit t=15.160] muscle_share=0.405  capable_share=1.000  |tau_m|=61.42  |tau_res|=90.28  act>thr=0.45  |u_res|=0.903
+[Recruit t=15.210] muscle_share=0.464  capable_share=1.000  |tau_m|=50.97  |tau_res|=58.82  act>thr=0.45  |u_res|=0.588
+[Recruit t=15.260] muscle_share=0.423  capable_share=1.000  |tau_m|=52.84  |tau_res|=71.96  act>thr=0.36  |u_res|=0.720
+[Recruit t=15.310] muscle_share=0.440  capable_share=1.000  |tau_m|=57.27  |tau_res|=72.85  act>thr=0.32  |u_res|=0.728
+  -> Activations : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_activations.sto
+  -> SEA ctrl    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_sea_controls.sto
+  -> Reserve ctrl: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_reserve_controls.sto
+  -> Reserve tau : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_reserve_torques.sto
+  -> Kinematics  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_kinematics.sto
+  -> Kin ref     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_kinematics_reference.sto
+  -> Tau_bio     : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_tau_bio.sto
+  -> Muscle F    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_muscle_forces.sto
+  -> SEA torques : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_sea_torques.sto
+  -> SEA states  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_sea_states.sto
+  -> SEA derivs  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_sea_derivatives.sto
+  -> SEA diag    : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_sea_diagnostics.sto
+  -> SEA power   : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_power.sto
+  -> States      : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_states.sto
+  -> Recruitment: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_recruitment.sto
+  -> SO tau diag : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_so_torque_diagnostics.sto
+  -> Online GRF  : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_online_grf.sto
+  -> Gait events : /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_gait_events.csv (left=4, right=4, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+  -> Online events: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs/rollout_episode_gait_events_online.csv (15 events)
+
+[Runner] All results saved to: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/sim_outputs
+{"status": "completed", "steps": 500, "end_reason": "episode_time_limit", "completed_requested_duration": true, "summary": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/rollout_summary.json"}

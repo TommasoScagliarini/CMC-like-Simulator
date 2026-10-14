@@ -1,0 +1,4388 @@
+{
+  "protocol": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/validation/reward_curriculum_2026_10_01/PROTOCOL.md",
+  "started": 1790870843.023576,
+  "training": [
+    {
+      "folder": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/ex_novo/stage01",
+      "total_iterations": 6,
+      "new_iterations": 6,
+      "sigma_constant": true,
+      "phases": [
+        "critic_warmup",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo"
+      ]
+    },
+    {
+      "folder": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/imitation/stage01",
+      "total_iterations": 6,
+      "new_iterations": 6,
+      "sigma_constant": true,
+      "phases": [
+        "critic_warmup",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation"
+      ]
+    },
+    {
+      "folder": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/ex_novo/stage01",
+      "total_iterations": 11,
+      "new_iterations": 5,
+      "sigma_constant": true,
+      "phases": [
+        "critic_warmup",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo",
+        "ex_novo"
+      ]
+    },
+    {
+      "folder": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/imitation/stage01",
+      "total_iterations": 11,
+      "new_iterations": 5,
+      "sigma_constant": true,
+      "phases": [
+        "critic_warmup",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation",
+        "imitation"
+      ]
+    }
+  ],
+  "evaluations": [
+    {
+      "label": "initial_ex_novo_hidden",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_ex_novo_hidden",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_ex_novo_hidden",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/smoke/ex_novo/milestone_iteration_000001/rl_module_last",
+        "steps": 500,
+        "episode_return": -342.41827368486054,
+        "visible_steps": 0,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "ex_novo",
+          "full_episode": {
+            "reward": -342.4182736848607,
+            "reward_base": 9.993138438597287,
+            "phase_event_progress_score": 1.2999999999999998,
+            "imitation_score": 288.7348954724866,
+            "served_imitation_score": 220.3535878410363,
+            "penalty": 95.48000727530747,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.006148938005464207,
+            "phase_timeout_penalty_term": 169.76874999977264,
+            "phase_clawback_penalty_term": 0.45000000000000007,
+            "contact_support_clawback_term": 3.8748596609097503,
+            "exnovo_task_term": 44.3291135047594,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 70.4755404016015,
+            "morphology_ankle_term": 63.39771520812508,
+            "morphology_term": 133.8732556097266,
+            "oob_term": 0.10928441028395484,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 13.77034719757352,
+            "rmse_served_target_deg": 13.677298458666693,
+            "rmse_actual_served_deg": 0.27254945712435513,
+            "rmse_actual_target_velocity_deg_s": 74.683622174607,
+            "rmse_command_target_deg": 23.61228596989268,
+            "corr_actual_target": 0.41526807506322655,
+            "actual_mean_bias_vs_target_deg": 0.9322885122931264,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 13.805468178201853,
+              "best_rmse_delay_s": -0.13499999999999968,
+              "best_lag_rmse_deg": 12.94935875774968,
+              "best_lag_correlation": 0.4365853897289471,
+              "max_correlation_delay_s": -0.06499999999999961,
+              "max_correlation": 0.4752366111461751,
+              "best_rmse_lag_affine_target_gain": 0.10472911490330586,
+              "best_rmse_lag_affine_bias_deg": 21.989761820772433,
+              "best_rmse_lag_affine_residual_rmse_deg": 2.999088511039745,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 17.67860424195339,
+              "max_deg": 29.701791360568713,
+              "excursion_deg": 12.023187118615322,
+              "sd_deg": 3.192143721832307
+            },
+            "served": {
+              "min_deg": 17.708170423323082,
+              "max_deg": 30.438386281419568,
+              "excursion_deg": 12.730215858096486,
+              "sd_deg": 3.2226276184906735
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 60.06510703282067,
+              "excursion_deg": 60.06510703282067,
+              "sd_deg": 19.02902186863722
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 29.48904462830116,
+                "served_deg": 30.26717392949486
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 24.691270453379495,
+                "served_deg": 25.484651566989836
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 28.969741930610503,
+                "served_deg": 29.526433083817807
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              13.801697528767093,
+              9.065446277989759,
+              16.51536604555886,
+              16.14715974981769,
+              10.017479337357342
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 9.289647863753734,
+            "rmse_served_target_deg": 9.283278032560665,
+            "rmse_actual_served_deg": 0.29123711032930094,
+            "rmse_actual_target_velocity_deg_s": 61.19038757238768,
+            "rmse_command_target_deg": 20.49105495712506,
+            "corr_actual_target": -0.057748514488510004,
+            "actual_mean_bias_vs_target_deg": 4.1837270700667695,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 9.378433378150985,
+              "best_rmse_delay_s": 0.4050000000000008,
+              "best_lag_rmse_deg": 8.097539140862294,
+              "best_lag_correlation": 0.7773828455149258,
+              "max_correlation_delay_s": 0.4140000000000008,
+              "max_correlation": 0.7780628056402362,
+              "best_rmse_lag_affine_target_gain": 0.1689530066301023,
+              "best_rmse_lag_affine_bias_deg": 10.065467014744003,
+              "best_rmse_lag_affine_residual_rmse_deg": 1.1419280897941648,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 6.988327259205587,
+              "max_deg": 17.245259474967348,
+              "excursion_deg": 10.256932215761761,
+              "sd_deg": 1.8867166278105965
+            },
+            "served": {
+              "min_deg": 6.762798681679997,
+              "max_deg": 17.891390247808676,
+              "excursion_deg": 11.12859156612868,
+              "sd_deg": 1.9805356139079353
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -28.92775641627297,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 69.03480207543059,
+              "sd_deg": 19.174227383271354
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 11.381832355551126,
+                "served_deg": 11.666107390127996
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 11.473198942304741,
+                "served_deg": 11.577714496984274
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              9.52331785579829,
+              6.406730002880811,
+              11.410922657903509,
+              10.582437130988696,
+              6.4315374415772535
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 2,
+          "phase_valid_to_count": 2,
+          "phase_valid_cycle_count": 1,
+          "invalid_event_count": 3,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 17.099999999998502,
+            "last_period_s": 1.5390000000010762,
+            "last_stance_fraction": 0.7355425601038253,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.057,
+        "action_clipped_steps": 56,
+        "reference_jerk_limit_fraction_mean": 0.7456439393939392,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.5850435896237234,
+          "ankle": 0.6115742746942148
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -68.63647415,
+            "max_nm": 16.64960578,
+            "rms_nm": 21.465271871269035,
+            "positive_area_nm_s": 7.523417518200013,
+            "negative_area_nm_s": -64.45839897077006,
+            "positive_fraction": 0.3140391496527047,
+            "positive_over8_fraction": 0.05956640707219533,
+            "highpass_rms_nm": {
+              "10": 3.397188414480904,
+              "20": 3.2250867803449053
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 14.892991682813598,
+                "residual_after_lowpass_10_rms_nm": 14.895448255013276,
+                "highpass_20_rms_nm": 14.813742050304702,
+                "residual_after_lowpass_20_rms_nm": 14.81216403661294
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 3.3502431846315326,
+                "residual_after_lowpass_10_rms_nm": 3.3517588847882958,
+                "highpass_20_rms_nm": 3.182223879586209,
+                "residual_after_lowpass_20_rms_nm": 3.1822723181528176
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 3.2138518754989938,
+                "residual_after_lowpass_10_rms_nm": 3.2134468235443716,
+                "highpass_20_rms_nm": 3.066748725041566,
+                "residual_after_lowpass_20_rms_nm": 3.066893276937925
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.728033041910385,
+                "residual_after_lowpass_10_rms_nm": 0.7372026321584235,
+                "highpass_20_rms_nm": 0.5360130936332214,
+                "residual_after_lowpass_20_rms_nm": 0.5359485490099012
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.2682389243823338
+          },
+          "ankle": {
+            "min_nm": -16.01919607,
+            "max_nm": 10.45275922,
+            "rms_nm": 7.980314362381647,
+            "positive_area_nm_s": 2.431158600920001,
+            "negative_area_nm_s": -28.014030954305014,
+            "positive_fraction": 0.31319722163755,
+            "positive_over8_fraction": 0.024836876447063776,
+            "highpass_rms_nm": {
+              "10": 0.28721705018846966,
+              "20": 0.2086335143157764
+            },
+            "highpass_10_peak_frequency_hz": 50.292968750027875,
+            "highpass_20_peak_frequency_hz": 50.292968750027875,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.38226269871443425,
+                "residual_after_lowpass_10_rms_nm": 0.3822179806505919,
+                "highpass_20_rms_nm": 0.3020703095006249,
+                "residual_after_lowpass_20_rms_nm": 0.3020675635593002
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.25378253102990045,
+                "residual_after_lowpass_10_rms_nm": 0.25391276500310755,
+                "highpass_20_rms_nm": 0.1688850954642414,
+                "residual_after_lowpass_20_rms_nm": 0.16888212839816305
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.20911592201582344,
+                "residual_after_lowpass_10_rms_nm": 0.20920503870484894,
+                "highpass_20_rms_nm": 0.1562355801612709,
+                "residual_after_lowpass_20_rms_nm": 0.15623117291216193
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.13201692734583878,
+                "residual_after_lowpass_10_rms_nm": 0.13241740469874078,
+                "highpass_20_rms_nm": 0.047810958255073574,
+                "residual_after_lowpass_20_rms_nm": 0.04781395777192302
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.02034073248482335
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 664.3645544205754,
+          "left_force_max_n": 424.17358053,
+          "left_force_mean_n": 139.877082060823,
+          "left_contact_fraction": 0.7360555672490002,
+          "left_loaded_over50n_fraction": 0.708903388760261,
+          "left_penetration_max_mm": 18.51985,
+          "left_penetration_whole_max_mm": 18.51985
+        },
+        "morphology": {
+          "morphology_available": 258.0,
+          "morphology_settled_sample_count": 258.0,
+          "morphology_knee_loss": 28.1902161606406,
+          "morphology_ankle_loss": 25.35908608325003,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "episode_end_without_physical_anchor",
+            "dropped_sample_count": 49,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 0,
+            "total_resolved_sample_count": 258,
+            "total_dropped_sample_count": 242,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 1,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": false,
+            "knee_rom": false,
+            "ankle_rom": false,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": false
+        }
+      }
+    },
+    {
+      "label": "initial_ex_novo_visible",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_ex_novo_visible",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_ex_novo_visible",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/smoke/ex_novo/milestone_iteration_000001/rl_module_last",
+        "steps": 500,
+        "episode_return": -680.318379762782,
+        "visible_steps": 500,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "ex_novo",
+          "full_episode": {
+            "reward": -680.3183797627819,
+            "reward_base": 9.37801584662462,
+            "phase_event_progress_score": 2.3000000000000003,
+            "imitation_score": 418.34577063078126,
+            "served_imitation_score": 369.9674153933762,
+            "penalty": 78.56320892498712,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.027266538871250443,
+            "phase_timeout_penalty_term": 5.196599999974455,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 2.0386415372502116,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 344.4944785057834,
+            "morphology_ankle_term": 337.7689319950504,
+            "morphology_term": 682.263410500834,
+            "oob_term": 0.17047703247703122,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 6.64131043905326,
+            "rmse_served_target_deg": 6.644277929352197,
+            "rmse_actual_served_deg": 0.17791924742209766,
+            "rmse_actual_target_velocity_deg_s": 41.54200720366792,
+            "rmse_command_target_deg": 17.685890267190405,
+            "corr_actual_target": 0.8999536198562296,
+            "actual_mean_bias_vs_target_deg": 0.9127775406299926,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 6.081044298232315,
+              "best_rmse_delay_s": -0.024999999999999578,
+              "best_lag_rmse_deg": 5.823270587875707,
+              "best_lag_correlation": 0.9215940072768362,
+              "max_correlation_delay_s": -0.020999999999999575,
+              "max_correlation": 0.921822381256404,
+              "best_rmse_lag_affine_target_gain": 0.7812767918476546,
+              "best_rmse_lag_affine_bias_deg": 5.530898153822181,
+              "best_rmse_lag_affine_residual_rmse_deg": 4.837802797743551,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 9.225625304395432,
+              "max_deg": 50.9397318299681,
+              "excursion_deg": 41.714106525572674,
+              "sd_deg": 11.900682511616015
+            },
+            "served": {
+              "min_deg": 9.246529952123904,
+              "max_deg": 50.89976497803977,
+              "excursion_deg": 41.65323502591586,
+              "sd_deg": 11.916139284870487
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 82.65794785900727,
+              "excursion_deg": 82.65794785900727,
+              "sd_deg": 18.938823612946134
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 43.70497347994257,
+                "served_deg": 43.97049366883223
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 42.015789151022965,
+                "served_deg": 42.38188046034647
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 50.77727578055935,
+                "served_deg": 50.77875451651466
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              6.02521501677206,
+              4.318525430901768,
+              6.652721000115464,
+              7.556008068841751,
+              8.184362934171112
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 3.939610067938611,
+            "rmse_served_target_deg": 4.001139546133511,
+            "rmse_actual_served_deg": 0.258763746992551,
+            "rmse_actual_target_velocity_deg_s": 31.048417164341142,
+            "rmse_command_target_deg": 20.005130102729684,
+            "corr_actual_target": 0.9200747143160092,
+            "actual_mean_bias_vs_target_deg": 1.9695789050635444,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 3.928509092993445,
+              "best_rmse_delay_s": 0.035000000000000475,
+              "best_lag_rmse_deg": 3.5658474451687305,
+              "best_lag_correlation": 0.9328940743016655,
+              "max_correlation_delay_s": 0.03700000000000048,
+              "max_correlation": 0.932976313250702,
+              "best_rmse_lag_affine_target_gain": 1.0247235768167224,
+              "best_rmse_lag_affine_bias_deg": 1.6673664650023925,
+              "best_rmse_lag_affine_residual_rmse_deg": 3.0560297477664458,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": -4.163823763804581,
+              "max_deg": 26.50759875369889,
+              "excursion_deg": 30.671422517503473,
+              "sd_deg": 8.708889038176078
+            },
+            "served": {
+              "min_deg": -4.168770528310963,
+              "max_deg": 26.53862147290909,
+              "excursion_deg": 30.70739200122005,
+              "sd_deg": 8.793912617579851
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -40.10704565915762,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 80.21409131831524,
+              "sd_deg": 20.79663219655793
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 20.4011569187082,
+                "served_deg": 20.64068482271138
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 26.124071678971628,
+                "served_deg": 26.14377165208524
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              2.8592621776001943,
+              2.537932417474675,
+              2.726261650181882,
+              6.080699491086146,
+              3.9389673447144546
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 3,
+          "phase_valid_to_count": 4,
+          "phase_valid_cycle_count": 2,
+          "invalid_event_count": 0,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 15.619999999998543,
+            "last_period_s": 1.6829999999990672,
+            "last_stance_fraction": 0.3909685086155674,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          },
+          {
+            "time": 17.099999999998502,
+            "last_period_s": 1.4870000000011192,
+            "last_stance_fraction": 0.4001344989909759,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.089,
+        "action_clipped_steps": 89,
+        "reference_jerk_limit_fraction_mean": 0.579371212121212,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.42824724499875294,
+          "ankle": 0.5580759240116528
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -31.87897313,
+            "max_nm": 31.26429569,
+            "rms_nm": 9.370226436986517,
+            "positive_area_nm_s": 19.607064126030018,
+            "negative_area_nm_s": -13.598935700849978,
+            "positive_fraction": 0.5586192380551462,
+            "positive_over8_fraction": 0.18669753736055567,
+            "highpass_rms_nm": {
+              "10": 4.692975159700158,
+              "20": 3.6208070004548794
+            },
+            "highpass_10_peak_frequency_hz": 18.06640625001001,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 13.82186405547424,
+                "residual_after_lowpass_10_rms_nm": 13.819082381959973,
+                "highpass_20_rms_nm": 13.238226257874688,
+                "residual_after_lowpass_20_rms_nm": 13.24015554293302
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 4.5943442957798,
+                "residual_after_lowpass_10_rms_nm": 4.5955102478121885,
+                "highpass_20_rms_nm": 3.5545726924491894,
+                "residual_after_lowpass_20_rms_nm": 3.554527384469324
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 4.26078173971958,
+                "residual_after_lowpass_10_rms_nm": 4.261633745254047,
+                "highpass_20_rms_nm": 3.388214746231644,
+                "residual_after_lowpass_20_rms_nm": 3.3881785548185523
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 1.4462712595355338,
+                "residual_after_lowpass_10_rms_nm": 1.445859686603327,
+                "highpass_20_rms_nm": 0.7827279374685256,
+                "residual_after_lowpass_20_rms_nm": 0.7829102922090818
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.0868005406812479
+          },
+          "ankle": {
+            "min_nm": -21.65297013,
+            "max_nm": 11.44678655,
+            "rms_nm": 6.2425854923860875,
+            "positive_area_nm_s": 2.8798648357449994,
+            "negative_area_nm_s": -14.267404382890001,
+            "positive_fraction": 0.5727215323089876,
+            "positive_over8_fraction": 0.018943380340980847,
+            "highpass_rms_nm": {
+              "10": 0.3081354655986341,
+              "20": 0.22242960455312133
+            },
+            "highpass_10_peak_frequency_hz": 18.554687500010285,
+            "highpass_20_peak_frequency_hz": 48.339843750026795,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.4551282907824749,
+                "residual_after_lowpass_10_rms_nm": 0.4550704161378379,
+                "highpass_20_rms_nm": 0.35464580833055437,
+                "residual_after_lowpass_20_rms_nm": 0.3547157826707205
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.2958639982882331,
+                "residual_after_lowpass_10_rms_nm": 0.29584911174118206,
+                "highpass_20_rms_nm": 0.19200379926380048,
+                "residual_after_lowpass_20_rms_nm": 0.19200864521013042
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.24327017406949153,
+                "residual_after_lowpass_10_rms_nm": 0.2432683873170823,
+                "highpass_20_rms_nm": 0.174868199106454,
+                "residual_after_lowpass_20_rms_nm": 0.1748728022546703
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.155156597776568,
+                "residual_after_lowpass_10_rms_nm": 0.15513510435501998,
+                "highpass_20_rms_nm": 0.06305582991992806,
+                "residual_after_lowpass_20_rms_nm": 0.06307523982608101
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.007252014621303785
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 465.18318628914506,
+          "left_force_max_n": 649.87706876,
+          "left_force_mean_n": 97.9126891943191,
+          "left_contact_fraction": 0.4371711218690802,
+          "left_loaded_over50n_fraction": 0.36708061460745106,
+          "left_penetration_max_mm": 17.523960000000002,
+          "left_penetration_whole_max_mm": 17.523960000000002
+        },
+        "morphology": {
+          "morphology_available": 484.0,
+          "morphology_settled_sample_count": 488.0,
+          "morphology_knee_loss": 137.79779140231332,
+          "morphology_ankle_loss": 135.10757279802016,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "",
+            "dropped_sample_count": 0,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 5,
+            "total_resolved_sample_count": 488,
+            "total_dropped_sample_count": 12,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": true,
+            "knee_rom": true,
+            "ankle_rom": true,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": true
+        }
+      }
+    },
+    {
+      "label": "initial_imitation_hidden",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_imitation_hidden",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_imitation_hidden",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/smoke/imitation/milestone_iteration_000001/rl_module_last",
+        "steps": 500,
+        "episode_return": -27.16431426742019,
+        "visible_steps": 0,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "imitation",
+          "full_episode": {
+            "reward": -27.164314267420245,
+            "reward_base": 142.71986908064207,
+            "phase_event_progress_score": 1.2999999999999998,
+            "imitation_score": 288.7348954724866,
+            "served_imitation_score": 220.3535878410363,
+            "penalty": 95.48000727530747,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.006148938005464207,
+            "phase_timeout_penalty_term": 169.76874999977264,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 0.0,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 0.0,
+            "morphology_ankle_term": 0.0,
+            "morphology_term": 0.0,
+            "oob_term": 0.10928441028395484,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 13.77034719757352,
+            "rmse_served_target_deg": 13.677298458666693,
+            "rmse_actual_served_deg": 0.27254945712435513,
+            "rmse_actual_target_velocity_deg_s": 74.683622174607,
+            "rmse_command_target_deg": 23.61228596989268,
+            "corr_actual_target": 0.41526807506322655,
+            "actual_mean_bias_vs_target_deg": 0.9322885122931264,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 13.805468178201853,
+              "best_rmse_delay_s": -0.13499999999999968,
+              "best_lag_rmse_deg": 12.94935875774968,
+              "best_lag_correlation": 0.4365853897289471,
+              "max_correlation_delay_s": -0.06499999999999961,
+              "max_correlation": 0.4752366111461751,
+              "best_rmse_lag_affine_target_gain": 0.10472911490330586,
+              "best_rmse_lag_affine_bias_deg": 21.989761820772433,
+              "best_rmse_lag_affine_residual_rmse_deg": 2.999088511039745,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 17.67860424195339,
+              "max_deg": 29.701791360568713,
+              "excursion_deg": 12.023187118615322,
+              "sd_deg": 3.192143721832307
+            },
+            "served": {
+              "min_deg": 17.708170423323082,
+              "max_deg": 30.438386281419568,
+              "excursion_deg": 12.730215858096486,
+              "sd_deg": 3.2226276184906735
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 60.06510703282067,
+              "excursion_deg": 60.06510703282067,
+              "sd_deg": 19.02902186863722
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 29.48904462830116,
+                "served_deg": 30.26717392949486
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 24.691270453379495,
+                "served_deg": 25.484651566989836
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 28.969741930610503,
+                "served_deg": 29.526433083817807
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              13.801697528767093,
+              9.065446277989759,
+              16.51536604555886,
+              16.14715974981769,
+              10.017479337357342
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 9.289647863753734,
+            "rmse_served_target_deg": 9.283278032560665,
+            "rmse_actual_served_deg": 0.29123711032930094,
+            "rmse_actual_target_velocity_deg_s": 61.19038757238768,
+            "rmse_command_target_deg": 20.49105495712506,
+            "corr_actual_target": -0.057748514488510004,
+            "actual_mean_bias_vs_target_deg": 4.1837270700667695,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 9.378433378150985,
+              "best_rmse_delay_s": 0.4050000000000008,
+              "best_lag_rmse_deg": 8.097539140862294,
+              "best_lag_correlation": 0.7773828455149258,
+              "max_correlation_delay_s": 0.4140000000000008,
+              "max_correlation": 0.7780628056402362,
+              "best_rmse_lag_affine_target_gain": 0.1689530066301023,
+              "best_rmse_lag_affine_bias_deg": 10.065467014744003,
+              "best_rmse_lag_affine_residual_rmse_deg": 1.1419280897941648,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 6.988327259205587,
+              "max_deg": 17.245259474967348,
+              "excursion_deg": 10.256932215761761,
+              "sd_deg": 1.8867166278105965
+            },
+            "served": {
+              "min_deg": 6.762798681679997,
+              "max_deg": 17.891390247808676,
+              "excursion_deg": 11.12859156612868,
+              "sd_deg": 1.9805356139079353
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -28.92775641627297,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 69.03480207543059,
+              "sd_deg": 19.174227383271354
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 11.381832355551126,
+                "served_deg": 11.666107390127996
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 11.473198942304741,
+                "served_deg": 11.577714496984274
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              9.52331785579829,
+              6.406730002880811,
+              11.410922657903509,
+              10.582437130988696,
+              6.4315374415772535
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 2,
+          "phase_valid_to_count": 2,
+          "phase_valid_cycle_count": 1,
+          "invalid_event_count": 3,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 17.099999999998502,
+            "last_period_s": 1.5390000000010762,
+            "last_stance_fraction": 0.7355425601038253,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.057,
+        "action_clipped_steps": 56,
+        "reference_jerk_limit_fraction_mean": 0.7456439393939392,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.5850435896237234,
+          "ankle": 0.6115742746942148
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -68.63647415,
+            "max_nm": 16.64960578,
+            "rms_nm": 21.465271871269035,
+            "positive_area_nm_s": 7.523417518200013,
+            "negative_area_nm_s": -64.45839897077006,
+            "positive_fraction": 0.3140391496527047,
+            "positive_over8_fraction": 0.05956640707219533,
+            "highpass_rms_nm": {
+              "10": 3.397188414480904,
+              "20": 3.2250867803449053
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 14.892991682813598,
+                "residual_after_lowpass_10_rms_nm": 14.895448255013276,
+                "highpass_20_rms_nm": 14.813742050304702,
+                "residual_after_lowpass_20_rms_nm": 14.81216403661294
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 3.3502431846315326,
+                "residual_after_lowpass_10_rms_nm": 3.3517588847882958,
+                "highpass_20_rms_nm": 3.182223879586209,
+                "residual_after_lowpass_20_rms_nm": 3.1822723181528176
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 3.2138518754989938,
+                "residual_after_lowpass_10_rms_nm": 3.2134468235443716,
+                "highpass_20_rms_nm": 3.066748725041566,
+                "residual_after_lowpass_20_rms_nm": 3.066893276937925
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.728033041910385,
+                "residual_after_lowpass_10_rms_nm": 0.7372026321584235,
+                "highpass_20_rms_nm": 0.5360130936332214,
+                "residual_after_lowpass_20_rms_nm": 0.5359485490099012
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.2682389243823338
+          },
+          "ankle": {
+            "min_nm": -16.01919607,
+            "max_nm": 10.45275922,
+            "rms_nm": 7.980314362381647,
+            "positive_area_nm_s": 2.431158600920001,
+            "negative_area_nm_s": -28.014030954305014,
+            "positive_fraction": 0.31319722163755,
+            "positive_over8_fraction": 0.024836876447063776,
+            "highpass_rms_nm": {
+              "10": 0.28721705018846966,
+              "20": 0.2086335143157764
+            },
+            "highpass_10_peak_frequency_hz": 50.292968750027875,
+            "highpass_20_peak_frequency_hz": 50.292968750027875,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.38226269871443425,
+                "residual_after_lowpass_10_rms_nm": 0.3822179806505919,
+                "highpass_20_rms_nm": 0.3020703095006249,
+                "residual_after_lowpass_20_rms_nm": 0.3020675635593002
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.25378253102990045,
+                "residual_after_lowpass_10_rms_nm": 0.25391276500310755,
+                "highpass_20_rms_nm": 0.1688850954642414,
+                "residual_after_lowpass_20_rms_nm": 0.16888212839816305
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.20911592201582344,
+                "residual_after_lowpass_10_rms_nm": 0.20920503870484894,
+                "highpass_20_rms_nm": 0.1562355801612709,
+                "residual_after_lowpass_20_rms_nm": 0.15623117291216193
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.13201692734583878,
+                "residual_after_lowpass_10_rms_nm": 0.13241740469874078,
+                "highpass_20_rms_nm": 0.047810958255073574,
+                "residual_after_lowpass_20_rms_nm": 0.04781395777192302
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.02034073248482335
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 664.3645544205754,
+          "left_force_max_n": 424.17358053,
+          "left_force_mean_n": 139.877082060823,
+          "left_contact_fraction": 0.7360555672490002,
+          "left_loaded_over50n_fraction": 0.708903388760261,
+          "left_penetration_max_mm": 18.51985,
+          "left_penetration_whole_max_mm": 18.51985
+        },
+        "morphology": {
+          "morphology_available": 258.0,
+          "morphology_settled_sample_count": 258.0,
+          "morphology_knee_loss": 28.1902161606406,
+          "morphology_ankle_loss": 25.35908608325003,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "episode_end_without_physical_anchor",
+            "dropped_sample_count": 49,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 0,
+            "total_resolved_sample_count": 258,
+            "total_dropped_sample_count": 242,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 1,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": false,
+            "knee_rom": false,
+            "ankle_rom": false,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": false
+        }
+      }
+    },
+    {
+      "label": "initial_imitation_visible",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_imitation_visible",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/initial_imitation_visible",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/smoke/imitation/milestone_iteration_000001/rl_module_last",
+        "steps": 500,
+        "episode_return": 295.6855339445474,
+        "visible_steps": 500,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "imitation",
+          "full_episode": {
+            "reward": 295.6855339445472,
+            "reward_base": 301.07987751586995,
+            "phase_event_progress_score": 2.3000000000000003,
+            "imitation_score": 418.34577063078126,
+            "served_imitation_score": 369.9674153933762,
+            "penalty": 78.56320892498712,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.027266538871250443,
+            "phase_timeout_penalty_term": 5.196599999974455,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 0.0,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 0.0,
+            "morphology_ankle_term": 0.0,
+            "morphology_term": 0.0,
+            "oob_term": 0.17047703247703122,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 6.64131043905326,
+            "rmse_served_target_deg": 6.644277929352197,
+            "rmse_actual_served_deg": 0.17791924742209766,
+            "rmse_actual_target_velocity_deg_s": 41.54200720366792,
+            "rmse_command_target_deg": 17.685890267190405,
+            "corr_actual_target": 0.8999536198562296,
+            "actual_mean_bias_vs_target_deg": 0.9127775406299926,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 6.081044298232315,
+              "best_rmse_delay_s": -0.024999999999999578,
+              "best_lag_rmse_deg": 5.823270587875707,
+              "best_lag_correlation": 0.9215940072768362,
+              "max_correlation_delay_s": -0.020999999999999575,
+              "max_correlation": 0.921822381256404,
+              "best_rmse_lag_affine_target_gain": 0.7812767918476546,
+              "best_rmse_lag_affine_bias_deg": 5.530898153822181,
+              "best_rmse_lag_affine_residual_rmse_deg": 4.837802797743551,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 9.225625304395432,
+              "max_deg": 50.9397318299681,
+              "excursion_deg": 41.714106525572674,
+              "sd_deg": 11.900682511616015
+            },
+            "served": {
+              "min_deg": 9.246529952123904,
+              "max_deg": 50.89976497803977,
+              "excursion_deg": 41.65323502591586,
+              "sd_deg": 11.916139284870487
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 82.65794785900727,
+              "excursion_deg": 82.65794785900727,
+              "sd_deg": 18.938823612946134
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 43.70497347994257,
+                "served_deg": 43.97049366883223
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 42.015789151022965,
+                "served_deg": 42.38188046034647
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 50.77727578055935,
+                "served_deg": 50.77875451651466
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              6.02521501677206,
+              4.318525430901768,
+              6.652721000115464,
+              7.556008068841751,
+              8.184362934171112
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 3.939610067938611,
+            "rmse_served_target_deg": 4.001139546133511,
+            "rmse_actual_served_deg": 0.258763746992551,
+            "rmse_actual_target_velocity_deg_s": 31.048417164341142,
+            "rmse_command_target_deg": 20.005130102729684,
+            "corr_actual_target": 0.9200747143160092,
+            "actual_mean_bias_vs_target_deg": 1.9695789050635444,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 3.928509092993445,
+              "best_rmse_delay_s": 0.035000000000000475,
+              "best_lag_rmse_deg": 3.5658474451687305,
+              "best_lag_correlation": 0.9328940743016655,
+              "max_correlation_delay_s": 0.03700000000000048,
+              "max_correlation": 0.932976313250702,
+              "best_rmse_lag_affine_target_gain": 1.0247235768167224,
+              "best_rmse_lag_affine_bias_deg": 1.6673664650023925,
+              "best_rmse_lag_affine_residual_rmse_deg": 3.0560297477664458,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": -4.163823763804581,
+              "max_deg": 26.50759875369889,
+              "excursion_deg": 30.671422517503473,
+              "sd_deg": 8.708889038176078
+            },
+            "served": {
+              "min_deg": -4.168770528310963,
+              "max_deg": 26.53862147290909,
+              "excursion_deg": 30.70739200122005,
+              "sd_deg": 8.793912617579851
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -40.10704565915762,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 80.21409131831524,
+              "sd_deg": 20.79663219655793
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 20.4011569187082,
+                "served_deg": 20.64068482271138
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 26.124071678971628,
+                "served_deg": 26.14377165208524
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              2.8592621776001943,
+              2.537932417474675,
+              2.726261650181882,
+              6.080699491086146,
+              3.9389673447144546
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 3,
+          "phase_valid_to_count": 4,
+          "phase_valid_cycle_count": 2,
+          "invalid_event_count": 0,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 15.619999999998543,
+            "last_period_s": 1.6829999999990672,
+            "last_stance_fraction": 0.3909685086155674,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          },
+          {
+            "time": 17.099999999998502,
+            "last_period_s": 1.4870000000011192,
+            "last_stance_fraction": 0.4001344989909759,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.089,
+        "action_clipped_steps": 89,
+        "reference_jerk_limit_fraction_mean": 0.579371212121212,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.42824724499875294,
+          "ankle": 0.5580759240116528
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -31.87897313,
+            "max_nm": 31.26429569,
+            "rms_nm": 9.370226436986517,
+            "positive_area_nm_s": 19.607064126030018,
+            "negative_area_nm_s": -13.598935700849978,
+            "positive_fraction": 0.5586192380551462,
+            "positive_over8_fraction": 0.18669753736055567,
+            "highpass_rms_nm": {
+              "10": 4.692975159700158,
+              "20": 3.6208070004548794
+            },
+            "highpass_10_peak_frequency_hz": 18.06640625001001,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 13.82186405547424,
+                "residual_after_lowpass_10_rms_nm": 13.819082381959973,
+                "highpass_20_rms_nm": 13.238226257874688,
+                "residual_after_lowpass_20_rms_nm": 13.24015554293302
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 4.5943442957798,
+                "residual_after_lowpass_10_rms_nm": 4.5955102478121885,
+                "highpass_20_rms_nm": 3.5545726924491894,
+                "residual_after_lowpass_20_rms_nm": 3.554527384469324
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 4.26078173971958,
+                "residual_after_lowpass_10_rms_nm": 4.261633745254047,
+                "highpass_20_rms_nm": 3.388214746231644,
+                "residual_after_lowpass_20_rms_nm": 3.3881785548185523
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 1.4462712595355338,
+                "residual_after_lowpass_10_rms_nm": 1.445859686603327,
+                "highpass_20_rms_nm": 0.7827279374685256,
+                "residual_after_lowpass_20_rms_nm": 0.7829102922090818
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.0868005406812479
+          },
+          "ankle": {
+            "min_nm": -21.65297013,
+            "max_nm": 11.44678655,
+            "rms_nm": 6.2425854923860875,
+            "positive_area_nm_s": 2.8798648357449994,
+            "negative_area_nm_s": -14.267404382890001,
+            "positive_fraction": 0.5727215323089876,
+            "positive_over8_fraction": 0.018943380340980847,
+            "highpass_rms_nm": {
+              "10": 0.3081354655986341,
+              "20": 0.22242960455312133
+            },
+            "highpass_10_peak_frequency_hz": 18.554687500010285,
+            "highpass_20_peak_frequency_hz": 48.339843750026795,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.4551282907824749,
+                "residual_after_lowpass_10_rms_nm": 0.4550704161378379,
+                "highpass_20_rms_nm": 0.35464580833055437,
+                "residual_after_lowpass_20_rms_nm": 0.3547157826707205
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.2958639982882331,
+                "residual_after_lowpass_10_rms_nm": 0.29584911174118206,
+                "highpass_20_rms_nm": 0.19200379926380048,
+                "residual_after_lowpass_20_rms_nm": 0.19200864521013042
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.24327017406949153,
+                "residual_after_lowpass_10_rms_nm": 0.2432683873170823,
+                "highpass_20_rms_nm": 0.174868199106454,
+                "residual_after_lowpass_20_rms_nm": 0.1748728022546703
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.155156597776568,
+                "residual_after_lowpass_10_rms_nm": 0.15513510435501998,
+                "highpass_20_rms_nm": 0.06305582991992806,
+                "residual_after_lowpass_20_rms_nm": 0.06307523982608101
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.007252014621303785
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 465.18318628914506,
+          "left_force_max_n": 649.87706876,
+          "left_force_mean_n": 97.9126891943191,
+          "left_contact_fraction": 0.4371711218690802,
+          "left_loaded_over50n_fraction": 0.36708061460745106,
+          "left_penetration_max_mm": 17.523960000000002,
+          "left_penetration_whole_max_mm": 17.523960000000002
+        },
+        "morphology": {
+          "morphology_available": 484.0,
+          "morphology_settled_sample_count": 488.0,
+          "morphology_knee_loss": 137.79779140231332,
+          "morphology_ankle_loss": 135.10757279802016,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "",
+            "dropped_sample_count": 0,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 5,
+            "total_resolved_sample_count": 488,
+            "total_dropped_sample_count": 12,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": true,
+            "knee_rom": true,
+            "ankle_rom": true,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": true
+        }
+      }
+    },
+    {
+      "label": "ex_novo_s1_u5_hidden",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u5_hidden",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u5_hidden",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/ex_novo/stage01/milestone_iteration_000006/rl_module_last",
+        "steps": 500,
+        "episode_return": -350.10332814218026,
+        "visible_steps": 0,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "ex_novo",
+          "full_episode": {
+            "reward": -350.1033281421807,
+            "reward_base": 7.7280331084796,
+            "phase_event_progress_score": 1.2999999999999998,
+            "imitation_score": 287.1196485253338,
+            "served_imitation_score": 219.2413951279432,
+            "penalty": 99.89630393213332,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.11663689274580054,
+            "phase_timeout_penalty_term": 174.31562499976724,
+            "phase_clawback_penalty_term": 0.45000000000000007,
+            "contact_support_clawback_term": 2.838761960638691,
+            "exnovo_task_term": 40.858828288603725,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 73.49036954614553,
+            "morphology_ankle_term": 65.65416803683158,
+            "morphology_term": 139.14453758297714,
+            "oob_term": 0.10697152592728684,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 13.711607475296958,
+            "rmse_served_target_deg": 13.603137198029101,
+            "rmse_actual_served_deg": 0.24088229538354272,
+            "rmse_actual_target_velocity_deg_s": 74.12650209648743,
+            "rmse_command_target_deg": 24.458303374188457,
+            "corr_actual_target": 0.4166592328625744,
+            "actual_mean_bias_vs_target_deg": 0.9279569706191226,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 13.825360502824978,
+              "best_rmse_delay_s": -0.13499999999999968,
+              "best_lag_rmse_deg": 12.923436416999143,
+              "best_lag_correlation": 0.43007154277922605,
+              "max_correlation_delay_s": -0.07199999999999962,
+              "max_correlation": 0.4592762836066861,
+              "best_rmse_lag_affine_target_gain": 0.11211201350810586,
+              "best_rmse_lag_affine_bias_deg": 21.86731445170966,
+              "best_rmse_lag_affine_residual_rmse_deg": 3.2704820664107057,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 16.9144341398759,
+              "max_deg": 31.001429510554985,
+              "excursion_deg": 14.086995370679084,
+              "sd_deg": 3.4532698694104504
+            },
+            "served": {
+              "min_deg": 16.969871370274312,
+              "max_deg": 31.771137188502063,
+              "excursion_deg": 14.801265818227751,
+              "sd_deg": 3.4922556068396973
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 65.61485942215135,
+              "excursion_deg": 65.61485942215135,
+              "sd_deg": 19.541885172539807
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 31.001429510554985,
+                "served_deg": 31.771137188502063
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 25.067422631350436,
+                "served_deg": 25.979529508208525
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 29.14546220738742,
+                "served_deg": 29.602265259077875
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              13.362207237220064,
+              9.354977341621014,
+              16.297978474932066,
+              16.59393407751444,
+              9.561490379884365
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 9.32324063328537,
+            "rmse_served_target_deg": 9.322476123717216,
+            "rmse_actual_served_deg": 0.2950884907472608,
+            "rmse_actual_target_velocity_deg_s": 59.16101967564606,
+            "rmse_command_target_deg": 20.800046385104302,
+            "corr_actual_target": -0.05202973141315766,
+            "actual_mean_bias_vs_target_deg": 4.319888709027257,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 9.426442918477225,
+              "best_rmse_delay_s": 0.43500000000000083,
+              "best_lag_rmse_deg": 8.290157438508587,
+              "best_lag_correlation": 0.752678036574807,
+              "max_correlation_delay_s": 0.43400000000000083,
+              "max_correlation": 0.7526866190849107,
+              "best_rmse_lag_affine_target_gain": 0.14853995051798569,
+              "best_rmse_lag_affine_bias_deg": 10.315183467646362,
+              "best_rmse_lag_affine_residual_rmse_deg": 1.0950309476991706,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 8.09062630303138,
+              "max_deg": 17.61415286939786,
+              "excursion_deg": 9.52352656636648,
+              "sd_deg": 1.8069777497520874
+            },
+            "served": {
+              "min_deg": 7.901424086606504,
+              "max_deg": 18.144511935807472,
+              "excursion_deg": 10.243087849200968,
+              "sd_deg": 1.903246410280138
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -25.860918150629377,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 65.967963809787,
+              "sd_deg": 19.11653034632482
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 12.268153560745123,
+                "served_deg": 12.41193160409483
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 10.987091817753994,
+                "served_deg": 11.04878891652672
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              10.511331915159385,
+              6.405943332061271,
+              10.85669516885676,
+              10.767407792886422,
+              5.656485794787126
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 2,
+          "phase_valid_to_count": 2,
+          "phase_valid_cycle_count": 1,
+          "invalid_event_count": 3,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 17.109999999998504,
+            "last_period_s": 1.5600000000010912,
+            "last_stance_fraction": 0.7307692307690901,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.058,
+        "action_clipped_steps": 57,
+        "reference_jerk_limit_fraction_mean": 0.7807121212121211,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.6182974496210565,
+          "ankle": 0.6195998475269111
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -62.69000364,
+            "max_nm": 16.18722323,
+            "rms_nm": 20.40776352699948,
+            "positive_area_nm_s": 7.623105821910018,
+            "negative_area_nm_s": -61.87662980790506,
+            "positive_fraction": 0.3117238476110293,
+            "positive_over8_fraction": 0.06567038518206693,
+            "highpass_rms_nm": {
+              "10": 3.2400541692998543,
+              "20": 3.1573525269863527
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 15.265457089261275,
+                "residual_after_lowpass_10_rms_nm": 15.267887402839088,
+                "highpass_20_rms_nm": 15.229831169912744,
+                "residual_after_lowpass_20_rms_nm": 15.228275419967982
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 3.200321788473215,
+                "residual_after_lowpass_10_rms_nm": 3.201956314989892,
+                "highpass_20_rms_nm": 3.119820967808957,
+                "residual_after_lowpass_20_rms_nm": 3.1198685240844686
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 3.0804112015072826,
+                "residual_after_lowpass_10_rms_nm": 3.079974579081062,
+                "highpass_20_rms_nm": 3.0131417242206333,
+                "residual_after_lowpass_20_rms_nm": 3.0132878985046507
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.5974602992348723,
+                "residual_after_lowpass_10_rms_nm": 0.6087753802734233,
+                "highpass_20_rms_nm": 0.48059754354254064,
+                "residual_after_lowpass_20_rms_nm": 0.48052192180680753
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.2241324316438778
+          },
+          "ankle": {
+            "min_nm": -17.14790852,
+            "max_nm": 14.39438793,
+            "rms_nm": 7.8028870657926195,
+            "positive_area_nm_s": 2.5629642606300003,
+            "negative_area_nm_s": -26.26148638820002,
+            "positive_fraction": 0.3245632498421385,
+            "positive_over8_fraction": 0.02252157440538834,
+            "highpass_rms_nm": {
+              "10": 0.26919449155570574,
+              "20": 0.2103530144429378
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.3556174978081734,
+                "residual_after_lowpass_10_rms_nm": 0.355599859201767,
+                "highpass_20_rms_nm": 0.29809903131724064,
+                "residual_after_lowpass_20_rms_nm": 0.2980974299272761
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.23149247196557207,
+                "residual_after_lowpass_10_rms_nm": 0.2317220167794476,
+                "highpass_20_rms_nm": 0.16830148781238077,
+                "residual_after_lowpass_20_rms_nm": 0.1683009351994642
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.19481663510370856,
+                "residual_after_lowpass_10_rms_nm": 0.19492428762013841,
+                "highpass_20_rms_nm": 0.15630788394373607,
+                "residual_after_lowpass_20_rms_nm": 0.15630308318320096
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.11319481344261456,
+                "residual_after_lowpass_10_rms_nm": 0.11395183718973957,
+                "highpass_20_rms_nm": 0.04539570680467267,
+                "residual_after_lowpass_20_rms_nm": 0.045403159315287225
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.022087722754491564
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 629.2321873227904,
+          "left_force_max_n": 412.25955705,
+          "left_force_mean_n": 132.48419915872236,
+          "left_contact_fraction": 0.7265838770785098,
+          "left_loaded_over50n_fraction": 0.70111555462008,
+          "left_penetration_max_mm": 18.335839999999997,
+          "left_penetration_whole_max_mm": 18.335839999999997
+        },
+        "morphology": {
+          "morphology_available": 259.0,
+          "morphology_settled_sample_count": 259.0,
+          "morphology_knee_loss": 29.39614781845821,
+          "morphology_ankle_loss": 26.261667214732643,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "episode_end_without_physical_anchor",
+            "dropped_sample_count": 46,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 0,
+            "total_resolved_sample_count": 259,
+            "total_dropped_sample_count": 241,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": false,
+            "knee_rom": false,
+            "ankle_rom": false,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": false
+        }
+      }
+    },
+    {
+      "label": "ex_novo_s1_u5_visible",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u5_visible",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u5_visible",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/ex_novo/stage01/milestone_iteration_000006/rl_module_last",
+        "steps": 500,
+        "episode_return": -577.5164684204494,
+        "visible_steps": 500,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "ex_novo",
+          "full_episode": {
+            "reward": -577.51646842045,
+            "reward_base": 4.947394429567863,
+            "phase_event_progress_score": 2.3000000000000003,
+            "imitation_score": 427.15685686782115,
+            "served_imitation_score": 380.7381237486262,
+            "penalty": 79.22993195327508,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.015408288749746247,
+            "phase_timeout_penalty_term": 9.465206249962687,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 1.0673425182505634,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 282.07136712068007,
+            "morphology_ankle_term": 289.6429240772292,
+            "morphology_term": 571.7142911979092,
+            "oob_term": 0.20161459514507318,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 7.063756751859278,
+            "rmse_served_target_deg": 7.069714398761801,
+            "rmse_actual_served_deg": 0.15712654442909155,
+            "rmse_actual_target_velocity_deg_s": 45.21883465868786,
+            "rmse_command_target_deg": 18.549972216233385,
+            "corr_actual_target": 0.8831304147559427,
+            "actual_mean_bias_vs_target_deg": 0.8278168758375732,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 6.87582724883178,
+              "best_rmse_delay_s": -0.022999999999999576,
+              "best_lag_rmse_deg": 6.706327095394623,
+              "best_lag_correlation": 0.8926649655915728,
+              "max_correlation_delay_s": -0.01599999999999957,
+              "max_correlation": 0.8931107329492065,
+              "best_rmse_lag_affine_target_gain": 0.7537287507760358,
+              "best_rmse_lag_affine_bias_deg": 6.44629957515798,
+              "best_rmse_lag_affine_residual_rmse_deg": 5.601974018563589,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 6.939577637778267,
+              "max_deg": 50.69654635966438,
+              "excursion_deg": 43.75696872188611,
+              "sd_deg": 11.887547681030197
+            },
+            "served": {
+              "min_deg": 6.921799082255547,
+              "max_deg": 50.394655413444404,
+              "excursion_deg": 43.47285633118886,
+              "sd_deg": 11.903427499578699
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 80.60496460300432,
+              "excursion_deg": 80.60496460300432,
+              "sd_deg": 19.385149738712204
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 42.166995878868704,
+                "served_deg": 42.53112009371125
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 42.88509464744717,
+                "served_deg": 43.110832399516084
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 50.120112544661154,
+                "served_deg": 50.25665827145347
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              6.771280659841633,
+              5.652271147283222,
+              6.99290914859216,
+              8.697760670239239,
+              6.7964712042132
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 3.2163536128838515,
+            "rmse_served_target_deg": 3.2902040094840874,
+            "rmse_actual_served_deg": 0.3276427237404211,
+            "rmse_actual_target_velocity_deg_s": 33.90118696178557,
+            "rmse_command_target_deg": 20.208285892523566,
+            "corr_actual_target": 0.9247140320258531,
+            "actual_mean_bias_vs_target_deg": 0.871674196715945,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 3.23506474249893,
+              "best_rmse_delay_s": 0.03800000000000048,
+              "best_lag_rmse_deg": 2.7274942611996016,
+              "best_lag_correlation": 0.9427488198956264,
+              "max_correlation_delay_s": 0.04200000000000048,
+              "max_correlation": 0.942934475427218,
+              "best_rmse_lag_affine_target_gain": 0.9372165612787045,
+              "best_rmse_lag_affine_bias_deg": 1.1974140197359806,
+              "best_rmse_lag_affine_residual_rmse_deg": 2.564518142447381,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": -4.324445480534363,
+              "max_deg": 23.747546630853417,
+              "excursion_deg": 28.07199211138778,
+              "sd_deg": 7.988330493442191
+            },
+            "served": {
+              "min_deg": -4.211671373374636,
+              "max_deg": 23.811776022260926,
+              "excursion_deg": 28.02344739563556,
+              "sd_deg": 8.081372148529102
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -40.10704565915762,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 80.21409131831524,
+              "sd_deg": 20.998009634807097
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 20.90684021919385,
+                "served_deg": 20.91147108745112
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 21.444765427656545,
+                "served_deg": 21.460572192943246
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              2.5764662329770553,
+              1.536740914596245,
+              3.6864069230608787,
+              4.211683924617274,
+              3.093532881850936
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 3,
+          "phase_valid_to_count": 4,
+          "phase_valid_cycle_count": 2,
+          "invalid_event_count": 0,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 15.639999999998532,
+            "last_period_s": 1.715999999999049,
+            "last_stance_fraction": 0.3548951048951049,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          },
+          {
+            "time": 17.109999999998504,
+            "last_period_s": 1.471000000001137,
+            "last_stance_fraction": 0.41060503059116965,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.095,
+        "action_clipped_steps": 94,
+        "reference_jerk_limit_fraction_mean": 0.5970227272727272,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.4569285130016282,
+          "ankle": 0.5681743756668243
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -20.66008111,
+            "max_nm": 34.16159209,
+            "rms_nm": 8.795631534988642,
+            "positive_area_nm_s": 18.382827945374988,
+            "negative_area_nm_s": -13.523688621465016,
+            "positive_fraction": 0.5257840454641128,
+            "positive_over8_fraction": 0.17617343717112188,
+            "highpass_rms_nm": {
+              "10": 4.804547799343097,
+              "20": 3.4916911369870607
+            },
+            "highpass_10_peak_frequency_hz": 20.019531250011095,
+            "highpass_20_peak_frequency_hz": 48.828125000027065,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 14.292955794270744,
+                "residual_after_lowpass_10_rms_nm": 14.290990217403536,
+                "highpass_20_rms_nm": 13.641773650214253,
+                "residual_after_lowpass_20_rms_nm": 13.64153720669682
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 4.713339740793748,
+                "residual_after_lowpass_10_rms_nm": 4.713761355032641,
+                "highpass_20_rms_nm": 3.4322799575523097,
+                "residual_after_lowpass_20_rms_nm": 3.432165079379865
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 4.350299462266143,
+                "residual_after_lowpass_10_rms_nm": 4.350101644877423,
+                "highpass_20_rms_nm": 3.2790157009855907,
+                "residual_after_lowpass_20_rms_nm": 3.278955711472537
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 1.548486092761331,
+                "residual_after_lowpass_10_rms_nm": 1.5503138000258876,
+                "highpass_20_rms_nm": 0.7225313124688014,
+                "residual_after_lowpass_20_rms_nm": 0.7222709836459422
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.079797372600918
+          },
+          "ankle": {
+            "min_nm": -22.49728381,
+            "max_nm": 11.06991892,
+            "rms_nm": 7.004980530176547,
+            "positive_area_nm_s": 3.061714428,
+            "negative_area_nm_s": -14.856750078240001,
+            "positive_fraction": 0.6131340770364134,
+            "positive_over8_fraction": 0.01599663228793938,
+            "highpass_rms_nm": {
+              "10": 0.3266739505220598,
+              "20": 0.22048208265562572
+            },
+            "highpass_10_peak_frequency_hz": 13.671875000007578,
+            "highpass_20_peak_frequency_hz": 49.316406250027335,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.4855075992836727,
+                "residual_after_lowpass_10_rms_nm": 0.4847472294233825,
+                "highpass_20_rms_nm": 0.3614835998641451,
+                "residual_after_lowpass_20_rms_nm": 0.36151406035803785
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.31737621991972786,
+                "residual_after_lowpass_10_rms_nm": 0.3176112448652927,
+                "highpass_20_rms_nm": 0.18886959245704987,
+                "residual_after_lowpass_20_rms_nm": 0.18888706371579103
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.2567956867817812,
+                "residual_after_lowpass_10_rms_nm": 0.256777464633955,
+                "highpass_20_rms_nm": 0.1728543166951574,
+                "residual_after_lowpass_20_rms_nm": 0.17285780758394298
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.1727057389380027,
+                "residual_after_lowpass_10_rms_nm": 0.17336709689244056,
+                "highpass_20_rms_nm": 0.05963841659415065,
+                "residual_after_lowpass_20_rms_nm": 0.059660691365555255
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.007854165881094851
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 501.27313305096004,
+          "left_force_max_n": 695.31029182,
+          "left_force_mean_n": 105.5089735109598,
+          "left_contact_fraction": 0.4203325615659861,
+          "left_loaded_over50n_fraction": 0.3464533782361608,
+          "left_penetration_max_mm": 17.68975,
+          "left_penetration_whole_max_mm": 17.68975
+        },
+        "morphology": {
+          "morphology_available": 484.0,
+          "morphology_settled_sample_count": 488.0,
+          "morphology_knee_loss": 112.82854684827201,
+          "morphology_ankle_loss": 115.85716963089165,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "",
+            "dropped_sample_count": 0,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 5,
+            "total_resolved_sample_count": 488,
+            "total_dropped_sample_count": 12,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": true,
+            "knee_rom": true,
+            "ankle_rom": true,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": true
+        }
+      }
+    },
+    {
+      "label": "imitation_s1_u5_hidden",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u5_hidden",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u5_hidden",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/imitation/stage01/milestone_iteration_000006/rl_module_last",
+        "steps": 500,
+        "episode_return": -45.4661263264006,
+        "visible_steps": 0,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "imitation",
+          "full_episode": {
+            "reward": -45.46612632640056,
+            "reward_base": 137.10335221354546,
+            "phase_event_progress_score": 1.2999999999999998,
+            "imitation_score": 285.4716754076357,
+            "served_imitation_score": 218.05869521867925,
+            "penalty": 98.42066878141132,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.0,
+            "phase_timeout_penalty_term": 182.4726249997599,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 0.0,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 0.0,
+            "morphology_ankle_term": 0.0,
+            "morphology_term": 0.0,
+            "oob_term": 0.09685354018600413,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 13.692024844829367,
+            "rmse_served_target_deg": 13.589119384294872,
+            "rmse_actual_served_deg": 0.2243279169867885,
+            "rmse_actual_target_velocity_deg_s": 74.24084852161408,
+            "rmse_command_target_deg": 23.564480983440692,
+            "corr_actual_target": 0.441693944344232,
+            "actual_mean_bias_vs_target_deg": 1.7335566828162972,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 13.78316395223157,
+              "best_rmse_delay_s": -0.10499999999999965,
+              "best_lag_rmse_deg": 13.331571965718469,
+              "best_lag_correlation": 0.3985321594367485,
+              "max_correlation_delay_s": -0.021999999999999575,
+              "max_correlation": 0.4497060411866528,
+              "best_rmse_lag_affine_target_gain": 0.10352885386276305,
+              "best_rmse_lag_affine_bias_deg": 22.997541826502626,
+              "best_rmse_lag_affine_residual_rmse_deg": 3.3523757670136174,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 19.622559749556352,
+              "max_deg": 32.28075467794964,
+              "excursion_deg": 12.658194928393286,
+              "sd_deg": 3.474519643475215
+            },
+            "served": {
+              "min_deg": 19.586723454528588,
+              "max_deg": 32.39572042205929,
+              "excursion_deg": 12.808996967530703,
+              "sd_deg": 3.546708439440662
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 59.69692355117702,
+              "excursion_deg": 59.69692355117702,
+              "sd_deg": 19.350538610462873
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 30.77974206066388,
+                "served_deg": 31.66629719983695
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 25.4141196185257,
+                "served_deg": 26.2622207926716
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 31.393509689670395,
+                "served_deg": 31.713060089989444
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              13.062377111302597,
+              8.712327777860539,
+              16.253924807099796,
+              16.27517024177008,
+              11.09919614103464
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 9.470747777472393,
+            "rmse_served_target_deg": 9.466160924707491,
+            "rmse_actual_served_deg": 0.26604906859378924,
+            "rmse_actual_target_velocity_deg_s": 61.343852649444386,
+            "rmse_command_target_deg": 20.851996024360496,
+            "corr_actual_target": -0.04172768334318757,
+            "actual_mean_bias_vs_target_deg": 4.594353505950209,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 9.413924745078402,
+              "best_rmse_delay_s": 0.34500000000000075,
+              "best_lag_rmse_deg": 8.663470978409354,
+              "best_lag_correlation": 0.5796854069712314,
+              "max_correlation_delay_s": 0.3840000000000008,
+              "max_correlation": 0.5844489709485314,
+              "best_rmse_lag_affine_target_gain": 0.10938847956715503,
+              "best_rmse_lag_affine_bias_deg": 10.792360842466282,
+              "best_rmse_lag_affine_residual_rmse_deg": 1.2558455369546382,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 9.323045146300972,
+              "max_deg": 17.732878632645605,
+              "excursion_deg": 8.409833486344633,
+              "sd_deg": 1.9477725022033148
+            },
+            "served": {
+              "min_deg": 9.28350261987483,
+              "max_deg": 18.321608495702147,
+              "excursion_deg": 9.038105875827318,
+              "sd_deg": 2.054932349026851
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -25.800941234999115,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 65.90798689415674,
+              "sd_deg": 19.44873720819746
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 12.794080688157043,
+                "served_deg": 13.057059192901812
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 10.470033690979335,
+                "served_deg": 10.46059351577273
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              11.812692384720966,
+              6.45166691631,
+              10.695217130250048,
+              10.108331843757847,
+              5.821782250385615
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 2,
+          "phase_valid_to_count": 2,
+          "phase_valid_cycle_count": 1,
+          "invalid_event_count": 3,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 17.129999999998507,
+            "last_period_s": 1.571000000001126,
+            "last_stance_fraction": 0.7237428389559393,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.069,
+        "action_clipped_steps": 68,
+        "reference_jerk_limit_fraction_mean": 0.7757878787878787,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.6121663804313463,
+          "ankle": 0.6246690123287854
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -63.68671556,
+            "max_nm": 15.80133388,
+            "rms_nm": 19.176283174698167,
+            "positive_area_nm_s": 7.746308371879975,
+            "negative_area_nm_s": -53.96904501898001,
+            "positive_fraction": 0.321616501789097,
+            "positive_over8_fraction": 0.06567038518206693,
+            "highpass_rms_nm": {
+              "10": 3.4179687795675164,
+              "20": 3.2529543661845834
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 15.20291087770362,
+                "residual_after_lowpass_10_rms_nm": 15.20459780311881,
+                "highpass_20_rms_nm": 15.13443971041207,
+                "residual_after_lowpass_20_rms_nm": 15.132688612904213
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 3.371083886013402,
+                "residual_after_lowpass_10_rms_nm": 3.3705927851954147,
+                "highpass_20_rms_nm": 3.2104795897138834,
+                "residual_after_lowpass_20_rms_nm": 3.2105832919675166
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 3.2311285714880067,
+                "residual_after_lowpass_10_rms_nm": 3.2302201054482955,
+                "highpass_20_rms_nm": 3.097023718173559,
+                "residual_after_lowpass_20_rms_nm": 3.097163094545876
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.6829832870709596,
+                "residual_after_lowpass_10_rms_nm": 0.683461192069987,
+                "highpass_20_rms_nm": 0.5213138307841315,
+                "residual_after_lowpass_20_rms_nm": 0.5212325961212982
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.25698406325596723
+          },
+          "ankle": {
+            "min_nm": -18.16137032,
+            "max_nm": 5.70873932,
+            "rms_nm": 7.944290715488671,
+            "positive_area_nm_s": 1.3460917499899998,
+            "negative_area_nm_s": -25.898025428300006,
+            "positive_fraction": 0.31866975373605555,
+            "positive_over8_fraction": 0.0,
+            "highpass_rms_nm": {
+              "10": 0.2580026751159956,
+              "20": 0.21006423684080483
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.35079241034795305,
+                "residual_after_lowpass_10_rms_nm": 0.35075365769610395,
+                "highpass_20_rms_nm": 0.3011984367956696,
+                "residual_after_lowpass_20_rms_nm": 0.30120519628383535
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.22374534374763927,
+                "residual_after_lowpass_10_rms_nm": 0.22377014020646224,
+                "highpass_20_rms_nm": 0.17032876347788395,
+                "residual_after_lowpass_20_rms_nm": 0.17031824404193152
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.19094535811666488,
+                "residual_after_lowpass_10_rms_nm": 0.1909627390275576,
+                "highpass_20_rms_nm": 0.15801897875232662,
+                "residual_after_lowpass_20_rms_nm": 0.15800801537215753
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.10432172633871219,
+                "residual_after_lowpass_10_rms_nm": 0.10439636227442134,
+                "highpass_20_rms_nm": 0.04670021201767866,
+                "residual_after_lowpass_20_rms_nm": 0.046699836674044766
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.024978406193403725
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 594.5498374513852,
+          "left_force_max_n": 439.09868226,
+          "left_force_mean_n": 125.16641901664072,
+          "left_contact_fraction": 0.7234266470216797,
+          "left_loaded_over50n_fraction": 0.6266049252788887,
+          "left_penetration_max_mm": 18.231730000000002,
+          "left_penetration_whole_max_mm": 18.231730000000002
+        },
+        "morphology": {
+          "morphology_available": 255.0,
+          "morphology_settled_sample_count": 255.0,
+          "morphology_knee_loss": 25.30224832902345,
+          "morphology_ankle_loss": 26.897469018652377,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "episode_end_without_physical_anchor",
+            "dropped_sample_count": 55,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 0,
+            "total_resolved_sample_count": 255,
+            "total_dropped_sample_count": 245,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": false,
+            "knee_rom": false,
+            "ankle_rom": false,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": false
+        }
+      }
+    },
+    {
+      "label": "imitation_s1_u5_visible",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u5_visible",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u5_visible",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/imitation/stage01/milestone_iteration_000006/rl_module_last",
+        "steps": 500,
+        "episode_return": 296.65654686665596,
+        "visible_steps": 500,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "imitation",
+          "full_episode": {
+            "reward": 296.65654686665613,
+            "reward_base": 306.4469682850112,
+            "phase_event_progress_score": 2.3000000000000003,
+            "imitation_score": 423.0429714465928,
+            "served_imitation_score": 375.86419212337563,
+            "penalty": 78.852979703008,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.0020054143129580706,
+            "phase_timeout_penalty_term": 9.610318749962358,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 0.0,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 0.0,
+            "morphology_ankle_term": 0.0,
+            "morphology_term": 0.0,
+            "oob_term": 0.17809725407959504,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 6.829330050403441,
+            "rmse_served_target_deg": 6.832757771065385,
+            "rmse_actual_served_deg": 0.1610415477872297,
+            "rmse_actual_target_velocity_deg_s": 40.729691407345314,
+            "rmse_command_target_deg": 17.927129829194755,
+            "corr_actual_target": 0.8944292445105753,
+            "actual_mean_bias_vs_target_deg": 1.5346372237001864,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 6.277279314584646,
+              "best_rmse_delay_s": -0.023999999999999577,
+              "best_lag_rmse_deg": 6.041296021669712,
+              "best_lag_correlation": 0.9154460370185828,
+              "max_correlation_delay_s": -0.021999999999999575,
+              "max_correlation": 0.9154877791363433,
+              "best_rmse_lag_affine_target_gain": 0.8100723660069084,
+              "best_rmse_lag_affine_bias_deg": 5.567809977690253,
+              "best_rmse_lag_affine_residual_rmse_deg": 5.238753219303953,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 7.824418826356487,
+              "max_deg": 53.30968452855747,
+              "excursion_deg": 45.485265702200984,
+              "sd_deg": 12.33055536078379
+            },
+            "served": {
+              "min_deg": 7.851496257547356,
+              "max_deg": 53.325520322148144,
+              "excursion_deg": 45.47402406460079,
+              "sd_deg": 12.345115737838865
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 85.51255029053321,
+              "excursion_deg": 85.51255029053321,
+              "sd_deg": 19.283212510553838
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 43.92812600541064,
+                "served_deg": 44.0338436733841
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 43.62442164396602,
+                "served_deg": 43.71150655588369
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 52.96384473012304,
+                "served_deg": 53.268092091606675
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              5.912905249479767,
+              5.073020761107097,
+              5.8885477900344005,
+              8.316557482500565,
+              8.313590165805648
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 3.584262622239549,
+            "rmse_served_target_deg": 3.656263258911409,
+            "rmse_actual_served_deg": 0.2779428295765278,
+            "rmse_actual_target_velocity_deg_s": 29.188753762319713,
+            "rmse_command_target_deg": 20.00072777046644,
+            "corr_actual_target": 0.9250637417725134,
+            "actual_mean_bias_vs_target_deg": 1.6708152313954456,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 3.4317125502433203,
+              "best_rmse_delay_s": 0.034000000000000474,
+              "best_lag_rmse_deg": 3.041478879522388,
+              "best_lag_correlation": 0.9409613841882254,
+              "max_correlation_delay_s": 0.036000000000000476,
+              "max_correlation": 0.9410998669143058,
+              "best_rmse_lag_affine_target_gain": 0.9586330389328289,
+              "best_rmse_lag_affine_bias_deg": 1.701705115188089,
+              "best_rmse_lag_affine_residual_rmse_deg": 2.663243816563021,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": -3.4079788085516918,
+              "max_deg": 25.8563572918111,
+              "excursion_deg": 29.264336100362794,
+              "sd_deg": 8.317623551244115
+            },
+            "served": {
+              "min_deg": -3.3216298495170977,
+              "max_deg": 25.90033687987681,
+              "excursion_deg": 29.22196672939391,
+              "sd_deg": 8.415092754896857
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -40.10704565915762,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 80.21409131831524,
+              "sd_deg": 20.776799722126647
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 21.055461720438743,
+                "served_deg": 21.228297949838623
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 23.962924693498724,
+                "served_deg": 23.986683506526614
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              2.715101844289405,
+              1.996268815920929,
+              2.750894381962287,
+              4.9939469930115745,
+              4.3299027758714
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 3,
+          "phase_valid_to_count": 4,
+          "phase_valid_cycle_count": 2,
+          "invalid_event_count": 0,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 15.619999999998543,
+            "last_period_s": 1.6819999999990678,
+            "last_stance_fraction": 0.3436385255648038,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          },
+          {
+            "time": 17.099999999998502,
+            "last_period_s": 1.486000000001118,
+            "last_stance_fraction": 0.3997308209956803,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.097,
+        "action_clipped_steps": 96,
+        "reference_jerk_limit_fraction_mean": 0.5746363636363636,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.436024444159083,
+          "ankle": 0.5622711565591888
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -25.53899616,
+            "max_nm": 30.81873372,
+            "rms_nm": 8.756858781573518,
+            "positive_area_nm_s": 18.989304840380008,
+            "negative_area_nm_s": -12.81392464141502,
+            "positive_fraction": 0.5792464744264365,
+            "positive_over8_fraction": 0.18080404125447275,
+            "highpass_rms_nm": {
+              "10": 4.920321681144284,
+              "20": 3.5501033218857914
+            },
+            "highpass_10_peak_frequency_hz": 17.08984375000947,
+            "highpass_20_peak_frequency_hz": 49.316406250027335,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 13.906027536876252,
+                "residual_after_lowpass_10_rms_nm": 13.907101766777963,
+                "highpass_20_rms_nm": 13.186812848742662,
+                "residual_after_lowpass_20_rms_nm": 13.185881222771416
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 4.817755057916597,
+                "residual_after_lowpass_10_rms_nm": 4.8183258978436205,
+                "highpass_20_rms_nm": 3.486274239687767,
+                "residual_after_lowpass_20_rms_nm": 3.486166366823206
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 4.447437038253318,
+                "residual_after_lowpass_10_rms_nm": 4.447605537317214,
+                "highpass_20_rms_nm": 3.3243462159056594,
+                "residual_after_lowpass_20_rms_nm": 3.3241775153976527
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 1.582948830309521,
+                "residual_after_lowpass_10_rms_nm": 1.5830204838336688,
+                "highpass_20_rms_nm": 0.7635459021346347,
+                "residual_after_lowpass_20_rms_nm": 0.7635320278709149
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.07804952366616616
+          },
+          "ankle": {
+            "min_nm": -19.15061551,
+            "max_nm": 9.66188186,
+            "rms_nm": 6.655972393605482,
+            "positive_area_nm_s": 2.450631502330003,
+            "negative_area_nm_s": -15.850978597450002,
+            "positive_fraction": 0.5685118922332141,
+            "positive_over8_fraction": 0.012207956219743212,
+            "highpass_rms_nm": {
+              "10": 0.31542883124995486,
+              "20": 0.218913144895497
+            },
+            "highpass_10_peak_frequency_hz": 18.554687500010285,
+            "highpass_20_peak_frequency_hz": 50.781250000028145,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.4658770419765579,
+                "residual_after_lowpass_10_rms_nm": 0.46595865045515267,
+                "highpass_20_rms_nm": 0.35824386536894604,
+                "residual_after_lowpass_20_rms_nm": 0.3582157449809125
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.3039896791387531,
+                "residual_after_lowpass_10_rms_nm": 0.3040013920511351,
+                "highpass_20_rms_nm": 0.19055729721476805,
+                "residual_after_lowpass_20_rms_nm": 0.19056606057198697
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.25019256238889076,
+                "residual_after_lowpass_10_rms_nm": 0.25020617357093866,
+                "highpass_20_rms_nm": 0.1729072352990807,
+                "residual_after_lowpass_20_rms_nm": 0.1729087649416334
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.15913140355360242,
+                "residual_after_lowpass_10_rms_nm": 0.1591372158835518,
+                "highpass_20_rms_nm": 0.06451991621563566,
+                "residual_after_lowpass_20_rms_nm": 0.06452345618923078
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.007480543694711841
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 471.84441849619003,
+          "left_force_max_n": 705.61716386,
+          "left_force_mean_n": 99.31475869782152,
+          "left_contact_fraction": 0.42348979162281625,
+          "left_loaded_over50n_fraction": 0.36202904651652285,
+          "left_penetration_max_mm": 17.86201,
+          "left_penetration_whole_max_mm": 17.86201
+        },
+        "morphology": {
+          "morphology_available": 484.0,
+          "morphology_settled_sample_count": 488.0,
+          "morphology_knee_loss": 141.77964029724433,
+          "morphology_ankle_loss": 134.8262164339566,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "",
+            "dropped_sample_count": 0,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 5,
+            "total_resolved_sample_count": 488,
+            "total_dropped_sample_count": 12,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": true,
+            "knee_rom": true,
+            "ankle_rom": true,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": true
+        }
+      }
+    },
+    {
+      "label": "ex_novo_s1_u10_hidden",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u10_hidden",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u10_hidden",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/ex_novo/stage01/milestone_iteration_000011/rl_module_last",
+        "steps": 500,
+        "episode_return": -351.5806481957686,
+        "visible_steps": 0,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "ex_novo",
+          "full_episode": {
+            "reward": -351.5806481957687,
+            "reward_base": 10.380003991935327,
+            "phase_event_progress_score": 1.2999999999999998,
+            "imitation_score": 295.43178163099293,
+            "served_imitation_score": 228.13101022718516,
+            "penalty": 98.05095439860933,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.027708390374871453,
+            "phase_timeout_penalty_term": 176.70574999976574,
+            "phase_clawback_penalty_term": 0.45000000000000007,
+            "contact_support_clawback_term": 2.6553383766071104,
+            "exnovo_task_term": 45.326306940378124,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 72.36353174312592,
+            "morphology_ankle_term": 64.31844713287038,
+            "morphology_term": 136.68197887599626,
+            "oob_term": 0.11356960458172433,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 13.645521159406604,
+            "rmse_served_target_deg": 13.527001323044358,
+            "rmse_actual_served_deg": 0.2583622327226713,
+            "rmse_actual_target_velocity_deg_s": 75.54657458437508,
+            "rmse_command_target_deg": 24.265038585889265,
+            "corr_actual_target": 0.46796277406418224,
+            "actual_mean_bias_vs_target_deg": 1.0195219521269632,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 13.782098579555521,
+              "best_rmse_delay_s": -0.12399999999999967,
+              "best_lag_rmse_deg": 13.147212316983616,
+              "best_lag_correlation": 0.413956640017881,
+              "max_correlation_delay_s": -0.03699999999999959,
+              "max_correlation": 0.47249812137837144,
+              "best_rmse_lag_affine_target_gain": 0.09357406532040884,
+              "best_rmse_lag_affine_bias_deg": 22.494048813319502,
+              "best_rmse_lag_affine_residual_rmse_deg": 2.8715400171385594,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 17.922974750078108,
+              "max_deg": 29.947247868771463,
+              "excursion_deg": 12.024273118693355,
+              "sd_deg": 3.0118556421410547
+            },
+            "served": {
+              "min_deg": 18.109363782338583,
+              "max_deg": 30.42519377103769,
+              "excursion_deg": 12.315829988699107,
+              "sd_deg": 3.0555867374397745
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 60.395343264096205,
+              "excursion_deg": 60.395343264096205,
+              "sd_deg": 19.471910686400406
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 27.925822648054922,
+                "served_deg": 28.881987660154177
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 25.759202973509545,
+                "served_deg": 26.553065615456372
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 29.489683250988552,
+                "served_deg": 30.106278578311453
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              14.120006651700013,
+              9.250140611149789,
+              16.02305783131455,
+              15.784074699283236,
+              9.89334062163286
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 9.133995107381013,
+            "rmse_served_target_deg": 9.134052180173233,
+            "rmse_actual_served_deg": 0.2875978926901128,
+            "rmse_actual_target_velocity_deg_s": 59.84294338780974,
+            "rmse_command_target_deg": 20.615813522860613,
+            "corr_actual_target": 0.13026075675293297,
+            "actual_mean_bias_vs_target_deg": 4.422816986395777,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 9.100475715851234,
+              "best_rmse_delay_s": 0.34500000000000075,
+              "best_lag_rmse_deg": 8.402228871959329,
+              "best_lag_correlation": 0.575677225225808,
+              "max_correlation_delay_s": 0.36600000000000077,
+              "max_correlation": 0.5789466239158411,
+              "best_rmse_lag_affine_target_gain": 0.13193372495226205,
+              "best_rmse_lag_affine_bias_deg": 10.34013761421372,
+              "best_rmse_lag_affine_residual_rmse_deg": 1.530534229199108,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 6.5283720752131735,
+              "max_deg": 17.828332233843824,
+              "excursion_deg": 11.29996015863065,
+              "sd_deg": 2.2413697025104913
+            },
+            "served": {
+              "min_deg": 6.43530818645081,
+              "max_deg": 18.54281953989864,
+              "excursion_deg": 12.10751135344783,
+              "sd_deg": 2.325321021841144
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -31.378027016859807,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 71.48507267601742,
+              "sd_deg": 19.082618417377624
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 13.049945550881246,
+                "served_deg": 13.275879670888804
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 10.708895651538436,
+                "served_deg": 10.774655005320026
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              11.292590129054545,
+              6.1359605200618645,
+              10.674224039360634,
+              10.113880984889429,
+              4.40929547292037
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 2,
+          "phase_valid_to_count": 2,
+          "phase_valid_cycle_count": 1,
+          "invalid_event_count": 3,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 17.129999999998507,
+            "last_period_s": 1.577000000001119,
+            "last_stance_fraction": 0.726062143309942,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.057,
+        "action_clipped_steps": 56,
+        "reference_jerk_limit_fraction_mean": 0.7702424242424242,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.6060380632606501,
+          "ankle": 0.6136013223881086
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -63.09722357,
+            "max_nm": 16.74894209,
+            "rms_nm": 20.48652503698924,
+            "positive_area_nm_s": 8.154072633039995,
+            "negative_area_nm_s": -61.10081192212009,
+            "positive_fraction": 0.3241422858345612,
+            "positive_over8_fraction": 0.07451062934119133,
+            "highpass_rms_nm": {
+              "10": 3.3871126161634764,
+              "20": 3.171470180708339
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 15.120035347545159,
+                "residual_after_lowpass_10_rms_nm": 15.12050728517698,
+                "highpass_20_rms_nm": 15.032387400770121,
+                "residual_after_lowpass_20_rms_nm": 15.031444097635266
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 3.342451996835219,
+                "residual_after_lowpass_10_rms_nm": 3.3411850542512602,
+                "highpass_20_rms_nm": 3.1321779683614843,
+                "residual_after_lowpass_20_rms_nm": 3.1324088519786804
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 3.1983814297863815,
+                "residual_after_lowpass_10_rms_nm": 3.196462593431513,
+                "highpass_20_rms_nm": 3.0225534019990703,
+                "residual_after_lowpass_20_rms_nm": 3.022783990850691
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.712556598835042,
+                "residual_after_lowpass_10_rms_nm": 0.7141661650821303,
+                "highpass_20_rms_nm": 0.5063769883216253,
+                "residual_after_lowpass_20_rms_nm": 0.5063966565638471
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.26375566734074435
+          },
+          "ankle": {
+            "min_nm": -18.73468829,
+            "max_nm": 11.79553986,
+            "rms_nm": 8.319162868205606,
+            "positive_area_nm_s": 1.845002401840001,
+            "negative_area_nm_s": -29.055292140405026,
+            "positive_fraction": 0.3033045674594822,
+            "positive_over8_fraction": 0.018311934329614817,
+            "highpass_rms_nm": {
+              "10": 0.27187049101433514,
+              "20": 0.21269679040665082
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.3586987179901178,
+                "residual_after_lowpass_10_rms_nm": 0.35834073331005845,
+                "highpass_20_rms_nm": 0.29598721862426475,
+                "residual_after_lowpass_20_rms_nm": 0.296029885251519
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.23687069846620026,
+                "residual_after_lowpass_10_rms_nm": 0.2366013460040495,
+                "highpass_20_rms_nm": 0.17021847130082499,
+                "residual_after_lowpass_20_rms_nm": 0.17026705237660766
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.19834135886840681,
+                "residual_after_lowpass_10_rms_nm": 0.1982818187646963,
+                "highpass_20_rms_nm": 0.1579656339160581,
+                "residual_after_lowpass_20_rms_nm": 0.15799161680208587
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.11785578575023145,
+                "residual_after_lowpass_10_rms_nm": 0.11830585276685274,
+                "highpass_20_rms_nm": 0.046330835788405605,
+                "residual_after_lowpass_20_rms_nm": 0.04633380103279069
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.018822791179860743
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 658.3202380482206,
+          "left_force_max_n": 450.70019111,
+          "left_force_mean_n": 138.6235733072048,
+          "left_contact_fraction": 0.7240580930330457,
+          "left_loaded_over50n_fraction": 0.6905914544306462,
+          "left_penetration_max_mm": 17.31982,
+          "left_penetration_whole_max_mm": 17.31982
+        },
+        "morphology": {
+          "morphology_available": 252.0,
+          "morphology_settled_sample_count": 252.0,
+          "morphology_knee_loss": 28.94541269725038,
+          "morphology_ankle_loss": 25.72737885314816,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "episode_end_without_physical_anchor",
+            "dropped_sample_count": 56,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 0,
+            "total_resolved_sample_count": 252,
+            "total_dropped_sample_count": 248,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": false,
+            "knee_rom": false,
+            "ankle_rom": false,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": false
+        }
+      }
+    },
+    {
+      "label": "ex_novo_s1_u10_visible",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u10_visible",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/ex_novo_s1_u10_visible",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/ex_novo/stage01/milestone_iteration_000011/rl_module_last",
+        "steps": 500,
+        "episode_return": -658.3900970228337,
+        "visible_steps": 500,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "ex_novo",
+          "full_episode": {
+            "reward": -658.3900970228339,
+            "reward_base": 5.063948407436012,
+            "phase_event_progress_score": 2.3000000000000003,
+            "imitation_score": 417.34890851406993,
+            "served_imitation_score": 365.9117401565588,
+            "penalty": 77.8336215580776,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.03031444241905697,
+            "phase_timeout_penalty_term": 10.93431249995941,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 1.9883125724968669,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 315.4417414643132,
+            "morphology_ankle_term": 334.9009462728815,
+            "morphology_term": 650.3426877371954,
+            "oob_term": 0.15841817819938186,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 7.054986576762564,
+            "rmse_served_target_deg": 7.063463534027263,
+            "rmse_actual_served_deg": 0.16584166148488355,
+            "rmse_actual_target_velocity_deg_s": 43.11498089185242,
+            "rmse_command_target_deg": 17.4871877617382,
+            "corr_actual_target": 0.8798277119494552,
+            "actual_mean_bias_vs_target_deg": 0.3074983175469325,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 6.729373645438228,
+              "best_rmse_delay_s": -0.03499999999999959,
+              "best_lag_rmse_deg": 6.27054840321332,
+              "best_lag_correlation": 0.90354929191651,
+              "max_correlation_delay_s": -0.02899999999999958,
+              "max_correlation": 0.9037811146498519,
+              "best_rmse_lag_affine_target_gain": 0.7980248889262622,
+              "best_rmse_lag_affine_bias_deg": 4.768579001986802,
+              "best_rmse_lag_affine_residual_rmse_deg": 5.531754205168386,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 6.823294947819269,
+              "max_deg": 51.7119632628135,
+              "excursion_deg": 44.88866831499423,
+              "sd_deg": 12.271085452454281
+            },
+            "served": {
+              "min_deg": 6.692492129458471,
+              "max_deg": 51.696042091858196,
+              "excursion_deg": 45.003549962399724,
+              "sd_deg": 12.29032162827039
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 80.05839408259969,
+              "excursion_deg": 80.05839408259969,
+              "sd_deg": 18.74720741898965
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 42.38513846058057,
+                "served_deg": 42.406113971521684
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 42.755908449485545,
+                "served_deg": 42.93799104747433
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 51.42498944974083,
+                "served_deg": 51.363954879317596
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              7.266888110258993,
+              5.676267298022465,
+              7.162216508255592,
+              7.734983390942055,
+              6.98019821573675
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 3.7335620136923975,
+            "rmse_served_target_deg": 3.7999380191343657,
+            "rmse_actual_served_deg": 0.30083286107441626,
+            "rmse_actual_target_velocity_deg_s": 30.473620379700552,
+            "rmse_command_target_deg": 19.93796695707334,
+            "corr_actual_target": 0.9168356743672117,
+            "actual_mean_bias_vs_target_deg": 1.5130807731139992,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 3.7329643490294218,
+              "best_rmse_delay_s": 0.04200000000000048,
+              "best_lag_rmse_deg": 3.1904570058767647,
+              "best_lag_correlation": 0.9377158069057017,
+              "max_correlation_delay_s": 0.04400000000000048,
+              "max_correlation": 0.9377768866578229,
+              "best_rmse_lag_affine_target_gain": 1.0001848121457482,
+              "best_rmse_lag_affine_bias_deg": 1.391893175860187,
+              "best_rmse_lag_affine_residual_rmse_deg": 2.870248639183597,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": -4.431805809003208,
+              "max_deg": 24.568463652102665,
+              "excursion_deg": 29.000269461105873,
+              "sd_deg": 8.54186838160049
+            },
+            "served": {
+              "min_deg": -4.4106454560676855,
+              "max_deg": 24.63796594954942,
+              "excursion_deg": 29.04861140561711,
+              "sd_deg": 8.610901585445054
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -40.10704565915762,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 80.21409131831524,
+              "sd_deg": 20.580586000638096
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 22.220762002281912,
+                "served_deg": 22.254919778321145
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 23.85654108208119,
+                "served_deg": 23.9064885479342
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              2.272143435528778,
+              2.092189637810405,
+              3.7222428418506093,
+              5.235883956895159,
+              4.007648808394387
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 3,
+          "phase_valid_to_count": 4,
+          "phase_valid_cycle_count": 2,
+          "invalid_event_count": 0,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 15.649999999998526,
+            "last_period_s": 1.704999999999055,
+            "last_stance_fraction": 0.34252199413489737,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          },
+          {
+            "time": 17.099999999998502,
+            "last_period_s": 1.4590000000011347,
+            "last_stance_fraction": 0.3858807402327634,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.09,
+        "action_clipped_steps": 90,
+        "reference_jerk_limit_fraction_mean": 0.563719696969697,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.42134643412887574,
+          "ankle": 0.5578218410959941
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -24.39145723,
+            "max_nm": 34.16046543,
+            "rms_nm": 8.896843665503233,
+            "positive_area_nm_s": 17.08482658835002,
+            "negative_area_nm_s": -14.48317637175002,
+            "positive_fraction": 0.515259945274679,
+            "positive_over8_fraction": 0.1547042727846769,
+            "highpass_rms_nm": {
+              "10": 4.376422775884274,
+              "20": 3.434600160602764
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 13.643283438694892,
+                "residual_after_lowpass_10_rms_nm": 13.645375461046008,
+                "highpass_20_rms_nm": 13.154936444228744,
+                "residual_after_lowpass_20_rms_nm": 13.152825559292848
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 4.28875085704173,
+                "residual_after_lowpass_10_rms_nm": 4.287858626608259,
+                "highpass_20_rms_nm": 3.372950925770819,
+                "residual_after_lowpass_20_rms_nm": 3.373116916371604
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 3.9962543537797255,
+                "residual_after_lowpass_10_rms_nm": 3.9952280654974928,
+                "highpass_20_rms_nm": 3.2191386886026727,
+                "residual_after_lowpass_20_rms_nm": 3.219300966634614
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 1.2945972461350455,
+                "residual_after_lowpass_10_rms_nm": 1.294629857099892,
+                "highpass_20_rms_nm": 0.7239964408826193,
+                "residual_after_lowpass_20_rms_nm": 0.7239649552695037
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.0765137458857406
+          },
+          "ankle": {
+            "min_nm": -21.75810108,
+            "max_nm": 12.09567591,
+            "rms_nm": 6.319530091722232,
+            "positive_area_nm_s": 4.130032439050001,
+            "negative_area_nm_s": -12.36422613029,
+            "positive_fraction": 0.6478636076615449,
+            "positive_over8_fraction": 0.029256998526625975,
+            "highpass_rms_nm": {
+              "10": 0.29899626204473845,
+              "20": 0.21563805072945136
+            },
+            "highpass_10_peak_frequency_hz": 14.648437500008118,
+            "highpass_20_peak_frequency_hz": 50.292968750027875,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.4535712238944933,
+                "residual_after_lowpass_10_rms_nm": 0.4534794706512521,
+                "highpass_20_rms_nm": 0.36444313599866596,
+                "residual_after_lowpass_20_rms_nm": 0.3644559391952022
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.283931258582731,
+                "residual_after_lowpass_10_rms_nm": 0.2839687405628051,
+                "highpass_20_rms_nm": 0.1881918843962094,
+                "residual_after_lowpass_20_rms_nm": 0.18817796843576745
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.23569308387773943,
+                "residual_after_lowpass_10_rms_nm": 0.23572485277157418,
+                "highpass_20_rms_nm": 0.1719293767231602,
+                "residual_after_lowpass_20_rms_nm": 0.17191399371103536
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.1452048919728901,
+                "residual_after_lowpass_10_rms_nm": 0.14520041625125588,
+                "highpass_20_rms_nm": 0.06025646579430236,
+                "residual_after_lowpass_20_rms_nm": 0.06025780548497839
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.007435725761743608
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 481.999575418965,
+          "left_force_max_n": 729.03929623,
+          "left_force_mean_n": 101.45223650263313,
+          "left_contact_fraction": 0.3948642391075563,
+          "left_loaded_over50n_fraction": 0.34203325615659863,
+          "left_penetration_max_mm": 18.00061,
+          "left_penetration_whole_max_mm": 18.00061
+        },
+        "morphology": {
+          "morphology_available": 484.0,
+          "morphology_settled_sample_count": 488.0,
+          "morphology_knee_loss": 126.17669658572535,
+          "morphology_ankle_loss": 133.96037850915263,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "",
+            "dropped_sample_count": 0,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 5,
+            "total_resolved_sample_count": 488,
+            "total_dropped_sample_count": 12,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": true,
+            "knee_rom": true,
+            "ankle_rom": true,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": true
+        }
+      }
+    },
+    {
+      "label": "imitation_s1_u10_hidden",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u10_hidden",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u10_hidden",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/imitation/stage01/milestone_iteration_000011/rl_module_last",
+        "steps": 500,
+        "episode_return": -20.22033347450067,
+        "visible_steps": 0,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "imitation",
+          "full_episode": {
+            "reward": -20.220333474500645,
+            "reward_base": 153.73750148449068,
+            "phase_event_progress_score": 1.4999999999999998,
+            "imitation_score": 301.48596347078217,
+            "served_imitation_score": 234.96053483282964,
+            "penalty": 97.62282763465191,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.0,
+            "phase_timeout_penalty_term": 173.81574999976857,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 0.0,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 0.0,
+            "morphology_ankle_term": 0.0,
+            "morphology_term": 0.0,
+            "oob_term": 0.1420849592227407,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 13.680571333871564,
+            "rmse_served_target_deg": 13.603858492910724,
+            "rmse_actual_served_deg": 0.267302567647326,
+            "rmse_actual_target_velocity_deg_s": 74.80947619289769,
+            "rmse_command_target_deg": 22.789764287457146,
+            "corr_actual_target": 0.41950124435149644,
+            "actual_mean_bias_vs_target_deg": 1.8220319507677434,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 13.704909191766939,
+              "best_rmse_delay_s": -0.11499999999999966,
+              "best_lag_rmse_deg": 13.189904277037044,
+              "best_lag_correlation": 0.40351847028773724,
+              "max_correlation_delay_s": -0.032999999999999585,
+              "max_correlation": 0.4417303945042797,
+              "best_rmse_lag_affine_target_gain": 0.1251229201784403,
+              "best_rmse_lag_affine_bias_deg": 22.54030527204882,
+              "best_rmse_lag_affine_residual_rmse_deg": 3.974074082493607,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 17.06857272642287,
+              "max_deg": 33.432392873905485,
+              "excursion_deg": 16.363820147482613,
+              "sd_deg": 4.075863177672716
+            },
+            "served": {
+              "min_deg": 17.125951438092855,
+              "max_deg": 33.451756460202475,
+              "excursion_deg": 16.32580502210962,
+              "sd_deg": 4.123479235788664
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 62.00952229753214,
+              "excursion_deg": 62.00952229753214,
+              "sd_deg": 18.995083004182582
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 29.739009061356114,
+                "served_deg": 30.59877278350981
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 24.505378317381137,
+                "served_deg": 25.39355904157667
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 32.57993062397453,
+                "served_deg": 32.96121227401216
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              13.393132009033033,
+              9.311092718949816,
+              16.200886056374216,
+              15.985055010333607,
+              10.650120069008734
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 8.43930125385791,
+            "rmse_served_target_deg": 8.4193740251687,
+            "rmse_actual_served_deg": 0.2748016152968989,
+            "rmse_actual_target_velocity_deg_s": 58.96653017210598,
+            "rmse_command_target_deg": 20.68359266581747,
+            "corr_actual_target": 0.1932412347890656,
+            "actual_mean_bias_vs_target_deg": 3.1332642914062125,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 8.370500922314335,
+              "best_rmse_delay_s": 0.3150000000000007,
+              "best_lag_rmse_deg": 7.8162242927961785,
+              "best_lag_correlation": 0.5936022869130789,
+              "max_correlation_delay_s": 0.34400000000000075,
+              "max_correlation": 0.5998753467507366,
+              "best_rmse_lag_affine_target_gain": 0.12728514416628242,
+              "best_rmse_lag_affine_bias_deg": 9.099844835023013,
+              "best_rmse_lag_affine_residual_rmse_deg": 1.3925877467466374,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 6.939131967934924,
+              "max_deg": 17.580609810383926,
+              "excursion_deg": 10.641477842449003,
+              "sd_deg": 2.0668750470367074
+            },
+            "served": {
+              "min_deg": 6.611529201471256,
+              "max_deg": 18.1569411725496,
+              "excursion_deg": 11.545411971078344,
+              "sd_deg": 2.172525762682727
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -34.986536508216396,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 75.09358216737402,
+              "sd_deg": 19.378144189875563
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 12.053490960415377,
+                "served_deg": 12.37139528514445
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 9.492461158473967,
+                "served_deg": 9.535109713425173
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              9.298012330619843,
+              6.165071903102058,
+              9.748063128620167,
+              9.242042810977406,
+              6.42253233305579
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 2,
+          "phase_valid_to_count": 3,
+          "phase_valid_cycle_count": 1,
+          "invalid_event_count": 2,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 17.119999999998505,
+            "last_period_s": 1.550000000001118,
+            "last_stance_fraction": 0.7490322580643904,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.068,
+        "action_clipped_steps": 67,
+        "reference_jerk_limit_fraction_mean": 0.763310606060606,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.5978516515359312,
+          "ankle": 0.6138725681794073
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -65.40890823,
+            "max_nm": 16.47362139,
+            "rms_nm": 20.66630097098603,
+            "positive_area_nm_s": 8.83697182402,
+            "negative_area_nm_s": -56.62603214835505,
+            "positive_fraction": 0.3561355504104399,
+            "positive_over8_fraction": 0.07430014733740266,
+            "highpass_rms_nm": {
+              "10": 3.435905070944592,
+              "20": 3.237166188363917
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 14.96972076696048,
+                "residual_after_lowpass_10_rms_nm": 14.971144088686783,
+                "highpass_20_rms_nm": 14.883227516480924,
+                "residual_after_lowpass_20_rms_nm": 14.881887034034566
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 3.3880892904619078,
+                "residual_after_lowpass_10_rms_nm": 3.3876496304185206,
+                "highpass_20_rms_nm": 3.194167399654071,
+                "residual_after_lowpass_20_rms_nm": 3.194253934793102
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 3.2437432948294456,
+                "residual_after_lowpass_10_rms_nm": 3.24290131981574,
+                "highpass_20_rms_nm": 3.0812342604219642,
+                "residual_after_lowpass_20_rms_nm": 3.0813594163262565
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.7552188707056872,
+                "residual_after_lowpass_10_rms_nm": 0.755646460808524,
+                "highpass_20_rms_nm": 0.5321141280312163,
+                "residual_after_lowpass_20_rms_nm": 0.5320378761780238
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.19782460080764933
+          },
+          "ankle": {
+            "min_nm": -21.82876355,
+            "max_nm": 4.27835775,
+            "rms_nm": 8.242096109427965,
+            "positive_area_nm_s": 1.0005482711999991,
+            "negative_area_nm_s": -27.303751584895007,
+            "positive_fraction": 0.33824458008840247,
+            "positive_over8_fraction": 0.0,
+            "highpass_rms_nm": {
+              "10": 0.26725993699653683,
+              "20": 0.20768722092197084
+            },
+            "highpass_10_peak_frequency_hz": 49.804687500027605,
+            "highpass_20_peak_frequency_hz": 49.804687500027605,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.3562730893358045,
+                "residual_after_lowpass_10_rms_nm": 0.3561028265095421,
+                "highpass_20_rms_nm": 0.295101061917343,
+                "residual_after_lowpass_20_rms_nm": 0.29510652112298863
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.23654791177632836,
+                "residual_after_lowpass_10_rms_nm": 0.23656033359089945,
+                "highpass_20_rms_nm": 0.16791320558184059,
+                "residual_after_lowpass_20_rms_nm": 0.1679084029209443
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.1965333306384391,
+                "residual_after_lowpass_10_rms_nm": 0.19654421787959633,
+                "highpass_20_rms_nm": 0.1560102299155088,
+                "residual_after_lowpass_20_rms_nm": 0.15600558085005
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.1203511041072137,
+                "residual_after_lowpass_10_rms_nm": 0.120394797905662,
+                "highpass_20_rms_nm": 0.044990330540905385,
+                "residual_after_lowpass_20_rms_nm": 0.04498996551605073
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.01951676487014836
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 637.8613966650203,
+          "left_force_max_n": 453.74916244,
+          "left_force_mean_n": 134.28612751076403,
+          "left_contact_fraction": 0.7141654388549779,
+          "left_loaded_over50n_fraction": 0.6230267312144812,
+          "left_penetration_max_mm": 19.647000000000002,
+          "left_penetration_whole_max_mm": 19.647000000000002
+        },
+        "morphology": {
+          "morphology_available": 300.0,
+          "morphology_settled_sample_count": 304.0,
+          "morphology_knee_loss": 41.597501094715696,
+          "morphology_ankle_loss": 22.480587088970445,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "",
+            "dropped_sample_count": 0,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 5,
+            "total_resolved_sample_count": 304,
+            "total_dropped_sample_count": 196,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": false,
+            "knee_rom": false,
+            "ankle_rom": false,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": false
+        }
+      }
+    },
+    {
+      "label": "imitation_s1_u10_visible",
+      "output": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u10_visible",
+      "metrics": {
+        "source": "Trajectory Generator/unified_MLP_39/runs/rollout/reward_curriculum_2026-10-01/imitation_s1_u10_visible",
+        "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_reward_curriculum_2026-10-01/imitation/stage01/milestone_iteration_000011/rl_module_last",
+        "steps": 500,
+        "episode_return": 280.1278085652326,
+        "visible_steps": 500,
+        "window_s": [
+          13.19,
+          17.94
+        ],
+        "common_window_complete": true,
+        "reward": {
+          "mode": "imitation",
+          "full_episode": {
+            "reward": 280.1278085652326,
+            "reward_base": 292.85040455673726,
+            "phase_event_progress_score": 2.3000000000000003,
+            "imitation_score": 415.28696357086295,
+            "served_imitation_score": 365.38501006877823,
+            "penalty": 82.51499621245782,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.0,
+            "phase_timeout_penalty_term": 12.587431249956639,
+            "phase_clawback_penalty_term": 0.0,
+            "contact_support_clawback_term": 0.0,
+            "exnovo_task_term": 0.0,
+            "prosthetic_joint_range_term": 0.0,
+            "morphology_knee_term": 0.0,
+            "morphology_ankle_term": 0.0,
+            "morphology_term": 0.0,
+            "oob_term": 0.13516474154790947,
+            "ankle_positive_torque_term": 0.0,
+            "knee_torque_rate_term": 0.0,
+            "knee_kinematic_jerk_term": 0.0,
+            "ankle_kinematic_jerk_term": 0.0,
+            "tuning_quality_term": 0.0
+          },
+          "reconstruction_exact": true
+        },
+        "joints": {
+          "knee": {
+            "rmse_actual_target_deg": 6.776600799849854,
+            "rmse_served_target_deg": 6.784162828902186,
+            "rmse_actual_served_deg": 0.16267783303232472,
+            "rmse_actual_target_velocity_deg_s": 41.97566178891835,
+            "rmse_command_target_deg": 18.71237671659912,
+            "corr_actual_target": 0.9066123511918586,
+            "actual_mean_bias_vs_target_deg": 2.076444444075713,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 6.173022652083626,
+              "best_rmse_delay_s": -0.012999999999999567,
+              "best_lag_rmse_deg": 6.112593963219829,
+              "best_lag_correlation": 0.9217177252997771,
+              "max_correlation_delay_s": -0.007999999999999563,
+              "max_correlation": 0.9219182189387471,
+              "best_rmse_lag_affine_target_gain": 0.75437720171639,
+              "best_rmse_lag_affine_bias_deg": 7.219358802954311,
+              "best_rmse_lag_affine_residual_rmse_deg": 4.699398753621227,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": 7.836587662136511,
+              "max_deg": 50.589626578397,
+              "excursion_deg": 42.75303891626049,
+              "sd_deg": 11.687309290495179
+            },
+            "served": {
+              "min_deg": 7.875767334762997,
+              "max_deg": 50.661162564669134,
+              "excursion_deg": 42.785395229906136,
+              "sd_deg": 11.70354128260668
+            },
+            "target": {
+              "min_deg": 10.885435612729205,
+              "max_deg": 56.23103635364625,
+              "excursion_deg": 45.34560074091705,
+              "sd_deg": 14.753950513953281
+            },
+            "command": {
+              "min_deg": -0.0,
+              "max_deg": 69.9122821130082,
+              "excursion_deg": 69.9122821130082,
+              "sd_deg": 19.36194155793666
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 13.519999999999706,
+                "target_deg": 56.2267355054663,
+                "actual_deg": 46.18951284714265,
+                "served_deg": 46.320362196167174
+              },
+              {
+                "time_s": 15.179999999998786,
+                "target_deg": 56.228363367413344,
+                "actual_deg": 42.846111342759315,
+                "served_deg": 42.98656735285146
+              },
+              {
+                "time_s": 16.75999999999845,
+                "target_deg": 56.23103635364625,
+                "actual_deg": 50.589626578397,
+                "served_deg": 50.62804297738374
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              5.225174470117626,
+              5.074044148390732,
+              6.338206861419116,
+              7.750033103723594,
+              8.882271205123388
+            ]
+          },
+          "ankle": {
+            "rmse_actual_target_deg": 4.068128621152737,
+            "rmse_served_target_deg": 4.114758399659134,
+            "rmse_actual_served_deg": 0.2675526814734812,
+            "rmse_actual_target_velocity_deg_s": 31.426145299372138,
+            "rmse_command_target_deg": 19.884146424480775,
+            "corr_actual_target": 0.9048820748138166,
+            "actual_mean_bias_vs_target_deg": 1.6790355321034014,
+            "lag": {
+              "fixed_support_s": [
+                13.5,
+                17.49
+              ],
+              "zero_lag_rmse_deg": 4.296883955019014,
+              "best_rmse_delay_s": 0.03800000000000048,
+              "best_lag_rmse_deg": 3.908658112608659,
+              "best_lag_correlation": 0.9162158785182448,
+              "max_correlation_delay_s": 0.04300000000000048,
+              "max_correlation": 0.9164692256236702,
+              "best_rmse_lag_affine_target_gain": 1.0252656585596507,
+              "best_rmse_lag_affine_bias_deg": 1.6286368406010665,
+              "best_rmse_lag_affine_residual_rmse_deg": 3.468190503051051,
+              "delay_definition": "actual(t) compared with target(t-delay); positive means actual lags target",
+              "limit": "Descriptive whole-window translation, not proof of a causal or constant delay."
+            },
+            "actual": {
+              "min_deg": -5.120146724028393,
+              "max_deg": 26.26574858537791,
+              "excursion_deg": 31.3858953094063,
+              "sd_deg": 8.702390470801788
+            },
+            "served": {
+              "min_deg": -5.183317009227725,
+              "max_deg": 26.253568650540483,
+              "excursion_deg": 31.43688565976821,
+              "sd_deg": 8.786202707061165
+            },
+            "target": {
+              "min_deg": -6.611822123192358,
+              "max_deg": 22.05182918647197,
+              "excursion_deg": 28.663651309664328,
+              "sd_deg": 7.968554237322056
+            },
+            "command": {
+              "min_deg": -40.10704565915762,
+              "max_deg": 40.10704565915762,
+              "excursion_deg": 80.21409131831524,
+              "sd_deg": 20.76276149593238
+            },
+            "at_target_peaks": [
+              {
+                "time_s": 14.819999999998986,
+                "target_deg": 22.05182918647197,
+                "actual_deg": 20.790728710850924,
+                "served_deg": 20.82555584542882
+              },
+              {
+                "time_s": 16.419999999998396,
+                "target_deg": 22.0433349728112,
+                "actual_deg": 26.188425721331487,
+                "served_deg": 26.179821390524562
+              }
+            ],
+            "per_elapsed_second_rmse_actual_target_deg": [
+              3.229513412988866,
+              2.0073610331480793,
+              3.058135205553242,
+              6.529697546303579,
+              3.5858280809740517
+            ]
+          }
+        },
+        "fsm": {
+          "phase_valid_hs_count": 3,
+          "phase_valid_to_count": 4,
+          "phase_valid_cycle_count": 2,
+          "invalid_event_count": 0,
+          "end_reason": "episode_time_limit"
+        },
+        "completed_cycles": [
+          {
+            "time": 15.629999999998537,
+            "last_period_s": 1.7099999999990523,
+            "last_stance_fraction": 0.32923976608187133,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          },
+          {
+            "time": 17.109999999998504,
+            "last_period_s": 1.4790000000011325,
+            "last_stance_fraction": 0.38945233265692214,
+            "cycle_knee_excursion_rad": 0.0,
+            "cycle_ankle_excursion_rad": 0.0
+          }
+        ],
+        "action_clipped_fraction": 0.086,
+        "action_clipped_steps": 85,
+        "reference_jerk_limit_fraction_mean": 0.6217348484848485,
+        "mean_command_endpoint_step_rad": {
+          "knee": 0.4824213634258162,
+          "ankle": 0.5613169433605039
+        },
+        "torque": {
+          "knee": {
+            "min_nm": -31.6842087,
+            "max_nm": 30.40326426,
+            "rms_nm": 9.051523545594765,
+            "positive_area_nm_s": 19.688263038259954,
+            "negative_area_nm_s": -12.596387471639979,
+            "positive_fraction": 0.5840875605135761,
+            "positive_over8_fraction": 0.2050094716901705,
+            "highpass_rms_nm": {
+              "10": 4.689002455105098,
+              "20": 3.5714560243245406
+            },
+            "highpass_10_peak_frequency_hz": 21.97265625001218,
+            "highpass_20_peak_frequency_hz": 49.316406250027335,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 14.397035240367101,
+                "residual_after_lowpass_10_rms_nm": 14.39944184411866,
+                "highpass_20_rms_nm": 13.831742284266104,
+                "residual_after_lowpass_20_rms_nm": 13.829585139298713
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 4.599627011229698,
+                "residual_after_lowpass_10_rms_nm": 4.599218964483256,
+                "highpass_20_rms_nm": 3.5100285290171813,
+                "residual_after_lowpass_20_rms_nm": 3.510175583319052
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 4.262111223591233,
+                "residual_after_lowpass_10_rms_nm": 4.261574262659794,
+                "highpass_20_rms_nm": 3.351220229424203,
+                "residual_after_lowpass_20_rms_nm": 3.3513658996387403
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 1.4631822582378076,
+                "residual_after_lowpass_10_rms_nm": 1.4631684823314115,
+                "highpass_20_rms_nm": 0.7509066108382717,
+                "residual_after_lowpass_20_rms_nm": 0.7508676598088956
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.08353689269480653
+          },
+          "ankle": {
+            "min_nm": -25.84490891,
+            "max_nm": 7.90746908,
+            "rms_nm": 7.078246271020048,
+            "positive_area_nm_s": 2.294336136535003,
+            "negative_area_nm_s": -15.501880608409998,
+            "positive_fraction": 0.5739844243317196,
+            "positive_over8_fraction": 0.0,
+            "highpass_rms_nm": {
+              "10": 0.29947933283469513,
+              "20": 0.22032227135782917
+            },
+            "highpass_10_peak_frequency_hz": 50.781250000028145,
+            "highpass_20_peak_frequency_hz": 50.781250000028145,
+            "controller_channels": {
+              "tau_input_plugin": {
+                "highpass_10_rms_nm": 0.4464435441727567,
+                "residual_after_lowpass_10_rms_nm": 0.4464625253436687,
+                "highpass_20_rms_nm": 0.3627222910805474,
+                "residual_after_lowpass_20_rms_nm": 0.3627271511718594
+              },
+              "tau_ref": {
+                "highpass_10_rms_nm": 0.282703139048784,
+                "residual_after_lowpass_10_rms_nm": 0.2826234434849588,
+                "highpass_20_rms_nm": 0.18921915013273666,
+                "residual_after_lowpass_20_rms_nm": 0.18920564520536431
+              },
+              "cascade_inner_p_cmd": {
+                "highpass_10_rms_nm": 0.2341419085643272,
+                "residual_after_lowpass_10_rms_nm": 0.2341446051408834,
+                "highpass_20_rms_nm": 0.1728837772002365,
+                "residual_after_lowpass_20_rms_nm": 0.17286970694507275
+              },
+              "cascade_inner_i_cmd": {
+                "highpass_10_rms_nm": 0.14505424708420556,
+                "residual_after_lowpass_10_rms_nm": 0.14503107100376803,
+                "highpass_20_rms_nm": 0.060645905472054326,
+                "residual_after_lowpass_20_rms_nm": 0.06064732028708799
+              }
+            },
+            "highpass20_per_actual_excursion_nm_per_deg": 0.007019786091359291
+          }
+        },
+        "contact": {
+          "left_normal_impulse_ns": 463.36412880369505,
+          "left_force_max_n": 663.17765706,
+          "left_force_mean_n": 97.5298103301284,
+          "left_contact_fraction": 0.42159545358871814,
+          "left_loaded_over50n_fraction": 0.35297832035360976,
+          "left_penetration_max_mm": 17.95579,
+          "left_penetration_whole_max_mm": 17.95579
+        },
+        "morphology": {
+          "morphology_available": 484.0,
+          "morphology_settled_sample_count": 488.0,
+          "morphology_knee_loss": 135.2806655822522,
+          "morphology_ankle_loss": 137.9366868954107,
+          "morphology_causal_failed_closed": 0.0,
+          "last_diagnostics": {
+            "event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+            "delay_s": 0.04,
+            "failed_closed": false,
+            "failure_reason": "",
+            "drop_reason": "",
+            "dropped_sample_count": 0,
+            "dropped_pending_sample_count": 0,
+            "dropped_wait_hs_sample_count": 0,
+            "pending_sample_count": 0,
+            "resolved_sample_count": 5,
+            "total_resolved_sample_count": 488,
+            "total_dropped_sample_count": 12,
+            "cancelled_transition_count": 0,
+            "total_cancelled_transition_count": 0,
+            "timeout_transition_count": 0,
+            "terminal_flushed": true,
+            "actor_state_name": "SWING_AFTER_TO",
+            "partial_stance_active": false
+          }
+        },
+        "mask_verified": true,
+        "gate": {
+          "checks": {
+            "full_episode": true,
+            "cycles": true,
+            "knee_rom": true,
+            "ankle_rom": true,
+            "tracking": true,
+            "normal_end": true
+          },
+          "passed": true
+        }
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "stage": 1,
+      "block": 1,
+      "actor_updates_per_arm": 5,
+      "visibility": 0.75,
+      "gate": {
+        "checks": {
+          "full_episode": true,
+          "cycles": false,
+          "knee_rom": false,
+          "ankle_rom": false,
+          "tracking": true,
+          "normal_end": true
+        },
+        "passed": false
+      },
+      "decision": "extend"
+    },
+    {
+      "stage": 1,
+      "block": 2,
+      "actor_updates_per_arm": 10,
+      "visibility": 0.75,
+      "gate": {
+        "checks": {
+          "full_episode": true,
+          "cycles": false,
+          "knee_rom": false,
+          "ankle_rom": false,
+          "tracking": true,
+          "normal_end": true
+        },
+        "passed": false
+      },
+      "decision": "stop_no_recovery"
+    }
+  ],
+  "orchestration_recovery": {
+    "reason": "iterations_run is cumulative; resumed-process count is iterations_completed_this_process",
+    "completed_training_reused": "train_ex_novo_s1_b2",
+    "production_code_changed": false,
+    "started": 1790880955.0823429
+  },
+  "stop_reason": "stopped_at_quality_gate",
+  "finished": 1790884223.466754,
+  "actor_updates_per_arm": 10,
+  "inputs_unchanged": true
+}

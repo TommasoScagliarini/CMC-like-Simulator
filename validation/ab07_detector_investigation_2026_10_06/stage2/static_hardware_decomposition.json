@@ -1,0 +1,675 @@
+{
+  "schema_version": 1,
+  "scope": "Offline static FK factor decomposition and visual/primary contact geometry; no integration or operative changes",
+  "sources": {
+    "AB06": {
+      "path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+      "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+    },
+    "AB07": {
+      "path": "models/AB07_SEASEA_Threadmill/AB07_SEASEA_stiff321_500_pi.osim",
+      "sha256": "79770a7ef8da5c784c152547e4970fa62158e57f30b92c6aa8919c4c91bcb9d5"
+    },
+    "AB06_static": {
+      "path": "models/AB06_SEASEA-raw/data/converted/static/static_01/static_01_ik_dataset_ab06_seasea.mot",
+      "sha256": "ea4d8b0718f692ecaa0529239295041b021ba16be223eea812a546ce306d0087"
+    },
+    "AB07_static": {
+      "path": "models/AB07_SEASEA-raw/data/converted/static/static01/static01_ik_dataset_ab06_seasea.mot",
+      "sha256": "cb66e6fc9c1b26bf751b9a4d0aa67c6af0d518b2f96b6afac9d4ea722cd250c4"
+    },
+    "binary": {
+      "path": "validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json",
+      "sha256": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2"
+    },
+    "primary": {
+      "path": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json",
+      "sha256": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0"
+    },
+    "mesh": {
+      "path": "Geometry/AM_foot_l.STL",
+      "sha256": "fcfc4d7a90c4ccd3bedb501ec3e50d4337aa9ca6e8438b58cc6be00f47a689e9"
+    },
+    "plugin": {
+      "path": "plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+      "sha256": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b"
+    },
+    "script": {
+      "path": "Trajectory Generator/validation/AB07/decompose_static_hardware_geometry.py",
+      "sha256": "aabd202f43f490a86dc24078c3bd7d48b53ef030d10f052c35add8a1df4635cf"
+    },
+    "AB06_ik": {
+      "path": "models/AB06_SEASEA_Threadmill/data/IK_results_AB06_SEASEA.mot",
+      "sha256": "ce4a948fd8f01f34ff32e4680b8a082f2e44de155aed89b7e4a55d37016c3596"
+    },
+    "AB07_ik": {
+      "path": "models/AB07_SEASEA_Threadmill/data/IK_results_AB07_SEASEA.mot",
+      "sha256": "6803f2fd224890e5ef166c26d8f70203522599be40e6e0659bed1174dcea2583"
+    },
+    "AB06_grf": {
+      "path": "models/AB06_SEASEA_Threadmill/data/AB06_SEASEA_GRF_FullSpan.mot",
+      "sha256": "6b84cce4abd6b313d102c6fa6123eb871e12154976fbf1e3c380f34928dc4059"
+    },
+    "AB07_grf": {
+      "path": "models/AB07_SEASEA_Threadmill/data/AB07_SEASEA_GRF_FullSpan.mot",
+      "sha256": "2a1c818c3166912346dcb5847b3d5827687d7e5dc3a3fac938c096e5171b57dd"
+    }
+  },
+  "source_files_unchanged": true,
+  "mean_static_coordinates_degrees_or_metres": {
+    "AB06": {
+      "pelvis_tilt": -0.4486434749500006,
+      "pelvis_list": 0.23177636965000037,
+      "pelvis_rotation": 43.10124709695001,
+      "pelvis_tx": -1.1489404004,
+      "pelvis_ty": 0.9751275134250003,
+      "pelvis_tz": -1.7917318991750006,
+      "hip_flexion_r": 4.947504127950001,
+      "hip_adduction_r": -10.971649279349997,
+      "hip_rotation_r": -19.78134945747499,
+      "knee_angle_r": -13.776788651050008,
+      "ankle_angle_r": 13.645322610399994,
+      "subtalar_angle_r": 0.021595299774999924,
+      "mtp_angle_r": 0.0,
+      "hip_flexion_l": -0.6288831050749996,
+      "hip_adduction_l": -4.4794039540999995,
+      "hip_rotation_l": -17.112322969749986,
+      "pros_knee_angle": -4.9236348923749995,
+      "pros_ankle_angle": 11.288072055349998,
+      "lumbar_extension": 0.0,
+      "lumbar_bending": 0.0,
+      "lumbar_rotation": 0.0
+    },
+    "AB07": {
+      "pelvis_tilt": 2.1007646884403677,
+      "pelvis_list": -0.7555161524770637,
+      "pelvis_rotation": 1.6298753891972466,
+      "pelvis_tx": -2.130890709564222,
+      "pelvis_ty": 0.9153844608944948,
+      "pelvis_tz": -1.7168446718577963,
+      "hip_flexion_r": 0.6003764711467888,
+      "hip_adduction_r": -3.623971369816513,
+      "hip_rotation_r": -25.988609923394485,
+      "knee_angle_r": -9.557930334174314,
+      "ankle_angle_r": 9.580130102110099,
+      "subtalar_angle_r": 0.10998306577981655,
+      "mtp_angle_r": 0.0,
+      "hip_flexion_l": -0.6495359253669721,
+      "hip_adduction_l": -4.799525221582568,
+      "hip_rotation_l": -13.397856582224763,
+      "pros_knee_angle": -7.10022214286697,
+      "pros_ankle_angle": 7.099145438577976,
+      "lumbar_extension": 0.0,
+      "lumbar_bending": 0.0,
+      "lumbar_rotation": 0.0
+    }
+  },
+  "native_mean_static_geometry": {
+    "AB06": {
+      "heel_world_y_m": 0.00041720024876226725,
+      "toe_world_y_m": 0.0225368726517026,
+      "heel_clearance_m": -0.014403622851237733,
+      "toe_clearance_m": 0.007716049551702601,
+      "foot_origin_y_m": 0.07162186457209907,
+      "visual_mesh_min_ground_y_m": 0.01265481375804229,
+      "primary_sphere_max_penetration_m": 0.012838230912086948,
+      "primary_sphere_min_surface_clearance_m": -0.012838230912086948
+    },
+    "AB07": {
+      "heel_world_y_m": 0.022277901805843395,
+      "toe_world_y_m": 0.028066769323935974,
+      "heel_clearance_m": 0.007457078705843395,
+      "toe_clearance_m": 0.013245946223935974,
+      "foot_origin_y_m": 0.08872791739144564,
+      "visual_mesh_min_ground_y_m": 0.038238900165034985,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.0016390658137417566
+    }
+  },
+  "hybrid_pose_count": 256,
+  "factor_groups": {
+    "pelvis_translation": [
+      "pelvis_tx",
+      "pelvis_ty",
+      "pelvis_tz"
+    ],
+    "pelvis_orientation": [
+      "pelvis_tilt",
+      "pelvis_list",
+      "pelvis_rotation"
+    ],
+    "hip_angles": [
+      "hip_flexion_l",
+      "hip_adduction_l",
+      "hip_rotation_l"
+    ],
+    "knee_angle": [
+      "pros_knee_angle"
+    ],
+    "ankle_angle": [
+      "pros_ankle_angle"
+    ],
+    "proximal_mount": [],
+    "distal_mount": [],
+    "anatomical_hip_frame": []
+  },
+  "exact_order_averaged_decomposition": {
+    "heel_world_y_m": {
+      "AB07_minus_AB06_m": 0.021860701557081127,
+      "contributions_m": {
+        "pelvis_translation": -0.05974305253050546,
+        "pelvis_orientation": -0.008321484858082463,
+        "hip_angles": 0.0007368136157068726,
+        "knee_angle": 0.003265990534934868,
+        "ankle_angle": 0.003933333702775329,
+        "proximal_mount": 0.01886418233052031,
+        "distal_mount": 0.04382878485940731,
+        "anatomical_hip_frame": 0.019296133902324417
+      },
+      "identity_error_m": 6.245004513516506e-17
+    },
+    "toe_world_y_m": {
+      "AB07_minus_AB06_m": 0.0055298966722333726,
+      "contributions_m": {
+        "pelvis_translation": -0.05974305253050546,
+        "pelvis_orientation": -0.0024543681219536236,
+        "hip_angles": 0.00010080576567553573,
+        "knee_angle": -0.00410559209405186,
+        "ankle_angle": -0.0102569974391832,
+        "proximal_mount": 0.01886418233052031,
+        "distal_mount": 0.04382878485940731,
+        "anatomical_hip_frame": 0.019296133902324417
+      },
+      "identity_error_m": 6.245004513516506e-17
+    },
+    "foot_origin_y_m": {
+      "AB07_minus_AB06_m": 0.017106052819346573,
+      "contributions_m": {
+        "pelvis_translation": -0.05974305253050546,
+        "pelvis_orientation": -0.0069906701260877505,
+        "hip_angles": 0.0006279822258279239,
+        "knee_angle": 0.0012226921578598802,
+        "ankle_angle": 0.0,
+        "proximal_mount": 0.01886418233052031,
+        "distal_mount": 0.04382878485940731,
+        "anatomical_hip_frame": 0.019296133902324417
+      },
+      "identity_error_m": 6.245004513516506e-17
+    }
+  },
+  "one_factor_swaps_from_AB06": {
+    "pelvis_translation": {
+      "heel_world_y_m": -0.059325852281743224,
+      "toe_world_y_m": -0.03720617987880289,
+      "heel_clearance_m": -0.07414667538174323,
+      "toe_clearance_m": -0.05202700297880289,
+      "foot_origin_y_m": 0.011878812041593578,
+      "visual_mesh_min_ground_y_m": -0.0470882387724632,
+      "primary_sphere_max_penetration_m": 0.07258128344259243,
+      "primary_sphere_min_surface_clearance_m": -0.07258128344259243
+    },
+    "pelvis_orientation": {
+      "heel_world_y_m": -0.00819063476676471,
+      "toe_world_y_m": 0.019580986596419124,
+      "heel_clearance_m": -0.023011457866764708,
+      "toe_clearance_m": 0.004760163496419124,
+      "foot_origin_y_m": 0.06415331757771953,
+      "visual_mesh_min_ground_y_m": 0.002732629671579008,
+      "primary_sphere_max_penetration_m": 0.015241096792421563,
+      "primary_sphere_min_surface_clearance_m": -0.015241096792421563
+    },
+    "hip_angles": {
+      "heel_world_y_m": 0.001261731536075436,
+      "toe_world_y_m": 0.02252797446070645,
+      "heel_clearance_m": -0.013559091563924564,
+      "toe_clearance_m": 0.0077071513607064514,
+      "foot_origin_y_m": 0.07229199942298636,
+      "visual_mesh_min_ground_y_m": 0.013691054646800427,
+      "primary_sphere_max_penetration_m": 0.013026764059805416,
+      "primary_sphere_min_surface_clearance_m": -0.013026764059805416
+    },
+    "knee_angle": {
+      "heel_world_y_m": 0.0039086161533660735,
+      "toe_world_y_m": 0.018672099463958598,
+      "heel_clearance_m": -0.010912206946633926,
+      "toe_clearance_m": 0.0038512763639585983,
+      "foot_origin_y_m": 0.07312948208479803,
+      "visual_mesh_min_ground_y_m": 0.017819050233057798,
+      "primary_sphere_max_penetration_m": 0.013655912415128807,
+      "primary_sphere_min_surface_clearance_m": -0.013655912415128807
+    },
+    "ankle_angle": {
+      "heel_world_y_m": 0.004322116236540857,
+      "toe_world_y_m": 0.012266586672348145,
+      "heel_clearance_m": -0.010498706863459143,
+      "toe_clearance_m": -0.0025542364276518546,
+      "foot_origin_y_m": 0.07162186457209907,
+      "visual_mesh_min_ground_y_m": 0.019741966106018763,
+      "primary_sphere_max_penetration_m": 0.017229578616960124,
+      "primary_sphere_min_surface_clearance_m": -0.017229578616960124
+    },
+    "proximal_mount": {
+      "heel_world_y_m": 0.019271352687540294,
+      "toe_world_y_m": 0.04139102509048063,
+      "heel_clearance_m": 0.004450529587540294,
+      "toe_clearance_m": 0.02657020199048063,
+      "foot_origin_y_m": 0.0904760170108771,
+      "visual_mesh_min_ground_y_m": 0.031508966196820316,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.00601592152669108
+    },
+    "distal_mount": {
+      "heel_world_y_m": 0.044232510141280074,
+      "toe_world_y_m": 0.0663521825442204,
+      "heel_clearance_m": 0.029411687041280075,
+      "toe_clearance_m": 0.0515313594442204,
+      "foot_origin_y_m": 0.11543717446461688,
+      "visual_mesh_min_ground_y_m": 0.056470123650560096,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.03097707898043086
+    },
+    "anatomical_hip_frame": {
+      "heel_world_y_m": 0.01905502187373928,
+      "toe_world_y_m": 0.041174694276679615,
+      "heel_clearance_m": 0.004234198773739281,
+      "toe_clearance_m": 0.026353871176679616,
+      "foot_origin_y_m": 0.09025968619707608,
+      "visual_mesh_min_ground_y_m": 0.0312926353830193,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.005799590712890067
+    }
+  },
+  "all_AB07_except_one_factor": {
+    "pelvis_translation": {
+      "heel_world_y_m": 0.082020954336349,
+      "toe_world_y_m": 0.08780982185444158,
+      "heel_clearance_m": 0.06720013123634899,
+      "toe_clearance_m": 0.07298899875444158,
+      "foot_origin_y_m": 0.14847096992195125,
+      "visual_mesh_min_ground_y_m": 0.09798195269554058,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.06138211834424736
+    },
+    "pelvis_orientation": {
+      "heel_world_y_m": 0.03030294919524669,
+      "toe_world_y_m": 0.030015693369579544,
+      "heel_clearance_m": 0.01548212609524669,
+      "toe_clearance_m": 0.015194870269579544,
+      "foot_origin_y_m": 0.09522755070577915,
+      "visual_mesh_min_ground_y_m": 0.047431337011947274,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.003414793349199509
+    },
+    "hip_angles": {
+      "heel_world_y_m": 0.021660316396371088,
+      "toe_world_y_m": 0.027867495449239194,
+      "heel_clearance_m": 0.006839493296371088,
+      "toe_clearance_m": 0.013046672349239194,
+      "foot_origin_y_m": 0.08814856982858027,
+      "visual_mesh_min_ground_y_m": 0.03755006681270466,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.001981426157593981
+    },
+    "knee_angle": {
+      "heel_world_y_m": 0.01923242354274632,
+      "toe_world_y_m": 0.03241350801241411,
+      "heel_clearance_m": 0.004411600442746319,
+      "toe_clearance_m": 0.017592684912414114,
+      "foot_origin_y_m": 0.08778511707308473,
+      "visual_mesh_min_ground_y_m": 0.03356099391375269,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.002914139475041981
+    },
+    "ankle_angle": {
+      "heel_world_y_m": 0.01831779306791162,
+      "toe_world_y_m": 0.03831748485039835,
+      "heel_clearance_m": 0.0034969699679116197,
+      "toe_clearance_m": 0.02349666175039835,
+      "foot_origin_y_m": 0.08872791739144564,
+      "visual_mesh_min_ground_y_m": 0.03108327182009283,
+      "primary_sphere_max_penetration_m": 0.0,
+      "primary_sphere_min_surface_clearance_m": 0.005992057821966872
+    },
+    "proximal_mount": {
+      "heel_world_y_m": 0.0034028087269565993,
+      "toe_world_y_m": 0.009191676245049178,
+      "heel_clearance_m": -0.0114180143730434,
+      "toe_clearance_m": -0.005629146854950822,
+      "foot_origin_y_m": 0.06985282431255885,
+      "visual_mesh_min_ground_y_m": 0.01936380708614819,
+      "primary_sphere_max_penetration_m": 0.01723602726514504,
+      "primary_sphere_min_surface_clearance_m": -0.01723602726514504
+    },
+    "distal_mount": {
+      "heel_world_y_m": -0.02158522128582628,
+      "toe_world_y_m": -0.015796353767733702,
+      "heel_clearance_m": -0.03640604438582628,
+      "toe_clearance_m": -0.0306171768677337,
+      "foot_origin_y_m": 0.04486479429977597,
+      "visual_mesh_min_ground_y_m": -0.005624222926634691,
+      "primary_sphere_max_penetration_m": 0.04222405727792792,
+      "primary_sphere_min_surface_clearance_m": -0.04222405727792792
+    },
+    "anatomical_hip_frame": {
+      "heel_world_y_m": 0.0023234556261717138,
+      "toe_world_y_m": 0.008112323144264293,
+      "heel_clearance_m": -0.012497367473828286,
+      "toe_clearance_m": -0.006708499955735707,
+      "foot_origin_y_m": 0.06877347121177396,
+      "visual_mesh_min_ground_y_m": 0.018284453985363304,
+      "primary_sphere_max_penetration_m": 0.018315380365929924,
+      "primary_sphere_min_surface_clearance_m": -0.018315380365929924
+    }
+  },
+  "sampled_dynamic_geometry": {
+    "AB06": {
+      "native_stride": 20,
+      "samples": 1431,
+      "metrics_m": {
+        "heel_world_y_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.0030605984517954044,
+            "median": 0.02469452881690032,
+            "mean": 0.060029274809504214,
+            "p95": 0.21467548217786403,
+            "max": 0.24237939673313802
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": -0.0030605984517954044,
+            "median": 0.011803668781024783,
+            "mean": 0.037343709838233805,
+            "p95": 0.17298434412804212,
+            "max": 0.23573300208988648
+          }
+        },
+        "toe_world_y_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.0008277074536573448,
+            "median": 0.017875372175714083,
+            "mean": 0.02608719548001376,
+            "p95": 0.07369198247322889,
+            "max": 0.1036428128285773
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": -0.0008277074536573448,
+            "median": 0.013826225462281138,
+            "mean": 0.015304385547678488,
+            "p95": 0.0403626608164007,
+            "max": 0.07396485591985272
+          }
+        },
+        "heel_clearance_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.017881421551795403,
+            "median": 0.009873705716900319,
+            "mean": 0.045208451709504216,
+            "p95": 0.19985465907786404,
+            "max": 0.22755857363313803
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": -0.017881421551795403,
+            "median": -0.003017154318975217,
+            "mean": 0.022522886738233803,
+            "p95": 0.15816352102804213,
+            "max": 0.2209121789898865
+          }
+        },
+        "toe_clearance_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.015648530553657343,
+            "median": 0.0030545490757140827,
+            "mean": 0.01126637238001376,
+            "p95": 0.058871159373228885,
+            "max": 0.0888219897285773
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": -0.015648530553657343,
+            "median": -0.000994597637718862,
+            "mean": 0.000483562447678488,
+            "p95": 0.025541837716400704,
+            "max": 0.05914403281985272
+          }
+        },
+        "foot_origin_y_m": {
+          "all": {
+            "count": 1431,
+            "min": 0.06586158825503763,
+            "median": 0.09418251551658124,
+            "mean": 0.1072163908696217,
+            "p95": 0.1947400826082971,
+            "max": 0.21009648086030186
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": 0.06586158825503763,
+            "median": 0.07810271580814757,
+            "mean": 0.09088647487293632,
+            "p95": 0.158206095445354,
+            "max": 0.20696314209960243
+          }
+        },
+        "visual_mesh_min_ground_y_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.011677903835488113,
+            "median": 0.02475801920631654,
+            "mean": 0.025724900439179237,
+            "p95": 0.045971438010605895,
+            "max": 0.0612685915037779
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": -0.011677903835488113,
+            "median": 0.022090359802293093,
+            "mean": 0.021534679277953262,
+            "p95": 0.036797299498259876,
+            "max": 0.04650046264221601
+          }
+        },
+        "primary_sphere_max_penetration_m": {
+          "all": {
+            "count": 1431,
+            "min": 0.0,
+            "median": 0.0007087026139874358,
+            "mean": 0.006006476017010615,
+            "p95": 0.01808039031090368,
+            "max": 0.021748690475536632
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": 0.0,
+            "median": 0.010317066510900185,
+            "mean": 0.009078445856718022,
+            "p95": 0.018576727709045913,
+            "max": 0.021748690475536632
+          }
+        },
+        "primary_sphere_min_surface_clearance_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.021748690475536632,
+            "median": -0.0007087026139874358,
+            "mean": 0.009664792943117739,
+            "p95": 0.07994659587851488,
+            "max": 0.1036275323771785
+          },
+          "nominal_loaded": {
+            "count": 940,
+            "min": -0.021748690475536632,
+            "median": -0.010317066510900185,
+            "mean": -0.003227787614904164,
+            "p95": 0.04268030868156818,
+            "max": 0.09657342508623933
+          }
+        }
+      },
+      "note": "No contact/event inference at this coarse grid; measured force defines nominal healthy support."
+    },
+    "AB07": {
+      "native_stride": 20,
+      "samples": 1431,
+      "metrics_m": {
+        "heel_world_y_m": {
+          "all": {
+            "count": 1431,
+            "min": 0.014225153900391654,
+            "median": 0.03205173699834961,
+            "mean": 0.06679601880836979,
+            "p95": 0.21774038823312214,
+            "max": 0.2503030350533406
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": 0.014225153900391654,
+            "median": 0.024864753065581988,
+            "mean": 0.04034890235276018,
+            "p95": 0.13720482968266914,
+            "max": 0.24123743545214538
+          }
+        },
+        "toe_world_y_m": {
+          "all": {
+            "count": 1431,
+            "min": 0.00010567422205168264,
+            "median": 0.023240024160439993,
+            "mean": 0.03546723372381229,
+            "p95": 0.10353201703449011,
+            "max": 0.14391938778619925
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": 0.00010567422205168264,
+            "median": 0.019983655421587594,
+            "mean": 0.02294521088262758,
+            "p95": 0.055951567799083925,
+            "max": 0.12167519278032529
+          }
+        },
+        "heel_clearance_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.0005956691996083455,
+            "median": 0.01723091389834961,
+            "mean": 0.0519751957083698,
+            "p95": 0.20291956513312215,
+            "max": 0.23548221195334063
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": -0.0005956691996083455,
+            "median": 0.010043929965581988,
+            "mean": 0.025528079252760183,
+            "p95": 0.12238400658266914,
+            "max": 0.22641661235214539
+          }
+        },
+        "toe_clearance_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.014715148877948317,
+            "median": 0.008419201060439993,
+            "mean": 0.020646410623812284,
+            "p95": 0.0887111939344901,
+            "max": 0.12909856468619926
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": -0.014715148877948317,
+            "median": 0.005162832321587594,
+            "mean": 0.008124387782627578,
+            "p95": 0.041130744699083926,
+            "max": 0.10685436968032529
+          }
+        },
+        "foot_origin_y_m": {
+          "all": {
+            "count": 1431,
+            "min": 0.07978860242229868,
+            "median": 0.09908998533941216,
+            "mean": 0.11574932381429778,
+            "p95": 0.20109985016863124,
+            "max": 0.22123502669726564
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": 0.07978860242229868,
+            "median": 0.08809418656989199,
+            "mean": 0.09689169616646615,
+            "p95": 0.14512141996214378,
+            "max": 0.21426294181586064
+          }
+        },
+        "visual_mesh_min_ground_y_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.011475759440021882,
+            "median": 0.039388548418610884,
+            "mean": 0.038280076683054796,
+            "p95": 0.059748955632898594,
+            "max": 0.08003733425879905
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": -0.011475759440021882,
+            "median": 0.037400343384040025,
+            "mean": 0.03547120380808369,
+            "p95": 0.04833160952835105,
+            "max": 0.06975072086739079
+          }
+        },
+        "primary_sphere_max_penetration_m": {
+          "all": {
+            "count": 1431,
+            "min": 0.0,
+            "median": 0.0,
+            "mean": 0.0011380138821342081,
+            "p95": 0.004875827764139418,
+            "max": 0.0072915593847655506
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": 0.0,
+            "median": 0.0007751668822060243,
+            "mean": 0.0017251036709047159,
+            "p95": 0.005277190904053976,
+            "max": 0.0072915593847655506
+          }
+        },
+        "primary_sphere_min_surface_clearance_m": {
+          "all": {
+            "count": 1431,
+            "min": -0.0072915593847655506,
+            "median": 0.007958253144191178,
+            "mean": 0.020550875871256334,
+            "p95": 0.09177707293787032,
+            "max": 0.11336944470370364
+          },
+          "nominal_loaded": {
+            "count": 944,
+            "min": -0.0072915593847655506,
+            "median": -0.0007751668822060243,
+            "mean": 0.005900952605143777,
+            "p95": 0.034799708750998415,
+            "max": 0.11164417692640455
+          }
+        }
+      },
+      "note": "No contact/event inference at this coarse grid; measured force defines nominal healthy support."
+    }
+  },
+  "limitations": [
+    "Shapley partitions subject differences; it does not establish whether a fitting convention is physically correct.",
+    "Static poses use dataset-healthy coordinate remaps employed during marker calibration, not new static IK.",
+    "Visual STL bounds do not define the online sphere contact law or a measured sole/surface.",
+    "Positive sphere penetration is geometric only; no force is calculated.",
+    "Different subjects, static postures and marker mounting; no hypothesis of identical foot posture."
+  ]
+}

@@ -1,0 +1,1540 @@
+{
+  "method": {
+    "scope": "Saved TensorBoard scalars and native training JSONL, iterations1-25, before LEFT optimizer restore defect.",
+    "sample_alignment": "Each update collects4096 transitions in both arms; compare at identical cumulative steps.",
+    "scalar_aggregation": "RewardComponentsCallback logs each finite component from each sampled step with reduce=mean, window=100; RLlib merges runner metrics and TensorBoard records float32 scalars. These are smoothed runner aggregates, not exact means over4096 transitions.",
+    "clip_lift_identity": "mean(base_clipped) - [0.2 mean(actual_score) +0.8 mean(served_score) -mean(base_penalty)]. Linear recombination preserves a shared averaging operator; it does NOT apply clip to the mean raw base.",
+    "interpretation": "With nonnegative scores/penalties, blends summing to1 and clip bounds[0,1], upper clipping cannot activate. Positive clip lift measures weighted aggregate upward correction from negative raw bases. It does not reveal number, duration or locations of clipped steps.",
+    "cross_check": "Mean reward equals mean base minus the sum of active post-clip terms within float32 precision. This supports aligned averaging of relevant component streams; raw early transition traces are unavailable.",
+    "window_summary": "Five-iteration table entries are arithmetic means of the five logged smoothed values, not pooled step means or episode-return estimates."
+  },
+  "runs": {
+    "left": {
+      "rows": [
+        {
+          "iteration": 1,
+          "cumulative_steps": 4096.0,
+          "scalars": {
+            "imitation_score": 0.3737693428993225,
+            "served_imitation_score": 0.27039864659309387,
+            "penalty": 0.19318383932113647,
+            "reward_base": 0.14260655641555786,
+            "command_rate_loss": 3.777862071990967,
+            "reward": 0.09344017505645752,
+            "safety_term": 0.016923077404499054,
+            "grf_penetration_term": 0.028633520007133484,
+            "grf_ankle_moment_flip_term": 0.00210635457187891,
+            "oob_term": 0.0015034249518066645
+          },
+          "mixed_imitation": 0.2910727858543396,
+          "base_penalty": 0.19318383932113647,
+          "command_rate_penalty": 0.18889310359954836,
+          "clip_lift": 0.044717609882354736,
+          "base_clipped": 0.14260655641555786,
+          "reward": 0.09344017505645752,
+          "postclip_penalties": 0.04916637693531811,
+          "identity_residual": -4.423782229423523e-09
+        },
+        {
+          "iteration": 2,
+          "cumulative_steps": 8192.0,
+          "scalars": {
+            "imitation_score": 0.3241879642009735,
+            "served_imitation_score": 0.22301407158374786,
+            "penalty": 0.19348901510238647,
+            "reward_base": 0.1087811067700386,
+            "command_rate_loss": 3.780208110809326,
+            "reward": 0.06427280604839325,
+            "safety_term": 0.01230769231915474,
+            "grf_penetration_term": 0.015954038128256798,
+            "grf_ankle_moment_flip_term": 0.014630600810050964,
+            "oob_term": 0.0016159687656909227
+          },
+          "mixed_imitation": 0.243248850107193,
+          "base_penalty": 0.19348901510238647,
+          "command_rate_penalty": 0.18901040554046633,
+          "clip_lift": 0.059021271765232086,
+          "base_clipped": 0.1087811067700386,
+          "reward": 0.06427280604839325,
+          "postclip_penalties": 0.044508300023153424,
+          "identity_residual": -6.984919309616089e-10
+        },
+        {
+          "iteration": 3,
+          "cumulative_steps": 12288.0,
+          "scalars": {
+            "imitation_score": 0.3371654450893402,
+            "served_imitation_score": 0.2365666627883911,
+            "penalty": 0.1899367868900299,
+            "reward_base": 0.11777964979410172,
+            "command_rate_loss": 3.7587857246398926,
+            "reward": 0.0805429071187973,
+            "safety_term": 0.013846153393387794,
+            "grf_penetration_term": 0.02174476720392704,
+            "grf_ankle_moment_flip_term": 0.00016164907719939947,
+            "oob_term": 0.0014841720694676042
+          },
+          "mixed_imitation": 0.25668641924858093,
+          "base_penalty": 0.1899367868900299,
+          "command_rate_penalty": 0.18793928623199463,
+          "clip_lift": 0.05103001743555069,
+          "base_clipped": 0.11777964979410172,
+          "reward": 0.0805429071187973,
+          "postclip_penalties": 0.03723674174398184,
+          "identity_residual": -9.313225746154785e-10
+        },
+        {
+          "iteration": 4,
+          "cumulative_steps": 16384.0,
+          "scalars": {
+            "imitation_score": 0.3723888397216797,
+            "served_imitation_score": 0.2707057595252991,
+            "penalty": 0.1869567483663559,
+            "reward_base": 0.1473759114742279,
+            "command_rate_loss": 3.6906211376190186,
+            "reward": 0.11365626007318497,
+            "safety_term": 0.009230769239366055,
+            "grf_penetration_term": 0.010910512879490852,
+            "grf_ankle_moment_flip_term": 0.01201474480330944,
+            "oob_term": 0.0015636238967999816
+          },
+          "mixed_imitation": 0.29104237556457524,
+          "base_penalty": 0.1869567483663559,
+          "command_rate_penalty": 0.18453105688095095,
+          "clip_lift": 0.04329028427600856,
+          "base_clipped": 0.1473759114742279,
+          "reward": 0.11365626007318497,
+          "postclip_penalties": 0.03371965081896633,
+          "identity_residual": -5.820766091346741e-10
+        },
+        {
+          "iteration": 5,
+          "cumulative_steps": 20480.0,
+          "scalars": {
+            "imitation_score": 0.3281158208847046,
+            "served_imitation_score": 0.22738200426101685,
+            "penalty": 0.186928391456604,
+            "reward_base": 0.10811422020196915,
+            "command_rate_loss": 3.699309825897217,
+            "reward": 0.0956154614686966,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.0063194166868925095,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0015639557968825102
+          },
+          "mixed_imitation": 0.2475287675857544,
+          "base_penalty": 0.186928391456604,
+          "command_rate_penalty": 0.18496549129486084,
+          "clip_lift": 0.04751384407281875,
+          "base_clipped": 0.10811422020196915,
+          "reward": 0.0956154614686966,
+          "postclip_penalties": 0.012498757103458047,
+          "identity_residual": -1.6298145055770874e-09
+        },
+        {
+          "iteration": 6,
+          "cumulative_steps": 24576.0,
+          "scalars": {
+            "imitation_score": 0.39193859696388245,
+            "served_imitation_score": 0.27170875668525696,
+            "penalty": 0.18723377585411072,
+            "reward_base": 0.13439559936523438,
+            "command_rate_loss": 3.714545965194702,
+            "reward": 0.12218233197927475,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.00611891271546483,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0014789743581786752
+          },
+          "mixed_imitation": 0.2957547247409821,
+          "base_penalty": 0.18723377585411072,
+          "command_rate_penalty": 0.1857272982597351,
+          "clip_lift": 0.025874650478363015,
+          "base_clipped": 0.13439559936523438,
+          "reward": 0.12218233197927475,
+          "postclip_penalties": 0.012213271693326533,
+          "identity_residual": 4.307366907596588e-09
+        },
+        {
+          "iteration": 7,
+          "cumulative_steps": 28672.0,
+          "scalars": {
+            "imitation_score": 0.3766252100467682,
+            "served_imitation_score": 0.2634717524051666,
+            "penalty": 0.18700484931468964,
+            "reward_base": 0.13095596432685852,
+            "command_rate_loss": 3.7150893211364746,
+            "reward": 0.1085316464304924,
+            "safety_term": 0.00615384615957737,
+            "grf_penetration_term": 0.014758712612092495,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.001511765643954277
+          },
+          "mixed_imitation": 0.28610244393348694,
+          "base_penalty": 0.18700484931468964,
+          "command_rate_penalty": 0.18575446605682375,
+          "clip_lift": 0.03185836970806122,
+          "base_clipped": 0.13095596432685852,
+          "reward": 0.1085316464304924,
+          "postclip_penalties": 0.02242432441562414,
+          "identity_residual": 6.51925802230835e-09
+        },
+        {
+          "iteration": 8,
+          "cumulative_steps": 32768.0,
+          "scalars": {
+            "imitation_score": 0.39171987771987915,
+            "served_imitation_score": 0.27808329463005066,
+            "penalty": 0.18491043150424957,
+            "reward_base": 0.14628033339977264,
+            "command_rate_loss": 3.6693179607391357,
+            "reward": 0.11820866167545319,
+            "safety_term": 0.00615384615957737,
+            "grf_penetration_term": 0.006013872101902962,
+            "grf_ankle_moment_flip_term": 0.01437766756862402,
+            "oob_term": 0.0015262826345860958
+          },
+          "mixed_imitation": 0.3008106112480164,
+          "base_penalty": 0.18491043150424957,
+          "command_rate_penalty": 0.1834658980369568,
+          "clip_lift": 0.030380153656005826,
+          "base_clipped": 0.14628033339977264,
+          "reward": 0.11820866167545319,
+          "postclip_penalties": 0.028071668464690447,
+          "identity_residual": -3.259629011154175e-09
+        },
+        {
+          "iteration": 9,
+          "cumulative_steps": 36864.0,
+          "scalars": {
+            "imitation_score": 0.3922543525695801,
+            "served_imitation_score": 0.27364277839660645,
+            "penalty": 0.186012402176857,
+            "reward_base": 0.14034739136695862,
+            "command_rate_loss": 3.6723361015319824,
+            "reward": 0.12198673188686371,
+            "safety_term": 0.00615384615957737,
+            "grf_penetration_term": 0.010776774026453495,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0014300434850156307
+          },
+          "mixed_imitation": 0.2973650932312012,
+          "base_penalty": 0.186012402176857,
+          "command_rate_penalty": 0.18361680507659914,
+          "clip_lift": 0.02899470031261442,
+          "base_clipped": 0.14034739136695862,
+          "reward": 0.12198673188686371,
+          "postclip_penalties": 0.018360663671046495,
+          "identity_residual": 4.190951585769653e-09
+        },
+        {
+          "iteration": 10,
+          "cumulative_steps": 40960.0,
+          "scalars": {
+            "imitation_score": 0.39311522245407104,
+            "served_imitation_score": 0.27533257007598877,
+            "penalty": 0.18591029942035675,
+            "reward_base": 0.13928090035915375,
+            "command_rate_loss": 3.6910903453826904,
+            "reward": 0.12761592864990234,
+            "safety_term": 0.003076923079788685,
+            "grf_penetration_term": 0.006602445151656866,
+            "grf_ankle_moment_flip_term": 0.0005456082872115076,
+            "oob_term": 0.0014399957144632936
+          },
+          "mixed_imitation": 0.2988891005516052,
+          "base_penalty": 0.18591029942035675,
+          "command_rate_penalty": 0.18455451726913452,
+          "clip_lift": 0.026302099227905273,
+          "base_clipped": 0.13928090035915375,
+          "reward": 0.12761592864990234,
+          "postclip_penalties": 0.011664972233120352,
+          "identity_residual": 5.238689482212067e-10
+        },
+        {
+          "iteration": 11,
+          "cumulative_steps": 45056.0,
+          "scalars": {
+            "imitation_score": 0.4742644727230072,
+            "served_imitation_score": 0.3524397909641266,
+            "penalty": 0.18559660017490387,
+            "reward_base": 0.20958200097084045,
+            "command_rate_loss": 3.687985420227051,
+            "reward": 0.19464929401874542,
+            "safety_term": 0.00615384615957737,
+            "grf_penetration_term": 0.006989465095102787,
+            "grf_ankle_moment_flip_term": 0.000366329331882298,
+            "oob_term": 0.0014230612432584167
+          },
+          "mixed_imitation": 0.3768047273159027,
+          "base_penalty": 0.18559660017490387,
+          "command_rate_penalty": 0.18439927101135256,
+          "clip_lift": 0.018373873829841625,
+          "base_clipped": 0.20958200097084045,
+          "reward": 0.19464929401874542,
+          "postclip_penalties": 0.014932701829820871,
+          "identity_residual": -5.122274160385132e-09
+        },
+        {
+          "iteration": 12,
+          "cumulative_steps": 49152.0,
+          "scalars": {
+            "imitation_score": 0.4464198052883148,
+            "served_imitation_score": 0.3167979121208191,
+            "penalty": 0.18430286645889282,
+            "reward_base": 0.17674227058887482,
+            "command_rate_loss": 3.6338441371917725,
+            "reward": 0.16322888433933258,
+            "safety_term": 0.003076923079788685,
+            "grf_penetration_term": 0.006975875701755285,
+            "grf_ankle_moment_flip_term": 0.0020679838489741087,
+            "oob_term": 0.0013925996609032154
+          },
+          "mixed_imitation": 0.34272229075431826,
+          "base_penalty": 0.18430286645889282,
+          "command_rate_penalty": 0.18169220685958865,
+          "clip_lift": 0.01832284629344938,
+          "base_clipped": 0.17674227058887482,
+          "reward": 0.16322888433933258,
+          "postclip_penalties": 0.013513382291421294,
+          "identity_residual": -3.958120942115784e-09
+        },
+        {
+          "iteration": 13,
+          "cumulative_steps": 53248.0,
+          "scalars": {
+            "imitation_score": 0.4997510313987732,
+            "served_imitation_score": 0.37035033106803894,
+            "penalty": 0.1844196915626526,
+            "reward_base": 0.22353559732437134,
+            "command_rate_loss": 3.65132212638855,
+            "reward": 0.2141612321138382,
+            "safety_term": 0.003076923079788685,
+            "grf_penetration_term": 0.00498545728623867,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0013119818177074194
+          },
+          "mixed_imitation": 0.3962304711341858,
+          "base_penalty": 0.1844196915626526,
+          "command_rate_penalty": 0.1825661063194275,
+          "clip_lift": 0.011724817752838124,
+          "base_clipped": 0.22353559732437134,
+          "reward": 0.2141612321138382,
+          "postclip_penalties": 0.009374362183734775,
+          "identity_residual": -3.026798367500305e-09
+        },
+        {
+          "iteration": 14,
+          "cumulative_steps": 57344.0,
+          "scalars": {
+            "imitation_score": 0.5127153396606445,
+            "served_imitation_score": 0.3795228600502014,
+            "penalty": 0.18295666575431824,
+            "reward_base": 0.232984721660614,
+            "command_rate_loss": 3.5637359619140625,
+            "reward": 0.19484281539916992,
+            "safety_term": 0.01230769231915474,
+            "grf_penetration_term": 0.024469846859574318,
+            "grf_ankle_moment_flip_term": 4.521975824900437e-06,
+            "oob_term": 0.0013598536606878042
+          },
+          "mixed_imitation": 0.4061613559722901,
+          "base_penalty": 0.18295666575431824,
+          "command_rate_penalty": 0.17818679809570315,
+          "clip_lift": 0.009780031442642168,
+          "base_clipped": 0.232984721660614,
+          "reward": 0.19484281539916992,
+          "postclip_penalties": 0.03814191481524176,
+          "identity_residual": 8.55379767017439e-09
+        },
+        {
+          "iteration": 15,
+          "cumulative_steps": 61440.0,
+          "scalars": {
+            "imitation_score": 0.579951822757721,
+            "served_imitation_score": 0.44379672408103943,
+            "penalty": 0.180931955575943,
+            "reward_base": 0.29452744126319885,
+            "command_rate_loss": 3.5873348712921143,
+            "reward": 0.2878401279449463,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.0038609798066318035,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0012878747656941414
+          },
+          "mixed_imitation": 0.4710277438163758,
+          "base_penalty": 0.180931955575943,
+          "command_rate_penalty": 0.17936674356460572,
+          "clip_lift": 0.004431653022766047,
+          "base_clipped": 0.29452744126319885,
+          "reward": 0.2878401279449463,
+          "postclip_penalties": 0.006687316112220287,
+          "identity_residual": 2.7939677238464355e-09
+        },
+        {
+          "iteration": 16,
+          "cumulative_steps": 65536.0,
+          "scalars": {
+            "imitation_score": 0.5709112286567688,
+            "served_imitation_score": 0.4354093670845032,
+            "penalty": 0.18156902492046356,
+            "reward_base": 0.28518009185791016,
+            "command_rate_loss": 3.5862674713134766,
+            "reward": 0.2642694115638733,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.014185784384608269,
+            "grf_ankle_moment_flip_term": 0.003906975965946913,
+            "oob_term": 0.0012794546782970428
+          },
+          "mixed_imitation": 0.46250973939895634,
+          "base_penalty": 0.18156902492046356,
+          "command_rate_penalty": 0.17931337356567384,
+          "clip_lift": 0.004239377379417375,
+          "base_clipped": 0.28518009185791016,
+          "reward": 0.2642694115638733,
+          "postclip_penalties": 0.020910676568746567,
+          "identity_residual": -3.725290298461914e-09
+        },
+        {
+          "iteration": 17,
+          "cumulative_steps": 69632.0,
+          "scalars": {
+            "imitation_score": 0.5825924873352051,
+            "served_imitation_score": 0.4499531388282776,
+            "penalty": 0.18142637610435486,
+            "reward_base": 0.29946663975715637,
+            "command_rate_loss": 3.593918800354004,
+            "reward": 0.2647823989391327,
+            "safety_term": 0.00615384615957737,
+            "grf_penetration_term": 0.022189028561115265,
+            "grf_ankle_moment_flip_term": 0.005035370588302612,
+            "oob_term": 0.0013059878256171942
+          },
+          "mixed_imitation": 0.47648100852966313,
+          "base_penalty": 0.18142637610435486,
+          "command_rate_penalty": 0.1796959400177002,
+          "clip_lift": 0.0044120073318481,
+          "base_clipped": 0.29946663975715637,
+          "reward": 0.2647823989391327,
+          "postclip_penalties": 0.03468423313461244,
+          "identity_residual": -7.683411240577698e-09
+        },
+        {
+          "iteration": 18,
+          "cumulative_steps": 73728.0,
+          "scalars": {
+            "imitation_score": 0.6228126883506775,
+            "served_imitation_score": 0.4935380220413208,
+            "penalty": 0.1794627457857132,
+            "reward_base": 0.343335896730423,
+            "command_rate_loss": 3.5376408100128174,
+            "reward": 0.3181103467941284,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.011666485108435154,
+            "grf_ankle_moment_flip_term": 0.007608024403452873,
+            "oob_term": 0.001335641136392951
+          },
+          "mixed_imitation": 0.5193929553031922,
+          "base_penalty": 0.1794627457857132,
+          "command_rate_penalty": 0.17688204050064088,
+          "clip_lift": 0.0034056872129439864,
+          "base_clipped": 0.343335896730423,
+          "reward": 0.3181103467941284,
+          "postclip_penalties": 0.025225535267964005,
+          "identity_residual": -1.4668330550193787e-08
+        },
+        {
+          "iteration": 19,
+          "cumulative_steps": 77824.0,
+          "scalars": {
+            "imitation_score": 0.6230096817016602,
+            "served_imitation_score": 0.487643301486969,
+            "penalty": 0.18291229009628296,
+            "reward_base": 0.3345666527748108,
+            "command_rate_loss": 3.6232478618621826,
+            "reward": 0.30014747381210327,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.012216608040034771,
+            "grf_ankle_moment_flip_term": 0.016166532412171364,
+            "oob_term": 0.0014206594787538052
+          },
+          "mixed_imitation": 0.5147165775299073,
+          "base_penalty": 0.18291229009628296,
+          "command_rate_penalty": 0.18116239309310914,
+          "clip_lift": 0.002762365341186457,
+          "base_clipped": 0.3345666527748108,
+          "reward": 0.30014747381210327,
+          "postclip_penalties": 0.03441918455064297,
+          "identity_residual": 5.587935447692871e-09
+        },
+        {
+          "iteration": 20,
+          "cumulative_steps": 81920.0,
+          "scalars": {
+            "imitation_score": 0.6337664127349854,
+            "served_imitation_score": 0.4954596757888794,
+            "penalty": 0.1810155212879181,
+            "reward_base": 0.3438614010810852,
+            "command_rate_loss": 3.5947024822235107,
+            "reward": 0.3137332499027252,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.013929860666394234,
+            "grf_ankle_moment_flip_term": 0.010196682997047901,
+            "oob_term": 0.0013862267369404435
+          },
+          "mixed_imitation": 0.5231210231781006,
+          "base_penalty": 0.1810155212879181,
+          "command_rate_penalty": 0.17973512411117554,
+          "clip_lift": 0.0017558991909026878,
+          "base_clipped": 0.3438614010810852,
+          "reward": 0.3137332499027252,
+          "postclip_penalties": 0.030128155020065606,
+          "identity_residual": 3.841705620288849e-09
+        },
+        {
+          "iteration": 21,
+          "cumulative_steps": 86016.0,
+          "scalars": {
+            "imitation_score": 0.6741515398025513,
+            "served_imitation_score": 0.5428755283355713,
+            "penalty": 0.1820344626903534,
+            "reward_base": 0.3887118995189667,
+            "command_rate_loss": 3.6095166206359863,
+            "reward": 0.3429032862186432,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.023881925269961357,
+            "grf_ankle_moment_flip_term": 0.015957077965140343,
+            "oob_term": 0.001354237087070942
+          },
+          "mixed_imitation": 0.5691307306289672,
+          "base_penalty": 0.1820344626903534,
+          "command_rate_penalty": 0.18047583103179932,
+          "clip_lift": 0.0016156315803528276,
+          "base_clipped": 0.3887118995189667,
+          "reward": 0.3429032862186432,
+          "postclip_penalties": 0.04580862494185567,
+          "identity_residual": 1.1641532182693481e-08
+        },
+        {
+          "iteration": 22,
+          "cumulative_steps": 90112.0,
+          "scalars": {
+            "imitation_score": 0.6779155731201172,
+            "served_imitation_score": 0.5459609031677246,
+            "penalty": 0.1812712699174881,
+            "reward_base": 0.39179593324661255,
+            "command_rate_loss": 3.592742443084717,
+            "reward": 0.34979939460754395,
+            "safety_term": 0.007692307699471712,
+            "grf_penetration_term": 0.016235332936048508,
+            "grf_ankle_moment_flip_term": 0.016713375225663185,
+            "oob_term": 0.0013555351179093122
+          },
+          "mixed_imitation": 0.5723518371582031,
+          "base_penalty": 0.1812712699174881,
+          "command_rate_penalty": 0.17963712215423586,
+          "clip_lift": 0.0007153660058974998,
+          "base_clipped": 0.39179593324661255,
+          "reward": 0.34979939460754395,
+          "postclip_penalties": 0.04199655097909272,
+          "identity_residual": 1.234002411365509e-08
+        },
+        {
+          "iteration": 23,
+          "cumulative_steps": 94208.0,
+          "scalars": {
+            "imitation_score": 0.6335040330886841,
+            "served_imitation_score": 0.49639466404914856,
+            "penalty": 0.18197986483573914,
+            "reward_base": 0.3435947597026825,
+            "command_rate_loss": 3.621223211288452,
+            "reward": 0.3019648790359497,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0008503554854542017,
+            "grf_ankle_moment_flip_term": 0.039390139281749725,
+            "oob_term": 0.001389402779750526
+          },
+          "mixed_imitation": 0.5238165378570557,
+          "base_penalty": 0.18197986483573914,
+          "command_rate_penalty": 0.18106116056442262,
+          "clip_lift": 0.0017580866813659002,
+          "base_clipped": 0.3435947597026825,
+          "reward": 0.3019648790359497,
+          "postclip_penalties": 0.04162989754695445,
+          "identity_residual": 1.6880221664905548e-08
+        },
+        {
+          "iteration": 24,
+          "cumulative_steps": 98304.0,
+          "scalars": {
+            "imitation_score": 0.675847589969635,
+            "served_imitation_score": 0.5390036106109619,
+            "penalty": 0.17945542931556702,
+            "reward_base": 0.3872759938240051,
+            "command_rate_loss": 3.568835735321045,
+            "reward": 0.3624204993247986,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.015954796224832535,
+            "grf_ankle_moment_flip_term": 0.006032933481037617,
+            "oob_term": 0.0013293121010065079
+          },
+          "mixed_imitation": 0.5663724064826965,
+          "base_penalty": 0.17945542931556702,
+          "command_rate_penalty": 0.17844178676605227,
+          "clip_lift": 0.00035901665687565476,
+          "base_clipped": 0.3872759938240051,
+          "reward": 0.3624204993247986,
+          "postclip_penalties": 0.024855503346771002,
+          "identity_residual": 8.847564458847046e-09
+        },
+        {
+          "iteration": 25,
+          "cumulative_steps": 102400.0,
+          "scalars": {
+            "imitation_score": 0.724012017250061,
+            "served_imitation_score": 0.6018965840339661,
+            "penalty": 0.17908702790737152,
+            "reward_base": 0.4485071897506714,
+            "command_rate_loss": 3.547274112701416,
+            "reward": 0.40202608704566956,
+            "safety_term": 0.007692307699471712,
+            "grf_penetration_term": 0.022093230858445168,
+            "grf_ankle_moment_flip_term": 0.015397564508020878,
+            "oob_term": 0.001297983224503696
+          },
+          "mixed_imitation": 0.6263196706771851,
+          "base_penalty": 0.17908702790737152,
+          "command_rate_penalty": 0.1773637056350708,
+          "clip_lift": 0.001274546980857827,
+          "base_clipped": 0.4485071897506714,
+          "reward": 0.40202608704566956,
+          "postclip_penalties": 0.04648108629044145,
+          "identity_residual": -1.641456037759781e-08
+        }
+      ],
+      "windows": [
+        {
+          "iterations": [
+            1,
+            5
+          ],
+          "endings": {
+            "phase_timeout_swing": 10,
+            "grf_penetration_hard": 15,
+            "grf_penetration": 92,
+            "episode_time_limit": 2
+          },
+          "complete": 2,
+          "episodes": 119,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.26591583967208865,
+            "base_penalty": 0.19009895622730255,
+            "command_rate_penalty": 0.1870678687095642,
+            "clip_lift": 0.049114605486392966,
+            "base_clipped": 0.12493148893117904,
+            "reward": 0.08950552195310593,
+            "postclip_penalties": 0.03542596532497555,
+            "command_fraction_of_base_penalty": 0.9840552122016175
+          }
+        },
+        {
+          "iterations": [
+            6,
+            10
+          ],
+          "endings": {
+            "phase_timeout_swing": 30,
+            "grf_penetration": 40,
+            "grf_penetration_hard": 8,
+            "episode_time_limit": 3
+          },
+          "complete": 3,
+          "episodes": 81,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.2957843947410584,
+            "base_penalty": 0.18621435165405273,
+            "command_rate_penalty": 0.18462379693984987,
+            "clip_lift": 0.02868199467658995,
+            "base_clipped": 0.13825203776359557,
+            "reward": 0.11970506012439727,
+            "postclip_penalties": 0.018546980095561594,
+            "command_fraction_of_base_penalty": 0.9914584740645674
+          }
+        },
+        {
+          "iterations": [
+            11,
+            15
+          ],
+          "endings": {
+            "phase_timeout_swing": 22,
+            "grf_penetration": 42,
+            "grf_penetration_hard": 4,
+            "episode_time_limit": 4
+          },
+          "complete": 4,
+          "episodes": 72,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.3985893177986145,
+            "base_penalty": 0.1836415559053421,
+            "command_rate_penalty": 0.18124222517013552,
+            "clip_lift": 0.01252664446830747,
+            "base_clipped": 0.2274744063615799,
+            "reward": 0.2109444707632065,
+            "postclip_penalties": 0.016529935446487797,
+            "command_fraction_of_base_penalty": 0.9869347069982172
+          }
+        },
+        {
+          "iterations": [
+            16,
+            20
+          ],
+          "endings": {
+            "phase_timeout_swing": 9,
+            "grf_penetration": 42,
+            "grf_penetration_hard": 5,
+            "episode_time_limit": 10
+          },
+          "complete": 10,
+          "episodes": 66,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.4992442607879639,
+            "base_penalty": 0.18127719163894654,
+            "command_rate_penalty": 0.17935777425765992,
+            "clip_lift": 0.0033150672912597213,
+            "base_clipped": 0.3212821364402771,
+            "reward": 0.2922085762023926,
+            "postclip_penalties": 0.029073556908406316,
+            "command_fraction_of_base_penalty": 0.9894116994866649
+          }
+        },
+        {
+          "iterations": [
+            21,
+            25
+          ],
+          "endings": {
+            "phase_timeout_swing": 0,
+            "grf_penetration": 32,
+            "grf_penetration_hard": 0,
+            "episode_time_limit": 19
+          },
+          "complete": 19,
+          "episodes": 51,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.5715982365608215,
+            "base_penalty": 0.18076561093330384,
+            "command_rate_penalty": 0.17939592123031617,
+            "clip_lift": 0.0011445295810699418,
+            "base_clipped": 0.39197715520858767,
+            "reward": 0.351822829246521,
+            "postclip_penalties": 0.04015433262102306,
+            "command_fraction_of_base_penalty": 0.9924228414026546
+          }
+        }
+      ],
+      "max_identity_residual": 1.6880221664905548e-08,
+      "clip_lift_peak": {
+        "iteration": 2,
+        "cumulative_steps": 8192.0,
+        "scalars": {
+          "imitation_score": 0.3241879642009735,
+          "served_imitation_score": 0.22301407158374786,
+          "penalty": 0.19348901510238647,
+          "reward_base": 0.1087811067700386,
+          "command_rate_loss": 3.780208110809326,
+          "reward": 0.06427280604839325,
+          "safety_term": 0.01230769231915474,
+          "grf_penetration_term": 0.015954038128256798,
+          "grf_ankle_moment_flip_term": 0.014630600810050964,
+          "oob_term": 0.0016159687656909227
+        },
+        "mixed_imitation": 0.243248850107193,
+        "base_penalty": 0.19348901510238647,
+        "command_rate_penalty": 0.18901040554046633,
+        "clip_lift": 0.059021271765232086,
+        "base_clipped": 0.1087811067700386,
+        "reward": 0.06427280604839325,
+        "postclip_penalties": 0.044508300023153424,
+        "identity_residual": -6.984919309616089e-10
+      },
+      "limitation": "Different target/normalization and visited states; score values across arms are not common physical quality metrics."
+    },
+    "right": {
+      "rows": [
+        {
+          "iteration": 1,
+          "cumulative_steps": 4096.0,
+          "scalars": {
+            "imitation_score": 0.2539183795452118,
+            "served_imitation_score": 0.1668943166732788,
+            "penalty": 0.19208906590938568,
+            "reward_base": 0.07917433977127075,
+            "command_rate_loss": 3.7485101222991943,
+            "reward": 0.04063965007662773,
+            "safety_term": 0.015384615398943424,
+            "grf_penetration_term": 0.02015116438269615,
+            "grf_ankle_moment_flip_term": 0.0014790231361985207,
+            "oob_term": 0.001519887475296855
+          },
+          "mixed_imitation": 0.18429912924766542,
+          "base_penalty": 0.19208906590938568,
+          "command_rate_penalty": 0.18742550611495973,
+          "clip_lift": 0.08696427643299101,
+          "base_clipped": 0.07917433977127075,
+          "reward": 0.04063965007662773,
+          "postclip_penalties": 0.03853469039313495,
+          "identity_residual": 6.984919309616089e-10
+        },
+        {
+          "iteration": 2,
+          "cumulative_steps": 8192.0,
+          "scalars": {
+            "imitation_score": 0.22397510707378387,
+            "served_imitation_score": 0.14107058942317963,
+            "penalty": 0.19241894781589508,
+            "reward_base": 0.056888654828071594,
+            "command_rate_loss": 3.7844924926757812,
+            "reward": 0.027196837589144707,
+            "safety_term": 0.01230769231915474,
+            "grf_penetration_term": 0.012493583373725414,
+            "grf_ankle_moment_flip_term": 0.003233578521758318,
+            "oob_term": 0.0016569606959819794
+          },
+          "mixed_imitation": 0.1576514929533005,
+          "base_penalty": 0.19241894781589508,
+          "command_rate_penalty": 0.18922462463378908,
+          "clip_lift": 0.09165610969066618,
+          "base_clipped": 0.056888654828071594,
+          "reward": 0.027196837589144707,
+          "postclip_penalties": 0.02969181491062045,
+          "identity_residual": -2.3283064365386963e-09
+        },
+        {
+          "iteration": 3,
+          "cumulative_steps": 12288.0,
+          "scalars": {
+            "imitation_score": 0.227259561419487,
+            "served_imitation_score": 0.1412372589111328,
+            "penalty": 0.19047173857688904,
+            "reward_base": 0.056323274970054626,
+            "command_rate_loss": 3.7544314861297607,
+            "reward": 0.014797547832131386,
+            "safety_term": 0.013846153393387794,
+            "grf_penetration_term": 0.026090513914823532,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0015890602953732014
+          },
+          "mixed_imitation": 0.15844171941280366,
+          "base_penalty": 0.19047173857688904,
+          "command_rate_penalty": 0.18772157430648806,
+          "clip_lift": 0.08835329413414,
+          "base_clipped": 0.056323274970054626,
+          "reward": 0.014797547832131386,
+          "postclip_penalties": 0.04152572760358453,
+          "identity_residual": 4.656612873077393e-10
+        },
+        {
+          "iteration": 4,
+          "cumulative_steps": 16384.0,
+          "scalars": {
+            "imitation_score": 0.2551083564758301,
+            "served_imitation_score": 0.1640651971101761,
+            "penalty": 0.18760089576244354,
+            "reward_base": 0.06949456036090851,
+            "command_rate_loss": 3.7149569988250732,
+            "reward": 0.05225048586726189,
+            "safety_term": 0.00615384615957737,
+            "grf_penetration_term": 0.009473253972828388,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0016169733135029674
+          },
+          "mixed_imitation": 0.1822738289833069,
+          "base_penalty": 0.18760089576244354,
+          "command_rate_penalty": 0.18574784994125368,
+          "clip_lift": 0.07482162714004514,
+          "base_clipped": 0.06949456036090851,
+          "reward": 0.05225048586726189,
+          "postclip_penalties": 0.017244073445908725,
+          "identity_residual": -1.0477378964424133e-09
+        },
+        {
+          "iteration": 5,
+          "cumulative_steps": 20480.0,
+          "scalars": {
+            "imitation_score": 0.2897842526435852,
+            "served_imitation_score": 0.19555823504924774,
+            "penalty": 0.18624934554100037,
+            "reward_base": 0.08952749520540237,
+            "command_rate_loss": 3.694471836090088,
+            "reward": 0.07139557600021362,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.008704314939677715,
+            "grf_ankle_moment_flip_term": 0.003186114365234971,
+            "oob_term": 0.0016261001583188772
+          },
+          "mixed_imitation": 0.21440343856811525,
+          "base_penalty": 0.18624934554100037,
+          "command_rate_penalty": 0.1847235918045044,
+          "clip_lift": 0.06137340217828749,
+          "base_clipped": 0.08952749520540237,
+          "reward": 0.07139557600021362,
+          "postclip_penalties": 0.01813191408291459,
+          "identity_residual": -5.122274160385132e-09
+        },
+        {
+          "iteration": 6,
+          "cumulative_steps": 24576.0,
+          "scalars": {
+            "imitation_score": 0.3120676577091217,
+            "served_imitation_score": 0.20659542083740234,
+            "penalty": 0.1857735514640808,
+            "reward_base": 0.09649789333343506,
+            "command_rate_loss": 3.690001964569092,
+            "reward": 0.07993333041667938,
+            "safety_term": 0.004615384619683027,
+            "grf_penetration_term": 0.007062892429530621,
+            "grf_ankle_moment_flip_term": 0.003288870444521308,
+            "oob_term": 0.001597416354343295
+          },
+          "mixed_imitation": 0.22768986821174625,
+          "base_penalty": 0.1857735514640808,
+          "command_rate_penalty": 0.1845000982284546,
+          "clip_lift": 0.05458157658576962,
+          "base_clipped": 0.09649789333343506,
+          "reward": 0.07993333041667938,
+          "postclip_penalties": 0.01656456384807825,
+          "identity_residual": 9.313225746154785e-10
+        },
+        {
+          "iteration": 7,
+          "cumulative_steps": 28672.0,
+          "scalars": {
+            "imitation_score": 0.27686217427253723,
+            "served_imitation_score": 0.17683367431163788,
+            "penalty": 0.1871168613433838,
+            "reward_base": 0.06614241003990173,
+            "command_rate_loss": 3.7220308780670166,
+            "reward": 0.059718482196331024,
+            "safety_term": 0.0,
+            "grf_penetration_term": 6.584260603403891e-08,
+            "grf_ankle_moment_flip_term": 0.004771830979734659,
+            "oob_term": 0.0016520259669050574
+          },
+          "mixed_imitation": 0.19683937430381776,
+          "base_penalty": 0.1871168613433838,
+          "command_rate_penalty": 0.18610154390335085,
+          "clip_lift": 0.05641989707946776,
+          "base_clipped": 0.06614241003990173,
+          "reward": 0.059718482196331024,
+          "postclip_penalties": 0.006423922789245751,
+          "identity_residual": -5.0543249585643935e-09
+        },
+        {
+          "iteration": 8,
+          "cumulative_steps": 32768.0,
+          "scalars": {
+            "imitation_score": 0.28823432326316833,
+            "served_imitation_score": 0.18711300194263458,
+            "penalty": 0.18362867832183838,
+            "reward_base": 0.07601799815893173,
+            "command_rate_loss": 3.65017032623291,
+            "reward": 0.03298494219779968,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.005818507634103298,
+            "grf_ankle_moment_flip_term": 0.034054771065711975,
+            "oob_term": 0.001621318282559514
+          },
+          "mixed_imitation": 0.20733726620674134,
+          "base_penalty": 0.18362867832183838,
+          "command_rate_penalty": 0.18250851631164552,
+          "clip_lift": 0.05230941027402877,
+          "base_clipped": 0.07601799815893173,
+          "reward": 0.03298494219779968,
+          "postclip_penalties": 0.04303305852226913,
+          "identity_residual": 2.561137080192566e-09
+        },
+        {
+          "iteration": 9,
+          "cumulative_steps": 36864.0,
+          "scalars": {
+            "imitation_score": 0.31820017099380493,
+            "served_imitation_score": 0.21321693062782288,
+            "penalty": 0.1850454956293106,
+            "reward_base": 0.09686587750911713,
+            "command_rate_loss": 3.6842427253723145,
+            "reward": 0.08825051784515381,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.00545459846034646,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0016222947742789984
+          },
+          "mixed_imitation": 0.2342135787010193,
+          "base_penalty": 0.1850454956293106,
+          "command_rate_penalty": 0.18421213626861574,
+          "clip_lift": 0.04769779443740843,
+          "base_clipped": 0.09686587750911713,
+          "reward": 0.08825051784515381,
+          "postclip_penalties": 0.008615354774519801,
+          "identity_residual": -4.889443516731262e-09
+        },
+        {
+          "iteration": 10,
+          "cumulative_steps": 40960.0,
+          "scalars": {
+            "imitation_score": 0.36579152941703796,
+            "served_imitation_score": 0.2486821711063385,
+            "penalty": 0.1852884441614151,
+            "reward_base": 0.12308934330940247,
+            "command_rate_loss": 3.6763486862182617,
+            "reward": 0.10240262001752853,
+            "safety_term": 0.003076923079788685,
+            "grf_penetration_term": 0.0035127969458699226,
+            "grf_ankle_moment_flip_term": 0.012514803558588028,
+            "oob_term": 0.0015821985434740782
+          },
+          "mixed_imitation": 0.2721040427684784,
+          "base_penalty": 0.1852884441614151,
+          "command_rate_penalty": 0.1838174343109131,
+          "clip_lift": 0.03627374470233918,
+          "base_clipped": 0.12308934330940247,
+          "reward": 0.10240262001752853,
+          "postclip_penalties": 0.020686722127720714,
+          "identity_residual": -1.1641532182693481e-09
+        },
+        {
+          "iteration": 11,
+          "cumulative_steps": 45056.0,
+          "scalars": {
+            "imitation_score": 0.3886885643005371,
+            "served_imitation_score": 0.27277857065200806,
+            "penalty": 0.18283919990062714,
+            "reward_base": 0.14472858607769012,
+            "command_rate_loss": 3.639116048812866,
+            "reward": 0.13952518999576569,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0036905230954289436,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0015128795057535172
+          },
+          "mixed_imitation": 0.2959605693817139,
+          "base_penalty": 0.18283919990062714,
+          "command_rate_penalty": 0.18195580244064333,
+          "clip_lift": 0.03160721659660337,
+          "base_clipped": 0.14472858607769012,
+          "reward": 0.13952518999576569,
+          "postclip_penalties": 0.005203402601182461,
+          "identity_residual": 6.51925802230835e-09
+        },
+        {
+          "iteration": 12,
+          "cumulative_steps": 49152.0,
+          "scalars": {
+            "imitation_score": 0.3981689214706421,
+            "served_imitation_score": 0.27512404322624207,
+            "penalty": 0.18204015493392944,
+            "reward_base": 0.13852640986442566,
+            "command_rate_loss": 3.623241662979126,
+            "reward": 0.1369682252407074,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 5.16546169819776e-05,
+            "oob_term": 0.0015065333573147655
+          },
+          "mixed_imitation": 0.2997330188751221,
+          "base_penalty": 0.18204015493392944,
+          "command_rate_penalty": 0.18116208314895632,
+          "clip_lift": 0.020833545923233,
+          "base_clipped": 0.13852640986442566,
+          "reward": 0.1369682252407074,
+          "postclip_penalties": 0.001558187974296743,
+          "identity_residual": 3.3505784813314676e-09
+        },
+        {
+          "iteration": 13,
+          "cumulative_steps": 53248.0,
+          "scalars": {
+            "imitation_score": 0.3689905107021332,
+            "served_imitation_score": 0.2544766664505005,
+            "penalty": 0.1810857504606247,
+            "reward_base": 0.13079196214675903,
+            "command_rate_loss": 3.599402904510498,
+            "reward": 0.12868903577327728,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0007095118053257465,
+            "grf_ankle_moment_flip_term": 2.2971758880885318e-05,
+            "oob_term": 0.0013704553712159395
+          },
+          "mixed_imitation": 0.27737943530082704,
+          "base_penalty": 0.1810857504606247,
+          "command_rate_penalty": 0.1799701452255249,
+          "clip_lift": 0.03449827730655669,
+          "base_clipped": 0.13079196214675903,
+          "reward": 0.12868903577327728,
+          "postclip_penalties": 0.0021029389354225714,
+          "identity_residual": 1.2561940820887685e-08
+        },
+        {
+          "iteration": 14,
+          "cumulative_steps": 57344.0,
+          "scalars": {
+            "imitation_score": 0.413122296333313,
+            "served_imitation_score": 0.2941972315311432,
+            "penalty": 0.17857474088668823,
+            "reward_base": 0.16759392619132996,
+            "command_rate_loss": 3.5497488975524902,
+            "reward": 0.13712343573570251,
+            "safety_term": 0.003076923079788685,
+            "grf_penetration_term": 0.007713016588240862,
+            "grf_ankle_moment_flip_term": 0.018235547468066216,
+            "oob_term": 0.001445004832930863
+          },
+          "mixed_imitation": 0.3179822444915772,
+          "base_penalty": 0.17857474088668823,
+          "command_rate_penalty": 0.17748744487762452,
+          "clip_lift": 0.028186422586440996,
+          "base_clipped": 0.16759392619132996,
+          "reward": 0.13712343573570251,
+          "postclip_penalties": 0.030470491969026625,
+          "identity_residual": 1.5133991837501526e-09
+        },
+        {
+          "iteration": 15,
+          "cumulative_steps": 61440.0,
+          "scalars": {
+            "imitation_score": 0.4553619623184204,
+            "served_imitation_score": 0.32206428050994873,
+            "penalty": 0.17700952291488647,
+            "reward_base": 0.18619471788406372,
+            "command_rate_loss": 3.523594617843628,
+            "reward": 0.1710415929555893,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.0025044104550033808,
+            "grf_ankle_moment_flip_term": 0.009651304222643375,
+            "oob_term": 0.0014589425409212708
+          },
+          "mixed_imitation": 0.3487238168716431,
+          "base_penalty": 0.17700952291488647,
+          "command_rate_penalty": 0.17617973089218142,
+          "clip_lift": 0.014480423927307084,
+          "base_clipped": 0.18619471788406372,
+          "reward": 0.1710415929555893,
+          "postclip_penalties": 0.01515311875846237,
+          "identity_residual": -6.170012056827545e-09
+        },
+        {
+          "iteration": 16,
+          "cumulative_steps": 65536.0,
+          "scalars": {
+            "imitation_score": 0.44706228375434875,
+            "served_imitation_score": 0.31684499979019165,
+            "penalty": 0.18007420003414154,
+            "reward_base": 0.17743930220603943,
+            "command_rate_loss": 3.5819478034973145,
+            "reward": 0.17610876262187958,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0,
+            "grf_ankle_moment_flip_term": 0.0,
+            "oob_term": 0.0013305445900186896
+          },
+          "mixed_imitation": 0.34288845658302314,
+          "base_penalty": 0.18007420003414154,
+          "command_rate_penalty": 0.17909739017486573,
+          "clip_lift": 0.014625045657157831,
+          "base_clipped": 0.17743930220603943,
+          "reward": 0.17610876262187958,
+          "postclip_penalties": 0.0013305445900186896,
+          "identity_residual": 5.005858838558197e-09
+        },
+        {
+          "iteration": 17,
+          "cumulative_steps": 69632.0,
+          "scalars": {
+            "imitation_score": 0.4941611886024475,
+            "served_imitation_score": 0.36294084787368774,
+            "penalty": 0.18032944202423096,
+            "reward_base": 0.2228529155254364,
+            "command_rate_loss": 3.586735248565674,
+            "reward": 0.2126886546611786,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.003921916242688894,
+            "grf_ankle_moment_flip_term": 0.004784453194588423,
+            "oob_term": 0.0014578909613192081
+          },
+          "mixed_imitation": 0.3891849160194397,
+          "base_penalty": 0.18032944202423096,
+          "command_rate_penalty": 0.1793367624282837,
+          "clip_lift": 0.013997441530227639,
+          "base_clipped": 0.2228529155254364,
+          "reward": 0.2126886546611786,
+          "postclip_penalties": 0.010164260398596525,
+          "identity_residual": -4.656612873077393e-10
+        },
+        {
+          "iteration": 18,
+          "cumulative_steps": 73728.0,
+          "scalars": {
+            "imitation_score": 0.5115526914596558,
+            "served_imitation_score": 0.3790275752544403,
+            "penalty": 0.18100251257419586,
+            "reward_base": 0.2361535131931305,
+            "command_rate_loss": 3.5986201763153076,
+            "reward": 0.21919582784175873,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.008644877932965755,
+            "grf_ankle_moment_flip_term": 0.00700930692255497,
+            "oob_term": 0.0013034985167905688
+          },
+          "mixed_imitation": 0.4055325984954834,
+          "base_penalty": 0.18100251257419586,
+          "command_rate_penalty": 0.1799310088157654,
+          "clip_lift": 0.011623427271842957,
+          "base_clipped": 0.2361535131931305,
+          "reward": 0.21919582784175873,
+          "postclip_penalties": 0.016957683372311294,
+          "identity_residual": -1.979060471057892e-09
+        },
+        {
+          "iteration": 19,
+          "cumulative_steps": 77824.0,
+          "scalars": {
+            "imitation_score": 0.4915596544742584,
+            "served_imitation_score": 0.34863415360450745,
+            "penalty": 0.1808127760887146,
+            "reward_base": 0.20399892330169678,
+            "command_rate_loss": 3.6006176471710205,
+            "reward": 0.19854073226451874,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0014575502136722207,
+            "grf_ankle_moment_flip_term": 0.002560009015724063,
+            "oob_term": 0.001440633786842227
+          },
+          "mixed_imitation": 0.37721925377845766,
+          "base_penalty": 0.1808127760887146,
+          "command_rate_penalty": 0.18003088235855103,
+          "clip_lift": 0.007592445611953713,
+          "base_clipped": 0.20399892330169678,
+          "reward": 0.19854073226451874,
+          "postclip_penalties": 0.005458193016238511,
+          "identity_residual": 1.979060471057892e-09
+        },
+        {
+          "iteration": 20,
+          "cumulative_steps": 81920.0,
+          "scalars": {
+            "imitation_score": 0.5303117632865906,
+            "served_imitation_score": 0.39110416173934937,
+            "penalty": 0.179682195186615,
+            "reward_base": 0.24754782021045685,
+            "command_rate_loss": 3.5697295665740967,
+            "reward": 0.22868727147579193,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.002630743430927396,
+            "grf_ankle_moment_flip_term": 0.01485403347760439,
+            "oob_term": 0.0013757715933024883
+          },
+          "mixed_imitation": 0.4189456820487976,
+          "base_penalty": 0.179682195186615,
+          "command_rate_penalty": 0.17848647832870485,
+          "clip_lift": 0.00828433334827422,
+          "base_clipped": 0.24754782021045685,
+          "reward": 0.22868727147579193,
+          "postclip_penalties": 0.018860548501834273,
+          "identity_residual": -2.3283064365386963e-10
+        },
+        {
+          "iteration": 21,
+          "cumulative_steps": 86016.0,
+          "scalars": {
+            "imitation_score": 0.5602729916572571,
+            "served_imitation_score": 0.42652204632759094,
+            "penalty": 0.1794041097164154,
+            "reward_base": 0.28477320075035095,
+            "command_rate_loss": 3.5704658031463623,
+            "reward": 0.23752039670944214,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.006897857412695885,
+            "grf_ankle_moment_flip_term": 0.03738703951239586,
+            "oob_term": 0.0014294461579993367
+          },
+          "mixed_imitation": 0.4532722353935242,
+          "base_penalty": 0.1794041097164154,
+          "command_rate_penalty": 0.17852329015731813,
+          "clip_lift": 0.010905075073242176,
+          "base_clipped": 0.28477320075035095,
+          "reward": 0.23752039670944214,
+          "postclip_penalties": 0.04725280462298542,
+          "identity_residual": 5.820766091346741e-10
+        },
+        {
+          "iteration": 22,
+          "cumulative_steps": 90112.0,
+          "scalars": {
+            "imitation_score": 0.591982901096344,
+            "served_imitation_score": 0.45364663004875183,
+            "penalty": 0.1787487268447876,
+            "reward_base": 0.3060709536075592,
+            "command_rate_loss": 3.552809000015259,
+            "reward": 0.2775578200817108,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0007643191493116319,
+            "grf_ankle_moment_flip_term": 0.026509176939725876,
+            "oob_term": 0.0012396489037200809
+          },
+          "mixed_imitation": 0.48131388425827026,
+          "base_penalty": 0.1787487268447876,
+          "command_rate_penalty": 0.17764045000076295,
+          "clip_lift": 0.003505796194076538,
+          "base_clipped": 0.3060709536075592,
+          "reward": 0.2775578200817108,
+          "postclip_penalties": 0.02851314499275759,
+          "identity_residual": 1.146690919995308e-08
+        },
+        {
+          "iteration": 23,
+          "cumulative_steps": 94208.0,
+          "scalars": {
+            "imitation_score": 0.6015675067901611,
+            "served_imitation_score": 0.463464617729187,
+            "penalty": 0.18005532026290894,
+            "reward_base": 0.31394681334495544,
+            "command_rate_loss": 3.5837562084198,
+            "reward": 0.283503919839859,
+            "safety_term": 0.0015384615398943424,
+            "grf_penetration_term": 0.005874429363757372,
+            "grf_ankle_moment_flip_term": 0.02174057625234127,
+            "oob_term": 0.0012894202955067158
+          },
+          "mixed_imitation": 0.49108519554138186,
+          "base_penalty": 0.18005532026290894,
+          "command_rate_penalty": 0.17918781042099,
+          "clip_lift": 0.0029169380664825217,
+          "base_clipped": 0.31394681334495544,
+          "reward": 0.283503919839859,
+          "postclip_penalties": 0.0304428874514997,
+          "identity_residual": -6.05359673500061e-09
+        },
+        {
+          "iteration": 24,
+          "cumulative_steps": 98304.0,
+          "scalars": {
+            "imitation_score": 0.6012195348739624,
+            "served_imitation_score": 0.4631519913673401,
+            "penalty": 0.17631034553050995,
+            "reward_base": 0.31743696331977844,
+            "command_rate_loss": 3.5093655586242676,
+            "reward": 0.3115774095058441,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0004940346116200089,
+            "grf_ankle_moment_flip_term": 0.004148168954998255,
+            "oob_term": 0.001217347220517695
+          },
+          "mixed_imitation": 0.4907655000686646,
+          "base_penalty": 0.17631034553050995,
+          "command_rate_penalty": 0.1754682779312134,
+          "clip_lift": 0.002981808781623796,
+          "base_clipped": 0.31743696331977844,
+          "reward": 0.3115774095058441,
+          "postclip_penalties": 0.005859550787135959,
+          "identity_residual": -3.026798367500305e-09
+        },
+        {
+          "iteration": 25,
+          "cumulative_steps": 102400.0,
+          "scalars": {
+            "imitation_score": 0.6250190734863281,
+            "served_imitation_score": 0.48595529794692993,
+            "penalty": 0.1757950782775879,
+            "reward_base": 0.33969035744667053,
+            "command_rate_loss": 3.503394365310669,
+            "reward": 0.3313133418560028,
+            "safety_term": 0.0,
+            "grf_penetration_term": 0.0005652289255522192,
+            "grf_ankle_moment_flip_term": 0.0066069564782083035,
+            "oob_term": 0.0012048095231875777
+          },
+          "mixed_imitation": 0.5137680530548097,
+          "base_penalty": 0.1757950782775879,
+          "command_rate_penalty": 0.17516971826553346,
+          "clip_lift": 0.0017173826694487637,
+          "base_clipped": 0.33969035744667053,
+          "reward": 0.3313133418560028,
+          "postclip_penalties": 0.0083769949269481,
+          "identity_residual": -2.066371962428093e-08
+        }
+      ],
+      "windows": [
+        {
+          "iterations": [
+            1,
+            5
+          ],
+          "endings": {
+            "phase_timeout_swing": 15,
+            "grf_penetration_hard": 22,
+            "grf_penetration": 74,
+            "episode_time_limit": 1
+          },
+          "complete": 1,
+          "episodes": 112,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.17941392183303834,
+            "base_penalty": 0.18976599872112274,
+            "command_rate_penalty": 0.18696862936019898,
+            "clip_lift": 0.08063374191522596,
+            "base_clipped": 0.07028166502714157,
+            "reward": 0.04125601947307587,
+            "postclip_penalties": 0.029025644087232648,
+            "command_fraction_of_base_penalty": 0.9852588483723329
+          }
+        },
+        {
+          "iterations": [
+            6,
+            10
+          ],
+          "endings": {
+            "phase_timeout_swing": 33,
+            "grf_penetration": 24,
+            "grf_penetration_hard": 7,
+            "episode_time_limit": 7
+          },
+          "complete": 7,
+          "episodes": 71,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.2276368260383606,
+            "base_penalty": 0.18537060618400575,
+            "command_rate_penalty": 0.18422794580459595,
+            "clip_lift": 0.04945648461580275,
+            "base_clipped": 0.09172270447015762,
+            "reward": 0.07265797853469849,
+            "postclip_penalties": 0.01906472441236673,
+            "command_fraction_of_base_penalty": 0.9938358059946378
+          }
+        },
+        {
+          "iterations": [
+            11,
+            15
+          ],
+          "endings": {
+            "phase_timeout_swing": 38,
+            "grf_penetration": 9,
+            "grf_penetration_hard": 0,
+            "episode_time_limit": 13
+          },
+          "complete": 13,
+          "episodes": 60,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.3079558169841767,
+            "base_penalty": 0.1803098738193512,
+            "command_rate_penalty": 0.1793510413169861,
+            "clip_lift": 0.025921177268028228,
+            "base_clipped": 0.1535671204328537,
+            "reward": 0.14266949594020845,
+            "postclip_penalties": 0.010897628047678154,
+            "command_fraction_of_base_penalty": 0.9946823072854803
+          }
+        },
+        {
+          "iterations": [
+            16,
+            20
+          ],
+          "endings": {
+            "phase_timeout_swing": 12,
+            "grf_penetration": 10,
+            "grf_penetration_hard": 2,
+            "episode_time_limit": 26
+          },
+          "complete": 26,
+          "episodes": 50,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.3867541813850403,
+            "base_penalty": 0.1803802251815796,
+            "command_rate_penalty": 0.17937650442123415,
+            "clip_lift": 0.011224538683891273,
+            "base_clipped": 0.217598494887352,
+            "reward": 0.20704424977302552,
+            "postclip_penalties": 0.010554245975799858,
+            "command_fraction_of_base_penalty": 0.9944355277340682
+          }
+        },
+        {
+          "iterations": [
+            21,
+            25
+          ],
+          "endings": {
+            "phase_timeout_swing": 3,
+            "grf_penetration": 7,
+            "grf_penetration_hard": 0,
+            "episode_time_limit": 32
+          },
+          "complete": 32,
+          "episodes": 42,
+          "smoothed_scalar_arithmetic_means": {
+            "mixed_imitation": 0.4860409736633301,
+            "base_penalty": 0.17806271612644195,
+            "command_rate_penalty": 0.17719790935516358,
+            "clip_lift": 0.004405400156974759,
+            "base_clipped": 0.3123836576938629,
+            "reward": 0.2882945775985718,
+            "postclip_penalties": 0.024089076556265354,
+            "command_fraction_of_base_penalty": 0.9951432462107099
+          }
+        }
+      ],
+      "max_identity_residual": 2.066371962428093e-08,
+      "clip_lift_peak": {
+        "iteration": 2,
+        "cumulative_steps": 8192.0,
+        "scalars": {
+          "imitation_score": 0.22397510707378387,
+          "served_imitation_score": 0.14107058942317963,
+          "penalty": 0.19241894781589508,
+          "reward_base": 0.056888654828071594,
+          "command_rate_loss": 3.7844924926757812,
+          "reward": 0.027196837589144707,
+          "safety_term": 0.01230769231915474,
+          "grf_penetration_term": 0.012493583373725414,
+          "grf_ankle_moment_flip_term": 0.003233578521758318,
+          "oob_term": 0.0016569606959819794
+        },
+        "mixed_imitation": 0.1576514929533005,
+        "base_penalty": 0.19241894781589508,
+        "command_rate_penalty": 0.18922462463378908,
+        "clip_lift": 0.09165610969066618,
+        "base_clipped": 0.056888654828071594,
+        "reward": 0.027196837589144707,
+        "postclip_penalties": 0.02969181491062045,
+        "identity_residual": -2.3283064365386963e-09
+      },
+      "limitation": "Different target/normalization and visited states; score values across arms are not common physical quality metrics."
+    }
+  },
+  "conclusion": [
+    "Early base clipping is real and materially changes aggregate scalar values in both arms. Mature-rollout clipping findings cannot be generalized to initial learning.",
+    "RIGHT has larger initial clip lift than LEFT yet subsequently better completion; current evidence does not identify clipping as a selective LEFT failure mechanism.",
+    "Initial command-rate cost is almost identical in both arms and dominates base penalty. Whether it blocks recovery corrections is not determined by these smoothed aggregates.",
+    "LEFT has better imitation-score aggregates while worse completion later; target-specific normalized scores do not rank cross-task physical robustness."
+  ],
+  "input_hashes": {
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/train_iterations.jsonl": "8750ae157718355f14fadcdcfde01d4deb8223bcfe1dcc773b6fd27d73afd578",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/milestone_iteration_000025/checkpoint_last/training_cfg.resolved.yaml": "85d99d4c7a44799583fce1211def21779eaf7ed1110e668820ca45ff1255cd8b",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/tensorboard/events.out.tfevents.1790079523.MacBook-Pro.local.41394.0": "68da5c6b375ed0f43276be15c2f7231e13aa6ca9271cd4cdec82dd6feeff5dc7",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/tensorboard/events.out.tfevents.1789989357.MacBook-Pro.local.23673.0": "def8ab6c7105106780ced8ad2ef0a6444fa5e59736615d69943ea018afa495cd",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/tensorboard/events.out.tfevents.1790068149.MacBook-Pro.local.87991.0": "868588af4986e52f65608bcf1b7ed418843436d213479118b408b0451e50fed9",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/tensorboard/events.out.tfevents.1790035284.MacBook-Pro.local.38228.0": "1c529cc62325e4e61c57260dbe62faf60a0f0a05709a3d7136b86b1f1c0a17ca",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/tensorboard/events.out.tfevents.1790004417.MacBook-Pro.local.92772.0": "cad0cdbef620ddc5d716d4acebd2ba4e5624e045c627905de2336b219edbbc5e",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/tensorboard/events.out.tfevents.1790057640.MacBook-Pro.local.39644.0": "8a1520e4ca4e2a6eb7729b366e889b739360cb54fd647bc1945a20f041cf135a",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_right_phase_fsmv3_40iter_2026-09-23/train_iterations.jsonl": "d73d3a024fc9c9539d09bcaf025ecaa708966924aa97fe05949bf26188914910",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_right_phase_fsmv3_40iter_2026-09-23/checkpoint_last/training_cfg.resolved.yaml": "444f18aea1c907c587d81a627c88d5e965c53f1868b7afea9d4b932c7588e3ea",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_right_phase_fsmv3_40iter_2026-09-23/tensorboard/events.out.tfevents.1790160647.MacBook-Pro.local.31267.0": "dcb494b6702188c597f93e7b2a5f72f2854e1b7970b8782e64fe9d364fec8eea",
+    "Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_right_phase_fsmv3_40iter_2026-09-23/tensorboard/events.out.tfevents.1790185665.MacBook-Pro.local.56543.0": "e508dbfcf1137052d47c98215916a96cde37b920bb757027187a26b40fba9a6a",
+    "Trajectory Generator/unified_MLP_39/validation/left_reward_audit_2026-09-24/physics/training_initial_probe.py": "74002e51df155cb024c6464bc3f57ed0bd31b954a5701ed25ce53d05462b5c07",
+    "Trajectory Generator/unified_MLP_39/tb_logging.py": "3368acdf2b559e421cf36f2186f3fa739c4b8a0f0e3697886f7aa6764a167bf2",
+    "Trajectory Generator/unified_MLP_39/reward_function.py": "18420e3481bbd7c3c81bc5d5fb3102f138cd21271bab57489c5c9cfdd98e1243"
+  }
+}

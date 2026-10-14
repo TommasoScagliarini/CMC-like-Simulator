@@ -115,7 +115,29 @@ class OnlineGRFPenetrationLimitExceeded(FloatingPointError):
     as a clean MDP termination (``grf_penetration_hard``) instead of a
     worker-fatal fault; subclassing ``FloatingPointError`` keeps every legacy
     catch site behaviourally identical.
+
+    Optional metadata preserves the measured contact that triggered the guard.
+    The snapshot describes an aborted integration substep, not a completed
+    control segment. Legacy callers may continue to pass only exception args.
     """
+
+    def __init__(
+        self,
+        *args,
+        time_s: float | None = None,
+        side: str | None = None,
+        penetration_m: float | None = None,
+        limit_m: float | None = None,
+        online_grf: dict | None = None,
+    ):
+        super().__init__(*args)
+        self.time_s = None if time_s is None else float(time_s)
+        self.side = side
+        self.penetration_m = (
+            None if penetration_m is None else float(penetration_m)
+        )
+        self.limit_m = None if limit_m is None else float(limit_m)
+        self.online_grf = copy.deepcopy(online_grf)
 
 
 class PhaseSensorSamplingError(RuntimeError):
@@ -1640,7 +1662,12 @@ class SimulationRunner:
                 if penetration > max_penetration:
                     raise OnlineGRFPenetrationLimitExceeded(
                         f"Online GRF penetration exceeds {max_penetration:g} m "
-                        f"at t={t:.4f} for {side}: {penetration:.6f} m."
+                        f"at t={t:.4f} for {side}: {penetration:.6f} m.",
+                        time_s=t,
+                        side=side,
+                        penetration_m=penetration,
+                        limit_m=max_penetration,
+                        online_grf=self._online_grf_info(grf),
                     )
 
         events = []
@@ -2007,6 +2034,20 @@ class SimulationRunner:
                 # or approximating the simulator substep trace.
                 "tau_spring_sum_squares_nm2": float(
                     np.sum(np.square(tau_spring))
+                ),
+                # Preserve the sign information needed by optional downstream
+                # reward tuning; these statistics do not affect SEA dynamics.
+                "tau_spring_positive_sum_nm": float(
+                    np.sum(np.maximum(tau_spring, 0.0))
+                ),
+                "tau_spring_positive_mean_nm": float(
+                    np.mean(np.maximum(tau_spring, 0.0))
+                ),
+                "tau_spring_positive_max_nm": float(
+                    np.max(np.maximum(tau_spring, 0.0))
+                ),
+                "tau_spring_positive_sample_count": float(
+                    np.count_nonzero(tau_spring > 0.0)
                 ),
                 "tau_spring_rms_nm": rms(tau_spring),
                 "tau_spring_abs_max_nm": float(np.max(np.abs(tau_spring))),

@@ -1,0 +1,82 @@
+{
+  "schema_version": 2,
+  "subject": "AB07",
+  "trial": "treadmill_01_01",
+  "created_utc": "2026-10-06T13:19:23.138191+00:00",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "status": "ground_registered_model_and_native_marker_ik_verified; V26_dynamic_qualification_pending",
+  "scope": "New geometric preparation, actual marker IK and saved-pose detector replay; no new forward integration or network",
+  "bundle": "models/AB07_SEASEA_Threadmill",
+  "model": {
+    "path": "models/AB07_SEASEA_Threadmill/AB07_SEASEA_stiff321_500_pi.osim",
+    "sha256": "6ea6dd779ecf88b69bc0cb940ed9e2d5225bb986a2d6f986920096ba574cc245"
+  },
+  "kinematics": {
+    "path": "models/AB07_SEASEA_Threadmill/data/IK_results_AB07_SEASEA.mot",
+    "sha256": "7f497b28c9c9483b042d6b84fbc4d9d897cfd6191eb63015599734b484f3e15a"
+  },
+  "native_schema": {
+    "coordinate_count": 21,
+    "muscle_count": 76,
+    "body_count": 11,
+    "sea_state_count": 6,
+    "mass_kg": 58.807650530000004,
+    "sea_states": [
+      "/forceset/SEA_Knee/motor_angle",
+      "/forceset/SEA_Knee/motor_speed",
+      "/forceset/SEA_Knee/torque_error_integral",
+      "/forceset/SEA_Ankle/motor_angle",
+      "/forceset/SEA_Ankle/motor_speed",
+      "/forceset/SEA_Ankle/torque_error_integral"
+    ]
+  },
+  "preparation": {
+    "status": "complete",
+    "method": "anatomical_fitting_then_donor_relative_static_hardware_ground_v1_then_marker_calibration_then_opensim_marker_ik",
+    "ik": {
+      "rows": 28612,
+      "time_range_s": [
+        10.36,
+        153.415
+      ],
+      "dynamic_marker_rms_mean_mm": 10.379906725150287,
+      "dynamic_marker_rms_max_mm": 28.794819999999998,
+      "dynamic_marker_max_error_mm": 120.59757
+    },
+    "ground_registration": "models/AB07_SEASEA_Threadmill/data/fitting/ground_registration.json",
+    "marker_fit_rms_m": 0.000249901315597452
+  },
+  "shared_parameters": {
+    "protected_model_semantics_unchanged": true,
+    "sea_matches_AB06": true,
+    "twenty_control_plugin_reference_fingerprints_unchanged": true,
+    "three_frozen_profiles_unchanged": true,
+    "shared_tasks_and_reserves_unchanged": true,
+    "setup_binds_current_bundle": true,
+    "external_loads_binds_current_grf": true,
+    "healthy_overlay_unchanged": true,
+    "grf_numerical_data_unchanged": true,
+    "new_native_marker_ik_provenance": true,
+    "full_ik_finite_schema_and_coverage": true,
+    "static_pose_only_ankle_offset": true,
+    "native_model_schema_and_mass": true,
+    "marker_errors_follow_exact_ik": true
+  },
+  "checks": {
+    "artifact": "validation/ab07_detector_investigation_2026_10_06/stage3/artifact_verification_canonical.json",
+    "regression_tests": "validation/ab07_detector_investigation_2026_10_06/stage3/final_contract_tests.json",
+    "native_static_marker_ik": "validation/ab07_detector_investigation_2026_10_06/stage3/static_marker_ik_recheck.json",
+    "saved_pose_contact_events": "validation/ab07_detector_investigation_2026_10_06/stage3/ik_contact_verification.json",
+    "ankle_geometry_after_registration": "validation/ab07_detector_investigation_2026_10_06/stage3/ankle_geometry_after_registration.json"
+  },
+  "historical_pre_correction": {
+    "archive_manifest": "validation/ab07_detector_investigation_2026_10_06/stage3/baseline/archive_manifest.json",
+    "verification": "validation/ab07_detector_investigation_2026_10_06/stage3/baseline/models/AB07_SEASEA_Threadmill/pipeline_verification.json",
+    "scope": "All previously saved dynamics and plots use the old model/IK; they do not validate this new preparation"
+  },
+  "remaining_qualification": [
+    "Fresh prescribed V26 dynamics: actor FSM, loads, tracking and reserves with the new model/IK",
+    "One confirmed HS fails the inherited 50ms development timing reference (60.705ms early); saved-pose cycle recovery does not close timing qualification",
+    "Known biological MTP tracking limit; Windows live verification"
+  ]
+}

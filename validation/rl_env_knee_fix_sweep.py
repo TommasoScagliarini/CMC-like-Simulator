@@ -2,8 +2,8 @@
 Remedies 2 and 3 for the knee saturating limit-cycle in the trajectory RL env,
 with 1 ms (control-rate) metrics, on the AB06 SEA PI setup.
 
-Remedy 2 (reference excitation): sweep segment_duration and the knee
-            max_delta_rad. Pure env-config, no controller change.
+Remedy 2 (reference excitation): sweep segment_duration with absolute actions.
+            Pure env-config, no controller change.
 Remedy 3 (gain-vs-timing / filter): sweep the knee output-command LPF
             (sea_u_lpf_cutoff_hz), an existing reversible controller knob.
 
@@ -56,7 +56,7 @@ def scripted_actions(env, n_steps, amplitude=AMPLITUDE, seed=SEED):
     return actions
 
 
-def make_env(seg, max_delta_knee, max_delta_ankle=0.35):
+def make_env(seg):
     # The knee command LPF (remedy 3) is not a CMCEnvConfig field; it lives on
     # the SimulatorConfig and is set on env.cfg after construction.
     return CMCLikeProsthesisTrajectoryEnv(
@@ -65,11 +65,7 @@ def make_env(seg, max_delta_knee, max_delta_ankle=0.35):
             segment_duration=seg,
             episode_duration=EPISODE,
             policy_knots=1,
-            action_mode="delta",
-            max_delta_rad={
-                "pros_knee_angle": max_delta_knee,
-                "pros_ankle_angle": max_delta_ankle,
-            },
+            action_mode="absolute",
             random_init=False,
             rebuild_model_on_reset=False,
             record_outputs=True,
@@ -145,8 +141,8 @@ def row(label, m):
 
 
 def main():
-    print("=== Part 1: baseline + oscillation frequency (seg=0.01, delta_knee=0.35) ===")
-    env = make_env(seg=0.01, max_delta_knee=0.35)
+    print("=== Part 1: baseline + oscillation frequency (seg=0.01) ===")
+    env = make_env(seg=0.01)
     base = rollout(env)
     fc = freq_characterization(base["u_series"])
     row("baseline", base)
@@ -157,20 +153,14 @@ def main():
     )
     env.close()
 
-    print("\n=== Part 2a: remedy 2 - segment_duration sweep (delta_knee=0.35) ===")
+    print("\n=== Part 2a: remedy 2 - segment_duration sweep (absolute) ===")
     for seg in (0.01, 0.02, 0.05):
-        env = make_env(seg=seg, max_delta_knee=0.35)
+        env = make_env(seg=seg)
         row(f"seg={seg:.3f}", rollout(env))
         env.close()
 
-    print("\n=== Part 2b: remedy 2 - knee max_delta_rad sweep (seg=0.01) ===")
-    for d in (0.35, 0.15, 0.05, 0.02):
-        env = make_env(seg=0.01, max_delta_knee=d)
-        row(f"max_delta_knee={d:.2f}", rollout(env))
-        env.close()
-
-    print("\n=== Part 3: remedy 3 - knee output-command LPF sweep (seg=0.01, delta=0.35) ===")
-    env = make_env(seg=0.01, max_delta_knee=0.35)
+    print("\n=== Part 3: remedy 3 - knee output-command LPF sweep (seg=0.01, absolute) ===")
+    env = make_env(seg=0.01)
     for cut in (0.0, 80.0, 50.0, 30.0, 20.0, 10.0):
         set_knee_lpf(env, cut)
         label = "lpf=off" if cut == 0.0 else f"lpf={cut:.0f}Hz"

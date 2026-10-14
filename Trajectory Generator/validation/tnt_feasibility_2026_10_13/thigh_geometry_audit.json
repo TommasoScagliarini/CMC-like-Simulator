@@ -1,0 +1,262 @@
+{
+  "analysis_date": "2026-10-13",
+  "scope": "offline forward kinematics from saved trajectories, no integration, no controller/policy, no GRF read or event labels",
+  "calibration_limit": "Fixed forward heading chosen from the mean reference pelvis x-axis for each subject. This uses full saved interval ONLY to define a diagnostic plane, not to initialise any online estimator. Runtime would require an independent fixed IMU/sagittal calibration. Body -y axis assumes calibrated thigh long-axis at model nominal alignment. No claim about paper IMU mounting offsets.",
+  "cycle_definition": "Independent diagnostic minima/maxima from scipy find_peaks, prominence 5deg, minimum separation .25s. Complete min\u2192max\u2192min only; theta extrema may differ from TNT selected theta_bm. Rho32 count is geometric plausibility, not TNT state-transition test.",
+  "results": {
+    "AB06": {
+      "model": {
+        "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+        "sha256": "33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1"
+      },
+      "sagittal_forward_unit_ground": [
+        -0.026913135156034128,
+        0.0,
+        -0.9996377759749143
+      ],
+      "ground_vertical": [
+        0,
+        1,
+        0
+      ],
+      "longitudinal_axis_in_thigh": [
+        0,
+        -1,
+        0
+      ],
+      "sign": "positive distal-thigh anterior to hip; theta=atan2(axis dot forward,-axis_y)",
+      "trajectories": {
+        "kinematics": {
+          "source": {
+            "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB06_control_2026_10_06_5s/sim_outputs/rollout_episode_kinematics.sto",
+            "sha256": "5d08e1b9bc1a192d5c5657a832900a3831b20906bc80b021603b674374b6b581"
+          },
+          "samples": 5000,
+          "time_start_s": 13.94687098,
+          "time_end_s": 18.94587098,
+          "dt_s": 0.0010000000000012221,
+          "theta_min_deg": -3.4369599103729778,
+          "theta_max_deg": 24.72005390786579,
+          "range_deg": 28.157013818238767,
+          "sigma_minus6_fraction_below": 0.0,
+          "sigma_minus6_crossings_times_s": [],
+          "complete_min_max_min_cycles": [
+            {
+              "min_time_s": 14.86687098,
+              "max_time_s": 15.41187098,
+              "next_min_time_s": 16.45087098,
+              "minimum_deg": -3.4369599103729778,
+              "maximum_deg": 24.72005390786579,
+              "flexion_excursion_deg": 28.157013818238767,
+              "rho32_reached": false,
+              "period_s": 1.5840000000000014
+            },
+            {
+              "min_time_s": 16.45087098,
+              "max_time_s": 16.95487098,
+              "next_min_time_s": 17.95287098,
+              "minimum_deg": -1.265307732664859,
+              "maximum_deg": 23.919468986606972,
+              "flexion_excursion_deg": 25.18477671927183,
+              "rho32_reached": false,
+              "period_s": 1.501999999999999
+            }
+          ],
+          "cycle_count": 2,
+          "cycle_count_rho32_reached": 0,
+          "hip_relative_min_max_deg": [
+            -0.6790025427270213,
+            25.284304350926774
+          ],
+          "rms_difference_from_tilt_plus_hip_deg": 4.708774685181336
+        },
+        "kinematics_reference": {
+          "source": {
+            "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB06_control_2026_10_06_5s/sim_outputs/rollout_episode_kinematics_reference.sto",
+            "sha256": "d783f30ca110c496ba1b3b6038b81bf937a220108ae4c35d21c158083727ffd6"
+          },
+          "samples": 5000,
+          "time_start_s": 13.94687098,
+          "time_end_s": 18.94587098,
+          "dt_s": 0.0010000000000012221,
+          "theta_min_deg": -3.3671428041097156,
+          "theta_max_deg": 24.765420981481086,
+          "range_deg": 28.1325637855908,
+          "sigma_minus6_fraction_below": 0.0,
+          "sigma_minus6_crossings_times_s": [],
+          "complete_min_max_min_cycles": [
+            {
+              "min_time_s": 14.86287098,
+              "max_time_s": 15.39887098,
+              "next_min_time_s": 16.43287098,
+              "minimum_deg": -3.3671428041097156,
+              "maximum_deg": 24.765420981481086,
+              "flexion_excursion_deg": 28.1325637855908,
+              "rho32_reached": false,
+              "period_s": 1.5700000000000003
+            },
+            {
+              "min_time_s": 16.43287098,
+              "max_time_s": 16.94587098,
+              "next_min_time_s": 17.96987098,
+              "minimum_deg": -1.017844584411585,
+              "maximum_deg": 23.933615567509122,
+              "flexion_excursion_deg": 24.951460151920706,
+              "rho32_reached": false,
+              "period_s": 1.536999999999999
+            }
+          ],
+          "cycle_count": 2,
+          "cycle_count_rho32_reached": 0,
+          "hip_relative_min_max_deg": [
+            -0.6840623330158218,
+            25.276865066914798
+          ],
+          "rms_difference_from_tilt_plus_hip_deg": 4.67374532919769
+        }
+      }
+    },
+    "AB07": {
+      "model": {
+        "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/ab07_standing_geometry_fit_2026_10_07/preparation/cases/PYLON400_REFERENCE/AB07_SEASEA_marker_calibrated.osim",
+        "sha256": "687e72046060e38d6864fd6b69ed5980f0c7593d4975de3a5479c58fdfe14bef"
+      },
+      "sagittal_forward_unit_ground": [
+        -0.0013889658193378426,
+        0.0,
+        -0.9999990353865111
+      ],
+      "ground_vertical": [
+        0,
+        1,
+        0
+      ],
+      "longitudinal_axis_in_thigh": [
+        0,
+        -1,
+        0
+      ],
+      "sign": "positive distal-thigh anterior to hip; theta=atan2(axis dot forward,-axis_y)",
+      "trajectories": {
+        "kinematics": {
+          "source": {
+            "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_pylon400_2026_10_07_6p11s/sim_outputs/rollout_episode_kinematics.sto",
+            "sha256": "68bfcb894af24f9bda8823b24077bb9f159fb2bb72d947d7701b65e88c299e9a"
+          },
+          "samples": 6110,
+          "time_start_s": 12.59174052,
+          "time_end_s": 18.70074052,
+          "dt_s": 0.0009999999999994458,
+          "theta_min_deg": -7.288318431551219,
+          "theta_max_deg": 30.327519922842676,
+          "range_deg": 37.615838354393894,
+          "sigma_minus6_fraction_below": 0.0353518821603928,
+          "sigma_minus6_crossings_times_s": [
+            16.43074052,
+            16.51174052,
+            17.92974052,
+            18.06474052
+          ],
+          "complete_min_max_min_cycles": [
+            {
+              "min_time_s": 13.41274052,
+              "max_time_s": 13.82274052,
+              "next_min_time_s": 14.89874052,
+              "minimum_deg": -5.342945034336869,
+              "maximum_deg": 30.327519922842676,
+              "flexion_excursion_deg": 35.67046495717955,
+              "rho32_reached": true,
+              "period_s": 1.4860000000000007
+            },
+            {
+              "min_time_s": 14.89874052,
+              "max_time_s": 15.31874052,
+              "next_min_time_s": 16.47574052,
+              "minimum_deg": -5.051167636910147,
+              "maximum_deg": 24.874420504744258,
+              "flexion_excursion_deg": 29.925588141654405,
+              "rho32_reached": false,
+              "period_s": 1.5769999999999982
+            },
+            {
+              "min_time_s": 16.47574052,
+              "max_time_s": 16.95474052,
+              "next_min_time_s": 18.00774052,
+              "minimum_deg": -6.505147735122693,
+              "maximum_deg": 22.094129546354896,
+              "flexion_excursion_deg": 28.59927728147759,
+              "rho32_reached": false,
+              "period_s": 1.532
+            }
+          ],
+          "cycle_count": 3,
+          "cycle_count_rho32_reached": 1,
+          "hip_relative_min_max_deg": [
+            -9.908203841905348,
+            23.02890755659585
+          ],
+          "rms_difference_from_tilt_plus_hip_deg": 4.952227057396398
+        },
+        "kinematics_reference": {
+          "source": {
+            "path": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_pylon400_2026_10_07_6p11s/sim_outputs/rollout_episode_kinematics_reference.sto",
+            "sha256": "266e50a460a8dd0e9eca5de5e8fffd8a38f61c37cd8ed75b9e13ce9771cefe26"
+          },
+          "samples": 6110,
+          "time_start_s": 12.59174052,
+          "time_end_s": 18.70074052,
+          "dt_s": 0.0009999999999994458,
+          "theta_min_deg": -7.153871268824069,
+          "theta_max_deg": 30.132449028514166,
+          "range_deg": 37.286320297338236,
+          "sigma_minus6_fraction_below": 0.034206219312602294,
+          "sigma_minus6_crossings_times_s": [
+            16.43674052,
+            16.51174052,
+            17.93174052,
+            18.06574052
+          ],
+          "complete_min_max_min_cycles": [
+            {
+              "min_time_s": 13.41574052,
+              "max_time_s": 13.82374052,
+              "next_min_time_s": 14.90274052,
+              "minimum_deg": -5.397830409082016,
+              "maximum_deg": 30.132449028514166,
+              "flexion_excursion_deg": 35.530279437596185,
+              "rho32_reached": true,
+              "period_s": 1.487
+            },
+            {
+              "min_time_s": 14.90274052,
+              "max_time_s": 15.32074052,
+              "next_min_time_s": 16.47674052,
+              "minimum_deg": -5.114968957809189,
+              "maximum_deg": 24.72057458274427,
+              "flexion_excursion_deg": 29.83554354055346,
+              "rho32_reached": false,
+              "period_s": 1.5739999999999998
+            },
+            {
+              "min_time_s": 16.47674052,
+              "max_time_s": 16.95674052,
+              "next_min_time_s": 18.00674052,
+              "minimum_deg": -6.336411849066664,
+              "maximum_deg": 22.105133689808103,
+              "flexion_excursion_deg": 28.441545538874767,
+              "rho32_reached": false,
+              "period_s": 1.5300000000000011
+            }
+          ],
+          "cycle_count": 3,
+          "cycle_count_rho32_reached": 1,
+          "hip_relative_min_max_deg": [
+            -9.763795559220574,
+            22.809836570669788
+          ],
+          "rms_difference_from_tilt_plus_hip_deg": 4.912456917822368
+        }
+      }
+    }
+  }
+}

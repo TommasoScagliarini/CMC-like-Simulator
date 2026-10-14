@@ -1,7 +1,8 @@
 """Single source of truth for unified_MLP training/rollout parameters.
 
-A YAML file (``configs/pretraining.yaml`` in this package) holds every network and
-simulation parameter. It is consumed by ``train_ppo_mlp.py`` and
+A YAML file (``configs/pretraining.yaml`` in this package) selects network and
+simulation parameters; validated GRF defaults are defined in this module.
+It is consumed by ``train_ppo_mlp.py`` and
 ``rollout_eval.py`` as argparse *defaults*: an explicitly-passed CLI flag still
 wins over the YAML (``argparse.set_defaults`` semantics).
 
@@ -19,6 +20,7 @@ from __future__ import annotations
 
 import os
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable
 
@@ -32,6 +34,60 @@ RESOLVED_CONFIG_NAME = "training_cfg.resolved.yaml"
 # (output_dir/resume_from): the snapshot describes the reproducible config, not
 # the invocation, and the rollout must not inherit the training run's output dir.
 _SNAPSHOT_SKIP_SECTIONS = {"run"}
+
+
+# Validated GRF defaults shared by training, rollout and env creation. Paths
+# remain repository-relative for Windows and macOS. Editable YAML presets may
+# omit these fields; resolved checkpoint snapshots still record every value.
+_GRF_DEFAULTS: dict[str, Any] = {
+    "grf_mode": "online_sensor",
+    "online_grf_profile": (
+        "online_grf_profiles/"
+        "AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json"
+    ),
+    "online_grf_detector_profile": (
+        "online_grf_profiles/"
+        "AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json"
+    ),
+    "binary_phase_detector_profile": (
+        "validation/binary_phase_detector_v25_geometry_runs/"
+        "2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json"
+    ),
+    "phase_sensor_on_threshold_n": 5.0,
+    "phase_sensor_off_threshold_n": 2.0,
+    "phase_sensor_dwell_s": 0.03,
+    "detector_sample_dt_s": 0.001,
+    "event_contract_id": "legacy_events_v1",
+    "binary_phase_fsm_mode": "binary_active",
+    "phase_fsm_input_mode": "legacy_events",
+    "binary_phase_debounce_s": 0.005,
+    "binary_phase_invalid_event_policy": "reject_continue",
+    "binary_phase_actor_fsm_version": "v3",
+    "binary_phase_event_contract_id": "binary_point_v25+heel_qualified_fsm_v2",
+    "online_grf_observation": True,
+    "online_grf_applied_side": ["left"],
+    "disable_prescribed_grf_side": [],
+}
+
+_GRF_ENV_NAMES = {
+    "online_grf_profile": "online_grf_profile_file",
+    "online_grf_detector_profile": "online_grf_detector_profile_file",
+    "binary_phase_detector_profile": "binary_phase_detector_profile_file",
+    "online_grf_observation": "include_online_grf_observation",
+    "online_grf_applied_side": "online_grf_applied_sides",
+    "disable_prescribed_grf_side": "prescribed_grf_disabled_sides",
+}
+
+
+def grf_argparse_defaults() -> dict[str, Any]:
+    """Return fresh GRF defaults before snapshot, YAML and CLI overrides."""
+    return deepcopy(_GRF_DEFAULTS)
+
+
+def grf_env_defaults() -> dict[str, Any]:
+    """Return the same GRF defaults using CMCEnvConfig field names."""
+    return {_GRF_ENV_NAMES.get(key, key): value
+            for key, value in grf_argparse_defaults().items()}
 
 
 def _cli_path(value: str | Path) -> Path:
@@ -131,12 +187,9 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "step_wall_timeout_s": float,
         "grf_penetration_penalty_threshold_m": float,
         "grf_penetration_termination_m": float,
-        # Diagnostic-only: "absolute" is the sole production action mode, so these
-        # are intentionally omitted from the shipped training_cfg.yaml. They stay
-        # valid keys so the resolved snapshot can round-trip a diagnostic run's
-        # action_mode/max_delta_rad back into the rollout.
+        # Preserve the action contract in snapshots, including raw-radian
+        # diagnostic playback. Production policies use absolute actions.
         "action_mode": str,
-        "max_delta_rad": float,
         "pros_knee_target_slew_rate_limit_rad_s": float,
         "pros_ankle_target_slew_rate_limit_rad_s": float,
         "pros_ref_governor": _to_bool,
@@ -219,7 +272,11 @@ def resolve_config_path(value: str | Path | None) -> Path:
 
 
 def load(path: str | Path) -> dict[str, Any]:
-    """Load an explicit, complete unified YAML config; missing files are errors."""
+    """Load a unified YAML config as written; missing files are errors.
+
+    Defaults are applied by the parsers so partial YAML overrides cannot replace
+    inherited checkpoint settings, and saved-runtime validation stays strict.
+    """
     path = _cli_path(path)
     if not path.is_file():
         raise FileNotFoundError(f"config file not found: {path}")

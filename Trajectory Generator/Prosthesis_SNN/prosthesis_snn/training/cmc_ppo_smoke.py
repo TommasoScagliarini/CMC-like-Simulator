@@ -30,6 +30,9 @@ for _path in (_PROSTHESIS_ROOT, _TRAJ_GEN_DIR, _REPO_ROOT):
 from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 from prosthesis_snn.config import SNNConfig
 from prosthesis_snn.generator import ReferenceGenerator
+from prosthesis_snn.cmc_checkpoint import (
+    require_absolute_reference, require_absolute_agent, write_agent_contract,
+)
 from prosthesis_snn.training.actor_critic import ProsthesisSNNActorCritic
 from prosthesis_snn.training.checkpoint import save_reference_checkpoint
 from prosthesis_snn.training.ppo_snn import PPO_SNN
@@ -43,7 +46,6 @@ class CMCPPOSmokeConfig:
     segment_duration: float = 0.002
     episode_duration: float = 0.004
     policy_knots: int = 3
-    max_delta_rad: float = 0.05
     timesteps: int = 2
     rollouts: int = 2
     learning_epochs: int = 1
@@ -78,8 +80,7 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
             segment_duration=config.segment_duration,
             episode_duration=config.episode_duration,
             policy_knots=config.policy_knots,
-            action_mode="delta",
-            max_delta_rad=config.max_delta_rad,
+            action_mode="absolute",
             random_init=False,
             rebuild_model_on_reset=False,
             record_outputs=False,
@@ -129,6 +130,7 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
                 config.load_reference_path,
                 device=device,
             )
+            require_absolute_reference(generator)
             model.load_reference_state_dict(generator.model.state_dict())
 
         memory = RandomMemory(
@@ -163,6 +165,7 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
         )
         agent.init(trainer_cfg={"timesteps": config.timesteps})
         if config.resume_agent_path:
+            require_absolute_agent(config.resume_agent_path)
             agent.load(config.resume_agent_path)
 
         rewards: list[float] = []
@@ -227,6 +230,7 @@ def run_cmc_ppo_smoke(config: CMCPPOSmokeConfig) -> dict[str, Any]:
                 obs_tensor = next_obs_tensor
 
         agent.save(str(agent_checkpoint_path))
+        write_agent_contract(agent_checkpoint_path)
         save_reference_checkpoint(
             reference_checkpoint_path,
             model,
@@ -307,7 +311,6 @@ def parse_args() -> CMCPPOSmokeConfig:
     parser.add_argument("--segment-duration", type=float, default=0.002)
     parser.add_argument("--episode-duration", type=float, default=0.004)
     parser.add_argument("--policy-knots", type=int, default=3)
-    parser.add_argument("--max-delta-rad", type=float, default=0.05)
     parser.add_argument("--timesteps", type=int, default=2)
     parser.add_argument("--rollouts", type=int, default=2)
     parser.add_argument("--hidden-size", type=int, default=16)
@@ -323,7 +326,6 @@ def parse_args() -> CMCPPOSmokeConfig:
         segment_duration=args.segment_duration,
         episode_duration=args.episode_duration,
         policy_knots=args.policy_knots,
-        max_delta_rad=args.max_delta_rad,
         timesteps=args.timesteps,
         rollouts=args.rollouts,
         hidden_size=args.hidden_size,

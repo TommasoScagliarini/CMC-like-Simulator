@@ -24,6 +24,9 @@ for _path in (_PROSTHESIS_ROOT, _TRAJ_GEN_DIR, _REPO_ROOT):
 from osim_trj_cmc_like import CMCEnvConfig, CMCLikeProsthesisTrajectoryEnv
 from prosthesis_snn.config import SNNConfig
 from prosthesis_snn.generator import ReferenceGenerator
+from prosthesis_snn.cmc_checkpoint import (
+    require_absolute_reference, require_absolute_agent, write_agent_contract,
+)
 from prosthesis_snn.training.actor_critic import ProsthesisSNNActorCritic
 from prosthesis_snn.training.checkpoint import save_reference_checkpoint
 from prosthesis_snn.training.ppo_snn import PPO_SNN
@@ -37,7 +40,6 @@ class CMCPPOTrainConfig:
     segment_duration: float = 0.01
     episode_duration: float = 0.5
     policy_knots: int = 3
-    max_delta_rad: float = 0.35
     timesteps: int = 100
     rollouts: int = 16
     learning_epochs: int = 4
@@ -76,8 +78,7 @@ def run_cmc_ppo_training(config: CMCPPOTrainConfig) -> dict[str, Any]:
         segment_duration=config.segment_duration,
         episode_duration=config.episode_duration,
         policy_knots=config.policy_knots,
-        action_mode="delta",
-        max_delta_rad=config.max_delta_rad,
+        action_mode="absolute",
         random_init=config.random_init,
         rebuild_model_on_reset=False,
         record_outputs=config.record_outputs,
@@ -125,6 +126,7 @@ def run_cmc_ppo_training(config: CMCPPOTrainConfig) -> dict[str, Any]:
                 device=device,
             )
             _validate_checkpoint_contract(generator, feature_names, action_shape)
+            require_absolute_reference(generator)
             model.load_reference_state_dict(generator.model.state_dict())
 
         memory = RandomMemory(
@@ -159,6 +161,7 @@ def run_cmc_ppo_training(config: CMCPPOTrainConfig) -> dict[str, Any]:
         )
         agent.init(trainer_cfg={"timesteps": config.timesteps})
         if config.resume_agent_path:
+            require_absolute_agent(config.resume_agent_path)
             agent.load(config.resume_agent_path)
 
         rewards: list[float] = []
@@ -437,6 +440,7 @@ def _save_training_checkpoint_pair(
     metadata: Mapping[str, Any],
 ) -> None:
     agent.save(str(agent_path))
+    write_agent_contract(agent_path)
     save_reference_checkpoint(
         reference_path,
         model,
@@ -524,7 +528,6 @@ def parse_args() -> CMCPPOTrainConfig:
     parser.add_argument("--segment-duration", type=float, default=0.01)
     parser.add_argument("--episode-duration", type=float, default=0.5)
     parser.add_argument("--policy-knots", type=int, default=3)
-    parser.add_argument("--max-delta-rad", type=float, default=0.35)
     parser.add_argument("--timesteps", type=int, default=100)
     parser.add_argument("--rollouts", type=int, default=16)
     parser.add_argument("--learning-epochs", type=int, default=4)
@@ -548,7 +551,6 @@ def parse_args() -> CMCPPOTrainConfig:
         segment_duration=args.segment_duration,
         episode_duration=args.episode_duration,
         policy_knots=args.policy_knots,
-        max_delta_rad=args.max_delta_rad,
         timesteps=args.timesteps,
         rollouts=args.rollouts,
         learning_epochs=args.learning_epochs,

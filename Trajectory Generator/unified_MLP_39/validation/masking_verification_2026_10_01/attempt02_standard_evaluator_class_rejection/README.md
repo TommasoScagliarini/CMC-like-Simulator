@@ -1,0 +1,1 @@
+Initial evaluations rejected by the standard exact-class validator before stepping. Training completed successfully and is unchanged. sigma_rollout.py admits the exact diagnostic subclass while retaining all original structural checks, plus reference-buffer and treatment audits.

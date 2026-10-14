@@ -131,12 +131,9 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "step_wall_timeout_s": float,
         "grf_penetration_penalty_threshold_m": float,
         "grf_penetration_termination_m": float,
-        # Diagnostic-only: "absolute" is the sole production action mode, so these
-        # are intentionally omitted from the shipped training_cfg.yaml. They stay
-        # valid keys so the resolved snapshot can round-trip a diagnostic run's
-        # action_mode/max_delta_rad back into the rollout.
+        # Preserve the action contract in snapshots, including raw-radian
+        # diagnostic playback. Production policies use absolute actions.
         "action_mode": str,
-        "max_delta_rad": float,
         "pros_knee_target_slew_rate_limit_rad_s": float,
         "pros_ankle_target_slew_rate_limit_rad_s": float,
         "pros_ref_governor": _to_bool,

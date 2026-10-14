@@ -1,0 +1,49 @@
+Audit indipendente richiesto dall'utente il13ottobre: verificare la capacita
+V26C best47 di gestire reset da pose CASUALI DI KNEE/ANKLE PROTESICI. Il resto
+biologico rimane inizializzato e guidato dalla IK; non e avvio autonomo da fermo.
+Usa italiano e cita file/funzioni/righe. Max1500 parole output. Opus5.5 effortmax.
+
+Questo e audit indipendente di sorgenti, progetto esperimento e possibili
+confondenti. Non leggere conclusioni Codex, source_protocol_audit, analysis_plan,
+report o risultati nuovi nella cartella random_pose_reset_2026_10_13. Puoi leggere
+SOLTANTO il nuovo harness random_pose_reset.py e bootstrap_probe.py, i sorgenti
+operativi originali elencati sotto e artifacts del12/10 per capire il confronto
+coerente vs legacy. Non eseguire comandi, simulazioni o training, non modificare
+file, non usare servizi esterni; tools Read/Grep/Glob soltanto.
+
+Disegno da auditare, non assumere corretto: checkpoint exnovo35/84 best47 frozen,
+AB06, tempo13.946870983805102s, biologia/GRFdestra originali, physicalGRFsinistra
+online. Jointposes IIDuniformi qknee[-1.20,-0.03]rad, qankle[-.55,+.55]rad;
+seed20261013, pool400, first20 ammessi dopo screeningGEOMETRIA prima dirollout,
+5s deterministicseed123 ciascuno. Gateinitialjointbounds/finiteFK e contatti
+primariLEFT maxpenetration<=27mm (operational28mm resta invariato), normforceLEFT
+<=5BW comeguardstandard. AIRammesso senza limite arbitrario clearance; non e
+certifica statico equilibrio o selfcollision. Tutti geometricrejections e poi
+physicalfailures salvati; nessun failure sostituito. Control coherentnominal
+qIKnom ma qdotprosth0, motorq=q/ω0, controllerPI0, prevendpointq, served/governor
+q0/vel0/acc0. Randomcases stessa coerenza. FSMprime dalla nuova geometria,
+nessunHS sintetico. Loadobs iniziale segue contratto originale0fino primasample.
+
+Esamina se il bootstrap davvero NONreintroduceIKprotesica al firstaction o
+segmento: _initialise_episode/kin.clear_segment/get/_action_to_segment/filterC2,
+state SEA/primi sensorpoints/FSM. Verifica come preservare eventi e tracce nei
+failure fail_fast, censure ultimo segmento nonritornato, forcevsdetectorplane.
+Definisci criteri per distinguere semplicecompletion da recupero gait stabile.
+Proposta primaria:500steps/5s,>=2cicli,firstHS<=3s,0invalid/resync,
+pen1ms<28mm,post0.5actualservedRMSE<=2deg,escursioni cicliche dichiarate;
+clipping/forze/reserve/timing separati. Critica selezione bias, campionamento,
+coerenza bootstrap e limiti inferenze daN20. Quali risultati permettono davvero
+concludere gestisceposecasuali nel dominio? Cosa non sarebbe dimostrato?
+
+Fonti mirate:
+AGENTS.md; simulation_runner.py (reset_to_time,_init_muscle_states,_sample_online_grf);
+Trajectory Generator/osim_trj_cmc_like.py (ProstheticSegmentKinematics,reset,
+_initialise_episode,_action_to_segment,_get_observation,primeFSM);
+Trajectory Generator/binary_phase_adapter.py; Trajectory Generator/prosthetic_phase_fsm.py;
+online_grf.py; Trajectory Generator/baseline_MLP/rollout_eval.py;
+Trajectory Generator/validation/random_pose_reset_2026_10_13/random_pose_reset.py;
+Trajectory Generator/validation/random_pose_reset_2026_10_13/bootstrap_probe.py;
+Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml;
+solo reset receipt del12/10 se necessario. NON leggere interi traininglogs o
+dailyreports: non aiutano questa verifica di randompose e aumentano contesto.
+Non vedere la proposta Codex per formulare un tuo verdetto indipendente.

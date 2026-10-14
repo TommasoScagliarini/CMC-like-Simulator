@@ -270,3 +270,33 @@ GRF primaria, plugin C++, semantica SEA, FSM V20 o checkpoint H0 storici.
 - [ ] Validare detector con rumore/delay e ground truth localizzata, portare la
       GRF online a production-ready mantenendola separata dai sensori e
       valutare una deflessione SEA iniziale coerente con la coppia.
+
+<!-- reconciled-report-todos-2026-10-05:start -->
+## TODO riconciliati e propagati — integrazione del 5 ottobre 2026
+
+Ricostruzione documentale dello stato a questa data. Le voci sotto precisano i TODO storici ripetuti nelle sezioni precedenti: una nuova esecuzione o un PASS su un altro ramo non chiude il debito originario. Le attività condizionate restano proposte; questa integrazione non avvia esperimenti. Le chiusure riportano una fonte esplicita.
+
+### Attività aperte
+
+- [ ] Riferimento storico al TODO giugno sulla scelta warm-start: luglio ha usato il 23 giugno grfsoft, non il 24 giugno. — [fonte 2026-08-25, riga 40](../user/2026-08-25_ricostruzione_storica_architetture_actor_e_tentativi_rete_larga.md).
+- [ ] Solo dopo tale freeze, eseguire prima le sei coppie A/B e, se tutte passano, i sei casi C. — [fonte 2026-08-05, riga 144](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md).
+- [ ] Mantenere H0_sep, trial protetti, corridor positivo e PPO chiusi fino ai gate rispettivi. — [fonte 2026-08-05, riga 232](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md).
+- [ ] Mantenere corridor, reward positivo e PPO chiusi fino ai rispettivi gate. — [fonte 2026-08-05, riga 147](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md).
+- [ ] Eseguire la prova A/B bit-exact prevista dal protocollo congelato, prima con V20 disabilitata e poi in shadow. — [fonte 2026-08-05, riga 226](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md).
+- [ ] Solo dopo il gate H0 decidere l'apertura one-shot dei trial protetti 05/06. — [fonte 2026-08-05, riga 146](../user/2026-08-05_protocollo_h0_v25_abc_congelato.md).
+- [ ] Eseguire il caso C `binary_active` soltanto dopo il PASS A/B e con le autorità previste dal protocollo. — [fonte 2026-08-05, riga 228](../user/2026-08-05_binary_active_v25_v20_adapter_h0.md).
+- [ ] Definire un nuovo gate baseline A per il candidato adattato e un nuovo percorso A/B/C soltanto dopo avere ottenuto una baseline valida. — [fonte 2026-08-05, riga 229](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md).
+- [ ] Mantenere B, C, H0_sep, trial 05/06, corridor positivo e PPO chiusi fino ai rispettivi gate. — [fonte 2026-08-05, riga 231](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md).
+- [ ] Decidere se autorizzare una nuova lineage H0, separata da V8R1P1, per correggere il mismatch fra target legacy e osservazione causale V26. Prima dell'esecuzione va congelata una semantica teacher coerente con V26 e va deciso se il gate deve misurare imitazione istantanea delle azioni o equivalenza comportamentale nei rollout. Un'eventuale revisione delle soglie richiede una motivazione indipendente; non è consentito trasformare il FAIL V8R1P1 in PASS retroattivamente. — [fonte 2026-08-07, riga 274](../user/2026-08-07_v26_v8r1p1_teacher_pass_h0_p0_fail.md).
+- [ ] Mantenere morphology reward positivo, corridor training e PPO chiusi fino a `H0_TRAINING_READY` reale. — [fonte 2026-08-07, riga 290](../user/2026-08-07_v26_v8r1p1_teacher_pass_h0_p0_fail.md).
+- [ ] Dopo tutti i gate: eseguire zero-update save/reload e creare il vero `checkpoint_zero`; solo allora pubblicare il comando di warm-start. — [fonte 2026-08-07, riga 288](../user/2026-08-07_v26_v8r1p1_teacher_pass_h0_p0_fail.md).
+- [ ] Congelare ed eseguire la qualification indipendente del candidato. — [fonte 2026-08-07, riga 285](../user/2026-08-07_v26_v8r1p1_teacher_pass_h0_p0_fail.md).
+- [ ] Correggere nella prossima lineage il riepilogo terminale di `actor_updates` e `completed_receipts`. — [fonte 2026-08-07, riga 281](../user/2026-08-07_v26_v8r1p1_teacher_pass_h0_p0_fail.md).
+- [ ] Richiedere autorizzazione separata prima di aprire one-shot trial 05 e, solo dopo PASS, trial 06. — [fonte 2026-08-07, riga 286](../user/2026-08-07_v26_v8r1p1_teacher_pass_h0_p0_fail.md).
+- [ ] Solo dopo un nuovo P0 PASS: eseguire due DAgger completi da 500 step, fit P1 e sei rollout development. — [fonte 2026-08-07, riga 283](../user/2026-08-07_v26_v8r1p1_teacher_pass_h0_p0_fail.md).
+
+### Chiusure documentate e consolidamento retrospettivo
+
+- [x] Revisionare e congelare con nuova autorità il percorso H0: la necessità ora evidenziata è adattare l'actor pre-split alla semantica della GRF primaria, prima di poter valutare separatamente l'attivazione V25/V20. — [fonte 2026-08-05, riga 226](../user/2026-08-05_preflight_h0_v25_abc_error_h0_reference.md). **Chiuso:** Nuova lineage H0/V26 con teacher replay6/6; P0 FAIL documentato. ([evidenza](2026-08-07_daily-report.md)).
+
+<!-- reconciled-report-todos-2026-10-05:end -->

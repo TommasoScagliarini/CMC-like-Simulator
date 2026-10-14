@@ -152,11 +152,8 @@ class CMCEnvConfig:
         a continuity anchor at the current target, so the interpolator sees
         policy_knots + 1 points.
     action_mode
-        "delta": action in [-1, 1] is an offset around kin_ref.
         "absolute": action in [-1, 1] is mapped to absolute coord bounds.
         "raw": action is already an absolute trajectory in radians.
-    max_delta_rad
-        Max offset from kin_ref when action_mode == "delta".
     absolute_bounds_rad
         Bounds used by action_mode == "absolute"; keys are prosthetic coord
         names and values are (low, high) in radians.
@@ -202,7 +199,6 @@ class CMCEnvConfig:
     segment_duration: float = 0.05
     policy_knots: int = 4
     action_mode: str = "absolute"
-    max_delta_rad: float | Mapping[str, float] | Sequence[float] = 0.35
     target_slew_rate_limit_rad_s: (
         float | Mapping[str, float] | Sequence[float] | None
     ) = None
@@ -1324,8 +1320,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
 
         q_policy(t_k) = low_j + 0.5 * (action[k, j] + 1) * (high_j - low_j)
 
-    ("delta" mode — q_kin_ref + action * max_delta_rad — and "raw" mode remain
-    available for diagnostics.) The environment prepends a continuity anchor at
+    "raw" mode accepts absolute radians for prescribed diagnostic playback.
+    The environment prepends a continuity anchor at
     the current prosthetic target and interpolates the full knot set with PCHIP.
 
     Observation
@@ -1518,7 +1514,6 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         self._imitation_velocity_ranges_rad_s: dict[str, float] = {}
         self._closed = False
 
-        self._delta_scale = self._resolve_delta_scale()
         self.action_space = self._build_action_space()
 
         self._build_simulator()
@@ -1847,6 +1842,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         failure_traceback = ""
         wall_timeout = False
         penetration_hard = False
+        terminal_contact = None
         step_info: dict = {}
 
         try:
@@ -1880,6 +1876,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             penetration_hard = True
             failure = exc
             failure_traceback = traceback.format_exc()
+            terminal_contact = self._hard_penetration_contact(exc)
         except Exception as exc:  # Native OpenSim faults cannot always be caught.
             if self.env_cfg.fail_fast:
                 raise
@@ -1897,6 +1894,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             # Preserve the historical disabled/shadow ordering exactly.
             self._update_phase_fsm(require_primary_sample=failure is None)
             self._update_binary_phase_fsm(require_batch=failure is None)
+        if terminal_contact is not None and terminal_contact["available"]:
+            # The guard measured a real primary contact inside an unfinished
+            # segment. Restore it only AFTER the failure path has skipped the
+            # FSM transport: it must not masquerade as a complete sensor batch.
+            # Keep the logical policy boundary self.t; the physical sample has
+            # its own explicit timestamp in terminal_contact.
+            self._online_grf = copy.deepcopy(terminal_contact["online_grf"])
         obs, obs_dict = self._get_observation()
         reward, reward_terms = self._get_reward(obs_dict)
         unsafe_reason = self._unsafe_end_reason(obs_dict)
@@ -1917,7 +1921,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             getattr(self, "_binary_phase_invalid_event_terminal", False)
         )
         self._binary_phase_invalid_event_terminal = False
-        if unsafe_reason is not None:
+        if penetration_hard:
+            # Recovering the contact now also makes the ordinary 28 mm check
+            # true. Preserve the reason for the interrupted 30 mm segment.
+            terminated = True
+            truncated = False
+            end_reason = "grf_penetration_hard"
+        elif unsafe_reason is not None:
             terminated = True
             truncated = False
             end_reason = unsafe_reason
@@ -1928,10 +1938,6 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             terminated = True
             truncated = False
             end_reason = "invalid_binary_event"
-        elif penetration_hard:
-            terminated = True
-            truncated = False
-            end_reason = "grf_penetration_hard"
         elif wall_timeout:
             terminated = False
             truncated = True
@@ -1979,7 +1985,13 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             25.0,
             (penetration_excess_m / penetration_scale_m) ** 2,
         )
-        ankle_moment_terms = self._grf_ankle_moment_flip_terms()
+        ankle_moment_terms = (
+            self._grf_ankle_moment_flip_terms(
+                sample_time_s=terminal_contact["time_s"],
+            )
+            if terminal_contact is not None and terminal_contact["available"]
+            else self._grf_ankle_moment_flip_terms()
+        )
         if penetration_loss:
             reward = float(
                 reward
@@ -1988,6 +2000,10 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         reward_terms.update(
             {
                 "safety_loss": float(safety_loss),
+                "segment_completed": float(failure is None),
+                "grf_hard_contact_available": float(
+                    terminal_contact is not None and terminal_contact["available"]
+                ),
                 "grf_penetration_m": float(penetration_m),
                 "grf_penetration_excess_m": float(penetration_excess_m),
                 "grf_penetration_scale_m": float(penetration_scale_m),
@@ -2002,6 +2018,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         info = {
             "time": self.t,
             "target_time": target_t,
+            "segment_completed": failure is None,
             "episode_start_offset_s": float(
                 self._episode_start - self.cfg.t_start
             ),
@@ -2035,6 +2052,8 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         }
         info.update(self._online_info_payload())
         info.update(self._binary_phase_info_payload())
+        if terminal_contact is not None:
+            info["terminal_contact"] = terminal_contact
         if failure is not None:
             info["failure"] = f"{type(failure).__name__}: {failure}"
             info["failure_traceback"] = failure_traceback
@@ -2597,23 +2616,11 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
     def _build_action_space(self):
         mode = self.env_cfg.action_mode.lower()
         shape = (self.env_cfg.policy_knots, 2)
-        if mode in {"delta", "absolute"}:
+        if mode == "absolute":
             return spaces.Box(low=-1.0, high=1.0, shape=shape, dtype=np.float32)
         if mode == "raw":
             return spaces.Box(low=-np.inf, high=np.inf, shape=shape, dtype=np.float32)
-        raise ValueError("action_mode must be 'delta', 'absolute', or 'raw'.")
-
-    def _resolve_delta_scale(self) -> np.ndarray:
-        value = self.env_cfg.max_delta_rad
-        pros = self._base_simulator_config.pros_coords
-        if isinstance(value, Mapping):
-            return np.array([float(value[name]) for name in pros], dtype=float)
-        arr = np.asarray(value, dtype=float)
-        if arr.ndim == 0:
-            return np.full(2, float(arr), dtype=float)
-        if arr.shape != (2,):
-            raise ValueError("max_delta_rad must be scalar, mapping, or length-2.")
-        return arr.astype(float)
+        raise ValueError("action_mode must be 'absolute' or diagnostic 'raw'.")
 
     def _resolve_target_slew_rate_limit(self) -> np.ndarray:
         value = self.env_cfg.target_slew_rate_limit_rad_s
@@ -2658,15 +2665,7 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         ) * max(float(target_t) - self.t, self.cfg.dt)
 
         mode = self.env_cfg.action_mode.lower()
-        if mode == "delta":
-            values = np.empty((n, 2), dtype=float)
-            for k, tk in enumerate(future):
-                q_base, _, _ = self.base_kin.get(float(tk))
-                for j, coord_name in enumerate(cfg.pros_coords):
-                    values[k, j] = (
-                        q_base[coord_name] + action[k, j] * self._delta_scale[j]
-                    )
-        elif mode == "absolute":
+        if mode == "absolute":
             bounds = self.env_cfg.absolute_bounds_rad
             if bounds is None:
                 raise ValueError(
@@ -4420,6 +4419,45 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
                 values.append(float(grf_side.get("penetration", 0.0)))
         return max(values) if values else 0.0
 
+    @staticmethod
+    def _hard_penetration_contact(
+        exc: OnlineGRFPenetrationLimitExceeded,
+    ) -> dict:
+        """Transport the measured guard sample without manufacturing one.
+
+        Message-only legacy exceptions remain clean terminal events. Structured
+        samples must be finite and self-consistent; parsing the error string or
+        substituting a configured limit would not recover a physical sample.
+        """
+        result = {"source": "hard_penetration_guard", "available": False}
+        snapshot = getattr(exc, "online_grf", None)
+        if snapshot is None:
+            result["unavailable_reason"] = "legacy_exception_without_contact_sample"
+            return result
+        if not isinstance(snapshot, Mapping):
+            raise ValueError("Hard penetration guard contact must be a mapping")
+        side = getattr(exc, "side", None)
+        side_data = snapshot.get(side)
+        if side not in ("left", "right") or not isinstance(side_data, Mapping):
+            raise ValueError("Hard penetration guard requires its measured contact side")
+        try:
+            sample_time = float(exc.time_s)
+            measured = float(exc.penetration_m)
+            limit = float(exc.limit_m)
+            recorded = float(side_data["penetration"])
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError("Hard penetration guard contact metadata is incomplete") from error
+        if (not np.all(np.isfinite([sample_time, measured, limit, recorded]))
+                or limit < 0.0 or measured <= limit
+                or abs(recorded - measured) > 1e-12):
+            raise ValueError("Hard penetration guard contact metadata is inconsistent")
+        result.update(
+            available=True, time_s=sample_time, side=side,
+            penetration_m=measured, limit_m=limit,
+            online_grf=copy.deepcopy(dict(snapshot)),
+        )
+        return result
+
     def _prosthetic_ankle_center_axis_ground(
         self,
     ) -> tuple[np.ndarray, np.ndarray] | None:
@@ -4430,14 +4468,24 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             model = self.ctx.model
             state = self.runner.state
             model.realizePosition(state)
-            tibia = model.getBodySet().get("tibia_pylon")
-            ankle_station = opensim.Vec3(0.0, -0.43, 0.0)
-            axis_station = opensim.Vec3(0.0, -0.43, 1.0)
+            # A PinJoint rotates about the Z axis of its parent joint frame.
+            # Use that frame's origin and orientation, including the subject's
+            # fitted mount translation, rather than an AB06 tibia station.
+            ankle_joint = opensim.PinJoint.safeDownCast(
+                model.getJointSet().get("pros_ankle")
+            )
+            if ankle_joint is None:
+                return None
+            parent_frame = ankle_joint.getParentFrame()
             ankle_center = _vec3_to_array(
-                tibia.findStationLocationInGround(state, ankle_station)
+                parent_frame.findStationLocationInGround(
+                    state, opensim.Vec3(0.0, 0.0, 0.0)
+                )
             )
             axis_tip = _vec3_to_array(
-                tibia.findStationLocationInGround(state, axis_station)
+                parent_frame.findStationLocationInGround(
+                    state, opensim.Vec3(0.0, 0.0, 1.0)
+                )
             )
             axis = axis_tip - ankle_center
             axis_norm = float(np.linalg.norm(axis))
@@ -4447,7 +4495,9 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
         except Exception:
             return None
 
-    def _grf_ankle_moment_flip_terms(self) -> dict[str, float]:
+    def _grf_ankle_moment_flip_terms(
+        self, *, sample_time_s: float | None = None,
+    ) -> dict[str, float]:
         """Loss for online GRF moment with the wrong sign about the pros ankle.
 
         tau_GRF_about_ankle = ankle_axis . (M_ground - ankle_center x F)
@@ -4471,6 +4521,16 @@ class CMCLikeProsthesisTrajectoryEnv(Env):
             "grf_ankle_moment_flip_raw_loss_nm2": 0.0,
             "grf_ankle_moment_flip_loss": 0.0,
         }
+        if sample_time_s is not None:
+            # Never project a recovered wrench onto geometry from a different
+            # instant. The normal runner guard leaves its state at sample time.
+            try:
+                state_time = float(self.runner.state.getTime())
+            except (AttributeError, RuntimeError, TypeError, ValueError):
+                return terms
+            if (not np.isfinite(state_time)
+                    or abs(state_time - sample_time_s) > 1e-9):
+                return terms
         applied_sides = {
             str(side).strip().lower()
             for side in getattr(self.cfg, "online_grf_applied_sides", [])

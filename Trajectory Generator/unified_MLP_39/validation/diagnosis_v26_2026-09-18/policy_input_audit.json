@@ -1,0 +1,917 @@
+{
+  "scope": "Offline checkpoint forward passes on archived rollout observations; no simulation or training.",
+  "caveats": [
+    "Teacher/clock interventions freeze other inputs, so observations may be outside the training distribution.",
+    "Sensitivity proves dependence on an input, not that it is used correctly or causally explains training failure.",
+    "The 250ms shifts wrap at trace endpoints; they are input sensitivity probes, not counterfactual physical rollouts.",
+    "The archived rollouts have different starts and targets; policy sensitivities are descriptive, not controlled architecture ablations."
+  ],
+  "v26": {
+    "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best",
+    "rollout": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/rollout/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter_rollout",
+    "checkpoint_sha256": "0ba56eb703a238de41afd10d079c1cd59903ba20189e24d43b5c3a363cde15bd",
+    "trace_sha256": "3dd96c517e58dcf1ff2c43798026c5a51b8eaefda17b99e10648d2e357855f1c",
+    "actor_width_checkpoint": 39,
+    "actor_width_rollout_summary": 43,
+    "critic_width_checkpoint": 88,
+    "actor_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos",
+      "healthy_knee_angle_imitation_target",
+      "healthy_knee_angle_imitation_target_vel",
+      "healthy_ankle_angle_imitation_target",
+      "healthy_ankle_angle_imitation_target_vel",
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u"
+    ],
+    "teacher_indices": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "teacher_mean_std_min_max": {
+      "healthy_knee_angle_imitation_target": [
+        -0.41957470774650574,
+        0.2963871955871582,
+        -1.1225879192352295,
+        -0.1900097131729126
+      ],
+      "healthy_knee_angle_imitation_target_vel": [
+        -0.02928321063518524,
+        1.8291754722595215,
+        -3.800554037094116,
+        4.235774993896484
+      ],
+      "healthy_ankle_angle_imitation_target": [
+        0.24655279517173767,
+        0.1091083437204361,
+        0.08650901913642883,
+        0.44138196110725403
+      ],
+      "healthy_ankle_angle_imitation_target_vel": [
+        0.008537769317626953,
+        0.7412376999855042,
+        -2.2202181816101074,
+        1.1144304275512695
+      ],
+      "gait_phase_sin": [
+        -0.011519759893417358,
+        0.6957223415374756,
+        -0.9999992251396179,
+        0.9999971985816956
+      ],
+      "gait_phase_cos": [
+        0.03936387598514557,
+        0.7171388864517212,
+        -0.9999862313270569,
+        0.9999998807907104
+      ]
+    },
+    "deterministic_trace_reproduction_max_abs_error": 7.152557373046875e-07,
+    "action_mean_mean_std_min_max": [
+      [
+        0.3869391977787018,
+        0.47869637608528137,
+        -0.8722765445709229,
+        1.3601949214935303
+      ],
+      [
+        0.3376769721508026,
+        0.3209964632987976,
+        -0.8655799031257629,
+        1.1383838653564453
+      ]
+    ],
+    "policy_std_mean_min_max": [
+      [
+        1.0256909132003784,
+        0.11811850219964981,
+        9.083822250366211
+      ],
+      [
+        0.7499486804008484,
+        0.13622917234897614,
+        3.9217898845672607
+      ]
+    ],
+    "first_tanh_fraction_abs_over_0_99": 0.19621875,
+    "first_layer_input_projection": {
+      "teacher": {
+        "rms": 0.21261796355247498,
+        "centered_rms": 0.2067985236644745
+      },
+      "clock": {
+        "rms": 0.10701195150613785,
+        "centered_rms": 0.10691104084253311
+      },
+      "all_inputs": {
+        "rms": 2.233819007873535,
+        "centered_rms": 2.2202324867248535
+      }
+    },
+    "sensitivity_single_step_frozen_other_inputs": {
+      "teacher_zero": {
+        "action_mean_delta_rms": [
+          0.765056312084198,
+          0.5248041749000549
+        ],
+        "action_mean_delta_abs_p95": [
+          1.6734379529953003,
+          1.2779083251953125
+        ],
+        "action_mean_delta_abs_max": [
+          2.103106737136841,
+          1.810413122177124
+        ]
+      },
+      "teacher_mean": {
+        "action_mean_delta_rms": [
+          0.7632383704185486,
+          0.5221487879753113
+        ],
+        "action_mean_delta_abs_p95": [
+          1.678517460823059,
+          1.2980111837387085
+        ],
+        "action_mean_delta_abs_max": [
+          1.9910948276519775,
+          1.841050386428833
+        ]
+      },
+      "teacher_previous_250ms": {
+        "action_mean_delta_rms": [
+          1.1068410873413086,
+          0.7566123008728027
+        ],
+        "action_mean_delta_abs_p95": [
+          2.433800220489502,
+          1.6027582883834839
+        ],
+        "action_mean_delta_abs_max": [
+          3.495363235473633,
+          2.118624687194824
+        ]
+      },
+      "teacher_next_250ms": {
+        "action_mean_delta_rms": [
+          1.0973008871078491,
+          0.7904345393180847
+        ],
+        "action_mean_delta_abs_p95": [
+          2.107792377471924,
+          1.7367912530899048
+        ],
+        "action_mean_delta_abs_max": [
+          3.10882568359375,
+          2.203392267227173
+        ]
+      },
+      "teacher_velocity_zero": {
+        "action_mean_delta_rms": [
+          0.7623990178108215,
+          0.5233654379844666
+        ],
+        "action_mean_delta_abs_p95": [
+          1.6832709312438965,
+          1.2830874919891357
+        ],
+        "action_mean_delta_abs_max": [
+          2.0210282802581787,
+          1.836251139640808
+        ]
+      },
+      "clock_zero": {
+        "action_mean_delta_rms": [
+          0.19176799058914185,
+          0.22658076882362366
+        ],
+        "action_mean_delta_abs_p95": [
+          0.3107229471206665,
+          0.34450700879096985
+        ],
+        "action_mean_delta_abs_max": [
+          0.3759281635284424,
+          0.49491119384765625
+        ]
+      },
+      "clock_previous_250ms": {
+        "action_mean_delta_rms": [
+          0.17628231644630432,
+          0.21303944289684296
+        ],
+        "action_mean_delta_abs_p95": [
+          0.27859213948249817,
+          0.3529171943664551
+        ],
+        "action_mean_delta_abs_max": [
+          0.369101345539093,
+          0.42497605085372925
+        ]
+      },
+      "teacher_and_clock_zero": {
+        "action_mean_delta_rms": [
+          0.8203793168067932,
+          0.5602515935897827
+        ],
+        "action_mean_delta_abs_p95": [
+          1.7041975259780884,
+          1.182084083557129
+        ],
+        "action_mean_delta_abs_max": [
+          2.324944257736206,
+          1.72268545627594
+        ]
+      }
+    },
+    "local_derivative_rms_times_observed_feature_std": {
+      "gait_phase_sin": [
+        0.15532813966274261,
+        0.15013954043388367
+      ],
+      "gait_phase_cos": [
+        0.10621212422847748,
+        0.17010702192783356
+      ],
+      "healthy_knee_angle_imitation_target": [
+        0.048765648156404495,
+        0.0069788419641554356
+      ],
+      "healthy_knee_angle_imitation_target_vel": [
+        0.7689856290817261,
+        0.27066105604171753
+      ],
+      "healthy_ankle_angle_imitation_target": [
+        0.002871849574148655,
+        0.01068422943353653
+      ],
+      "healthy_ankle_angle_imitation_target_vel": [
+        0.09562982618808746,
+        0.39268288016319275
+      ],
+      "pros_knee_angle": [
+        0.016937268897891045,
+        0.010234534740447998
+      ],
+      "pros_knee_angle_vel": [
+        0.3533758819103241,
+        0.15084291994571686
+      ],
+      "pros_ankle_angle": [
+        0.009947841055691242,
+        0.030649710446596146
+      ],
+      "pros_ankle_angle_vel": [
+        0.013852550648152828,
+        0.07618967443704605
+      ],
+      "SEA_Knee_motor_angle": [
+        0.042633600533008575,
+        0.035103484988212585
+      ],
+      "SEA_Knee_motor_speed": [
+        0.08397208899259567,
+        0.16715161502361298
+      ],
+      "SEA_Ankle_motor_angle": [
+        0.011254324577748775,
+        0.026165012270212173
+      ],
+      "SEA_Ankle_motor_speed": [
+        0.027065901085734367,
+        0.1870838701725006
+      ],
+      "online_left_normal_grf_bw": [
+        0.020622849464416504,
+        0.012423076666891575
+      ],
+      "online_left_in_contact": [
+        0.011454695835709572,
+        0.0710240826010704
+      ],
+      "online_left_heel_strike": [
+        0.00977847445756197,
+        0.003635417204350233
+      ],
+      "online_left_toe_off": [
+        0.010024232789874077,
+        0.003068436635658145
+      ],
+      "online_left_gait_phase_sin": [
+        0.017925402149558067,
+        0.05879385024309158
+      ],
+      "online_left_gait_phase_cos": [
+        0.0264127254486084,
+        0.034975286573171616
+      ],
+      "online_left_cycle_duration_s": [
+        0.06975969672203064,
+        0.024051634594798088
+      ],
+      "phase_fsm_wait_hs": [
+        0.0,
+        0.0
+      ],
+      "phase_fsm_stance_after_hs": [
+        0.02785329893231392,
+        0.04103054106235504
+      ],
+      "phase_fsm_swing_after_to": [
+        0.05618443712592125,
+        0.038525041192770004
+      ],
+      "phase_expected_hs": [
+        0.04908185824751854,
+        0.037322476506233215
+      ],
+      "phase_expected_to": [
+        0.024717038497328758,
+        0.05401056632399559
+      ],
+      "phase_stance_elapsed_norm": [
+        0.003890560707077384,
+        0.005955960135906935
+      ],
+      "phase_swing_elapsed_norm": [
+        0.004352188669145107,
+        0.010953824035823345
+      ],
+      "phase_cycle_progress_credit": [
+        0.007972480729222298,
+        0.004192141816020012
+      ],
+      "pros_knee_angle_previous_endpoint": [
+        0.023102782666683197,
+        0.01608153246343136
+      ],
+      "pros_knee_angle_served_ref": [
+        0.009631716646254063,
+        0.012097889557480812
+      ],
+      "pros_knee_angle_served_ref_vel": [
+        0.3187922239303589,
+        0.09956929832696915
+      ],
+      "pros_knee_angle_served_ref_accel": [
+        0.5266335606575012,
+        0.36604177951812744
+      ],
+      "pros_knee_angle_sea_u": [
+        0.025600271299481392,
+        0.004394881892949343
+      ],
+      "pros_ankle_angle_previous_endpoint": [
+        0.014111562632024288,
+        0.028447125107049942
+      ],
+      "pros_ankle_angle_served_ref": [
+        0.009708616882562637,
+        0.03294949233531952
+      ],
+      "pros_ankle_angle_served_ref_vel": [
+        0.02435930073261261,
+        0.29036545753479004
+      ],
+      "pros_ankle_angle_served_ref_accel": [
+        0.2591908872127533,
+        0.3529905378818512
+      ],
+      "pros_ankle_angle_sea_u": [
+        0.007306928746402264,
+        0.006708532106131315
+      ]
+    },
+    "teacher_pre_step_next_equals_previous_post_step": {
+      "healthy_knee_angle_imitation_target": {
+        "divisor": 1.0,
+        "max_absolute_error": 0.0,
+        "equal_float32": true,
+        "within_float32_tolerance_1e_7": true
+      },
+      "healthy_knee_angle_imitation_target_vel": {
+        "divisor": 1.0,
+        "max_absolute_error": 0.0,
+        "equal_float32": true,
+        "within_float32_tolerance_1e_7": true
+      },
+      "healthy_ankle_angle_imitation_target": {
+        "divisor": 1.0,
+        "max_absolute_error": 0.0,
+        "equal_float32": true,
+        "within_float32_tolerance_1e_7": true
+      },
+      "healthy_ankle_angle_imitation_target_vel": {
+        "divisor": 1.0,
+        "max_absolute_error": 0.0,
+        "equal_float32": true,
+        "within_float32_tolerance_1e_7": true
+      }
+    },
+    "conditional_exploration_slew_probability": null
+  },
+  "unified39": {
+    "checkpoint": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/training/MLP39_left_phase_visible_best_to100_2026-09-18/milestone_iteration_000054/rl_module_last",
+    "rollout": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_left_phase_best_iter54_center_2026-09-18",
+    "checkpoint_sha256": "5ffa42ef73c0792e2c4d7f65f14f8d142c40ff010810f234d23769da02935e03",
+    "trace_sha256": "8c5868cee1b7779cbd2ab2c220384f4a7f15b1921ad68218aba86238e92a6871",
+    "actor_width_checkpoint": 39,
+    "actor_width_rollout_summary": 39,
+    "critic_width_checkpoint": 88,
+    "actor_feature_names": [
+      "gait_phase_sin",
+      "gait_phase_cos",
+      "pros_knee_angle",
+      "pros_knee_angle_vel",
+      "pros_ankle_angle",
+      "pros_ankle_angle_vel",
+      "SEA_Knee_motor_angle",
+      "SEA_Knee_motor_speed",
+      "SEA_Ankle_motor_angle",
+      "SEA_Ankle_motor_speed",
+      "online_left_normal_grf_bw",
+      "online_left_in_contact",
+      "online_left_heel_strike",
+      "online_left_toe_off",
+      "online_left_gait_phase_sin",
+      "online_left_gait_phase_cos",
+      "online_left_cycle_duration_s",
+      "phase_fsm_wait_hs",
+      "phase_fsm_stance_after_hs",
+      "phase_fsm_swing_after_to",
+      "phase_expected_hs",
+      "phase_expected_to",
+      "phase_stance_elapsed_norm",
+      "phase_swing_elapsed_norm",
+      "phase_cycle_progress_credit",
+      "pros_knee_angle_previous_endpoint",
+      "pros_knee_angle_served_ref",
+      "pros_knee_angle_served_ref_vel",
+      "pros_knee_angle_served_ref_accel",
+      "pros_knee_angle_sea_u",
+      "pros_ankle_angle_previous_endpoint",
+      "pros_ankle_angle_served_ref",
+      "pros_ankle_angle_served_ref_vel",
+      "pros_ankle_angle_served_ref_accel",
+      "pros_ankle_angle_sea_u",
+      "prescribed_left_knee_q_scaled",
+      "prescribed_left_knee_qdot_scaled",
+      "prescribed_left_ankle_q_scaled",
+      "prescribed_left_ankle_qdot_scaled"
+    ],
+    "teacher_indices": [
+      35,
+      36,
+      37,
+      38
+    ],
+    "teacher_mean_std_min_max": {
+      "prescribed_left_knee_q_scaled": [
+        -0.40085384249687195,
+        0.25222766399383545,
+        -0.9816092252731323,
+        -0.1899605393409729
+      ],
+      "prescribed_left_knee_qdot_scaled": [
+        -0.001184956287033856,
+        0.14746098220348358,
+        -0.29787760972976685,
+        0.33864039182662964
+      ],
+      "prescribed_left_ankle_q_scaled": [
+        0.1274295151233673,
+        0.13989175856113434,
+        -0.1153515949845314,
+        0.3848699629306793
+      ],
+      "prescribed_left_ankle_qdot_scaled": [
+        0.00014387512055691332,
+        0.10069555789232254,
+        -0.3214859068393707,
+        0.12592241168022156
+      ],
+      "gait_phase_sin": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "gait_phase_cos": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "deterministic_trace_reproduction_max_abs_error": 4.76837158203125e-07,
+    "action_mean_mean_std_min_max": [
+      [
+        0.5704025626182556,
+        0.1514592319726944,
+        -0.006903529167175293,
+        0.9058865308761597
+      ],
+      [
+        0.25394994020462036,
+        0.21198242902755737,
+        -0.35149264335632324,
+        0.7989076375961304
+      ]
+    ],
+    "policy_std_mean_min_max": [
+      [
+        1.1010162830352783,
+        0.2695237696170807,
+        3.7361559867858887
+      ],
+      [
+        1.365323543548584,
+        0.16706052422523499,
+        7.476831436157227
+      ]
+    ],
+    "first_tanh_fraction_abs_over_0_99": 0.0243828125,
+    "first_layer_input_projection": {
+      "teacher": {
+        "rms": 0.0537298358976841,
+        "centered_rms": 0.03345551714301109
+      },
+      "clock": {
+        "rms": 0.0,
+        "centered_rms": 0.0
+      },
+      "all_inputs": {
+        "rms": 1.0065057277679443,
+        "centered_rms": 0.9848301410675049
+      }
+    },
+    "sensitivity_single_step_frozen_other_inputs": {
+      "teacher_zero": {
+        "action_mean_delta_rms": [
+          0.015081528574228287,
+          0.045830462127923965
+        ],
+        "action_mean_delta_abs_p95": [
+          0.031234221532940865,
+          0.11260603368282318
+        ],
+        "action_mean_delta_abs_max": [
+          0.03994101285934448,
+          0.15028658509254456
+        ]
+      },
+      "teacher_mean": {
+        "action_mean_delta_rms": [
+          0.014461374841630459,
+          0.043865978717803955
+        ],
+        "action_mean_delta_abs_p95": [
+          0.02910023368895054,
+          0.09513060748577118
+        ],
+        "action_mean_delta_abs_max": [
+          0.03985852003097534,
+          0.13036763668060303
+        ]
+      },
+      "teacher_previous_250ms": {
+        "action_mean_delta_rms": [
+          0.02110407128930092,
+          0.05992516130208969
+        ],
+        "action_mean_delta_abs_p95": [
+          0.050929490476846695,
+          0.15362989902496338
+        ],
+        "action_mean_delta_abs_max": [
+          0.07254010438919067,
+          0.18879517912864685
+        ]
+      },
+      "teacher_next_250ms": {
+        "action_mean_delta_rms": [
+          0.02101127803325653,
+          0.054663125425577164
+        ],
+        "action_mean_delta_abs_p95": [
+          0.052747972309589386,
+          0.12888921797275543
+        ],
+        "action_mean_delta_abs_max": [
+          0.07028418779373169,
+          0.20576122403144836
+        ]
+      },
+      "teacher_velocity_zero": {
+        "action_mean_delta_rms": [
+          0.012001424096524715,
+          0.014880689792335033
+        ],
+        "action_mean_delta_abs_p95": [
+          0.029489416629076004,
+          0.036296308040618896
+        ],
+        "action_mean_delta_abs_max": [
+          0.042066752910614014,
+          0.05790823698043823
+        ]
+      },
+      "clock_zero": {
+        "action_mean_delta_rms": [
+          0.0,
+          0.0
+        ],
+        "action_mean_delta_abs_p95": [
+          0.0,
+          0.0
+        ],
+        "action_mean_delta_abs_max": [
+          0.0,
+          0.0
+        ]
+      },
+      "clock_previous_250ms": {
+        "action_mean_delta_rms": [
+          0.0,
+          0.0
+        ],
+        "action_mean_delta_abs_p95": [
+          0.0,
+          0.0
+        ],
+        "action_mean_delta_abs_max": [
+          0.0,
+          0.0
+        ]
+      },
+      "teacher_and_clock_zero": {
+        "action_mean_delta_rms": [
+          0.015081528574228287,
+          0.045830462127923965
+        ],
+        "action_mean_delta_abs_p95": [
+          0.031234221532940865,
+          0.11260603368282318
+        ],
+        "action_mean_delta_abs_max": [
+          0.03994101285934448,
+          0.15028658509254456
+        ]
+      }
+    },
+    "local_derivative_rms_times_observed_feature_std": {
+      "gait_phase_sin": [
+        0.0,
+        0.0
+      ],
+      "gait_phase_cos": [
+        0.0,
+        0.0
+      ],
+      "pros_knee_angle": [
+        0.0020574363879859447,
+        0.003835648065432906
+      ],
+      "pros_knee_angle_vel": [
+        0.05110587179660797,
+        0.014047520235180855
+      ],
+      "pros_ankle_angle": [
+        0.00413597421720624,
+        0.005519724916666746
+      ],
+      "pros_ankle_angle_vel": [
+        0.04255431890487671,
+        0.04319506883621216
+      ],
+      "SEA_Knee_motor_angle": [
+        0.010361123830080032,
+        0.0038335914723575115
+      ],
+      "SEA_Knee_motor_speed": [
+        0.037097688764333725,
+        0.021287301555275917
+      ],
+      "SEA_Ankle_motor_angle": [
+        0.010266614146530628,
+        0.013353819027543068
+      ],
+      "SEA_Ankle_motor_speed": [
+        0.02367193065583706,
+        0.0825137123465538
+      ],
+      "online_left_normal_grf_bw": [
+        0.0082217613235116,
+        0.06977030634880066
+      ],
+      "online_left_in_contact": [
+        0.019190117716789246,
+        0.08590301871299744
+      ],
+      "online_left_heel_strike": [
+        0.0024644385557621717,
+        0.0029160950798541307
+      ],
+      "online_left_toe_off": [
+        0.006176026072353125,
+        0.0033830481115728617
+      ],
+      "online_left_gait_phase_sin": [
+        0.03433495759963989,
+        0.016627078875899315
+      ],
+      "online_left_gait_phase_cos": [
+        0.02117457240819931,
+        0.020439619198441505
+      ],
+      "online_left_cycle_duration_s": [
+        0.01790560781955719,
+        0.0285110492259264
+      ],
+      "phase_fsm_wait_hs": [
+        0.0,
+        0.0
+      ],
+      "phase_fsm_stance_after_hs": [
+        0.03328524902462959,
+        0.05047956109046936
+      ],
+      "phase_fsm_swing_after_to": [
+        0.07969768345355988,
+        0.03387840837240219
+      ],
+      "phase_expected_hs": [
+        0.0467219315469265,
+        0.005724883172661066
+      ],
+      "phase_expected_to": [
+        0.01440973300486803,
+        0.030164316296577454
+      ],
+      "phase_stance_elapsed_norm": [
+        0.0015589556423947215,
+        0.004077971447259188
+      ],
+      "phase_swing_elapsed_norm": [
+        0.007168125361204147,
+        0.0011714623542502522
+      ],
+      "phase_cycle_progress_credit": [
+        0.01545465923845768,
+        0.01030220091342926
+      ],
+      "pros_knee_angle_previous_endpoint": [
+        0.0018000737763941288,
+        0.0022437535226345062
+      ],
+      "pros_knee_angle_served_ref": [
+        0.003760096849873662,
+        0.00188761530444026
+      ],
+      "pros_knee_angle_served_ref_vel": [
+        0.028970878571271896,
+        0.02147824503481388
+      ],
+      "pros_knee_angle_served_ref_accel": [
+        0.20228531956672668,
+        0.1348722130060196
+      ],
+      "pros_knee_angle_sea_u": [
+        0.04285857453942299,
+        0.020027155056595802
+      ],
+      "pros_ankle_angle_previous_endpoint": [
+        0.00657263956964016,
+        0.012365342117846012
+      ],
+      "pros_ankle_angle_served_ref": [
+        0.008537465706467628,
+        0.01006353460252285
+      ],
+      "pros_ankle_angle_served_ref_vel": [
+        0.01147088035941124,
+        0.01676243543624878
+      ],
+      "pros_ankle_angle_served_ref_accel": [
+        0.22598996758460999,
+        0.18046392500400543
+      ],
+      "pros_ankle_angle_sea_u": [
+        0.003548486391082406,
+        0.009412872605025768
+      ],
+      "prescribed_left_knee_q_scaled": [
+        0.0030873334035277367,
+        0.02254650369286537
+      ],
+      "prescribed_left_knee_qdot_scaled": [
+        0.0065105208195745945,
+        0.0030219622422009706
+      ],
+      "prescribed_left_ankle_q_scaled": [
+        0.006338327657431364,
+        0.02450988069176674
+      ],
+      "prescribed_left_ankle_qdot_scaled": [
+        0.006052123382687569,
+        0.012335522100329399
+      ]
+    },
+    "teacher_pre_step_next_equals_previous_post_step": {
+      "prescribed_left_knee_q_scaled": {
+        "divisor": 1.0,
+        "max_absolute_error": 0.0,
+        "equal_float32": true,
+        "within_float32_tolerance_1e_7": true
+      },
+      "prescribed_left_knee_qdot_scaled": {
+        "divisor": 10.0,
+        "max_absolute_error": 2.9802322387695312e-08,
+        "equal_float32": false,
+        "within_float32_tolerance_1e_7": true
+      },
+      "prescribed_left_ankle_q_scaled": {
+        "divisor": 1.0,
+        "max_absolute_error": 0.0,
+        "equal_float32": true,
+        "within_float32_tolerance_1e_7": true
+      },
+      "prescribed_left_ankle_qdot_scaled": {
+        "divisor": 10.0,
+        "max_absolute_error": 2.9802322387695312e-08,
+        "equal_float32": false,
+        "within_float32_tolerance_1e_7": true
+      }
+    },
+    "conditional_exploration_slew_probability": {
+      "scope": "Gaussian probabilities conditional on deterministic rollout observations; not sampled training frequencies.",
+      "absolute_half_spans_rad": [
+        0.75,
+        0.7
+      ],
+      "slew_rates_rad_s": [
+        2.5,
+        2.0
+      ],
+      "allowed_action_half_width_mean": [
+        0.03333333333333608,
+        0.02857142857143124
+      ],
+      "probability_no_slew_clip_mean": [
+        0.02944412848181102,
+        0.02423308134110861
+      ],
+      "probability_slew_clip_mean": [
+        0.9705558715181888,
+        0.9757669186588911
+      ],
+      "probability_both_actions_no_slew_clip_mean": 0.0008878662122720005,
+      "probability_no_slew_clip_min_max": [
+        [
+          0.0071180243755967765,
+          0.09680206625057686
+        ],
+        [
+          0.0030460138482000243,
+          0.10741846640931452
+        ]
+      ],
+      "deterministic_mean_action_slew_clip_fraction": [
+        0.792,
+        0.748
+      ],
+      "trace_endpoint_reconstruction_max_abs_error_rad": 1.1102230246251565e-16
+    }
+  }
+}
