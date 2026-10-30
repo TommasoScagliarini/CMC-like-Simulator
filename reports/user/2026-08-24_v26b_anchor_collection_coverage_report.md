@@ -1,5 +1,12 @@
 # V26B — Raccolta anchor: report di copertura (immutabile)
 
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 **Data:** 2026-08-24 · **Protocollo:** `V26B-bridge-rev3` (`5e0b6a5cdbec…`) · **Stage autorizzato:** `V26B-ANCHORS` (GO dell'architetto dopo approvazione V0) · **Esito: PASS** · Questo report è immutabile: ogni futura rettifica avviene in un nuovo file.
 
 ## 1. Esecuzione

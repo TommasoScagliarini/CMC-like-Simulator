@@ -1,0 +1,215 @@
+{
+  "operation": "geometry path compatibility in live validation tools",
+  "changed_files": [
+    {
+      "path": "validation/audit_two_sensor_prescribed_geometry.py",
+      "before": {
+        "bytes": 50794,
+        "sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307"
+      },
+      "after": {
+        "bytes": 50812,
+        "sha256": "563d107a6590e862542fdff18cfea39c18a0d6dfcfe362af81b2dad61edbdd26"
+      }
+    },
+    {
+      "path": "validation/build_primary_grf_mesh_sole.py",
+      "before": {
+        "bytes": 50857,
+        "sha256": "1231811b836d076de0a2548110eb3686883f3a95ee7eefcd89e6ddbb3fb9fae9"
+      },
+      "after": {
+        "bytes": 51616,
+        "sha256": "d4fae648164b8433f860d4c4374a386a52e9070eb2b41904c02d278b5349eedf"
+      }
+    },
+    {
+      "path": "validation/test_build_primary_grf_mesh_sole.py",
+      "before": {
+        "bytes": 16273,
+        "sha256": "7a3d9e6ebbf722942789f802c23ca6d03a96d36bdd93e436a59aadc7c1599412"
+      },
+      "after": {
+        "bytes": 18465,
+        "sha256": "6780abe1ddcbaa60e775af65c18e373037469dadb4fe890644f4afeadea592fb"
+      }
+    },
+    {
+      "path": "validation/test_ground_registration.py",
+      "before": {
+        "bytes": 19166,
+        "sha256": "581b1a458de26370efbb573e9ad66a709c4a20f0b6fe38e7d29af29d6b2f2f23"
+      },
+      "after": {
+        "bytes": 19193,
+        "sha256": "442f5418c3320a43fa981d47beda2f7aeed89eac7b423947f665b6f390f8df16"
+      }
+    },
+    {
+      "path": "validation/test_abx_default_ground_registration.py",
+      "before": {
+        "bytes": 22813,
+        "sha256": "82ec4f7896c4c758885527ab3d25100c1640458df51f432196031f5e2271953e"
+      },
+      "after": {
+        "bytes": 22820,
+        "sha256": "9493e358b4bd6a98b7ec6b6667f32c263b998e4611257e308b48fba22bc82831"
+      }
+    }
+  ],
+  "owned_files": [
+    "validation/audit_two_sensor_prescribed_geometry.py",
+    "validation/build_primary_grf_mesh_sole.py",
+    "validation/test_build_primary_grf_mesh_sole.py",
+    "validation/test_ground_registration.py",
+    "validation/test_abx_default_ground_registration.py"
+  ],
+  "all_changes_owned": true,
+  "all_owned_python_ast_valid": true,
+  "preserved": {
+    "profiles": {
+      "count": 24,
+      "all_24_byte_identical": true
+    },
+    "candidate_grid": true,
+    "two_sensor_v4_test_source": true,
+    "audit_test_source": true,
+    "DEFAULT_MESH_PATH": "Geometry/AM_foot_l.STL",
+    "DEFAULT_MODEL_PATH": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim",
+    "frozen_source_sha256_constants": "unchanged"
+  },
+  "tests": {
+    "builder_audit_v4_baseline": "40 passed, 5 failed; no source edits yet",
+    "builder_audit_v4_after": "44 passed, 3 failed; 2 extra custom-checkout identity tests",
+    "ground_fixture_baseline": "20 passed, 10 skipped, 1 failed; before fixture path edits, after move",
+    "ground_fixture_after": "31 passed; native tests now run",
+    "deterministic_mesh_sole_profiles": "10/10 complete candidate dictionaries and serialized bytes identical to before source using old-path temporary checkout; no candidate output written",
+    "standalone_cli_help_from_tmp": true,
+    "git_diff_check": true
+  },
+  "remaining_v4_failures": [
+    {
+      "test": "test_checked_profile_exactly_matches_deterministic_builder",
+      "baseline_failed": true,
+      "reason": "Frozen metadata retains original source paths and setup SHA; rebuilt live metadata names current paths; Geometry move adds mesh path difference, runtime sphere geometry unchanged."
+    },
+    {
+      "test": "test_embedded_source_hashes_match_current_sources",
+      "baseline_failed": true,
+      "reason": "Setup SHA already differs after previous models reorganization; original pinned SHA retained."
+    },
+    {
+      "test": "test_legacy_profile_config_and_fsm_are_bitwise_unchanged",
+      "baseline_failed": true,
+      "reason": "training_exnovo_cfg.yaml SHA already differs before this task; original pinned SHA retained."
+    }
+  ],
+  "historical_code_attestations": [
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v1.json",
+      "path": "validation/build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "1231811b836d076de0a2548110eb3686883f3a95ee7eefcd89e6ddbb3fb9fae9",
+      "current_sha256": "d4fae648164b8433f860d4c4374a386a52e9070eb2b41904c02d278b5349eedf",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v1.json",
+      "path": "validation/test_build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "7a3d9e6ebbf722942789f802c23ca6d03a96d36bdd93e436a59aadc7c1599412",
+      "current_sha256": "6780abe1ddcbaa60e775af65c18e373037469dadb4fe890644f4afeadea592fb",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v1.json",
+      "path": "validation/audit_two_sensor_prescribed_geometry.py",
+      "pinned_sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307",
+      "current_sha256": "563d107a6590e862542fdff18cfea39c18a0d6dfcfe362af81b2dad61edbdd26",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v2.json",
+      "path": "validation/build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "1231811b836d076de0a2548110eb3686883f3a95ee7eefcd89e6ddbb3fb9fae9",
+      "current_sha256": "d4fae648164b8433f860d4c4374a386a52e9070eb2b41904c02d278b5349eedf",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v2.json",
+      "path": "validation/test_build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "7a3d9e6ebbf722942789f802c23ca6d03a96d36bdd93e436a59aadc7c1599412",
+      "current_sha256": "6780abe1ddcbaa60e775af65c18e373037469dadb4fe890644f4afeadea592fb",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v2.json",
+      "path": "validation/audit_two_sensor_prescribed_geometry.py",
+      "pinned_sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307",
+      "current_sha256": "563d107a6590e862542fdff18cfea39c18a0d6dfcfe362af81b2dad61edbdd26",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v3.json",
+      "path": "validation/build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "1231811b836d076de0a2548110eb3686883f3a95ee7eefcd89e6ddbb3fb9fae9",
+      "current_sha256": "d4fae648164b8433f860d4c4374a386a52e9070eb2b41904c02d278b5349eedf",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v3.json",
+      "path": "validation/test_build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "7a3d9e6ebbf722942789f802c23ca6d03a96d36bdd93e436a59aadc7c1599412",
+      "current_sha256": "6780abe1ddcbaa60e775af65c18e373037469dadb4fe890644f4afeadea592fb",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v3.json",
+      "path": "validation/audit_two_sensor_prescribed_geometry.py",
+      "pinned_sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307",
+      "current_sha256": "563d107a6590e862542fdff18cfea39c18a0d6dfcfe362af81b2dad61edbdd26",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v4.json",
+      "path": "validation/build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "1231811b836d076de0a2548110eb3686883f3a95ee7eefcd89e6ddbb3fb9fae9",
+      "current_sha256": "d4fae648164b8433f860d4c4374a386a52e9070eb2b41904c02d278b5349eedf",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v4.json",
+      "path": "validation/test_build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "7a3d9e6ebbf722942789f802c23ca6d03a96d36bdd93e436a59aadc7c1599412",
+      "current_sha256": "6780abe1ddcbaa60e775af65c18e373037469dadb4fe890644f4afeadea592fb",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v4.json",
+      "path": "validation/audit_two_sensor_prescribed_geometry.py",
+      "pinned_sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307",
+      "current_sha256": "563d107a6590e862542fdff18cfea39c18a0d6dfcfe362af81b2dad61edbdd26",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v5.json",
+      "path": "validation/build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "1231811b836d076de0a2548110eb3686883f3a95ee7eefcd89e6ddbb3fb9fae9",
+      "current_sha256": "d4fae648164b8433f860d4c4374a386a52e9070eb2b41904c02d278b5349eedf",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v5.json",
+      "path": "validation/test_build_primary_grf_mesh_sole.py",
+      "pinned_sha256": "7a3d9e6ebbf722942789f802c23ca6d03a96d36bdd93e436a59aadc7c1599412",
+      "current_sha256": "6780abe1ddcbaa60e775af65c18e373037469dadb4fe890644f4afeadea592fb",
+      "ledger_rewritten": false
+    },
+    {
+      "ledger": "validation/primary_grf_readiness_protocol_v5.json",
+      "path": "validation/audit_two_sensor_prescribed_geometry.py",
+      "pinned_sha256": "c82d114ab8550d6963f394a2cfa99decf94a992880e751792ac56af8dd76a307",
+      "current_sha256": "563d107a6590e862542fdff18cfea39c18a0d6dfcfe362af81b2dad61edbdd26",
+      "ledger_rewritten": false
+    }
+  ],
+  "historical_code_note": "Live tool source paths are updated for current layout; older protocol source-code hashes describe their frozen generation and are deliberately not rewritten or promoted as validating these changed live tools."
+}

@@ -1,0 +1,71 @@
+{
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "scope": "Read-only final archived V26C and structural suite verification after models reorganization",
+  "archive_verify": {
+    "passed": true,
+    "exit_code": 0,
+    "source_entries": 1888,
+    "objects": 692,
+    "object_bytes": 257138708,
+    "external": 1,
+    "in_place_manifest_entries": 1357,
+    "full": false,
+    "live_sources": false,
+    "log": "models_v26c_archive_verify.log"
+  },
+  "structural_suite": {
+    "exit_code": 1,
+    "tests_run": 19,
+    "passed": 17,
+    "failures": 0,
+    "errors": 1,
+    "skipped": 1,
+    "log": "models_v26c_structural_suite.log",
+    "error": {
+      "test": "test_every_object_and_in_place_artefact_matches_sha256",
+      "reason": "Preexisting in-place evidence size drift in v26c_j1_collect.py",
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j1_collect.py",
+      "manifest_expected_bytes": 55428,
+      "manifest_expected_sha256": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+      "current": {
+        "bytes": 55320,
+        "sha256": "f264342b978db1879620c6fdf803a6662f252ee82f61accc7ff3b012aaff6bb8"
+      },
+      "unchanged_from_before": true
+    },
+    "skip": {
+      "test": "test_audited_source_closure_is_exact",
+      "reason": "Historic live source workspace model files no longer present at old paths after authorized relocation. Test itself skips on missing optional workspace.",
+      "old_models_missing": 6,
+      "coverage_reduced": true,
+      "interpretation": "This replaces the preexisting closure assertion failure with SKIP; it is not a resolved integrity finding and must not be reported as a validation improvement."
+    }
+  },
+  "frozen_controls_and_manifests": {
+    "Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/README.md": {
+      "sha256": "140eb88867fabd669e17b9c16a40e93160242f118884aaedc60a7512c67e8825",
+      "unchanged_from_before": true
+    },
+    "Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/materialize_pipeline_bundle.py": {
+      "sha256": "50f005a9ac8167d236048a20c64e5acb09506d69f28b5ce80da3c6c8eb19a537",
+      "unchanged_from_before": true
+    },
+    "Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/test_pipeline_bundle.py": {
+      "sha256": "da085b5213c55fc4b3cf8f2835cf937d3aa1edecd9a41e8b1cfd0cb90604d7c8",
+      "unchanged_from_before": true
+    },
+    "Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/bundle_manifest.json": {
+      "sha256": "20329ab3df2773d4e6048442cf2712e37aeb0c9ff41c35a3afd7de323e5bfcba",
+      "unchanged_from_before": true
+    },
+    "Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/in_place_manifest.json": {
+      "sha256": "706413231055e2a496701c441bf5a885a5415d89392a7184c9e4bd6d88650048",
+      "unchanged_from_before": true
+    }
+  },
+  "tools_nine_files_diff_check": {
+    "passed": true,
+    "exit_code": 0
+  },
+  "mutations": "No frozen source, archived evidence, control or manifest edited. Only temporary verification logs and this receipt written."
+}

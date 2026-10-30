@@ -1,5 +1,11 @@
 # Separazione morphology knee/ankle e critic-only rewarm J20
 
+> Aggiornamento del 2026-10-19: `Trajectory Generator/baseline_MLP/experimental_configs/`
+> è stata rimossa. Due preset sono conservati come fixture dei test; gli altri
+> preset e i comandi che li selezionavano sono storici e richiedono ripristino.
+> La configurazione V26C corrente resta `training_exnovo_cfg.yaml`. Vedere il
+> [registro della rimozione](../cleanup/2026-10-19_experimental_configs_removal/README.md).
+
 **Data:** 2026-08-31  
 **Stato:** implementazione e verifiche completate  
 **Baseline:** actor V26C/J20 derivato dal warm start imitativo V26 di agosto

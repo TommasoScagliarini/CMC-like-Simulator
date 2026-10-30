@@ -1,5 +1,10 @@
 # Risultati della continuazione 39D riallineata al V26 fino a 40 iterazioni
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 21 settembre 2026.
 
 ## Valutazione
@@ -71,7 +76,7 @@ Alla 32 della 39D, vicino al budget del V26 alla 25, il completamento delle ulti
 
 Le percentuali storiche restano quelle degli episodi registrati: alcuni guasti fatali possono non comparire nei contatori. Non è una stima di equivalenza statistica, essendo disponibile un solo seed. Ritorni simili non implicano stessa accuratezza o stesso rischio di terminazione, anche perché i target imitativi differiscono.
 
-![Confronto a quantità di esperienza simile](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_40iter_2026-09-21/training_by_samples.png>)
+[Immagine rimossa: Confronto a quantità di esperienza simile — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-ff89b36068f9bc83>)
 
 ## Imitazione e stabilità stanno evolvendo diversamente
 
@@ -105,7 +110,7 @@ La caviglia non migliora nel RMSE globale rispetto alla 25. Alla 40 resta fra **
 
 Il best29 supera lievemente la soglia di penalizzazione della penetrazione, 20 mm, ma resta sotto quella di terminazione, 28 mm. La 40 resta sotto entrambe. Non si tratta di penetrazione geometrica nulla.
 
-![Confronto cinematico 25/29/40](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_40iter_2026-09-21/rollout_comparison.png>)
+[Immagine rimossa: Confronto cinematico 25/29/40 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-554c0140314a0b1c>)
 
 ### Contatti e FSM nel rollout
 
@@ -136,7 +141,7 @@ La penalità in questione era già presente nella reward V26 ed è rimasta invar
 
 Nel best29 è positiva in 172 step su 500; nella 40 in 126 su 500. Al picco, nella 40 a circa 17,53 s assoluti, il momento GRF è −36,36 Nm con forza normale circa 538 N: la penalità non è soltanto un piccolo attraversamento numerico della soglia. La variazione di questo termine spiega aritmeticamente la perdita di ritorno della 40 rispetto alla 25. Non dimostra da sola quale cambiamento di policy abbia prodotto quel contatto, né che il termine sia sbagliato.
 
-![Momento GRF e penalità](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_40iter_2026-09-21/contact_moment_comparison.png>)
+[Immagine rimossa: Momento GRF e penalità — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d34c6a8c532e21c8>)
 
 ## Diagnosi e prossimo passo
 
@@ -154,12 +159,12 @@ Il test a 40 iterazioni è quindi informativo: ha evidenziato progressi cinemati
 
 ## Artefatti e verifiche eseguite
 
-- [Metriche complete e audit riproducibile](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_40iter_2026-09-21/metrics.json>).
-- [Script di analisi](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_40iter_2026-09-21/analyze.py>).
-- [Rollout best29](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_40iter_2026-09-21_best29/rollout_summary.json>).
-- [Rollout last40](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_40iter_2026-09-21_last40/rollout_summary.json>).
-- [Elenco verificato dei sette grafici best29](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_40iter_2026-09-21_best29/plots/plot_receipt.json>).
-- [Elenco verificato dei sette grafici last40](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_40iter_2026-09-21_last40/plots/plot_receipt.json>).
+- [Metriche complete e audit riproducibile — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d79c21ac404e6616>).
+- [Script di analisi — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d0eb97c9d9b3a10d>).
+- [Rollout best29 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-ef86be496b4e7b4a>).
+- [Rollout last40 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-149139f115e1a9a3>).
+- [Elenco verificato dei sette grafici best29 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5e92362ab277ebbc>).
+- [Elenco verificato dei sette grafici last40](<../../plot/09_21_2026_1_unified39_LEFT_iter40/plot_receipt.json>).
 
 I sette grafici canonici della 40:
 

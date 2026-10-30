@@ -1,5 +1,10 @@
 # Risultati intermedi della 39D riallineata al V26 — 25 iterazioni
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 21 settembre 2026.
 
 ## Valutazione
@@ -116,7 +121,7 @@ Il divario 37,3%–79,4% a parità di numero di iterazioni resta un dato corrett
 
 Il primo controllo futuro che pareggerebbe circa il budget del V26 alla 25 sarebbe la **32 della 39D**: 131.072 contro 130.444 transizioni. La proposta di arrivare alla 40 conserva il significato di confronto con il budget del V26 intorno alla 32; il checkpoint 32 diventa però una verifica intermedia particolarmente informativa. Nessun ulteriore training è stato avviato durante questo approfondimento.
 
-![Confronto delle prime 25 iterazioni](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_25iter_2026-09-21/training_comparison.png>)
+[Immagine rimossa: Confronto delle prime 25 iterazioni — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6912e4c36c25f10b>)
 
 ## Rollout deterministico del best25
 
@@ -145,7 +150,7 @@ La penetrazione attuale resta sotto i 20 mm che attivano la penalità e i 28 mm 
 
 **Regolarità dei contatti.** I due cicli hanno periodi di 1,680 e 1,544 s, ma quote di stance rispettivamente del **38,1% e dell'81,0%**. Nel rollout storico sono 33,8% e 36,7%. Il secondo toe-off completo della nuova rete arriva a 16,811 s, contro 16,153 s del V26; l'heel-strike successivo è invece vicino nei due casi, 17,105 contro 17,094 s. Il problema non emerge dal solo conteggio dei cicli: l'alternanza stance/swing è ancora irregolare. Queste sono misure del rilevatore/FSM del simulatore, non una validazione clinica del passo.
 
-![Confronto cinematico dei rollout](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_25iter_2026-09-21/rollout_comparison.png>)
+[Immagine rimossa: Confronto cinematico dei rollout — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-94a694cc917347a7>)
 
 ## Cosa suggerisce la diagnosi
 
@@ -174,22 +179,22 @@ Il test a 25 iterazioni ha già prodotto un segnale sufficiente per proseguire q
 
 ## Artefatti, file e verifiche
 
-- [Configurazione congelata del run](<../../Trajectory Generator/unified_MLP_39/runs/plans/v26_aligned_left_phase_fsmv3_25iter_2026-09-21/config.yaml>).
-- [Riepilogo training](<../../Trajectory Generator/unified_MLP_39/runs/training/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21/summary.json>).
-- [Riepilogo rollout best25](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/rollout_summary.json>).
-- [Metriche complete e audit](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_25iter_2026-09-21/metrics.json>).
-- [Audit dei batch effettivi e delle finestre a pari esperienza](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_25iter_2026-09-21/sampling_budget_audit.json>).
-- [Script riproducibile di analisi](<../../Trajectory Generator/unified_MLP_39/validation/v26_aligned_25iter_2026-09-21/analyze.py>).
+- [Configurazione congelata del run — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-06e61a6e2e8d833e>).
+- [Riepilogo training — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-c969496862b0aacf>).
+- [Riepilogo rollout best25 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-225434faef44cfcd>).
+- [Metriche complete e audit — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5fc61642770cf868>).
+- [Audit dei batch effettivi e delle finestre a pari esperienza — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-731f4410204232a1>).
+- [Script riproducibile di analisi — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-89046076f6d419c5>).
 
 Sono stati prodotti tutti i sette grafici canonici:
 
-1. [Comandi SEA e reserve](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/plots/09_21_2026_1/01_time_sea_control_reserve.png>).
-2. [Stati di giunti e motori](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/plots/09_21_2026_1/02_time_joint_motor_states.png>).
-3. [Coppia, angolo e potenza nel ciclo](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/plots/09_21_2026_1/03_gaitcycle_torque_angle_power.png>).
-4. [Velocità e potenza nel ciclo](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/plots/09_21_2026_1/04_gaitcycle_joint_velocity_power.png>).
-5. [Coppia in ingresso ed errore di tracking](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/plots/09_21_2026_1/05_time_tau_input_tracking_error.png>).
-6. [Giunti, reference e tracking SEA](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/plots/09_21_2026_1/06_time_joint_ref_sea_error.png>).
-7. [Imitazione del target sinistro ed errore](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21_best25/plots/09_21_2026_1/07_mlp_policy_vs_sound_leg_error.png>).
+1. [Comandi SEA e reserve — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4c15a64ef464c6df>).
+2. [Stati di giunti e motori — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4d1a065b46f68ab6>).
+3. [Coppia, angolo e potenza nel ciclo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8b1f1a284f386603>).
+4. [Velocità e potenza nel ciclo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-c03eb8cd7af55629>).
+5. [Coppia in ingresso ed errore di tracking — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-604d88e751bad8ba>).
+6. [Giunti, reference e tracking SEA — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4cbbe920deb868c0>).
+7. [Imitazione del target sinistro ed errore — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a18cbfd59dad4bd4>).
 
 Il nome storico del file 07 contiene `sound_leg`, ma target, curve d'errore ed etichette principali usano il prescribed sinistro della reward. La riga centrale con la gamba destra è solo un riferimento visivo.
 

@@ -239,7 +239,8 @@ mantengono la stessa area ankle negativa.
 
 ## Analisi cinematica dei pesi reward
 
-Artifact generati:
+Artefatti storici, **rimossi il 2026-10-19**
+([registro della rimozione](../cleanup/2026-10-19_analysis_removal/README.md#analisi-cinematica-dei-pesi-reward)):
 
 ```text
 Trajectory Generator/runs/analysis/kinematic_weight_diagnostics_2026-06-21/
@@ -336,7 +337,8 @@ qdot target/CMC-like nervosa
 -> clipping
 ```
 
-Artifact generati:
+Artefatti storici, **rimossi il 2026-10-19**
+([registro della rimozione](../cleanup/2026-10-19_analysis_removal/README.md#oscillazioni-delle-velocità-e-clipping)):
 
 ```text
 Trajectory Generator/runs/analysis/qdot_chattering_vs_clipping_2026-06-21/
@@ -405,9 +407,13 @@ Creati:
 
 ```text
 reports/user/2026-06-21_analisi_sym60_coppia_ankle_e_reset_asym100.md
-Trajectory Generator/runs/analysis/kinematic_weight_diagnostics_2026-06-21/
-Trajectory Generator/runs/analysis/qdot_chattering_vs_clipping_2026-06-21/
 ```
+
+Create allora e **rimosse il 2026-10-19**
+([registro della rimozione](../cleanup/2026-10-19_analysis_removal/README.md)):
+
+- `Trajectory Generator/runs/analysis/kinematic_weight_diagnostics_2026-06-21/`
+- `Trajectory Generator/runs/analysis/qdot_chattering_vs_clipping_2026-06-21/`
 
 Gia presenti nel worktree prima o comunque non oggetto di revert:
 

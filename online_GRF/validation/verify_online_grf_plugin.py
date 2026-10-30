@@ -1,0 +1,120 @@
+"""Verify that the offline onlineGRF evaluator matches the C++ plugin."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+import opensim
+
+from workspace_bootstrap import ensure_simulator_paths
+
+ensure_simulator_paths()
+
+from model_loader import _load_plugin
+from online_GRF.runtime import add_online_grf_forces, load_online_grf_profile, read_online_grf
+from path_resolver import resolve_repo_path
+from setup_io import read_setup_xml
+from online_GRF.validation.validate_online_grf import _calculate_wrench, _sample_spheres
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--setup", required=True)
+    parser.add_argument("--profile", required=True)
+    parser.add_argument("--sample-dt", type=float, default=0.25)
+    parser.add_argument(
+        "--sea-plugin",
+        default="plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff",
+    )
+    parser.add_argument("--report", default="results/online_grf_plugin_audit.json")
+    args = parser.parse_args()
+
+    setup = read_setup_xml(args.setup)
+    profile = load_online_grf_profile(args.profile)
+    times = np.arange(setup.t_start, setup.t_end + args.sample_dt * 0.25, args.sample_dt)
+    samples = _sample_spheres(setup, profile, times, args.sea_plugin)
+    expected = _calculate_wrench(profile, samples)
+
+    _load_plugin(str(resolve_repo_path(args.sea_plugin)))
+    _load_plugin(str(resolve_repo_path("plugins/OnlineGRFContact")))
+    model = opensim.Model(str(setup.model_file))
+    force_paths, force_sides = add_online_grf_forces(
+        model,
+        profile,
+        applies_force=False,
+    )
+    state = model.initSystem()
+    coord_set = model.getCoordinateSet()
+
+    actual = {
+        side: {
+            key: np.zeros_like(expected[side][key])
+            for key in ("force", "moment")
+        }
+        for side in ("left", "right")
+    }
+    from config import SimulatorConfig
+    from kinematics_interpolator import KinematicsInterpolator
+
+    cfg = SimulatorConfig()
+    cfg.model_bundle_dir = str(setup.model_file.parent)
+    cfg.model_file = str(setup.model_file)
+    cfg.kinematics_file = str(setup.kinematics_file)
+    cfg.t_start = float(times[0])
+    cfg.t_end = float(times[-1])
+    kin = KinematicsInterpolator(cfg)
+
+    for row, time in enumerate(times):
+        q, qdot, _ = kin.get(float(time))
+        state.setTime(float(time))
+        for i in range(coord_set.getSize()):
+            coord = coord_set.get(i)
+            name = coord.getName()
+            if name in q:
+                coord.setValue(state, float(q[name]), False)
+                coord.setSpeedValue(state, float(qdot[name]))
+        grf = read_online_grf(model, state, force_paths, force_sides)
+        for side in ("left", "right"):
+            for key in ("force", "moment"):
+                actual[side][key][row] = grf["sides"][side][key]
+
+    report = {"samples": int(len(times)), "sample_dt": float(args.sample_dt), "sides": {}}
+    maximum = 0.0
+    for side in ("left", "right"):
+        errors = {
+            key: actual[side][key] - expected[side][key]
+            for key in ("force", "moment")
+        }
+        side_maximum = max(
+            float(np.max(np.abs(error))) for error in errors.values()
+        )
+        maximum = max(maximum, side_maximum)
+        report["sides"][side] = {
+            key: {
+                "rmse": np.sqrt(np.mean(error * error, axis=0)).tolist(),
+                "max_abs_error": float(np.max(np.abs(error))),
+            }
+            for key, error in errors.items()
+        }
+        report["sides"][side]["max_abs_error"] = side_maximum
+    report["max_abs_error_n"] = maximum
+    report["equivalent_within_1e-8_n"] = bool(maximum <= 1.0e-8)
+
+    destination = resolve_repo_path(args.report)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(report, indent=2))
+    return 0 if report["equivalent_within_1e-8_n"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

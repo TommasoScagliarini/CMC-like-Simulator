@@ -1,5 +1,10 @@
 # Osservabilità prescribed, mascheramento e test di fattibilità della rete unificata
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Data:** 2026-09-14  
 **Instruction check token:** `CMC_AGENT_OK_2026`  
 **Stato:** analisi e protocollo sperimentale; mascheramento e curriculum non implementati né addestrati.
@@ -68,8 +73,8 @@ pre-step e target post-step. Per costruire coppie di apprendimento o analisi
 di ambiguità occorre riallineare esplicitamente i timestamp. Il confronto
 precedente riguarda soltanto costanza ed escursioni complessive.
 
-Fonti: [TODO della pipeline](<../../Trajectory Generator/unified_MLP/TODO.md>)
-e [VALIDATION.md con collegamenti alle tracce](<../../Trajectory Generator/unified_MLP/VALIDATION.md>).
+Fonti: [TODO della pipeline — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4bfd4583c8d75f29>)
+e [VALIDATION.md con collegamenti alle tracce — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9c819e86ce3077bd>).
 
 ## 3. Soluzione proposta: disponibilità progressiva dei target
 
@@ -302,11 +307,11 @@ di modifica. Actor predittivo e compensazione del ritardo restano rinviati.
 
 ## 9. Riferimenti
 
-- [Implementazione del target sinistro e invarianti V1](<../../Trajectory Generator/unified_MLP/env.py>)
-- [Factory della rete unificata](<../../Trajectory Generator/unified_MLP/env_factory.py>)
-- [Guida e comandi della V1](<../../Trajectory Generator/unified_MLP/README.md>)
-- [Validazione e artefatti storici](<../../Trajectory Generator/unified_MLP/VALIDATION.md>)
-- [TODO dell'osservabilità](<../../Trajectory Generator/unified_MLP/TODO.md>)
-- [Provenienza dei preset](<../../Trajectory Generator/unified_MLP/configs/provenance.json>)
+- [Implementazione del target sinistro e invarianti V1 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-352d13a3c98b2b9b>)
+- [Factory della rete unificata — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-ae98c46bec812946>)
+- [Guida e comandi della V1 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-47553b1e2e1630c0>)
+- [Validazione e artefatti storici — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9c819e86ce3077bd>)
+- [TODO dell'osservabilità — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4bfd4583c8d75f29>)
+- [Provenienza dei preset — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-adcbbd6627206698>)
 - [Fit supervisionato storico J15R1](2026-08-27_v26c_j15r1_fresh_refit_execution.md)
 - [Qualifica closed-loop storica J16](2026-08-27_v26c_j16_j15r1_closed_loop_requalification_execution.md)

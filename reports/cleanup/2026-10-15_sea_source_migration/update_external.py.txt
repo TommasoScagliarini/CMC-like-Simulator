@@ -1,0 +1,86 @@
+"""Guarded source synchronization explicitly requested by the project owner."""
+from pathlib import Path
+import datetime
+import hashlib
+import io
+import json
+import os
+import shutil
+import subprocess
+import tarfile
+
+ROOT = Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+EXT = Path('/Users/tommy/Documents/SEA_plugin_core - agent')
+OUT = Path('/tmp/cmc_sea_source_migration_2026_10_15')
+NAMES = ['SeriesElasticActuator.cpp', 'SeriesElasticActuator.h', 'Plugin_interface.cpp']
+
+def sha(p):
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+def main():
+    pre = json.loads((OUT/'migration_preflight.json').read_text())
+    for name, meta in pre['source'].items():
+        assert sha(ROOT/'tools/sea_plugin_relative_d'/name) == meta['sha256'], name
+    for name, meta in pre['external_before'].items():
+        assert sha(EXT/name) == meta['sha256'], name
+    assert not (EXT/'README.md').exists(), 'External README unexpectedly exists'
+    receipt_path = EXT/'SEA_PI_SOURCE_MIGRATION_2026-10-15.json'
+    assert not receipt_path.exists(), 'External migration receipt already exists'
+    backup_path = EXT/'.migration_backups/2026-10-15_before_pi.tar.gz'
+    assert not backup_path.exists(), 'Backup already exists; do not overwrite'
+    # Capture the external state, including original libraries and build products.
+    before = {}
+    for base, dirs, files in os.walk(EXT):
+        dirs[:] = [d for d in dirs if d != '.git']
+        for name in files:
+            p = Path(base)/name
+            if p.is_symlink():
+                before[p.relative_to(EXT).as_posix()] = {'symlink': os.readlink(p)}
+            elif p.is_file():
+                before[p.relative_to(EXT).as_posix()] = {
+                    'bytes': p.stat().st_size, 'sha256': sha(p)}
+    (OUT/'external_all_files_before.json').write_text(json.dumps(before,indent=2)+'\n')
+    backup_path.parent.mkdir(exist_ok=True)
+    with tarfile.open(backup_path, 'w:gz') as archive:
+        for name in NAMES + ['CMakeLists.txt', '.gitignore']:
+            archive.add(EXT/name, arcname=name, recursive=False)
+    with tarfile.open(backup_path, 'r:gz') as archive:
+        for name in NAMES + ['CMakeLists.txt', '.gitignore']:
+            restored = archive.extractfile(name).read()
+            assert hashlib.sha256(restored).hexdigest() == sha(EXT/name), name
+    migrated=[]
+    for name in NAMES:
+        source = ROOT/'tools/sea_plugin_relative_d'/name
+        target = EXT/name
+        changed = sha(source) != sha(target)
+        if changed:
+            shutil.copyfile(source, target)
+        assert sha(target) == pre['source'][name]['sha256'], name
+        migrated.append({'old_simulator_path': 'tools/sea_plugin_relative_d/'+name,
+                         'external_path': name, **pre['source'][name],
+                         'external_file_changed': changed})
+    ignore_path=EXT/'.gitignore'
+    ignore_before=ignore_path.read_text()
+    ignore_after=ignore_before.rstrip('\n')+'\n\n# Local source-migration backups.\n/.migration_backups/\n'
+    ignore_path.write_text(ignore_after)
+    shutil.copyfile(OUT/'external_README.md', EXT/'README.md')
+    result={
+        'date': '2026-10-15', 'created_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        'source_simulator_head_before_migration': pre['heads']['simulator'],
+        'external_head_before_migration': pre['heads']['external'],
+        'external_worktree_was_dirty': True,
+        'files': migrated,
+        'external_cmake_preserved_sha256': sha(EXT/'CMakeLists.txt'),
+        'old_internal_cmake_removed_after_verification': pre['source']['CMakeLists.txt'],
+        'old_internal_cmake_recoverable_from_simulator_git': True,
+        'backup_relative_path': backup_path.relative_to(EXT).as_posix(),
+        'backup_sha256': sha(backup_path),
+        'runtime_libraries_replaced': False,
+        'note': 'Copy verified; native build/load/numerical verification is recorded separately in the simulator migration report.',
+    }
+    receipt_path.write_text(json.dumps(result,indent=2)+'\n')
+    (OUT/'external_transfer_result.json').write_text(json.dumps(result,indent=2)+'\n')
+    print(json.dumps(result,indent=2),flush=True)
+
+if __name__ == '__main__':
+    main()

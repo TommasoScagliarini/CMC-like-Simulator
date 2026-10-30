@@ -1,5 +1,10 @@
 # Ritardo, coppia della caviglia e proseguimento della unified39
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 22 settembre 2026. Run: `MLP39_v26_aligned_left_phase_fsmv3_25iter_2026-09-21`, completato fino alla 40. Analisi offline; nessun nuovo training o rollout fisico avviato.
 
 ## Valutazione
@@ -40,7 +45,7 @@ Il passaggio reference servita → giunto non aggiunge ritardo rilevabile alla r
 
 Un controllo aggiuntivo ricalcola solo la componente imitativa sui dati registrati, spostando insieme q e qdot dei due giunti degli shift che minimizzano il rispettivo RMSE di posizione. Nella 40 lo score medio passa da 0,6570 a 0,6498: **non migliora**. L'ottimo dell'RMSE di posizione non coincide con quello dello score non lineare che considera anche le velocità. Questa è una diagnosi sui trace, non il ritorno atteso di una nuova simulazione: contatti, dinamica e penalità fisiche non sono ricalcolati.
 
-![Riallineamento diagnostico](<../../Trajectory Generator/unified_MLP_39/validation/phase_delay_torque_2026-09-22/lag_audit/alignment_diagnostic.png>)
+[Immagine rimossa: Riallineamento diagnostico — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-301a2a4ef7f31811>)
 
 ## Perché la coppia della caviglia diventa positiva
 
@@ -58,7 +63,7 @@ Sui campioni caricati, la correlazione fra coppia SEA e opposto del momento GRF 
 
 Il burst finale oltre +8 Nm occupa circa 17,183–17,808 s; all'ultimo campione è già sceso a +0,69 Nm. Non tutte le coppie positive sono patologiche: anche il V26 ha piccoli transitori positivi.
 
-![Bilancio di coppia nell'ultimo appoggio](<../../Trajectory Generator/unified_MLP_39/validation/phase_delay_torque_2026-09-22/torque_audit/last_stance_cascade.png>)
+[Immagine rimossa: Bilancio di coppia nell'ultimo appoggio — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-efab278d5fecf67f>)
 
 ## Quale correzione storica era stata adottata
 
@@ -102,6 +107,6 @@ Il completamento esplorativo recente resta 38,8% contro 88,4% del V26 a esperien
 
 - Spostati e verificati gli otto file originali della cartella dei canonici; aggiornate ricevute e collegamenti.
 - Modificati `AGENTS.md` e `unified_MLP_39/validation/render_canonical_rollout.py` per la destinazione dei grafici; compilazione sintattica riuscita.
-- Nuove analisi riproducibili e metriche in [phase_delay_torque_2026-09-22](<../../Trajectory Generator/unified_MLP_39/validation/phase_delay_torque_2026-09-22>): audit ritardo su sei trace, audit coppia su sette rollout, analisi della componente rapida e ricevuta dello spostamento.
+- Nuove analisi riproducibili e metriche in [phase_delay_torque_2026-09-22 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6dda9a1696b284ae>): audit ritardo su sei trace, audit coppia su sette rollout, analisi della componente rapida e ricevuta dello spostamento.
 - Ricalcolo delle loss imitativo/served coerente con le registrazioni entro 8×10⁻⁸; controlli temporali e finestre di confronto invarianti.
 - Nessuna modifica ai dieci sorgenti congelati del training, alla reward, alla configurazione operativa o ai controllori. Nessun nuovo processo di training o simulazione.

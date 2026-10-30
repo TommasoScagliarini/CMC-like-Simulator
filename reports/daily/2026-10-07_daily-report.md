@@ -1,5 +1,17 @@
 # Daily Report — 2026-10-07
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Stato:** giornata chiusa con `end_day`, data 7/10 richiesta dall'utente. **Compilazione:** 8 ottobre 2026, Europe/Rome. **Instruction check token:** `CMC_AGENT_OK_2026`.
 
 ## Perimetro e report consolidato
@@ -96,7 +108,7 @@ Bias onset HS −27,214 ms, TO +14,463 ms; errore medio assoluto 33,249/64,171 m
 
 Zero clipping policy/comando SEA e zero clamp motore a 500 N·m. L'integratore della cascata knee raggiunge invece il limite per 388 campioni, 0,388 s (6,35%), distinto dai limiti di comando e motore. Penetrazione massima sinistra 22,356 mm nell'intero episodio, 17,833 mm nei tre cicli, sotto la guardia di 28 mm.
 
-Fonti: [sintesi del rollout](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/result_summary.txt>), [ricevuta finale](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/final_completion_receipt.json>), [sette plot](../../plot/MLP_V26C_best47_AB07_pylon400_2026_10_07_6p11s/).
+Fonti: [sintesi del rollout — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-cef5f7cde5b9030c>), [ricevuta finale — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a9b821f2320e46a6>), [sette plot](../../plot/MLP_V26C_best47_AB07_pylon400_2026_10_07_6p11s/).
 
 ## Collaborazione, file e verifiche
 

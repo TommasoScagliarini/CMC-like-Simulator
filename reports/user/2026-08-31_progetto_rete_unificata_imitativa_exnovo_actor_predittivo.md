@@ -1,5 +1,11 @@
 # Progetto della rete unificata imitativa/ex-novo e dell'actor predittivo
 
+> Aggiornamento del 2026-10-19: `Trajectory Generator/baseline_MLP/experimental_configs/`
+> è stata rimossa. Due preset sono conservati come fixture dei test; gli altri
+> preset e i comandi che li selezionavano sono storici e richiedono ripristino.
+> La configurazione V26C corrente resta `training_exnovo_cfg.yaml`. Vedere il
+> [registro della rimozione](../cleanup/2026-10-19_experimental_configs_removal/README.md).
+
 **Data:** 2026-08-31  
 **Stato:** specifica architetturale iniziale; separazione morphology knee/ankle
 implementata; critic-only rewarm di controllo completato  

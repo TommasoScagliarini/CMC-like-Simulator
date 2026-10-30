@@ -1,5 +1,10 @@
 # Test preliminari V26 su AB07 e confronto controllato con AB06 — 2026-10-06
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Giornata di riferimento:** 6 ottobre 2026, come richiesto dall'utente con `create_report` ed `end_day`. **Instruction check token:** `CMC_AGENT_OK_2026`.
 
 La parte finale del lavoro è stata completata dopo mezzanotte del 7 ottobre, ora Europe/Rome. I percorsi `2026_10_07` e i timestamp delle receipt restano invariati: il report attribuisce il lavoro alla giornata richiesta, senza retrodatare le evidenze.
@@ -27,7 +32,7 @@ Le misure confrontano:
 
 ## Test 1: controllo AB07 dopo la registrazione geometrica
 
-Run: [ab07_v26_ground_registered_prescribed_9p01s_2026_10_06_r1](../../results/ab07_v26_ground_registered_prescribed_9p01s_2026_10_06_r1/). Audit: [result_summary.json](<../../Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/result_summary.json>).
+Run: [ab07_v26_ground_registered_prescribed_9p01s_2026_10_06_r1](../../results/ab07_v26_ground_registered_prescribed_9p01s_2026_10_06_r1/). Audit: [result_summary.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8850f6eb16146587>).
 
 Il nuovo modello ground-registered è stato integrato da 10,360 a 19,370 s: 901 segmenti, 9.010 campioni a 1 ms, completamento normale. Nessuna rete. La destinazione inizialmente non vuota è stata rifiutata prima dell'integrazione; `_r1` identifica l'unica esecuzione effettiva di questo test.
 
@@ -48,7 +53,7 @@ Questo test sostituisce, come evidenza sul modello corrente, il vecchio diagnost
 
 ## Test 2: controllo del checkpoint ex-novo su AB06
 
-Run: [MLP_V26C_best47_AB06_control_2026_10_06_5s](<../../Trajectory Generator/runs/rollout/MLP_V26C_best47_AB06_control_2026_10_06_5s/>). Audit: [result_summary.json](<../../Trajectory Generator/validation/AB06/v26c_best47_control_2026_10_06/result_summary.json>).
+Run: [MLP_V26C_best47_AB06_control_2026_10_06_5s](<../../Trajectory Generator/runs/rollout/MLP_V26C_best47_AB06_control_2026_10_06_5s/>). Audit: [result_summary.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-39c61ea830c9e497>).
 
 Checkpoint congelato: [rl_module_best](<../../Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/rl_module_best/>); SHA-256 di `module_state`: `2d1d9b30f2b043f4b3b7b4347c06e9b3aace1c7d089b33e2893930554d84bd7c`. Actor 35 feature, osservazione completa 84, policy deterministica, seed 123, azione absolute, un knot ogni 10 ms.
 
@@ -58,7 +63,7 @@ Risultati: 3 HS, 3 TO, 2 cicli validi, nessun invalid/resync; penetrazione sinis
 
 ## Test 3: primo trasferimento best47 su AB07
 
-Run: [MLP_V26C_best47_AB07_transfer_2026_10_06_5s](<../../Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/>). Audit: [result_summary.json](<../../Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/result_summary.json>).
+Run: [MLP_V26C_best47_AB07_transfer_2026_10_06_5s](<../../Trajectory Generator/runs/rollout/MLP_V26C_best47_AB07_transfer_2026_10_06_5s/>). Audit: [result_summary.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-047412ee2e9d7fe0>).
 
 Stesso checkpoint congelato, inferenza deterministica e contratto learned del controllo AB06; cambia il bundle AB07. Finestra 10,360–15,360 s, 500 segmenti e 5.000 campioni, completamento normale con tre clock fisici/logici concordi. Questa finestra è accoppiata all'inizio del controllo AB07, ma non alla stessa fase del reset AB06.
 
@@ -80,7 +85,7 @@ Sui medesimi 5 s il controllo IK-driven AB07 ha impulso +48,657% e correlazione 
 
 ## Ricostruzione della divergenza storica AB06
 
-Audit offline: [result_summary.json](<../../Trajectory Generator/validation/AB06/measured_divergence_2026_10_06/result_summary.json>). Non sono state eseguite nuove integrazioni o inferenze per questa ricostruzione.
+Audit offline: [result_summary.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0036375171d9a8fc>). Non sono state eseguite nuove integrazioni o inferenze per questa ricostruzione.
 
 | Evidenza salvata | Errore impulso | Bias onset HS | Bias onset TO |
 |---|---:|---:|---:|
@@ -94,7 +99,7 @@ Separatamente, il learned AB06 del controllo ha errore di impulso −18,440% sul
 
 ## Confronto omogeneo finale: due controlli IK-driven
 
-Protocollo e riepilogo: [result_summary.json](<../../Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/result_summary.json>). Le finestre sono state congelate nella [selection.json](<../../Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/selection.json>) prima dei rollout.
+Protocollo e riepilogo: [result_summary.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f5f2644fc62adf6c>). Le finestre sono state congelate nella [selection.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4cadbcfbce5304f4>) prima dei rollout.
 
 Sono conservate le impostazioni del test 1, senza rete: SEA, controllori, tre profili congelati, governor, filtri, limiti del target, clock, FSM e integrazione 1 ms. Il primo HS misurato almeno 2 s dopo l'inizio del setup seleziona il reset; devono essere disponibili 9 s nei dati e un ciclo startup seguito da tre cicli completi. Il confine di misura è nominale sperimentale, non scelto dopo aver visto i contatti simulati.
 
@@ -126,7 +131,7 @@ Entrambi producono 17 STO × 9.000 campioni finiti a 1 ms e raggiungono il termi
 
 L'ultimo segmento AB06 è integrato; dopo la dinamica, il gestore binario degli eventi rifiuta il confine: `(boundary − previous) / 0.001 = 9.999999998868248`, con errore rispetto a 10 di `1.13175247e-9`, maggiore della guardia `1e-9`. Il residuo temporale è −1,13175 ps. Non è un arresto per contatto: fallisce la contabilizzazione/commit del callback finale prima di observation/reward/trace. Il payload mancante non è stato ricostruito e la receipt non è stata promossa a completed. I tre cicli primari sono anteriori e interamente osservati.
 
-La diagnosi è nelle verifiche [AB06](<../../Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/AB06/numerical_verification.json>) e [AB07](<../../Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/AB07/numerical_verification.json>). Il runtime e le soglie non sono stati modificati per ottenere una chiusura regolare.
+La diagnosi è nelle verifiche [AB06 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-acc38d640b404a89>) e [AB07 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e06d5baced778202>). Il runtime e le soglie non sono stati modificati per ottenere una chiusura regolare.
 
 ### Verifiche e limiti fisici
 

@@ -1,5 +1,10 @@
 # Best80 LEFT: cause delle coppie anomale alla caviglia e del chattering al ginocchio
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 ## Problema e conclusione
 
 Il checkpoint best80 del ramo `MLP39_LEFT72_penetration_weight2_10iter_2026-09-24` migliora il tracking imitativo e completa il rollout deterministico, ma conserva un burst positivo alla caviglia e oscillazioni rapide della coppia al ginocchio. Sono due problemi distinti, accomunati da una reward che valuta soprattutto la cinematica e lascia debolmente vincolata la qualità delle coppie.
@@ -124,6 +129,6 @@ TODO: screening rumoroso best80; se si prosegue, selezione con metriche cinemati
 
 Codice di produzione, reward, controller, FSM e plugin non modificati. Nessun nuovo training o rollout dinamico. Eseguiti calcoli offline e una ricostruzione statica del contatto.
 
-- [Script e metriche](<../../Trajectory Generator/unified_MLP_39/validation/best80_torque_audit_2026-09-24/>): `analyze.py`, `metrics.json`, `input_hashes.json`, `analysis.log`, `static_contact_probe.py`, relativo JSON e log.
+- [Script e metriche — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-2eec0f16388a418a>): `analyze.py`, `metrics.json`, `input_hashes.json`, `analysis.log`, `static_contact_probe.py`, relativo JSON e log.
 - [Grafico diagnostico](../../plot/09_24_2026_best80_torque_diagnosis/best80_contact_controller.png).
 - Verificata ricostruzione del ritorno dei sei rollout entro1e-5; coerenza della scomposizione command_rate entro1e-8; somma P+I e tau_ref entro1e-6 Nm; uniformità temporale STO; riproduzione statica di forza, momento e COP entro le tolleranze documentate. Hash degli input salvati.

@@ -1,4 +1,4 @@
-"""Smoke test for the training_cfg.yaml loader + train/rollout argparse wiring.
+"""Smoke test for the canonical ex-novo config + train/rollout argparse wiring.
 
 Light-weight: imports only the entrypoint modules (no OpenSim/Ray stack is loaded
 at import or parse time) and exercises the config loader, default seeding, CLI
@@ -38,12 +38,14 @@ def check(name, cond):
 # 1. Loader: default YAML -> flat defaults + reward.
 cfg = training_config.load(training_config.DEFAULT_CONFIG_PATH)
 flat, reward = training_config.to_argparse_defaults(cfg)
-check("default reward_mode imitation", reward.get("reward_mode") == "imitation")
-check("default reward carries penetration weight", reward.get("grf_penetration_weight") == 0.5)
+check("default file is the canonical ex-novo config", training_config.DEFAULT_CONFIG_PATH == _BASELINE / "training_exnovo_cfg.yaml")
+check("default reward_mode ex_novo", reward.get("reward_mode") == "ex_novo")
+check("default reward carries penetration weight", reward.get("grf_penetration_weight") == 0.05)
 check("flat has num/dim hidden layers", flat.get("num_hidden_layers") == 2 and flat.get("dim_hidden_layers") == 256)
-check("flat lr is float 0.0001", isinstance(flat.get("lr"), float) and abs(flat["lr"] - 1e-4) < 1e-12)
+check("flat lr is float 5e-7", isinstance(flat.get("lr"), float) and abs(flat["lr"] - 5e-7) < 1e-12)
 check("flat grf applied side == ['left']", flat.get("online_grf_applied_side") == ["left"])
-check("no action_mode in shipped yaml flat", "action_mode" not in flat)
+check("default absolute action contract", flat.get("action_mode") == "absolute")
+check("default fixed exploration sigma 0.01", flat.get("fixed_exploration_sigma") == [0.01])
 
 # 1b. Explicit ex-novo YAML -> task-based reward defaults.
 exnovo_cfg = training_config.load(_BASELINE / "training_exnovo_cfg.yaml")
@@ -72,9 +74,9 @@ check(
     and exnovo_reward.get("contact_support_failure_clawback_weight") == 1.0,
 )
 check(
-    "exnovo penetration thresholds match frozen full-episode baseline",
-    exnovo_flat.get("grf_penetration_penalty_threshold_m") == 0.015
-    and exnovo_flat.get("grf_penetration_termination_m") == 0.025,
+    "exnovo penetration thresholds match best47",
+    exnovo_flat.get("grf_penetration_penalty_threshold_m") == 0.02
+    and exnovo_flat.get("grf_penetration_termination_m") == 0.028,
 )
 check("exnovo task phase regularity enabled", exnovo_reward.get("blend_phase_regular", 0.0) > 0.0)
 check("exnovo command tracking reward disabled", exnovo_reward.get("blend_tracking") == 0.0)
@@ -91,7 +93,7 @@ check("exnovo FSM ledger credits configured", exnovo_reward.get("phase_hs_event_
 check("exnovo FSM clawback enabled", exnovo_reward.get("phase_failure_extra_penalty") == 0.05 and exnovo_reward.get("phase_clawback_penalty_weight") == 1.00)
 check("exnovo FSM anti-fake-cycle gates configured", exnovo_reward.get("phase_min_stance_contact_fraction") == 0.20 and exnovo_reward.get("phase_min_stance_load_bw_s") == 0.04 and exnovo_reward.get("phase_min_cycle_knee_excursion_rad") == 0.12)
 check("exnovo phase timeout post-clip penalty enabled", exnovo_reward.get("phase_timeout_penalty_weight") == 0.50)
-check("exnovo hard stance/swing timeouts configured", exnovo_reward.get("phase_stance_hard_timeout_s") == 2.20 and exnovo_reward.get("phase_swing_hard_timeout_s") == 1.10)
+check("exnovo hard stance/swing timeouts configured", exnovo_reward.get("phase_stance_hard_timeout_s") == 2.20 and exnovo_reward.get("phase_swing_hard_timeout_s") == 2.60)
 check("exnovo action clip penalty enabled", exnovo_reward.get("policy_action_clip_weight") == 0.25)
 check("exnovo tightened knee range configured", exnovo_reward.get("oob_q_min") == [-1.25, -0.60] and exnovo_reward.get("prosthetic_joint_q_min") == [-1.30, -0.60] and exnovo_reward.get("prosthetic_joint_range_weight") == 2.0)
 check("exnovo reserve/pelvis diagnostic weights zero", exnovo_reward.get("reserve_residual_weight") == 0.0 and exnovo_reward.get("pelvis_height_weight") == 0.0)
@@ -99,17 +101,19 @@ check(
     "exnovo morphology profile configured",
     exnovo_reward.get("morphology_profile")
     == (
-        "morphology_profiles/"
+        "morphology_corridor/profiles/"
         "ab06_prosthetic_event_warped_mean_std_corridor.json"
     ),
 )
 check(
-    "exnovo morphology phase is event anchored",
-    exnovo_reward.get("morphology_phase_mode") == "event_anchored",
+    "exnovo morphology phase is event-anchored causal delayed",
+    exnovo_reward.get("morphology_phase_mode") == "event_anchored_causal_delayed_experimental",
 )
 check(
-    "exnovo morphology diagnostic weight zero",
-    exnovo_reward.get("morphology_weight") == 0.0,
+    "exnovo morphology weights match best47",
+    exnovo_reward.get("morphology_weight") == 5.0
+    and exnovo_reward.get("morphology_knee_weight") == 5.0
+    and exnovo_reward.get("morphology_ankle_weight") == 5.0,
 )
 check(
     "exnovo morphology K configured",
@@ -126,15 +130,16 @@ check(
 a = _parse(train_ppo_mlp, [])
 check("train default num_hidden_layers=2 (yaml)", a.num_hidden_layers == 2)
 check("train default dim_hidden_layers=256 (yaml)", a.dim_hidden_layers == 256)
-check("train default train_batch_size=4096 (yaml)", a.train_batch_size == 4096)
-check("train default iterations=40 (yaml)", a.iterations == 40)
+check("train default train_batch_size=4608 (yaml)", a.train_batch_size == 4608)
+check("train default iterations=51 (yaml)", a.iterations == 51)
 check("train default grf_mode online_sensor (yaml)", a.grf_mode == "online_sensor")
 check("train default asymmetric True (yaml)", a.asymmetric_actor_critic is True)
-check("train _cfg_reward reward_mode imitation", a._cfg_reward.get("reward_mode") == "imitation")
+check("train _cfg_reward reward_mode ex_novo", a._cfg_reward.get("reward_mode") == "ex_novo")
 hiddens = [int(a.dim_hidden_layers)] * int(a.num_hidden_layers)
 check("train hiddens expand to [256, 256]", hiddens == [256, 256])
-check("train default start choices empty", a.episode_start_offset_choices_s == [])
+check("train default three exact start choices", a.episode_start_offset_choices_s == [1.756870983805102, 1.956870983805102, 2.156870983805102] and a.exact_start_sampling is True)
 check("train default KL target 0.01", a.kl_target == 0.01)
+check("train default freeze logstd with fixed exploration sigma", a.freeze_logstd is True and a.fixed_exploration_sigma == [0.01])
 
 # 2b. Train parse_args with ex-novo config: explicit config seeds ex-novo defaults.
 a_ex = _parse(train_ppo_mlp, ["--config", str(_BASELINE / "training_exnovo_cfg.yaml")])
@@ -145,13 +150,20 @@ check("train exnovo config deployable minimal obs off", a_ex.deployable_minimal_
 check("train exnovo config reference state obs on", a_ex.include_reference_state_observation is True)
 check("train exnovo config controller state actor-visible", a_ex.include_controller_state_observation is True)
 check("train exnovo config controller diagnostics critic-only", a_ex.include_controller_diagnostic_observation is False)
-check("train exnovo config profile correct magnitude", "grf_correct_magnitude" in a_ex.online_grf_profile)
+check("train exnovo config full-wrench residual profile", "online_full_wrench_residual_tangent_v2" in a_ex.online_grf_profile)
 check("train exnovo config detector HS/TO profile", "grf_detector_HS-TO" in a_ex.online_grf_detector_profile)
 check(
     "train exnovo config carries penetration thresholds",
-    a_ex.grf_penetration_penalty_threshold_m == 0.015
-    and a_ex.grf_penetration_termination_m == 0.025,
+    a_ex.grf_penetration_penalty_threshold_m == 0.02
+    and a_ex.grf_penetration_termination_m == 0.028,
 )
+
+# 2c. The previous imitation preset remains available by explicit selection.
+a_imit = _parse(train_ppo_mlp, ["--config", str(_BASELINE / "training_cfg.yaml")])
+check("explicit imitation config keeps imitation reward", a_imit._cfg_reward.get("reward_mode") == "imitation")
+check("explicit imitation config retains its optimizer and iteration settings", a_imit.train_batch_size == 4096 and a_imit.iterations == 40 and a_imit.lr == 1e-4)
+check("explicit imitation config does not inherit fixed exnovo sigma", a_imit.fixed_exploration_sigma is None)
+check("explicit imitation config keeps controller diagnostics actor-visible", a_imit.include_controller_diagnostic_observation is True)
 check(
     "train exnovo config leaves two-sensor mode opt-in",
     a_ex.phase_fsm_input_mode == "legacy_events"
@@ -210,7 +222,7 @@ check(
     f3.warm_start_source_config is None,
 )
 
-# 6. Rollout parse_args: built-in defaults when no snapshot (--no-auto-config).
+# 6. Rollout parse_args: canonical defaults without checkpoint auto-config.
 # A dummy checkpoint is OK for argparse only, but provide output_dir so rollout
 # does not try to resolve the nonexistent checkpoint just to derive a run name.
 r = _parse(
@@ -224,7 +236,9 @@ r = _parse(
     ],
 )
 check("rollout action_mode default absolute", r.action_mode == "absolute")
-check("rollout asymmetric default False", r.asymmetric_actor_critic is False)
+check("rollout asymmetric canonical default True", r.asymmetric_actor_critic is True)
+check("rollout canonical exnovo reward", r._cfg_reward.get("reward_mode") == "ex_novo")
+check("rollout canonical morphology weights", r._cfg_reward.get("morphology_weight") == 5.0 and r._cfg_reward.get("morphology_knee_weight") == 5.0 and r._cfg_reward.get("morphology_ankle_weight") == 5.0)
 check(
     "rollout two-sensor mode is explicit opt-in",
     r.phase_fsm_input_mode == "legacy_events"
@@ -247,6 +261,31 @@ with tempfile.TemporaryDirectory() as tmp:
     check("snapshot carries action_mode (diagnostic round-trip)", sflat.get("action_mode") == "absolute")
     check("snapshot reward_mode imitation", sreward.get("reward_mode") == "imitation")
     check("snapshot omits run-identity output_dir", "output_dir" not in sflat)
+
+    # A historical resolved snapshot is authoritative over the global default;
+    # an explicitly selected config then takes precedence over that snapshot.
+    training_config.dump_resolved(a_imit, a_imit._cfg_reward, snap_path)
+    rollout_argv = [
+        "--checkpoint", str(run_dir / "rl_module_best"),
+        "--output-dir", str(run_dir / "rollout"),
+    ]
+    historical = _parse(rollout_eval, rollout_argv)
+    check("rollout snapshot overrides default reward", historical._cfg_reward.get("reward_mode") == "imitation")
+    check("rollout snapshot overrides default actor visibility", historical.include_controller_diagnostic_observation is True)
+    check("rollout snapshot does not inherit exnovo morphology split weights", historical._cfg_reward.get("morphology_knee_weight") is None and historical._cfg_reward.get("morphology_ankle_weight") is None)
+
+    selected = _parse(rollout_eval, [*rollout_argv, "--config", str(_BASELINE / "training_exnovo_cfg.yaml")])
+    check("explicit config overrides snapshot reward", selected._cfg_reward.get("reward_mode") == "ex_novo")
+    check("explicit config overrides snapshot actor visibility", selected.include_controller_diagnostic_observation is False)
+
+    cli = _parse(rollout_eval, [*rollout_argv, "--config", str(_BASELINE / "training_exnovo_cfg.yaml"), "--episode-duration", "2.5", "--reward-mode", "imitation"])
+    check("rollout CLI overrides config and snapshot", cli.episode_duration == 2.5 and cli.reward_mode == "imitation")
+
+    no_auto = _parse(rollout_eval, [*rollout_argv, "--no-auto-config"])
+    check("no-auto-config bypasses snapshot but retains canonical config", no_auto._cfg_reward.get("reward_mode") == "ex_novo" and no_auto.include_controller_diagnostic_observation is False)
+
+    explicit_imitation = _parse(rollout_eval, [*rollout_argv, "--no-auto-config", "--config", str(_BASELINE / "training_cfg.yaml")])
+    check("explicit imitation config remains usable in rollout", explicit_imitation._cfg_reward.get("reward_mode") == "imitation" and explicit_imitation.include_controller_diagnostic_observation is True)
 
     training_config.dump_resolved(
         b_start, {"reward_mode": "ex_novo"}, snap_path

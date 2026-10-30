@@ -1,5 +1,12 @@
 # V26B S1A (rev3q) — materializzato il candidato intermedio **NON deployable**: P0 bit-exact, G_task PASS
 
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 **Token:** `V26B-S1A-BC-FIT` · **Data:** 2026-08-24 · **Ambito:** solo stadio offline. Nessun rollout, DAgger, PPO/critic, multistart, σ-sweep, morphology; nessuna modifica a env/reward/FSM/SEA/C++ né ad alcun artefatto/tool/contratto preesistente.
 
 ## 1. Esito

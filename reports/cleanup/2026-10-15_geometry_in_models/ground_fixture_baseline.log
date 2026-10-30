@@ -1,0 +1,35 @@
+.......ssssssssss.............F                                          [100%]
+=================================== FAILURES ===================================
+_ DefaultGroundPreparationTests.test_validate_only_exposes_resolved_contract_without_build_or_native_execution _
+
+self = <test_abx_default_ground_registration.DefaultGroundPreparationTests testMethod=test_validate_only_exposes_resolved_contract_without_build_or_native_execution>
+
+    def test_validate_only_exposes_resolved_contract_without_build_or_native_execution(self):
+        output = io.StringIO()
+        with ExitStack() as stack:
+            stack.enter_context(patch.object(sys, "argv", self.argv("AB08", "--validate-only")))
+            stack.enter_context(patch.object(builder, "discover_subject", return_value=self.discovery("AB08")))
+            stack.enter_context(patch.object(builder, "python_has_opensim", return_value=True))
+            for name in ("freeze_preparation_references", "build_subject", "graft_seasea_model", "run_matlab_convert", "run_ground_registration",
+                         "run_marker_calibration", "run_ik_pipeline", "run_smoke"):
+                stack.enter_context(patch.object(builder, name, side_effect=AssertionError(f"unexpected {name}")))
+            stack.enter_context(patch.object(builder.subprocess, "run", side_effect=AssertionError("unexpected subprocess")))
+            stack.enter_context(redirect_stdout(output))
+            self.assertEqual(builder.main(), 0)
+        payload = json.loads(output.getvalue())
+        preparation = payload["preparation"]
+        self.assertTrue(preparation["anatomical_fitting_required"])
+        self.assertTrue(preparation["ground_registration_required"])
+        self.assertEqual(preparation["ik_method"], "opensim_marker_ik")
+        self.assertFalse(preparation["dataset_ik_fallback"])
+        expected = {"reference_donor": self.donor, "reference_healthy_model": self.healthy,
+                    "reference_static_motion": self.static, "ground_plane_profile": builder.DEFAULT_GROUND_PLANE_PROFILE,
+                    "foot_mesh": REPO / "Geometry/AM_foot_l.STL"}
+        for name, path in expected.items():
+>           self.assertEqual(self.resolved_payload_path(preparation[name]), path.resolve())
+E           AssertionError: Posix[25 chars]nts/CMC-like-Simulator - Claude/models/Geometry/AM_foot_l.STL') != Posix[25 chars]nts/CMC-like-Simulator - Claude/Geometry/AM_foot_l.STL')
+
+validation/test_abx_default_ground_registration.py:164: AssertionError
+=========================== short test summary info ============================
+FAILED validation/test_abx_default_ground_registration.py::DefaultGroundPreparationTests::test_validate_only_exposes_resolved_contract_without_build_or_native_execution
+1 failed, 20 passed, 10 skipped in 0.52s

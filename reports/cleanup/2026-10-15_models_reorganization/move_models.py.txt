@@ -1,0 +1,38 @@
+from pathlib import Path
+import hashlib
+import json
+
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+OUT=Path('/tmp/cmc_models_reorganization_2026_10_15')
+moves=json.loads((OUT/'directory_mapping.json').read_text())
+baseline=json.loads((OUT/'model_files_before.json').read_text())
+for source,target in moves.items():
+    assert (ROOT/source).is_dir() and not (ROOT/source).is_symlink(),source
+    assert not (ROOT/target).exists(),target
+for name,meta in baseline.items():
+    p=ROOT/name
+    assert p.is_file() and not p.is_symlink(),name
+    if p.suffix in {'.osim','.xml'}:
+        assert hashlib.sha256(p.read_bytes()).hexdigest()==meta['sha256'],name
+mapping={}
+for name,meta in baseline.items():
+    new=name
+    for source,target in moves.items():
+        if name.startswith(source+'/'):
+            new=target+name[len(source):];break
+    mapping[name]={'new_path':new,**meta}
+(OUT/'file_mapping.json').write_text(json.dumps(mapping,indent=2)+'\n')
+done=[]
+for source,target in moves.items():
+    (ROOT/target).parent.mkdir(parents=True,exist_ok=True)
+    (ROOT/source).rename(ROOT/target)
+    done.append({'old':source,'new':target})
+    (OUT/'move_journal.json').write_text(json.dumps(done,indent=2)+'\n')
+assert {p.name for p in (ROOT/'models').iterdir() if p.is_dir()}=={'AB06','AB07','AB08','SEASEA','SEASEA_healthy'}
+result={'passed':True,'directory_moves':done,'all_model_files':len(mapping),
+        'files_relocated':sum(a!=m['new_path'] for a,m in mapping.items()),
+        'model_bytes':sum(m['bytes'] for m in mapping.values()),
+        'families':['AB06','AB07','AB08','SEASEA','SEASEA_healthy'],
+        'method':'same-filesystem directory rename; no file duplication or symlink'}
+(OUT/'move_result.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result,indent=2),flush=True)

@@ -1,0 +1,51 @@
+........................................FF..F..                          [100%]
+=================================== FAILURES ===================================
+_ TwoSensorMeshProfileV4Test.test_checked_profile_exactly_matches_deterministic_builder _
+
+self = <test_two_sensor_mesh_profile_v4.TwoSensorMeshProfileV4Test testMethod=test_checked_profile_exactly_matches_deterministic_builder>
+
+    def test_checked_profile_exactly_matches_deterministic_builder(self) -> None:
+>       self.assertEqual(self.checked.to_dict(), self.built.to_dict())
+E       AssertionError: {'ver[1796 chars]/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_5[1466 chars]5}}}} != {'ver[1796 chars]/AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff[1483 chars]5}}}}
+E       Diff is 6984 characters long. Set self.maxDiff to None to see it.
+
+validation/test_two_sensor_mesh_profile_v4.py:70: AssertionError
+_ TwoSensorMeshProfileV4Test.test_embedded_source_hashes_match_current_sources _
+
+self = <test_two_sensor_mesh_profile_v4.TwoSensorMeshProfileV4Test testMethod=test_embedded_source_hashes_match_current_sources>
+
+    def test_embedded_source_hashes_match_current_sources(self) -> None:
+        design = self.checked.metadata["v4_mesh_design"]
+        records = (
+            design["base_profile"],
+            design["setup"],
+            design["model"],
+            design["foot_mesh"],
+        )
+        for record in records:
+            path = resolve_repo_path(record["path"])
+            with self.subTest(path=path):
+>               self.assertEqual(_sha256(path), record["sha256"])
+E               AssertionError: 'bdd3efdf70c7cc2632cb8aa1ef6c8b6cc3966d29af194416caa91aca21a0aa5a' != '5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931'
+E               - bdd3efdf70c7cc2632cb8aa1ef6c8b6cc3966d29af194416caa91aca21a0aa5a
+E               + 5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931
+
+validation/test_two_sensor_mesh_profile_v4.py:173: AssertionError
+_ TwoSensorMeshProfileV4Test.test_legacy_profile_config_and_fsm_are_bitwise_unchanged _
+
+self = <test_two_sensor_mesh_profile_v4.TwoSensorMeshProfileV4Test testMethod=test_legacy_profile_config_and_fsm_are_bitwise_unchanged>
+
+    def test_legacy_profile_config_and_fsm_are_bitwise_unchanged(self) -> None:
+        for path, expected in FROZEN_HASHES.items():
+            with self.subTest(path=path):
+>               self.assertEqual(_sha256(path), expected)
+E               AssertionError: 'ee249a958db6d8780a2f7b5b91cdf0f3fef275a5a693525e1e336eb9ccc425af' != '847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13'
+E               - ee249a958db6d8780a2f7b5b91cdf0f3fef275a5a693525e1e336eb9ccc425af
+E               + 847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13
+
+validation/test_two_sensor_mesh_profile_v4.py:152: AssertionError
+=========================== short test summary info ============================
+FAILED validation/test_two_sensor_mesh_profile_v4.py::TwoSensorMeshProfileV4Test::test_checked_profile_exactly_matches_deterministic_builder
+FAILED validation/test_two_sensor_mesh_profile_v4.py::TwoSensorMeshProfileV4Test::test_embedded_source_hashes_match_current_sources
+FAILED validation/test_two_sensor_mesh_profile_v4.py::TwoSensorMeshProfileV4Test::test_legacy_profile_config_and_fsm_are_bitwise_unchanged
+3 failed, 44 passed in 1.83s

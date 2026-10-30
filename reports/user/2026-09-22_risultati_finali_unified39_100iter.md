@@ -1,5 +1,10 @@
 # Unified 39D: risultati finali a 100 iterazioni e diagnosi della robustezza
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 22 settembre 2026. Training concluso alle **16:51:07 CEST**; valutazioni e pipeline concluse alle **17:24:50 CEST**.
 
 ## Esito
@@ -136,9 +141,9 @@ Non partirei dall’oscuramento dei prescribed o da una nuova modifica di FSM, r
 ## Artefatti e verifiche
 
 - [Set dei sette grafici canonici della 100](../../plot/09_22_2026_3/); [tappa 60](../../plot/09_22_2026_1/) e [tappa 80](../../plot/09_22_2026_2/).
-- [Metriche finali riproducibili](../../Trajectory%20Generator/unified_MLP_39/validation/final_completion_analysis_2026-09-22/final_metrics.json), script `analyze_final.py` e hash degli input nella stessa cartella.
-- [Audit del rumore e del clipping](../../Trajectory%20Generator/unified_MLP_39/validation/final_completion_analysis_2026-09-22/noise_audit.md), con script e JSON.
-- [Esiti della pipeline](../../Trajectory%20Generator/unified_MLP_39/runs/plans/completion_recovery42_2026-09-22/comparison.md), con `results.json`, audit delle riprese, telemetria e ricevute dei grafici.
+- [Metriche finali riproducibili — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-48a90259538f0d09>), script `analyze_final.py` e hash degli input nella stessa cartella.
+- [Audit del rumore e del clipping — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a8802777889331ef>), con script e JSON.
+- [Esiti della pipeline — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-46df9dc9bb280b63>), con `results.json`, audit delle riprese, telemetria e ricevute dei grafici.
 - [Report precedente della diagnosi alla 60](2026-09-22_robustezza_unified39_diagnosi_checkpoint60.md) e [correzioni della ripresa](2026-09-22_diagnosi_completamento_e_ripresa_unified39.md).
 
 Verifiche eseguite: storico 1–100 contiguo; batch e visibilità 100%; audit Adam delle tre continuazioni; ricostruzione della reward deterministica con errore inferiore a 10⁻⁶; identità del target sinistro fra le tappe; visibilità e valori degli ingressi clock/prescribed; osservazioni iniziali e rumore appaiati; confronto degli errori sul medesimo intervallo; mappatura azione→endpoint; lettura dei JSON e controllo visivo dei grafici di sintesi e dei canonici pertinenti.

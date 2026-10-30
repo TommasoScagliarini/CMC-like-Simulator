@@ -1,0 +1,49 @@
+from pathlib import Path
+import hashlib,json,sys,yaml
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+WORK=Path('/tmp/cmc_grf_removal_2026_10_15')
+sys.path.insert(0,str(ROOT))
+from online_grf import load_online_grf_profile
+from path_resolver import resolve_repo_path
+before=json.loads((WORK/'independent_integrity_before.json').read_text())
+def fingerprint(path):
+    b=path.read_bytes();return {'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()}
+comparisons=[{'path':name,'exists':(ROOT/name).is_file(),'unchanged':(ROOT/name).is_file() and fingerprint(ROOT/name)==meta} for name,meta in before['files'].items()]
+remaining=sorted(p.name for p in (ROOT/'online_grf_profiles').glob('*.json'))
+parsed=[]
+for name in remaining:
+    profile=load_online_grf_profile(ROOT/'online_grf_profiles'/name)
+    parsed.append({'file':name,'sphere_count':len(profile.spheres),'sides':sorted({x.side for x in profile.spheres}),'pass':True})
+# All currently editable MLP YAML presets, excluding saved runs, snapshots,
+# experimental configs and morphology data outside current standard families.
+configs=[]
+for family in ('baseline_MLP','unified_MLP','unified_MLP_39'):
+    base=ROOT/'Trajectory Generator'/family
+    configs.extend(p for p in base.glob('*.yaml'))
+    configs.extend(p for p in (base/'configs').glob('*.yaml'))
+best47=ROOT/'Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml'
+configs.append(best47)
+profile_refs=[]
+for cfg in sorted(set(configs)):
+    doc=yaml.safe_load(cfg.read_text())
+    for key,value in (doc.get('grf') or {}).items():
+        if key.endswith('_profile') and value and str(value).startswith('online_grf_profiles/'):
+            resolved=resolve_repo_path(value)
+            profile=load_online_grf_profile(resolved)
+            profile_refs.append({'config':str(cfg.relative_to(ROOT)),'key':key,'path':str(resolved.relative_to(ROOT)),'exists':resolved.is_file(),'sphere_count':len(profile.spheres)})
+hits=(WORK/'removed_profile_code_references.txt').read_text().splitlines()
+active_hits=[line for line in hits if '/validation/right_reference_results60_2026-09-23/' not in line]
+result={
+  'pass':all(row['unchanged'] for row in comparisons) and remaining==sorted(before['keep']) and not active_hits,
+  'baseline_file_count':len(comparisons),'all_baseline_files_unchanged':all(row['unchanged'] for row in comparisons),
+  'baseline_comparisons':comparisons,'remaining_exactly_five':remaining==sorted(before['keep']),
+  'profiles_parsed':parsed,'operational_and_best47_profile_references':profile_refs,
+  'yaml_configs_reviewed':len(set(configs)),
+  'active_removed_profile_specific_references':active_hits,
+  'historical_removed_profile_reference_lines':len(hits)-len(active_hits),
+  'qualification':'Specific operational references scanned in non-report code/config. Frozen inventory reads deliberately remain unchanged and will report removed files in historical live-source checks.'
+}
+(WORK/'independent_integrity_after.json').write_text(json.dumps(result,indent=2)+'\n')
+assert result['pass'],result
+print(json.dumps({k:v for k,v in result.items() if k not in ('baseline_comparisons','operational_and_best47_profile_references')},indent=2))
+print('Profile references validated:',len(profile_refs))

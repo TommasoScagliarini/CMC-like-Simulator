@@ -1,5 +1,10 @@
 # Banco di tuning rapido della reward LEFT: implementazione, analisi offline e pilot predisposto
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 25 settembre 2026. Instruction check token: `CMC_AGENT_OK_2026`.
 
 ## Stato e punto di ripartenza
@@ -171,13 +176,13 @@ Nella tabella `39/` abbrevia `Trajectory Generator/unified_MLP_39/`.
 
 Collegamenti principali:
 
-- [Guida e comandi](<../../Trajectory Generator/unified_MLP_39/reward_tuning/README.md>).
-- [Configurazione](<../../Trajectory Generator/unified_MLP_39/configs/reward_tuning_left.yaml>).
-- [Report offline](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/analysis/report.md>).
-- [Metriche, pesi e sensitività](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/analysis/analysis.json>).
-- [Manifest pilot](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/pilot/pilot_manifest.json>) e [stato](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/pilot/pilot_state.json>).
-- [Verifiche della consegna](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/verification.json>).
-- [Smoke OpenSim](<../../Trajectory Generator/unified_MLP_39/validation/reward_tuning_smoke_2026-09-25.json>).
+- [Guida e comandi — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0fe045e94030c646>).
+- [Configurazione — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d8df9f1480de598e>).
+- [Report offline — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-c465d3ef20ee64b5>).
+- [Metriche, pesi e sensitività — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a4272d7dceee8afc>).
+- [Manifest pilot — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d5dc8ff8273f953b>) e [stato — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f4254909c9468124>).
+- [Verifiche della consegna — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-3235408ad8f801b2>).
+- [Smoke OpenSim — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-dd880b41e4e75ad8>).
 - [Confronto fisico](../../plot/09_25_2026_LEFT_reward_tuning/offline_physical_comparison.png) e [distribuzione dei costi per fase](../../plot/09_25_2026_LEFT_reward_tuning/offline_reward_sensitivity.png).
 
 ## Test e verifiche
@@ -235,5 +240,5 @@ penetrazione peso2 e FSMv3. Nessun errore fatale di avvio rilevato.
 
 La prima iterazione non è ancora conclusa; candidata e valutazioni devono
 ancora partire. L'avvio non costituisce un risultato del confronto.
-Ricevute: [launch_receipt.json](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/pilot/launch_receipt.json>)
-e [startup_check.json](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/pilot/startup_check.json>).
+Ricevute: [launch_receipt.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4d8fa938c0d7c490>)
+e [startup_check.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9398c2c6609a9f32>).

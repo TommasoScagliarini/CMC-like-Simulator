@@ -1,5 +1,17 @@
 # Daily Report — 2026-09-30
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Aggiornamento parziale tramite `create_report`; non è una chiusura `end_day`.
 Instruction check token: `CMC_AGENT_OK_2026`.
 
@@ -22,7 +34,7 @@ iterazione aggiuntiva completata è attestata da questa nota.
 ## Preparazione pilot oscuramento da best90 — stato prima dell’avvio
 
 Su richiesta dell’utente è stato preparato il
-[piano eseguibile](<../../Trajectory Generator/unified_MLP_39/runs/plans/left_best90_masking_100iter_2026-09-30/README.md>)
+[piano eseguibile — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-79357e1c36826f1c>)
 con quattro blocchi fissi di 25 aggiornamenti da CP90: iterazioni globali
 91–115/116–140/141–165/166–190, oscuramento episodico 25/50/75/100%.
 Start singolo offset 1,0 s e parametri best90 invariati; il bug bootstrap PPO

@@ -1,0 +1,28 @@
+{
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "scope": "Independent READ-ONLY review of final root model path resolver and dedicated migration path tests; git diff inspected, no source edits and no broad tests run",
+  "reviewed_files": [
+    {
+      "path": "path_resolver.py",
+      "bytes": 9095,
+      "sha256": "fb8b77a8cbc2e8f6c2a5e5692c87b7ad59979ee99f9cee68d3b39184f7c94526"
+    },
+    {
+      "path": "validation/test_model_layout_paths.py",
+      "bytes": 6154,
+      "sha256": "174c18085b18a67462e7066e8a3d89b4d78991d0ea2bdfd7ff96ed0617810c6b"
+    }
+  ],
+  "result": "PASS; no material bug found within the authorized migration namespace",
+  "material_findings": [],
+  "review_points": {
+    "canonical_layout": "Explicit ten legacy model directory mappings, five canonical families; current top-level model paths resolve to this checkout.",
+    "windows_macos": "Backslash and forward slash model paths normalized with PureWindowsPath absolute detection; native Windows Path handles current workspace comparisons while saved foreign Windows checkout paths can be recognized on macOS.",
+    "frozen_namespaces": "Current-workspace absolute paths outside top-level models do not fall through to foreign checkout remapping; relative validation/.../models stays untouched. Foreign paths under validation/runs are excluded.",
+    "existing_external": "An existing absolute path outside REPO_ROOT is returned unchanged through caller fallback, including an external checkout with the same project basename.",
+    "foreign_namespace_limit": "Only explicit known checkout basenames qualify, followed immediately by models and a known family/legacy directory; arbitrary occurrences of models are not rewritten.",
+    "runtime_call_sites": "Compatibility applied consistently to resolve_repo_path, normalize_cli_existing_path and bundle input resolution while ordinary bundle-relative data filenames retain their existing behavior.",
+    "tests_read": "Dedicated tests cover all ten moved directories, Windows/POSIX separators, saved current/foreign/UNC absolute paths, current nested frozen copies, unknown foreign roots, existing external model, operational AB06/AB07 setup binding, and unchanged historical setup bytes."
+  },
+  "validation_limit": "This is static independent code review plus previously completed native macOS path integration checks. Native Windows execution is not claimed. No historical frozen manifest or SHA rewritten."
+}

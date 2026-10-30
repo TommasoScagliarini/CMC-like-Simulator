@@ -1,0 +1,26 @@
+from pathlib import Path
+import json
+import subprocess
+import time
+
+OUT=Path('/tmp/cmc_sea_source_migration_2026_10_15')
+EXT=Path('/Users/tommy/Documents/SEA_plugin_core - agent')
+BUILD=OUT/'build_mac_arm64'
+commands=[
+    ['/opt/homebrew/bin/cmake','-S',str(EXT),'-B',str(BUILD),'-G','Ninja',
+     '-DCMAKE_BUILD_TYPE=Release','-DCMAKE_OSX_ARCHITECTURES=arm64',
+     '-DCMAKE_C_COMPILER=/usr/bin/clang','-DCMAKE_CXX_COMPILER=/usr/bin/clang++',
+     '-DOPENSIM_INSTALL_DIR=/Users/tommy/opensim-core-install'],
+    ['/opt/homebrew/bin/cmake','--build',str(BUILD),'--config','Release',
+     '--target','SEA_Plugin_BlackBox_mCMC_impedence_ff','--parallel','4'],
+]
+records=[]
+for name,cmd in zip(['configure','build'],commands):
+    started=time.monotonic()
+    p=subprocess.run(cmd,cwd=OUT,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
+    (OUT/f'external_{name}.log').write_text(p.stdout)
+    records.append({'phase':name,'command':cmd,'returncode':p.returncode,'elapsed_s':time.monotonic()-started})
+    (OUT/'external_build_result.json').write_text(json.dumps({'passed':all(r['returncode']==0 for r in records),'phases':records},indent=2)+'\n')
+    print(json.dumps(records[-1]),flush=True)
+    print(p.stdout[-5000:],flush=True)
+    if p.returncode:raise SystemExit(p.returncode)

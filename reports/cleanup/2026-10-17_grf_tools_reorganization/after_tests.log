@@ -1,0 +1,92 @@
+........................................................................ [ 13%]
+........................................................................ [ 27%]
+................F....................................................... [ 41%]
+........................................................................ [ 55%]
+........................................................................ [ 69%]
+......................F................................................. [ 83%]
+........................................................................ [ 97%]
+...............                                                          [100%]
+=================================== FAILURES ===================================
+___________ test_candidate_yaml_is_separate_preflight_only_contract ____________
+
+    def test_candidate_yaml_is_separate_preflight_only_contract() -> None:
+        candidate_path = (
+            BASELINE_DIR
+            / "experimental_configs"
+            / "morphology_event_anchored_causal_candidate.yaml"
+        )
+        candidate = yaml.safe_load(candidate_path.read_text(encoding="utf-8"))
+        active = yaml.safe_load(
+            (BASELINE_DIR / "training_exnovo_cfg.yaml").read_text(encoding="utf-8")
+        )
+    
+        assert candidate["candidate"]["ppo_updates_authorized"] is False
+        assert candidate["candidate"]["active_training_config_replaced"] is False
+        assert candidate["simulation"]["segment_duration"] == 0.01
+        assert candidate["grf"]["event_contract_id"] == TWO_SENSOR_EVENT_CONTRACT_ID
+        assert candidate["grf"]["phase_fsm_input_mode"] == "two_sensor"
+        assert candidate["grf"]["phase_sensor_on_threshold_n"] == 0.5
+        assert candidate["grf"]["phase_sensor_off_threshold_n"] == 0.25
+        assert candidate["grf"]["phase_sensor_dwell_s"] == 0.03
+        assert candidate["reward"]["morphology_phase_mode"] == CAUSAL_DELAYED_PHASE_MODE
+        assert candidate["reward"]["morphology_reward_delay_s"] == 0.04
+        assert candidate["reward"]["morphology_max_delivery_latency_s"] == 0.01
+        assert candidate["reward"]["morphology_weight"] == 0.05
+        assert candidate["reward"]["morphology_hard_termination_enabled"] == 0.0
+>       assert active["reward"]["morphology_weight"] == 0.0
+E       assert 0.0025 == 0.0
+
+/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/test/test_causal_delayed_morphology_corridor.py:402: AssertionError
+______________ test_exnovo_config_enables_task_based_reward_terms ______________
+
+    @_test
+    def test_exnovo_config_enables_task_based_reward_terms() -> None:
+        cfg = training_config.load(BASELINE_DIR / "training_exnovo_cfg.yaml")
+        _, reward = training_config.to_argparse_defaults(cfg)
+        resolved = reward_function.RewardConfig.from_mapping(reward)
+    
+        assert resolved.reward_mode == "ex_novo"
+        assert resolved.blend_tracking == 0.0
+        assert resolved.blend_reference == 0.0
+        assert resolved.blend_bio == 0.0
+        assert resolved.blend_contact_load == 0.10
+        assert resolved.blend_contact_support_to == 0.30
+        assert resolved.contact_load_confidence_full_bw == 0.20
+        assert resolved.contact_load_dense_evidence_limit_bw_s == 0.04
+        assert resolved.contact_load_penetration_full_reward_m == 0.010
+        assert resolved.contact_load_penetration_zero_reward_m == 0.012
+        assert resolved.contact_support_to_window_start_s == 0.79
+        assert resolved.contact_support_to_window_end_s == 1.26
+        assert resolved.contact_support_failure_clawback_weight == 1.0
+        assert resolved.grf_penetration_weight == 0.05
+        assert resolved.blend_phase_regular > 0.0
+        assert resolved.phase_period_nominal_s == 1.58
+        assert resolved.phase_timeout_penalty_weight == 0.50
+        assert resolved.phase_stance_hard_timeout_s == 2.20
+>       assert resolved.phase_swing_hard_timeout_s == 1.10
+E       assert 2.6 == 1.1
+E        +  where 2.6 = RewardConfig(tracking_weight=8.0, reference_weight=6.0, bio_weight=2.0, effort_weight=0.05, smoothness_weight=0.02, sa...2, imitation_ankle_velocity_weight=0.02, blend_served_imitation=0.0, blend_imitation=0.8, blend_imitation_tracking=0.2).phase_swing_hard_timeout_s
+
+/Users/tommy/Documents/CMC-like-Simulator - Claude/validation/test/test_reward_function.py:149: AssertionError
+=============================== warnings summary ===============================
+test_binary_invalid_event_policy.py::test_injected_rejection_terminates_the_episode_cleanly
+test_binary_invalid_event_policy.py::test_reject_continue_drops_the_event_and_survives_later_steps
+test_binary_invalid_event_policy.py::test_injected_rejection_with_default_raise_stays_fail_closed
+test_process_guards_termination.py::test_hard_penetration_terminates_episode_and_env_survives
+test_process_guards_termination.py::test_state_level_rejection_terminates_cleanly_under_reject_continue
+  /opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_slsqp_py.py:435: RuntimeWarning: Values in x were outside bounds during a minimize step, clipping to bounds
+    fx = wrapped_fun(x)
+
+test_binary_invalid_event_policy.py::test_injected_rejection_terminates_the_episode_cleanly
+test_binary_invalid_event_policy.py::test_reject_continue_drops_the_event_and_survives_later_steps
+test_binary_invalid_event_policy.py::test_injected_rejection_with_default_raise_stays_fail_closed
+test_process_guards_termination.py::test_hard_penetration_terminates_episode_and_env_survives
+test_process_guards_termination.py::test_state_level_rejection_terminates_cleanly_under_reject_continue
+  /opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_slsqp_py.py:439: RuntimeWarning: Values in x were outside bounds during a minimize step, clipping to bounds
+    g = append(wrapped_grad(x), 0.0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../../../Users/tommy/Documents/CMC-like-Simulator - Claude/validation/test/test_causal_delayed_morphology_corridor.py::test_candidate_yaml_is_separate_preflight_only_contract
+FAILED ../../../Users/tommy/Documents/CMC-like-Simulator - Claude/validation/test/test_reward_function.py::test_exnovo_config_enables_task_based_reward_terms
+2 failed, 517 passed, 10 warnings in 73.08s (0:01:13)

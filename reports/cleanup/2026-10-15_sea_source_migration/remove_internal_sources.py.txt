@@ -1,0 +1,54 @@
+from pathlib import Path
+import hashlib
+import json
+
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+EXT=Path('/Users/tommy/Documents/SEA_plugin_core - agent')
+OUT=Path('/tmp/cmc_sea_source_migration_2026_10_15')
+pre=json.loads((OUT/'migration_preflight.json').read_text())
+assert json.loads((OUT/'external_build_result.json').read_text())['passed']
+assert json.loads((OUT/'differential_probe_result.json').read_text())['passed']
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+records=[]
+for name,meta in pre['source'].items():
+    p=ROOT/'tools/sea_plugin_relative_d'/name
+    assert not p.is_symlink() and sha(p)==meta['sha256'],name
+    if name!='CMakeLists.txt':assert sha(EXT/name)==meta['sha256'],name
+    records.append({'path':p.relative_to(ROOT).as_posix(),**meta,'kind':'live_sea_source_or_build_configuration'})
+expected_generated={
+    'build/.DS_Store',
+    'build/.cmake/api/v1/query/client-vscode/query.json',
+    'build/.cmake/api/v1/reply/error-2026-10-15T15-06-51-0962.json',
+    'build/CMakeCache.txt',
+    'build/CMakeFiles/4.3.1/CMakeSystem.cmake',
+    'build/CMakeFiles/4.3.1/CompilerIdC/CMakeCCompilerId.c',
+    'build/CMakeFiles/4.3.1/CompilerIdCXX/CMakeCXXCompilerId.cpp',
+    'build/CMakeFiles/CMakeConfigureLog.yaml',
+    'build/CMakeFiles/cmake.check_cache',
+}
+generated=[p for p in (ROOT/'build').rglob('*') if p.is_file()]
+assert {p.relative_to(ROOT).as_posix() for p in generated}==expected_generated
+for p in generated:
+    assert not p.is_symlink() and p.suffix.lower() not in {'.dll','.dylib','.so'},p
+    records.append({'path':p.relative_to(ROOT).as_posix(),'bytes':p.stat().st_size,
+                    'sha256':sha(p),'kind':'stale_cmake_generated_file'})
+for name,meta in pre['runtime_binaries'].items():assert sha(ROOT/name)==meta['sha256'],name
+assert sha(EXT/'CMakeLists.txt')==pre['external_before']['CMakeLists.txt']['sha256']
+# Recheck all paths before deleting any; never recurse-delete a directory.
+for r in records:assert sha(ROOT/r['path'])==r['sha256'],r['path']
+for r in records:(ROOT/r['path']).unlink()
+removed_dirs=[]
+for rel in ['tools/sea_plugin_relative_d','build']:
+    base=ROOT/rel
+    paths=[base]+[p for p in base.rglob('*') if p.is_dir() and not p.is_symlink()]
+    for p in sorted(paths,key=lambda p:len(p.parts),reverse=True):
+        try:p.rmdir();removed_dirs.append(p.relative_to(ROOT).as_posix())
+        except OSError:pass
+result={'passed':True,'files_removed':records,'removed_empty_directories':removed_dirs,
+        'live_sea_files_removed':4,'stale_cmake_files_removed':len(generated),
+        'total_removed_bytes':sum(r['bytes'] for r in records),
+        'source_directory_absent':not (ROOT/'tools/sea_plugin_relative_d').exists(),
+        'stale_root_build_absent':not (ROOT/'build').exists(),
+        'runtime_libraries_unchanged':True}
+(OUT/'internal_removal_result.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({k:v for k,v in result.items() if k not in ['files_removed','removed_empty_directories']},indent=2))

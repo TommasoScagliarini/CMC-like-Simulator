@@ -1,5 +1,13 @@
 # Warm start H0 con detector V13 e Morphology Corridor
 
+> Aggiornamento del 2026-10-19: sono stati rimossi l’archivio
+> `Trajectory Generator/runs/training/validation/` e i port storici
+> `v12r7zero`, `v12r8zero`, `v12r9zero`. I riferimenti a questi materiali
+> descrivono lo stato dell’epoca; alcuni vecchi percorsi erano già assenti.
+> Configurazioni e riepiloghi conservati, dipendenze ritirate e controlli
+> sono indicati nel [registro della rimozione](../cleanup/2026-10-19_training_validation_zero_removal/README.md).
+
+
 ## Problema
 
 L'obiettivo della sessione era avviare un training ex-novo comparabile con il

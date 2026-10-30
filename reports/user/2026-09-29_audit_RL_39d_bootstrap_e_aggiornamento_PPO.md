@@ -1,5 +1,10 @@
 # Audit RL della 39D: bootstrap del critic e aggiornamento PPO
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 29 settembre 2026. Instruction check token: `CMC_AGENT_OK_2026`.
 
 Stato: raccolta, aggiornamento originale, replay controllato e tutte le
@@ -285,7 +290,7 @@ stocastico di cui il critic stima il valore. I ritorni a orizzonte finito e
 quelli completati con bootstrap del critic iniziale sono distinti. Questi
 confronti non certificano una calibrazione assoluta o un ranking generale
 dei critic: dati e limiti sono nel
-[confronto dedicato](<../../Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/replay_comparison/report.md>).
+[confronto dedicato — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-cf7ae05d793f1630>).
 
 ## Cosa permette di concludere lo storico
 
@@ -299,7 +304,7 @@ esclude patch locali storiche non documentate.
 Il fix del 14 luglio rimuoveva righe mascherate dopo la GAE per compattare e
 bilanciare i minibatch. Non documenta una correzione del bootstrap. V26 aveva
 inoltre disabilitato quella modalità di campionamento esatto. Vedere la
-[ricostruzione dello stack](<../../Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/historical_stack.md>).
+[ricostruzione dello stack — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4b99a28f2b144ccd>).
 
 ## File, verifiche e limiti
 
@@ -317,7 +322,7 @@ sono congelati con SHA256. Sono passati 17 test mirati: 3 del probe, 5
 dell'analisi learner, 6 dell'esplorazione e 3 del replay, oltre alle verifiche
 analitiche della Gaussiana clippata e al confronto con il codice Ray ufficiale.
 
-La [verifica finale](<../../Trajectory Generator/unified_MLP_39/validation/rl_learning_audit_2026-09-29/verification.json>)
+La [verifica finale — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-566342d48456be9f>)
 è passata: 125 input iniziali invariati, 113 artefatti della raccolta,
 riproduzione esatta degli 81 minibatch e delle nove colonne estranee alla
 correzione, ricevute di tutti i 13 casi e 91 plot canonici verificati.

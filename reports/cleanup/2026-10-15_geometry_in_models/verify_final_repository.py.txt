@@ -1,0 +1,65 @@
+import hashlib
+import json
+import subprocess
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+ROOT = Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+WORK = Path('/tmp/cmc_geometry_move_2026_10_15')
+before = json.loads((WORK / 'before_manifest.json').read_text())
+allowed = {
+    'AGENTS.md', 'models/README.md', 'path_resolver.py', 'model_loader.py',
+    'visualize.py', 'tools/build_abx_seasea_pipeline.py',
+    'online_grf_profiles/README.md', 'validation/test_model_layout_paths.py',
+    'validation/audit_two_sensor_prescribed_geometry.py',
+    'validation/build_primary_grf_mesh_sole.py',
+    'validation/test_build_primary_grf_mesh_sole.py',
+    'validation/test_ground_registration.py',
+    'validation/test_abx_default_ground_registration.py',
+}
+
+def inspect(pair):
+    old, entry = pair
+    new = 'models/' + old if old.startswith('Geometry/') else old
+    path = ROOT / new
+    if not path.is_file():
+        return {'old': old, 'path': new, 'missing': True}
+    data = path.read_bytes()
+    sha = hashlib.sha256(data).hexdigest()
+    return {'old': old, 'path': new, 'bytes': len(data), 'sha256': sha,
+            'changed': sha != entry['sha256']}
+
+with ThreadPoolExecutor(max_workers=8) as pool:
+    results = list(pool.map(inspect, before['files'].items()))
+missing = [r for r in results if r.get('missing')]
+changed = [r for r in results if r.get('changed')]
+unexpected = [r for r in changed if r['path'] not in allowed]
+head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+profiles = [r for r in results if r['path'].startswith('online_grf_profiles/')
+            and r['path'].endswith('.json')]
+meshes = [r for r in results if r['old'].startswith('Geometry/')]
+model_files = [r for r in results if r['old'].startswith('models/')
+               and r['old'] != 'models/README.md']
+diff = subprocess.run(['git', 'diff', '--check'], cwd=ROOT, text=True,
+                      capture_output=True)
+report = {
+    'passed': not missing and not unexpected and head == before['head']
+              and not (ROOT / 'Geometry').exists() and diff.returncode == 0,
+    'files_checked': len(results), 'bytes_before': before['bytes'],
+    'files_byte_identical': len(results) - len(changed) - len(missing),
+    'changed_count': len(changed), 'changed_files': changed,
+    'missing_files': missing, 'unexpected_changes': unexpected,
+    'geometry_files_relocated': len(meshes),
+    'geometry_bytes_identical': all(not r.get('changed') and not r.get('missing') for r in meshes),
+    'model_files_checked': len(model_files),
+    'model_bytes_identical': all(not r.get('changed') and not r.get('missing') for r in model_files),
+    'profile_json_count': len(profiles),
+    'all_profile_json_bytes_identical': all(not r.get('changed') and not r.get('missing') for r in profiles),
+    'head_before': before['head'], 'head_after': head,
+    'diff_check_exit_code': diff.returncode,
+    'diff_check_output': diff.stdout + diff.stderr,
+    'scope': 'All present tracked files, all model files, shared Geometry, plugins and online GRF profiles, plus selected local metadata, captured before this move.',
+}
+(WORK / 'final_repository_integrity.json').write_text(json.dumps(report, indent=2) + '\n')
+print(json.dumps({k:v for k,v in report.items() if k != 'changed_files'}, indent=2))
+raise SystemExit(0 if report['passed'] else 1)

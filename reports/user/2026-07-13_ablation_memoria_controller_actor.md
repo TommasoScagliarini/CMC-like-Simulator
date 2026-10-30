@@ -1,5 +1,12 @@
 # Ablation dello stato del controller nell'actor
 
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 > **Stato superato.** Questo report documenta il primo candidato 35-feature,
 > correttamente rifiutato con il protocollo allora disponibile. La successiva
 > diagnosi ha trovato label recovery fuori fase e input non condizionati. La

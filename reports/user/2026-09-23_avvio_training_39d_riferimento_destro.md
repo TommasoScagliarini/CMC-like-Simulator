@@ -1,5 +1,10 @@
 # Training 39D da zero sul riferimento destro V26: implementazione, smoke e avvio
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 23 settembre 2026. Richiesta: addestrare la 39D sul riferimento destro,
 eseguendo smoke test prima del training completo fino a iterazione 40.
 
@@ -47,7 +52,7 @@ fallimenti restano attive: non si ripristinano i bug storici.
 | Budget | 40 iterazioni, nominalmente 163.840 transizioni |
 | Checkpoint | Completi e moduli di inferenza conservati a ogni iterazione |
 
-[Configurazione completa](<../../Trajectory Generator/unified_MLP_39/configs/v26_aligned_right_phase_fsmv3_40iter_2026-09-23.yaml>).
+[Configurazione completa — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9f6a9111962438c5>).
 
 ## Verifiche prima dell'avvio
 
@@ -92,9 +97,9 @@ Run:
 - Registrati 48 hash e copie degli input/sorgenti; 14 input storici esterni
   alla variante risultano invariati, inclusi asset/checkpoint verificati.
 
-[Stato aggiornato](<../../Trajectory Generator/unified_MLP_39/runs/plans/right_reference_training_2026-09-23/status.json>) ·
-[Log training](<../../Trajectory Generator/unified_MLP_39/runs/plans/right_reference_training_2026-09-23/training.log>) ·
-[Protocollo](<../../Trajectory Generator/unified_MLP_39/runs/plans/right_reference_training_2026-09-23/protocol.json>).
+[Stato aggiornato — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6df43ed8be9c8cbd>) ·
+[Log training — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-671e67c426343bc5>) ·
+[Protocollo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-73fd8e950029c7ea>).
 
 ## File modificati e artefatti
 

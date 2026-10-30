@@ -1,5 +1,13 @@
 # V26C J20 — Il precedente di luglio della sonda di gradiente
 
+> Aggiornamento del 2026-10-19: sono stati rimossi l’archivio
+> `Trajectory Generator/runs/training/validation/` e i port storici
+> `v12r7zero`, `v12r8zero`, `v12r9zero`. I riferimenti a questi materiali
+> descrivono lo stato dell’epoca; alcuni vecchi percorsi erano già assenti.
+> Configurazioni e riepiloghi conservati, dipendenze ritirate e controlli
+> sono indicati nel [registro della rimozione](../cleanup/2026-10-19_training_validation_zero_removal/README.md).
+
+
 **Data**: 2026-08-27
 **Tipo**: indagine documentale di sola lettura, chiusa
 **Esecutore**: Opus 5, effort xhigh — braccio operativo. Codex architetto e gate owner.

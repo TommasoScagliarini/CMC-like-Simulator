@@ -1,0 +1,210 @@
+..F........F..........................FF..F..                            [100%]
+=================================== FAILURES ===================================
+_______________ test_canonical_g00_build_is_bound_to_signed_grid _______________
+
+    def test_canonical_g00_build_is_bound_to_signed_grid() -> None:
+>       profile = builder.build_candidate_profile(
+            candidate_id="G00_mesh_r20_n8_go0_ff0",
+            plateau_speed_mps=1.25,
+            **_canonical_sources(),
+        )
+
+validation/test_build_primary_grf_mesh_sole.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+validation/build_primary_grf_mesh_sole.py:1187: in build_candidate_profile
+    model_path, verified_model = _validate_frozen_source_request(
+validation/build_primary_grf_mesh_sole.py:936: in _validate_frozen_source_request
+    verified_hash = verify_file_identity(resolved, expected_sha256, label)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim')
+expected_sha256 = '33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1'
+label = 'model'
+
+    def verify_file_identity(path: Path, expected_sha256: str, label: str) -> str:
+        expected = str(expected_sha256).strip().lower()
+        if not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise SourceIdentityError(f"{label} expected SHA-256 is malformed")
+        if not path.is_file():
+>           raise SourceIdentityError(f"{label} not found: {path}")
+E           validation.build_primary_grf_mesh_sole.SourceIdentityError: model not found: /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+
+validation/build_primary_grf_mesh_sole.py:233: SourceIdentityError
+______ test_cli_rejects_alternate_frozen_sources_without_output[profile] _______
+
+tmp_path = PosixPath('/private/var/folders/29/08m5ch691ng86j7fr9v8z49c0000gn/T/pytest-of-tommy/pytest-0/test_cli_rejects_alternate_fro1')
+source_kind = 'profile'
+
+    @pytest.mark.parametrize("source_kind", ["mesh", "profile"])
+    def test_cli_rejects_alternate_frozen_sources_without_output(
+        tmp_path: Path,
+        source_kind: str,
+    ) -> None:
+        output = (
+            builder.REPO_ROOT
+            / builder.EXPERIMENTAL_OUTPUT_DIRECTORY
+            / f"alternate_{source_kind}_{tmp_path.name}"
+            / "candidate.json"
+        )
+        assert not output.exists()
+        args = _cli_args(output)
+        if source_kind == "mesh":
+            alternate = tmp_path / "alternate_foot.STL"
+            alternate.write_bytes(
+                (builder.REPO_ROOT / builder.DEFAULT_MESH_PATH).read_bytes()
+            )
+            assert _sha256(alternate) == builder.DEFAULT_MESH_SHA256
+            args.extend(
+                [
+                    "--mesh",
+                    str(alternate),
+                    "--mesh-sha256",
+                    builder.DEFAULT_MESH_SHA256,
+                ]
+            )
+        else:
+            alternate = tmp_path / "alternate_profile.json"
+            alternate.write_bytes(
+                (builder.REPO_ROOT / builder.DEFAULT_BASE_PROFILE_PATH).read_bytes()
+            )
+            assert _sha256(alternate) == builder.DEFAULT_BASE_PROFILE_SHA256
+            args.extend(
+                [
+                    "--base-profile",
+                    str(alternate),
+                    "--base-profile-sha256",
+                    builder.DEFAULT_BASE_PROFILE_SHA256,
+                ]
+            )
+    
+        with pytest.raises(builder.SourceIdentityError, match="path is not frozen"):
+>           builder.main(args)
+
+validation/test_build_primary_grf_mesh_sole.py:330: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+validation/build_primary_grf_mesh_sole.py:1395: in main
+    profile = build_candidate_profile(
+validation/build_primary_grf_mesh_sole.py:1187: in build_candidate_profile
+    model_path, verified_model = _validate_frozen_source_request(
+validation/build_primary_grf_mesh_sole.py:936: in _validate_frozen_source_request
+    verified_hash = verify_file_identity(resolved, expected_sha256, label)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim')
+expected_sha256 = '33e67d84bf11740eac509f620a143ad3c57d98c6f765d857e69c1892513de0c1'
+label = 'model'
+
+    def verify_file_identity(path: Path, expected_sha256: str, label: str) -> str:
+        expected = str(expected_sha256).strip().lower()
+        if not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise SourceIdentityError(f"{label} expected SHA-256 is malformed")
+        if not path.is_file():
+>           raise SourceIdentityError(f"{label} not found: {path}")
+E           validation.build_primary_grf_mesh_sole.SourceIdentityError: model not found: /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim
+
+validation/build_primary_grf_mesh_sole.py:233: SourceIdentityError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/29/08m5ch691ng86j7fr9v8z49c0000gn/T/pytest-of-tommy/pytest-0/test_cli_rejects_alternate_fro1')
+source_kind = 'profile'
+
+    @pytest.mark.parametrize("source_kind", ["mesh", "profile"])
+    def test_cli_rejects_alternate_frozen_sources_without_output(
+        tmp_path: Path,
+        source_kind: str,
+    ) -> None:
+        output = (
+            builder.REPO_ROOT
+            / builder.EXPERIMENTAL_OUTPUT_DIRECTORY
+            / f"alternate_{source_kind}_{tmp_path.name}"
+            / "candidate.json"
+        )
+        assert not output.exists()
+        args = _cli_args(output)
+        if source_kind == "mesh":
+            alternate = tmp_path / "alternate_foot.STL"
+            alternate.write_bytes(
+                (builder.REPO_ROOT / builder.DEFAULT_MESH_PATH).read_bytes()
+            )
+            assert _sha256(alternate) == builder.DEFAULT_MESH_SHA256
+            args.extend(
+                [
+                    "--mesh",
+                    str(alternate),
+                    "--mesh-sha256",
+                    builder.DEFAULT_MESH_SHA256,
+                ]
+            )
+        else:
+            alternate = tmp_path / "alternate_profile.json"
+            alternate.write_bytes(
+                (builder.REPO_ROOT / builder.DEFAULT_BASE_PROFILE_PATH).read_bytes()
+            )
+            assert _sha256(alternate) == builder.DEFAULT_BASE_PROFILE_SHA256
+            args.extend(
+                [
+                    "--base-profile",
+                    str(alternate),
+                    "--base-profile-sha256",
+                    builder.DEFAULT_BASE_PROFILE_SHA256,
+                ]
+            )
+    
+>       with pytest.raises(builder.SourceIdentityError, match="path is not frozen"):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'path is not frozen'
+E        Input: 'model not found: /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim'
+
+validation/test_build_primary_grf_mesh_sole.py:329: AssertionError
+_ TwoSensorMeshProfileV4Test.test_checked_profile_exactly_matches_deterministic_builder _
+
+self = <test_two_sensor_mesh_profile_v4.TwoSensorMeshProfileV4Test testMethod=test_checked_profile_exactly_matches_deterministic_builder>
+
+    def test_checked_profile_exactly_matches_deterministic_builder(self) -> None:
+>       self.assertEqual(self.checked.to_dict(), self.built.to_dict())
+E       AssertionError: {'ver[1796 chars]/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_5[1466 chars]5}}}} != {'ver[1796 chars]/AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff[1476 chars]5}}}}
+E       Diff is 6827 characters long. Set self.maxDiff to None to see it.
+
+validation/test_two_sensor_mesh_profile_v4.py:70: AssertionError
+_ TwoSensorMeshProfileV4Test.test_embedded_source_hashes_match_current_sources _
+
+self = <test_two_sensor_mesh_profile_v4.TwoSensorMeshProfileV4Test testMethod=test_embedded_source_hashes_match_current_sources>
+
+    def test_embedded_source_hashes_match_current_sources(self) -> None:
+        design = self.checked.metadata["v4_mesh_design"]
+        records = (
+            design["base_profile"],
+            design["setup"],
+            design["model"],
+            design["foot_mesh"],
+        )
+        for record in records:
+            path = resolve_repo_path(record["path"])
+            with self.subTest(path=path):
+>               self.assertEqual(_sha256(path), record["sha256"])
+E               AssertionError: 'bdd3efdf70c7cc2632cb8aa1ef6c8b6cc3966d29af194416caa91aca21a0aa5a' != '5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931'
+E               - bdd3efdf70c7cc2632cb8aa1ef6c8b6cc3966d29af194416caa91aca21a0aa5a
+E               + 5fa4748e537ae1a0fbda091a5ed2b5774ac445a4904b3ad0bb02f259bf0a4931
+
+validation/test_two_sensor_mesh_profile_v4.py:173: AssertionError
+_ TwoSensorMeshProfileV4Test.test_legacy_profile_config_and_fsm_are_bitwise_unchanged _
+
+self = <test_two_sensor_mesh_profile_v4.TwoSensorMeshProfileV4Test testMethod=test_legacy_profile_config_and_fsm_are_bitwise_unchanged>
+
+    def test_legacy_profile_config_and_fsm_are_bitwise_unchanged(self) -> None:
+        for path, expected in FROZEN_HASHES.items():
+            with self.subTest(path=path):
+>               self.assertEqual(_sha256(path), expected)
+E               AssertionError: 'ee249a958db6d8780a2f7b5b91cdf0f3fef275a5a693525e1e336eb9ccc425af' != '847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13'
+E               - ee249a958db6d8780a2f7b5b91cdf0f3fef275a5a693525e1e336eb9ccc425af
+E               + 847da69896fec1ae2a8da34b56369fdd7edf2b6b6bbdb1a463b30cd2d830ee13
+
+validation/test_two_sensor_mesh_profile_v4.py:152: AssertionError
+=========================== short test summary info ============================
+FAILED validation/test_build_primary_grf_mesh_sole.py::test_canonical_g00_build_is_bound_to_signed_grid
+FAILED validation/test_build_primary_grf_mesh_sole.py::test_cli_rejects_alternate_frozen_sources_without_output[profile]
+FAILED validation/test_two_sensor_mesh_profile_v4.py::TwoSensorMeshProfileV4Test::test_checked_profile_exactly_matches_deterministic_builder
+FAILED validation/test_two_sensor_mesh_profile_v4.py::TwoSensorMeshProfileV4Test::test_embedded_source_hashes_match_current_sources
+FAILED validation/test_two_sensor_mesh_profile_v4.py::TwoSensorMeshProfileV4Test::test_legacy_profile_config_and_fsm_are_bitwise_unchanged
+5 failed, 40 passed in 1.06s

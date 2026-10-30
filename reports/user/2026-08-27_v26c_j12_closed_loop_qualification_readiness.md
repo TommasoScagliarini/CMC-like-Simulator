@@ -1,5 +1,13 @@
 # V26C J12 — Qualifica closed-loop post-J11: readiness
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
 **Data**: 2026-08-27
 **Stadio proposto**: `V26C_J12_CLOSED_LOOP_QUALIFICATION`
 **Stato**: bundle **r2**, dopo la prima revisione architetturale. **Nessun rollout eseguito,

@@ -37,7 +37,12 @@ from typing import Any
 import gymnasium as gym
 import numpy as np
 
-from experimental_morphology_corridor import (
+import _bootstrap
+
+_bootstrap.ensure_sim_paths()
+
+from path_resolver import remap_morphology_profile_path  # noqa: E402
+from experimental_morphology_corridor import (  # noqa: E402
     CAUSAL_DELAYED_PHASE_MODE,
     EXPERIMENTAL_PHASE_MODE,
     V26_EVENT_CONTRACT_ID,
@@ -446,6 +451,9 @@ def _resolve_reward_asset_path(spec: str | os.PathLike[str]) -> Path:
     for candidate in candidates:
         if candidate.is_file():
             return candidate.resolve()
+    relocated = remap_morphology_profile_path(spec)
+    if relocated is not None and relocated.is_file():
+        return relocated.resolve()
     searched = ", ".join(str(candidate) for candidate in candidates)
     raise FileNotFoundError(f"reward asset not found: {text!r}; searched: {searched}")
 

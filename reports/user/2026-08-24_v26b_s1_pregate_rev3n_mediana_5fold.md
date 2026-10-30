@@ -1,5 +1,20 @@
 # V26B S1 — rev3n: pre-gate kNN5 a 5 fold bloccati simmetrici, mediana ≤ 0,15 — ESITO PASS
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 **Token:** `V26B-S1-REV3N-PREREG-MEDIAN` (NON `V26B-S1-FIT`) · **Data:** 2026-08-24 · **Ambito:** addendum + tooling/test + UNA esecuzione del pre-gate + report. Nessun fit, export o rollout. Nessuna modifica a env/reward/FSM/morphology/SEA/C++ né ad artefatti già congelati.
 
 ## 1. Esito

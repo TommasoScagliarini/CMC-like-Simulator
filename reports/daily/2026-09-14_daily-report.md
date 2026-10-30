@@ -1,5 +1,17 @@
 # Daily Report - 2026-09-14
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Instruction check token: `CMC_AGENT_OK_2026`
 
 Consolidamento della giornata e propagazione dei TODO tramite `create_report`.
@@ -199,7 +211,7 @@ falliva prima degli update per `psutil/sysctl`; il rilancio runtime è attivo.
 
 Coordinatore persistente avviato alle19:47 CEST, PID14612: attende50,
 valuta, prosegue fino a100, valuta e avvia la fattibilità39. Stato corrente:
-[STATUS.md](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_50_100_feasibility_2026-09-14/STATUS.md>).
+[STATUS.md — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-fcc395cfa8e7cd1d>).
 Il [protocollo](../plans/2026-09-14_protocollo_fattibilita_unificata39.md) fissa
 budget A/B/C e trasferimento, maschere, repliche condizionate e criteri.
 La variante runtime viene creata soltanto dopo la valutazione100; il bundle

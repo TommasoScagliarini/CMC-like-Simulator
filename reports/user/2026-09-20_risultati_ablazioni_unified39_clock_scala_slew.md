@@ -1,5 +1,10 @@
 # Risultati delle ablazioni Unified MLP 39D: clock, scala delle velocità e slew limiter
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 20 settembre 2026. Instruction check token: CMC_AGENT_OK_2026.
 
 ## 1. Esito e decisione
@@ -58,7 +63,7 @@ La B raggiunge il best alla 78 e nelle ultime 20 iterazioni peggiora rispetto al
 Un confronto particolarmente istruttivo: il return medio delle ultime 20 iterazioni di A è **257,09**, quasi uguale ai **257,43 del V26 storico**, ma la durata media è 430,46 step contro 493,60 e la qualità cinematica resta nettamente inferiore. Sono valori verificati nei rispettivi log; la loro somiglianza non dimostra parità degli obiettivi raggiunti.
 
 
-![Curve dei tre training, metriche grezze e media mobile di 10 iterazioni](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/training_curves.png>)
+[Immagine rimossa: Curve dei tre training, metriche grezze e media mobile di 10 iterazioni — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6fbd080b02898f9e>)
 
 
 ## 4. Risultati di tutti i rollout
@@ -84,9 +89,9 @@ La A completa **1/3** episodi, la B **2/3**, la C **0/3**. Sono conteggi descrit
 I grafici seguenti mostrano target, reference servita e angolo simulato. L'area grigia indica il tratto non osservato dopo la terminazione: nessuna curva viene estrapolata oltre lo stop.
 
 
-![Ginocchio: tutte le varianti e tutti gli start](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/knee_all_starts.png>)
+[Immagine rimossa: Ginocchio: tutte le varianti e tutti gli start — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5bcb538087b8f5c3>)
 
-![Caviglia: tutte le varianti e tutti gli start](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/ankle_all_starts.png>)
+[Immagine rimossa: Caviglia: tutte le varianti e tutti gli start — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-33841a104c548ce1>)
 
 
 ## 5. Confronto a parità di finestra temporale
@@ -132,7 +137,7 @@ Il ginocchio B raggiunge circa 28,92° contro 56,24° richiesti; nella porzione 
 Le differenze dei dati prescribed sono accettate e non vengono considerate un bug: ogni rete è confrontata con il proprio obiettivo. Il confronto storico resta però **descrittivo**: V26 ha target destro sfasato, start fisso a offset 1,0 s, batch 4.096 e 13 worker; le nuove reti hanno target sinistro, tre start, batch 4.608 e 12 worker. Il precedente 39D ha inoltre una storia di ripresa dal best diversa dai tre run nuovi. Non è possibile attribuire ogni differenza storica al solo clock.
 
 
-![Confronto dei tre rollout completi: V26, precedente 39D, nuova variante B](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/historical_comparison.png>)
+[Immagine rimossa: Confronto dei tre rollout completi: V26, precedente 39D, nuova variante B — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-31d34f15d3373398>)
 
 
 ## 8. Localizzazione del problema: policy/reference oppure SEA?
@@ -213,24 +218,24 @@ In questa fase di resoconto sono stati aggiunti soltanto `analyze_results.py`, `
 Verifiche svolte per il resoconto: audit delle 300 iterazioni e degli hash congelati; confronto delle tre configurazioni; controllo dei nove trace e dei sei ingressi; ricalcolo indipendente degli RMSE; identità dei target nei prefissi comuni; ricostruzione di 11 return; caricamento di cinque checkpoint e riproduzione delle azioni; verifica dei 21 PNG canonici. Le quattro nuove figure sono state ispezionate visivamente. I precedenti 55 test unitari e smoke di salvataggio/ripresa restano documentati nella ricevuta di preflight, senza sostituire queste verifiche sui run completi.
 
 
-- [Metriche complete e risultati degli audit](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/metrics.json>)
-- [Hash degli artefatti analizzati](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/input_hashes.json>)
-- [Script di analisi e figure](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/analyze_results.py>)
-- [Generatore del report](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/write_report.py>)
-- [Protocollo e configurazioni](<../../Trajectory Generator/unified_MLP_39/runs/plans/phase_clock_ablation_2026-09-18/README.md>)
-- [Ricevuta preflight](<../../Trajectory Generator/unified_MLP_39/runs/plans/phase_clock_ablation_2026-09-18/preflight.json>)
-- [Diagnosi precedente al ciclo di ablazioni](<../../Trajectory Generator/unified_MLP_39/validation/diagnosis_v26_2026-09-18/diagnosi.md>)
+- [Metriche complete e risultati degli audit — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-2bea099b073a735f>)
+- [Hash degli artefatti analizzati — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-edbdf1d57a690882>)
+- [Script di analisi e figure — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-939e75ce4ab7dd4d>)
+- [Generatore del report — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-710710d9e0d2cad8>)
+- [Protocollo e configurazioni — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8cb27a2c2ce1b492>)
+- [Ricevuta preflight — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4863a74d249c1d05>)
+- [Diagnosi precedente al ciclo di ablazioni — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-7f016a52c9a3685f>)
 - [Identificazione del riferimento V26 del 20 agosto](<2026-08-20_verdetto_fresh_run_june_equivalent_nativo_v26.md>)
 
 
 ### Sette grafici canonici per variante
 
 
-- A — Clock + scala 10 + slew: [cartella dei sette grafici](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_phase_baseline_phase_2026-09-18/center/plots/09_19_2026_1>); [grafico 7, policy e target sinistro](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_phase_baseline_phase_2026-09-18/center/plots/09_19_2026_1/07_mlp_policy_vs_sound_leg_error.png>).
+- A — Clock + scala 10 + slew: [cartella dei sette grafici — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5d14b065b9c6dfbf>); [grafico 7, policy e target sinistro — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-7c8d3fb9bc57d288>).
 
-- B — Clock + scala 1 + slew: [cartella dei sette grafici](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_phase_velocity_scale1_2026-09-18/center/plots/09_19_2026_1>); [grafico 7, policy e target sinistro](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_phase_velocity_scale1_2026-09-18/center/plots/09_19_2026_1/07_mlp_policy_vs_sound_leg_error.png>).
+- B — Clock + scala 1 + slew: [cartella dei sette grafici — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-86beb8a04da72d92>); [grafico 7, policy e target sinistro — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-08c07681e8de4c0e>).
 
-- C — Clock + scala 10, senza slew: [cartella dei sette grafici](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_phase_no_slew_2026-09-18/center/plots/09_20_2026_1>); [grafico 7, policy e target sinistro](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_phase_no_slew_2026-09-18/center/plots/09_20_2026_1/07_mlp_policy_vs_sound_leg_error.png>).
+- C — Clock + scala 10, senza slew: [cartella dei sette grafici — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-90fc39664d4edc6b>); [grafico 7, policy e target sinistro — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-7590f96fe0db0a50>).
 
 
 Il nome storico del file 07 contiene ancora `sound_leg`; il renderer di queste prove usa il target sinistro effettivamente registrato e lo etichetta come tale. I pannelli di ciclo eventualmente privi di un ciclo completo non costituiscono evidenza di assenza di errore.

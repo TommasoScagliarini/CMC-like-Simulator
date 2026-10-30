@@ -1,0 +1,50 @@
+# 2026-10-26 — Diagnosi del mancato arresto e della ripartenza best47
+
+**La causa osservabile del movimento è la policy, che continua a richiedere traiettorie oscillanti. Il training documentato non definisce un compito di arresto; la FSM actor impedirebbe comunque un appoggio fermo di tre secondi. Il protocollo precedente introduce inoltre condizioni che non permettono di attribuire il risultato alla sola rete.** Questi aspetti sono distinti e possono coesistere.
+
+L'indagine approfondisce il [primo test](2026-10-26_test_camminata_fermo_ripartenza_best47.md). Usa best47 e gli stessi dati AB06, ricalcola l'inferenza e il generatore dei riferimenti, confronta FSM reali su sequenze di contatto controllate e verifica training e protocollo. Non sono stati eseguiti nuovi rollout dinamici, training o modifiche operative.
+
+| Ipotesi | Evidenza ottenuta | Conclusione |
+|---|---|---|
+| Il detector/FSM inventa passi o impedisce il fermo | Contatti costanti: binary V26 conserva l'appoggio e non genera eventi; actor v3 entra in timeout | La FSM binaria mantiene l'appoggio; manca un contratto di pausa nella FSM actor. La sonda non esercita il detector geometrico |
+| La rete non è stata preparata per il compito | Training best47 su camminata, reward di avanzamento del passo, nessun ingresso esplicito stop/velocità desiderata | Il percorso documentato non allena arresto e ripartenza |
+| Il test è impostato male | Il doppio appoggio sorgente coincide con swing della protesi reale; forze destre congelate senza verifica di equilibrio | Valido come perturbazione sintetica, insufficiente come prova di arresto comandato |
+| Le oscillazioni sono soltanto un effetto del filtro | Target della rete oscillanti; stesso governor con target costante si assesta | Esclusa questa spiegazione del movimento persistente |
+
+Il replay attraversa il checkpoint reale, la trasformazione azione→segmento e il governor operativo. Riproduce **831 azioni e segmenti esattamente**, con errore massimo dei riferimenti pari a **1,39×10⁻¹⁴ rad**. Dopo aver escluso i primi 0,5 s della pausa, le escursioni dei target grezzi sono **0,8072 rad al ginocchio e 0,5462 rad alla caviglia**; dopo il governor restano **0,7597 e 0,5122 rad**. Il filtro riceve quindi richieste di movimento. Sostituendo soltanto il target con uno costante, dalla stessa condizione del filtro, le escursioni residue scendono a **5,51×10⁻⁵ e 7,52×10⁻⁵ rad**, con velocità RMS inferiori a 0,0002 rad/s. Questa sonda verifica il generatore dei riferimenti, non l'equilibrio fisico della protesi.
+
+Il checkpoint ha 35 ingressi actor: stato protesico/motore, carico e fase protesica, stato FSM e memoria del controllore. Non riceve un comando di arresto, la velocità desiderata del cammino, la velocità del nastro o la cinematica biologica che abbiamo congelato. Le variazioni meccaniche possono raggiungerlo indirettamente: l'assenza di un comando esplicito, da sola, non prova un'impossibilità matematica di fermarsi. Tuttavia il test non impartisce alla rete un'intenzione distinta da una perturbazione del cammino.
+
+Il riepilogo del run best47 conserva 50 update, con episodi medi di 500 step/5 s e tre offset iniziali dello stesso cammino AB06. I parametri numerici della reward salvata coincidono con il preset corrente; cambia soltanto il percorso del profilo morphology dopo la riorganizzazione. La lineage documentata parte da imitazione della camminata, adattamento/recupero e successivo PPO. Non risulta un programma di pause, standing e ripartenze nella preparazione documentata di questa policy; non è stato ricostruito ogni dataset storico rimosso.
+
+L'obiettivo effettivo è `ex_novo`: premia gli eventi del passo, mantiene un periodo nominale di 1,58 s e penalizza una stance oltre 1,45 s. I campi imitativi presenti nel YAML non sono il ramo attivo della reward. Applicando il calcolo operativo della penalità a un appoggio costante, il solo termine sottratto dopo il clipping vale **1,125 a 2 s** e **3,625 a 3 s** di stance. Per osservare il secondo valore si è esteso il timeout soltanto nella sonda: nell'episodio reale scatterebbe prima la terminazione. La reward influenza ciò che si apprende; non aggiorna i pesi durante il rollout deterministico.
+
+La distinzione fra le due FSM è essenziale. La **binary V26** interpreta heel/toe e può mantenere `BOTH` indefinitamente senza inventare HS/TO. La **FSM actor v3** dispone di attesa HS, stance, swing e timeout, ma non di uno stato standing. Dopo 2,2 s in stance entra in `TIMEOUT`; il wrapper termina l'episodio e il resync non recupera quel terminale. Nella sonda camminata→appoggio→camminata il timeout arriva a 5,57 s, cioè 2,209 s dopo l'ultimo HS, per la consegna a intervalli di 10 ms.
+
+Confrontando la stessa sequenza e cambiando esclusivamente `stance_hard_timeout_s` da 2,2 a 10 s, la sonda riesce a riprendere gli eventi. Non è però una soluzione: la pausa viene inclusa in una stance di **4,074 s** e in un ciclo di **4,579 s**, anziché riconosciuta come fermo. Cambia inoltre la normalizzazione del tempo osservato dall'actor. Nel rollout originale non scatta alcun timeout: la protesi si muove realmente e rinnova gli eventi. Il timeout è quindi una barriera al fermo corretto, **non la causa di una terminazione nella prova originale**, che completa il tempo previsto.
+
+È escluso anche un clock prescritto lasciato acceso: `gait_clock_enable=False` e le feature `gait_phase_sin/cos` restano 0/1. La fase online della protesi, invece, continua ad avanzare. Congelare separatamente solo questa fase oppure solo timer e credito FSM cambia le azioni ma lascia oscillazioni nel replay. Le osservazioni meccaniche rimangono quelle registrate: queste sonde non dimostrano cosa accadrebbe modificando la FSM in anello chiuso.
+
+Il protocollo applica correttamente la mappa temporale: le velocità e accelerazioni biologiche di riferimento sono nulle durante la pausa, e non è emerso un parametro della superficie ignorato. Il suo limite è la definizione biomeccanica del fermo. Il doppio appoggio è selezionato sulle GRF sorgenti; all'inizio effettivo della pausa, **2,81 s**, la protesi è in `SWING_AFTER_TO`, con heel e toe senza contatto e ginocchio a circa **−53,7°**. Congelare la sorgente non porta automaticamente la gamba simulata in appoggio.
+
+La forza destra resta costante a **(−7,238; 301,663; 22,297) N**, con COP e momento congelati. È un carico tratto dalla camminata; non è stato risolto un equilibrio statico compatibile. Le componenti tangenziali non dimostrano da sole che stare fermi sia impossibile. Durante la pausa stabilizzata, però, la forza verticale fisica complessiva varia fra **0,394 e 1,992 volte il peso corporeo** e la reserve verticale del bacino ha RMS **411,8 N**. La posa reale del corpo non è perfettamente ferma. La rampa di 0,5 s è inoltre severa per il vettore di superficie calibrato. Non è stata svolta un'ablazione dinamica che dimostri che correggere soltanto questi aspetti fermerebbe best47.
+
+La conclusione precedente va dunque circoscritta a: **best47 non si arresta quando vengono fermati sinteticamente nastro e riferimenti biologici con questo protocollo**. Il test non dimostra l'incapacità della rete di eseguire qualsiasi arresto fisicamente coerente; mostra che l'attuale catena non dispone di un comportamento di arresto definito e verificato.
+
+La strategia successiva proposta, non implementata, è definire come arriva l'intento di fermarsi, predisporre una condizione di appoggio ed equilibrio verificata e distinguere camminata/standing/ripartenza nel contratto FSM e nella reward. Solo dopo ha senso introdurre episodi di transizione nel training. Aumentare da solo il timeout o congelare la fase non risolve questi requisiti. **TODO aperto:** resta quello del primo report, ora precisato in intento, protocollo fisico, FSM e obiettivo di apprendimento.
+
+Gli strumenti aggiunti sono contenuti in [diagnosis/](<../../Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/>): `replay_stop_policy.py`, `policy_replay_probes.py`, `fsm_diagnosis.py`, `protocol_audit.py`, `training_audit.py`, con JSON/CSV delle evidenze. Aggiornato il primo report con il rinvio alla diagnosi e la precisazione sulle unità delle reserve. Codice operativo, pesi, preset e plugin non modificati. Le sonde sono state eseguite su macOS arm64; non è stata eseguita una prova nativa Windows.
+
+Comandi riproducibili dalla radice, con `envCMC-rllib` attivo:
+
+```sh
+python "Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/replay_stop_policy.py" --assert-still
+python "Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/policy_replay_probes.py"
+python "Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/fsm_diagnosis.py"
+python "Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/protocol_audit.py"
+python "Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/training_audit.py"
+```
+
+Il primo comando termina intenzionalmente con `AssertionError: STOP FAILED`; è il riproduttore del sintomo, non una regressione introdotta. Gli altri controlli diagnostici passano. Verificate la compilazione dei cinque script, l'invarianza SHA-256 dei 41 input protetti del rollout e l'esistenza dei collegamenti nei report; dettagli in [verification.json](<../../Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/verification.json>). Nessuna correzione funzionale viene dichiarata: l'incarico è diagnosticare il fallimento.
+
+Riferimenti operativi: [osservazioni actor](<../../Trajectory Generator/osim_trj_cmc_like.py>), [FSM actor e timeout](<../../Trajectory Generator/phase_tracking/prosthetic_phase_fsm.py>), [FSM binaria e adapter](<../../Trajectory Generator/phase_tracking/binary_phase.py>), [reward e terminazione](<../../Trajectory Generator/baseline_MLP/reward_function.py>), [configurazione corrente](<../../Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml>), [riepilogo del training effettivo](<../../Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/summary.json>).

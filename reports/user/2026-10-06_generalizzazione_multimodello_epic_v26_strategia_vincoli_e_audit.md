@@ -1,5 +1,18 @@
 # Generalizzazione multi-modello EPIC della catena V26: decisioni, audit e protocollo da concretizzare
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Data di completamento:** 6 ottobre 2026, Europe/Rome.  
 **Discussione e primo audit:** 5 ottobre 2026; stesura ripresa dopo interruzione.  
 **Tipo:** report utente richiesto con `create_report`; documento di contesto e handover.  
@@ -51,7 +64,7 @@ Nel confronto specifico CP90, su finestra comune 13,19–17,94 s:
 
 Entrambi i rami oscurati falliscono il gate di escursione e cicli. La diagnosi localizza il limite soprattutto nella traiettoria generata, con critic e attribuzione morphology ancora da approfondire. Questi numeri sono risultati storici di una ricetta, un seed e uno start: non sono stati rieseguiti per questo report e non costituiscono risultati della generalizzazione V26.
 
-Fonti: [analisi del confronto](<../../Trajectory Generator/unified_MLP_39/validation/reward_curriculum_2026_10_01/README.md>) e [ricevuta finale](<../../Trajectory Generator/unified_MLP_39/validation/reward_curriculum_2026_10_01/verification.json>).
+Fonti: [analisi del confronto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e7f022fd4a935ff5>) e [ricevuta finale — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-2ede5a0f72d744f1>).
 
 Best90 fresh resta la baseline storica scelta per quel ramo. La riapertura del workstream V26 non seleziona automaticamente un nuovo checkpoint V26 corrente, né promuove J19A/J20 o il pilot ex-novo come baseline definitiva del nuovo esperimento.
 

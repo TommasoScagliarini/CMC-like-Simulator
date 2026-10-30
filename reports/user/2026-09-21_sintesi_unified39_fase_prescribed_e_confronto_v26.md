@@ -1,5 +1,10 @@
 # Unified 39D: fase prescribed, correzioni software e confronto imitativo con V26
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data del report: 21 settembre 2026. Attività riepilogate: 17–20 settembre 2026.
 
 Instruction check token: CMC_AGENT_OK_2026.
@@ -82,7 +87,7 @@ Il confronto storico seguente usa solo rollout completi di 5 s, ciascuno rispett
 | 39D precedente senza clock, best54 | 14,21° | 8,49° | 25,67° / 56,24° |
 | 39D B, best78, start centrale | 12,39° | 7,46° | 28,92° / 56,24° |
 
-![Confronto dei rollout completi](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/historical_comparison.png>)
+[Immagine rimossa: Confronto dei rollout completi — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-31d34f15d3373398>)
 
 Il confronto con V26 è descrittivo: oltre ai target diversi, lo storico aveva un solo start a offset 1,0 s, 13 worker e batch 4.096. Le differenze non consentono di attribuire il divario a una singola causa. Un solo seed e tre reset non costituiscono una verifica statistica di equivalenza.
 
@@ -118,7 +123,7 @@ Tutti i percorsi della tabella sono relativi a `Trajectory Generator/unified_MLP
 | `runs/plans/phase_clock_ablation_2026-09-18/` | Configurazioni dei tre esperimenti, log, ricevute e snapshot |
 | `Trajectory Generator/unified_MLP/validation/feasibility39_bundle/target_availability.py` | Medesima correzione worker nel payload storico |
 
-Sono stati preservati plugin C++, semantica del comando SEA e checkpoint storici. Per il dettaglio della prima implementazione vedere la [ricevuta del 17 settembre](<../../Trajectory Generator/unified_MLP_39/validation/2026-09-17_left_phase_implementation.md>): descrive lo stato v2 di allora, superato dal clock actor e dalla maschera a sei canali del v3.
+Sono stati preservati plugin C++, semantica del comando SEA e checkpoint storici. Per il dettaglio della prima implementazione vedere la [ricevuta del 17 settembre — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-fad6b014887afaa8>): descrive lo stato v2 di allora, superato dal clock actor e dalla maschera a sei canali del v3.
 
 ## Test e verifiche eseguite
 
@@ -144,9 +149,9 @@ L'oscuramento progressivo è predisposto nel software ma **non è stato sperimen
 ## Artefatti di riferimento
 
 - [Analisi completa del 20 settembre](2026-09-20_risultati_ablazioni_unified39_clock_scala_slew.md).
-- [Protocollo dei tre esperimenti](<../../Trajectory Generator/unified_MLP_39/runs/plans/phase_clock_ablation_2026-09-18/README.md>).
-- [Ricevuta preflight v3](<../../Trajectory Generator/unified_MLP_39/runs/plans/phase_clock_ablation_2026-09-18/preflight.json>).
-- [Risultati originali dei tre run](<../../Trajectory Generator/unified_MLP_39/runs/plans/phase_clock_ablation_2026-09-18/results.json>).
-- [Metriche e diagnosi ricalcolate](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/metrics.json>).
-- [Ricevuta delle verifiche del resoconto](<../../Trajectory Generator/unified_MLP_39/validation/ablation_report_2026-09-20/report_verification.json>).
+- [Protocollo dei tre esperimenti — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8cb27a2c2ce1b492>).
+- [Ricevuta preflight v3 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4863a74d249c1d05>).
+- [Risultati originali dei tre run — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-573af4f46b0f221c>).
+- [Metriche e diagnosi ricalcolate — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-2bea099b073a735f>).
+- [Ricevuta delle verifiche del resoconto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-909354628e183518>).
 - [Riferimento imitativo V26 del 20 agosto](2026-08-20_verdetto_fresh_run_june_equivalent_nativo_v26.md).

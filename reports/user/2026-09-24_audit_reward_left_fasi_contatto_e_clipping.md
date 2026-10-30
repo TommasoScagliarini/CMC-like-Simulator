@@ -1,5 +1,10 @@
 # Audit della reward LEFT: fasi, contatto e clipping
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 24 settembre 2026. Analisi richiesta dopo il confronto RIGHT39/V26, per
 verificare se la reward storica produca incentivi adeguati al riferimento
 sinistro. Tutte le prove di questo audit usano dati già registrati: **nessun
@@ -233,7 +238,7 @@ ritorno nominale LEFT72 di 0,139 punti e quello del comando diretto LEFT
 di 3,344; anche quest'ultimo ha penetrazione e viene correttamente penalizzato.
 
 L'override isolato è conservato in
-[candidate_penetration_weight_2.json](../../Trajectory%20Generator/unified_MLP_39/validation/left_reward_audit_2026-09-24/candidate_penetration_weight_2.json).
+[candidate_penetration_weight_2.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-3b5e3afe30d1a721>).
 È un frammento da fondere con la configurazione LEFT, non una configurazione
 completa e non è stato attivato.
 
@@ -280,7 +285,7 @@ Non è stata dimostrata una causa unica né equivalenza statistica a V26.
 ## File prodotti e verifiche
 
 Tutto il codice nuovo è in
-[left_reward_audit_2026-09-24](../../Trajectory%20Generator/unified_MLP_39/validation/left_reward_audit_2026-09-24/):
+[left_reward_audit_2026-09-24 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-3fb9b5d3ac66bb4f>):
 
 - `analyze.py`, `metrics.json`, `summary.csv`, `phase_summary.csv`, dieci
   `steps_*.csv`, `sources.json`, `input_hashes.json`, `verification.json`;

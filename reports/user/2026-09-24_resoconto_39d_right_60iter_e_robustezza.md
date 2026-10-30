@@ -1,5 +1,10 @@
 # Resoconto RIGHT39 alla 60: imitazione, coppie e robustezza
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Report del 24 settembre 2026, redatto su richiesta `create_report`.
 Il training è terminato il 23 settembre alle 22:26 CEST; i due rollout
 deterministici e i cinque rollout con rumore sono conclusi. Questo documento
@@ -195,14 +200,14 @@ I dati localizzano una fragilità del transitorio di contatto e della storia
 dei comandi, senza isolare una singola causa meccanica.
 
 - [Confronto delle penetrazioni sui cinque seed](../../plot/09_23_2026_right60_comparison/noise_paired_penetration.png)
-- [Metriche complete dello screening](../../Trajectory%20Generator/unified_MLP_39/validation/right_reference_results60_2026-09-23/noise_screening/metrics.json)
-- [Diagnosi temporale del seed125](../../Trajectory%20Generator/unified_MLP_39/validation/right_reference_results60_2026-09-23/failure_seed125/findings.md)
+- [Metriche complete dello screening — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e62fc8b7eac3ccdc>)
+- [Diagnosi temporale del seed125 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6ddffe966fc83eb5>)
 
 ## Verifiche, file e limiti
 
 Nessuna modifica a produzione, plugin SEA, FSM o configurazione di training.
 Script, metriche, log, ricevute e hash sono nella nuova cartella
-[right_reference_results60_2026-09-23](../../Trajectory%20Generator/unified_MLP_39/validation/right_reference_results60_2026-09-23/README.md).
+[right_reference_results60_2026-09-23 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e4e190e82b08736b>).
 
 Audit del training superati: prefisso 1–40 immutato, 145 input congelati
 verificati, checkpoint 40/60 e archivio preservati, actor/critic/optimizer/PPO

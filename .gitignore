@@ -4,10 +4,15 @@ models/**/data/**
 !models/**/data/**/
 !models/**/data/.gitkeep
 !models/**/data/**/.gitkeep
-models/*-raw/
+models/**/*-raw/
 
 # Ignore plugin and result contents, but keep the folders tracked
-plugins/*
+plugins/**
+!plugins/SEA/
+!plugins/SEA/.gitkeep
+!plugins/online_grf_contact/
+!plugins/online_grf_contact/.gitkeep
+!plugins/README.md
 results/*
 
 # RL training/rollout outputs (checkpoints, summaries) are reproducible
@@ -24,7 +29,10 @@ plot/**
 !plot/plotter.py
 
 # Local CMake/build products for experimental plugins and tools.
+/build/
+/build_online_grf/
 tools/**/build/
+/online_GRF/build/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
@@ -64,3 +72,10 @@ validation/binary_phase_detector_v21_runs/2026-08-04_run01/fine_results.jsonl
 Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/repository_snapshot/
 !Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/objects/
 !Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/objects/**
+
+# Generated intermediates for the active LaTeX manuscript.
+/paper/main.aux
+/paper/main.fdb_latexmk
+/paper/main.fls
+/paper/main.log
+/paper/main.synctex.gz

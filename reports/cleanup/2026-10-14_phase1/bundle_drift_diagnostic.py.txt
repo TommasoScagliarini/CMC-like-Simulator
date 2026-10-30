@@ -1,0 +1,31 @@
+from pathlib import Path
+import hashlib,json,subprocess,sys,time,importlib.util
+root=Path.cwd();out=Path('/tmp/cmc_cleanup_phase1_2026_10_14');start=time.time()
+before=json.loads((out/'whole_worktree_before.json').read_text())
+bundle=root/'Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28'
+manifest=json.loads((bundle/'in_place_manifest.json').read_text())
+def digest(p):
+ h=hashlib.sha256()
+ with p.open('rb') as f:
+  for part in iter(lambda:f.read(1024*1024),b''):h.update(part)
+ return h.hexdigest()
+rows=[];drifts=[]
+for e in manifest['entries']:
+ name=e['repo_relpath'];p=root/name;exists=p.is_file();sha=digest(p) if exists else None;size=p.stat().st_size if exists else None
+ old=before['files'].get(name)
+ row={'path':name,'expected_bytes':e['size_bytes'],'expected_sha256':e['sha256'],'current_bytes':size,'current_sha256':sha,'exists':exists,'size_matches_manifest':size==e['size_bytes'],'sha256_matches_manifest':sha==e['sha256'],'before':old,'same_bytes_as_pre_cleanup':old is not None and old.get('bytes')==size and old.get('sha256')==sha}
+ if not row['sha256_matches_manifest'] or not row['size_matches_manifest']:
+  r=subprocess.run(['git','show',f"{before['head']}:{name}"],capture_output=True)
+  row['head_blob_exists']=r.returncode==0
+  if r.returncode==0:row['head_blob_bytes']=len(r.stdout);row['head_blob_sha256']=hashlib.sha256(r.stdout).hexdigest();row['current_matches_head_blob']=sha==row['head_blob_sha256'];row['head_blob_matches_manifest']=row['head_blob_sha256']==e['sha256']
+  else:row['head_blob_error']=r.stderr.decode(errors='replace').strip()
+  drifts.append(row)
+ rows.append(row)
+sys.dont_write_bytecode=True
+spec=importlib.util.spec_from_file_location('cmc_bundle_drift_module',bundle/'materialize_pipeline_bundle.py');mod=importlib.util.module_from_spec(spec);sys.modules[spec.name]=mod;spec.loader.exec_module(mod)
+try:archive={'passed':True,'counts':mod.verify(root,full=False,check_live_sources=False)}
+except Exception as exc:archive={'passed':False,'error':type(exc).__name__+': '+str(exc)}
+result={'root':str(root),'snapshot_head':before['head'],'scope':'Readonly diagnostics after phase1; compared independently with full before-manifest','in_place_manifest_path':str(bundle/'in_place_manifest.json'),'in_place_manifest_sha256':digest(bundle/'in_place_manifest.json'),'count':len(rows),'matching_manifest':sum(r['sha256_matches_manifest'] and r['size_matches_manifest'] for r in rows),'drift_count':len(drifts),'all_files_unchanged_since_pre_cleanup':all(r['same_bytes_as_pre_cleanup'] for r in rows),'all_drifts_unchanged_since_pre_cleanup':all(r['same_bytes_as_pre_cleanup'] for r in drifts),'all_drifts_match_snapshot_head':all(r.get('current_matches_head_blob',False) for r in drifts),'archive_object_control_verification':archive,'drifts':drifts,'entries':rows,'elapsed_seconds':time.time()-start}
+(out/'bundle_drift_diagnostic.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({k:v for k,v in result.items() if k not in ['entries','drifts']},indent=2))
+print(json.dumps({'drift_paths':[r['path'] for r in drifts]},indent=2))

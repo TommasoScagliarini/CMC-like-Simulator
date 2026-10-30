@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "processes": [
+    {
+      "label": "installed",
+      "command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "-B",
+        "/tmp/cmc_sea_source_migration_2026_10_15/probe_plugin.py",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+        "/tmp/cmc_sea_source_migration_2026_10_15/installed_probe.json"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "rebuilt",
+      "command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "-B",
+        "/tmp/cmc_sea_source_migration_2026_10_15/probe_plugin.py",
+        "/tmp/cmc_sea_source_migration_2026_10_15/build_mac_arm64/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib",
+        "/tmp/cmc_sea_source_migration_2026_10_15/rebuilt_probe.json"
+      ],
+      "returncode": 0
+    }
+  ],
+  "rows_compared": 36,
+  "numeric_values_compared": 180,
+  "max_absolute_difference": 0.0,
+  "relative_tolerance": 1e-12,
+  "absolute_tolerance": 1e-09,
+  "coverage": [
+    "both actuators",
+    "non-impedance PI",
+    "impedance",
+    "integral clamp",
+    "integral unwind",
+    "motor saturation",
+    "Ki=0"
+  ],
+  "runtime_plugins_replaced": false
+}

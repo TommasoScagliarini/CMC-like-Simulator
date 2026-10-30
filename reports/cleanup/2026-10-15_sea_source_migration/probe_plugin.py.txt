@@ -1,0 +1,82 @@
+"""Differential probe of the installed and freshly built SEA, one per process."""
+from pathlib import Path
+import json
+import math
+import sys
+
+import opensim as osim
+
+lib=Path(sys.argv[1]).resolve()
+result_path=Path(sys.argv[2]).resolve()
+root=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+assert osim.LoadOpenSimLibraryExact(str(lib)), lib
+osim.ModelVisualizer.addDirToGeometrySearchPaths(str(root/'Geometry'))
+model=osim.Model(str(root/'models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim'))
+model.setUseVisualizer(False)
+model.setAllControllersEnabled(False)
+
+cases=[
+    {'name':'rest','u':0.0,'deflection':0.0,'speed':0.0,'joint_speed':0.0,'xi':0.0},
+    {'name':'positive_torque','u':0.15,'deflection':0.02,'speed':0.2,'joint_speed':-0.1,'xi':0.01},
+    {'name':'negative_torque','u':-0.15,'deflection':-0.02,'speed':-0.2,'joint_speed':0.1,'xi':-0.01},
+    {'name':'integral_limit_positive','u':0.2,'deflection':0.03,'speed':0.2,'joint_speed':-0.1,'xi':2.0},
+    {'name':'integral_limit_negative','u':-0.2,'deflection':-0.03,'speed':-0.2,'joint_speed':0.1,'xi':-2.0},
+    {'name':'integral_unwind','u':-0.05,'deflection':0.01,'speed':0.2,'joint_speed':0.1,'xi':2.0},
+    {'name':'motor_limit_positive','u':1.0,'deflection':0.0,'speed':0.0,'joint_speed':0.1,'xi':0.0},
+    {'name':'motor_limit_negative','u':-1.0,'deflection':0.0,'speed':0.0,'joint_speed':-0.1,'xi':0.0},
+    {'name':'disabled_integral','u':0.1,'deflection':0.01,'speed':0.2,'joint_speed':-0.1,'xi':2.0,'ki_zero':True},
+]
+rows=[]
+for impedance in [False,True]:
+    for case in cases:
+        for name in ['SEA_Knee','SEA_Ankle']:
+            sea=model.updForceSet().get(name)
+            osim.PropertyHelper.setValueBool(impedance,sea.updPropertyByName('Impedence'))
+            default_ki=190.0 if name=='SEA_Knee' else 123.0
+            osim.PropertyHelper.setValueDouble(0.0 if case.get('ki_zero') else default_ki,sea.updPropertyByName('Ki'))
+        state=model.initSystem()
+        controls=osim.Vector(model.getNumControls(),0.0)
+        for name in ['SEA_Knee','SEA_Ankle']:
+            sea=model.updForceSet().get(name)
+            act=osim.CoordinateActuator.safeDownCast(sea)
+            coord=act.getCoordinate()
+            q=-0.3 if name=='SEA_Knee' else 0.05
+            coord.setValue(state,q,False)
+            coord.setSpeedValue(state,case['joint_speed'])
+            sea.setStateVariableValue(state,'motor_angle',q+case['deflection'])
+            sea.setStateVariableValue(state,'motor_speed',case['speed'])
+            sea.setStateVariableValue(state,'torque_error_integral',case['xi'])
+            act.setControls(osim.Vector(1,case['u']),controls)
+        model.realizeVelocity(state)
+        model.setControls(state,controls)
+        model.realizeDynamics(state)
+        for name in ['SEA_Knee','SEA_Ankle']:
+            sea=model.getForceSet().get(name)
+            act=osim.CoordinateActuator.safeDownCast(sea)
+            assert sea.getConcreteClassName()=='SeriesElasticActuator'
+            names=sea.getStateVariableNames()
+            state_names=[names.get(i) for i in range(names.getSize())]
+            assert len(state_names)==3 and any(n.endswith('torque_error_integral') for n in state_names)
+            properties={key:osim.PropertyHelper.getValueDouble(sea.getPropertyByName(key))
+                        for key in ['Ki','integral_torque_limit','Kd_Imp','Kp','Kd','stiffness','motor_inertia','motor_damping']}
+            outputs={key:float(osim.OutputDouble.safeDownCast(sea.getOutput(key)).getValue(state))
+                     for key in ['tau_input','motor_angle_dot','motor_speed_dot','torque_error_integral_dot']}
+            outputs['actuation']=act.getActuation(state)
+            assert all(math.isfinite(v) for v in outputs.values()), outputs
+            assert abs(outputs['tau_input'])<=500.0+1e-9
+            if impedance or case.get('ki_zero'):
+                assert outputs['torque_error_integral_dot']==0.0
+            if not impedance and case['name'].startswith('motor_limit_'):
+                assert abs(outputs['tau_input'])==500.0
+                assert outputs['torque_error_integral_dot']==0.0
+            if not impedance and case['name'].startswith('integral_limit_'):
+                assert outputs['torque_error_integral_dot']==0.0
+            if not impedance and case['name']=='integral_unwind':
+                assert outputs['torque_error_integral_dot']<0.0
+            rows.append({'case':case['name'],'impedance':impedance,'actuator':name,
+                         'state_names':state_names,'properties':properties,'outputs':outputs})
+result={'passed':True,'scope':'model initialization, PI schema, finite outputs and differential cases in both SEA modes',
+        'plugin_loaded_exact_path':str(lib),'cases_per_actuator_and_mode':len(cases),
+        'actuators':2,'modes':2,'rows':rows}
+result_path.write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({k:v for k,v in result.items() if k!='rows'}),flush=True)

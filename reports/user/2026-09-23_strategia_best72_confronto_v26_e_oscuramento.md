@@ -1,5 +1,10 @@
 # Strategia dalla best72: confronto con V26 e oscuramento dei prescribed
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 23 settembre 2026. Questo report registra la discussione e le verifiche documentali; non autorizza né avvia i nuovi esperimenti proposti.
 
 ## Stato del progetto e scelta dell’utente
@@ -108,9 +113,9 @@ La sequenza futura non è ancora stata scelta o avviata. Nessuna nuova modifica 
 
 - [Risultati finali a 100 e diagnosi](2026-09-22_risultati_finali_unified39_100iter.md).
 - [Audit delle differenze rispetto a V26](2026-09-21_cause_differenze_unified39_v26.md).
-- [Valutazione fisica del best72](../../Trajectory%20Generator/unified_MLP_39/runs/plans/evaluation_best72_2026-09-22/comparison.md).
+- [Valutazione fisica del best72 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8ec4e895ce608a8c>).
 - [Set canonico best72](../../plot/09_22_2026_4/); [set iterazione 60](../../plot/09_22_2026_1/).
-- [Disponibilità e curriculum](../../Trajectory%20Generator/unified_MLP_39/target_availability.py), [maschera nel modulo](../../Trajectory%20Generator/unified_MLP_39/asymmetric_rl_module.py) e [preset ex novo](../../Trajectory%20Generator/unified_MLP_39/configs/ex_novo.yaml).
+- [Disponibilità e curriculum — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-ba00f840c70b0711>), [maschera nel modulo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f221263086aea844>) e [preset ex novo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a71f16657df74cfd>).
 
 Per questa discussione sono stati riletti report, risultati dei rollout e codice della transizione. Per il report sono stati verificati nuovamente i risultati del best72, il vincolo di oscuramento in ex novo, i parametri del preset e i contatori V26 alle iterazioni 20/25/33. Nessun nuovo test fisico o training è stato eseguito; le prove citate sono quelle archiviate. È stato aggiunto soltanto questo file Markdown, con controllo dei collegamenti locali.
 

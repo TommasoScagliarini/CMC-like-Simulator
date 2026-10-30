@@ -1,5 +1,10 @@
 # Riuso della policy V26 nella unified39 con riferimento destro storico
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 23 settembre 2026. Esperimento diagnostico autorizzato dall'utente, senza
 training. Checkpoint sorgente: best87 del training imitativo del 20 agosto.
 FSM mantenuta alla versione v3. Baseline operativa dell'utente: unified39 best72.
@@ -10,7 +15,7 @@ le 500 azioni storiche e i file di cinematica, coppie SEA e GRF. Le differenze
 residue descritte in questo report riguardano il primo percorso con colonne
 dei pesi permutate: sono state ricondotte all'amplificazione delle differenze
 floating point, mantenendo la stessa FSM v3. Vedi la
-[verifica del controllo](<../../Trajectory Generator/unified_MLP_39/validation/v26_robustness_2026-09-23/deterministic_sto_equality.json>)
+[verifica del controllo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-1c907e94ec1cde22>)
 e i [nuovi grafici canonici](../../plot/09_23_2026_2/).
 
 ## Risultato e significato
@@ -173,10 +178,10 @@ TODO ancora aperti, nessuno avviato da questo test:
 
 Sorgenti nuovi, tutti nel perimetro della rete:
 
-- [probe.py](<../../Trajectory Generator/unified_MLP_39/validation/v26_weight_transfer_2026-09-23/probe.py>): conversione, ambiente diagnostico, rollout e watchdog.
-- [verify_artifacts.py](<../../Trajectory Generator/unified_MLP_39/validation/v26_weight_transfer_2026-09-23/verify_artifacts.py>): ingressi, normalizzazioni, reset e provenienza.
-- [analyze.py](<../../Trajectory Generator/unified_MLP_39/validation/v26_weight_transfer_2026-09-23/analyze.py>): metriche confrontabili e grafici.
-- [README e protocollo](<../../Trajectory Generator/unified_MLP_39/validation/v26_weight_transfer_2026-09-23/README.md>).
+- [probe.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-560d4a9edc315066>): conversione, ambiente diagnostico, rollout e watchdog.
+- [verify_artifacts.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-aa85364c2ac49f66>): ingressi, normalizzazioni, reset e provenienza.
+- [analyze.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-07d03d07c3dda63f>): metriche confrontabili e grafici.
+- [README e protocollo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8394c096ec7dd6b7>).
 
 Nessuna modifica ai sorgenti di produzione, FSM o plugin SEA; checkpoint
 storici e best72 preservati. Il file YAML nel rollout conserva la configurazione
@@ -185,8 +190,8 @@ esplicitamente l'intervento RIGHT.
 
 - [Sette plot canonici](../../plot/09_23_2026_1/).
 - [Confronto V26 / trasferimento / best72](../../plot/09_23_2026_v26_transfer_comparison/comparison.png).
-- [Metriche complete](<../../Trajectory Generator/unified_MLP_39/validation/v26_weight_transfer_2026-09-23/metrics.json>).
-- [Verifiche sugli artefatti](<../../Trajectory Generator/unified_MLP_39/validation/v26_weight_transfer_2026-09-23/artifact_verification.json>).
-- [Rollout](<../../Trajectory Generator/unified_MLP_39/runs/rollout/V26_best87_in_unified39_right_fsmv3_2026-09-23/>).
+- [Metriche complete — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-1ebcbda9eabdecfc>).
+- [Verifiche sugli artefatti — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-15b6a9fdfde0c2f4>).
+- [Rollout — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a922b5bf17052f05>).
 
 ![Confronto diagnostico](../../plot/09_23_2026_v26_transfer_comparison/comparison.png)

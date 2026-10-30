@@ -1,5 +1,12 @@
 # Daily Report — 2026-10-08
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
 **Stato:** aggiornamento parziale conseguente a `create_report`; la chiusura dell’8 ottobre non è stata richiesta. La sessione sperimentale del 7 ottobre è chiusa nel [daily del 7 ottobre](2026-10-07_daily-report.md), secondo la data indicata dall’utente per `end_day`. **Instruction check token:** `CMC_AGENT_OK_2026`.
 
 ## Attività documentale dell'8 ottobre

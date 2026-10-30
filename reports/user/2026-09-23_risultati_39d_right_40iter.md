@@ -1,5 +1,10 @@
 # Risultati del training unified39 RIGHT a 40 iterazioni
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 23 settembre 2026. Run concluso alle 18:18:21 CEST, dopo 5 h 27 min 48 s.
 
 **Il riferimento destro recupera il completamento durante training e riduce
@@ -239,11 +244,11 @@ successo misurata con un checkpoint congelato.
 - [Sette grafici canonici RIGHT best35](../../plot/09_23_2026_39D_right_best35/).
 - [Sette grafici canonici RIGHT last40](../../plot/09_23_2026_39D_right_last40/).
 - [Confronto grafico RIGHT/LEFT](../../plot/09_23_2026_right_reference_comparison/right_vs_left_deterministic.png).
-- [Metriche complete dei rollout](<../../Trajectory Generator/unified_MLP_39/validation/right_reference_results_2026-09-23/rollout_metrics.json>).
-- [Curve, metriche e audit del training](<../../Trajectory Generator/unified_MLP_39/validation/right_reference_results_2026-09-23/training_history/findings.md>).
-- [Sequenze degli eventi e audit FSM](<../../Trajectory Generator/unified_MLP_39/validation/right_reference_results_2026-09-23/fsm_audit/metrics.json>).
-- [Verifiche finali di integrità](<../../Trajectory Generator/unified_MLP_39/validation/right_reference_results_2026-09-23/final_verification.json>).
-- [Metodo e riproduzione](<../../Trajectory Generator/unified_MLP_39/validation/right_reference_results_2026-09-23/README.md>).
+- [Metriche complete dei rollout — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a293157cbfbd80f3>).
+- [Curve, metriche e audit del training — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-df1e7269c52ee12a>).
+- [Sequenze degli eventi e audit FSM — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-153be6fd9838f005>).
+- [Verifiche finali di integrità — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d2d6f2786dd42165>).
+- [Metodo e riproduzione — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0ce283ac460b5333>).
 
 Nuovi file: script e ricevute in `validation/right_reference_results_2026-09-23/`,
 due cartelle di rollout, quattordici plot canonici e figure comparative in

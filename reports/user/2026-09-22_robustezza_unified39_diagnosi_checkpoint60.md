@@ -1,5 +1,10 @@
 # Robustezza della unified 39D: diagnosi al checkpoint 60
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 22 settembre 2026. Stato verificato alle 12:31 CEST: completata l’iterazione 70, in corso la 71. Il training fino a 100 non è ancora concluso.
 
 ## Problema e conclusione provvisoria
@@ -87,9 +92,9 @@ File modificati nelle precedenti attività documentate:
 Fonti e risultati:
 
 - [Report della diagnosi iniziale e delle correzioni della ripresa](2026-09-22_diagnosi_completamento_e_ripresa_unified39.md).
-- [Riepilogo degli episodi fino alla tappa 60](../../Trajectory%20Generator/unified_MLP_39/runs/plans/completion_recovery42_2026-09-22/telemetry_analysis_iter060/summary.md), con `summary.json` e `per_episode.jsonl` nella stessa cartella.
-- [Valutazione del rumore al checkpoint 60](../../Trajectory%20Generator/unified_MLP_39/runs/plans/completion_recovery42_2026-09-22/analysis_iter060/noise_analysis.md), con dettagli per rollout in `noise_analysis.json`.
-- [Confronto delle tappe](../../Trajectory%20Generator/unified_MLP_39/runs/plans/completion_recovery42_2026-09-22/comparison.md). Piano attivo: `completion_recovery42_2026-09-22`; stato corrente in `status.json` e cronologia in `pipeline.log`.
+- [Riepilogo degli episodi fino alla tappa 60 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f2f57dca18f87050>), con `summary.json` e `per_episode.jsonl` nella stessa cartella.
+- [Valutazione del rumore al checkpoint 60 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-497ad289bd46c16a>), con dettagli per rollout in `noise_analysis.json`.
+- [Confronto delle tappe — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-46df9dc9bb280b63>). Piano attivo: `completion_recovery42_2026-09-22`; stato corrente in `status.json` e cronologia in `pipeline.log`.
 - [Set dei sette grafici canonici al checkpoint 60](../../plot/09_22_2026_1/), salvato nella cartella `plot/` del root. La ricevuta del rollout identifica checkpoint e target sinistro; il nome storico del file 07 contiene ancora `sound_leg`, ma le etichette del grafico indicano il target sinistro.
 
 ## TODO da propagare al daily report

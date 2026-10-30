@@ -1,5 +1,12 @@
 # V26B — V1: transplant init 39D → 35D (report immutabile)
 
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 **Data:** 2026-08-24 · **Protocollo:** `V26B-bridge-rev3` (`5e0b6a5c…`) · **Stage:** `V1_init_transplant_39_to_35`, GO dell'architetto dopo verifica indipendente della copertura anchor (coverage JSON `5c8123607bba3bf6339ad220163f95966a0f9cf4497854ed32aac863e1e9218e`, report `4348aded…`) · **Esito: EXPORT COMPLETATO, batteria fail-closed tutta PASS.** Report immutabile; rettifiche solo in nuovi file.
 
 ## 1. Sorgente (unica): V26 agosto 39D

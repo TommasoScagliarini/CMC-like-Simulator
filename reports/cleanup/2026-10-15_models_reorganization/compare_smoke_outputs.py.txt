@@ -1,0 +1,22 @@
+from pathlib import Path
+import json,sys,hashlib
+import numpy as np
+root=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude');sys.path.insert(0,str(root))
+from output import read_sto
+out=Path('/tmp/cmc_models_reorganization_2026_10_15');results=[]
+for subject in ('AB06','AB07','AB08'):
+ before=out/f'cascade_before_{subject}';after=out/f'cascade_after_{subject}'
+ records=[]
+ for p in sorted(before.glob('*.sto')):
+  q=after/p.name
+  bt,bc,bv,_=read_sto(str(p));at,ac,av,_=read_sto(str(q))
+  same=bc==ac and np.array_equal(bt,at,equal_nan=True) and np.array_equal(bv,av,equal_nan=True)
+  record={'name':p.name,'columns':len(bc),'rows':len(bt),'numeric_values':int(bv.size+len(bt)),'exact_equal':bool(same),'bytes_equal':p.read_bytes()==q.read_bytes()}
+  if bv.shape==av.shape:
+   delta=np.abs(bv-av);record['max_abs_finite_difference']=float(np.max(delta[np.isfinite(delta)])) if np.isfinite(delta).any() else None
+  assert same,record
+  records.append(record)
+ result={'subject':subject,'passed':all(r['exact_equal'] for r in records),'sto_files':len(records),'numeric_values':sum(r['numeric_values'] for r in records),'files':records}
+ results.append(result);print(json.dumps({k:v for k,v in result.items() if k!='files'}),flush=True)
+result={'all_passed':all(r['passed'] for r in results),'subjects':results,'total_numeric_values':sum(r['numeric_values'] for r in results),'scope':'Exact exported numeric equality for 30ms/30steps per subject; not full-episode scientific validation.'}
+(out/'cascade_before_after_comparison.json').write_text(json.dumps(result,indent=2)+'\n')

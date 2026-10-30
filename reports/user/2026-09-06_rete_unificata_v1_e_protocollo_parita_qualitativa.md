@@ -1,5 +1,10 @@
 # Rete unificata V1 e protocollo di parità qualitativa con la baseline
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Data:** 2026-09-06  
 **Instruction check token:** `CMC_AGENT_OK_2026`  
 **Stato:** pipeline V1 implementata e verificata con test e smoke su macOS; confronto qualitativo completo ancora da realizzare.
@@ -35,7 +40,7 @@ Occorre quindi verificare separatamente:
 ## 2. Soluzione implementata nella V1
 
 La nuova pipeline vive in
-[Trajectory Generator/unified_MLP](<../../Trajectory Generator/unified_MLP/README.md>).
+[Trajectory Generator/unified_MLP — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-47553b1e2e1630c0>).
 La baseline del commit `8ef48f914898fff8431cf8d164554448dbe35947`, il runtime
 condiviso e il plugin C++ non sono stati modificati durante l'implementazione.
 Output, TensorBoard e checkpoint hanno directory dedicate; il registro dei
@@ -65,7 +70,7 @@ compensazione del ritardo e training lunghi restano esclusi dalla consegna V1.**
 ## 3. Test e verifiche già eseguiti
 
 Il dettaglio e i collegamenti agli artefatti originali sono in
-[VALIDATION.md](<../../Trajectory Generator/unified_MLP/VALIDATION.md>).
+[VALIDATION.md — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9c819e86ce3077bd>).
 
 | Verifica | Risultato effettivo |
 |---|---|
@@ -259,9 +264,9 @@ appartengono alla consegna V1 già documentata, non a una nuova esecuzione.
 
 ## 8. Riferimenti
 
-- [Guida operativa della rete unificata](<../../Trajectory Generator/unified_MLP/README.md>)
-- [Verifiche effettive della V1 e artefatti dello smoke](<../../Trajectory Generator/unified_MLP/VALIDATION.md>)
-- [Provenienza dei preset](<../../Trajectory Generator/unified_MLP/configs/provenance.json>)
+- [Guida operativa della rete unificata — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-47553b1e2e1630c0>)
+- [Verifiche effettive della V1 e artefatti dello smoke — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9c819e86ce3077bd>)
+- [Provenienza dei preset — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-adcbbd6627206698>)
 - [Metadati del checkpoint best baseline](<../../Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/checkpoint_best_meta.json>)
 - [Rollout baseline centrale](<../../Trajectory Generator/runs/rollout/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-02_best_rollout/rollout_summary.json>)
 - [Progetto iniziale del 31 agosto](2026-08-31_progetto_rete_unificata_imitativa_exnovo_actor_predittivo.md): contesto storico; la V1 implementata segue le successive istruzioni dell'utente che rinviano predittività e compensazione del ritardo.

@@ -1,5 +1,10 @@
 # 2026-09-24 — Conservazione del contatto nella terminazione hard della 39D
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 ## Richiesta e risultato
 
 Implementata la correzione richiesta prima del confronto fra peso di penetrazione
@@ -51,7 +56,7 @@ storico.
 ## Verifiche
 
 Artefatti riproducibili in
-[`hard_guard_contact_2026-09-24`](../../Trajectory%20Generator/unified_MLP_39/validation/hard_guard_contact_2026-09-24/).
+[`hard_guard_contact_2026-09-24` — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8f8139bfa0fa7c37>).
 
 - **24 test passati**: payload, serializzazione/pickle, indipendenza delle copie,
   soglie e lati applicati, step dell'ambiente, wrapper reward, telemetria e
@@ -77,7 +82,7 @@ Artefatti riproducibili in
   della policy alla soglia di produzione.
 
 Dettagli numerici e configurazione dello smoke in
-[`live_smoke.json`](../../Trajectory%20Generator/unified_MLP_39/validation/hard_guard_contact_2026-09-24/live_smoke.json);
+[`live_smoke.json` — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-32cc5824817fd557>);
 comando riproducibile nello script `verify_live.py`, log dei test nella stessa
 cartella. Le copie `before/` e il relativo manifest distinguono il fix dalle
 modifiche già presenti nel workspace.

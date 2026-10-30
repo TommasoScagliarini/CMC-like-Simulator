@@ -1,5 +1,10 @@
 # Screening RIGHT39 e continuazione dalla 40 alla 60
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 23 settembre 2026. Screening concluso alle 19:46 CEST; continuazione
 avviata alle 19:47 CEST. Al momento di questo resoconto la prima iterazione
 aggiuntiva, la 41, è in esecuzione: il training alla 60 non è ancora concluso.
@@ -83,11 +88,11 @@ controlla le nuove iterazioni e alla 41 completa la verifica del primo update.
 Nessuna modifica a codice di produzione, plugin SEA, simulatore root o FSM.
 Gli script e la documentazione nuovi sono nei seguenti percorsi:
 
-- [Screening: protocollo e script](../../Trajectory%20Generator/unified_MLP_39/validation/right_reference_screening_2026-09-23/README.md)
-- [Metriche complete dello screening](../../Trajectory%20Generator/unified_MLP_39/validation/right_reference_screening_2026-09-23/metrics.json)
-- [Preparazione e monitor della continuazione](../../Trajectory%20Generator/unified_MLP_39/validation/right_reference_resume60_2026-09-23/README.md)
-- [Configurazione 40–60](../../Trajectory%20Generator/unified_MLP_39/runs/plans/right_reference_resume60_2026-09-23/config_40_to_60.yaml)
-- [Stato aggiornato della continuazione](../../Trajectory%20Generator/unified_MLP_39/runs/plans/right_reference_resume60_2026-09-23/status.json)
+- [Screening: protocollo e script — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e168bf9a96219724>)
+- [Metriche complete dello screening — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-df4df5c4c496d999>)
+- [Preparazione e monitor della continuazione — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-894f4299d2bc5af0>)
+- [Configurazione 40–60 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-bab82e1793b045de>)
+- [Stato aggiornato della continuazione — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-03d11e7be18281db>)
 - [Grafico comparativo della penetrazione](../../plot/09_23_2026_right_screening_comparison/paired_penetration.png)
 
 Verifiche concluse: dieci rollout senza errori tecnici; integrità dei 62 input

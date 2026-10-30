@@ -1,5 +1,25 @@
 # Audit della compatibilità Windows dal pretraining V26 alla rete unificata
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: **2026-09-15**  
 Instruction check token: **CMC_AGENT_OK_2026**  
 Commit osservato: `eda70161ba4f9064c5c3fc0d4f8551ada6446474`  
@@ -104,7 +124,7 @@ L'inventario locale ha trovato le corrispondenti librerie macOS, ma non:
 
 È presente `SEA_Plugin_BlackBox_mCMC_impedence.dll`, che non corrisponde al basename `_ff` richiesto. La sua presenza non dimostra equivalenza con il plugin attivo.
 
-Il [README del bundle V26C](<../../Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/README.md>), righe 57–59, documenta esplicitamente la stessa mancanza. Inoltre [.gitignore](../../.gitignore) esclude ordinariamente `plugins/*`, DLL e dati locali del modello: un checkout Git da solo non equivale all'ambiente runtime completo.
+Il [README del bundle V26C (rimosso)](<../cleanup/2026-10-19_baseline_validation_removal/README.md#artifact-8c169d5bbe44ae69>), righe 57–59, documenta esplicitamente la stessa mancanza. Inoltre [.gitignore](../../.gitignore) esclude ordinariamente `plugins/*`, DLL e dati locali del modello: un checkout Git da solo non equivale all'ambiente runtime completo.
 
 **Conseguenza:** il workspace/bundle osservato non costituisce una distribuzione Windows pronta all'avvio. Non è stata ispezionata la macchina Windows dell'utente e non si afferma che quelle DLL manchino anche lì.
 
@@ -112,7 +132,7 @@ Il [README del bundle V26C](<../../Trajectory Generator/baseline_MLP/validation/
 
 ### W02 — Il controllo del processo nel coordinatore non è portabile
 
-In [run_authorized_plan.py](<../../Trajectory Generator/unified_MLP/validation/run_authorized_plan.py>), riga 101, `wait_for_existing_training()` esegue `os.kill(int(watchdog["pid"]), 0)` e considera vivo il processo se la chiamata ritorna.
+In [run_authorized_plan.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0e194cbc0db6d4e6>), riga 101, `wait_for_existing_training()` esegue `os.kill(int(watchdog["pid"]), 0)` e considera vivo il processo se la chiamata ritorna.
 
 Il percorso è raggiunto con `--attach-training-to50`, alle righe 194–195, mentre la milestone non è già conclusa.
 
@@ -126,11 +146,11 @@ Il difetto è stato accertato tramite lettura del codice: non è stato riprodott
 
 ### W03 — J20 warm-up e restore R3 dipendono da un eseguibile macOS
 
-In [v26c_j20_critic_warmup_readiness.py](<../../Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_critic_warmup_readiness.py>), riga 232, `INTERPRETER` è fissato a `/opt/anaconda3/envs/envCMC-rllib/bin/python`.
+In [v26c_j20_critic_warmup_readiness.py](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/v26c_july_replica_2026-08-26/v26c_j20_critic_warmup_readiness.py>), riga 232, `INTERPRETER` è fissato a `/opt/anaconda3/envs/envCMC-rllib/bin/python`.
 
-La funzione `sealed_command()` lo inserisce come primo token, alla riga 365. [v26c_j20_critic_warmup_execution.py](<../../Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_critic_warmup_execution.py>) deriva quel comando e lo passa a `subprocess.Popen`, righe 1212–1214.
+La funzione `sealed_command()` lo inserisce come primo token, alla riga 365. [v26c_j20_critic_warmup_execution.py](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/v26c_july_replica_2026-08-26/v26c_j20_critic_warmup_execution.py>) deriva quel comando e lo passa a `subprocess.Popen`, righe 1212–1214.
 
-Anche [v26c_j20_restore_audit_r3.py](<../../Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j20_restore_audit_r3.py>) parte dal comando del warm-up, righe 474–475, e conserva `tokens[0]` nel comando del child, righe 512–517.
+Anche [v26c_j20_restore_audit_r3.py](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/v26c_july_replica_2026-08-26/v26c_j20_restore_audit_r3.py>) parte dal comando del warm-up, righe 474–475, e conserva `tokens[0]` nel comando del child, righe 512–517.
 
 **Conseguenza:** questi runner dedicati non avviano un interprete Windows con la configurazione implementata. Non emerge un override CLI dell'interprete nei percorsi considerati.
 
@@ -140,7 +160,7 @@ Diversi launcher V26B presentano invece un default macOS ma espongono `--python`
 
 ### W04 — L'attestazione J21 confronta separatori non canonicalizzati
 
-In [v26c_j21_training_ready_attestation.py](<../../Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j21_training_ready_attestation.py>):
+In [v26c_j21_training_ready_attestation.py](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/v26c_july_replica_2026-08-26/v26c_j21_training_ready_attestation.py>):
 
 - `file_set()`, riga 783, costruisce le chiavi con `str(p.relative_to(root))`;
 - `check_leaf_set()`, righe 795–800, confronta esattamente gli insiemi con le mappe archiviate;
@@ -156,11 +176,11 @@ Il finding non invalida retroattivamente l'attestazione macOS J21. Evidenzia che
 
 ### W05 — Il preflight congelato fallisce con conversione LF → CRLF
 
-In [run_authorized_plan.py](<../../Trajectory Generator/unified_MLP/validation/run_authorized_plan.py>), righe 64–69, `source_is_preserved()` ricalcola SHA-256 dai byte e li confronta con quelli del preflight.
+In [run_authorized_plan.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0e194cbc0db6d4e6>), righe 64–69, `source_is_preserved()` ricalcola SHA-256 dai byte e li confronta con quelli del preflight.
 
 `git check-attr text eol` ha mostrato attributi non specificati per i file unified controllati. Le regole di [.gitattributes](../../.gitattributes) proteggono diverse sorgenti e archivi storici, ma non stabiliscono la stessa politica LF per il nuovo perimetro unified esaminato.
 
-Il [preflight del piano](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_50_100_feasibility_2026-09-14/preflight.json>) contiene 69 voci di sorgenti runtime. Il controllo mirato ha quantificato tutte le 17 voci unified: 13 Python e quattro YAML.
+Il [preflight del piano — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e2782b0cfd3a5e2a>) contiene 69 voci di sorgenti runtime. Il controllo mirato ha quantificato tutte le 17 voci unified: 13 Python e quattro YAML.
 
 | Controllo sulle 17 voci unified | Risultato |
 |---|---:|
@@ -173,7 +193,7 @@ La condizione è la conversione effettiva dei byte. Una copia che preserva LF no
 
 ### W06 — Il generatore differito 39 richiede sorgenti con LF
 
-In [build_variant.py](<../../Trajectory Generator/unified_MLP/validation/feasibility39_bundle/build_variant.py>), righe 113–115, il sorgente viene letto come byte e decodificato UTF-8 senza normalizzazione dei fine-riga.
+In [build_variant.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e433eb332c7ca631>), righe 113–115, il sorgente viene letto come byte e decodificato UTF-8 senza normalizzazione dei fine-riga.
 
 Le sostituzioni multilinea in `_transform()` richiedono però sequenze LF letterali, per esempio alla riga 54 per `env_config` e alla riga 67 per `_actor_in`. `_replace()`, righe 20–23, solleva `ValueError` se il numero atteso di corrispondenze non è presente.
 
@@ -190,13 +210,13 @@ L'oggetto dell'audit è il software già preparato nel bundle differito per la f
 
 ### W07 — Le valutazioni esistenti non sono ricollocabili direttamente
 
-In [evaluate_training_milestone.py](<../../Trajectory Generator/unified_MLP/validation/evaluate_training_milestone.py>):
+In [evaluate_training_milestone.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-ac566364fb3aec4d>):
 
 - righe 139–146: il percorso originale `summary["checkpoint"]` deve esistere per verificare il contenuto;
 - riga 300: `plan.run_dir` del report precedente deve coincidere con il percorso assoluto corrente;
 - righe 316–320: le trace precedenti vengono cercate usando `source_directory` archiviato.
 
-Il [report JSON della milestone 50](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/milestone_evaluation.json>) contiene il percorso `/Users/tommy/...` del run e nove directory caso assolute. Il commento nel valutatore accenna allo spostamento tra OS, ma il percorso implementato solleva un errore se il vecchio checkpoint non è disponibile.
+Il [report JSON della milestone 50 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0b66075f05f039a9>) contiene il percorso `/Users/tommy/...` del run e nove directory caso assolute. Il commento nel valutatore accenna allo spostamento tra OS, ma il percorso implementato solleva un errore se il vecchio checkpoint non è disponibile.
 
 **Conseguenza:** copiare run e valutazioni su Windows non basta per riutilizzare quelle evidenze nel confronto 50/100. Non esiste nei punti osservati una risoluzione coerente rispetto alla nuova root.
 
@@ -204,9 +224,9 @@ Il problema riguarda anche un trasferimento fra due directory macOS. È un difet
 
 ### W08 — La rianalisi sigma può assegnare zero a configurazioni non recuperate
 
-In [analyze_v26c_sigma_exploration_smoke.py](<../../Trajectory Generator/baseline_MLP/validation/analyze_v26c_sigma_exploration_smoke.py>), righe 103–107, `_actor_configuration()` cerca `exploration_configuration_report.json` vicino al checkpoint indicato dal summary. Se il file non esiste a quel percorso, restituisce `sigma=[0.0, 0.0]`.
+In [analyze_v26c_sigma_exploration_smoke.py (rimosso)](<../cleanup/2026-10-19_baseline_validation_removal/README.md#artifact-38c36a11f677b90c>), righe 103–107, `_actor_configuration()` cerca `exploration_configuration_report.json` vicino al checkpoint indicato dal summary. Se il file non esiste a quel percorso, restituisce `sigma=[0.0, 0.0]`.
 
-Gli artefatti dello sweep del 31 agosto, per esempio il [summary del run isotropico 0.010](<../../Trajectory Generator/baseline_MLP/validation/v26c_sigma_exploration_smoke_2026-08-31/rollouts/iso_0p010_seed123_nominal/rollout_summary.json>), riga 3, contengono un percorso assoluto `/Users/tommy/...`.
+Gli artefatti dello sweep del 31 agosto, per esempio il [summary del run isotropico 0.010 (rimosso)](<../cleanup/2026-10-19_baseline_validation_removal/README.md#artifact-7702ec2d8a4d2900>), riga 3, contengono un percorso assoluto `/Users/tommy/...`.
 
 La stessa analisi raggruppa poi i run usando il sigma recuperato, righe 379–388.
 
@@ -222,7 +242,7 @@ L'inventario Git dell'audit comprendeva 60.222 file tracciati. Il massimo percor
 
 Per la root esemplificativa `C:\Users\tommy\Documents\CMC-like-Simulator - Claude`, il controllo della lunghezza ha individuato 13 file oltre 259 caratteri assoluti e 26 oltre il budget conservativo di 248. Con `C:\cmc` nessuno dei percorsi tracciati considerati supera quei limiti.
 
-Il [manifest del bundle](<../../Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/bundle_manifest.json>), righe 15–19, registra il massimo relativo di 233, il budget conservativo 248 e una root massima di 14 caratteri senza supporto ai percorsi lunghi. Il relativo README, righe 76–82, descrive root corta o configurazione long-path Windows/Git.
+Il [manifest del bundle (rimosso)](<../cleanup/2026-10-19_baseline_validation_removal/README.md#artifact-4a48da44ff7e42d2>), righe 15–19, registra il massimo relativo di 233, il budget conservativo 248 e una root massima di 14 caratteri senza supporto ai percorsi lunghi. Il relativo README, righe 76–82, descrive root corta o configurazione long-path Windows/Git.
 
 Questo è un requisito operativo condizionale, non la prova di un guasto su qualunque installazione Windows. Il conteggio riguarda i file tracciati esaminati, non ogni percorso che Ray potrebbe generare in futuro.
 
@@ -230,7 +250,7 @@ Questo è un requisito operativo condizionale, non la prova di un guasto su qual
 
 Il [README baseline](<../../Trajectory Generator/baseline_MLP/README.md>), righe 14–15, descrive OpenSim-mCMC 4.5.2, Python 3.12, NumPy 2, Torch 2.7 e Ray 2.55. La procedura di installazione, righe 27–34, parte da un ambiente locale preesistente e installa `ray[rllib]` senza fissare nel comando una versione precisa.
 
-La [validazione unified](<../../Trajectory Generator/unified_MLP/VALIDATION.md>), righe 136–140, documenta invece esecuzioni macOS con Python 3.10.20, Ray 2.55.1 e Torch 2.10.0. Il [README del bundle](<../../Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/README.md>), righe 66–67, dichiara che manca un lock completo delle dipendenze Python e native.
+La [validazione unified — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9c819e86ce3077bd>), righe 136–140, documenta invece esecuzioni macOS con Python 3.10.20, Ray 2.55.1 e Torch 2.10.0. Il [README del bundle (rimosso)](<../cleanup/2026-10-19_baseline_validation_removal/README.md#artifact-8c169d5bbe44ae69>), righe 66–67, dichiara che manca un lock completo delle dipendenze Python e native.
 
 La differenza tra versioni documentate non dimostra da sola un'incompatibilità. Significa però che la ricostruzione dell'ambiente Windows e il restore dei checkpoint non sono determinati completamente dai materiali disponibili.
 
@@ -369,7 +389,7 @@ Le attività seguenti derivano dall'audit. Sono da riportare nel prossimo `end_d
 - [Valutazione intermedia V1 a 50 iterazioni](2026-09-15_pretraining_unificata_valutazione_intermedia_50.md).
 - [Guida di ricostruzione V26 → V26C](2026-08-28_guida_ricostruzione_pipeline_exnovo_training_ready_da_imitativo_v26_agosto.md).
 - [Rete unificata V1 e protocollo di parità](2026-09-06_rete_unificata_v1_e_protocollo_parita_qualitativa.md).
-- [README unified](<../../Trajectory Generator/unified_MLP/README.md>) e [VALIDATION](<../../Trajectory Generator/unified_MLP/VALIDATION.md>).
-- [README del bundle V26C](<../../Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/README.md>).
+- [README unified — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-47553b1e2e1630c0>) e [VALIDATION — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9c819e86ce3077bd>).
+- [README del bundle V26C (rimosso)](<../cleanup/2026-10-19_baseline_validation_removal/README.md#artifact-8c169d5bbe44ae69>).
 
 I collegamenti a `runs/` e ad altri dati locali identificano le evidenze consultate nel workspace. Alcuni di questi artefatti sono esclusi dal normale checkout Git: la presenza del link nel report non implica che il relativo file sia distribuito dal repository.

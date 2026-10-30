@@ -1,0 +1,179 @@
+{
+  "limitations": "Offline sensitivity and governor checks on recorded actor feedback. No recomputation of mechanics, contact, FSM events or observations; no claim that feature clamping makes a physical prosthesis stand.",
+  "hold_metrics_discard_initial_s": 0.5,
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "n_actor_loaded_checkpoint": 35,
+  "hold_temporal_feature_ranges": {
+    "gait_phase_cos": [
+      1.0,
+      1.0
+    ],
+    "gait_phase_sin": [
+      0.0,
+      0.0
+    ],
+    "online_left_gait_phase_cos": [
+      -0.9999746680259705,
+      1.0
+    ],
+    "online_left_gait_phase_sin": [
+      -0.9999224543571472,
+      0.9999983906745911
+    ],
+    "phase_cycle_progress_credit": [
+      0.25,
+      1.0
+    ],
+    "phase_stance_elapsed_norm": [
+      0.0,
+      0.5368182063102722
+    ],
+    "phase_swing_elapsed_norm": [
+      0.0,
+      0.39423078298568726
+    ]
+  },
+  "cases": {
+    "baseline": {
+      "clamped_features": [],
+      "clamped_values": {},
+      "hold_action_max_difference_from_baseline": 0.0,
+      "hold_raw_target_rom_rad": {
+        "pros_knee_angle": 0.8072224855422974,
+        "pros_ankle_angle": 0.5462306141853333
+      },
+      "hold_served_reference_rom_rad": {
+        "pros_knee_angle": 0.7596729835496896,
+        "pros_ankle_angle": 0.512187220073209
+      },
+      "hold_served_velocity_rms_rad_s": {
+        "pros_knee_angle": 1.0875832151201617,
+        "pros_ankle_angle": 0.6847009923769303
+      }
+    },
+    "freeze_prescribed_clock": {
+      "clamped_features": [
+        "gait_phase_sin",
+        "gait_phase_cos"
+      ],
+      "clamped_values": {
+        "gait_phase_sin": 0.0,
+        "gait_phase_cos": 1.0
+      },
+      "hold_action_max_difference_from_baseline": 0.0,
+      "hold_raw_target_rom_rad": {
+        "pros_knee_angle": 0.8072224855422974,
+        "pros_ankle_angle": 0.5462306141853333
+      },
+      "hold_served_reference_rom_rad": {
+        "pros_knee_angle": 0.7596729835496896,
+        "pros_ankle_angle": 0.512187220073209
+      },
+      "hold_served_velocity_rms_rad_s": {
+        "pros_knee_angle": 1.0875832151201617,
+        "pros_ankle_angle": 0.6847009923769303
+      }
+    },
+    "freeze_online_phase": {
+      "clamped_features": [
+        "online_left_gait_phase_sin",
+        "online_left_gait_phase_cos"
+      ],
+      "clamped_values": {
+        "online_left_gait_phase_sin": 0.0,
+        "online_left_gait_phase_cos": 1.0
+      },
+      "hold_action_max_difference_from_baseline": 0.0660315752029419,
+      "hold_raw_target_rom_rad": {
+        "pros_knee_angle": 0.7921102643013,
+        "pros_ankle_angle": 0.4853721261024475
+      },
+      "hold_served_reference_rom_rad": {
+        "pros_knee_angle": 0.7279483629015956,
+        "pros_ankle_angle": 0.46612254879315423
+      },
+      "hold_served_velocity_rms_rad_s": {
+        "pros_knee_angle": 1.0444459105471142,
+        "pros_ankle_angle": 0.6391263331225602
+      }
+    },
+    "freeze_fsm_timers": {
+      "clamped_features": [
+        "phase_stance_elapsed_norm",
+        "phase_swing_elapsed_norm",
+        "phase_cycle_progress_credit"
+      ],
+      "clamped_values": {
+        "phase_stance_elapsed_norm": 0.0,
+        "phase_swing_elapsed_norm": 0.04769230633974075,
+        "phase_cycle_progress_credit": 0.5
+      },
+      "hold_action_max_difference_from_baseline": 0.1948055997490883,
+      "hold_raw_target_rom_rad": {
+        "pros_knee_angle": 0.7726302146911621,
+        "pros_ankle_angle": 0.5679885745048523
+      },
+      "hold_served_reference_rom_rad": {
+        "pros_knee_angle": 0.7622133610988946,
+        "pros_ankle_angle": 0.48157791781657133
+      },
+      "hold_served_velocity_rms_rad_s": {
+        "pros_knee_angle": 1.1642026191862254,
+        "pros_ankle_angle": 0.6573117708356672
+      }
+    },
+    "constant_target_serving_only": {
+      "clamped_features": [],
+      "clamped_values": {},
+      "hold_action_max_difference_from_baseline": 1.1362749765744575,
+      "hold_raw_target_rom_rad": {
+        "pros_knee_angle": 0.0,
+        "pros_ankle_angle": 0.0
+      },
+      "hold_served_reference_rom_rad": {
+        "pros_knee_angle": 5.511058550611292e-05,
+        "pros_ankle_angle": 7.521516286211616e-05
+      },
+      "hold_served_velocity_rms_rad_s": {
+        "pros_knee_angle": 0.00016429842548184486,
+        "pros_ankle_angle": 0.00018425144167318944
+      }
+    }
+  }
+}

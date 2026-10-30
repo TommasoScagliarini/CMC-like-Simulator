@@ -1,5 +1,20 @@
 # Sampling PPO interleaved, gate condition-matched e recovery da H0
 
+> Aggiornamento del 2026-10-19: sono stati rimossi l’archivio
+> `Trajectory Generator/runs/training/validation/` e i port storici
+> `v12r7zero`, `v12r8zero`, `v12r9zero`. I riferimenti a questi materiali
+> descrivono lo stato dell’epoca; alcuni vecchi percorsi erano già assenti.
+> Configurazioni e riepiloghi conservati, dipendenze ritirate e controlli
+> sono indicati nel [registro della rimozione](../cleanup/2026-10-19_training_validation_zero_removal/README.md).
+
+
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 ## Esito sintetico
 
 Il piano e stato eseguito fino alla sua condizione di arresto:

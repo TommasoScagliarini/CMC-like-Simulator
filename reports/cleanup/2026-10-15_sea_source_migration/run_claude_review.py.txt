@@ -1,0 +1,99 @@
+from pathlib import Path
+import datetime
+import hashlib
+import json
+import shutil
+import subprocess
+
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+EXT=Path('/Users/tommy/Documents/SEA_plugin_core - agent')
+OUT=Path('/tmp/cmc_sea_source_migration_2026_10_15')
+PROMPT='''Revisione finale in italiano, circa700parole. Utente ha richiesto:
+"aggiorna SEA_plugin_core - agent alla versione attuale del plugin sea,
+verifica poi questa operazione. una volta fatto elimina il source code in
+questa cartella relativa al plugin sea (non il dylib o il dll)."
+Nel contesto della pulizia ha richiesto collaborazione con Claude Opus5.5
+effortmassimo. Sei il revisore indipendente di questa migrazione, non devi
+modificare file, avviare comandi, build o simulazioni. Solo Read/Grep/Glob.
+
+Repository simulatore: cwd. Sorgenti esterni:
+/Users/tommy/Documents/SEA_plugin_core - agent (directory autorizzata).
+Evidenze: /tmp/cmc_sea_source_migration_2026_10_15 (directory autorizzata).
+
+Attivita gia eseguite:
+- Letture AGENTS.md e istruzioni; nessun AGENTS specifico esterno o antenato.
+- Preflight e backup: migration_preflight.json (SHAfile4interni e4esterni,
+  dueHEADgit,statoGitgia sporco), external_all_files_before.json; i due
+  sorgentiesterni erano PD senzaKi. Sincronizzati CPP/H byte-identici dal
+  simulatorePI, Plugin_interface.cpp giaidentico quindi preservato; CMake
+  esterno5737B gia modificato dall'utente conservato SHAaf685...; non copiato
+  il CMake interno minimale663B. Backup completo dei5fileesterni precedenti
+  (compreso.gitignore) in .migration_backups/2026-10-15_before_pi.tar.gz,
+  SHA57cdce...; aggiunti README e receipt e regolaignore backup. Tutti i
+  vecchi binari esterni e installati nel simulatore devono essere invariati.
+- Build isolata /tmp/.../build_mac_arm64, sorgente -S repositoryESTERNA,
+  AppleClang17, arm64 Release, OpenSim SDK~/opensim-core-install come binding
+  Python; solo targetplugin SEA_Plugin_BlackBox_mCMC_impedence_ff.
+  external_build_result.json+external_configure.log+external_build.log PASS.
+- probe_plugin.py/run_probes.py caricamentoExact old/new inPROCESSISEPARATI,
+  9casi*2actuators*2modi=36righe,180valoriDoubletyped comparati PASS,delta0,
+  inclusi Ki=0, clamping integrale/motore,unwind,modoimpedance.
+  Vedi differential_probe_result.json e installed_probe.json/rebuilt_probe.json.
+- DOPO queste verifiche rimossi4file vivi tools/sea_plugin_relative_d:
+  cpp,h,Plugin_interface.cpp,CMakeLists.txt. Rimossi anche9cacheCMake della
+  rootbuild (nessunbinario), medianteunlinkspecifici/rmdirvuote conSHAguard.
+  internal_removal_result.json. Tutte librerie runtime plugins/ preservate.
+- .vscode/settings.json rimosso sourceDirectoryassolutointerno e aggiunto
+  cmake.configureOnOpen=false per non ricreare automaticamentebuildnella
+  workspacePython; aggiunto tools/README.md conbuildesternoMac/Windows,
+  AGENTS aggiornato a collocazioneesterna e documentazionePIeffettiva.
+- DOPO rimozione sorgenti, cascade_smoke.py/run_cascade_smokes.py hanno
+  eseguito2processiOpenSimreali,30ms ciascuno, dt1ms30step, controllerPython
+  cascade+SEA_PI, libreriainstallata e ricompilata caricate separatamente.
+  PASS,16STOconfrontati uguali(delta0alla precisioneregistrata),6statiSEA
+  finiti,integralientrambinonzero. cascade_smoke_comparison.json e cartelle
+  cascade_installed/rebuilt. NON rolloutRL5s,NONqualificaWindows.
+- final_integrity_check.json e peer_review.md se presenti sono revisione
+  indipendente dei65009trackedpresenti prima+10plugins+metadata e diTUTTI
+  i fileesterniprecedenti. Non leggere il voluminoso simulator_before.json.
+  Se non ancora presenti, basa il giudizio sulle altre evidenze e segnala.
+
+Aspetto storico consapevole:4source SEA NON fanno parte delle1888entry e1357
+in_place V26C; gia prima suite17/19 perdriftJ1+3aggiunteclosure, estranei a
+questa migrazione. Alcuni freezer/checker H0V1/V3/V7 e mainAB07prescribed
+verify_sto_numerics.py:521 richiedono vecchifile SEA perhash. Non modificati:
+i sigilli attestano i vecchi percorsi; rerun incheckoutstoricoHEADsimulatore
+dba42388c32a441a5543f20881612a52781d7a99. CheckeriAB06/AB07cheimportanohelper
+continuano a importarli;nessun bisogno runtime dei sourceCpp. Vedi nuova
+tools/README.md. Non proporre riscrivere manifest o ripristinareduplicitaviva.
+
+Controlla i sorgentiPIesterni/CMake, configurazioneeditor/docs, ricevute e
+risultati pertinenti. Verdetto: 1)migrazioneesatta completa?2)binari e
+semantica preservati?3)verificheadeguate/limiti?4)qualchecorrezioneCONCRETA
+necessaria prima consegna? Distingui obblighi da miglioramentiopzionali,
+non richiedere ulterioriconsensi: backup e migrazione autorizzati.
+'''
+(OUT/'claude_migration_input.txt').write_text(PROMPT)
+cli=shutil.which('claude')
+assert cli,'No fallback permitted'
+command=[cli,'--print','--model','claude-opus-5-5','--effort','max',
+         '--restricted','--tools','Read,Grep,Glob','--allowedTools','Read,Grep,Glob',
+         '--disable-slash-commands','--strict-mcp-config','--mcp-config','{"mcpServers":{}}',
+         '--setting-sources','','--no-session-persistence','--output-format','json',
+         '--add-dir',str(OUT),'--add-dir',str(EXT)]
+receipt={'model_requested':'claude-opus-5-5','effort_requested':'max','fallback_allowed':False,
+         'command':command,'cwd':str(ROOT),'input_sha256':hashlib.sha256(PROMPT.encode()).hexdigest(),
+         'started_utc':datetime.datetime.now(datetime.timezone.utc).isoformat()}
+path=OUT/'claude_migration_receipt.json'
+path.write_text(json.dumps(receipt,indent=2)+'\n')
+with (OUT/'claude_migration_response.json').open('w') as stdout,(OUT/'claude_migration_stderr.log').open('w') as stderr:
+    result=subprocess.run(command,input=PROMPT,text=True,cwd=ROOT,stdout=stdout,stderr=stderr,timeout=1800)
+receipt.update(returncode=result.returncode,completed_utc=datetime.datetime.now(datetime.timezone.utc).isoformat())
+try:
+    response=json.loads((OUT/'claude_migration_response.json').read_text())
+    receipt.update(model_usage=response.get('modelUsage'),usage=response.get('usage'),is_error=response.get('is_error'))
+    (OUT/'claude_migration_response.md').write_text(str(response.get('result',response))+'\n')
+except (ValueError,OSError):receipt['response_json_parse_failed']=True
+path.write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps(receipt,ensure_ascii=False),flush=True)
+raise SystemExit(result.returncode)

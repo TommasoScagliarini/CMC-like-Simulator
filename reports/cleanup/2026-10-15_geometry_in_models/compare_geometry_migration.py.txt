@@ -1,0 +1,36 @@
+from pathlib import Path
+import json, hashlib, sys
+import numpy as np
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+OUT=Path('/tmp/cmc_geometry_move_2026_10_15')
+sys.path.insert(0,str(ROOT))
+from output import read_sto
+before=json.loads((OUT/'geometry_assets_before.json').read_text())
+after=json.loads((OUT/'geometry_assets_after.json').read_text())
+geometry_identical=before['files']==after['files']
+a=json.loads((OUT/'native_models_geometry_before.json').read_text())
+b=json.loads((OUT/'native_models_geometry_after.json').read_text())
+comparisons=[]
+for x,y in zip(a['models'],b['models']):
+    expected_meshes=[dict(m,resolved=(m['resolved'].replace(str(ROOT/'Geometry'),str(ROOT/'models/Geometry'),1) if m['resolved'] else None)) for m in x['mesh_resolutions']]
+    fields=('path','sha256','ok','coordinates','states','forces','time','all_meshes_resolved')
+    row={'path':x['path'],'model_and_init_identical':all(x.get(k)==y.get(k) for k in fields),'mesh_resolutions_identical_after_path_mapping':expected_meshes==y['mesh_resolutions']}
+    row['passed']=all(row[k] for k in ('model_and_init_identical','mesh_resolutions_identical_after_path_mapping'))
+    comparisons.append(row)
+cascades=[]
+for subject in ('AB06','AB07','AB08'):
+    before_dir=OUT/f'cascade_before_{subject}';after_dir=OUT/f'cascade_after_{subject}'
+    left={p.name:p for p in before_dir.glob('*.sto')};right={p.name:p for p in after_dir.glob('*.sto')}
+    files=[]
+    for name in sorted(left):
+        l,r=left[name],right[name]
+        t1,c1,v1,_=read_sto(str(l));t2,c2,v2,_=read_sto(str(r))
+        identical=l.read_bytes()==r.read_bytes()
+        numeric_equal=np.array_equal(t1,t2) and c1==c2 and np.array_equal(v1,v2)
+        files.append({'file':name,'byte_identical':identical,'numeric_equal':numeric_equal,'numeric_values':int(np.asarray(v1).size),'max_abs_difference':float(np.max(np.abs(v1-v2))) if np.asarray(v1).size else 0.0})
+    cascades.append({'subject':subject,'file_set_equal':left.keys()==right.keys(),'files':files,'passed':left.keys()==right.keys() and bool(files) and all(f['byte_identical'] and f['numeric_equal'] for f in files)})
+result={'geometry_file_count':len(before['files']),'all_geometry_bytes_preserved':geometry_identical,'root_Geometry_absent':not (ROOT/'Geometry').exists(),'new_Geometry_present':(ROOT/'models/Geometry').is_dir(),'models':comparisons,'all_native_before_after_identical':len(a['models'])==len(b['models']) and all(r['passed'] for r in comparisons),'all_mesh_references_resolved_before':a['all_meshes_resolved'],'all_mesh_references_resolved_after':b['all_meshes_resolved'],'mesh_reference_count':sum(len(m['mesh_resolutions']) for m in b['models']),'cascades':cascades,'scope':'Native macOS arm64 OpenSim load/init and 3x30ms cascade/SEA-PI integration; standalone GUI and Windows native were not executed.'}
+result['all_passed']=all([result['all_geometry_bytes_preserved'],result['root_Geometry_absent'],result['new_Geometry_present'],result['all_native_before_after_identical'],result['all_mesh_references_resolved_after'],*[c['passed'] for c in cascades]])
+(OUT/'native_geometry_migration_comparison.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({'all_passed':result['all_passed'],'geometry_file_count':len(before['files']),'models':len(comparisons),'mesh_references':result['mesh_reference_count'],'cascade_sto':sum(len(c['files']) for c in cascades),'cascade_numeric_values':sum(f['numeric_values'] for c in cascades for f in c['files'])},indent=2))
+assert result['all_passed']

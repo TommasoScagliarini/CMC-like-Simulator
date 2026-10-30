@@ -1,5 +1,17 @@
 # Daily Report - 2026-09-15
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 <!-- create_report_50:41b7d69e7228f7d2 -->
 
 ## Valutazione intermedia V1 a 50 iterazioni
@@ -99,7 +111,7 @@ Verifiche: **75 test mirati superati**, comprese valutazione, report e coordinat
 
 La valutazione intermedia resta negativa sullo screening complessivo: CP49 produce tre cicli nello start center e CP50 due nello start late, ma entrambi quei rollout terminano per penetrazione. Lo start early raggiunge 5 secondi senza cicli validi. I risultati non stabiliscono ancora cammino stabile ai tre start; metriche e confronti a prefisso comune sono nel report utente.
 
-La precedente esecuzione fallita è conservata nella directory di recovery del piano; [evidenza del ripristino](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_50_100_feasibility_2026-09-14/evaluation_50_recovery.json>). I TODO aperti sopra rimangono validi.
+La precedente esecuzione fallita è conservata nella directory di recovery del piano; [evidenza del ripristino — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9c10c379d81c6d8d>). I TODO aperti sopra rimangono validi.
 
 <!-- september-coverage-completion-2026-10-05 -->
 

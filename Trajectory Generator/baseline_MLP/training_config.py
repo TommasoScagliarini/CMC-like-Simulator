@@ -1,14 +1,16 @@
 """Single source of truth for baseline_MLP training/rollout parameters.
 
-A YAML file (``training_cfg.yaml`` next to this module) holds every network and
+A YAML file (``training_exnovo_cfg.yaml`` next to this module) holds every network and
 simulation parameter. It is consumed by ``train_ppo_mlp.py`` and
 ``rollout_eval.py`` as argparse *defaults*: an explicitly-passed CLI flag still
 wins over the YAML (``argparse.set_defaults`` semantics).
 
 Training writes the fully-resolved config (YAML + CLI overrides) to
 ``<output_dir>/training_cfg.resolved.yaml``. ``rollout_eval.py`` auto-loads that
-snapshot from a checkpoint's run directory so the evaluated env/model/reward
-always match what was actually trained (no silent mismatch).
+snapshot from a checkpoint's run directory. When present, it supplies the
+checkpoint's defaults without inheriting fields from the current global YAML.
+Without a snapshot, rollout uses the global ex-novo configuration. Explicit
+``--config`` values and CLI flags can override either source.
 
 Only stdlib + PyYAML here (no numpy/torch/OpenSim): this module is imported in
 the early argparse phase, before the heavy training stack and the Windows
@@ -24,14 +26,29 @@ from typing import Any, Callable
 
 import yaml
 
+import _bootstrap
+
+_bootstrap.ensure_sim_paths()
+
+from path_resolver import remap_policy_transfer_path  # noqa: E402
+
 _THIS_DIR = Path(__file__).resolve().parent
-DEFAULT_CONFIG_PATH = _THIS_DIR / "training_cfg.yaml"
+DEFAULT_CONFIG_PATH = _THIS_DIR / "training_exnovo_cfg.yaml"
 RESOLVED_CONFIG_NAME = "training_cfg.resolved.yaml"
 
 # Sections written to the resolved snapshot are everything EXCEPT run-identity
 # (output_dir/resume_from): the snapshot describes the reproducible config, not
 # the invocation, and the rollout must not inherit the training run's output dir.
 _SNAPSHOT_SKIP_SECTIONS = {"run"}
+
+# Frozen standard snapshots may still contain these formerly optional fields.
+# Accept their null placeholders, but never silently run a retired topology.
+_RETIRED_V25_RESIDUAL_FIELDS = {
+    "primary_split_v25_residual_input_mean",
+    "primary_split_v25_residual_input_std",
+    "primary_split_v25_residual_limits",
+    "primary_split_v25_residual_init_seed",
+}
 
 
 def _cli_path(value: str | Path) -> Path:
@@ -92,10 +109,6 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
         "fcnet_activation": str,
         "asymmetric_actor_critic": _to_bool,
         "rl_module_kind": str,
-        "primary_split_v25_residual_input_mean": _opt(_list_float),
-        "primary_split_v25_residual_input_std": _opt(_list_float),
-        "primary_split_v25_residual_limits": _opt(_list_float),
-        "primary_split_v25_residual_init_seed": _opt(int),
         "freeze_logstd": _to_bool,
         "fixed_exploration_sigma": _opt(_list_float),
         "freeze_actor": _to_bool,
@@ -202,22 +215,34 @@ SECTION_MAP: dict[str, dict[str, Callable[[Any], Any]]] = {
 
 def resolve_config_path(value: str | Path | None) -> Path:
     """Resolve a ``--config`` value: absolute honored; relative tried against the
-    CWD first, then this module's directory; ``None`` -> the default path."""
+    CWD first, then this module's directory; ``None`` -> the default path.
+
+    Accept the former policy-transfer workspace namespace without rewriting
+    historical configuration files.
+    """
     if value is None:
         return DEFAULT_CONFIG_PATH
     path = _cli_path(value)
+    path = remap_policy_transfer_path(path) or path
     if path.is_absolute():
         return path
     cwd_candidate = Path.cwd() / path
+    cwd_candidate = remap_policy_transfer_path(cwd_candidate) or cwd_candidate
     if cwd_candidate.is_file():
         return cwd_candidate.resolve()
-    return (_THIS_DIR / path).resolve()
+    module_candidate = (_THIS_DIR / path).resolve()
+    return remap_policy_transfer_path(module_candidate) or module_candidate
 
 
 def load(path: str | Path) -> dict[str, Any]:
     """Load a YAML config into a dict. A missing *default* file yields ``{}`` (the
-    built-in argparse defaults then apply); a missing *explicit* file is an error."""
+    built-in argparse defaults then apply); a missing *explicit* file is an error.
+
+    Relocated workspace paths are mapped only for reading; contents stay intact.
+    """
     path = _cli_path(path)
+    path = remap_policy_transfer_path(path) or path
+    path = remap_policy_transfer_path(path.resolve()) or path
     if not path.is_file():
         if path.resolve() == DEFAULT_CONFIG_PATH.resolve():
             return {}
@@ -239,6 +264,8 @@ def to_argparse_defaults(
     ``flat_defaults`` maps argparse dest -> coerced value (feed to
     ``parser.set_defaults``). ``reward_overrides`` is the raw ``reward:`` mapping
     (not an argparse dest). Unknown sections/keys are warned and ignored.
+    Retired module selections/settings raise instead of changing the topology;
+    legacy null residual placeholders are accepted without becoming defaults.
     """
     flat: dict[str, Any] = {}
     reward: dict[str, Any] = {}
@@ -259,6 +286,19 @@ def to_argparse_defaults(
             _warn(f"config section '{section}' must be a mapping (ignored)")
             continue
         for key, value in content.items():
+            if section == "model":
+                if key == "rl_module_kind" and str(value).strip().lower() != "standard":
+                    raise ValueError(
+                        f"unsupported config 'model.rl_module_kind'={value!r}; "
+                        "only 'standard' is supported"
+                    )
+                if key in _RETIRED_V25_RESIDUAL_FIELDS:
+                    if value is not None:
+                        raise ValueError(
+                            f"config 'model.{key}' is retired; only null legacy "
+                            "values are accepted"
+                        )
+                    continue
             # Backward compatibility for configs written before iterations
             # became a simulation-level parameter.
             if section == "supervision" and key == "iterations":
@@ -327,14 +367,18 @@ def dump_resolved(
 def load_resolved_for_checkpoint(checkpoint_dir: str | Path | None) -> dict[str, Any] | None:
     """Find and load ``training_cfg.resolved.yaml`` for a checkpoint, by walking up
     from the checkpoint dir (e.g. ``<run>/rl_module_best``) to the run dir.
-    Returns ``None`` if no snapshot is found (legacy run)."""
+    Accepts relocated workspace paths without editing the snapshot. Returns
+    ``None`` if no snapshot is found (legacy run).
+    """
     if not checkpoint_dir:
         return None
     base = _cli_path(checkpoint_dir)
+    base = remap_policy_transfer_path(base) or base
     try:
         base = base.resolve()
     except OSError:
         pass
+    base = remap_policy_transfer_path(base) or base
     seen: set[Path] = set()
     for candidate in (base, base.parent, base.parent.parent):
         if candidate in seen:

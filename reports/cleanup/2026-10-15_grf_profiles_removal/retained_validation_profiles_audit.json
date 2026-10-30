@@ -1,0 +1,58 @@
+{
+  "head": "dba42388c32a441a5543f20881612a52781d7a99",
+  "files_untouched": true,
+  "v4": {
+    "file": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO_v4_mesh_experimental.json",
+    "current_runtime_required": false,
+    "uses": [
+      "validation/test_two_sensor_mesh_profile_v4.py: geometry and provenance contract tests",
+      "validation/compare_two_sensor_mesh_profiles_prescribed.py: fixed-geometry comparison against existing detector",
+      "validation/diagnose_two_sensor_dual_stream_prescribed.py and two-sensor sweep protocols: rejected experimental comparator/geometry reference"
+    ],
+    "scientific_status": "experimental_not_promoted; report 2026-07-21 NOT PROMOTABLE,1/51 HS and0/50 TO on prescribed fixed replay",
+    "rebuild_script": "validation/build_two_sensor_mesh_profile_v4.py",
+    "rebuild_required_inputs": [
+      "current grf_detector_HS-TO.json",
+      "AB06 PI setup and.osim",
+      "models/Geometry/AM_foot_l.stl",
+      "Python NumPy and OpenSim dependencies"
+    ],
+    "rebuild_executed": true,
+    "rebuild_all_nonmetadata_fields_equal": true,
+    "rebuild_byte_identical": false,
+    "rebuild_differences": [
+      "metadata/v4_mesh_design/foot_mesh/path",
+      "metadata/v4_mesh_design/model/path",
+      "metadata/v4_mesh_design/setup/path",
+      "metadata/v4_mesh_design/setup/sha256"
+    ],
+    "exact_historical_recovery": "Restore original from Git commit or external backup; rebuilding on current checkout does not satisfy frozen original hash"
+  },
+  "sensor_basis": {
+    "file": "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_sensor_basis.json",
+    "current_runtime_required": false,
+    "uses": [
+      "validation/rl_env_smoke_ab06_pi.py: optional online_sensor short integration smoke",
+      "tools/online_grf_contact/README.md: example plugin parity verification command",
+      "historical June8 reports: IK baseline and known-invalid contact negative control"
+    ],
+    "legacy_smoke_preflight_old_setup_exists": false,
+    "canonical_setup_exists": true,
+    "calibration_script": "validation/calibrate_online_grf_basis.py",
+    "calibration_required_inputs": [
+      "model and marker-derived/preliminary starting contact geometry",
+      "setup/IK trajectory",
+      "prescribed ExternalLoads and GRF data",
+      "original sampling interval/time window/fit parameters",
+      "compatible OpenSim NumPy SciPy solver environment"
+    ],
+    "regenerate_possible_as_calibration": true,
+    "exact_recalibration_verified": false,
+    "current_vs_original_algorithm_diff": "Current calibrator fits full wrench on 2D candidate patch with different candidate dissipation set; original commit2ff7398ee fitted vertical GRF with longitudinal basis. Fixed optimizer seed alone is insufficient for exact original reconstruction.",
+    "original_metadata_incomplete_for_byte_exact_rebuild": "No original source filename/hash, command line, solver versions, full fit hyperparameters recorded; reports show procedure and metrics rather than a byte-exact rebuild recipe",
+    "exact_historical_recovery": "Restore original from Git commit or external backup rather than rerunning optimization",
+    "physical_limitation": "Historical negative control: maximum left penetration approx102mm; not suitable as active support contact"
+  },
+  "exact_Git_recovery_verified": "Both retained JSONs tracked and byte-identical to current HEAD; see retained_profiles_git_recovery.json",
+  "no_full_calibration_or_scientific_replay_run": true
+}

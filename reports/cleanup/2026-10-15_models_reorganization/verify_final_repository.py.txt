@@ -1,0 +1,79 @@
+import concurrent.futures
+import hashlib
+import json
+import subprocess
+import time
+from pathlib import Path
+
+ROOT = Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+WORK = Path('/tmp/cmc_models_reorganization_2026_10_15')
+before = json.loads((WORK / 'before_manifest.json').read_text())
+mapping = json.loads((WORK / 'file_mapping.json').read_text())
+allowed = {'.gitignore', 'AGENTS.md', 'config.py', 'path_resolver.py',
+           'setup_io.py', 'visualize.py', '.simulator_last_setup.json'}
+expected_after = {}
+for item in json.loads((WORK / 'trajectory_edits.json').read_text())['files']:
+    allowed.add(item['path'])
+    expected_after[item['path']] = item['sha256']
+for item in json.loads((WORK / 'tools_agent_changes.json').read_text())['owned_changed_files']:
+    allowed.add(item['path'])
+    expected_after[item['path']] = item['after']['sha256']
+for item in json.loads((WORK / 'models_xml_applied_result.json').read_text())['files']:
+    allowed.add(item['path'])
+    expected_after[item['path']] = item['sha256_after']
+
+def inspect(pair):
+    old, entry = pair
+    new = mapping[old]['new_path'] if old in mapping else old
+    path = ROOT / new
+    if not path.is_file():
+        return {'old': old, 'path': new, 'missing': True}
+    sha = hashlib.sha256(path.read_bytes()).hexdigest()
+    return {'old': old, 'path': new, 'bytes': path.stat().st_size,
+            'sha256': sha, 'changed': sha != entry['sha256']}
+
+started = time.monotonic()
+with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+    results = list(pool.map(inspect, before['files'].items()))
+missing = [r for r in results if r.get('missing')]
+changed = [r for r in results if r.get('changed')]
+unexpected = [r for r in changed if r['path'] not in allowed]
+receipt_mismatch = [r for r in results
+                    if r['path'] in expected_after
+                    and r.get('sha256') != expected_after[r['path']]]
+prior_missing_restored = [p for p in before['missing_tracked'] if (ROOT / p).is_file()]
+head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+all_paths = list(mapping) + [e['new_path'] for e in mapping.values()]
+ignored = subprocess.run(['git', 'check-ignore', '--no-index', '-z', '--stdin'],
+                         input='\0'.join(all_paths).encode() + b'\0',
+                         cwd=ROOT, capture_output=True, check=False)
+if ignored.returncode not in (0, 1):
+    raise RuntimeError(ignored.stderr.decode())
+ignored_set = set(ignored.stdout.decode().strip('\0').split('\0'))
+ignore_drift = [{'old': old, 'new': item['new_path']}
+                for old, item in mapping.items()
+                if (old in ignored_set) != (item['new_path'] in ignored_set)]
+report = {
+    'passed': not (missing or unexpected or receipt_mismatch or ignore_drift)
+              and head == before['head'] and not prior_missing_restored,
+    'files_checked': len(results), 'bytes_before': before['bytes_checked'],
+    'files_byte_identical': len(results) - len(changed) - len(missing),
+    'changed_files': changed, 'expected_changed_count': len(allowed),
+    'missing_files': missing, 'unexpected_changes': unexpected,
+    'agent_receipt_mismatches': receipt_mismatch,
+    'head_before': before['head'], 'head_after': head,
+    'preexisting_missing_tracked_count': len(before['missing_tracked']),
+    'preexisting_missing_tracked_restored': prior_missing_restored,
+    'model_ignore_status_comparison_count': len(mapping),
+    'model_ignore_status_drift': ignore_drift,
+    'new_model_files': sorted(str(p.relative_to(ROOT))
+                              for p in (ROOT / 'models').rglob('*')
+                              if p.is_file() and str(p.relative_to(ROOT))
+                              not in {v['new_path'] for v in mapping.values()}),
+    'scope': 'All present tracked files plus all model files, plugins, old user/cleanup reports and selected local metadata, captured before this migration.',
+    'elapsed_s': round(time.monotonic() - started, 2),
+}
+(WORK / 'final_repository_integrity.json').write_text(json.dumps(report, indent=2) + '\n')
+print(json.dumps({k: v for k, v in report.items()
+                  if k not in {'changed_files'}}, indent=2))
+raise SystemExit(0 if report['passed'] else 1)

@@ -1,0 +1,24 @@
+from pathlib import Path
+import json, sys, gc, glob
+import opensim
+root=Path(sys.argv[1]);out=Path(sys.argv[2]);mode=sys.argv[3]
+opensim.Logger.setLevelString("error")
+plugins=[]
+for name in ("libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib", "libonlineGRFContact.dylib"):
+ p=root/"plugins"/name
+ if p.exists():
+  opensim.LoadOpenSimLibraryExact(str(p));plugins.append(str(p))
+for d in [str(root/"Geometry")]+glob.glob("/Applications/OpenSim*/OpenSim*.app/Contents/Resources/opensim/Geometry"):
+ if Path(d).is_dir():opensim.ModelVisualizer.addDirToGeometrySearchPaths(d)
+records=[]
+for p in sorted((root/"models").rglob("*.osim")):
+ row={"path":p.relative_to(root).as_posix()}
+ try:
+  m=opensim.Model(str(p));s=m.initSystem()
+  row.update(ok=True,coordinates=m.getCoordinateSet().getSize(),states=m.getNumStateVariables(),forces=m.getForceSet().getSize(),time=s.getTime())
+  del s,m;gc.collect()
+ except Exception as e:row.update(ok=False,error=str(e))
+ records.append(row);print(json.dumps(row),flush=True)
+result={"mode":mode,"plugins":plugins,"models":records,"all_ok":all(r["ok"] for r in records)}
+out.write_text(json.dumps(result,indent=2)+"\n")
+print("RESULT",json.dumps({"count":len(records),"all_ok":result["all_ok"]}))

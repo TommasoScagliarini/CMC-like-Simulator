@@ -1,0 +1,44 @@
+from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+
+OUT=Path('/tmp/cmc_sea_source_migration_2026_10_15')
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+sys.path.insert(0,str(ROOT))
+import numpy as np
+from output import read_sto
+
+libs={'installed':ROOT/'plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff',
+      'rebuilt':OUT/'build_mac_arm64/SEA_Plugin_BlackBox_mCMC_impedence_ff'}
+records=[]
+for label,lib in libs.items():
+    work=OUT/('cascade_'+label);work.mkdir(exist_ok=True)
+    cmd=['/opt/anaconda3/envs/envCMC-rllib/bin/python','-B',str(OUT/'cascade_smoke.py'),str(lib),str(work)]
+    p=subprocess.run(cmd,cwd=work,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','MPLCONFIGDIR':str(OUT/'mpl')},stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=180)
+    (OUT/(label+'_cascade.log')).write_text(p.stdout)
+    records.append({'label':label,'command':cmd,'returncode':p.returncode})
+    print(json.dumps(records[-1]),flush=True)
+    if p.returncode:
+        print(p.stdout[-7000:],flush=True)
+        raise SystemExit(p.returncode)
+leftdir=OUT/'cascade_installed';rightdir=OUT/'cascade_rebuilt'
+left_names={p.name for p in leftdir.glob('*.sto')}
+right_names={p.name for p in rightdir.glob('*.sto')}
+assert left_names==right_names and left_names
+results=[]
+for name in sorted(left_names):
+    ta,ca,a,da=read_sto(str(leftdir/name));tb,cb,b,db=read_sto(str(rightdir/name))
+    assert ca==cb and da==db and a.shape==b.shape,name
+    assert np.array_equal(ta,tb),name
+    assert np.allclose(a,b,atol=1e-9,rtol=1e-12,equal_nan=True),name
+    finite=np.isfinite(a)&np.isfinite(b)
+    delta=float(np.max(np.abs(a[finite]-b[finite]))) if finite.any() else 0.0
+    results.append({'file':name,'rows':len(ta),'columns':len(ca),'max_absolute_difference':delta,
+                    'nonfinite_values':int((~np.isfinite(a)).sum())})
+result={'passed':True,'processes':records,'duration_s':0.03,'files_compared':len(results),
+        'max_absolute_difference':max(r['max_absolute_difference'] for r in results),
+        'table_comparisons':results,'scope':'30ms real CMC cascade+PI smoke, same installed and rebuilt plugin outputs'}
+(OUT/'cascade_smoke_comparison.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({k:v for k,v in result.items() if k!='table_comparisons'},indent=2),flush=True)

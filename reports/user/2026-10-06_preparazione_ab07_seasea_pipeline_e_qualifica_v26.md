@@ -1,5 +1,10 @@
 # AB07 SEASEA: preparazione della pipeline e qualifica V26 — 2026-10-06
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Esito:** preparazione del modello e dei dati completata in `models/AB07_SEASEA_Threadmill`; due simulazioni prescribed da 9,01 s completate con i parametri SEA e della control chain di AB06. **La qualifica del contatto e degli eventi V26 su AB07 resta incompleta.** Rimane anche il limite di tracking biologico MTP già documentato in AB06.
 
 **Instruction check token:** `CMC_AGENT_OK_2026`.
@@ -186,10 +191,10 @@ Fonti: [validazione prescribed CMC](../../validation/ab07_pipeline_2026_10_06/se
 | [tools/convert_epic_ab06_to_opensim.m](../../tools/convert_epic_ab06_to_opensim.m) | Lettura e validazione dei timestamp Header, fallback soltanto in assenza di Header e controllo della sovrapposizione temporale |
 | [scripts/run_opensim_sea_pipeline.py](../../scripts/run_opensim_sea_pipeline.py) | Percorso `--ik-only`, gestione dell'esito OpenSim, eliminazione dell'output atteso obsoleto e associazione esatta delle diagnostiche marker al MOT prodotto |
 | [Trajectory Generator/osim_trj_cmc_like.py](<../../Trajectory Generator/osim_trj_cmc_like.py>) | Centro e asse della caviglia letti dal frame parent del PinJoint protesico, anziché dalla stazione tibia fissa a −0,43 m |
-| [qualify_prescribed_v26.py](<../../Trajectory Generator/validation/AB07/qualify_prescribed_v26.py>), nuovo | Wrapper diagnostico senza checkpoint, binding AB07 e conservazione della configurazione/profili V26 |
-| [analyze_prescribed_v26.py](<../../Trajectory Generator/validation/AB07/analyze_prescribed_v26.py>), nuovo | Analisi di eventi, carico e replay delle pose salvate con provenance e limiti espliciti |
+| [qualify_prescribed_v26.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0f5eb35e62d4d4ea>), nuovo | Wrapper diagnostico senza checkpoint, binding AB07 e conservazione della configurazione/profili V26 |
+| [analyze_prescribed_v26.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-509d692b5c9043a0>), nuovo | Analisi di eventi, carico e replay delle pose salvate con provenance e limiti espliciti |
 | [validation/ab07_pipeline_2026_10_06/](../../validation/ab07_pipeline_2026_10_06/) | Validator bundle, diagnostica piede/piano, confronto healthy–IK–actual e receipt/log delle verifiche |
-| Test in `validation/` e [Trajectory Generator/validation/AB07/](<../../Trajectory Generator/validation/AB07/>) | Regression fitting, preparazione pipeline, timestamp MATLAB, wrapper V26, geometria caviglia e matching offline |
+| Test in `validation/` e [Trajectory Generator/validation/AB07/ — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-3866d980498c9741>) | Regression fitting, preparazione pipeline, timestamp MATLAB, wrapper V26, geometria caviglia e matching offline |
 
 La modifica alla geometria della caviglia conserva AB06 entro 10⁻¹² nelle pose testate; per AB07 corregge una differenza del centro di circa 44,101 mm. È verificato anche il caso con asse orientato. Non cambia i guadagni SEA né il plugin.
 

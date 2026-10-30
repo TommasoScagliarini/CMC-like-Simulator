@@ -1,0 +1,358 @@
+{
+  "schema_version": 1,
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "date": "2026-10-14",
+  "source": "Read-only reconciliation of completed verification artifacts; no new test executed by summary step",
+  "overall_cleanup_integrity": "PASS: retained file bytes unchanged except precisely expected .gitignore modification; no new failure attributable to cleanup",
+  "important_qualification": "Historical V26C bundle full/structural validation is not green: two pre-existing inconsistencies documented below. The native smoke is a load/reset/two-segment execution check, not a full scientific best47 validation.",
+  "checks": {
+    "retained_worktree_bytes": {
+      "result": "PASS",
+      "evidence": "whole_worktree_after_check.json",
+      "details": {
+        "passed": true,
+        "retained_files_checked": 151319,
+        "retained_bytes_checked": 44636575150,
+        "unchanged_files": 151318,
+        "expected_changes": [
+          ".gitignore"
+        ],
+        "changed": [
+          ".gitignore"
+        ],
+        "unexpected_changes": [],
+        "missing_retained": [],
+        "unexpected_added": [],
+        "regenerated_removed_targets": [],
+        "elapsed_s": 23.11941079099779
+      },
+      "interpretation": "Checks every retained workspace file against captured baseline before removals; excludes .git metadata and separately handles the expected .gitignore edit. No unexpected source/model/plugin/checkpoint/data/report mutation or missing retained file.",
+      "reproduction_command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "-B",
+        "/tmp/cmc_cleanup_phase1_2026_10_14/phase1_ops.py",
+        "after"
+      ],
+      "command_provenance": "Equivalent reproduction command; exact invocation interpreter is not recorded in this individual result artifact."
+    },
+    "precise_ignore_rules": {
+      "result": "PASS",
+      "evidence": "ignore_rule_checks.json",
+      "cases_checked": 8,
+      "details": {
+        "passed": true,
+        "cases": [
+          {
+            "path": "build/new_generated.json",
+            "expected_ignored": true,
+            "actual_ignored": true,
+            "rule": ".gitignore:27:/build/\tbuild/new_generated.json"
+          },
+          {
+            "path": "build_online_grf/new_generated.obj",
+            "expected_ignored": true,
+            "actual_ignored": true,
+            "rule": ".gitignore:28:/build_online_grf/\tbuild_online_grf/new_generated.obj"
+          },
+          {
+            "path": "paper/main.aux",
+            "expected_ignored": true,
+            "actual_ignored": true,
+            "rule": ".gitignore:71:/paper/main.aux\tpaper/main.aux"
+          },
+          {
+            "path": "paper/main.log",
+            "expected_ignored": true,
+            "actual_ignored": true,
+            "rule": ".gitignore:74:/paper/main.log\tpaper/main.log"
+          },
+          {
+            "path": "validation/ab07_detector_investigation_2026_10_06/stage3/build/retained.json",
+            "expected_ignored": false,
+            "actual_ignored": false,
+            "rule": ""
+          },
+          {
+            "path": "tools/sea_plugin_relative_d/SeriesElasticActuator.cpp",
+            "expected_ignored": false,
+            "actual_ignored": false,
+            "rule": ""
+          },
+          {
+            "path": "paper/main.tex",
+            "expected_ignored": false,
+            "actual_ignored": false,
+            "rule": ""
+          },
+          {
+            "path": "paper/main.pdf",
+            "expected_ignored": false,
+            "actual_ignored": false,
+            "rule": ""
+          }
+        ]
+      },
+      "interpretation": "Root-generated build and exact LaTeX products ignored; scientific nested build directory, SEA source, paper source and chosen PDF remain visible."
+    },
+    "protected_operational_anchors": {
+      "result": "PASS through full before/after retained-file comparison",
+      "baseline_evidence": "protected_paths_integrity_baseline.json",
+      "baseline_count": 86,
+      "all_historical_pins_matched_before": true,
+      "interpretation": "The 86 selected anchors consist of 84 historical SHA pins, all matched before cleanup, and 2 additional operational/provenance anchors captured from their current bytes. All 86 are covered by the retained-file comparison before/after cleanup. The two extra anchors have no historical_sha256 value in this selected baseline; this does not assert that no other historical manifest pins them.",
+      "historical_pin_count": 84,
+      "extra_operational_anchor_count": 2,
+      "extra_operational_anchors": [
+        "validation/validate_sim_results.py",
+        "models/SEASEA/data/.DS_Store"
+      ]
+    },
+    "v26c_archive_objects_controls": {
+      "result": "PASS",
+      "evidence": "bundle_drift_diagnostic.json",
+      "details": {
+        "passed": true,
+        "counts": {
+          "external_file_count": 1,
+          "in_place_file_count": 1357,
+          "object_bytes": 257138708,
+          "object_count": 692,
+          "source_entry_count": 1888,
+          "source_logical_bytes": 267995033
+        }
+      },
+      "interpretation": "692 content-addressed objects (257138708 B), controls, related manifest and one external evidence log retain exact archive hashes.",
+      "reproduction_command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "-B",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/materialize_pipeline_bundle.py",
+        "--verify"
+      ],
+      "command_provenance": "Equivalent reproduction command; exact invocation interpreter is not recorded in this individual result artifact."
+    },
+    "v26c_in_place_full_hashes": {
+      "result": "PREEXISTING INCONSISTENCY",
+      "evidence": "bundle_drift_diagnostic.json",
+      "counts": {
+        "entries": 1357,
+        "matches_historical_manifest": 1356,
+        "drifts": 1,
+        "unchanged_since_pre_cleanup": true
+      },
+      "interpretation": "All 1,357 current entries are unchanged by cleanup; 1,356 match the historical sealed manifest. The remaining file had already diverged in snapshot HEAD.",
+      "reproduction_command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "-B",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/materialize_pipeline_bundle.py",
+        "--verify",
+        "--full"
+      ],
+      "command_provenance": "Equivalent reproduction command; exact invocation interpreter is not recorded in this individual result artifact.",
+      "diagnostic_documentary_source": "bundle_drift_diagnostic.py.txt",
+      "diagnostic_source_provenance": "Exact Python code reconstructed from the executed heredoc and saved as documentary text; not rerun. Original command was python3 -B with cwd repository root; file reads and git show are read-only, output JSON is written under /tmp."
+    },
+    "v26c_structural_suite": {
+      "result": "17 PASS; 1 failure and 1 error are PREEXISTING",
+      "evidence": [
+        "bundle_structural_result.json",
+        "bundle_structural_suite.log"
+      ],
+      "details": {
+        "suite_total": 19,
+        "passed": 17,
+        "failures": 1,
+        "errors": 1,
+        "preexisting_source_closure_extra_files": [
+          {
+            "path": "Trajectory Generator/baseline_MLP/experimental_configs/morphology_joint_split_equal_5p0_2026-09-01.json",
+            "present_before_cleanup": true,
+            "sha256_before": "c230035150a1e430dfe526ce4db74dd13124da3d90b05054df62108e09c25ea2",
+            "sha256_after": "c230035150a1e430dfe526ce4db74dd13124da3d90b05054df62108e09c25ea2"
+          },
+          {
+            "path": "Trajectory Generator/baseline_MLP/experimental_configs/morphology_joint_split_equal_1p05_2026-08-31.json",
+            "present_before_cleanup": true,
+            "sha256_before": "9df746ee766d7d2cd31aa4db65bc142ae827af1f2e4e0f4279ad4057821dee65",
+            "sha256_after": "9df746ee766d7d2cd31aa4db65bc142ae827af1f2e4e0f4279ad4057821dee65"
+          },
+          {
+            "path": "reports/user/2026-08-28_rollout_best_exnovo_v26c_j20_plot_canonici_e_corridor_morfologico.md",
+            "present_before_cleanup": true,
+            "sha256_before": "2bf73a5f69152d827cff29cbf9f4d24bc51e4a5edf0e0c3dfef895242171e6ec",
+            "sha256_after": "2bf73a5f69152d827cff29cbf9f4d24bc51e4a5edf0e0c3dfef895242171e6ec"
+          }
+        ],
+        "in_place_drift_preexisting": "v26c_j1_collect.py; same baseline and HEAD bytes",
+        "sources_unchanged": true
+      },
+      "interpretation": "The 1 error is the same in-place byte drift. The 1 failure is source-discovery closure now containing three additional files; all existed before cleanup and remain byte-identical.",
+      "reproduction_command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "-B",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/test_pipeline_bundle.py"
+      ],
+      "command_provenance": "Equivalent reproduction command; exact invocation interpreter is not recorded in this individual result artifact."
+    },
+    "best47_inference_checkpoint_reload": {
+      "result": "PASS",
+      "evidence": [
+        "checkpoint_reload_result.json",
+        "checkpoint_reload.log"
+      ],
+      "details": {
+        "passed": true,
+        "class": "asymmetric_rl_module.AsymmetricActorCriticTorchRLModule",
+        "actor_features": 35,
+        "full_features": 84,
+        "action_dim": 2,
+        "logits_shape": [
+          1,
+          4
+        ],
+        "inference_finite": true,
+        "prefix_and_full_equal": true,
+        "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+        "torch": "2.10.0",
+        "ray": "2.55.1"
+      },
+      "interpretation": "Loads canonical flat module class from best47, verifies 35 actor and 84 full features, 2 action dimensions, finite outputs and identical inference on a zero full observation vs its zero actor prefix. This is a reload and finite inference smoke check only: equality at this one all-zero input does not prove invariance to privileged observations. No Algorithm resume, PPO update or Ray cluster.",
+      "reproduction_command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "-B",
+        "/tmp/cmc_cleanup_phase1_2026_10_14/reload_best47.py"
+      ],
+      "command_provenance": "Equivalent reproduction command; exact invocation interpreter is not recorded in this individual result artifact.",
+      "privileged_observation_invariance_proven": false
+    },
+    "native_smoke": {
+      "result": "PASS as load/reset/two-segment smoke only",
+      "evidence": [
+        "native_smoke/watchdog_summary.json",
+        "native_smoke/rollout_summary.json",
+        "native_smoke/rollout_policy_trace.json"
+      ],
+      "executed_supervised_worker_command": [
+        "/opt/anaconda3/envs/envCMC-rllib/bin/python",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/rollout_eval.py",
+        "--checkpoint",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/rl_module_best",
+        "--setup-xml",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+        "--episode-duration",
+        "5",
+        "--episode-start-offset-s",
+        "1.956870983805102",
+        "--segment-duration",
+        "0.01",
+        "--max-steps",
+        "2",
+        "--action-selection",
+        "deterministic",
+        "--seed",
+        "123",
+        "--no-record-outputs",
+        "--record-policy-trace",
+        "--no-progress",
+        "--startup-timeout-s",
+        "120",
+        "--run-timeout-s",
+        "120",
+        "--output-dir",
+        "/tmp/cmc_cleanup_phase1_2026_10_14/native_smoke",
+        "--checkpoint",
+        "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/rl_module_best",
+        "--output-dir",
+        "/private/tmp/cmc_cleanup_phase1_2026_10_14/native_smoke",
+        "--worker-process"
+      ],
+      "cwd": "/tmp/cmc_cleanup_phase1_2026_10_14",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "details": {
+        "returncode": 0,
+        "timeout_reason": null,
+        "elapsed_wall_time_s": 8.261882066726685,
+        "ok": true,
+        "policy_steps": 2,
+        "segment_duration_s": 0.01,
+        "executed_simulation_duration_s": 0.019999999999988916,
+        "start_time_s": 13.946870983805102,
+        "last_recorded_time_s": 13.96687098380509,
+        "requested_episode_duration_s": 5.0,
+        "max_steps": 2,
+        "stopped_by_max_steps": true,
+        "end_reason": null,
+        "terminated": false,
+        "truncated": false,
+        "n_actor": 35,
+        "n_observation": 84,
+        "action_selection": "deterministic",
+        "action_mode": "absolute",
+        "action_clipped_steps": 0,
+        "phase_fsm_input_mode": "legacy_events",
+        "event_contract_id": "legacy_events_v1",
+        "binary_phase_fsm_mode": "binary_active",
+        "phase_valid_cycle_count": 0,
+        "episode_return": 0.0,
+        "record_outputs": false,
+        "record_policy_trace": true
+      },
+      "interpretation": "The supervised worker loaded current runtime/model/plugins and best47 and produced two policy/dynamic segments. It used a 5 s configured horizon but max_steps=2 capped execution near 20 ms; end_reason=null and terminated/truncated=false are consistent with that cap and must not be described as completing a 5 s episode. Default CLI phase input legacy_events applies; this is not a repetition of the frozen scientific validation protocol."
+    }
+  },
+  "preexisting_bundle_problems": [
+    {
+      "id": "BUNDLE_BYTE_DRIFT",
+      "test": "test_every_object_and_in_place_artefact_matches_sha256",
+      "path": "Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j1_collect.py",
+      "expected_bytes": 55428,
+      "actual_bytes": 55320,
+      "expected_sha256": "83862a8684d1970fc7f205be43a71040ec0a655f545e7c4f4607ac8f38c6691d",
+      "actual_sha256": "f264342b978db1879620c6fdf803a6662f252ee82f61accc7ff3b012aaff6bb8",
+      "present_before_cleanup": true,
+      "same_bytes_as_pre_cleanup": true,
+      "current_matches_snapshot_head": true,
+      "snapshot_head": "dba42388c32a441a5543f20881612a52781d7a99",
+      "root_full_verify_already_failed_before_removal": true
+    },
+    {
+      "id": "BUNDLE_SOURCE_CLOSURE_ADDITIONS",
+      "test": "test_audited_source_closure_is_exact",
+      "files": [
+        {
+          "path": "Trajectory Generator/baseline_MLP/experimental_configs/morphology_joint_split_equal_5p0_2026-09-01.json",
+          "present_before_cleanup": true,
+          "sha256_before": "c230035150a1e430dfe526ce4db74dd13124da3d90b05054df62108e09c25ea2",
+          "sha256_after": "c230035150a1e430dfe526ce4db74dd13124da3d90b05054df62108e09c25ea2"
+        },
+        {
+          "path": "Trajectory Generator/baseline_MLP/experimental_configs/morphology_joint_split_equal_1p05_2026-08-31.json",
+          "present_before_cleanup": true,
+          "sha256_before": "9df746ee766d7d2cd31aa4db65bc142ae827af1f2e4e0f4279ad4057821dee65",
+          "sha256_after": "9df746ee766d7d2cd31aa4db65bc142ae827af1f2e4e0f4279ad4057821dee65"
+        },
+        {
+          "path": "reports/user/2026-08-28_rollout_best_exnovo_v26c_j20_plot_canonici_e_corridor_morfologico.md",
+          "present_before_cleanup": true,
+          "sha256_before": "2bf73a5f69152d827cff29cbf9f4d24bc51e4a5edf0e0c3dfef895242171e6ec",
+          "sha256_after": "2bf73a5f69152d827cff29cbf9f4d24bc51e4a5edf0e0c3dfef895242171e6ec"
+        }
+      ],
+      "all_present_before_cleanup": true,
+      "all_unchanged": true,
+      "interpretation": "Live discovery includes three files beyond the original historical closure. Cleanup removed none of these sources and did not edit the source-discovery code or archive manifests."
+    }
+  ],
+  "limits": [
+    "Native runtime verified on macOS arm64; no Windows x86 execution or ABI qualification performed.",
+    "Windows ff.dll and OnlineGRFContact.dll gap already declared by V26C bundle; deletion changed no runtime plugin binary or source semantics.",
+    "Tiny smoke cannot validate gait recovery, full-cycle contact/phase dynamics,5s best47 behavior, numeric equivalence to historical rollout, AB07/AB08 generalization or policy contribution.",
+    "Zero episode return and zero gait events over approximately20ms do not establish a scientific policy failure or success.",
+    "Checkpoint reload covers exported inference RLModule; full Algorithm/Learner/optimizer resume and training were not tested.",
+    "Historical manifest inconsistencies were diagnosed and left intact; no retrospective source/manifest rewrite or checksum refresh.",
+    "Whole retained-file comparison occurred before persistence of new cleanup evidence/report files; subsequent intentional additions must be listed separately.",
+    "User reported complete external backup; external-media restore verification was not repeated during cleanup.",
+    "Prefix/full inference equality was checked only with all-zero inputs; privileged-observation invariance was not tested by changing the privileged suffix."
+  ]
+}

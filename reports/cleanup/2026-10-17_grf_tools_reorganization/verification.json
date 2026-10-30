@@ -1,0 +1,561 @@
+{
+  "status": "PASS_WITH_TWO_UNCHANGED_BASELINE_FAILURES",
+  "date": "2026-10-17",
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "user_requests": {
+    "annotation_1": "Remove 11 policy/PPO/rollout-analysis tools.",
+    "annotation_2": "Remove 5 morphology, scenario-helper, forensic and readiness files.",
+    "annotation_3": "Remove 3 strict SEA postprocessing/inertia files.",
+    "additional_explicit_user_answer": "Remove dependent audit_primary_grf_training_readiness.py, build_canonical_grf_event_oracle.py, validate_event_warped_morphology_profile.py and their dedicated tests.",
+    "main_request": "Organize retained GRF/contact scripts in dedicated online_grf_profiles/ subfolders."
+  },
+  "removed": {
+    "source_files": 22,
+    "dedicated_test_modules": 15,
+    "dedicated_fixture_files": 9,
+    "total_files": 46,
+    "total_bytes": 20221353,
+    "paths": [
+      "validation/analyze_stochastic_rollouts.py",
+      "validation/audit_policy_milestones.py",
+      "validation/audit_primary_grf_training_readiness.py",
+      "validation/audit_training_restarts.py",
+      "validation/build_canonical_grf_event_oracle.py",
+      "validation/build_event_warped_morphology_profile.py",
+      "validation/build_pilot_evidence_table.py",
+      "validation/cmc_strict_metrics.py",
+      "validation/compare_policy_checkpoints.py",
+      "validation/compare_rollout_traces.py",
+      "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_short_minus020/rollout_policy_trace.json",
+      "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_short_minus020/rollout_summary.json",
+      "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_short_nominal/rollout_policy_trace.json",
+      "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_short_nominal/rollout_summary.json",
+      "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_short_plus020/rollout_policy_trace.json",
+      "validation/controller_memory_ablation/2026-07-13_markov35_corrected_full_short_plus020/rollout_summary.json",
+      "validation/diagnose_actor_fragility.py",
+      "validation/effective_joint_inertia.py",
+      "validation/exploration_noise_runs/2026-07-14_h0_sigma0005_stochastic_plus020_seed123/rollout_policy_trace.json",
+      "validation/exploration_noise_runs/2026-07-14_h0_sigma0005_stochastic_plus020_seed123/rollout_summary.json",
+      "validation/fsm_v3_scenarios.py",
+      "validation/h0_forensic_rollout.py",
+      "validation/heldout_paired_gate.py",
+      "validation/hpf_noise_metric.py",
+      "validation/pilot_protocols/2026-07-15_h0_exact_interleaved_lr5e-7_pilot50.json",
+      "validation/ppo_pilot_screen.py",
+      "validation/readiness_gatekeeper.py",
+      "validation/replay_completed_segment_morphology.py",
+      "validation/robust_ppo_gate.py",
+      "validation/summarize_warm_start_preflight.py",
+      "validation/test/test_analyze_stochastic_rollouts.py",
+      "validation/test/test_build_pilot_evidence_table.py",
+      "validation/test/test_canonical_grf_event_oracle.py",
+      "validation/test/test_compare_policy_checkpoints.py",
+      "validation/test/test_compare_rollout_traces.py",
+      "validation/test/test_diagnose_actor_fragility.py",
+      "validation/test/test_h0_forensic_rollout.py",
+      "validation/test/test_heldout_paired_gate.py",
+      "validation/test/test_ppo_pilot_screen.py",
+      "validation/test/test_primary_grf_training_readiness.py",
+      "validation/test/test_readiness_gatekeeper.py",
+      "validation/test/test_replay_completed_segment_morphology.py",
+      "validation/test/test_robust_ppo_gate.py",
+      "validation/test/test_training_restart_audit.py",
+      "validation/test/test_warm_start_preflight.py",
+      "validation/validate_event_warped_morphology_profile.py"
+    ],
+    "retired_test_dependencies": [
+      {
+        "path": "validation/test/test_analyze_stochastic_rollouts.py",
+        "removed_dependencies": [
+          "analyze_stochastic_rollouts"
+        ]
+      },
+      {
+        "path": "validation/test/test_build_pilot_evidence_table.py",
+        "removed_dependencies": [
+          "build_pilot_evidence_table",
+          "ppo_pilot_screen"
+        ]
+      },
+      {
+        "path": "validation/test/test_canonical_grf_event_oracle.py",
+        "removed_dependencies": [
+          "build_canonical_grf_event_oracle"
+        ]
+      },
+      {
+        "path": "validation/test/test_compare_policy_checkpoints.py",
+        "removed_dependencies": [
+          "audit_policy_milestones",
+          "compare_policy_checkpoints"
+        ]
+      },
+      {
+        "path": "validation/test/test_compare_rollout_traces.py",
+        "removed_dependencies": [
+          "compare_rollout_traces"
+        ]
+      },
+      {
+        "path": "validation/test/test_diagnose_actor_fragility.py",
+        "removed_dependencies": [
+          "diagnose_actor_fragility"
+        ]
+      },
+      {
+        "path": "validation/test/test_h0_forensic_rollout.py",
+        "removed_dependencies": [
+          "h0_forensic_rollout"
+        ]
+      },
+      {
+        "path": "validation/test/test_heldout_paired_gate.py",
+        "removed_dependencies": [
+          "compare_policy_checkpoints",
+          "heldout_paired_gate"
+        ]
+      },
+      {
+        "path": "validation/test/test_ppo_pilot_screen.py",
+        "removed_dependencies": [
+          "audit_training_restarts",
+          "compare_policy_checkpoints",
+          "ppo_pilot_screen",
+          "robust_ppo_gate"
+        ]
+      },
+      {
+        "path": "validation/test/test_primary_grf_training_readiness.py",
+        "removed_dependencies": [
+          "audit_primary_grf_training_readiness",
+          "readiness_gatekeeper"
+        ]
+      },
+      {
+        "path": "validation/test/test_readiness_gatekeeper.py",
+        "removed_dependencies": [
+          "readiness_gatekeeper"
+        ]
+      },
+      {
+        "path": "validation/test/test_replay_completed_segment_morphology.py",
+        "removed_dependencies": [
+          "replay_completed_segment_morphology"
+        ]
+      },
+      {
+        "path": "validation/test/test_robust_ppo_gate.py",
+        "removed_dependencies": [
+          "robust_ppo_gate"
+        ]
+      },
+      {
+        "path": "validation/test/test_training_restart_audit.py",
+        "removed_dependencies": [
+          "audit_training_restarts"
+        ]
+      },
+      {
+        "path": "validation/test/test_warm_start_preflight.py",
+        "removed_dependencies": [
+          "summarize_warm_start_preflight"
+        ]
+      }
+    ]
+  },
+  "moved": {
+    "scripts": 17,
+    "json_support_files": 4,
+    "mapping": {
+      "validation/generate_online_grf_profile.py": "online_grf_profiles/calibration/generate_online_grf_profile.py",
+      "validation/calibrate_online_grf_basis.py": "online_grf_profiles/calibration/calibrate_online_grf_basis.py",
+      "validation/calibrate_online_grf_intensive.py": "online_grf_profiles/calibration/calibrate_online_grf_intensive.py",
+      "validation/calibrate_online_grf_residual.py": "online_grf_profiles/calibration/calibrate_online_grf_residual.py",
+      "validation/tune_online_grf_support.py": "online_grf_profiles/calibration/tune_online_grf_support.py",
+      "validation/build_primary_grf_mesh_sole.py": "online_grf_profiles/contact/build_primary_grf_mesh_sole.py",
+      "validation/audit_two_sensor_prescribed_geometry.py": "online_grf_profiles/detector/audit_two_sensor_prescribed_geometry.py",
+      "validation/build_two_sensor_mesh_profile_v4.py": "online_grf_profiles/detector/build_two_sensor_mesh_profile_v4.py",
+      "validation/validate_online_grf_events.py": "online_grf_profiles/detector/validate_online_grf_events.py",
+      "validation/validate_two_sensor_prescribed_replay.py": "online_grf_profiles/detector/validate_two_sensor_prescribed_replay.py",
+      "validation/validate_two_sensor_forward_states.py": "online_grf_profiles/detector/validate_two_sensor_forward_states.py",
+      "validation/validate_online_grf.py": "online_grf_profiles/validation/validate_online_grf.py",
+      "validation/validate_online_grf_forward_drift.py": "online_grf_profiles/validation/validate_online_grf_forward_drift.py",
+      "validation/compare_online_grf_output.py": "online_grf_profiles/validation/compare_online_grf_output.py",
+      "validation/check_online_grf_cop_rollover.py": "online_grf_profiles/validation/check_online_grf_cop_rollover.py",
+      "validation/verify_online_grf_plugin.py": "online_grf_profiles/validation/verify_online_grf_plugin.py",
+      "validation/online_grf_acceptance.py": "online_grf_profiles/validation/online_grf_acceptance.py",
+      "validation/primary_grf_candidate_grid_v1.json": "online_grf_profiles/contact/primary_grf_candidate_grid_v1.json",
+      "validation/primary_grf_model_compatibility_audit_2026-07-24.json": "online_grf_profiles/contact/primary_grf_model_compatibility_audit_2026-07-24.json",
+      "validation/primary_grf_surface_velocity_audit_2026-07-24.json": "online_grf_profiles/contact/primary_grf_surface_velocity_audit_2026-07-24.json",
+      "validation/online_grf_acceptance_thresholds.json": "online_grf_profiles/validation/online_grf_acceptance_thresholds.json"
+    },
+    "groups": {
+      "calibration": [
+        "generate_online_grf_profile",
+        "calibrate_online_grf_basis",
+        "calibrate_online_grf_intensive",
+        "calibrate_online_grf_residual",
+        "tune_online_grf_support"
+      ],
+      "contact": [
+        "build_primary_grf_mesh_sole"
+      ],
+      "detector": [
+        "audit_two_sensor_prescribed_geometry",
+        "build_two_sensor_mesh_profile_v4",
+        "validate_online_grf_events",
+        "validate_two_sensor_prescribed_replay",
+        "validate_two_sensor_forward_states"
+      ],
+      "validation": [
+        "validate_online_grf",
+        "validate_online_grf_forward_drift",
+        "compare_online_grf_output",
+        "check_online_grf_cop_rollover",
+        "verify_online_grf_plugin",
+        "online_grf_acceptance"
+      ]
+    },
+    "moved_json_bytes_and_hashes_preserved": true
+  },
+  "retained_tests": {
+    "modules": 52,
+    "fsm_support": "The standalone fsm_v3_scenarios.py was deleted; its deterministic fixture functions/data were inlined into test_prosthetic_phase_fsm_v3_resync.py. Existing FSM assertions were not changed.",
+    "source_updates": [
+      "validation/test/test_binary_phase_detector_v19.py",
+      "validation/test/test_build_primary_grf_mesh_sole.py",
+      "validation/test/test_online_grf_event_matching.py",
+      "validation/test/test_prosthetic_phase_fsm_v3_resync.py"
+    ],
+    "assertion_note": "Only the mesh-sole test expected candidate-grid metadata path changed to the new physical address. Physical gates, expected hashes and numerical assertions were preserved.",
+    "results": {
+      "collected_before": 519,
+      "collected_after": 519,
+      "same_retained_test_ids": true,
+      "results": {
+        "passed": 517,
+        "failed": 2
+      },
+      "failures": [
+        "test_causal_delayed_morphology_corridor.py::test_candidate_yaml_is_separate_preflight_only_contract",
+        "test_reward_function.py::test_exnovo_config_enables_task_based_reward_terms"
+      ],
+      "new_failures": [],
+      "skips_added": 0
+    },
+    "known_failure_reasons": [
+      "Current morphology_weight=0.0025; old assertion expects0.0.",
+      "Current phase_swing_hard_timeout_s=2.6; old assertion expects1.1."
+    ],
+    "command": "envCMC-rllib python -B pytest, -p no:cacheprovider, --basetemp under scratch; cwd outside repo, PYTHONDONTWRITEBYTECODE=1",
+    "manual_scripts_not_run": [
+      "validation/test/test_phase_fsm_prescribed_env.py",
+      "validation/validate_training_config.py"
+    ]
+  },
+  "cli_help_checks": {
+    "status": "PASS",
+    "passed": 18,
+    "checks": [
+      {
+        "path": "online_grf_profiles/calibration/generate_online_grf_profile.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.227
+      },
+      {
+        "path": "online_grf_profiles/calibration/calibrate_online_grf_basis.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.622
+      },
+      {
+        "path": "online_grf_profiles/calibration/calibrate_online_grf_intensive.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.621
+      },
+      {
+        "path": "online_grf_profiles/calibration/calibrate_online_grf_residual.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.621
+      },
+      {
+        "path": "online_grf_profiles/calibration/tune_online_grf_support.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.205
+      },
+      {
+        "path": "online_grf_profiles/contact/build_primary_grf_mesh_sole.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.063
+      },
+      {
+        "path": "online_grf_profiles/detector/audit_two_sensor_prescribed_geometry.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.615
+      },
+      {
+        "path": "online_grf_profiles/detector/build_two_sensor_mesh_profile_v4.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.63
+      },
+      {
+        "path": "online_grf_profiles/detector/validate_online_grf_events.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.213
+      },
+      {
+        "path": "online_grf_profiles/detector/validate_two_sensor_prescribed_replay.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.638
+      },
+      {
+        "path": "online_grf_profiles/detector/validate_two_sensor_forward_states.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.671
+      },
+      {
+        "path": "online_grf_profiles/validation/validate_online_grf.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.63
+      },
+      {
+        "path": "online_grf_profiles/validation/validate_online_grf_forward_drift.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.627
+      },
+      {
+        "path": "online_grf_profiles/validation/compare_online_grf_output.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.639
+      },
+      {
+        "path": "online_grf_profiles/validation/check_online_grf_cop_rollover.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.613
+      },
+      {
+        "path": "online_grf_profiles/validation/verify_online_grf_plugin.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.581
+      },
+      {
+        "path": "online_grf_profiles/validation/online_grf_acceptance.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.029
+      },
+      {
+        "path": "validation/validate_sim_results.py",
+        "returncode": 0,
+        "usage": true,
+        "sha256_unchanged": true,
+        "seconds": 0.215
+      }
+    ]
+  },
+  "native_plugin_equivalence": {
+    "samples": 19,
+    "sample_dt": 0.5,
+    "sides": {
+      "left": {
+        "force": {
+          "rmse": [
+            1.0243555778821261e-15,
+            3.160776284579743e-14,
+            3.7084044243150044e-16
+          ],
+          "max_abs_error": 1.1368683772161603e-13
+        },
+        "moment": {
+          "rmse": [
+            1.9864025636041178e-14,
+            1.7050675048427835e-15,
+            1.2059457971812148e-14
+          ],
+          "max_abs_error": 5.684341886080802e-14
+        },
+        "max_abs_error": 1.1368683772161603e-13
+      },
+      "right": {
+        "force": {
+          "rmse": [
+            1.9921953041897826e-15,
+            9.872678011047079e-14,
+            8.001555234557199e-16
+          ],
+          "max_abs_error": 3.6415457509240273e-13
+        },
+        "moment": {
+          "rmse": [
+            6.677199771625584e-14,
+            3.909833734614556e-15,
+            7.356591965358931e-14
+          ],
+          "max_abs_error": 2.674117573426074e-13
+        },
+        "max_abs_error": 3.6415457509240273e-13
+      }
+    },
+    "max_abs_error_n": 3.6415457509240273e-13,
+    "equivalent_within_1e-8_n": true
+  },
+  "protected_file_sha256": {
+    "plugins/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "plugins/README.md": "d83ed2a49cf87900b86ad0e39fafb6f119307b7dee98f10d089a386563b1d719",
+    "plugins/online_grf_contact/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "plugins/online_grf_contact/libOnlineGRFContact.dylib": "5597a59a5368825fd207753b59291e72240c1ece3aa5280804f1e9b9c7d6a2b3",
+    "plugins/SEA/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "plugins/SEA/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib": "77390d0f74055fb3419e88637baac1d215b1dd402ee1effe3e8cb14a66caf54b",
+    "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+    "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json": "61ea948a3c0613e5c0e684a3197de118c7116e36188fca6993da79ce713fd99e",
+    "online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json": "09e04ab94954703d74acc3a80b24ecefcc07d3fc918c03b9e9df8116a6c1a2b0",
+    "online_grf_profiles/binary_detector/operational/heel_toe_v25.json": "db704e502b99e49bea6d89493812bafdac748f8ce8d3ce28214ff624078539a2",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/training_cfg.resolved.yaml": "6904f7a9000b63b5c1aab661ebcab4974dffdd1cfb8c731df6a953fc9234229e",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last_meta.json": "adc5e26c84f3a0fb2de88eacea945426d38ea4e80c7f2f0cd1979ea663c9dfff",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/class_and_ctor_args.pkl": "5c98f006d99a71a0f1ddcbb31d8d73fe0a6dade8401e679f6af5b1bc943b4228",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/rl_module_last/module_state.pkl": "44457ca5df7fa0e0e1f1d361d940136917fe8f71e984a1b0afaefb8ca3ced33b",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/algorithm_state.pkl": "65c52fdc1c431eac2bb320ded6addc1efae4cd2c8837af57f611b4e418f98826",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/class_and_ctor_args.pkl": "573b0892236a3e48dda38221f2c46db38064575234fff6469a48ab0dc654bcf5",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/rllib_checkpoint.json": "80dcbfd86d311932527fe4d8121cd4cf27dc788f23f667e2467b3526967ff8dc",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/class_and_ctor_args.pkl": "07ab2ea8192b0ee669ca843c056484d628dfb05ff98513da9ffbfc6a5829d6e4",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/metadata.json": "96ece4363f8b7069198bf7a7bee7954f599110723552317892af0a20abb8a79e",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/state.pkl": "bfce13fc2f13ad950016bb48ccbbbd04ce13be07c748476dde1f940fcdfa0d52",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/class_and_ctor_args.pkl": "a63c64e5f43a88e73f2e076b06cd2c0bf0de749631d539f0f1177c50656e221a",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/metadata.json": "96ece4363f8b7069198bf7a7bee7954f599110723552317892af0a20abb8a79e",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/state.pkl": "950d15f3c25a90cc1208d28464953d9309de5d95c3ad3f86502b82e4bf8ec5c7",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/rl_module/class_and_ctor_args.pkl": "1abf975053f8b9cd29871c0f1498154c397c46265afa1951657273f8200d6d59",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/rl_module/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/rl_module/module_state.pkl": "bfce13fc2f13ad950016bb48ccbbbd04ce13be07c748476dde1f940fcdfa0d52",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/rl_module/default_policy/class_and_ctor_args.pkl": "fba1d8e29daedd99bac5120e7a29724364bfef575eb140fe27e7da569c8a92e3",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/rl_module/default_policy/metadata.json": "3a032ba54abcee8c9bcbb39e72fa05566912e94461d01f3c6228dc60e088bf12",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/learner_group/learner/rl_module/default_policy/module_state.pkl": "14978ef0548ea7c22eca260c3a6ff2d7f0983513b91833ad2fae9a4bf2c35003",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/class_and_ctor_args.pkl": "fbecc49f2843f77a794a396af500efcd71232fbec17e91c0abf8ac663f1da89b",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/metadata.json": "96ece4363f8b7069198bf7a7bee7954f599110723552317892af0a20abb8a79e",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/state.pkl": "036fc526315c6d82c1e5e19b910aeb870fef040bb9c5ef0c38c3cfa3857c963e",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/module_to_env_connector/class_and_ctor_args.pkl": "be8e6b75185d584447514f8f2e6162c6639ce47f28e23be4334b0d8d6d69e711",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/module_to_env_connector/metadata.json": "96ece4363f8b7069198bf7a7bee7954f599110723552317892af0a20abb8a79e",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/module_to_env_connector/state.pkl": "bfce13fc2f13ad950016bb48ccbbbd04ce13be07c748476dde1f940fcdfa0d52",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/env_to_module_connector/class_and_ctor_args.pkl": "2c9974c82d2ab723273d8c896ca63556a6f888f4873f82346d4cd4d14e8d8eff",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/env_to_module_connector/metadata.json": "96ece4363f8b7069198bf7a7bee7954f599110723552317892af0a20abb8a79e",
+    "validation/critic_warmup/2026-07-13_markov35_phase_aligned_sigma0005_iter1_retry/checkpoint_last/env_runner/env_to_module_connector/state.pkl": "bfce13fc2f13ad950016bb48ccbbbd04ce13be07c748476dde1f940fcdfa0d52",
+    "validation/fixtures/fsm_v2_golden_scripted_sequence.json": "06df2856db073b1b0ecb081f0fef1272b84024f56d4a3219999f00a600578850"
+  },
+  "whole_repository_integrity_before_receipt": {
+    "status": "PASS",
+    "baseline_files": 138099,
+    "remaining_files": 138058,
+    "unchanged_files": 138023,
+    "removed_paths": 67,
+    "moved_files": 21,
+    "deleted_files": 46,
+    "deleted_bytes": 20221353,
+    "changed": [
+      "AGENTS.md",
+      "online_grf_profiles/README.md",
+      "online_grf_profiles/binary_detector/README.md",
+      "tools/online_GRF/README.md",
+      "validation/README.md",
+      "validation/test/test_binary_phase_detector_v19.py",
+      "validation/test/test_build_primary_grf_mesh_sole.py",
+      "validation/test/test_online_grf_event_matching.py",
+      "validation/test/test_prosthetic_phase_fsm_v3_resync.py"
+    ],
+    "added": [
+      "online_grf_profiles/__init__.py",
+      "online_grf_profiles/calibration/__init__.py",
+      "online_grf_profiles/calibration/calibrate_online_grf_basis.py",
+      "online_grf_profiles/calibration/calibrate_online_grf_intensive.py",
+      "online_grf_profiles/calibration/calibrate_online_grf_residual.py",
+      "online_grf_profiles/calibration/generate_online_grf_profile.py",
+      "online_grf_profiles/calibration/tune_online_grf_support.py",
+      "online_grf_profiles/contact/__init__.py",
+      "online_grf_profiles/contact/build_primary_grf_mesh_sole.py",
+      "online_grf_profiles/contact/primary_grf_candidate_grid_v1.json",
+      "online_grf_profiles/contact/primary_grf_model_compatibility_audit_2026-07-24.json",
+      "online_grf_profiles/contact/primary_grf_surface_velocity_audit_2026-07-24.json",
+      "online_grf_profiles/detector/__init__.py",
+      "online_grf_profiles/detector/audit_two_sensor_prescribed_geometry.py",
+      "online_grf_profiles/detector/build_two_sensor_mesh_profile_v4.py",
+      "online_grf_profiles/detector/validate_online_grf_events.py",
+      "online_grf_profiles/detector/validate_two_sensor_forward_states.py",
+      "online_grf_profiles/detector/validate_two_sensor_prescribed_replay.py",
+      "online_grf_profiles/validation/__init__.py",
+      "online_grf_profiles/validation/check_online_grf_cop_rollover.py",
+      "online_grf_profiles/validation/compare_online_grf_output.py",
+      "online_grf_profiles/validation/online_grf_acceptance.py",
+      "online_grf_profiles/validation/online_grf_acceptance_thresholds.json",
+      "online_grf_profiles/validation/validate_online_grf.py",
+      "online_grf_profiles/validation/validate_online_grf_forward_drift.py",
+      "online_grf_profiles/validation/verify_online_grf_plugin.py"
+    ],
+    "unexpected_removed": [],
+    "planned_removals_not_done": [],
+    "unexpected_added": [],
+    "unexpected_changed": [],
+    "expected_changes_not_done": [],
+    "git_head": "dba42388c32a441a5543f20881612a52781d7a99",
+    "head_unchanged": true,
+    "symlinks": [],
+    "elapsed_s": 38.43
+  },
+  "path_and_semantic_scope": {
+    "runtime_source_unchanged": true,
+    "models_unchanged": true,
+    "plugin_sources_and_binaries_unchanged": true,
+    "operational_profiles_unchanged": true,
+    "moved_script_updates": "Repository-root discovery, package imports, acceptance-threshold and candidate-grid lookup paths. The primary builder output boundary moved to online_grf_profiles/contact/experimental; its no-overwrite/source-identity guards remain.",
+    "frozen_records": "Three moved contact JSON records and all surviving historical reports/manifests/snapshots retain original bytes, internal historical paths and hashes. Their archived workflows may need their original layout/inputs."
+  },
+  "current_documentation_updated": [
+    "AGENTS.md",
+    "online_grf_profiles/README.md",
+    "online_grf_profiles/binary_detector/README.md",
+    "tools/online_GRF/README.md",
+    "validation/README.md"
+  ],
+  "git": {
+    "head": "dba42388c32a441a5543f20881612a52781d7a99",
+    "head_unchanged": true,
+    "commit_stage_push_performed": false
+  },
+  "evidence_sha256": {
+    "before_manifest.json": "b340cd5078726b6ed9576c8f119f6fb84b5a998b3d40202b1293e2da214a2cd8",
+    "after_manifest.json": "1916a543a2a62b756c389b8fe0acac4fa7a0020ce208e3336289a0c21094e317",
+    "source_changes.diff": "db07226419021148e8e2ac13f2d62d8b7fc105f6430971bbd96922a18524d327",
+    "before_kept_nodes.json": "d637c0997ac66aa4b54544a2c37bd9cb41e83b7368d8211ac6fb265641854209",
+    "after_results.json": "1ae42c21af565091e1a74ad8890734716e824771209ff8a1f10fae1c5ae789f9"
+  }
+}

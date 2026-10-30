@@ -32,10 +32,24 @@ import copy
 import hashlib
 import json
 import os
+import sys
 import traceback
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, Mapping, Optional, Sequence, Tuple
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from workspace_bootstrap import ensure_simulator_paths
+
+ensure_simulator_paths()
+
+# Also support importing this environment directly from Trajectory Generator/.
+_PHASE_TRACKING_DIR = str(Path(__file__).resolve().parent / "phase_tracking")
+if _PHASE_TRACKING_DIR not in sys.path:
+    sys.path.insert(0, _PHASE_TRACKING_DIR)
 
 import numpy as np
 import opensim
@@ -68,21 +82,20 @@ except ModuleNotFoundError:  # pragma: no cover - small import-time fallback.
     spaces = _Spaces()  # type: ignore[assignment]
 
 from config import SimulatorConfig
-from binary_phase_adapter import (
+from binary_phase import (
     BINARY_ACTIVE_EVENT_CONTRACT_ID,
     BinaryPhaseActiveAdapter,
+    BinaryPhaseActiveAdapterV26,
+    BinaryPhaseFSM,
+    BinaryPhaseFSMConfig,
     BinaryPhaseTransferError,
-)
-from binary_phase_adapter_v26 import BinaryPhaseActiveAdapterV26
-from binary_phase_fsm import BinaryPhaseFSM, BinaryPhaseFSMConfig
-from binary_phase_fsm_v26 import (
     HeelQualifiedBinaryPhaseFSM,
     HeelQualifiedBinaryPhaseFSMConfig,
     V26_EVENT_CONTRACT_ID,
 )
 from kinematics_interpolator import KinematicsInterpolator
 from model_loader import setup_model
-from online_grf import online_grf_sensor_role
+from online_GRF.runtime import online_grf_sensor_role
 from path_resolver import normalize_cli_existing_path, resolve_repo_path
 from prosthetic_phase_fsm import ProstheticPhaseFSM, ProstheticPhaseFSMConfig
 from setup_io import read_last_setup_path, read_setup_xml
@@ -123,7 +136,7 @@ _BINARY_PHASE_V25_SHADOW_EVENT_CONTRACT_ID = (
     "binary_point_v25+functional_contact_fsm_v1_shadow"
 )
 _V25_LEGACY_ANALOG_DETECTOR_PROFILE_PATH = resolve_repo_path(
-    "online_grf_profiles/"
+    "online_GRF/profiles/"
     "AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json"
 )
 _V25_LEGACY_ANALOG_DETECTOR_PROFILE_SHA256 = (

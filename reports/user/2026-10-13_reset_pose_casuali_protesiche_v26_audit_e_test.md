@@ -1,5 +1,10 @@
 # Reset da pose protesiche casuali — V26 best47
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 13 ottobre 2026. Instruction check token: CMC_AGENT_OK_2026.
 Stato: test, verifiche, audit source e confronto finale Claude conclusi.
 
@@ -151,8 +156,8 @@ stesso conserva errori, fra cui MTP destro circa 13,97° RMS dopo 0,5 s.
 
 ![Pool delle pose ed esiti](../../plot/random_pose_reset_2026_10_13/summary/pose_pool_and_recovery.png)
 
-Tabella individuale e [CSV completo](<../../Trajectory Generator/validation/random_pose_reset_2026_10_13/case_summary.csv>) accompagnano gli
-[esiti sigillati](<../../Trajectory Generator/validation/random_pose_reset_2026_10_13/aggregate_results.json>).
+Tabella individuale e [CSV completo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d9909e593723c658>) accompagnano gli
+[esiti sigillati — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-610d04754a4291c7>).
 
 | Caso | q0 knee / ankle [°] | Durata logica [s] | Cicli validi | Picco pen. [mm] | Esito |
 |---|---:|---:|---:|---:|---|
@@ -224,7 +229,7 @@ comune per uno shift di 1 ms, viene verificata sui journal e **non confermata**:
 nel controllo gli HS sono confermati a 1,648, 3,187 e 4,735 s; il secondo ciclo
 è quindi chiuso **265 ms** prima del limite 5 s. I nove PASS detector ON hanno
 lo stesso HS3 a 4,735 s. Non si usa il periodo GRF 1,669 s come se fosse il periodo
-actor. L’[adjudication con tutti i timestamp](<../../Trajectory Generator/validation/random_pose_reset_2026_10_13/claude/timing_margin_adjudication.json>) conserva questa correzione.
+actor. L’[adjudication con tutti i timestamp — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-142ba8cce3baa885>) conserva questa correzione.
 
 La sintesi condivisa è il recupero della sequenza operativa nel sistema
 chiuso per 18/20 pose ammesse, senza sostituzioni, a un solo timing biologico.
@@ -240,10 +245,10 @@ di recuperare le 36 pose escluse. Il confronto con Claude è una critica della
 capsula numerica; Claude non ha rieseguito i rollout né ispezionato i raw
 nel confronto finale. Le verifiche raw sono eseguite separatamente da Codex.
 
-Risposte complete: [audit source Claude](<../../Trajectory Generator/validation/random_pose_reset_2026_10_13/claude/source_response.md>),
-[confronto finale Claude](<../../Trajectory Generator/validation/random_pose_reset_2026_10_13/claude/comparison_response.md>),
-[audit Codex](<../../Trajectory Generator/validation/random_pose_reset_2026_10_13/source_protocol_audit.md>) e
-[verifica indipendente degli output](<../../Trajectory Generator/validation/random_pose_reset_2026_10_13/independent_saved_output_verification.md>).
+Risposte complete: [audit source Claude — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0acffef99124b01f>),
+[confronto finale Claude — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-dc025c313c648b99>),
+[audit Codex — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-40c691e84a135428>) e
+[verifica indipendente degli output — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-18f5331ee5261ab7>).
 
 ## File e verifiche
 

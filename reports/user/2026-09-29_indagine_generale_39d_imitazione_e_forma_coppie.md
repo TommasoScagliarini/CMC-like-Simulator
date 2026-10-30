@@ -1,5 +1,10 @@
 # Indagine generale 39D: imitazione LEFT e forma delle coppie
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 29 settembre 2026. Instruction check token: `CMC_AGENT_OK_2026`.
 
 Stato: indagine completata, con otto rollout diagnostici. Nessun training o
@@ -36,7 +41,7 @@ con controller, plugin, contatto, FSM e protezioni invariati.
 Queste sequenze hanno accesso al target futuro: sono una prova diagnostica di
 ciò che la catena può realizzare, **non una policy appresa né una tabella AB06
 proposta per l'uso futuro**. Il protocollo non cambia dopo aver osservato gli
-esiti: [protocollo e artefatti](<../../Trajectory Generator/unified_MLP_39/validation/general_method_diagnosis_2026-09-29/PROTOCOL.md>).
+esiti: [protocollo e artefatti — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-38baf8345b574576>).
 
 ## Risultato principale
 
@@ -115,7 +120,7 @@ L'analisi offline localizza molta sensibilità nelle accelerazioni della
 reference servita, più che nell'ultimo endpoint. Il percorso è presente anche
 nella buona V26. Le prove confermano quindi una reale amplificazione della
 catena prima dei cambiamenti FSM, ma non una causa unica del divario LEFT.
-[Risultati e verifiche degli impulsi](<../../Trajectory Generator/unified_MLP_39/validation/general_method_diagnosis_2026-09-29/dynamic/README.md>).
+[Risultati e verifiche degli impulsi — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f91994e37ae150ae>).
 
 ## Storico e letteratura
 
@@ -134,7 +139,7 @@ regolarità durante l'apprendimento. Non forniscono pesi trasferibili ad AB06:
 [controllo di giunti flessibili, ICRA 2022](https://www.ais.uni-bonn.de/papers/ICRA_2022_Pavlichenko.pdf),
 [CAPS](https://cs-people.bu.edu/rmancuso/files/papers/ICRA21_1616_FI.pdf),
 [OpenSim Moco](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008493).
-La [mappa dettagliata delle evidenze](<../../Trajectory Generator/unified_MLP_39/validation/general_method_diagnosis_2026-09-29/quality/README.md>)
+La [mappa dettagliata delle evidenze — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e5fc4507110fe2ce>)
 distingue esplicitamente risultati storici risolti, ipotesi e limiti del riuso.
 
 ## File e verifiche
@@ -157,7 +162,7 @@ oltre alle figure comparative. Nei brevi impulsi alcuni pannelli per ciclo
 sono esplicitamente non disponibili perché manca un ciclo completo; l'analisi
 degli impulsi usa i segnali nel tempo, senza ricostruire cicli mancanti.
 
-La [verifica conclusiva](<../../Trajectory Generator/unified_MLP_39/validation/general_method_diagnosis_2026-09-29/final_verification.json>)
+La [verifica conclusiva — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-72d96d3e41c9e7b1>)
 ricontrolla manifest, checkpoint, ricevute e figure.
 
 ## TODO emersi, da propagare alla prossima chiusura

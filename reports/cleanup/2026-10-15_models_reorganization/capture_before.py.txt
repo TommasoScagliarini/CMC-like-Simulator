@@ -1,0 +1,43 @@
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
+import json
+import os
+import subprocess
+import time
+
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+OUT=Path('/tmp/cmc_models_reorganization_2026_10_15')
+OUT.mkdir(exist_ok=True)
+MOVES={f'models/{subject}{suffix}':f'models/{subject}/{subject}{suffix}'
+       for subject in ['AB06','AB07','AB08']
+       for suffix in ['-raw','_SEASEA-raw','_SEASEA_Threadmill']}
+MOVES['models/SEASEA - whealthy data']='models/SEASEA_healthy'
+(OUT/'directory_mapping.json').write_text(json.dumps(MOVES,indent=2)+'\n')
+def fingerprint(name):
+    p=ROOT/name
+    if not p.is_file():return name,None
+    assert not p.is_symlink(),name
+    a=p.stat();h=hashlib.sha256()
+    with p.open('rb') as f:
+        for chunk in iter(lambda:f.read(2*1024*1024),b''):h.update(chunk)
+    b=p.stat();assert (a.st_size,a.st_mtime_ns)==(b.st_size,b.st_mtime_ns),name
+    return name,{'bytes':a.st_size,'sha256':h.hexdigest()}
+tracked=subprocess.check_output(['git','ls-files','-z'],cwd=ROOT).decode().strip('\0').split('\0')
+paths=set(tracked)
+for base in ['models','plugins','reports/cleanup','reports/user']:
+    paths.update(p.relative_to(ROOT).as_posix() for p in (ROOT/base).rglob('*') if p.is_file())
+paths.update(['.simulator_last_setup.json','.vscode/settings.json','tools/README.md'])
+started=time.monotonic()
+with ThreadPoolExecutor(max_workers=8) as pool:observed=dict(pool.map(fingerprint,sorted(paths)))
+files={k:v for k,v in observed.items() if v is not None}
+before={'root':str(ROOT),'head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        'git_status':subprocess.check_output(['git','status','--porcelain=v1','-z','--untracked-files=all'],cwd=ROOT).decode(),
+        'files':files,'missing_tracked':[n for n in tracked if observed[n] is None],
+        'files_checked':len(files),'bytes_checked':sum(v['bytes'] for v in files.values()),
+        'elapsed_s':time.monotonic()-started,'directory_mapping':MOVES}
+(OUT/'before_manifest.json').write_text(json.dumps(before,indent=2)+'\n')
+model_files={k:v for k,v in files.items() if k.startswith('models/')}
+(OUT/'model_files_before.json').write_text(json.dumps(model_files,indent=2)+'\n')
+print(json.dumps({k:v for k,v in before.items() if k not in ['files','git_status','missing_tracked','directory_mapping']},indent=2),flush=True)
+print('model_files',len(model_files), 'model_bytes',sum(v['bytes'] for v in model_files.values()),flush=True)

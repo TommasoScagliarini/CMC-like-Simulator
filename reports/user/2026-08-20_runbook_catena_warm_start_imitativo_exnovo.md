@@ -1,5 +1,18 @@
 # Runbook: dalla baseline imitativa al training ex-novo con warm start (catena standard, riproducibile)
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-19: `Trajectory Generator/baseline_MLP/experimental_configs/`
+> è stata rimossa. Due preset sono conservati come fixture dei test; gli altri
+> preset e i comandi che li selezionavano sono storici e richiedono ripristino.
+> La configurazione V26C corrente resta `training_exnovo_cfg.yaml`. Vedere il
+> [registro della rimozione](../cleanup/2026-10-19_experimental_configs_removal/README.md).
+
 Data: 2026-08-20 — prima esecuzione: lineage **B0820** (baseline
 `MLP_imitation_native_v26_08-20-2026_june_equiv_100iter`).
 

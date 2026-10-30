@@ -1,0 +1,382 @@
+diff --git a/config.py b/config.py
+index ecf23fe54..bfaae8b45 100644
+--- a/config.py
++++ b/config.py
+@@ -20,7 +20,7 @@ class SimulatorConfig:
+ 
+     # Model bundle directory. Each bundle keeps its .osim files at the root
+     # and the supporting XML/STO files inside a local data/ folder.
+-    model_bundle_dir: str = "models/AB06_SEASEA_Threadmill"
++    model_bundle_dir: str = "models/AB06/AB06_SEASEA_Threadmill"
+ 
+     # Biomechanical model (contains muscles + SEA CoordinateActuators).
+     # If this is only a filename, it is resolved inside model_bundle_dir.
+@@ -29,7 +29,7 @@ class SimulatorConfig:
+ 
+     # C++ plugin basename WITHOUT OS extension.
+     # Loader adds .dll / .dylib / .so automatically.
+-    plugin_name: str = "plugins/SEA_Plugin_BlackBox_mCMC_impedence_ff"
++    plugin_name: str = "plugins/SEA/SEA_Plugin_BlackBox_mCMC_impedence_ff"
+ 
+     # IK result: positions only, inDegrees=yes  (e.g. Kinematics_q.sto).
+     # Relative paths are resolved inside model_bundle_dir.
+@@ -58,7 +58,7 @@ class SimulatorConfig:
+     # Causal heel/toe detector lattice.  Policy/control segments may remain at
+     # 10 ms; detector samples are transported independently at this cadence.
+     detector_sample_dt_s: float = 0.001
+-    online_grf_contact_plugin: str = "plugins/OnlineGRFContact"
++    online_grf_contact_plugin: str = "plugins/online_grf_contact/OnlineGRFContact"
+     online_grf_max_force_bw: float = 5.0
+     online_grf_max_penetration_m: float = 0.03
+     # Diagnostic opt-in: keep prescribed GRF data loaded as an oracle, but do
+diff --git a/model_loader.py b/model_loader.py
+index cade44405..a6aada59f 100644
+--- a/model_loader.py
++++ b/model_loader.py
+@@ -30,7 +30,13 @@ from binary_phase_detector import (
+ )
+ from config import SimulatorConfig
+ from online_grf import GRF_MODES, add_online_grf_forces, load_online_grf_profile
+-from path_resolver import resolve_repo_path, resolve_simulator_paths
++from path_resolver import (
++    SHARED_GEOMETRY_DIR,
++    remap_plugin_path,
++    resolve_plugin_path,
++    resolve_repo_path,
++    resolve_simulator_paths,
++)
+ 
+ 
+ _DLL_DIR_HANDLES = []
+@@ -294,13 +300,16 @@ def _load_plugin(plugin_name: str) -> None:
+     opensim.LoadOpenSimLibrary() already applies the platform-specific
+     naming convention internally:
+       - macOS  : prepends 'lib' and appends '.dylib'
+-                 e.g. "plugins/SEA_…" → dlopen("plugins/libSEA_….dylib")
++                 e.g. "plugins/SEA/SEA_…" → "plugins/SEA/libSEA_….dylib"
+       - Windows: appends '.dll'  (no 'lib' prefix)
+       - Linux  : prepends 'lib' and appends '.so'
+ 
+     Therefore we must pass the bare basename WITHOUT any extension.
+     Adding '.dylib' here would produce a double extension (.dylib.dylib).
+     """
++    relocated = remap_plugin_path(plugin_name)
++    if relocated is not None:
++        plugin_name = str(resolve_plugin_path(relocated))
+     _configure_windows_dll_search_path()
+     print(f"[ModelLoader] Loading plugin  : {plugin_name}")
+     opensim.LoadOpenSimLibrary(plugin_name)
+@@ -314,12 +323,10 @@ def _configure_geometry_search_paths(model_file: str) -> None:
+     the visualizer is disabled. Registering these paths here keeps the simulator
+     and visualizer behavior consistent across Windows and macOS.
+     """
+-    module_dir = os.path.dirname(os.path.abspath(__file__))
+     model_dir = os.path.dirname(os.path.abspath(model_file))
+ 
+     candidate_dirs = [
+-        os.path.join(module_dir, "Geometry"),
+-        os.path.join(module_dir, "geometry"),
++        str(SHARED_GEOMETRY_DIR),
+         model_dir,
+         os.path.join(model_dir, "Geometry"),
+         os.path.join(model_dir, "geometry"),
+diff --git a/path_resolver.py b/path_resolver.py
+index fb12fe730..d69d1ebc8 100644
+--- a/path_resolver.py
++++ b/path_resolver.py
+@@ -7,8 +7,9 @@ Centralized path resolution for model bundles and repo-relative resources.
+ from __future__ import annotations
+ 
+ import os
++import posixpath
+ from dataclasses import dataclass
+-from pathlib import Path
++from pathlib import Path, PurePosixPath, PureWindowsPath
+ from typing import TYPE_CHECKING
+ 
+ if TYPE_CHECKING:
+@@ -16,6 +17,155 @@ if TYPE_CHECKING:
+ 
+ 
+ REPO_ROOT = Path(__file__).resolve().parent
++SHARED_GEOMETRY_DIR = REPO_ROOT / "models" / "Geometry"
++SEA_PLUGIN_DIR = REPO_ROOT / "plugins" / "SEA"
++ONLINE_GRF_PLUGIN_DIR = REPO_ROOT / "plugins" / "online_grf_contact"
++
++# These names identify the current implementations. Older SEA binaries have
++# different dynamics and must never be redirected to the current PI plugin.
++PLUGIN_DIRECTORIES = {
++    "SEA_Plugin_BlackBox_mCMC_impedence_ff": "SEA",
++    "OnlineGRFContact": "online_grf_contact",
++}
++
++# Only top-level model bundles and shared Geometry were reorganized. Archived
++# workspaces under validation/.../models must keep their own paths and bytes.
++LEGACY_MODEL_DIRECTORIES = {
++    f"{subject}{suffix}": f"{subject}/{subject}{suffix}"
++    for subject in ("AB06", "AB07", "AB08")
++    for suffix in ("-raw", "_SEASEA-raw", "_SEASEA_Threadmill")
++}
++LEGACY_MODEL_DIRECTORIES["SEASEA - whealthy data"] = "SEASEA_healthy"
++MODEL_FAMILIES = frozenset(("AB06", "AB07", "AB08", "SEASEA", "SEASEA_healthy"))
++
++
++def remap_model_path(raw: str | Path) -> Path | None:
++    """Resolve known model/geometry paths, including saved checkout paths.
++
++    Return None for unrelated paths. Existing external files and nested archived
++    model namespaces are deliberately not redirected to this checkout.
++    """
++    text = posixpath.normpath(os.fspath(raw).replace("\\", "/"))
++    path = Path(text).expanduser()
++    windows_absolute = PureWindowsPath(text).is_absolute()
++    absolute = path.is_absolute() or windows_absolute
++    if path.is_absolute() and path.exists():
++        try:
++            path.relative_to(REPO_ROOT)
++        except ValueError:
++            return None
++
++    parts = PurePosixPath(text).parts
++    model_parts: tuple[str, ...] | None = None
++    if not absolute:
++        if len(parts) >= 2 and parts[0] == "models":
++            model_parts = parts[1:]
++        elif parts and parts[0] == "Geometry":
++            model_parts = parts
++    else:
++        # Handle this workspace first: a nested validation copy must not fall
++        # through to the foreign-checkout compatibility rule below.
++        try:
++            relative = path.relative_to(REPO_ROOT)
++        except ValueError:
++            relative = None
++        if relative is not None:
++            if len(relative.parts) >= 2 and relative.parts[0] == "models":
++                model_parts = relative.parts[1:]
++            elif relative.parts and relative.parts[0] == "Geometry":
++                model_parts = relative.parts
++        else:
++            checkout_names = {
++                REPO_ROOT.name.casefold(),
++                "cmc-like-simulator",
++                "cmc-like-simulator - claude",
++            }
++            for index, part in enumerate(parts):
++                if (part in {"models", "Geometry"} and index > 0
++                        and parts[index - 1].casefold() in checkout_names
++                        and not any(p.casefold() in {"validation", "runs"}
++                                    for p in parts[:index - 1])):
++                    model_parts = parts[index + 1:] if part == "models" else parts[index:]
++                    break
++    if not model_parts:
++        return None
++    first, *tail = model_parts
++    relocated = LEGACY_MODEL_DIRECTORIES.get(first)
++    if relocated is not None:
++        return REPO_ROOT / "models" / relocated / Path(*tail)
++    if first in MODEL_FAMILIES or first == "Geometry":
++        return REPO_ROOT / "models" / Path(*model_parts)
++    return None
++
++
++def _current_plugin_stem(filename: str) -> str | None:
++    stem = filename
++    for extension in (".dll", ".dylib", ".so"):
++        if stem.lower().endswith(extension):
++            stem = stem[:-len(extension)]
++            break
++    if stem.startswith("lib") and stem[3:] in PLUGIN_DIRECTORIES:
++        stem = stem[3:]
++    return stem if stem in PLUGIN_DIRECTORIES else None
++
++
++def _plugin_variant_exists(path: Path, stem: str) -> bool:
++    return path.exists() or any(
++        (path.parent / filename).is_file()
++        for filename in (stem + ".dll", stem + ".dylib", stem + ".so",
++                         "lib" + stem + ".dylib", "lib" + stem + ".so")
++    )
++
++
++def remap_plugin_path(raw: str | Path) -> Path | None:
++    """Map the two current plugins into their dedicated directories.
++
++    Preserve the requested filename or extension-free OpenSim basename. Only
++    the top-level plugins namespace of this or a recognized former checkout is
++    relocated; existing external libraries and frozen nested copies keep their
++    own paths. No removed SEA implementation is substituted by the current PI.
++    """
++    text = posixpath.normpath(os.fspath(raw).replace("\\", "/"))
++    path = Path(text).expanduser()
++    stem = _current_plugin_stem(path.name)
++    if stem is None:
++        return None
++    absolute = path.is_absolute() or PureWindowsPath(text).is_absolute()
++    parts = PurePosixPath(text).parts
++    plugin_parts: tuple[str, ...] | None = None
++    if not absolute:
++        if len(parts) >= 2 and parts[0] == "plugins":
++            plugin_parts = parts[1:]
++    else:
++        try:
++            relative = path.relative_to(REPO_ROOT)
++        except ValueError:
++            relative = None
++            if path.is_absolute() and _plugin_variant_exists(path, stem):
++                return None
++        if relative is not None:
++            # Do not reinterpret this checkout's validation/.../plugins copies.
++            if len(relative.parts) >= 2 and relative.parts[0] == "plugins":
++                plugin_parts = relative.parts[1:]
++        else:
++            checkout_names = {
++                REPO_ROOT.name.casefold(), "cmc-like-simulator",
++                "cmc-like-simulator - claude",
++            }
++            for index, part in enumerate(parts):
++                if (part == "plugins" and index > 0
++                        and parts[index - 1].casefold() in checkout_names
++                        and not any(p.casefold() in {"validation", "runs"}
++                                    for p in parts[:index - 1])):
++                    plugin_parts = parts[index + 1:]
++                    break
++    directory = PLUGIN_DIRECTORIES[stem]
++    if plugin_parts is None or not (
++        len(plugin_parts) == 1
++        or (len(plugin_parts) == 2 and plugin_parts[0] == directory)
++    ):
++        return None
++    return REPO_ROOT / "plugins" / directory / plugin_parts[-1]
+ 
+ 
+ def normalize_cli_path_text(raw: str | Path) -> str:
+@@ -52,10 +202,22 @@ class ResolvedSimulatorPaths:
+ 
+ 
+ def resolve_repo_path(raw: str | Path) -> Path:
++    relocated = remap_model_path(raw)
++    if relocated is None:
++        relocated = remap_plugin_path(raw)
++    if relocated is not None:
++        return relocated
+     path = cli_path(raw)
+     return path if path.is_absolute() else REPO_ROOT / path
+ 
+ 
++def resolve_plugin_path(raw: str | Path) -> Path:
++    """Return the basename OpenSim needs, independent of host library suffix."""
++    path = resolve_repo_path(raw)
++    stem = _current_plugin_stem(path.name)
++    return path.with_name(stem) if stem is not None else path
++
++
+ def normalize_cli_existing_path(raw: str | Path) -> str:
+     """
+     Turn an existing repo-relative CLI path into an absolute path.
+@@ -64,6 +226,11 @@ def normalize_cli_existing_path(raw: str | Path) -> str:
+     ``data/3DGaitModel2392_Kinematics_q.sto`` when no repo-level file exists.
+     """
+     text = normalize_cli_path_text(raw)
++    relocated = remap_model_path(raw)
++    if relocated is None:
++        relocated = remap_plugin_path(raw)
++    if relocated is not None:
++        return str(relocated)
+     path = Path(text)
+     if path.is_absolute():
+         return str(path)
+@@ -126,6 +293,9 @@ def _resolve_model_path(bundle_dir: Path, model_file: str | None) -> Path:
+ 
+ 
+ def _resolve_bundle_input_path(bundle_dir: Path, raw: str | Path) -> Path:
++    relocated = remap_model_path(raw)
++    if relocated is not None:
++        return relocated
+     path = cli_path(raw)
+     return path if path.is_absolute() else bundle_dir / path
+ 
+@@ -158,7 +328,7 @@ def resolve_simulator_paths(cfg: "SimulatorConfig") -> ResolvedSimulatorPaths:
+         repo_root=REPO_ROOT,
+         model_bundle_dir=bundle_dir,
+         model_path=model_path,
+-        plugin_path=resolve_repo_path(cfg.plugin_name),
++        plugin_path=resolve_plugin_path(cfg.plugin_name),
+         kinematics_path=_resolve_bundle_input_path(bundle_dir, cfg.kinematics_file),
+         external_loads_path=_resolve_optional_bundle_input_path(
+             bundle_dir, cfg.external_loads_xml
+@@ -173,8 +343,9 @@ def resolve_simulator_paths(cfg: "SimulatorConfig") -> ResolvedSimulatorPaths:
+             bundle_dir,
+             getattr(cfg, "binary_phase_detector_profile_file", ""),
+         ),
+-        online_grf_contact_plugin_path=resolve_repo_path(
+-            getattr(cfg, "online_grf_contact_plugin", "plugins/OnlineGRFContact")
++        online_grf_contact_plugin_path=resolve_plugin_path(
++            getattr(cfg, "online_grf_contact_plugin",
++                    "plugins/online_grf_contact/OnlineGRFContact")
+         ),
+         reserve_actuators_path=_resolve_bundle_input_path(bundle_dir, cfg.reserve_actuators_xml),
+         healthy_dir=_resolve_healthy_dir(bundle_dir),
+diff --git a/visualize.py b/visualize.py
+index 160a1a473..9bc4a743a 100644
+--- a/visualize.py
++++ b/visualize.py
+@@ -35,6 +35,9 @@ import numpy as np
+ from config import SimulatorConfig
+ from output import read_sto
+ from path_resolver import (
++    SHARED_GEOMETRY_DIR,
++    remap_model_path,
++    remap_plugin_path,
+     normalize_cli_path_text,
+     normalize_cli_existing_path,
+     resolve_repo_path,
+@@ -77,6 +80,11 @@ def _library_variant_exists(path_without_ext: str) -> bool:
+ 
+ def _resolve_project_path(path: str, library_basename: bool = False) -> str:
+     """Resolve repo-relative defaults even if visualize.py is launched elsewhere."""
++    relocated = remap_model_path(path)
++    if relocated is None:
++        relocated = remap_plugin_path(path)
++    if relocated is not None:
++        return str(relocated)
+     path = normalize_cli_path_text(path)
+     if os.path.isabs(path):
+         return path
+@@ -280,7 +288,7 @@ def _configure_geometry_search_paths(
+ ) -> list[str]:
+     """
+     Register geometry directories so OpenSim can resolve mesh filenames used
+-    by the model.  The workspace Geometry folder is added first, then common
++    by the model.  The shared models/Geometry folder is added first, then common
+     OpenSim installation paths.
+     """
+     if opensim_module is None:
+@@ -288,13 +296,7 @@ def _configure_geometry_search_paths(
+ 
+     candidate_dirs: list[str] = []
+ 
+-    script_dir = os.path.dirname(os.path.abspath(__file__))
+-    candidate_dirs.extend(
+-        [
+-            os.path.join(script_dir, "Geometry"),
+-            os.path.join(script_dir, "geometry"),
+-        ]
+-    )
++    candidate_dirs.append(str(SHARED_GEOMETRY_DIR))
+     if model_file:
+         model_dir = os.path.dirname(os.path.abspath(model_file))
+         candidate_dirs.extend(
+@@ -306,7 +308,11 @@ def _configure_geometry_search_paths(
+             ]
+         )
+     if extra_dirs:
+-        candidate_dirs.extend(extra_dirs)
++        for path in extra_dirs:
++            local_dir = os.path.abspath(os.path.expanduser(normalize_cli_path_text(path)))
++            candidate_dirs.append(
++                local_dir if os.path.isdir(local_dir) else str(remap_model_path(path) or path)
++            )
+ 
+     for env_name in ["OPENSIM_HOME", "OPENSIM_ROOT", "OPENSIM_INSTALL_DIR"]:
+         root = os.environ.get(env_name)

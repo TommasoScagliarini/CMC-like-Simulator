@@ -1,0 +1,43 @@
+from pathlib import Path
+import gc, hashlib, json, sys
+import xml.etree.ElementTree as ET
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+OUT=Path('/tmp/cmc_geometry_move_2026_10_15')
+PHASE=sys.argv[1]
+sys.path.insert(0,str(ROOT))
+import opensim
+import model_loader
+import visualize
+opensim.Logger.setLevelString('warn')
+plugins=[]
+for name in ('libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib','libonlineGRFContact.dylib'):
+    path=ROOT/'plugins'/name
+    if path.exists():
+        opensim.LoadOpenSimLibraryExact(str(path));plugins.append(str(path))
+def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
+geom=ROOT/('Geometry' if PHASE=='before' else 'models/Geometry')
+assetfiles=[{'relative':p.relative_to(geom).as_posix(),'bytes':p.stat().st_size,'sha256':sha(p)} for p in sorted(geom.rglob('*')) if p.is_file()]
+(OUT/f'geometry_assets_{PHASE}.json').write_text(json.dumps({'phase':PHASE,'root':str(geom),'files':assetfiles},indent=2)+'\n')
+records=[]
+for path in sorted((ROOT/'models').rglob('*.osim')):
+    row={'path':path.relative_to(ROOT).as_posix(),'sha256':sha(path)}
+    model_loader._configure_geometry_search_paths(str(path))
+    dirs=visualize._configure_geometry_search_paths(model_file=str(path),opensim_module=opensim)
+    refs=visualize._mesh_files_from_model(str(path))
+    resolutions=[]
+    for ref in refs:
+        candidates=[Path(ref)] if Path(ref).is_absolute() else [Path(d)/ref for d in dirs]
+        resolved=next((candidate for candidate in candidates if candidate.is_file()),None)
+        resolutions.append({'mesh':ref,'found':resolved is not None,'resolved':str(resolved) if resolved else None,'sha256':sha(resolved) if resolved else None})
+    row.update(search_dirs=dirs,mesh_resolutions=resolutions,all_meshes_resolved=all(r['found'] for r in resolutions))
+    try:
+        model=opensim.Model(str(path));state=model.initSystem()
+        row.update(ok=True,coordinates=model.getCoordinateSet().getSize(),states=model.getNumStateVariables(),forces=model.getForceSet().getSize(),time=state.getTime())
+        del state,model;gc.collect()
+    except Exception as e:row.update(ok=False,error=str(e))
+    records.append(row)
+    print('MODEL_RESULT',json.dumps({k:row[k] for k in ('path','ok','all_meshes_resolved')}),flush=True)
+result={'phase':PHASE,'cwd':str(Path.cwd()),'plugins':plugins,'models':records,'model_count':len(records),'all_ok':all(r['ok'] for r in records),'all_meshes_resolved':all(r['all_meshes_resolved'] for r in records),'missing_meshes':[{'path':r['path'],'mesh':m['mesh']} for r in records for m in r['mesh_resolutions'] if not m['found']]}
+(OUT/f'native_models_geometry_{PHASE}.json').write_text(json.dumps(result,indent=2)+'\n')
+print('FINAL_RESULT',json.dumps({k:result[k] for k in ('phase','model_count','all_ok','all_meshes_resolved','missing_meshes')}),flush=True)
+assert result['all_ok'] and result['all_meshes_resolved'],result['missing_meshes']

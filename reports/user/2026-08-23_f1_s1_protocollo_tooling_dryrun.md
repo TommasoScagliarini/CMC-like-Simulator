@@ -1,5 +1,20 @@
 # F1 — Stage S1 (protocollo preregistrato, tooling, test sintetici, dry-run) e micro-gate S2a (cross-check, moduli derivati, rollout A_iso det)
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 **Data:** 23 agosto 2026
 **Piano:** `reports/plans/2026-08-22_piano_operativo_recupero_pipeline_exnovo_v26_fsmv3_morphology.md`, Fase 1
 **Gate di ingresso:** F0 PASS tecnico (`reports/user/2026-08-23_fase0_gate_finale_recupero_ab06.md`), hash decisionali F0 ri-verificati identici (analisi `0ac94243…`/`58212261…`, sidecar drift `9370b700…` 5 file/5.233.728 B, sidecar overlay `ce74a9d5…` 216 file/128.179.435 B, manifest `30b5b013…`, summary `152b2280…`)

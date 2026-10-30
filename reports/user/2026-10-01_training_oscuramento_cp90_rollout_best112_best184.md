@@ -1,5 +1,10 @@
 # Training con oscuramento da CP90 e rollout di CP112 e CP184 — 2026-10-01
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 ## Risultato
 
 Completato il pilot di 100 aggiornamenti aggiuntivi da CP90, fino all’iterazione globale 190. Il best per ritorno medio di training nell’intervallo 91–190 è **CP112**; il best delle ultime 25 iterazioni è **CP184**. Eseguiti due rollout deterministici con oscuramento completo e prodotti **sette plot canonici per checkpoint**, tutti sotto `plot/` del repository.
@@ -25,7 +30,7 @@ La preparazione ha introdotto un fork esplicito del curriculum, con offset persi
 
 ## Esito del training e selezione
 
-Il [registro di avanzamento](<../../Trajectory Generator/unified_MLP_39/runs/plans/left_best90_masking_100iter_2026-09-30/progress.json>) attesta quattro blocchi completati, ciascuno con 25 aggiornamenti. Le summary dei blocchi riportano completamento regolare, nessuna iterazione saltata e nessun crash restart.
+Il [registro di avanzamento — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-c855f3acc71e824f>) attesta quattro blocchi completati, ciascuno con 25 aggiornamenti. Le summary dei blocchi riportano completamento regolare, nessuna iterazione saltata e nessun crash restart.
 
 | Blocco | Best globale del blocco | Ritorno medio di training |
 |---|---:|---:|
@@ -58,11 +63,11 @@ Entrambi riportano `terminated=false` e `truncated=true`: fine della finestra te
 
 - [Set completo di 7 plot CP112](../../plot/10_01_2026_unified39_LEFT_masking_best112_overall_hidden/).
 - [Set completo di 7 plot CP184](../../plot/10_01_2026_unified39_LEFT_masking_best184_last25_hidden/).
-- [Rollout CP112: summary, traccia e output fisici](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_LEFT_masking_best112_overall_hidden_2026-10-01/>).
-- [Rollout CP184: summary, traccia e output fisici](<../../Trajectory Generator/unified_MLP_39/runs/rollout/MLP39_LEFT_masking_best184_last25_hidden_2026-10-01/>).
-- [Selezione e hash dei checkpoint](<../../Trajectory Generator/unified_MLP_39/validation/masking_results_2026-10-01/selection.json>).
-- [Risultati e verifiche aggregate](<../../Trajectory Generator/unified_MLP_39/validation/masking_results_2026-10-01/results.json>).
-- [Piano eseguibile, configurazioni e log del training](<../../Trajectory Generator/unified_MLP_39/runs/plans/left_best90_masking_100iter_2026-09-30/README.md>).
+- [Rollout CP112: summary, traccia e output fisici — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5ca9412348973bdd>).
+- [Rollout CP184: summary, traccia e output fisici — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f4c878ae727c60e3>).
+- [Selezione e hash dei checkpoint — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-76f04ca86d294ee1>).
+- [Risultati e verifiche aggregate — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-ed02cbcefbb9a2a1>).
+- [Piano eseguibile, configurazioni e log del training — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-79357e1c36826f1c>).
 
 Ogni set contiene le figure canoniche 01–07: controllo SEA/reserve; stati articolari e motore; coppia/angolo/potenza sul ciclo; velocità/potenza sul ciclo; coppia motore ed errore; riferimento articolare ed errore SEA; policy rispetto al target imitativo. Nella figura 7 il target è il template LEFT registrato (`imitation_target_q`); la gamba sana grezza nella riga centrale è solo contesto.
 

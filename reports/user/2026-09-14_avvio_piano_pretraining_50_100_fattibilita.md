@@ -1,5 +1,10 @@
 # Avvio del piano pretraining 50→100 e fattibilità a 39 ingressi
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 2026-09-14. Instruction check token: `CMC_AGENT_OK_2026`.
 
 ## Richiesta e stato
@@ -10,7 +15,7 @@ test di fattibilità. Sono quindi95 nuovi aggiornamenti della V1.
 
 **Il lavoro è in esecuzione; i traguardi50/100 e la campagna fisica39 non
 sono ancora conclusi.** Lo stato aggiornato è in
-[STATUS.md](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_50_100_feasibility_2026-09-14/STATUS.md>)
+[STATUS.md — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-fcc395cfa8e7cd1d>)
 e nel relativo `execution_state.json`, che prevalgono su questo resoconto
 di avvio per i conteggi correnti.
 

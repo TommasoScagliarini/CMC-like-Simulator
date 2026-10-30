@@ -39,14 +39,20 @@ from contextlib import contextmanager  # noqa: E402
 from datetime import datetime  # noqa: E402
 from typing import Any  # noqa: E402
 
-import progress_display  # noqa: E402
-import start_sampling  # noqa: E402
-import training_config  # noqa: E402
+import _bootstrap  # noqa: E402
 
-_DEFAULT_SETUP_XML = r"models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
+_bootstrap.ensure_sim_paths()
+
+import progress_display  # noqa: E402
+import training_config  # noqa: E402
+import start_sampling  # noqa: E402
+
+from path_resolver import remap_policy_transfer_path  # noqa: E402
+
+_DEFAULT_SETUP_XML = r"models\AB06\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
 _DEFAULT_GRF_MODE = "online_sensor"
 _DEFAULT_ONLINE_GRF_PROFILE = (
-    "online_grf_profiles/"
+    "online_GRF/profiles/"
     "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
 _DEFAULT_ONLINE_GRF_DETECTOR_PROFILE = None
@@ -69,12 +75,6 @@ _ITERATION_MILESTONE_PREFIX = "milestone_iteration_"
 _ITERATION_MILESTONE_WIDTH = 6
 _MIN_MINIBATCH_MEAN_KL_LOSS_FLOOR = -1.0e-7
 _STANDARD_RL_MODULE_KIND = "standard"
-_V25_RESIDUAL_RL_MODULE_KIND = "primary_split_v25_residual"
-_V25_RESIDUAL_INPUT_COUNT = 33
-_V25_RESIDUAL_ACTION_DIM = 2
-_V25_ACTIVE_EVENT_CONTRACT_ID = (
-    "binary_point_v25+functional_contact_fsm_v1"
-)
 
 
 def _cli_path(value: str | Path) -> Path:
@@ -1315,12 +1315,12 @@ def _asymmetric_module_selection(
     n_full: int,
     hiddens: list[int],
 ) -> tuple[type, dict[str, Any]]:
-    """Return the explicit custom RLModule class and serialized model config."""
+    """Return the standard asymmetric actor/critic and its model config."""
 
+    _validate_rl_module_args(args)
     from asymmetric_rl_module import AsymmetricActorCriticTorchRLModule
 
-    module_class = AsymmetricActorCriticTorchRLModule
-    model_config = {
+    return AsymmetricActorCriticTorchRLModule, {
         "n_actor": int(n_actor),
         "n_full": int(n_full),
         "fcnet_hiddens": list(hiddens),
@@ -1328,30 +1328,6 @@ def _asymmetric_module_selection(
         "freeze_logstd": bool(args.freeze_logstd),
         "freeze_actor": bool(args.freeze_actor),
     }
-    if args.rl_module_kind == _V25_RESIDUAL_RL_MODULE_KIND:
-        from primary_split_v25_residual import (
-            PrimarySplitV25ResidualTorchRLModule,
-        )
-
-        module_class = PrimarySplitV25ResidualTorchRLModule
-        model_config.update(
-            {
-                "primary_split_v25_residual_input_mean": list(
-                    args.primary_split_v25_residual_input_mean
-                ),
-                "primary_split_v25_residual_input_std": list(
-                    args.primary_split_v25_residual_input_std
-                ),
-                "primary_split_v25_residual_limits": list(
-                    args.primary_split_v25_residual_limits
-                ),
-                "primary_split_v25_residual_init_seed": int(
-                    args.primary_split_v25_residual_init_seed
-                ),
-                "primary_split_v25_residual_reset_bypass": False,
-            }
-        )
-    return module_class, model_config
 
 
 def build_config(
@@ -1512,7 +1488,7 @@ def build_config(
         .debugging(seed=args.seed)
     )
 
-    # Uniform-width MLP: fcnet_hiddens = [dim] * num (see training_cfg.yaml model:).
+    # Uniform-width MLP: fcnet_hiddens = [dim] * num (see the selected YAML model:).
     # Backward-compat: an explicit (deprecated) --fcnet-hiddens list wins.
     if getattr(args, "fcnet_hiddens", None):
         hiddens = [int(x) for x in args.fcnet_hiddens]
@@ -1622,18 +1598,23 @@ def _resolve_resume_path(value: str | None) -> Path | None:
     Generator\\runs\\...`` from the simulator root), then against the Trajectory
     Generator directory, then against ``Trajectory Generator\\runs\\training``.
     Thus the historical ``runs\\foo\\checkpoint_last`` form still resolves after
-    training artifacts moved under ``runs\\training``. Missing paths fall back to
-    the CWD candidate so the child's existing not-found error stays meaningful.
+    training artifacts moved under ``runs\\training``. The former policy-transfer
+    workspace namespace is mapped to ``imitation_to_exnovo``. Missing paths fall
+    back to the CWD candidate so the child's existing not-found error stays
+    meaningful.
     """
     if not value:
         return None
     path = _cli_path(value)
+    path = remap_policy_transfer_path(path) or path
     if path.is_absolute():
         return path.resolve()
     cwd_candidate = (Path.cwd() / path).resolve()
+    cwd_candidate = remap_policy_transfer_path(cwd_candidate) or cwd_candidate
     if cwd_candidate.exists():
         return cwd_candidate
     traj_candidate = (_TRAJ_GEN_DIR / path).resolve()
+    traj_candidate = remap_policy_transfer_path(traj_candidate) or traj_candidate
     if traj_candidate.exists():
         return traj_candidate
     training_candidate = (
@@ -1750,7 +1731,7 @@ def run(args: argparse.Namespace) -> dict:
         ):
             _load_training_stack()
 
-        # Reward precedence (weak -> strong): training_cfg.yaml `reward:` section,
+        # Reward precedence (weak -> strong): selected YAML `reward:` section,
         # then --reward-json, then --reward-mode. None of --reward-mode leaves the
         # json/yaml setting (default "ex_novo"). All shaped by reward_function.py.
         reward_overrides = dict(getattr(args, "_cfg_reward", None) or {})
@@ -2019,7 +2000,7 @@ def run(args: argparse.Namespace) -> dict:
             )
 
         if args.fixed_exploration_sigma is not None:
-            import configure_actor_exploration
+            import exploration
             import warm_start
             from ray.rllib.algorithms.algorithm import (
                 COMPONENT_LEARNER,
@@ -2035,7 +2016,7 @@ def run(args: argparse.Namespace) -> dict:
             ):
                 source_state = _learner_module_state(algo)
                 configured_state, configuration = (
-                    configure_actor_exploration.configure_constant_std(
+                    exploration.configure_constant_std(
                         source_state,
                         sigma=args.fixed_exploration_sigma,
                         action_dim=2,
@@ -2488,16 +2469,6 @@ def run(args: argparse.Namespace) -> dict:
         ),
         "exploration_configuration": exploration_configuration_report,
         "rl_module_kind": str(args.rl_module_kind),
-        "primary_split_v25_residual": (
-            {
-                "input_mean": list(args.primary_split_v25_residual_input_mean),
-                "input_std": list(args.primary_split_v25_residual_input_std),
-                "limits": list(args.primary_split_v25_residual_limits),
-                "init_seed": int(args.primary_split_v25_residual_init_seed),
-            }
-            if args.rl_module_kind == _V25_RESIDUAL_RL_MODULE_KIND
-            else None
-        ),
         "warm_start_report": (
             str(warm_start_report_path) if warm_start_report_path is not None else None
         ),
@@ -3460,7 +3431,7 @@ def _run_watchdog_probe(args: argparse.Namespace) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    # First pass: read only --config so training_cfg.yaml can seed the defaults of
+    # First pass: read only --config so training_exnovo_cfg.yaml can seed the defaults of
     # every argument below (an explicit CLI flag still overrides the YAML value).
     pre = argparse.ArgumentParser(add_help=False)
     pre.add_argument("--config", default=str(training_config.DEFAULT_CONFIG_PATH))
@@ -3472,9 +3443,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--config",
         default=str(training_config.DEFAULT_CONFIG_PATH),
-        help="YAML config (training_cfg.yaml) read as DEFAULTS for the parameters "
-        "below; an explicit CLI flag still overrides it. Use a different file "
-        "(e.g. training_cfg.mac.yaml) for other setups.",
+        help="YAML config (default: training_exnovo_cfg.yaml) read as DEFAULTS "
+        "for the parameters below; an explicit CLI flag still overrides it. "
+        "Select training_cfg.yaml explicitly for the imitation preset.",
     )
     p.add_argument("--setup-xml", default=_DEFAULT_SETUP_XML)
     p.add_argument("--output-dir")
@@ -3794,43 +3765,9 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--rl-module-kind",
-        choices=(_STANDARD_RL_MODULE_KIND, _V25_RESIDUAL_RL_MODULE_KIND),
+        choices=(_STANDARD_RL_MODULE_KIND,),
         default=_STANDARD_RL_MODULE_KIND,
-        help=(
-            "RLModule topology. 'standard' preserves the historical default; "
-            "'primary_split_v25_residual' selects the explicit 35-column H0 + "
-            "bounded V25 residual policy."
-        ),
-    )
-    p.add_argument(
-        "--primary-split-v25-residual-input-mean",
-        type=float,
-        nargs="+",
-        default=None,
-        metavar="VALUE",
-        help="Exactly 33 frozen normalization means for actor columns 2:35.",
-    )
-    p.add_argument(
-        "--primary-split-v25-residual-input-std",
-        type=float,
-        nargs="+",
-        default=None,
-        metavar="VALUE",
-        help="Exactly 33 positive frozen normalization scales.",
-    )
-    p.add_argument(
-        "--primary-split-v25-residual-limits",
-        type=float,
-        nargs="+",
-        default=None,
-        metavar="VALUE",
-        help="Exactly two positive residual action-mean limits.",
-    )
-    p.add_argument(
-        "--primary-split-v25-residual-init-seed",
-        type=int,
-        default=None,
-        help="Frozen non-negative initialization seed for the V25 residual MLP.",
+        help="RLModule topology; retained for compatibility with standard checkpoints.",
     )
     p.add_argument(
         "--freeze-actor",
@@ -4186,92 +4123,26 @@ def _validate_warm_start_args(args: argparse.Namespace) -> None:
 
 
 def _validate_rl_module_args(args: argparse.Namespace) -> None:
-    """Validate the explicit RLModule topology without importing Ray or Torch."""
+    """Reject retired module topologies without importing Ray or Torch."""
 
     kind = str(
         getattr(args, "rl_module_kind", _STANDARD_RL_MODULE_KIND)
     ).strip().lower()
-    if kind not in {_STANDARD_RL_MODULE_KIND, _V25_RESIDUAL_RL_MODULE_KIND}:
-        raise SystemExit(f"unsupported --rl-module-kind: {kind!r}")
-    args.rl_module_kind = kind
-    field_specs = (
-        ("primary_split_v25_residual_input_mean", _V25_RESIDUAL_INPUT_COUNT, False),
-        ("primary_split_v25_residual_input_std", _V25_RESIDUAL_INPUT_COUNT, True),
-        ("primary_split_v25_residual_limits", _V25_RESIDUAL_ACTION_DIM, True),
-    )
-    configured = [
+    if kind != _STANDARD_RL_MODULE_KIND:
+        raise SystemExit(
+            f"unsupported --rl-module-kind: {kind!r}; only 'standard' is available"
+        )
+    retired = [
         name
-        for name, _, _ in field_specs
-        if getattr(args, name, None) is not None
+        for name, value in vars(args).items()
+        if name.startswith("primary_split_v25_residual_") and value is not None
     ]
-    seed = getattr(args, "primary_split_v25_residual_init_seed", None)
-    if kind == _STANDARD_RL_MODULE_KIND:
-        if configured or seed is not None:
-            raise SystemExit(
-                "V25 residual parameters require "
-                "--rl-module-kind primary_split_v25_residual"
-            )
-        return
-
-    if not bool(getattr(args, "asymmetric_actor_critic", False)):
+    if retired:
         raise SystemExit(
-            "--rl-module-kind primary_split_v25_residual requires "
-            "--asymmetric-actor-critic"
+            "V25 residual adaptation has been removed; unsupported parameters: "
+            + ", ".join(sorted(retired))
         )
-    if bool(getattr(args, "warm_start", False)) or bool(
-        getattr(args, "warm_start_raw", False)
-    ):
-        raise SystemExit(
-            "the V25 residual module must be initialized from its qualified full "
-            "policy/checkpoint; historical warm-start modes would omit residual "
-            "state"
-        )
-    expected_runtime = {
-        "phase_fsm_input_mode": "legacy_events",
-        "event_contract_id": "legacy_events_v1",
-        "binary_phase_fsm_mode": "binary_active",
-        "binary_phase_event_contract_id": _V25_ACTIVE_EVENT_CONTRACT_ID,
-    }
-    drifted = {
-        name: getattr(args, name, None)
-        for name, expected in expected_runtime.items()
-        if getattr(args, name, None) != expected
-    }
-    if drifted:
-        raise SystemExit(
-            "primary_split_v25_residual requires the frozen V25 active event "
-            f"routing; incompatible values: {drifted}"
-        )
-    if not str(getattr(args, "binary_phase_detector_profile", "") or "").strip():
-        raise SystemExit(
-            "primary_split_v25_residual requires an explicit frozen V25 binary "
-            "detector profile"
-        )
-    if not str(getattr(args, "online_grf_detector_profile", "") or "").strip():
-        raise SystemExit(
-            "primary_split_v25_residual requires the frozen legacy analog "
-            "detector profile used by the active V25 transport contract"
-        )
-    for name, length, positive in field_specs:
-        raw = getattr(args, name, None)
-        if raw is None:
-            raise SystemExit(f"--{name.replace('_', '-')} is required")
-        try:
-            values = [float(value) for value in raw]
-        except (TypeError, ValueError) as exc:
-            raise SystemExit(f"--{name.replace('_', '-')} must be numeric") from exc
-        if len(values) != length or any(not math.isfinite(value) for value in values):
-            raise SystemExit(
-                f"--{name.replace('_', '-')} must contain exactly {length} "
-                "finite values"
-            )
-        if positive and any(value <= 0.0 for value in values):
-            raise SystemExit(f"--{name.replace('_', '-')} values must be > 0")
-        setattr(args, name, values)
-    if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
-        raise SystemExit(
-            "--primary-split-v25-residual-init-seed must be a non-negative integer"
-        )
+    args.rl_module_kind = kind
 
 
 def _validate_start_sampling_args(args: argparse.Namespace) -> None:

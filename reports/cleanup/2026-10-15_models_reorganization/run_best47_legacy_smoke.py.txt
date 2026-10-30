@@ -1,0 +1,69 @@
+from __future__ import annotations
+
+from datetime import datetime, timezone
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import time
+
+ROOT = Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+WORK = Path('/tmp/cmc_models_reorganization_2026_10_15')
+RUN = ROOT / 'Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01'
+CHECKPOINT = RUN / 'rl_module_best'
+CONFIG = RUN / 'training_cfg.resolved.yaml'
+OUTPUT = WORK / 'best47_legacy_smoke'
+
+def fingerprint(path):
+    data = path.read_bytes()
+    return {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+
+def checkpoint_hashes():
+    return {str(path.relative_to(CHECKPOINT)): fingerprint(path)
+            for path in sorted(CHECKPOINT.rglob('*')) if path.is_file()}
+
+assert CHECKPOINT.is_dir(), CHECKPOINT
+assert not OUTPUT.exists(), OUTPUT
+before = checkpoint_hashes()
+config_before = fingerprint(CONFIG)
+argv = [
+    '/opt/anaconda3/envs/envCMC-rllib/bin/python', '-B',
+    str(ROOT / 'Trajectory Generator/baseline_MLP/rollout_eval.py'),
+    '--checkpoint', str(CHECKPOINT),
+    '--setup-xml', 'models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml',
+    '--episode-duration', '5', '--episode-start-offset-s', '1.956870983805102',
+    '--segment-duration', '0.01', '--max-steps', '2',
+    '--action-selection', 'deterministic', '--seed', '123',
+    '--no-record-outputs', '--record-policy-trace', '--no-progress',
+    '--startup-timeout-s', '120', '--run-timeout-s', '120',
+    '--output-dir', str(OUTPUT),
+]
+env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1', MPLCONFIGDIR=str(WORK / 'mpl'))
+start = time.monotonic()
+started = datetime.now(timezone.utc).isoformat()
+with (WORK / 'best47_legacy_smoke.stdout.log').open('w') as stdout:
+    with (WORK / 'best47_legacy_smoke.stderr.log').open('w') as stderr:
+        process = subprocess.run(argv, cwd=WORK, env=env, stdout=stdout, stderr=stderr, check=False, timeout=300)
+after = checkpoint_hashes()
+config_after = fingerprint(CONFIG)
+summary_path = OUTPUT / 'rollout_summary.json'
+summary = json.loads(summary_path.read_text()) if summary_path.is_file() else None
+receipt = {
+    'argv': argv, 'cwd': str(WORK), 'started_utc': started,
+    'elapsed_s': time.monotonic() - start, 'exit_code': process.returncode,
+    'checkpoint': str(CHECKPOINT), 'checkpoint_files_before': before,
+    'checkpoint_files_after': after, 'checkpoint_bytes_unchanged': before == after,
+    'config_before': config_before, 'config_after': config_after,
+    'config_bytes_unchanged': config_before == config_after,
+    'summary': summary,
+    'qualification_scope': 'Legacy relative setup loading plus deterministic two-step native OpenSim integration; not a full 5-second scientific replay.',
+}
+(WORK / 'best47_legacy_smoke_receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+assert process.returncode == 0, receipt
+assert before == after and config_before == config_after
+assert summary is not None and summary.get('ok') is True, summary
+assert summary.get('steps') == 2, summary
+print(json.dumps({'status': 'PASS', 'steps': summary['steps'], 'checkpoint_files': len(before),
+                  'checkpoint_bytes_unchanged': True, 'config_bytes_unchanged': True,
+                  'elapsed_s': receipt['elapsed_s'], 'receipt': str(WORK / 'best47_legacy_smoke_receipt.json')}, indent=2))

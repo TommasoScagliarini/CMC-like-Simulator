@@ -1,0 +1,41 @@
+from pathlib import Path
+import json
+import math
+import os
+import subprocess
+
+OUT=Path('/tmp/cmc_sea_source_migration_2026_10_15')
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+libs={
+    'installed':ROOT/'plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib',
+    'rebuilt':OUT/'build_mac_arm64/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib',
+}
+records=[]
+for label,lib in libs.items():
+    work=OUT/('probe_'+label);work.mkdir(exist_ok=True)
+    cmd=['/opt/anaconda3/envs/envCMC-rllib/bin/python','-B',str(OUT/'probe_plugin.py'),str(lib),str(OUT/(label+'_probe.json'))]
+    p=subprocess.run(cmd,cwd=work,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'},stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
+    (OUT/(label+'_probe.log')).write_text(p.stdout)
+    records.append({'label':label,'command':cmd,'returncode':p.returncode})
+    print(json.dumps(records[-1]),flush=True)
+    if p.returncode:
+        print(p.stdout[-6000:],flush=True)
+        raise SystemExit(p.returncode)
+a=json.loads((OUT/'installed_probe.json').read_text())
+b=json.loads((OUT/'rebuilt_probe.json').read_text())
+assert len(a['rows'])==len(b['rows'])==36
+max_delta=0.0
+values=0
+for left,right in zip(a['rows'],b['rows']):
+    assert {k:v for k,v in left.items() if k!='outputs'}=={k:v for k,v in right.items() if k!='outputs'}
+    for name,x in left['outputs'].items():
+        y=right['outputs'][name]
+        assert math.isclose(x,y,rel_tol=1e-12,abs_tol=1e-9),(left['case'],left['actuator'],name,x,y)
+        max_delta=max(max_delta,abs(x-y));values+=1
+result={'passed':True,'processes':records,'rows_compared':len(a['rows']),
+        'numeric_values_compared':values,'max_absolute_difference':max_delta,
+        'relative_tolerance':1e-12,'absolute_tolerance':1e-9,
+        'coverage':['both actuators','non-impedance PI','impedance','integral clamp','integral unwind','motor saturation','Ki=0'],
+        'runtime_plugins_replaced':False}
+(OUT/'differential_probe_result.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result,indent=2),flush=True)

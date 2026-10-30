@@ -24,6 +24,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+import workspace_bootstrap  # noqa: E402
+
+workspace_bootstrap.ensure_simulator_paths()
+
 from config import SimulatorConfig  # noqa: E402
 from output import read_sto  # noqa: E402
 from path_resolver import normalize_cli_existing_path, resolve_repo_path, resolve_simulator_paths  # noqa: E402

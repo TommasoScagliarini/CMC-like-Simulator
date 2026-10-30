@@ -1,5 +1,18 @@
 # Daily Report - 2026-07-20
 
+> Aggiornamento del 2026-10-19: `Trajectory Generator/baseline_MLP/experimental_configs/`
+> è stata rimossa. Due preset sono conservati come fixture dei test; gli altri
+> preset e i comandi che li selezionavano sono storici e richiedono ripristino.
+> La configurazione V26C corrente resta `training_exnovo_cfg.yaml`. Vedere il
+> [registro della rimozione](../cleanup/2026-10-19_experimental_configs_removal/README.md).
+
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 Instruction check token: CMC_AGENT_OK_2026
 
 ## Report utente consolidati

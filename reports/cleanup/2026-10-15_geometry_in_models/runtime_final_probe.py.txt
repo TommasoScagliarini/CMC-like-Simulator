@@ -1,0 +1,52 @@
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+from contextlib import redirect_stdout
+import io, json, os, sys, tempfile
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+OUT=Path('/tmp/cmc_geometry_move_2026_10_15')
+sys.path.insert(0,str(ROOT))
+import path_resolver as paths
+import model_loader, visualize
+from tools import build_abx_seasea_pipeline as builder
+checks=[]
+def check(name,passed,**details):checks.append(dict(name=name,passed=bool(passed),**details))
+expected=paths.SHARED_GEOMETRY_DIR/'AM_foot_l.STL'
+for raw in ('Geometry/AM_foot_l.STL','Geometry\\AM_foot_l.STL','models/Geometry/AM_foot_l.STL','models\\Geometry\\AM_foot_l.STL',str(ROOT/'Geometry/AM_foot_l.STL'),'C:/archive/CMC-like-Simulator/Geometry/AM_foot_l.STL','C:\\archive\\CMC-like-Simulator - Claude\\models\\Geometry\\AM_foot_l.STL','//server/share/CMC-like-Simulator/Geometry/AM_foot_l.STL'):
+    actual=paths.remap_model_path(raw);check('legacy_or_canonical_portable_path',actual==expected,raw=raw,actual=str(actual))
+for raw in ('validation/frozen/Geometry/AM_foot_l.STL',str(ROOT/'validation/frozen/Geometry/AM_foot_l.STL'),'C:/validation/CMC-like-Simulator/Geometry/AM_foot_l.STL','C:/other_project/Geometry/AM_foot_l.STL','models/unknown/Geometry/AM_foot_l.STL'):
+    actual=paths.remap_model_path(raw);check('unknown_and_archived_namespace_preserved',actual is None,raw=raw,actual=str(actual))
+record=[]
+fake=SimpleNamespace(ModelVisualizer=SimpleNamespace(addDirToGeometrySearchPaths=record.append))
+with redirect_stdout(io.StringIO()),patch.object(model_loader,'opensim',fake):
+    model_loader._configure_geometry_search_paths(str(ROOT/'models/AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim'))
+check('loader_canonical_first',record[0]==str(paths.SHARED_GEOMETRY_DIR),registered=record)
+check('loader_deduplicated',len(record)==len(set(os.path.normcase(p) for p in record)))
+record.clear()
+with redirect_stdout(io.StringIO()):
+    dirs=visualize._configure_geometry_search_paths(extra_dirs=['Geometry',str(paths.SHARED_GEOMETRY_DIR),'models/Geometry'],opensim_module=fake)
+check('visualize_canonical_first',dirs[0]==str(paths.SHARED_GEOMETRY_DIR),registered=dirs)
+check('visualize_deduplicated',len(dirs)==len(set(os.path.normcase(p) for p in dirs)))
+old_cwd=Path.cwd()
+try:
+    with tempfile.TemporaryDirectory() as work:
+        work=Path(work);custom=work/'custom_meshes';custom.mkdir();os.chdir(work)
+        record.clear()
+        with redirect_stdout(io.StringIO()):
+            dirs=visualize._configure_geometry_search_paths(extra_dirs=['custom_meshes'],opensim_module=fake)
+        check('custom_relative_extra_directory_keeps_cwd',str(custom.resolve()) in dirs,registered=dirs)
+        geometry=work/'Geometry';geometry.mkdir()
+        record.clear()
+        with redirect_stdout(io.StringIO()):
+            dirs=visualize._configure_geometry_search_paths(extra_dirs=['Geometry'],opensim_module=fake)
+        check('existing_external_relative_Geometry_keeps_cwd',str(geometry.resolve()) in dirs,registered=dirs)
+        external=work/'CMC-like-Simulator/Geometry/AM_foot_l.STL';external.parent.mkdir(parents=True);external.write_text('temporary fixture')
+        check('existing_external_absolute_keeps_path',paths.remap_model_path(external) is None)
+finally:os.chdir(old_cwd)
+for raw in (None,'Geometry/AM_foot_l.STL','models\\Geometry\\AM_foot_l.STL','C:/archive/CMC-like-Simulator/Geometry/AM_foot_l.STL'):
+    argv=['build_abx_seasea_pipeline.py','--subject','AB06']+(['--foot-mesh',raw] if raw else [])
+    with patch.object(sys,'argv',argv): args=builder.parse_args()
+    check('builder_default_and_legacy_geometry',args.foot_mesh==expected,raw=raw,actual=str(args.foot_mesh))
+result={'checks':checks,'all_passed':all(c['passed'] for c in checks),'failed_checks':[c for c in checks if not c['passed']],'geometry_and_model_native_receipt':'native_geometry_migration_comparison.json','frozen_evidence_modified_by_this_agent':False,'native_scope':'macOS arm64, not native Windows or GUI'}
+(OUT/'final_runtime_review.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({'checks':len(checks),'all_passed':result['all_passed'],'failed_checks':result['failed_checks']},indent=2))

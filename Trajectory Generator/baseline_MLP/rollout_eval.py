@@ -25,15 +25,21 @@ import json  # noqa: E402
 import math  # noqa: E402
 from datetime import datetime  # noqa: E402
 
+import _bootstrap  # noqa: E402
+
+_bootstrap.ensure_sim_paths()
+
 import process_watchdog  # noqa: E402
 import progress_display  # noqa: E402
-import exploration_noise  # noqa: E402
+import exploration  # noqa: E402
 import training_config  # noqa: E402
 
-_DEFAULT_SETUP_XML = r"models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
+from path_resolver import remap_policy_transfer_path  # noqa: E402
+
+_DEFAULT_SETUP_XML = r"models\AB06\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml"
 _DEFAULT_GRF_MODE = "online_sensor"
 _DEFAULT_ONLINE_GRF_PROFILE = (
-    "online_grf_profiles/"
+    "online_GRF/profiles/"
     "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
 _DEFAULT_ONLINE_GRF_DETECTOR_PROFILE = None
@@ -256,15 +262,19 @@ def _resolve_input_path(value: str) -> Path:
     Generator\\runs\\...`` from the simulator root) and then against the
     Trajectory Generator directory, so the historical ``runs\\foo`` form keeps
     working after the 2026-06-09 move of ``runs/`` — mirroring how
-    ``--output-dir`` is resolved. Absolute paths are honored as-is.
+    ``--output-dir`` is resolved. The former policy-transfer workspace namespace
+    is mapped to ``imitation_to_exnovo`` without modifying saved checkpoints.
     """
     path = _cli_path(value)
+    path = remap_policy_transfer_path(path) or path
     if path.is_absolute():
         return path.resolve()
     cwd_candidate = (Path.cwd() / path).resolve()
+    cwd_candidate = remap_policy_transfer_path(cwd_candidate) or cwd_candidate
     if cwd_candidate.exists():
         return cwd_candidate
     traj_candidate = (_TRAJ_GEN_DIR / path).resolve()
+    traj_candidate = remap_policy_transfer_path(traj_candidate) or traj_candidate
     if traj_candidate.exists():
         return traj_candidate
     training_candidate = (
@@ -617,7 +627,7 @@ def run(args: argparse.Namespace) -> dict:
     reset_diagnostics: dict = {}
     terminated = truncated = False
     steps = 0
-    held_noise_process = exploration_noise.HeldStandardNormal(
+    held_noise_process = exploration.HeldStandardNormal(
         np.random.default_rng(args.seed),
         action_shape,
         args.exploration_noise_hold_steps,
@@ -1059,10 +1069,10 @@ def run_supervised(args: argparse.Namespace) -> int:
 
 
 def parse_args() -> argparse.Namespace:
-    # First pass: read --checkpoint/--config/--no-auto-config so the trained run's
-    # resolved snapshot (and/or a --config file) can seed argparse defaults for the
-    # env/model/reward parameters. An explicit CLI flag still overrides them, so the
-    # evaluated env matches training without re-typing ~14 flags.
+    # Use the global ex-novo config when no checkpoint snapshot is loaded.
+    # A snapshot remains authoritative, including for older runs that omit
+    # fields added to the global config later. Explicit --config and CLI values
+    # can override the selected defaults.
     pre = argparse.ArgumentParser(add_help=False)
     pre.add_argument("--checkpoint")
     pre.add_argument("--config", default=None)
@@ -1080,8 +1090,8 @@ def parse_args() -> argparse.Namespace:
         except (FileNotFoundError, OSError) as exc:
             default_checkpoint_error = exc
 
-    layered_defaults: dict = {}
-    cfg_reward: dict = {}
+    default_cfg = training_config.load(training_config.resolve_config_path(None))
+    layered_defaults, cfg_reward = training_config.to_argparse_defaults(default_cfg)
     if checkpoint_for_snapshot and not pre_args.no_auto_config:
         # Resolve the checkpoint the same way --checkpoint is resolved later (the
         # "runs\..." convention maps to "Trajectory Generator\runs\..."), so the
@@ -1092,9 +1102,7 @@ def parse_args() -> argparse.Namespace:
             ckpt_path = checkpoint_for_snapshot
         snapshot = training_config.load_resolved_for_checkpoint(ckpt_path)
         if snapshot:
-            flat, reward = training_config.to_argparse_defaults(snapshot)
-            layered_defaults.update(flat)
-            cfg_reward.update(reward)
+            layered_defaults, cfg_reward = training_config.to_argparse_defaults(snapshot)
     if pre_args.config:
         cfg = training_config.load(training_config.resolve_config_path(pre_args.config))
         flat, reward = training_config.to_argparse_defaults(cfg)
@@ -1115,9 +1123,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--config",
         default=None,
-        help="Optional YAML config read as defaults (env/model/reward). Normally "
-        "unnecessary: a checkpoint's training_cfg.resolved.yaml is auto-loaded so "
-        "the rollout matches training.",
+        help="Optional YAML override for env/model/reward. A checkpoint's "
+        "training_cfg.resolved.yaml is auto-loaded when present; otherwise "
+        "training_exnovo_cfg.yaml supplies the defaults. Explicit CLI flags win.",
     )
     p.add_argument(
         "--no-auto-config",
@@ -1457,8 +1465,8 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--worker-process", action="store_true", help=argparse.SUPPRESS)
 
-    # Apply snapshot/--config values as defaults (only for args this script has),
-    # then parse so explicit CLI flags win.
+    # Apply the selected YAML defaults (only for args this script has), then
+    # parse so explicit CLI flags win.
     valid_dests = {action.dest for action in p._actions}
     p.set_defaults(**{k: v for k, v in layered_defaults.items() if k in valid_dests})
     args = p.parse_args()

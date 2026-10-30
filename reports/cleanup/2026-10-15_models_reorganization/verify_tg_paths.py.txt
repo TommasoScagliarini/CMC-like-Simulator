@@ -1,0 +1,80 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+import yaml
+
+ROOT = Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+WORK = Path('/tmp/cmc_models_reorganization_2026_10_15')
+sys.path.insert(0, str(ROOT))
+from path_resolver import resolve_repo_path
+from setup_io import read_setup_xml
+
+checkpoint_config = ROOT / 'Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml'
+saved_sha = hashlib.sha256(checkpoint_config.read_bytes()).hexdigest()
+saved = yaml.safe_load(checkpoint_config.read_text())
+legacy = saved['simulation']['setup_xml']
+setup_path = resolve_repo_path(legacy)
+assert setup_path.is_file(), setup_path
+setup = read_setup_xml(setup_path)
+for path in (setup.model_file, setup.kinematics_file, setup.external_loads_xml, setup.reserve_actuators_xml):
+    assert path is not None and path.is_file(), path
+
+code = r'''
+import importlib, json, sys
+from pathlib import Path
+root = Path(sys.argv[2])
+sys.path[:0] = [str(root), str(root / 'Trajectory Generator')]
+factory = importlib.import_module(sys.argv[1] + '.env_factory')
+expected = root / 'models/AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml'
+legacy = 'models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml'
+paths = [legacy, legacy.replace('/', '\\'), str(root / legacy),
+         r'C:\archive\CMC-like-Simulator - Claude\models\AB06_SEASEA_Threadmill\AB06_SEASEA_stiff321_500_pi_setup.xml',
+         str(expected)]
+for value in paths:
+    cfg = factory.build_env_config({'setup_xml_path': value})
+    assert Path(cfg.setup_xml_path) == expected, (value, cfg.setup_xml_path)
+    assert Path(cfg.setup_xml_path).is_file()
+assert factory._resolve_setup_xml(None) is None
+if sys.argv[1] == 'baseline_MLP':
+    oracle = importlib.import_module('baseline_MLP.imitation_oracle_rollout')
+    variant = oracle._setup_with_knee_kp(legacy, 112.0, Path(sys.argv[3]) / 'oracle_variant')
+    from setup_io import read_setup_xml
+    assert read_setup_xml(variant).model_file.is_file()
+    validator = importlib.import_module('baseline_MLP.validate_online_grf_train_inference')
+    assert validator._repo_path(legacy) == expected
+print(json.dumps({'family': sys.argv[1], 'legacy_and_current_paths': len(paths),
+                  'env_config': 'PASS', 'utilities': 'PASS' if sys.argv[1] == 'baseline_MLP' else 'not_applicable'}))
+'''
+family_checks = []
+for family in ('baseline_MLP', 'unified_MLP', 'unified_MLP_39'):
+    result = subprocess.run([sys.executable, '-B', '-c', code, family, str(ROOT), str(WORK)],
+                            text=True, capture_output=True, check=False, cwd=WORK)
+    (WORK / f'{family}_path_checks.stdout.log').write_text(result.stdout)
+    (WORK / f'{family}_path_checks.stderr.log').write_text(result.stderr)
+    assert result.returncode == 0, (family, result.stdout, result.stderr)
+    family_checks.append(json.loads(result.stdout.splitlines()[-1]))
+
+preset_paths = []
+edits = json.loads((WORK / 'trajectory_edits.json').read_text())['files']
+for item in edits:
+    if not item['path'].endswith('.yaml'):
+        continue
+    preset = yaml.safe_load((ROOT / item['path']).read_text())
+    configured = preset['simulation']['setup_xml']
+    assert configured.startswith('models/AB06/AB06_SEASEA_Threadmill/'), configured
+    assert resolve_repo_path(configured).is_file(), configured
+    preset_paths.append(item['path'])
+
+assert hashlib.sha256(checkpoint_config.read_bytes()).hexdigest() == saved_sha
+report = {'status': 'PASS', 'checkpoint_config_sha256_unchanged_during_verification': saved_sha,
+          'saved_checkpoint_setup': legacy, 'resolved_setup': str(setup_path),
+          'saved_setup_inputs_exist': True, 'families': family_checks,
+          'operational_presets_checked': len(preset_paths), 'presets': preset_paths}
+(WORK / 'trajectory_path_checks.json').write_text(json.dumps(report, indent=2) + '\n')
+print(json.dumps(report, indent=2))

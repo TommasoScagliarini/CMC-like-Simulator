@@ -1,5 +1,10 @@
 # Pilot della rete unificata, strategia 50→100 e futura variante a 39 feature
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Data:** 2026-09-14  
 **Instruction check token:** `CMC_AGENT_OK_2026`  
 **Stato:** pilot V1 a 35 ingressi completato a 5 iterazioni; sei rollout e analisi storica completati. Prosecuzione a 50/100 e variante a 39 ingressi ancora da eseguire.
@@ -48,7 +53,7 @@ terminazione fisica già presente. Il fix risolve quindi un errore potenziale
 di isolamento, coperto dai test; non dimostra una variazione dei ritorni
 di quel batch specifico.
 
-Il [pilot corretto](<../../Trajectory Generator/unified_MLP/runs/training/pretraining_v1_pen1_pilot_2026-09-14/summary.json>)
+Il [pilot corretto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f9e8f0ee7d865feb>)
 ha completato **5/5 iterazioni**, **23 040 transizioni**, senza crash, restart
 o iterazioni saltate, dalle 13:11:59 alle 13:57:56 CEST. Il tempo misurato
 del processo è **2753.43 s**, circa 45 min 53 s.
@@ -107,9 +112,9 @@ queste prove non distinguono ancora allenamento insufficiente, limiti di
 osservabilità e altre difficoltà di controllo o ottimizzazione. Gli altri
 segnali causali e la FSM restano disponibili all'actor.
 
-Artefatti: [tabelle complete](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/comparison.md>),
-[grafici](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/tracking_angles.png>),
-[manifest ed esito dei controlli](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_compare_3_5_2026-09-14/completion_verification.json>).
+Artefatti: [tabelle complete — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9bdc8325befa7efc>),
+[grafici — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-fc062346f40de0f9>),
+[manifest ed esito dei controlli — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-1cb3373b67e47e1b>).
 
 ## 4. Precedente V26 e motivazione del budget
 
@@ -155,7 +160,7 @@ distinti. Un episodio lungo senza cicli non dimostra qualità del cammino.
 La configurazione della V1 resta costante fra 5, 50 e 100 per rendere
 interpretabile l'effetto dell'esperienza aggiuntiva.
 
-Fonti e calcoli: [confronto storico ed ETA](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v26_comparison_eta_2026-09-14/comparison_eta.md>).
+Fonti e calcoli: [confronto storico ed ETA — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-3fdb999918e4cb3f>).
 
 ## 6. Test futuri e variante a 39 feature
 

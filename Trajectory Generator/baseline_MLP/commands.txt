@@ -2,17 +2,30 @@
 # baseline_MLP - comandi training / inference (Ray RLlib, nuovo API stack)
 # ============================================================================
 #
-# Esecuzione: PowerShell o shell macOS, dalla ROOT del simulatore.
+# Esecuzione: PowerShell o shell macOS, dalla ROOT del workspace condiviso.
 #   Windows: C:\Users\tomma\Desktop\Opensim OMNIBUS\CMC-like-Simulator - Claude
+# Core Python: "CMC-like Simulator/" e "Trajectory Generator/".
+# models/, plugins/, online_GRF/, results/, plot/ e validation/ restano nella root.
 # I path relativi usano "/" per essere validi sia su Windows/Python sia su macOS.
 # Ambiente conda dedicato: envCMC-rllib (setup una tantum: sezione H in fondo).
 #
-# SORGENTE DEI PARAMETRI: training_cfg.yaml
+# SORGENTE PREDEFINITA DEI PARAMETRI: training_exnovo_cfg.yaml (dal 2026-10-19)
 #   Tutti i parametri di rete e simulazione vivono in
-#   "Trajectory Generator/baseline_MLP/training_cfg.yaml". Il comando default
+#   "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml": parametri
+#   V26C importati dal run best47, sigma fisso 0.010 e pesi morphology 5.0.
+#   Il preset imitativo training_cfg.yaml richiede --config esplicito.
+#   Il comando default
 #   non richiede flag: output-dir e nome run vengono generati automaticamente;
 #   eventuali flag CLI espliciti restano override del YAML. Il training scrive la config RISOLTA
 #   (YAML + override CLI) in <output-dir>/training_cfg.resolved.yaml.
+#   La configurazione non carica automaticamente i pesi del checkpoint best47.
+#   Le due CLI manuali in imitation_to_exnovo/utilities/ hanno input propri:
+#   l'oracle usa default CLI per la simulazione e legge solo il sottoinsieme
+#   reward documentato nel README da training_cfg.yaml;
+#   freeze_actor_checkpoint.py richiede modulo, config risolta e feature metadata.
+#   Il training corrente usa la MLP standard (anche asimmetrica). Il ramo
+#   primary split adapter/residual V25 e' ritirato; per i checkpoint di quel
+#   ramo e i gate F0 storici serve il checkout originale completo.
 #
 # REGOLE D'ORO
 #  1. Usare SEMPRE "conda run --no-capture-output": senza, conda bufferizza
@@ -20,12 +33,14 @@
 #  2. Precedenza: il YAML da' i DEFAULT; un flag CLI esplicito VINCE sul YAML.
 #     Per una config alternativa (es. macOS) usare --config <file.yaml>.
 #  3. Rollout = AUTO-MATCH: senza flag, rollout_eval.py usa l'ultimo training
-#     valido in runs/training, prende rl_module_best e carica da solo
-#     <run>/training_cfg.resolved.yaml, quindi env/rete/reward/action_mode
-#     combaciano col training SENZA ri-specificare i flag. --checkpoint resta
-#     override esplicito; --no-auto-config per disattivare; --config <file> per
-#     forzare un file. Checkpoint LEGACY senza snapshot -> passare i flag a mano
-#     (vedi nota in B).
+#     valido in runs/training e prende rl_module_best. Se presente, lo snapshot
+#     <run>/training_cfg.resolved.yaml sostituisce COMPLETAMENTE il default;
+#     senza snapshot, o con --no-auto-config, usa training_exnovo_cfg.yaml.
+#     --config <file> aggiunge i suoi override; i flag CLI prevalgono.
+#     Best47 usa il default: il suo snapshot e' stato importato nel preset e
+#     rimosso. Modificare il preset cambia anche il rollout best47.
+#     Per altri checkpoint senza snapshot specificare la configurazione del
+#     relativo training (vedi nota in B).
 #  4. Path relativi:
 #     - train_ppo_mlp.py salva sotto "Trajectory Generator/runs/training";
 #     - rollout_eval.py e imitation_oracle_rollout.py salvano sotto
@@ -40,9 +55,9 @@
 #  6. Rete: definita come num_hidden_layers x dim_hidden_layers (larghezza
 #     uniforme) -> fcnet_hiddens = [dim]*num. Override CLI:
 #     --num-hidden-layers / --dim-hidden-layers / --fcnet-activation.
-#  7. action_mode "absolute" (traiettoria ex-novo + gait clock del lato sano) e'
-#     l'unica modalita' di produzione e NON e' nel YAML; "delta"/"raw" restano
-#     solo come flag CLI diagnostici (--action-mode). I checkpoint "delta"
+#  7. action_mode "absolute" e' la modalita' di produzione selezionata nel YAML;
+#     il preset corrente disabilita il gait clock del lato sano. "delta"/"raw"
+#     restano flag CLI diagnostici (--action-mode). I checkpoint "delta"
 #     pre-2026-06-09 sono INCOMPATIBILI.
 #  8. Barra live: singola riga in place su TTY; su output rediretto degrada a
 #     righe ASCII periodiche (mai mojibake). Debug: --verbose-workers (training)
@@ -57,16 +72,14 @@
 
 
 # ============================================================================
-# A) TRAINING DEFAULT - configurazione da training_cfg.yaml
-#    Default attuale: imitativo V4 obs-target, C2 Butterworth 4 Hz, episodio 5 s.
+# A) TRAINING DEFAULT - configurazione da training_exnovo_cfg.yaml
+#    Default attuale: ex novo V26C, parametri best47, episodio 5 s, 51 iterazioni.
 # ============================================================================
 # Robustezza gia' inclusa (valori nel YAML, sezione supervision): self-timeout
 # monotonic del child + supervisor che riparte da checkpoint_last sull'iterazione
-# in stallo (checkpoint_every 1 = si perde al piu' 1 iterazione; max_consecutive_skips
-# 5 = abort su stallo sistemico); guardia per env-step (step_wall_timeout_s) che
-# tronca l'episodio degenere. Throughput osservato (absolute): ~13-15 min/iter
-# con batch 4096 e 12 worker. NB: ogni worker carica modello+Static Optimization
-# -> sorvegliare la RAM.
+# in stallo (checkpoint_every 1, max_consecutive_skips 1); guardia per env-step
+# (step_wall_timeout_s 60 s) che tronca l'episodio degenere. Il preset usa
+# batch 4608 e 12 worker; ogni worker carica modello e Static Optimization.
 
 # [TRAIN-DEFAULT] se l'ambiente envCMC-rllib e' gia attivo
 python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py"
@@ -78,7 +91,7 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --name _example
 
 # [TRAIN-STD-MAC] macOS arm64, 5 worker (richiede plugin onlineGRF .dylib
-# compilato, vedi tools/online_grf_contact/README.md, e sezione H per l'env).
+# compilato, vedi online_GRF/sources/README.md, e sezione H per l'env).
 # Override CLI sul YAML per il parallelismo/batch ridotti; in alternativa tenere
 # un "training_cfg.mac.yaml" e passarlo con --config.
 conda run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --num-env-runners 5 --ray-num-cpus 6 --train-batch-size 2048 --minibatch-size 256
@@ -101,12 +114,13 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # ============================================================================
 # B) INFERENCE STANDARD - rollout deterministico da checkpoint
 # ============================================================================
-# Env/rete/reward/action_mode sono AUTO-CARICATI dallo snapshot del run (regola
-# d'oro 3). Se non passi --checkpoint, viene usato l'ultimo training valido in
+# Env/rete/reward/action_mode arrivano dallo snapshot del run se presente,
+# altrimenti dal default ex novo (regola d'oro 3). Best47 usa il default.
+# Se non passi --checkpoint, viene usato l'ultimo training valido in
 # runs/training/.../rl_module_best. Il rollout salva di default gli .sto in
-# <output-dir>/sim_outputs (riproducibili con visualize.py); usare
-# --no-record-outputs per un run leggero. --episode-duration eredita dallo
-# snapshot; passarlo solo per valutare una durata diversa.
+# <output-dir>/sim_outputs (riproducibili con "CMC-like Simulator/visualize.py"); usare
+# --no-record-outputs per un run leggero. --episode-duration eredita dalla
+# configurazione selezionata; passarlo solo per valutare una durata diversa.
 # NB: con record_outputs attivo compaiono le righe diagnostiche [Recruit ...].
 
 # [ROLLOUT-DEFAULT] se l'ambiente envCMC-rllib e' gia attivo
@@ -124,9 +138,22 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # [ROLLOUT-MANUAL] checkpoint e output manuali restano supportati
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint "runs/training/baseline_mlp_hybrid_win/rl_module_best" --output-dir "runs/rollout/baseline_mlp_hybrid_win_rollout"
 
-# Checkpoint LEGACY (senza training_cfg.resolved.yaml): l'auto-match non trova lo
-# snapshot -> specificare a mano i flag del training, es. per gli imitativi delta
-# pre 2026-06-09:
+# [EXPLORATION-SIGMA] crea una copia dell'actor con sigma fisso, preservando la
+# media. Sorgente: training_cfg.resolved.yaml e actor_feature_manifest.json
+# adiacenti al modulo; per un manifest esterno usare --source-feature-manifest.
+# --sigma accetta un valore condiviso o uno per componente; --action-dim e' 2
+# di default. --reference-trace verifica anche le medie su una trace esistente.
+# La cartella output deve essere nuova.
+python "Trajectory Generator/baseline_MLP/utility/exploration.py" --source-module "runs/training/baseline_mlp_hybrid_win/rl_module_best" --output-dir "Trajectory Generator/runs/training/baseline_mlp_hybrid_win_sigma010" --sigma 0.010
+
+# [ROLLOUT-HELD] probe diagnostico: stesso draw gaussiano per 5 step (50 ms a
+# 100 Hz), tramite HeldStandardNormal del modulo condiviso exploration.py.
+python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint "runs/training/baseline_mlp_hybrid_win/rl_module_best" --action-selection stochastic_held --exploration-noise-hold-steps 5 --no-record-outputs
+
+# Checkpoint LEGACY (senza training_cfg.resolved.yaml): il fallback e' ex novo,
+# quindi specificare --config e i flag coerenti con il training originale.
+# Per gli imitativi delta pre 2026-06-09, per esempio:
+#   --config "Trajectory Generator/baseline_MLP/training_cfg.yaml"
 #   --action-mode delta --grf-mode prescribed --no-online-grf-observation
 # (eventualmente --no-auto-config per ignorare uno snapshot presente).
 
@@ -144,15 +171,15 @@ python "plot/plotter.py" --mlp
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-like python "plot/plotter.py" --mlp
 
 # [VISUALIZE-MLP] replay nel Simbody visualizer
-python "visualize.py" --mlp
+python "CMC-like Simulator/visualize.py" --mlp
 
 # [VISUALIZE-MLP-SAVE] salva MP4 in Trajectory Generator/runs/visualize
 # Su macOS la cattura e' limitata alla finestra Simbody/OpenSim; se la finestra
 # non viene trovata, il comando fallisce invece di registrare tutto lo schermo.
-python "visualize.py" --mlp --save
+python "CMC-like Simulator/visualize.py" --mlp --save
 
 # [VISUALIZE-MLP-SAVE-WIN]
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-like python "visualize.py" --mlp --save
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-like python "CMC-like Simulator/visualize.py" --mlp --save
 
 
 # ============================================================================
@@ -174,37 +201,49 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # ============================================================================
 # --reward-mode imitation: la reward premia pros_knee->knee_r e
 # pros_ankle->ankle_r sfasati di mezzo ciclo. Scopo: (1) validare la pipeline,
-# (2) seed di pre-training per il run ex-novo. reward_imitation.json allarga la
-# banda oob al ROM della gamba sana (knee fino a -1.40, ankle +-0.60). In rollout
-# reward_mode arriva dallo snapshot (niente da ri-specificare).
+# (2) seed di pre-training per il run ex-novo. La sezione reward di
+# training_cfg.yaml include la banda oob della gamba sana (knee fino a -1.40,
+# ankle +-0.60). In rollout reward_mode arriva dallo snapshot.
 # IMPORTANTE: `--warm-start` indica ora la baseline ex-novo canonica H0 completa.
 # Per il vecchio trapianto actor-only da un modulo imitativo usare
 # `--warm-start-raw`; `--resume-from` resta il resume completo generico.
 
 # [TRAIN-IMIT-WIN] Windows, pre-training imitativo
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --output-dir "runs/training/baseline_mlp_imit_win" --reward-mode imitation --reward-json "Trajectory Generator/baseline_MLP/reward_imitation.json"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --config "Trajectory Generator/baseline_MLP/training_cfg.yaml" --output-dir "runs/training/baseline_mlp_imit_win" --reward-mode imitation
 
 # [TRAIN-IMIT-V2-WIN] target phase-based corretto + reward SEA/command-rate.
 # Avviare un run NUOVO: il vecchio checkpoint imitativo e' stato allenato con
 # target temporale clampato e reward cieca alla saturazione interna.
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --output-dir "runs/training/baseline_mlp_imit_v2_win" --reward-mode imitation --reward-json "Trajectory Generator/baseline_MLP/reward_imitation.json"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --config "Trajectory Generator/baseline_MLP/training_cfg.yaml" --output-dir "runs/training/baseline_mlp_imit_v2_win" --reward-mode imitation
 
 # [TRAIN-IMIT-V3-GOV-WIN] Kp=18 nominale + reference governor fisicamente
 # compatibile con l'IK sperimentale filtrato. Avviare un run NUOVO: cambia la
 # dinamica action->riferimento rispetto a V2.
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --output-dir "runs/training/baseline_mlp_imit_v3_governed_win" --reward-mode imitation --reward-json "Trajectory Generator/baseline_MLP/reward_imitation.json"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --config "Trajectory Generator/baseline_MLP/training_cfg.yaml" --output-dir "runs/training/baseline_mlp_imit_v3_governed_win" --reward-mode imitation
 
-# [TRAIN-IMIT-V4-C2-OBS-TARGET-WIN] ora coincide con il default training_cfg.yaml:
+# [TRAIN-IMIT-V4-C2-OBS-TARGET-WIN] preset imitativo training_cfg.yaml esplicito:
 # singolo q_cmd per giunto a 100 Hz, reference model C2 Butterworth terzo ordine
 # a 4 Hz jerk-limited, reward served/actual separata e target imitativo esplicito.
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --config "Trajectory Generator/baseline_MLP/training_cfg.yaml"
 
 # [ORACLE-IMIT] gate plant/reward senza policy appresa. Deve precedere ogni nuovo
 # tuning SEA e salva diagnostica completa in runs/rollout/imitation_oracle_final.
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-like python "Trajectory Generator/baseline_MLP/imitation_oracle_rollout.py" --output-dir "runs/rollout/imitation_oracle_final"
+# La simulazione usa i propri default CLI (reference model second_order,
+# cutoff 6 Hz); la reward legge solo i nove campi documentati nel README dalla
+# sezione reward di training_cfg.yaml. --reward-json opzionale sostituisce
+# questo sottoinsieme con un mapping custom; reward_mode resta imitation.
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-like python "Trajectory Generator/baseline_MLP/imitation_to_exnovo/utilities/imitation_oracle_rollout.py" --output-dir "runs/rollout/imitation_oracle_final"
 
 # [ORACLE-IMIT-KP18-GOV] valida Kp=18 nominale con reference governor.
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-like python "Trajectory Generator/baseline_MLP/imitation_oracle_rollout.py" --output-dir "runs/rollout/imitation_oracle_kp18_governed_final"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-like python "Trajectory Generator/baseline_MLP/imitation_to_exnovo/utilities/imitation_oracle_rollout.py" --output-dir "runs/rollout/imitation_oracle_kp18_governed_final"
+
+# [FREEZE-ACTOR] copia verificata dell'actor selezionato per il warm-start.
+# Sostituire SOURCE_RUN con un run che contenga training_cfg.resolved.yaml e
+# actor_feature_names in adaptation_report.json oppure run_summary.json.
+# Il best47 attuale richiede prima il ripristino degli input mancanti.
+# Usare percorsi completi dalla repo root; la cartella output deve essere nuova.
+# --expected-actor-digest consente un controllo aggiuntivo del digest selezionato.
+python "Trajectory Generator/baseline_MLP/imitation_to_exnovo/utilities/freeze_actor_checkpoint.py" --source-run "Trajectory Generator/runs/training/SOURCE_RUN" --source-module "Trajectory Generator/runs/training/SOURCE_RUN/rl_module_best" --output-dir "Trajectory Generator/runs/training/frozen_actor" --selection-reason "Actor selezionato per il preflight warm-start"
 
 # [ROLLOUT-IMIT] inference dal run imitativo (reward_mode dallo snapshot)
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint "runs/training/baseline_mlp_imit_win/rl_module_best" --output-dir "runs/rollout/baseline_mlp_imit_win_rollout" --record-outputs
@@ -215,8 +254,9 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # [ROLLOUT-IMIT-V3-GOV] inference dal training Kp=18 + governor
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint "runs/training/baseline_mlp_imit_v3_governed_win/rl_module_best" --output-dir "runs/rollout/baseline_mlp_imit_v3_governed_win_rollout" --record-outputs
 
-# [ROLLOUT-IMIT-V4-C2-OBS-TARGET] ora coincide col default: ultimo training valido
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/rollout_eval.py"
+# [ROLLOUT-IMIT-V4-C2-OBS-TARGET] checkpoint imitativo selezionato esplicitamente;
+# il comando generico senza --checkpoint puo' selezionare best47 ex novo.
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/rollout_eval.py" --checkpoint "runs/training/MLP_imitation_native_v26_08-20-2026_june_equiv_100iter/rl_module_best"
 
 # [WARM-START-H0-EXNOVO] baseline canonica H0 completa: actor adattato, critic
 # caldo, optimizer e stato PPO.
@@ -259,14 +299,15 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 
 
 # ============================================================================
-# E) REWARD CUSTOM (training_cfg.yaml reward: oppure --reward-json)
+# E) REWARD CUSTOM (training_exnovo_cfg.yaml reward: oppure --reward-json)
 # ============================================================================
 # La reward e' definita in reward_function.py; i campi base stanno nel YAML
 # (sezione reward:, p.es. reward_mode). Precedenza: YAML reward: < --reward-json
 # < --reward-mode. Override inline (PowerShell: virgolette singole esterne)
-# oppure file JSON; in rollout la reward arriva dallo snapshot.
+# oppure file JSON; in rollout la reward parte dallo snapshot se presente,
+# altrimenti dal preset predefinito, con gli override indicati nella regola 3.
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --output-dir "runs/training/baseline_mlp_reward_test" --num-env-runners 0 --iterations 50 --episode-duration 0.5 --reward-json '{\"blend_reference\": 0.35, \"blend_tracking\": 0.45, \"saturation_weight\": 0.5}'
-#   in alternativa: --reward-json "Trajectory Generator/baseline_MLP/reward_overrides_example.json"
+#   Per un file proprio: --reward-json "percorso/al/mio_reward.json"
 
 
 # ============================================================================
@@ -274,16 +315,16 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # ============================================================================
 
 # [SMOKE-IMPORT] coesistenza torch + opensim + ray nello stesso processo
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python -c "import sys; sys.path.insert(0, 'Trajectory Generator/baseline_MLP'); import win_runtime; import ray; from ray.rllib.algorithms.ppo import PPOConfig; import torch, opensim, gymnasium; print('ok ray', ray.__version__, 'torch', torch.__version__, 'gym', gymnasium.__version__, 'opensim', opensim.__version__)"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python -c "import sys; sys.path.insert(0, 'Trajectory Generator/baseline_MLP'); import _bootstrap; _bootstrap.ensure_sim_paths(); import win_runtime; import ray; from ray.rllib.algorithms.ppo import PPOConfig; import torch, opensim, gymnasium; print('ok ray', ray.__version__, 'torch', torch.__version__, 'gym', gymnasium.__version__, 'opensim', opensim.__version__)"
 
-# [SMOKE-CFG] loader training_cfg.yaml + wiring argparse (no OpenSim/Ray)
+# [SMOKE-CFG] loader YAML e wiring argparse (no OpenSim/Ray)
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "validation/validate_training_config.py"
 
 # [SMOKE-ENV] build + reset + step dell'env senza RLlib
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python -c "import sys; sys.path.insert(0, 'Trajectory Generator/baseline_MLP'); import env_factory; e=env_factory.make_cmc_env({'setup_xml_path': 'models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml','segment_duration':0.01,'episode_duration':0.05,'policy_knots':3}); o,i=e.reset(seed=0); print('obs', o.shape, 'act', e.action_space.shape); o,r,te,tr,inf=e.step(e.action_space.sample()); print('reward', float(r), 'terminated', te, 'truncated', tr); e.close()"
 
 # [COMPILE] py_compile di tutti i moduli baseline_MLP
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python -m py_compile "Trajectory Generator/baseline_MLP/win_runtime.py" "Trajectory Generator/baseline_MLP/_bootstrap.py" "Trajectory Generator/baseline_MLP/env_factory.py" "Trajectory Generator/baseline_MLP/reward_function.py" "Trajectory Generator/baseline_MLP/training_config.py" "Trajectory Generator/baseline_MLP/tb_logging.py" "Trajectory Generator/baseline_MLP/progress_display.py" "Trajectory Generator/baseline_MLP/process_watchdog.py" "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py" "Trajectory Generator/baseline_MLP/validate_online_grf_train_inference.py" "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" "Trajectory Generator/baseline_MLP/rollout_eval.py"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python -m py_compile "Trajectory Generator/baseline_MLP/utility/win_runtime.py" "Trajectory Generator/baseline_MLP/_bootstrap.py" "Trajectory Generator/baseline_MLP/env_factory.py" "Trajectory Generator/baseline_MLP/reward_function.py" "Trajectory Generator/baseline_MLP/training_config.py" "Trajectory Generator/baseline_MLP/utility/tb_logging.py" "Trajectory Generator/baseline_MLP/utility/progress_display.py" "Trajectory Generator/baseline_MLP/utility/process_watchdog.py" "Trajectory Generator/baseline_MLP/asymmetric_rl_module.py" "Trajectory Generator/baseline_MLP/utility/validate_online_grf_train_inference.py" "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" "Trajectory Generator/baseline_MLP/rollout_eval.py"
 
 # [TINY-TRAIN] training minimo single-process (Fase A, ~1 min): override del YAML
 C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/train_ppo_mlp.py" --output-dir "runs/training/_baseline_mlp_tiny" --num-env-runners 0 --ray-num-cpus 1 --iterations 1 --train-batch-size 4 --minibatch-size 4 --num-epochs 1 --episode-duration 0.08 --segment-duration 0.02 --num-hidden-layers 2 --dim-hidden-layers 64 --startup-timeout-s 90 --iteration-timeout-s 90 --cleanup-timeout-s 20
@@ -299,16 +340,19 @@ C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rll
 # ============================================================================
 # G) DIAGNOSTICA / GATE onlineGRF
 # ============================================================================
+# Il report di accettazione predefinito e' stato eliminato da results/.
+# Nei due gate sostituire path/to/acceptance_report.json con un report valido
+# relativo al profilo richiesto; lo spostamento delle CLI non rigenera il report.
 
 # [WATCHDOG-SELFTEST] preflight obbligatorio prima di training/inference lunghi
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/process_watchdog.py" --self-test --output-dir "results/watchdog_self_test_online_grf" --stall-timeout-s 1.5
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/utility/process_watchdog.py" --self-test --output-dir "results/watchdog_self_test_online_grf" --stall-timeout-s 1.5
 
 # [GATE-SENSOR] contratto train/inference della modalita' online_sensor
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/process_watchdog.py" --heartbeat-file "results/online_grf_sensor_train_inference_watchdog.json" --summary-file "results/online_grf_sensor_train_inference_watchdog_summary.json" --startup-timeout-s 60 --stall-timeout-s 150 --run-timeout-s 600 --label "online_sensor train/inference contract" -- python "Trajectory Generator/baseline_MLP/validate_online_grf_train_inference.py" --grf-mode online_sensor --report "results/online_grf_training_inference_validation_sensor.json" --heartbeat-file "results/online_grf_sensor_train_inference_watchdog.json"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/utility/process_watchdog.py" --heartbeat-file "results/online_grf_sensor_train_inference_watchdog.json" --summary-file "results/online_grf_sensor_train_inference_watchdog_summary.json" --startup-timeout-s 60 --stall-timeout-s 150 --run-timeout-s 600 --label "online_sensor train/inference contract" -- python "Trajectory Generator/baseline_MLP/utility/validate_online_grf_train_inference.py" --grf-mode online_sensor --acceptance-report "path/to/acceptance_report.json" --report "results/online_grf_training_inference_validation_sensor.json" --heartbeat-file "results/online_grf_sensor_train_inference_watchdog.json"
 
 # [GATE-ACTIVE] la modalita' online attiva deve dare BLOCKED finche' il gate
 # fisico non e' PASS
-C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/validate_online_grf_train_inference.py" --grf-mode online --report "results/online_grf_training_inference_validation_active.json"
+C:\Users\tomma\anaconda3\Scripts\conda.exe run --no-capture-output -n envCMC-rllib python "Trajectory Generator/baseline_MLP/utility/validate_online_grf_train_inference.py" --grf-mode online --acceptance-report "path/to/acceptance_report.json" --report "results/online_grf_training_inference_validation_active.json"
 
 
 # ============================================================================

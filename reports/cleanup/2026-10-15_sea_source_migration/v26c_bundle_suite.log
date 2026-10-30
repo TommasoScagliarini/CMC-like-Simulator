@@ -1,0 +1,45 @@
+test_archive_verification_is_standalone (__main__.PipelineBundleTests) ... ok
+test_audited_source_closure_is_exact (__main__.PipelineBundleTests) ... FAIL
+test_bundle_is_sibling_of_sealed_stage (__main__.PipelineBundleTests) ... ok
+test_bundle_pins_the_in_place_manifest (__main__.PipelineBundleTests) ... ok
+test_declared_gaps_are_not_silenced (__main__.PipelineBundleTests) ... ok
+test_ephemeral_files_are_excluded (__main__.PipelineBundleTests) ... ok
+test_every_object_and_in_place_artefact_matches_sha256 (__main__.PipelineBundleTests) ... ERROR
+test_external_j5_log_is_recovered (__main__.PipelineBundleTests) ... ok
+test_git_attributes_preserve_pins_across_platforms (__main__.PipelineBundleTests) ... ok
+test_in_place_inventory_matches_workspace_file_set (__main__.PipelineBundleTests) ... ok
+test_manifest_is_path_independent (__main__.PipelineBundleTests) ... ok
+test_manifest_schemas_and_policy (__main__.PipelineBundleTests) ... ok
+test_no_clobber_is_concurrency_safe_and_preserves_different_files (__main__.PipelineBundleTests) ... ok
+test_repository_ignore_rules_reinclude_the_byte_archive (__main__.PipelineBundleTests) ... ok
+test_repository_snapshot_paths_are_safe (__main__.PipelineBundleTests) ... ok
+test_required_operational_and_analysis_anchors_are_present (__main__.PipelineBundleTests) ... ok
+test_roles_distinguish_operational_inputs_from_context_extras (__main__.PipelineBundleTests) ... ok
+test_snapshot_contains_no_symlinks (__main__.PipelineBundleTests) ... ok
+test_windows_path_policy_is_explicit (__main__.PipelineBundleTests) ... ok
+
+======================================================================
+ERROR: test_every_object_and_in_place_artefact_matches_sha256 (__main__.PipelineBundleTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/test_pipeline_bundle.py", line 307, in test_every_object_and_in_place_artefact_matches_sha256
+    counts = bundle.verify(self.repo, full=True, check_live_sources=False)
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/materialize_pipeline_bundle.py", line 948, in verify
+    raise BundleError(f"in-place evidence size drift: {path}")
+materialize_pipeline_bundle.BundleError: in-place evidence size drift: /Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/v26c_july_replica_2026-08-26/v26c_j1_collect.py
+
+======================================================================
+FAIL: test_audited_source_closure_is_exact (__main__.PipelineBundleTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/baseline_MLP/validation/pipeline_bundle_v26c_2026-08-28/test_pipeline_bundle.py", line 99, in test_audited_source_closure_is_exact
+    self.assertEqual(current, recorded)
+AssertionError: Items in the first set but not the second:
+'Trajectory Generator/baseline_MLP/experimental_configs/morphology_joint_split_equal_5p0_2026-09-01.json'
+'reports/user/2026-08-28_rollout_best_exnovo_v26c_j20_plot_canonici_e_corridor_morfologico.md'
+'Trajectory Generator/baseline_MLP/experimental_configs/morphology_joint_split_equal_1p05_2026-08-31.json'
+
+----------------------------------------------------------------------
+Ran 19 tests in 2.055s
+
+FAILED (failures=1, errors=1)

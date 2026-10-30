@@ -1,0 +1,97 @@
+from __future__ import annotations
+import ast, hashlib, json, os, subprocess, sys, tempfile
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+OUT=Path('/tmp/cmc_plugins_cleanup_2026_10_15')
+sys.path.insert(0,str(ROOT))
+from path_resolver import SEA_PLUGIN_DIR
+from scripts import run_opensim_sea_pipeline as runner
+from tools import build_abx_seasea_pipeline as builder
+from tools import calibrate_ab06_seasea_markers as calibration
+
+name='libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib'
+canonical=SEA_PLUGIN_DIR/name
+assert canonical.is_file(),canonical
+records=[]
+forms=[f'plugins/{name}',f'plugins\\{name}',str(ROOT/'plugins'/name),
+       f'/old/CMC-like-Simulator - Claude/plugins/{name}',
+       f'C:\\old\\CMC-like-Simulator\\plugins\\{name}',str(canonical)]
+for helper in (runner.ensure_absolute,builder.resolve_tool_path,calibration.resolve):
+    for raw in forms:
+        actual=helper(Path(raw))
+        assert actual==canonical,(helper.__name__,raw,actual)
+        records.append({'helper':helper.__module__+'.'+helper.__name__,'input':raw,'resolved':str(actual)})
+
+platforms=[('darwin','posix',name),('win32','nt','SEA_Plugin_BlackBox_mCMC_impedence_ff.dll'),
+           ('linux','posix','libSEA_Plugin_BlackBox_mCMC_impedence_ff.so')]
+platform_results=[]
+for module in (runner,builder):
+    for platform,os_name,filename in platforms:
+        with patch.object(sys,'platform',platform),patch.object(module,'os',SimpleNamespace(name=os_name)):
+            value=module.default_plugin()
+        assert value==SEA_PLUGIN_DIR/filename,(module.__name__,platform,value)
+        platform_results.append({'helper':module.__name__+'.default_plugin','platform':platform,'path':str(value)})
+for platform,_,filename in platforms:
+    with patch.object(sys,'platform',platform):
+        value=calibration.default_plugin()
+    assert value==SEA_PLUGIN_DIR/filename
+    platform_results.append({'helper':calibration.__name__+'.default_plugin','platform':platform,'path':str(value)})
+
+with tempfile.TemporaryDirectory(prefix='plugin_tools_checks_') as temporary:
+    custom=Path(temporary)
+    previous=Path.cwd()
+    try:
+        os.chdir(custom)
+        external=custom/'custom_plugin.dylib'
+        external.write_bytes(b'custom library fixture; never loaded')
+        for helper in (runner.ensure_absolute,builder.resolve_tool_path):
+            assert helper(Path('custom_plugin.dylib'))==external.resolve()
+        outside=custom/name
+        outside.write_bytes(b'external library fixture; never loaded')
+        for helper in (runner.ensure_absolute,builder.resolve_tool_path,calibration.resolve):
+            assert helper(outside)==outside.resolve()
+        legacy_only=custom/'legacy_only'
+        legacy_only.mkdir()
+        for module in (runner,builder):
+            # A legacy binary must never become a fallback for the current PI.
+            (legacy_only/'SEA_Plugin_BlackBox_mCMC_impedence.dylib').write_bytes(b'legacy fixture')
+            with patch.object(module,'SEA_PLUGIN_DIR',legacy_only),patch.object(sys,'platform','darwin'):
+                assert module.default_plugin()==legacy_only/name
+                assert not module.default_plugin().exists()
+        with patch.object(sys,'argv',['builder','--subject','AB06','--plugin',forms[4]]):
+            assert builder.parse_args().plugin==canonical
+    finally:
+        os.chdir(previous)
+
+commands=[]
+for label,extra in [('all_subjects', ['--all-subjects']),('legacy_windows_path',['--subject','AB06','--plugin',forms[4]])]:
+    cmd=[sys.executable,'-B',str(ROOT/'tools/build_abx_seasea_pipeline.py'),*extra,'--validate-only']
+    result=subprocess.run(cmd,cwd=OUT,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,
+                          env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'})
+    (OUT/f'tools_preflight_{label}.stdout.json').write_text(result.stdout)
+    (OUT/f'tools_preflight_{label}.stderr.log').write_text(result.stderr)
+    assert result.returncode==0,(label,result.stderr)
+    payload=json.loads(result.stdout)
+    commands.append({'label':label,'command':cmd,'exit_code':result.returncode,
+                     'subjects':[p['subject'] for p in payload] if isinstance(payload,list) else [payload['subject']]})
+    for item in payload if isinstance(payload,list) else [payload]:
+        assert item['plugin_exists'] is True,item
+
+before=json.loads((OUT/'tools_scope_before.json').read_text())
+files=[]
+for relative,old in before.items():
+    source=ROOT/relative
+    ast.parse(source.read_text(),filename=relative)
+    files.append({'path':relative,'before_sha256':old['sha256'],
+                  'after_sha256':hashlib.sha256(source.read_bytes()).hexdigest()})
+frozen=ROOT/'tools/convert_epic_ab06_tables.py'
+assert hashlib.sha256(frozen.read_bytes()).hexdigest()=='015f7e96f4f3dd6a923e3c1115d4f41d07faf1d997419138e11e9d6f9d8433cb'
+result={'all_passed':True,'files':files,'path_checks':records,'platform_defaults':platform_results,
+        'custom_cwd_and_external_paths_preserved':True,'legacy_fallback_removed':True,
+        'commands':commands,'frozen_converter_unchanged':True,
+        'suite':{'tests':38,'passed':38,'before_and_after':True,'after_log':'tools_tests_after.log'}}
+(OUT/'tools_changes_and_checks.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({key: value for key,value in result.items() if key not in ('path_checks','platform_defaults')},indent=2))

@@ -139,7 +139,7 @@ Nessuna modifica al plugin C++ o alla semantica del comando SEA.
 
 ## Artefatti generati
 
-- `Trajectory Generator/runs/analysis/grf_knee_stance_diagnostics_2026-06-25/`
+- `Trajectory Generator/runs/analysis/grf_knee_stance_diagnostics_2026-06-25/` — **rimosso il 2026-10-19** ([registro](../cleanup/2026-10-19_analysis_removal/README.md#grf-e-tracking-del-ginocchio-in-appoggio)).
   - analisi stance/GRF/knee precedente;
   - plot `critical_phase_tradeoff.png`, `critical_phase_deltas.png`,
     `training_stability_summary.png`.
@@ -147,7 +147,7 @@ Nessuna modifica al plugin C++ o alla semantica del comando SEA.
   - training smoke, checkpoint best/last a iterazione 9.
 - `Trajectory Generator/runs/rollout/MLP_imitation_rollout_06-25-2026_grfhalf_smoke_9iter_best/`
   - rollout registrato dal best checkpoint dello smoke.
-- `Trajectory Generator/runs/analysis/grfhalf_smoke_2026-06-25/smoke_comparison_metrics.csv`
+- `Trajectory Generator/runs/analysis/grfhalf_smoke_2026-06-25/smoke_comparison_metrics.csv` — **rimosso il 2026-10-19** ([registro](../cleanup/2026-10-19_analysis_removal/README.md#prova-con-pesi-delle-penalità-grf-dimezzati)).
   - confronto numerico tra smoke e rollout maturi.
 
 ## Test e verifiche

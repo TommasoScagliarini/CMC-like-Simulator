@@ -1,5 +1,10 @@
 # 2026-09-17 — Analisi del training V1 35D da CP200 a CP300
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Analisi completata. Le altre 100 iterazioni migliorano alcuni indicatori del training stocastico, ma non producono una camminata deterministica complessivamente migliore di CP200.** CP300 conserva i 5 s sui tre start, aumenta moderatamente l'escursione del ginocchio, ma non riduce l'errore del ginocchio rispetto al prescribed; peggiora il tracking della caviglia e la regolarità degli eventi. Anche CP283, best per return di training, non supera CP200 sul comportamento complessivo verificato.
 
 La valutazione comprende CP200, CP250, CP283 e CP300 sui medesimi tre start early/center/late: 12 episodi da 500 step, 5 s ciascuno, seed 123, azione deterministica. CP200/250 e CP300 early sono riutilizzati dopo verifica; cinque rollout mancanti sono stati eseguiti durante questa analisi. Tutti raggiungono il limite temporale. Nessun training oltre 300 è stato avviato.
@@ -35,7 +40,7 @@ Rispetto al blocco precedente il training produce episodi mediamente più lunghi
 
 Gli score imitativi medi 101–200 → 201–300 cambiano poco: reference servita/prescribed **0,6273 → 0,6356**, movimento effettivo/prescribed **0,7289 → 0,7300**. Sono score adimensionali che includono posizione e velocità, aggregati su finestre mobili dei worker; non sono RMSE in gradi. Non emerge una traiettoria di miglioramento continuo fino a 300.
 
-![Percorso effettivo 1–300](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/training_1_300.png>)
+[Immagine rimossa: Percorso effettivo 1–300 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0305c8013ae49f10>)
 
 ## Il confronto deterministico sui medesimi 5 secondi
 
@@ -65,7 +70,7 @@ La penetrazione recupera rispetto a CP250, che raggiungeva 21,73–24,18 mm. A C
 
 Gli eventi invalidi compaiono anche dopo che il periodo online è disponibile: in CP300 early già a 2,40 s, center a 3,77 s e late a 3,21 s. Fra gli eventi compaiono appoggi insufficientemente caricati, contatti troppo ravvicinati, heel-strike cancellati come rimbalzi e cicli respinti per escursione insufficiente del ginocchio. Non si tratta soltanto di un transitorio iniziale senza clock.
 
-![Confronto delle metriche sui tre start](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/deterministic_comparison_200_300.png>)
+[Immagine rimossa: Confronto delle metriche sui tre start — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f4453579acc840bd>)
 
 **Lo screening di fattibilità non è superato.** CP300 fallisce per eventi invalidi in tutti gli start e per un solo ciclo valido in center. CP283 produce 3/1/1 cicli e 5/6/4 eventi invalidi in early/center/late. CP200 falliva già la condizione di zero eventi invalidi, ma aveva almeno due cicli su ogni start e meno eventi invalidi. Nessuno di questi checkpoint è quindi qualificato come cammino corretto e robusto.
 
@@ -77,7 +82,7 @@ A CP300 il RMSE actual–served è soltanto **0,43–0,46° al ginocchio** e **0
 
 Le traiettorie mostrano che manca ancora la flessione marcata del ginocchio presente nel prescribed. La caviglia presenta differenze di forma, ampiezza e fase, soprattutto nella seconda parte degli episodi. La penetrazione contenuta e il raggiungimento dei 5 s non bastano a certificare questa cinematica.
 
-![Movimento effettivo e prescribed](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/kinematics_200_283_300.png>)
+[Immagine rimossa: Movimento effettivo e prescribed — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e76714c032520a41>)
 
 ## Best, esplorazione e interpretazione del return
 
@@ -87,7 +92,7 @@ Il return di training può crescere anche perché gli episodi durano più a lung
 
 L'entropia media aumenta da **2,49** nelle iterazioni 181–200 a **3,07 nat** nelle 281–300. Sugli stati deterministici salvati di CP300, sigma mediana ginocchio/caviglia vale circa **2,25/1,80** in early, **1,05/0,77** in center e **0,99/0,76** in late, in coordinate di azione normalizzata. Non emerge un'esplorazione collassata. Queste sigma non sono misure della distribuzione completa degli stati di training né della variabilità fisica dopo clipping e filtri.
 
-Il clipping interessa almeno una componente dell'azione media nel 17,0–22,6% degli step CP300, contro 2,6–5,6% a CP200. Resta il disallineamento noto: RLlib limita l'azione prima del wrapper di reward nel training; il rollout gli passa il valore grezzo e limita l'azione prima dell'esecuzione fisica. Per questo il valore zero della telemetria di clipping nel training non certifica assenza di saturazione. L'effetto diretto della diversa penalità su early è però inferiore a un punto di return: non spiega da solo il peggioramento cinematico o il calo del return deterministico. Dettagli nell'[audit delle metriche](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/runtime_and_metric_audit.md>).
+Il clipping interessa almeno una componente dell'azione media nel 17,0–22,6% degli step CP300, contro 2,6–5,6% a CP200. Resta il disallineamento noto: RLlib limita l'azione prima del wrapper di reward nel training; il rollout gli passa il valore grezzo e limita l'azione prima dell'esecuzione fisica. Per questo il valore zero della telemetria di clipping nel training non certifica assenza di saturazione. L'effetto diretto della diversa penalità su early è però inferiore a un punto di return: non spiega da solo il peggioramento cinematico o il calo del return deterministico. Dettagli nell'[audit delle metriche — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-19b1f49ccadb5f6b>).
 
 ## Conseguenza per il prossimo esperimento
 
@@ -101,14 +106,14 @@ Questo non dimostra che la V1 senza prescribed nell'actor non possa mai raggiung
 
 L'osservatore automatico aveva completato CP300 early, poi interrotto il confronto perché la configurazione esportata non includeva più il campo storico `max_delta_rad`. La modalità `absolute` usata dal run non utilizza quel parametro. Dopo l'audit, il confronto di configurazione è stato adattato esclusivamente negli strumenti di analisi: viene ignorata quella sola chiave nella modalità absolute, mentre differenze di modalità, reward e soglie continuano a essere rifiutate. Lo stato di errore dell'osservatore originale è conservato come documento storico; la valutazione recuperata è completa.
 
-Sono state rilevate modifiche concorrenti al repository, documentate nell'[audit del runtime](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/runtime_and_metric_audit.md>) e nel [diff archiviato](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/runtime_changes_after_launch.diff>). La successiva centralizzazione dei default GRF è avvenuta dopo il caricamento dei cinque processi di recovery; configurazioni GRF e reward emesse coincidono nei sei rollout finali. I 30 artefatti parent controllati sono intatti. Non si dichiara il repository interamente immutato e non sono state annullate modifiche concorrenti.
+Sono state rilevate modifiche concorrenti al repository, documentate nell'[audit del runtime — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-19b1f49ccadb5f6b>) e nel [diff archiviato — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-53bf77dd645638c0>). La successiva centralizzazione dei default GRF è avvenuta dopo il caricamento dei cinque processi di recovery; configurazioni GRF e reward emesse coincidono nei sei rollout finali. I 30 artefatti parent controllati sono intatti. Non si dichiara il repository interamente immutato e non sono state annullate modifiche concorrenti.
 
 Verifiche completate: identità e hash dei checkpoint e dei dati storici; 12 casi e 18 confronti su finestre comuni; contatori FSM coerenti; replay NumPy delle azioni medie su 6.000 osservazioni, errore massimo 8,35e-7; ispezione delle figure; controllo sintattico dei due nuovi strumenti. Queste verifiche non costituiscono una validazione statistica su nuovi start, più seed o durate maggiori di 5 s.
 
-- [Dati training e provenienza](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/training_analysis.json>), [serie 1–300](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/training_series.csv>), [dettaglio del proseguimento](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/training_181_300.png>).
-- [Valutazione completa](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/milestone_evaluation.md>), [metriche JSON](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/milestone_evaluation.json>), [sintesi CSV](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/evaluation_summary.csv>), [replay e diagnostica](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/evaluation_diagnostics.json>).
-- [Grafico training in PDF](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/training_1_300.pdf>), [confronto in PDF](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/deterministic_comparison_200_300.pdf>), [cinematica in PDF](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/kinematics_200_283_300.pdf>).
-- Nuovi strumenti: [evaluate_training_300.py](<../../Trajectory Generator/unified_MLP/validation/evaluate_training_300.py>) e [analyze_training_300.py](<../../Trajectory Generator/unified_MLP/validation/analyze_training_300.py>); calcolo training riproducibile con [training_compute.py](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/training_compute.py>).
+- [Dati training e provenienza — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-af4834c7d12e77e4>), [serie 1–300 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-664ccbe6184e6450>), [dettaglio del proseguimento — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d0dc10d0a6ce4aeb>).
+- [Valutazione completa — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-b104f38739a3234c>), [metriche JSON — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-61a2ec2f0dbc72ec>), [sintesi CSV — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6f3186f1844c54ea>), [replay e diagnostica — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-2ac90c61d2b4fa77>).
+- [Grafico training in PDF — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f410692eb960eab5>), [confronto in PDF — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-fec8ddf5bd0fef19>), [cinematica in PDF — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-222bf2ceb4852a5e>).
+- Nuovi strumenti: [evaluate_training_300.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-589c572b818f0654>) e [analyze_training_300.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d85132b1ee900779>); calcolo training riproducibile con [training_compute.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-500b9f5341550a25>).
 
 Le modifiche eseguite per questa analisi riguardano strumenti di valutazione, report e stato del piano. Nessuna modifica a checkpoint, reward, architettura o plugin SEA; nessun nuovo aggiornamento della policy.
 
@@ -116,12 +121,12 @@ Le modifiche eseguite per questa analisi riguardano strumenti di valutazione, re
 
 | Stato | File o cartella | Scopo |
 |---|---|---|
-| Creato | [validation/evaluate_training_300.py](<../../Trajectory Generator/unified_MLP/validation/evaluate_training_300.py>) | Recupero e confronto deterministico di CP200, CP250, CP283 e CP300. |
-| Creato | [validation/analyze_training_300.py](<../../Trajectory Generator/unified_MLP/validation/analyze_training_300.py>) | Replay offline della policy, sintesi delle metriche e grafici comparativi. |
-| Creato | [runs/validation/pretraining_v1_continuation_300_2026-09-17/training_compute.py](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17/training_compute.py>) | Calcolo riproducibile delle statistiche di training e delle curve 1–300. |
-| Creati | [runs/validation/pretraining_v1_continuation_300_2026-09-17](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_continuation_300_2026-09-17>) | Report, JSON/CSV, grafici PNG/PDF, piano di valutazione e audit di compatibilità/provenienza. |
-| Aggiornato | [runs/plans/pretraining_cp200_to300_2026-09-16/STATUS.md](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_cp200_to300_2026-09-16/STATUS.md>) | Stato finale del training e della valutazione, con conclusioni e collegamenti. |
-| Creato | [runs/plans/pretraining_cp200_to300_2026-09-16/completion_verification.json](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_cp200_to300_2026-09-16/completion_verification.json>) | Ricevuta delle verifiche di integrità, completamento e replay. |
+| Creato | [validation/evaluate_training_300.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-589c572b818f0654>) | Recupero e confronto deterministico di CP200, CP250, CP283 e CP300. |
+| Creato | [validation/analyze_training_300.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d85132b1ee900779>) | Replay offline della policy, sintesi delle metriche e grafici comparativi. |
+| Creato | [runs/validation/pretraining_v1_continuation_300_2026-09-17/training_compute.py — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-500b9f5341550a25>) | Calcolo riproducibile delle statistiche di training e delle curve 1–300. |
+| Creati | [runs/validation/pretraining_v1_continuation_300_2026-09-17 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-85a2f7579e23a2c1>) | Report, JSON/CSV, grafici PNG/PDF, piano di valutazione e audit di compatibilità/provenienza. |
+| Aggiornato | [runs/plans/pretraining_cp200_to300_2026-09-16/STATUS.md — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-eb1df1877ee4e5c8>) | Stato finale del training e della valutazione, con conclusioni e collegamenti. |
+| Creato | [runs/plans/pretraining_cp200_to300_2026-09-16/completion_verification.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d03731218c164bd2>) | Ricevuta delle verifiche di integrità, completamento e replay. |
 
 Il presente comando `create_report` aggiunge soltanto questo report in `reports/user/`. I risultati e le verifiche descritti sono quelli dell’analisi già completata; non vengono rilanciati rollout o training. Le modifiche concorrenti del runtime appartengono ad altro lavoro e sono descritte separatamente negli audit.
 

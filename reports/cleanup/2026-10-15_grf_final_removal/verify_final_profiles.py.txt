@@ -1,0 +1,83 @@
+from pathlib import Path
+import hashlib
+import json
+import sys
+import yaml
+
+ROOT = Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+WORK = Path('/tmp/cmc_grf_final_removal_2026_10_15')
+sys.path.insert(0, str(ROOT))
+from online_grf import load_online_grf_profile
+from path_resolver import resolve_repo_path
+
+before = json.loads((WORK / 'independent_final_before.json').read_text())
+prior = json.loads((ROOT / 'reports/cleanup/2026-10-15_grf_profiles_removal/independent_integrity_before.json').read_text())
+
+def fingerprint(path):
+    data = path.read_bytes()
+    return {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+
+def compare(records):
+    return [{'path': name, 'exists': (ROOT / name).is_file(),
+             'unchanged': (ROOT / name).is_file() and fingerprint(ROOT / name) == meta}
+            for name, meta in records.items()]
+
+checks = compare(before['files'])
+prior_checks = compare({p: meta for p, meta in prior['files'].items()
+                        if Path(p).name not in before['remove']})
+remaining = sorted(path.name for path in (ROOT / 'online_grf_profiles').glob('*.json'))
+parsed = []
+for name in remaining:
+    profile = load_online_grf_profile(ROOT / 'online_grf_profiles' / name)
+    parsed.append({'file': name, 'sphere_count': len(profile.spheres),
+                   'sides': sorted({sphere.side for sphere in profile.spheres}), 'pass': True})
+
+configs = []
+for family in ('baseline_MLP', 'unified_MLP', 'unified_MLP_39'):
+    base = ROOT / 'Trajectory Generator' / family
+    configs.extend(base.glob('*.yaml'))
+    configs.extend((base / 'configs').glob('*.yaml'))
+best47 = ROOT / 'Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/training_cfg.resolved.yaml'
+configs.append(best47)
+profile_refs = []
+for config in sorted(set(configs)):
+    doc = yaml.safe_load(config.read_text())
+    for key, value in (doc.get('grf') or {}).items():
+        if key.endswith('_profile') and value and str(value).startswith('online_grf_profiles/'):
+            resolved = resolve_repo_path(value)
+            profile = load_online_grf_profile(resolved)
+            profile_refs.append({'config': str(config.relative_to(ROOT)), 'key': key,
+                                 'path': str(resolved.relative_to(ROOT)),
+                                 'exists': resolved.is_file(), 'sphere_count': len(profile.spheres)})
+
+source_hits = []
+for name in before['files']:
+    path = ROOT / name
+    if path.suffix not in {'.py', '.yaml', '.yml'}:
+        continue
+    content = path.read_text()
+    for removed in before['remove']:
+        if removed in content:
+            source_hits.append({'file': name, 'removed_profile': removed})
+
+result = {
+    'pass': all(row['unchanged'] for row in checks + prior_checks)
+            and remaining == before['keep']
+            and all(not (ROOT / 'online_grf_profiles' / name).exists() for name in before['remove'])
+            and not source_hits,
+    'independent_capture_qualification': 'Current capture completed after the two requested unlinks. The earlier immutable 56-file baseline independently anchors 54 surviving files. Removal proof is in the separate root receipt.',
+    'baseline_file_count': len(checks), 'baseline_comparisons': checks,
+    'previous_baseline_surviving_file_count': len(prior_checks),
+    'previous_baseline_comparisons': prior_checks,
+    'remaining_exactly_three': remaining == before['keep'],
+    'removed_both_absent': all(not (ROOT / 'online_grf_profiles' / name).exists() for name in before['remove']),
+    'profiles_parsed': parsed,
+    'yaml_configs_reviewed': len(set(configs)),
+    'operational_and_best47_profile_references': profile_refs,
+    'operational_source_specific_removed_profile_references': source_hits,
+    'qualification': 'Historical validation manifests and optional legacy validators still name the removed profiles intentionally. Full scientific replay requires exact Git restore. No frozen evidence was changed; native macOS runtime parser and portable runtime contracts were checked.',
+}
+(WORK / 'independent_final_after.json').write_text(json.dumps(result, indent=2) + '\n')
+assert result['pass'], result
+print(json.dumps({key: value for key, value in result.items() if not key.endswith('comparisons') and key != 'operational_and_best47_profile_references'}, indent=2))
+print('Profile references validated:', len(profile_refs))

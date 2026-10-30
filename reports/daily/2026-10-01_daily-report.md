@@ -1,5 +1,17 @@
 # Daily Report — 2026-10-01
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Aggiornamento parziale tramite `create_report`; non costituisce una chiusura `end_day`.
 Instruction check token: `CMC_AGENT_OK_2026`.
 
@@ -24,9 +36,9 @@ Artefatti, ricevute e script di rendering/verifica sotto `Trajectory Generator/u
 
 ## Confronto imitazione/ex-novo durante l'oscuramento
 
-Fonti: [analisi completa](<../../Trajectory Generator/unified_MLP_39/validation/reward_curriculum_2026_10_01/README.md>),
-[protocollo preregistrato](<../../Trajectory Generator/unified_MLP_39/validation/reward_curriculum_2026_10_01/PROTOCOL.md>)
-e [ricevuta finale](<../../Trajectory Generator/unified_MLP_39/validation/reward_curriculum_2026_10_01/verification.json>).
+Fonti: [analisi completa — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e7f022fd4a935ff5>),
+[protocollo preregistrato — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5c3e8c3d20433343>)
+e [ricevuta finale — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-2ede5a0f72d744f1>).
 
 **Confronto concluso: sostituire la reward non ha recuperato il passo oscurato
 entro il budget di questa prova.** Entrambi i rami ripartono dallo stesso
@@ -434,6 +446,6 @@ Ricostruzione documentale dello stato a questa data. Le voci sotto precisano i T
 - [x] Daily 2026-08-16/17/18 da consolidare al prossimo `end_day`. — [fonte 2026-08-18, riga 154](../user/2026-08-18_rollout_nativo_v26_bug_probe_schema_7plot_e_avvio_opzione_a.md). **Chiuso il 5 ottobre 2026, con questa integrazione:** Daily corrispondente esistente e consolidato; copertura documentale attestata il5ottobre2026. ([evidenza](2026-08-18_daily-report.md)).
 - [x] Daily 2026-08-18/19 da consolidare al prossimo `end_day`. — [fonte 2026-08-19, riga 159](../user/2026-08-19_indagine_iterazioni_lente_crash_storm_reject_continue_fix.md). **Chiuso il 5 ottobre 2026, con questa integrazione:** Daily corrispondente esistente e consolidato; copertura documentale attestata il5ottobre2026. ([evidenza](2026-08-19_daily-report.md)).
 - [x] Daily 2026-08-18/19/20 da consolidare al prossimo `end_day`. — [fonte 2026-08-20, riga 104](../user/2026-08-20_audit_equivalenza_giugno_per_fresh_run_nativo_v26.md). **Chiuso il 5 ottobre 2026, con questa integrazione:** Daily corrispondente esistente e consolidato; copertura documentale attestata il5ottobre2026. ([evidenza](2026-08-20_daily-report.md)).
-- [x] Separare nel software reward, visibilità dei sei canali ed esplorazione, consentendo ex-novo visibile e curriculum. — [fonte 2026-09-23, riga 124](../user/2026-09-23_strategia_best72_confronto_v26_e_oscuramento.md). **Chiuso:** Il nuovo target_mask_mode episode separa visibilità e obiettivo in ambiente/modulo, con maschera conservata nel batch PPO. ([evidenza](../../Trajectory%20Generator/unified_MLP_39/validation/reward_curriculum_2026_10_01/README.md)).
+- [x] Separare nel software reward, visibilità dei sei canali ed esplorazione, consentendo ex-novo visibile e curriculum. — [fonte 2026-09-23, riga 124](../user/2026-09-23_strategia_best72_confronto_v26_e_oscuramento.md). **Chiuso:** Il nuovo target_mask_mode episode separa visibilità e obiettivo in ambiente/modulo, con maschera conservata nel batch PPO. ([evidenza — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-e7f022fd4a935ff5>)).
 
 <!-- reconciled-report-todos-2026-10-05:end -->

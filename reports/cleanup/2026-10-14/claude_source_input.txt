@@ -1,0 +1,54 @@
+L'utente richiede una pulizia della codebase dopo mesi di sviluppo.
+Prima vuole verificare se il commit corrente protegge davvero ogni file e poi
+analizzare insieme a Codex l'INTERA repository, identificando file fondamentali
+e file rimovibili. Questa fase e SOLTANTO ANALISI, non eliminare/modificare nulla.
+Usa italiano. Sei l'auditor indipendente Claude Opus 5.5 effort max richiesto.
+
+Leggi AGENTS.md, .gitignore, .gitattributes, la struttura completa con Glob e i
+sorgenti/config/README rilevanti con Read/Grep. Tools soltanto Read/Grep/Glob:
+nessun comando, test, simulazione, training, modifica, servizi esterni.
+Non leggere nuove conclusioni Codex/agent di questa analisi. I report storici
+sono utilizzabili per capire finalita e stato dei rami, ma non leggerli tutti.
+Il progetto e grande: raggruppa gli artefatti per campagne e usa il grafo di
+dipendenze reale. Non fingere di aver verificato ogni byte o ogni file.
+
+Contesto fattuale da verificare nel codice: root OpenSim/CMC-like biologico
+muscle-driven, due SEA e loro plugin; Trajectory Generator contiene ambiente
+RL, baseline_MLP V26 corrente, unified_MLP 35 e unified_MLP_39 sospesa dal5/10,
+validation e runs. V26 best47 ex-novo del1/9 e riferimento operativo nelle
+campagne12/13 ottobre. Generalizzazione AB07/AB08 in corso. Il plugin attuale
+PI evolve rispetto alla descrizione PD storica in AGENTS. Moduli e asset devono
+restare validi sia macOS arm64 sia Windows. Le31 cancellazioni preesistenti
+Prosthesis_SNN non sono state fatte da questa indagine.
+
+Fatti Git verificati da terminale: HEAD locale
+dba42388c32a441a5543f20881612a52781d7a99, tree
+85c00158318071f244c4ad4dc2bd9197186cb26f, 65125 file tracciati.
+git ls-remote origin mostra soltanto HEAD e refs/heads/main a
+5782540579b138c59fa4e64fd221cf59a5d44c5e: commit recente NON sul remoto.
+Nessun untracked non ignorato; working tree contiene31 file SNN cancellati.
+Ignorati (checkpoint/dati/plugin/output/cache) sono fuori dal commit.
+
+Copri TUTTE le macroaree: root, scripts, tools/plugin sources, build,
+plugins, models/raw/data/Geometry, online_grf_profiles, detector profiles,
+validation root, ogni ramo Trajectory Generator, runs/checkpoint, plot,
+results, reports/daily/user/plans, root docs e cache/config locali.
+Esamina import AST equivalenti via sorgente, path dinamici, config/setup XML,
+pickle/cloudpickle/RLlib, classi importabili al reload, path+hash di manifest,
+symlink e portabilita. File non importati possono essere entrypoint, checkpoint
+dependency o prove sigillate. Un duplicato identico puo avere nomi vincolanti.
+
+Risultato richiesto (circa3500 parole, concreto con percorsi/righe):
+1. File/gruppi fondamentali per simulatore e workflow V26, distinguendo
+   entrypoint, moduli, profili, dati/modelli, binari, checkpoint e plotter.
+2. Candidati eliminabili ora (cache/build/log temporanei) con condizioni.
+3. Codice storico opzionale rimovibile dal ramo di lavoro dopo migrazione
+   dei riferimenti/archiviazione: stima gruppo e motivazione.
+4. Archivi scientifici/output congelati da conservare o spostare solo dopo
+   backup valido e qualifica dei path/hash; non equipararli a spazzatura.
+5. Confronta vantaggio in dimensione con vantaggio nella leggibilita del codice.
+6. Snapshot Git: cosa e recuperabile e cosa no; verifica specifica push e
+   ignored; spiega minimo piano di protezione e rollback non distruttivo.
+7. Ordine operativo della pulizia e verifiche appropriate, evitando test
+   superflui per sole cache. Segnala dubbi, file davvero ispezionati, copertura
+   e limiti; non autorizzare implicitamente una cancellazione.

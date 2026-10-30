@@ -44,6 +44,10 @@ TRAJ_GEN_ROLLOUT_ROOT = REPO_ROOT / "Trajectory Generator" / "runs" / "rollout"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from workspace_bootstrap import ensure_simulator_paths
+
+ensure_simulator_paths()
+
 from output import read_sto  # noqa: E402
 from config import SimulatorConfig  # noqa: E402
 from kinematics_interpolator import KinematicsInterpolator  # noqa: E402

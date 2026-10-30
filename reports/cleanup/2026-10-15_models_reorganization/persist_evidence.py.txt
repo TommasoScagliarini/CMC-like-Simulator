@@ -1,0 +1,54 @@
+import gzip
+import hashlib
+import json
+import shutil
+import tarfile
+from pathlib import Path
+
+ROOT = Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+WORK = Path('/tmp/cmc_models_reorganization_2026_10_15')
+DEST = ROOT / 'reports/cleanup/2026-10-15_models_reorganization'
+DEST.mkdir(parents=True, exist_ok=True)
+compressed = []
+copied = []
+for source in sorted(WORK.iterdir()):
+    if not source.is_file() or source.name == 'opensim.log':
+        continue
+    target = DEST / (source.name + '.txt' if source.suffix == '.py' else source.name)
+    data = source.read_bytes()
+    if source.suffix == '.json' and len(data) > 200_000:
+        target = target.with_suffix(target.suffix + '.gz')
+        target.write_bytes(gzip.compress(data, mtime=0))
+        assert gzip.decompress(target.read_bytes()) == data
+        compressed.append({'original': source.name, 'stored': target.name,
+                           'bytes_uncompressed': len(data),
+                           'sha256_uncompressed': hashlib.sha256(data).hexdigest()})
+    else:
+        shutil.copyfile(source, target)
+    copied.append(target.name)
+
+run_dirs = [p for p in sorted(WORK.iterdir())
+            if p.is_dir() and (p.name.startswith('cascade_')
+                               or p.name in {'best47_legacy_smoke', 'oracle_variant'})]
+with tarfile.open(DEST / 'simulation_outputs.tar.gz', 'w:gz') as archive:
+    for folder in run_dirs:
+        archive.add(folder, arcname=folder.name)
+with tarfile.open(DEST / 'simulation_outputs.tar.gz') as archive:
+    for item in archive.getmembers():
+        if item.isfile():
+            assert archive.extractfile(item).read() == (WORK / item.name).read_bytes()
+
+integrity = json.loads((WORK / 'final_repository_integrity.json').read_text())
+inventory = {'existing_files_changed': integrity['changed_files'],
+             'existing_changed_count': len(integrity['changed_files']),
+             'new_source_and_documentation': []}
+for name in ['models/README.md', 'validation/test_model_layout_paths.py',
+             'reports/user/2026-10-15_riorganizzazione_modelli_per_famiglia.md']:
+    data = (ROOT / name).read_bytes()
+    inventory['new_source_and_documentation'].append(
+        {'path': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
+(DEST / 'change_inventory.json').write_text(json.dumps(inventory, indent=2) + '\n')
+(DEST / 'compressed_evidence.json').write_text(json.dumps(compressed, indent=2) + '\n')
+print(json.dumps({'copied_top_level_files': len(copied),
+                  'compressed_baselines': compressed,
+                  'run_directories_archived': [p.name for p in run_dirs]}, indent=2))

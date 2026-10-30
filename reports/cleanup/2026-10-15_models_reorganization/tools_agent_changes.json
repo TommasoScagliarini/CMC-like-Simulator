@@ -1,0 +1,149 @@
+{
+  "instruction_check_token": "CMC_AGENT_OK_2026",
+  "owned_changed_files": [
+    {
+      "path": "tools/build_abx_seasea_pipeline.py",
+      "before": {
+        "bytes": 57363,
+        "sha256": "0b9eb51b0dc482b39b0b8ef3565f019481fe3048f3d97727f09ee06ac230c711"
+      },
+      "after": {
+        "bytes": 59207,
+        "sha256": "90aa03e585f91c6d9198d72bf7b6cf4584dc9dda6112edfc5d4ab183ac3f13ac"
+      }
+    },
+    {
+      "path": "tools/calibrate_ab06_seasea_markers.py",
+      "before": {
+        "bytes": 11495,
+        "sha256": "49f9b6d2edbfb5b5e096a9420500b0d9faa8b269c948bccf8b4370a08323e05f"
+      },
+      "after": {
+        "bytes": 11630,
+        "sha256": "7821545a321d197595d40ba3a88c1d127b216bdb975f2647245b4795015bf948"
+      }
+    },
+    {
+      "path": "tools/cascade_outer_metrics.py",
+      "before": {
+        "bytes": 18884,
+        "sha256": "6218018e49e3350c450e609e42e7d4092270efbf3f6bd88e00a7615f0ead925c"
+      },
+      "after": {
+        "bytes": 18927,
+        "sha256": "018d852e348c4c1dbb0dedb7c23bea470b16233a966da00a72e834a7a6dafd21"
+      }
+    },
+    {
+      "path": "tools/driver_isolation_suite.py",
+      "before": {
+        "bytes": 27010,
+        "sha256": "815c256515dae9a5ab4efd01d24ebba1e125eab9ca8d30e80a62f06f4276c535"
+      },
+      "after": {
+        "bytes": 27015,
+        "sha256": "d11f56d2ff19c86aa0e5c78f389d0876672492e332b9f59313c2bbb5d78b1b0f"
+      }
+    },
+    {
+      "path": "tools/driver_isolation_suite_pi.py",
+      "before": {
+        "bytes": 32500,
+        "sha256": "448173320963bdd264cde75ccf2700653d0781a0589036141e4ed6730ee8ee2f"
+      },
+      "after": {
+        "bytes": 32510,
+        "sha256": "cd02127fee58cd6aed7a90bf88be3d82c1f2d63fc40c4d78719db56cfe5e1424"
+      }
+    },
+    {
+      "path": "scripts/run_opensim_sea_pipeline.py",
+      "before": {
+        "bytes": 67742,
+        "sha256": "6118073f53267a57058615ac303b41a4475d8c68230205909ddcb5af706a5599"
+      },
+      "after": {
+        "bytes": 68151,
+        "sha256": "5cd1a6d242ec7e291af0299729a3fada7093fb60337ef5eaff04324f1d5915d3"
+      }
+    },
+    {
+      "path": "tools/convert_epic_ab06_to_opensim.m",
+      "before": {
+        "bytes": 45491,
+        "sha256": "3348971e8b554a1e02203c7f8f3e6454e9e9e0fe717ce14467d6955769ae1422"
+      },
+      "after": {
+        "bytes": 45558,
+        "sha256": "549702ab209c149feb4ddd6451b94a4a08162299174f13b35c19fcd2960850cb"
+      }
+    },
+    {
+      "path": "tools/export_ab06_healthy_overlay.m",
+      "before": {
+        "bytes": 7062,
+        "sha256": "6e7e0a2d7156d5b3c80ddbe9bcb71f792d55e37e50b7bff14add563858e9e1cb"
+      },
+      "after": {
+        "bytes": 7078,
+        "sha256": "55121e78008b4915313df08d54d4ecd688d429c42e0966fadc7603adcb0f3f0e"
+      }
+    },
+    {
+      "path": "tools/online_grf_contact/README.md",
+      "before": {
+        "bytes": 2860,
+        "sha256": "152b725746f982942dcb432206e48da84cdceaf4f477955fca416629a1ad4623"
+      },
+      "after": {
+        "bytes": 2865,
+        "sha256": "b130b5e90f25e3b99b1503564e88f73339c8aba1233cbaa4145a6e7e0797e193"
+      }
+    }
+  ],
+  "scope": "Current preparation tools, driver diagnostics, MATLAB converter/exporter defaults, active onlineGRF usage command. No validation frozen source, scientific JSON, checkpoint, model data or generic SEA README edited.",
+  "checks": {
+    "python_ast_pass": 6,
+    "existing_abx_ground_registration_contract_tests": {
+      "passed": 14,
+      "failed": 0,
+      "log": "tools_abx_contract_suite.log"
+    },
+    "grouped_layout_integration": "tools_grouped_layout_check.json",
+    "real_discovery_preflight": {
+      "passed": true,
+      "subjects": [
+        "AB06",
+        "AB07",
+        "AB08"
+      ],
+      "evidence": "tools_discovery_preflight.json"
+    },
+    "matlab_defaults": {
+      "passed": 6,
+      "evidence": "tools_matlab_default_paths.json",
+      "matlab_engine_invoked": false
+    },
+    "scope_limit": "No model conversion, calibration, pipeline simulation or MATLAB native run performed by this subagent; native model/simulation verification is owned by root."
+  },
+  "behavior": [
+    "AB06 tools defaults point at models/AB06/{AB06-raw,AB06_SEASEA-raw,AB06_SEASEA_Threadmill}.",
+    "Healthy support fallback now uses models/SEASEA_healthy/data.",
+    "ABx discovery supports grouped subject hierarchy and user-supplied legacy flat roots without duplicates.",
+    "Future prepared raw output and runtime bundle output are created within output_models_dir/ABxx; explicit --bundle-dir still wins.",
+    "Existing command-line paths are relocated via root model namespace resolver; external cwd-relative paths keep their original CLI meaning.",
+    "No compilation, conversion, calibration or scientific artifact regeneration performed."
+  ],
+  "preexisting_missing_reference": {
+    "old_path": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500.osim",
+    "new_path": "models/AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500.osim",
+    "before_sha256": null,
+    "after_sha256": null,
+    "used_by": [
+      "tools/driver_isolation_suite.py:OSIM_PATH",
+      "tools/driver_isolation_suite_pi.py:PD_OSIM_PATH"
+    ],
+    "impact": "Historical PD isolation cannot be rerun without restoring its original model. It was missing before the migration. No replacement or parameter changes made."
+  },
+  "status": "PASS for current preparation/PI runtime path checks; historical PD missing-file limitation preserved and identified"
+}

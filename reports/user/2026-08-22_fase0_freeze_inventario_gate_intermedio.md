@@ -1,5 +1,20 @@
 # Fase 0 — Freeze, inventario, provenienza, censimento B0820 e protocollo di ricampionamento: stato al gate (revisione r3)
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 > **Documento intermedio superseded.** La conclusione della Fase 0, gli artefatti decisionali e il verdetto finale sono in `reports/user/2026-08-23_fase0_gate_finale_recupero_ab06.md`. La cronologia seguente è conservata come audit trail e non rappresenta più lo stato corrente.
 
 Data: 2026-08-22 — esecutore: Claude Fable 5 (effort max) — architetto/gate owner: Codex.

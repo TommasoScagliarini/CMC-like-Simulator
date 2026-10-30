@@ -1,5 +1,17 @@
 # Daily Report — 2026-10-06
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Stato:** giornata chiusa con `create_report` ed `end_day`, attribuita al **6 ottobre 2026** su richiesta esplicita dell'utente.  
 **Instruction check token:** `CMC_AGENT_OK_2026`.
 
@@ -44,7 +56,7 @@ Checkpoint ex-novo: `Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_
 
 Nel test 3 i tre clock finali concordano e la penetrazione sinistra massima a 1 ms è 27,929 mm. Sono distinti 199 comandi SEA knee saturati, 621 flag del limite integrale cascade/202 anti-windup e due azioni policy clippate; non ci sono clamp motore/plugin PI. Tracking RMS actual/served knee/ankle 2,195°/0,646°, contro 15,685°/8,584° sulla IK originale. La riduzione dell'impulso rispetto al controllo IK-driven non implica miglioramento della waveform o qualifica della rete. Reward/corridor restano quelli AB06.
 
-Sorgenti: [audit test 1](<../../Trajectory Generator/validation/AB07/prescribed_ground_registered_2026_10_06/result_summary.json>), [controllo AB06](<../../Trajectory Generator/validation/AB06/v26c_best47_control_2026_10_06/result_summary.json>), [trasferimento AB07](<../../Trajectory Generator/validation/AB07/v26c_best47_transfer_2026_10_06/result_summary.json>). Ogni rollout ha sette plot canonici nel root `plot/`. Finitezza e 50 identità SEA passano; MTP e reserve restano diagnostici scientifici distinti. Gli ingressi protetti sono rispettivamente 42/91/119; non sono stati aggiornati i pesi.
+Sorgenti: [audit test 1 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8850f6eb16146587>), [controllo AB06 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-39c61ea830c9e497>), [trasferimento AB07 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-047412ee2e9d7fe0>). Ogni rollout ha sette plot canonici nel root `plot/`. Finitezza e 50 identità SEA passano; MTP e reserve restano diagnostici scientifici distinti. Gli ingressi protetti sono rispettivamente 42/91/119; non sono stati aggiornati i pesi.
 
 ## Chiarimento delle divergenze e audit storico
 
@@ -52,11 +64,11 @@ Sorgenti: [audit test 1](<../../Trajectory Generator/validation/AB07/prescribed_
 
 Il +42,2% del test 1 confronta l'impulso sinistro simulato con quello sperimentale AB07 sugli stessi timestamp; i 89/118 ms confrontano onset binario e nominali della GRF a 20 N. Non sono percentuali di errore rispetto ad AB06 o alla rete. Onset, conferma, consegna, crossing della forza e accettazione actor sono distinti. Actual/served e actual/IK sono distinti.
 
-L'[audit salvato AB06](<../../Trajectory Generator/validation/AB06/measured_divergence_2026_10_06/result_summary.json>) ricostruisce J1 teacher IK storico sui confini post-step a 10 ms: impulso −17,268%, HS −26,753 ms, TO +73,440 ms. Sono abbinati 3 HS successivi al reset su 4 nominali e tutti i 3 TO; l'HS al reset non è trasportato come nuovo evento. J1 usava absolute teacher, clock off, slew 2,5/2 e FSM diversa, quindi non era una baseline omogenea del test 1. Separatamente il learned AB06 ha impulso −18,440%, HS −33,753 ms e TO +48,440 ms, su supporto STO a 1 ms di 4,999 s: sono disponibili eventi actor/adattatore, non il journal binario completo. Nessuna nuova integrazione o inferenza nell'audit storico.
+L'[audit salvato AB06 — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0036375171d9a8fc>) ricostruisce J1 teacher IK storico sui confini post-step a 10 ms: impulso −17,268%, HS −26,753 ms, TO +73,440 ms. Sono abbinati 3 HS successivi al reset su 4 nominali e tutti i 3 TO; l'HS al reset non è trasportato come nuovo evento. J1 usava absolute teacher, clock off, slew 2,5/2 e FSM diversa, quindi non era una baseline omogenea del test 1. Separatamente il learned AB06 ha impulso −18,440%, HS −33,753 ms e TO +48,440 ms, su supporto STO a 1 ms di 4,999 s: sono disponibili eventi actor/adattatore, non il journal binario completo. Nessuna nuova integrazione o inferenza nell'audit storico.
 
 ## Confronto omogeneo finale IK-driven AB06/AB07
 
-[Riepilogo finale](<../../Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/result_summary.json>) e [selezione congelata](<../../Trajectory Generator/validation/paired_prescribed_AB06_AB07_2026_10_07/selection.json>). I nomi 7 ottobre identificano gli artefatti materialmente prodotti dopo mezzanotte, inclusi nella chiusura del 6 ottobre richiesta dall'utente.
+[Riepilogo finale — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f5f2644fc62adf6c>) e [selezione congelata — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-4cadbcfbce5304f4>). I nomi 7 ottobre identificano gli artefatti materialmente prodotti dopo mezzanotte, inclusi nella chiusura del 6 ottobre richiesta dall'utente.
 
 I due controlli usano il contratto del test 1, nessuna rete, stessa integrazione a 1 ms, stessi SEA/controller, governor, filtri, limiti, clock, FSM e tre profili. Reset al primo HS misurato almeno 2 s dopo il t_start originale, con 9 s coperti nei dati. Un ciclo startup resta separato; i tre cicli primari sono scelti prima dei risultati. Le copie setup nell'audit cambiano soltanto t_end; l'offset selezionato evita il clamp del reset senza alterare i setup canonici.
 

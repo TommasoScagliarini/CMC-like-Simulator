@@ -12,7 +12,6 @@ and bootstrap the simulator roots before importing the env.
 
 from __future__ import annotations
 
-import os
 import math
 import sys
 from dataclasses import fields, replace
@@ -26,6 +25,7 @@ import _bootstrap  # noqa: E402
 
 _bootstrap.ensure_sim_paths()
 
+from path_resolver import resolve_repo_path  # noqa: E402
 import win_runtime  # noqa: E402,F401  (apply Windows torch/OpenSim shim first)
 
 import numpy as np  # noqa: E402
@@ -42,7 +42,7 @@ import reward_function  # noqa: E402
 ENV_NAME = "cmc_traj_env"
 DEFAULT_NETWORK_GRF_MODE = "online_sensor"
 DEFAULT_NETWORK_ONLINE_GRF_PROFILE = (
-    "online_grf_profiles/"
+    "online_GRF/profiles/"
     "AB06_SEASEA_stiff321_500_pi_grf_correct_magnitude.json"
 )
 
@@ -145,13 +145,7 @@ def _resolve_setup_xml(value: Any) -> Any:
     """
     if not value:
         return value
-    text = os.fspath(value)
-    if os.name != "nt":
-        text = text.replace("\\", "/")
-    path = Path(text)
-    if not path.is_absolute():
-        path = (_bootstrap.REPO_ROOT / path).resolve()
-    return str(path)
+    return str(resolve_repo_path(value).resolve())
 
 
 def build_env_config(env_config: Mapping[str, Any] | None) -> CMCEnvConfig:

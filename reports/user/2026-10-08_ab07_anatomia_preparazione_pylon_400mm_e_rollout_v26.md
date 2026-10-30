@@ -1,5 +1,10 @@
 # AB07: anatomia, preparazione, pylon da 400 mm e rollout v26 — 2026-10-08
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 **Data del report:** 8 ottobre 2026, Europe/Rome. **Esperimenti documentati:** sessione del 7 ottobre, successiva al [report dei test preliminari del 6 ottobre](2026-10-06_test_preliminari_v26_ab07_e_confronto_controllato_ab06.md). I nomi e i timestamp originali degli audit sono conservati. **Instruction check token:** `CMC_AGENT_OK_2026`.
 
 ## Problema, risultato e decisione operativa
@@ -121,7 +126,7 @@ La misura sana AB07 sugli stessi tempi è **1373,010 N·s**. La percentuale usa 
 
 La differenza RMS dalla IK originale non filtrata di AB07 è **9,664° al ginocchio e 6,156° alla caviglia**. È distinta dall'errore di inseguimento del riferimento della rete. Una policy ex-novo non ha automaticamente la fedeltà alla IK come obiettivo di imitazione.
 
-Il confronto conserva modello, IK, profili e configurazione fisica, ma mantiene il contratto proprio del checkpoint: sorgente/mapping delle azioni, slew, clock e criteri dell'actor FSM differiscono dal controllo da IK. **Non è un esperimento che isola soltanto i pesi della rete.** Dettagli nel [confronto dei contratti](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/learned_vs_CMC_contract_review.json>).
+Il confronto conserva modello, IK, profili e configurazione fisica, ma mantiene il contratto proprio del checkpoint: sorgente/mapping delle azioni, slew, clock e criteri dell'actor FSM differiscono dal controllo da IK. **Non è un esperimento che isola soltanto i pesi della rete.** Dettagli nel [confronto dei contratti — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-7970d6a0b5ca9305>).
 
 ### Detector e limiti effettivamente osservati
 
@@ -139,7 +144,7 @@ Gli attraversamenti della forza online a 20 N sono un altro canale: tre HS assoc
 
 Nessun clipping dell'azione della rete, del comando SEA o clamp della coppia motore a 500 N·m. L'integratore della cascata al ginocchio raggiunge invece il proprio limite per **388 campioni, 0,388 s, 6,35%**: è un limite distinto. Penetrazione massima sinistra **22,356 mm**, sotto la guardia di 28 mm; nei tre cicli primari **17,833 mm**.
 
-Fonti: [sintesi del rollout](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/result_summary.txt>), [metriche](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/analysis/metrics.json>), [eventi](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/analysis/phase_metrics.json>).
+Fonti: [sintesi del rollout — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-cef5f7cde5b9030c>), [metriche — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-7ca6be26832954af>), [eventi — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5ddc06c9ce190796>).
 
 ## Collaborazione indipendente con Claude
 
@@ -168,9 +173,9 @@ Lo screening conserva **126 plot canonici**, il confronto standing **21** e il r
 - Screening dinamico di 18 condizioni, finitezza dei dati, bilancio verticale, identità SEA e trattamento esplicito dei tre run interrotti. Il riferimento AB07 corrente riproduce esattamente il prefisso comune dei 17 STO storici a 9 s, di 6110 campioni; i file completi hanno durata e hash diversi. Il controllo AB06 dello screening a 6,21 s mantiene un piccolo scostamento terminale già documentato, senza effetto sul contrasto di montaggio.
 - Standing: verifica geometrica delle quattro regioni, comparazione sul solo prefisso comune osservato e riproduzione byte-identica del controllo 400, senza promuovere le varianti interrotte a completamenti.
 - Rollout: 130 input protetti invariati, 17 STO × 6110 righe finite, 26 artefatti nativi invariati. Calcolo indipendente di 10.945 scalari su 231 combinazioni coordinata/finestra con corrispondenza esatta sulla quadratura comune; controllo diretto di media e RMS della reserve verticale.
-- Sette PNG neurali ispezionati, peer review numerica PASS e [ricevuta finale](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/final_completion_receipt.json>).
+- Sette PNG neurali ispezionati, peer review numerica PASS e [ricevuta finale — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a9b821f2320e46a6>).
 
-La finestra primaria era fissata prima dell'esecuzione. Il protocollo analitico neurale dettagliato è stato sigillato dopo l'avvio del worker, prima di leggere gli esiti: la [qualifica temporale](<../../Trajectory Generator/validation/AB07/v26c_best47_pylon400_2026_10_07/analysis_timing_qualification.json>) conserva questa distinzione. Correzioni dei reader, preflight e review sono tracciate e non equivalgono a retry dinamici selettivi. Le prove native documentate sono macOS arm64; non è stata svolta una nuova qualifica live Windows.
+La finestra primaria era fissata prima dell'esecuzione. Il protocollo analitico neurale dettagliato è stato sigillato dopo l'avvio del worker, prima di leggere gli esiti: la [qualifica temporale — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-866744d29e66bfb1>) conserva questa distinzione. Correzioni dei reader, preflight e review sono tracciate e non equivalgono a retry dinamici selettivi. Le prove native documentate sono macOS arm64; non è stata svolta una nuova qualifica live Windows.
 
 Il precedente paired AB06 a 9 s conserva la receipt `failed` per l'ultimo callback del detector, anche se stato, runner e ambiente raggiungono l'horizon fisico. Il callback finale non produce tutti gli output di trace/reward/osservazione/eventi attesi. I tre cicli precedenti usati nell'audit restano osservati; il run non viene promosso a completato. Questo debito è distinto dallo scostamento terminale del controllo AB06 dello screening a 6,21 s e rimane in V26-T01.
 

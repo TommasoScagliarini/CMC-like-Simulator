@@ -1,5 +1,10 @@
 # Origine delle differenze tra unified39 e training imitativo V26
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 21 settembre 2026. Riferimenti: V26 del 20 agosto e unified39 riallineata, continuata fino alla 40. Analisi e diagnostica senza nuovi training e senza modificare FSM v3, reward, governor o controllori SEA.
 
 ## Problema e risultato dell'indagine
@@ -51,7 +56,7 @@ La normalizzazione per escursione rimane la scelta concordata. Essa mantiene l'o
 
 Per esempio, 5° di errore alla caviglia contribuiscono 0,1210 alla loss V26 e 0,0610 a quella attuale. È una conseguenza accettata dei dati diversi, non un bug da correggere automaticamente. Può però cambiare il compromesso che PPO apprende fra i due giunti e le penalità fisiche. Il contributo causale di questa differenza al divario di training non è ancora isolato.
 
-![Target e contatto](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/target_audit/target_contact_comparison.png>)
+[Immagine rimossa: Target e contatto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-045bff871c8b9570>)
 
 ## Dove nasce il peggioramento della camminata
 
@@ -97,9 +102,9 @@ Il braccio con target destro, eseguito attraverso la stessa pipeline, ha una pen
 
 Il ritorno LEFT 366,77 non va interpretato come equivalenza al V26 best87 da 363,79. Il comando diretto ha un costo cumulativo di variazione del comando di 20,03, contro 70,86 nella policy 40 e 61,41 nel V26 best87; i target sono diversi e gli errori cinematici restano diversi. Il valore scalare da solo non certifica qualità del passo.
 
-![Rollout diagnostici con target comandato direttamente](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/oracle_comparison.png>)
+[Immagine rimossa: Rollout diagnostici con target comandato direttamente — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5089e64453631632>)
 
-[Metriche complete](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/oracle_metrics.json>), [rollout LEFT](<../../Trajectory Generator/unified_MLP_39/runs/rollout/causal_difference_2026-09-21_oracle_left/rollout_summary.json>) e [rollout RIGHT](<../../Trajectory Generator/unified_MLP_39/runs/rollout/causal_difference_2026-09-21_oracle_right/rollout_summary.json>).
+[Metriche complete — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-23f4969f47afd4a3>), [rollout LEFT — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-31d9f808898a9bdc>) e [rollout RIGHT — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6a5335ea7e3893b0>).
 
 Limite metodologico: l'azione diagnostica accede al target del prossimo endpoint, 10 ms avanti; la rete reale osserva fase, q e qdot correnti e deve apprendere la previsione/compensazione. L'osservazione e i metadata del braccio RIGHT restano quelli del contenitore 39D sinistro, ma nessuna rete li usa; `diagnostic_intervention` identifica esplicitamente la modifica. Non è un checkpoint valutato né un test di apprendimento.
 
@@ -141,11 +146,11 @@ Il controllo più netto per la prossima fase è una coppia di training nella ste
 
 Tutto il codice diagnostico nuovo è in `Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/`. I sorgenti di training e simulazione restano invariati.
 
-- [Audit learner, ingressi e provenienza fisica](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/training_audit/findings.md>) e [hash degli asset](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/training_audit/physical_provenance.json>).
-- [Audit reward e FSM](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/fsm_audit/findings.md>), con script `audit.py`, metriche e replay degli otto ingressi.
-- [Audit target e contatto](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/target_audit/README.md>), con `analyze.py`, `static_contact_probe.py`, metriche e grafico.
-- [Ricostruzione indipendente delle loss](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/loss_reconstruction.json>), riproducibile con `verify_losses.py`.
-- [Rollout diagnostici diretti](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/oracle_probe.py>) e [script di confronto](<../../Trajectory Generator/unified_MLP_39/validation/causal_difference_2026-09-21/analyze_oracles.py>).
+- [Audit learner, ingressi e provenienza fisica — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d88fc18f9909098a>) e [hash degli asset — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-aea128497b9f6af9>).
+- [Audit reward e FSM — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-24bc17830db62a4e>), con script `audit.py`, metriche e replay degli otto ingressi.
+- [Audit target e contatto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-3d7fba527e8b8326>), con `analyze.py`, `static_contact_probe.py`, metriche e grafico.
+- [Ricostruzione indipendente delle loss — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-1fb00c998ba9e7fc>), riproducibile con `verify_losses.py`.
+- [Rollout diagnostici diretti — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-66115f86ff779fbf>) e [script di confronto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-5af93fe8626586a7>).
 - [Risultati completi della continuazione a 40](2026-09-21_risultati_unified39_v26_aligned_40iter.md).
 
 Restano necessari più seed e criteri di confronto predefiniti per stabilire equivalenza statistica. Le verifiche attuali localizzano differenze e meccanismi; non sostituiscono quel test.

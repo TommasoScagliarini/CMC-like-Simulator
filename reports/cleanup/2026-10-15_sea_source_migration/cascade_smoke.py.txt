@@ -1,0 +1,42 @@
+"""Short real CMC cascade/SEA-PI run; no GUI and no persisted setup edits."""
+from pathlib import Path
+import json
+import sys
+
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+sys.path.insert(0,str(ROOT))
+import numpy as np
+from config import SimulatorConfig
+from main import _apply_setup_to_config, main
+from setup_io import read_setup_xml
+from output import read_sto
+
+plugin_base=Path(sys.argv[1])
+out=Path(sys.argv[2]);out.mkdir(parents=True,exist_ok=True)
+cfg=SimulatorConfig()
+_apply_setup_to_config(cfg,read_setup_xml(ROOT/'models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml'))
+cfg.plugin_name=str(plugin_base)
+cfg.output_dir=str(out)
+cfg.output_prefix='migration'
+cfg.t_start=11.99
+cfg.t_end=12.02
+assert cfg.sea_outer_controller_mode=='cascade'
+assert cfg.sea_forward_mode=='plugin'
+code=main(cfg)
+assert code==0,code
+status=dict(line.split('=',1) for line in (out/'migration_run_status.txt').read_text().splitlines() if '=' in line)
+assert status['status']=='complete',status
+assert abs(float(status['t'])-cfg.t_end)<1e-9,status
+assert int(status['step'])>=30,status
+statefile=out/'migration_sea_states.sto'
+times,columns,values,_=read_sto(str(statefile))
+assert len(columns)==6,(columns,values.shape)
+assert np.isfinite(values).all()
+integrals={n:float(np.max(np.abs(values[:,i]))) for i,n in enumerate(columns) if 'torque_error_integral' in n}
+assert len(integrals)==2 and all(x>0.0 for x in integrals.values()),integrals
+result={'passed':True,'plugin_basename':str(plugin_base),'duration_s':cfg.t_end-cfg.t_start,
+        'controller':cfg.sea_outer_controller_mode,'sea_forward_mode':cfg.sea_forward_mode,
+        'status':status,'sea_state_columns':columns,'integral_max_abs':integrals,
+        'scope':'30ms integration smoke; not a scientific full-episode validation'}
+(out/'smoke_result.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result,indent=2),flush=True)

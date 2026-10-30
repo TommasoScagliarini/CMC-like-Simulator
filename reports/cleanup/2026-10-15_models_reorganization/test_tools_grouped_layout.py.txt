@@ -1,0 +1,88 @@
+"""Read-only integration checks for grouped preparation and diagnostic paths."""
+from __future__ import annotations
+import json
+import os
+from pathlib import Path
+import sys
+import tempfile
+from types import SimpleNamespace
+from unittest.mock import patch
+import numpy as np
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+sys.path.insert(0,str(ROOT))
+from tools import build_abx_seasea_pipeline as builder
+from scripts import run_opensim_sea_pipeline as runner
+from tools import calibrate_ab06_seasea_markers as calibration
+from tools import driver_isolation_suite as pd
+from tools import driver_isolation_suite_pi as pi
+from tools import cascade_outer_metrics as metrics
+checks={}
+models=ROOT/'models'
+subjects=builder.discover_subjects(models)
+assert subjects==['AB06','AB07','AB08'],subjects
+checks['discover_subjects']=subjects
+for subject in subjects:
+ d=builder.discover_subject(models,subject,'treadmill','auto','auto')
+ assert d.raw_dir==models/subject/(subject+'-raw')
+ assert d.healthy_model.is_file() and d.static_trial.marker_file.is_file() and d.operating_trial.marker_file.is_file()
+checks['three_grouped_raw_subjects_discovered']=True
+for path in (builder.default_donor_model(models),builder.default_fit_reference_model(models),builder.default_ground_reference_motion(models)):
+ assert path.is_file(),path
+checks['shared_reference_files_present']=True
+legacy='models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim'
+current=models/'AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi.osim'
+for raw in (legacy,legacy.replace('/','\\'),str(ROOT/legacy),'C:\\Users\\tommy\\Documents\\CMC-like-Simulator - Claude\\'+legacy.replace('/','\\')):
+ for helper in (builder.resolve_tool_path,runner.ensure_absolute,calibration.resolve):
+  actual=helper(raw)
+  assert actual==current,(helper.__name__,raw,actual)
+checks['saved_legacy_paths_relative_windows_absolute']=True
+with tempfile.TemporaryDirectory(prefix='cmc_tool_layout_') as scratch:
+ scratch=Path(scratch)
+ flat=scratch/'custom_models'
+ (flat/'AB06-raw').mkdir(parents=True)
+ assert builder.discover_subjects(flat)==['AB06']
+ assert builder.subject_models_dir(flat,'AB06')==flat
+ (flat/'AB06/AB06-raw').mkdir(parents=True)
+ assert builder.discover_subjects(flat)==['AB06']
+ assert builder.subject_models_dir(flat,'AB06')==flat/'AB06'
+ previous=Path.cwd()
+ try:
+  os.chdir(scratch)
+  for helper in (builder.resolve_tool_path,runner.ensure_absolute):
+   assert helper(Path('outside/data.csv'))==(scratch/'outside/data.csv').resolve()
+ finally:
+  os.chdir(previous)
+ args=SimpleNamespace(skip_opensim_ik=False,fit_reference_model=Path('healthy'),ground_reference_motion=Path('static'),ground_plane_profile=Path('plane'),output_models_dir=scratch/'output_models',bundle_dir=None,results_dir=scratch/'results',force=False)
+ discovery=builder.discover_subject(models,'AB07','treadmill','auto','auto')
+ class RoutingChecked(Exception):pass
+ captured={}
+ def capture_outputs(paths,force):
+  captured['raw_model']=str(paths[0]);captured['bundle']=str(paths[-1])
+  assert paths[0]==scratch/'output_models/AB07/AB07_SEASEA-raw/osimxml/AB07_SEASEA.osim'
+  assert paths[-1]==scratch/'output_models/AB07/AB07_SEASEA_Treadmill'
+  raise RoutingChecked()
+ with patch.object(builder,'ensure_overwrite_policy',side_effect=capture_outputs):
+  try:builder.build_subject(discovery,args,current,ROOT/'plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib',models/'SEASEA/data')
+  except RoutingChecked:pass
+  else:raise AssertionError('routing guard not reached')
+ assert not args.output_models_dir.exists()
+ checks['future_build_outputs_grouped_without_building']=captured
+checks['legacy_custom_data_roots_supported_without_duplicate_subjects']=True
+checks['external_cli_cwd_preserved']=True
+for path in (runner.AB06_CONVERTED_DEFAULT,runner.DEFAULT_MODEL,runner.DEFAULT_TRC,runner.DEFAULT_GRF,runner.DEFAULT_SUPPORT_DATA,calibration.DEFAULT_MODEL,calibration.DEFAULT_TRC,calibration.DEFAULT_IK):
+ assert path.exists(),path
+checks['preparation_converter_calibration_defaults_exist']=True
+assert pi.OSIM_PATH.is_file()
+pi_params=pi.read_sea_params_pi(pi.OSIM_PATH)
+assert set(pi_params)=={'SEA_Knee','SEA_Ankle'}
+checks['pi_driver_current_model_parses_two_actuators']=True
+baseline=json.loads(Path('/tmp/cmc_models_reorganization_2026_10_15/before_manifest.json').read_text())['files']
+legacy_pd='models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500.osim'
+assert legacy_pd not in baseline and not pd.OSIM_PATH.exists() and not pi.PD_OSIM_PATH.exists()
+checks['pd_historical_reference_missing_before_and_after']={'legacy_path':legacy_pd,'current_path':str(pd.OSIM_PATH.relative_to(ROOT)),'before_sha256':None,'after_sha256':None,'scope':'Historical PD diagnostic not run; missing file is preexisting. No replacement model or parameter change.'}
+values=metrics.reference_values(np.asarray([11.99,12.0]))
+assert set(values)=={'pros_knee_angle','pros_ankle_angle'} and all(np.isfinite(v).all() and v.shape==(2,) for v in values.values())
+checks['cascade_reference_interpolation_finite']=True
+payload={'passed':True,'scope':'Current grouped paths, saved legacy model CLI paths, external cwd path handling, future output routing without building/calibration, read-only diagnostic references','checks':checks,'numeric_reference_sample':{k:v.tolist() for k,v in values.items()}}
+Path('/tmp/cmc_models_reorganization_2026_10_15/tools_grouped_layout_check.json').write_text(json.dumps(payload,indent=2)+'\n')
+print(json.dumps(payload,indent=2))

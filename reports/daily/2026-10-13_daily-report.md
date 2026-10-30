@@ -1,5 +1,12 @@
 # Daily Report — 2026-10-13
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
 **Stato:** aggiornamento parziale della verifica autorizzata dei reset casuali; audit source e confronto finale Claude conclusi. Nessuna chiusura end_day richiesta. Instruction check token: CMC_AGENT_OK_2026.
 
 ## Reset casuali protesici V26 best47

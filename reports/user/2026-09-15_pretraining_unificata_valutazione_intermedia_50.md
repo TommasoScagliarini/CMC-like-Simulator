@@ -1,5 +1,10 @@
 # Pretraining unificata: valutazione intermedia a 50 iterazioni
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Redatto: 2026-09-15T08:12:03.072324+02:00. Instruction check token: `CMC_AGENT_OK_2026`.
 
 ## Problema
@@ -65,19 +70,19 @@ Ogni cella riporta **actual / served** rispetto al prescribed.
 | late | 5 | 2.830 | 23.634 / 23.591 | 10.750 / 10.697 | 118.232 / 116.485 | 112.071 / 110.189 |
 | late | 50 | 2.830 | 18.887 / 19.275 | 12.386 / 12.405 | 126.572 / 124.077 | 87.592 / 81.959 |
 
-Ulteriori confronti con il best, SEA, saturazione e penetrazione sopra 20/25/28 mm: [analisi completa](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/milestone_evaluation.md>) e [metrics.csv](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/metrics.csv>).
+Ulteriori confronti con il best, SEA, saturazione e penetrazione sopra 20/25/28 mm: [analisi completa — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-89668af746e67637>) e [metrics.csv — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-aa3f1404df94c719>).
 
 ### Fonti e figure
 
-- [milestone_evaluation.json](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/milestone_evaluation.json>)
-- [training_summary_50.json](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_50_100_feasibility_2026-09-14/training_summary_50.json>)
-- [stato del piano successivo](<../../Trajectory Generator/unified_MLP/runs/plans/pretraining_50_100_feasibility_2026-09-14/STATUS.md>)
-- [tracking_early.png](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/tracking_early.png>)
-- [tracking_early.pdf](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/tracking_early.pdf>)
-- [tracking_center.png](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/tracking_center.png>)
-- [tracking_center.pdf](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/tracking_center.pdf>)
-- [tracking_late.png](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/tracking_late.png>)
-- [tracking_late.pdf](<../../Trajectory Generator/unified_MLP/runs/validation/pretraining_v1_pen1_milestone_50_2026-09-14/tracking_late.pdf>)
+- [milestone_evaluation.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0b66075f05f039a9>)
+- [training_summary_50.json — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-1cb076b1bcfc2595>)
+- [stato del piano successivo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-fcc395cfa8e7cd1d>)
+- [tracking_early.png — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a3ccb38b8370565b>)
+- [tracking_early.pdf — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-87bbf97ae45e314b>)
+- [tracking_center.png — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-090747e54fde5d71>)
+- [tracking_center.pdf — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-f29e116033e59b2b>)
+- [tracking_late.png — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-6324d0f8cb0ca9d7>)
+- [tracking_late.pdf — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-a979666bba519448>)
 - [daily precedente e TODO storici](<../daily/2026-09-14_daily-report.md>)
 - [2026-09-14_avvio_piano_pretraining_50_100_fattibilita.md](<2026-09-14_avvio_piano_pretraining_50_100_fattibilita.md>)
 - [2026-09-14_pilot_unificata_strategia_50_100_e_test_39_feature.md](<2026-09-14_pilot_unificata_strategia_50_100_e_test_39_feature.md>)

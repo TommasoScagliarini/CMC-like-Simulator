@@ -1,0 +1,146 @@
+{
+  "scope": "Stored best47 training summary + current equivalent preset + actual rollout actor schema; no claim to reconstruct removed historical datasets.",
+  "logical_best_iteration": 47,
+  "successful_updates_in_run": 50,
+  "setup_xml_at_training": "models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+  "resume_from": "/Users/tommy/Documents/CMC-like-Simulator - Claude/Trajectory Generator/runs/training/MLP_V26C_J20_critic_rewarm_morphology_split_equal_1p05_2026-08-31_r2/checkpoint_last",
+  "sampled_start_conditions_all_updates": [
+    "offset_1p756871s",
+    "offset_1p956871s",
+    "offset_2p156871s"
+  ],
+  "episode_steps_mean_range": [
+    500.0,
+    500.0
+  ],
+  "current_simulation_config": {
+    "setup_xml": "models/AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml",
+    "segment_duration": 0.01,
+    "episode_duration": 5.0,
+    "iterations": 51,
+    "policy_knots": 1,
+    "random_init": false,
+    "episode_start_offset_s": 1.956870983805102,
+    "episode_start_offset_choices_s": [
+      1.756870983805102,
+      1.956870983805102,
+      2.156870983805102
+    ],
+    "step_wall_timeout_s": 60.0,
+    "grf_penetration_penalty_threshold_m": 0.02,
+    "grf_penetration_termination_m": 0.028,
+    "action_mode": "absolute",
+    "pros_knee_target_slew_rate_limit_rad_s": 2.5,
+    "pros_ankle_target_slew_rate_limit_rad_s": 2.0,
+    "pros_ref_governor": true,
+    "pros_ref_model": "butterworth3_jerk_limited",
+    "pros_ref_cutoff_hz": 4.0,
+    "pros_knee_ref_velocity_limit_rad_s": 6.0,
+    "pros_ankle_ref_velocity_limit_rad_s": 3.5,
+    "pros_knee_ref_acceleration_limit_rad_s2": 60.0,
+    "pros_ankle_ref_acceleration_limit_rad_s2": 55.0,
+    "pros_knee_ref_jerk_limit_rad_s3": 3000.0,
+    "pros_ankle_ref_jerk_limit_rad_s3": 2750.0,
+    "gait_clock_enable": false,
+    "actor_cyclic_phase_only": true,
+    "include_reference_state_observation": true,
+    "include_controller_state_observation": true,
+    "include_controller_diagnostic_observation": false,
+    "deployable_minimal_observation": false,
+    "imitation_initialize_to_target": false,
+    "reward_reference_range_floor": 0.05,
+    "reward_reference_velocity_range_floor": 0.1
+  },
+  "reward_mode": "ex_novo",
+  "reward_differences_current_vs_training": {
+    "morphology_profile": {
+      "current": "morphology_corridor/profiles/ab06_prosthetic_event_warped_mean_std_corridor.json",
+      "training": "morphology_profiles/ab06_prosthetic_event_warped_mean_std_corridor.json"
+    }
+  },
+  "walking_objective_parameters": {
+    "blend_phase_regular": 0.25,
+    "blend_phase_event_progress": 1.0,
+    "phase_period_nominal_s": 1.58,
+    "phase_period_soft_margin_s": 0.25,
+    "phase_stance_timeout_s": 1.45,
+    "phase_stance_hard_timeout_s": 2.2,
+    "phase_swing_hard_timeout_s": 2.6,
+    "phase_cycle_complete_bonus": 0.7,
+    "phase_min_cycle_knee_excursion_rad": 0.12,
+    "morphology_knee_weight": 5.0,
+    "morphology_ankle_weight": 5.0
+  },
+  "inactive_imitation_blend_explanation": "reward_function.compute_reward selects imitation terms only when reward_mode == imitation; stored best47 mode is ex_novo.",
+  "fixed_loaded_contact_reward_probe": {
+    "1.0": {
+      "stance_elapsed_s": 1.0,
+      "timeout_loss": 0.0,
+      "timeout_penalty_subtracted_after_clip": 0.0
+    },
+    "1.5": {
+      "stance_elapsed_s": 1.5,
+      "timeout_loss": 0.031250000000000056,
+      "timeout_penalty_subtracted_after_clip": 0.015625000000000028
+    },
+    "2.0": {
+      "stance_elapsed_s": 2.0,
+      "timeout_loss": 2.25,
+      "timeout_penalty_subtracted_after_clip": 1.125
+    },
+    "3.0": {
+      "stance_elapsed_s": 3.0,
+      "timeout_loss": 7.25,
+      "timeout_penalty_subtracted_after_clip": 3.625
+    }
+  },
+  "reward_probe_scope": "Production phase loss only, not total reward; hard timeout extended in sensor probe solely to inspect sustained stance. Soft penalty retains actual training values.",
+  "actor_feature_names": [
+    "gait_phase_sin",
+    "gait_phase_cos",
+    "pros_knee_angle",
+    "pros_knee_angle_vel",
+    "pros_ankle_angle",
+    "pros_ankle_angle_vel",
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "online_left_normal_grf_bw",
+    "online_left_in_contact",
+    "online_left_heel_strike",
+    "online_left_toe_off",
+    "online_left_gait_phase_sin",
+    "online_left_gait_phase_cos",
+    "online_left_cycle_duration_s",
+    "phase_fsm_wait_hs",
+    "phase_fsm_stance_after_hs",
+    "phase_fsm_swing_after_to",
+    "phase_expected_hs",
+    "phase_expected_to",
+    "phase_stance_elapsed_norm",
+    "phase_swing_elapsed_norm",
+    "phase_cycle_progress_credit",
+    "pros_knee_angle_previous_endpoint",
+    "pros_knee_angle_served_ref",
+    "pros_knee_angle_served_ref_vel",
+    "pros_knee_angle_served_ref_accel",
+    "pros_knee_angle_sea_u",
+    "pros_ankle_angle_previous_endpoint",
+    "pros_ankle_angle_served_ref",
+    "pros_ankle_angle_served_ref_vel",
+    "pros_ankle_angle_served_ref_accel",
+    "pros_ankle_angle_sea_u"
+  ],
+  "direct_stop_or_belt_speed_input": false,
+  "absent_intent_input_caveat": "Indirect changes in ipsilateral mechanics can reach the actor; missing explicit intent alone is not a mathematical proof that stopping cannot emerge.",
+  "source_sha256": {
+    "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/summary.json": "803a954093edb8d759ed61607d55557479441565023a277005594badcd91ca7c",
+    "Trajectory Generator/baseline_MLP/training_exnovo_cfg.yaml": "d235016ff2382d4d29218355cdcc5929b3d217241e20bb1de72cb1fe3f11dadb",
+    "Trajectory Generator/runs/training/MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01/checkpoint_best_meta.json": "4e9cab26bf80f03dbc93956495b542c3d2156e4bf84da101e89fa84c013ccf19",
+    "Trajectory Generator/validation/speed_transitions_2026_10_26/stop_restart_aligned/rollout_policy_trace.json": "df2a1c9e4a4700c5abfcd2e7e32eba7de7a78a55854c4e3d9fd7b662956c5ec6",
+    "Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/fsm_diagnosis.json": "7d617c22000e1c83f9ecefc2fee2b78b8b6cae225b01257bdb1f3775a0e63624",
+    "Trajectory Generator/baseline_MLP/reward_function.py": "d778a4c0b8e7a63a198614e0ba876ac716af931b1ea9a34be6ef59380a1b411f",
+    "Trajectory Generator/validation/speed_transitions_2026_10_26/diagnosis/training_audit.py": "21ce84b520c761b707edac8210708c063565e492ca3d20dc038d733cf2664b7d"
+  }
+}

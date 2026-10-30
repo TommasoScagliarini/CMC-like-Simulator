@@ -1,0 +1,138 @@
+
+
+****************************************************************
+[DEBUG] >>> SYSTEM ALERT: IL PLUGIN E' STATO CARICATO IN MEMORIA.
+[DEBUG] >>> INIZIO REGISTRAZIONE OGGETTI...
+[DEBUG] >>> SEA: registered.
+****************************************************************
+
+[info] Loaded library /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib
+[info] Loaded model AB08_SEASEA from file /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/AB08_SEASEA_stiff321_500_pi.osim
+[info] Old version storage/motion file encountered
+[info] Storage: read data file = /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/data/AB08_SEASEA_GRF_FullSpan.mot (nr=142899 nc=19)
+[info] .. assuming rotations in Degrees..
+=================================================================
+  Prosthetic Gait Simulator - Custom CMC Replacement
+=================================================================
+
+[Main] Step 1/3 - Loading model ...
+[ModelLoader] Loading plugin  : /Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/Geometry
+[ModelLoader] Geometry path : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/OpenSim 4.5.app/Contents/Resources/opensim/Geometry
+[ModelLoader] Geometry path : /Applications/OpenSim 4.5/Geometry
+[ModelLoader] Loading model    : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/AB08_SEASEA_stiff321_500_pi.osim
+[ModelLoader] GRF mode         : prescribed
+[ModelLoader] Removed 0 ExternalForce(s) from .osim
+[ModelLoader] Loading GRF XML  : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/data/ExternalForces.xml
+[ModelLoader] GRF datafile     : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/data/AB08_SEASEA_GRF_FullSpan.mot
+[ModelLoader] GRF Storage loaded: 142899 rows, 18 columns
+[ModelLoader]   'left_ground_force1' -> addForce OK (applied_to: foot_l, force_id: ground_force1_v)
+[ModelLoader]   'right_ground_force2' -> addForce OK (applied_to: calcn_r, force_id: ground_force2_v)
+[ModelLoader] Loading reserves : /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/data/CMC_Actuators.xml
+[ModelLoader] Building system ...
+[ModelLoader] Mobility index map inferred from reserve actuators.
+[ModelLoader] SEA XML props    : {'SEA_Knee': {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}, 'SEA_Ankle': {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}}
+[ModelLoader] Done.
+  Coordinates : 21 total (19 bio, 2 pros)
+  Muscles     : 76
+  Reserves    : 19 SO, 21 diagnostic total
+  Controls    : 99
+  SEA F_opt   : {'SEA_Knee': 100.0, 'SEA_Ankle': 250.0}
+  SEA motor SV: angle={'SEA_Knee': 194, 'SEA_Ankle': 197}, speed={'SEA_Knee': 195, 'SEA_Ankle': 198}
+  SEA state SV: {'SEA_Knee': {'motor_angle': 194, 'motor_speed': 195, 'torque_error_integral': 196}, 'SEA_Ankle': {'motor_angle': 197, 'motor_speed': 198, 'torque_error_integral': 199}}
+
+[Main] Step 2/3 - Loading kinematics ...
+[KinInterp] Reading /Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/data/IK_results_AB08_SEASEA.mot ...
+[KinInterp] Applied IK low-pass: cutoff=6 Hz, order=4, dt=0.001 s, samples=28580->142896
+[KinInterp] Ready. 21 coordinates, t in [8.630, 151.525] s, 142896 samples (low-pass 6 Hz, dt=0.001 s).
+
+[Main] Step 3/3 - Starting simulation ...
+[Runner] SEA 'SEA_Knee' props: {'K': 321.0, 'Kp': 18.0, 'Kd': 11.0, 'Ki': 190.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 100.0, 'impedance': False}
+[Runner] SEA 'SEA_Ankle' props: {'K': 500.0, 'Kp': 11.3, 'Kd': 11.0, 'Ki': 123.0, 'integral_torque_limit': 100.0, 'Bm': 0.1, 'Jm': 0.01, 'F_opt': 250.0, 'impedance': False}
+[Runner] SEA RK4 state variables: [('SEA_Knee', 'motor_angle'), ('SEA_Knee', 'motor_speed'), ('SEA_Knee', 'torque_error_integral'), ('SEA_Ankle', 'motor_angle'), ('SEA_Ankle', 'motor_speed'), ('SEA_Ankle', 'torque_error_integral')]
+[Runner] SEA_Knee motor_angle = -0.2135 rad
+[Runner] SEA_Ankle motor_angle = 0.2448 rad
+[Runner] Muscle states initialised: activation=0.01, fiber_length=optimal for 76 muscles.
+[Runner] Plugin state vars zeroed (6): motor_angle, motor_speed, torque_error_integral, motor_angle, motor_speed, torque_error_integral
+/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_slsqp_py.py:435: RuntimeWarning: Values in x were outside bounds during a minimize step, clipping to bounds
+  fx = wrapped_fun(x)
+/opt/anaconda3/envs/envCMC-rllib/lib/python3.10/site-packages/scipy/optimize/_slsqp_py.py:439: RuntimeWarning: Values in x were outside bounds during a minimize step, clipping to bounds
+  g = append(wrapped_grad(x), 0.0)
+
+[Runner] Starting simulation  t in [8.630, 8.660] s  T_control=0.0010 s  h_sub=0.0010 s  (~29 windows × 1 substeps = 29 steps)
+
+[Recruit t=8.630] muscle_share=0.368  capable_share=1.000  |tau_m|=23.19  |tau_res|=39.85  act>thr=0.39  |u_res|=0.398
+[Runner] t=8.6310 - first window OK
+
+[Runner] Simulation complete. 30 steps, 2.6 s wall time.
+  -> Activations : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_activations.sto
+  -> SEA ctrl    : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_sea_controls.sto
+  -> Reserve ctrl: /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_reserve_controls.sto
+  -> Reserve tau : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_reserve_torques.sto
+  -> Kinematics  : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_kinematics.sto
+  -> Kin ref     : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_kinematics_reference.sto
+  -> Tau_bio     : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_tau_bio.sto
+  -> Muscle F    : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_muscle_forces.sto
+  -> SEA torques : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_sea_torques.sto
+  -> SEA states  : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_sea_states.sto
+  -> SEA derivs  : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_sea_derivatives.sto
+  -> SEA diag    : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_sea_diagnostics.sto
+  -> SEA power   : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_power.sto
+  -> States      : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_states.sto
+  -> Recruitment: /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_recruitment.sto
+  -> SO tau diag : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_so_torque_diagnostics.sto
+  -> Gait events : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_gait_events.csv (left=0, right=0, threshold=20 N, min_contact=0.05 s, min_cycle=0.3 s)
+
+[Runner] All results saved to: /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08
+  -> Run status  : /tmp/cmc_plugins_cleanup_2026_10_15/cascade_before_AB08/migration_run_status.txt
+
+[Main] Done.
+{
+  "subject": "AB08",
+  "phase": "before",
+  "setup_xml": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08_SEASEA_Threadmill/AB08_SEASEA_stiff321_500_pi_setup.xml",
+  "passed": true,
+  "plugin_basename": "/Users/tommy/Documents/CMC-like-Simulator - Claude/plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff",
+  "duration_s": 0.02999999999999936,
+  "controller": "cascade",
+  "sea_forward_mode": "plugin",
+  "status": {
+    "status": "complete",
+    "t": "8.66",
+    "step": "30",
+    "wall_time_s": "2.562308084",
+    "t_start": "8.63",
+    "t_end": "8.66",
+    "dt": "0.001",
+    "use_control_window": "True",
+    "T_control": "0.001",
+    "integration_dt": "0.001",
+    "integration_scheme": "rk4_bypass",
+    "sea_forward_mode": "plugin",
+    "grf_mode": "prescribed",
+    "prescribed_grf_disabled_sides": "",
+    "online_grf_applied_sides": "",
+    "online_grf_max_penetration_m": "0.03",
+    "sea_motor_substeps": "5",
+    "sea_motor_max_substeps": "80",
+    "enable_grf_contact_filter": "False",
+    "grf_contact_threshold_n": "20",
+    "grf_min_contact_duration_s": "0.05",
+    "grf_source_file": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/data/AB08_SEASEA_GRF_FullSpan.mot",
+    "grf_loaded_file": "/Users/tommy/Documents/CMC-like-Simulator - Claude/models/AB08/AB08_SEASEA_Threadmill/data/AB08_SEASEA_GRF_FullSpan.mot"
+  },
+  "sea_state_columns": [
+    "SEA_Knee_motor_angle",
+    "SEA_Knee_motor_speed",
+    "SEA_Knee_torque_error_integral",
+    "SEA_Ankle_motor_angle",
+    "SEA_Ankle_motor_speed",
+    "SEA_Ankle_torque_error_integral"
+  ],
+  "integral_max_abs": {
+    "SEA_Knee_torque_error_integral": 0.01773513,
+    "SEA_Ankle_torque_error_integral": 0.01634099
+  },
+  "scope": "30ms integration smoke; not a scientific full-episode validation"
+}

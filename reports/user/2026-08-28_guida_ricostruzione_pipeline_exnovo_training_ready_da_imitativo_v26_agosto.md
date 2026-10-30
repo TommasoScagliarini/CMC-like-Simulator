@@ -1,5 +1,36 @@
 # Guida di ricostruzione della pipeline ex-novo training-ready dal training imitativo V26 di agosto
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
+> Aggiornamento successivo del 2026-10-19: la workspace V26C e il checkpoint J20
+> sono conservati, mentre sono stati eliminati la filiera V12, il bundle, la
+> campagna sigma e tutti i file nella radice di `baseline_MLP/validation/`.
+> I gate storici J20/J21 richiedono ancora il test di telemetria rimosso:
+> per rieseguirli occorre ripristinare i suoi byte originali, senza cambiare
+> i pin. Il procedimento descritto resta storico; vedere il
+> [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
+> Aggiornamento del 2026-10-19: sono stati rimossi l’archivio
+> `Trajectory Generator/runs/training/validation/` e i port storici
+> `v12r7zero`, `v12r8zero`, `v12r9zero`. I riferimenti a questi materiali
+> descrivono lo stato dell’epoca; alcuni vecchi percorsi erano già assenti.
+> Configurazioni e riepiloghi conservati, dipendenze ritirate e controlli
+> sono indicati nel [registro della rimozione](../cleanup/2026-10-19_training_validation_zero_removal/README.md).
+
+
+> Aggiornamento del 2026-10-19: la cartella `Trajectory Generator/runs/rollout/validation/`
+> è stata rimossa nella pulizia del progetto, inclusi i moduli di policy sperimentali.
+> I riferimenti a quei risultati, anche nei precedenti percorsi `validation/…`,
+> sono storici. Note, comandi ed esiti sono descritti nel [registro della rimozione](../cleanup/2026-10-19_rollout_validation_removal/README.md);
+> le repliche che richiedono gli input eliminati necessitano di ripristino o rigenerazione.
+
+
 **Data:** 2026-08-28  
 **Perimetro:** AB06, detector gait-cycle V26, FSM attore v3, Morphology Corridor corrente  
 **Destinatario:** un LLM o un operatore che debba ricostruire rapidamente la pipeline senza ripetere gli errori storici  

@@ -1,5 +1,10 @@
 # V26 nella unified39: ordine dei calcoli e robustezza al rumore
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 23 settembre 2026. Autorizzazione: «svolgi i primi 2 e poi valutiamo».
 Stato: entrambi gli esperimenti conclusi e verificati. La batteria stocastica
 è terminata alle 11:43 CEST. Nessun nuovo training avviato.
@@ -248,10 +253,10 @@ percentuale di episodi completati durante il training PPO.
 - [Sette grafici canonici del controllo deterministico](../../plot/09_23_2026_2/).
 - [Confronto grafico dell'ordine dei calcoli](../../plot/09_23_2026_v26_robustness_comparison/deterministic_arithmetic_comparison.png).
 - [Confronto della penetrazione nei venti episodi](../../plot/09_23_2026_v26_robustness_comparison/paired_noise_penetration.png).
-- [Metriche complete, compresi i confronti per coppia](<../../Trajectory Generator/unified_MLP_39/validation/v26_robustness_2026-09-23/all_metrics.json>).
-- [Verifica finale degli input e del completamento](<../../Trajectory Generator/unified_MLP_39/validation/v26_robustness_2026-09-23/final_verification.json>).
-- [Verifica byte-per-byte degli STO e precisione dei JSON](<../../Trajectory Generator/unified_MLP_39/validation/v26_robustness_2026-09-23/deterministic_sto_equality.json>).
-- [Protocollo ed esecuzione riproducibile](<../../Trajectory Generator/unified_MLP_39/validation/v26_robustness_2026-09-23/README.md>).
+- [Metriche complete, compresi i confronti per coppia — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-752c905a6e23f095>).
+- [Verifica finale degli input e del completamento — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-7eef8d8dd18b5124>).
+- [Verifica byte-per-byte degli STO e precisione dei JSON — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-1c907e94ec1cde22>).
+- [Protocollo ed esecuzione riproducibile — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-c0fe5f8648e7cd34>).
 
 ## File introdotti e modificati
 

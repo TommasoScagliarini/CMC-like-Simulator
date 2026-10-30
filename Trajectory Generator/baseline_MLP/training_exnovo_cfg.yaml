@@ -1,23 +1,22 @@
-# Training ex-novo — CANONICO (promosso dalla lineage B0820 il 2026-08-20;
-# FSM attore v3 default e corridoio V26 promosso post-Q2 il 2026-08-21).
-# Contenuto = catena B0820 validata: stack detector V26 heel-qualified,
-# penetrazione 20/28 mm (involucro giugno), swing hard timeout 2.6 s,
-# invalid_event_policy reject_continue (drop-mode), profilo GRF di giugno,
-# exact-start 3 start, corridor event-anchored causale (morphology_weight 0.0025).
-# Convenzione (runbook 2026-08-20): questo file e' il canonico EDITABILE;
-# ogni lineage congela la propria copia in experimental_configs/ al freeze
-# della catena. Snapshot B0820: experimental_configs/exnovo_v26_B0820_chain.yaml.
+# Configurazione ex novo predefinita — V26C / best47.
+# Importata il 2026-10-19 dal training_cfg.resolved.yaml del run
+# MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01.
+# Parametri effettivi conservati: sigma 0.01, pesi morphology 5.0 per entrambi
+# i giunti, FSM v3 e target di training logical_iteration 51.
+# I path operativi usano il layout corrente del repository.
+# Il rollout best47 usa questo file dopo la rimozione del suo snapshot;
+# gli altri checkpoint continuano a usare i propri snapshot quando presenti.
+# training_cfg.yaml resta il preset imitativo, selezionabile con --config.
+
 model:
   num_hidden_layers: 2
   dim_hidden_layers: 256
   fcnet_activation: tanh
   asymmetric_actor_critic: true
   rl_module_kind: standard
-  primary_split_v25_residual_input_mean: null
-  primary_split_v25_residual_input_std: null
-  primary_split_v25_residual_limits: null
-  primary_split_v25_residual_init_seed: null
   freeze_logstd: true
+  fixed_exploration_sigma:
+  - 0.01
   freeze_actor: false
   seed: 123
 ppo:
@@ -37,10 +36,10 @@ parallelism:
   ray_num_cpus: 13
   exact_start_sampling: true
 simulation:
-  setup_xml: models/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml
+  setup_xml: models/AB06/AB06_SEASEA_Threadmill/AB06_SEASEA_stiff321_500_pi_setup.xml
   segment_duration: 0.01
   episode_duration: 5.0
-  iterations: 50
+  iterations: 51
   policy_knots: 1
   random_init: false
   episode_start_offset_s: 1.956870983805102
@@ -52,6 +51,7 @@ simulation:
   grf_penetration_penalty_threshold_m: 0.02
   grf_penetration_termination_m: 0.028
   action_mode: absolute
+  # Il campo legacy max_delta_rad=0.35 dello snapshot era ignorato dal loader.
   pros_knee_target_slew_rate_limit_rad_s: 2.5
   pros_ankle_target_slew_rate_limit_rad_s: 2.0
   pros_ref_governor: true
@@ -74,9 +74,9 @@ simulation:
   reward_reference_velocity_range_floor: 0.1
 grf:
   grf_mode: online_sensor
-  online_grf_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json
-  online_grf_detector_profile: online_grf_profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json
-  binary_phase_detector_profile: validation/binary_phase_detector_v25_geometry_runs/2026-08-04_local_reach_sweep_dev02_04_08/selected_candidate_profile.json
+  online_grf_profile: online_GRF/profiles/AB06_SEASEA_stiff321_500_pi_online_full_wrench_residual_tangent_v2.json
+  online_grf_detector_profile: online_GRF/profiles/AB06_SEASEA_stiff321_500_pi_grf_detector_HS-TO.json
+  binary_phase_detector_profile: online_GRF/binary_detector/operational/heel_toe_v25.json
   phase_fsm_input_mode: legacy_events
   phase_sensor_on_threshold_n: 5.0
   phase_sensor_off_threshold_n: 2.0
@@ -85,13 +85,13 @@ grf:
   event_contract_id: legacy_events_v1
   binary_phase_fsm_mode: binary_active
   binary_phase_debounce_s: 0.005
+  binary_phase_invalid_event_policy: reject_continue
+  binary_phase_actor_fsm_version: v3
   binary_phase_event_contract_id: binary_point_v25+heel_qualified_fsm_v2
   online_grf_observation: true
   online_grf_applied_side:
   - left
   disable_prescribed_grf_side: []
-  binary_phase_invalid_event_policy: reject_continue
-  binary_phase_actor_fsm_version: v3
 supervision:
   iteration_timeout_s: 3600.0
   sample_timeout_s: 3000.0
@@ -215,9 +215,11 @@ reward:
   prosthetic_joint_q_max:
   - 0.0
   - 0.6
-  morphology_profile: morphology_profiles/ab06_prosthetic_event_warped_mean_std_corridor.json
+  morphology_profile: morphology_corridor/profiles/ab06_prosthetic_event_warped_mean_std_corridor.json
   morphology_phase_mode: event_anchored_causal_delayed_experimental
-  morphology_weight: 0.0025
+  morphology_weight: 5.0
+  morphology_knee_weight: 5.0
+  morphology_ankle_weight: 5.0
   morphology_std_multiplier_knee: 1.6
   morphology_std_multiplier_ankle: 0.6
   morphology_margin_knee_deg: 7.5

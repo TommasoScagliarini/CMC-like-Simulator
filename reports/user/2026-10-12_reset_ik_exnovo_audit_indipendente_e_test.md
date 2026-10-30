@@ -1,5 +1,10 @@
 # Reset IK nella rete ex-novo: audit indipendenti e test
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data: 12 ottobre 2026, Europe/Rome. Instruction check token: CMC_AGENT_OK_2026.
 Report richiesto con create_report nella stessa sessione.
 
@@ -19,7 +24,7 @@ Sei rollout a policy congelata completano cinque secondi. Azzerare le sole veloc
 
 Banco AB06, setup PI321/500 e config risolta del run MLP_V26C_J20_sigma0p010_morph_equal5p0_ppo50_2026-09-01, sotto Trajectory Generator/runs/training/. Checkpoint rl_module_best, logical iteration 47: corrisponde a 46 nuovi aggiornamenti actor; i 50 nuovi update complessivi del run sono logical 2–51. Actor 35D, osservazione completa 84D, inferenza deterministica seed 123.
 
-Il [protocollo](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/PROTOCOL.md>) prevedeva audit sorgenti e log storici, reset passivi, isolamento actor/critic, sei rollout, confronto numerico con lo storico e sintesi dei due audit. Le metriche distinguono startup 0–0,5 s e porzione successiva, come fissato nel harness prima dell'esecuzione; l'addendum corregge la formulazione «primo secondo» del protocollo.
+Il [protocollo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-dbe35b50ba2605e5>) prevedeva audit sorgenti e log storici, reset passivi, isolamento actor/critic, sei rollout, confronto numerico con lo storico e sintesi dei due audit. Le metriche distinguono startup 0–0,5 s e porzione successiva, come fissato nel harness prima dell'esecuzione; l'addendum corregge la formulazione «primo secondo» del protocollo.
 
 Muscoli/SO, reserve, controllo biologico, governor, limiti, profili, plugin e checkpoint sono preservati. La sinistra usa contatto online applicato; la destra conserva GRF prescribed. Tre processi isolati hanno eseguito ciascuno due casi seriali.
 
@@ -54,7 +59,7 @@ Gli start non sono tre copie della stessa posa: q knee ricostruita dai file attu
 
 I trend dei return sono sostanzialmente piatti. Explained variance VF media 0,0647, range −0,0462–0,1291. Il parent critic-rewarm usava solo lo start nominale, 4096 step e morphology weight 1,05; il run usa peso 5,0. Gli advantage sono standardizzati globalmente: il segno per start non misura da solo l'errore grezzo del critic. Questi dati e il learning rate 5e−7 non identificano il motivo causale della curva piatta.
 
-Evidenze: [audit della distribuzione](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/distribution/distribution_audit.md>), [statistiche indipendenti](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/distribution/distribution_metrics.json>).
+Evidenze: [audit della distribuzione — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-94d9a2c7a259ee1a>), [statistiche indipendenti — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-7f75654cb93080b6>).
 
 ## Prescribed: actor, critic e plant
 
@@ -64,7 +69,7 @@ La separazione non elimina il supporto prescribed del plant. Le 19 coordinate bi
 
 In questa config blend_tracking, blend_reference e blend_bio sono tutti zero: gli score computati non contribuiscono direttamente al ritorno. Il corridor morphology rimane derivato dall'IK e indicizzato dagli eventi FSM. È un prior sulla forma, distinto dall'imposizione di q_IK(t) all'actor. La reference servita e la memoria controller diventano poi funzioni della policy/governor, pur ereditando il bootstrap iniziale.
 
-Ricevuta: [isolamento actor/critic](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/privilege_invariance_receipt.json>).
+Ricevuta: [isolamento actor/critic — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-c6091da15db50c0e>).
 
 ## Sei test dinamici a pesi congelati
 
@@ -87,7 +92,7 @@ Gli start nuovi completano l'episodio ma hanno return inferiori. A +0,4 s: RMSE 
 
 Il caso −0,2 s parte in WAIT_HS e accredita tre cicli; il nominale parte in stance parziale e ne accredita due. Cambiano anche finestra biologica/GRF e copertura morphology. La differenza di return non può essere assegnata alla sola posa o interpretata automaticamente come migliore qualità meccanica. Il successivo HS include anche una porzione temporale oltre le finestre usate nel training esaminato.
 
-Evidenze: [risultati consolidati](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/consolidated_results.json>), [sonde passive](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/rollouts/passive_reset_probe/reset_probe.json>), [42 plot canonici](../../plot/reset_ik_audit_2026_10_12/).
+Evidenze: [risultati consolidati — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0e0a324ef1132e0e>), [sonde passive — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9ff584926faefe68>), [42 plot canonici](../../plot/reset_ik_audit_2026_10_12/).
 
 ## Audit indipendenti e confronto con Claude
 
@@ -95,19 +100,19 @@ Codex ha sigillato il proprio audit source prima di leggere l'output Claude. Cla
 
 Entrambi gli audit distinguono reset IK deterministico, tre start fissi, actor separato dal critic, supporto prescribed del plant e mancanza di un effetto causale dimostrato sul training. Claude ha segnalato anche qddot IK nell'osservazione iniziale e i confondenti del critic-rewarm; Codex li ha verificati nei log, nelle sorgenti e nelle sonde native.
 
-Il primo audit Codex resta congelato. Un [addendum](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/codex_source_addendum.json>) chiarisce che il possibile contributo bio alla reward citato condizionalmente è inattivo nella config. Le espressioni del primo audit Claude su equilibrio «garantito» dalle reserve o curva piatta spiegata dal learning rate non vengono adottate come esiti causali: le reserve forniscono supporto, mentre critic e learning rate rimangono ipotesi concorrenti.
+Il primo audit Codex resta congelato. Un [addendum — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-bbf3dd9795cb439e>) chiarisce che il possibile contributo bio alla reward citato condizionalmente è inattivo nella config. Le espressioni del primo audit Claude su equilibrio «garantito» dalle reserve o curva piatta spiegata dal learning rate non vengono adottate come esiti causali: le reserve forniscono supporto, mentre critic e learning rate rimangono ipotesi concorrenti.
 
-Fonti: [audit Codex sigillato](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/codex_source_audit.json>), [audit Claude](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/claude/source_response.md>), [ricevuta modello](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/claude/source_receipt.json>).
+Fonti: [audit Codex sigillato — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-23395efe65ff8df8>), [audit Claude — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-32801c44eb48464a>), [ricevuta modello — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-9b0407d87a4f6e41>).
 
 ### Discussione finale e sintesi riconciliata
 
-La seconda chiamata Claude, ancora Opus 5.5 con effort massimo e senza tools, ha analizzato entrambi gli audit e i risultati numerici. Modello effettivo confermato anche in questa fase. [Risposta completa](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/claude/comparison_response.md>) e [sintesi riconciliata](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/comparison_synthesis.json>).
+La seconda chiamata Claude, ancora Opus 5.5 con effort massimo e senza tools, ha analizzato entrambi gli audit e i risultati numerici. Modello effettivo confermato anche in questa fase. [Risposta completa — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-926d23f1034eb9fa>) e [sintesi riconciliata — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d14b5a947e80d671>).
 
 Claude conferma i fatti e la mancata identificazione del nesso causale reset–apprendimento. Accolte le precisazioni: una posa per runner, tre nell'intero training; forte dipendenza del return dallo start, più contenuta nelle metriche meccaniche osservate; il test zero velocità non rimuove la velocità IK dalla reference/governor; curva storica senza miglioramento rilevabile, senza attribuirne già la causa all'ottimizzatore.
 
 Il successivo HS ha posa protesica vicina al nominale ma qddot knee iniziale +0,816 contro −14,696 rad/s², oltre a una diversa finestra biologica/GRF. La riduzione del return non isola quindi la posa o la sola copertura morphology. I return fra start diversi restano totali descrittivi, non un confronto causale di qualità a condizioni comuni.
 
-Una precisazione alla risposta Claude: reserve e residui sono stati registrati nei file nativi e le loro massime forze generalizzate sono nelle metriche, pur escluse dalla capsula compatta della discussione. Per la reserve verticale, picco assoluto nominale 364,90 N, +0,4 s 531,09 N, successivo HS 470,34 N e zero velocità 363,17 N. Non ne deriva una qualifica scientifica dell'equilibrio. La [review indipendente dei dati salvati](<../../Trajectory Generator/validation/reset_ik_audit_2026_10_12/independent_saved_outputs_review.md>) conferma i ricalcoli e l'ispezione visiva di 18 PNG.
+Una precisazione alla risposta Claude: reserve e residui sono stati registrati nei file nativi e le loro massime forze generalizzate sono nelle metriche, pur escluse dalla capsula compatta della discussione. Per la reserve verticale, picco assoluto nominale 364,90 N, +0,4 s 531,09 N, successivo HS 470,34 N e zero velocità 363,17 N. Non ne deriva una qualifica scientifica dell'equilibrio. La [review indipendente dei dati salvati — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-36d321a4924231ed>) conferma i ricalcoli e l'ispezione visiva di 18 PNG.
 
 La soluzione operativa è mantenere separati diagnosi e modifica: il reset attuale non è stato identificato come collo di bottiglia dell'apprendimento. Per una prova causale, definire prima un controllo positivo di apprendimento e una inizializzazione critic comune sulla reward effettiva; poi confrontare distribuzioni reset con unico fattore variato, budget/seed uguali e start held-out comuni. Aumentare gli start fissi per runner e ricampionare per episodio sono interventi diversi. Questa è una proposta futura RIK-T01, non un training già eseguito né una modifica già autorizzata del learner o del bootstrap PPO rinviato.
 

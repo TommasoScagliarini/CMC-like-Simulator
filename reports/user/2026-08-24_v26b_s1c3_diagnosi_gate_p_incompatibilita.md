@@ -1,5 +1,13 @@
 # V26B S1C-3 — Diagnosi: il gate `P/max_abs = 0,25` è **matematicamente incompatibile** con il recupero del segno IK
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
 **Token:** `V26B-S1C-3-DIAG` (sola diagnosi read-only) · **Data:** 2026-08-24 · Nessun fit, rollout, episodio, collection, checkpoint, modifica a codice/config/production/gate, nessuna scelta σ. Prodotti: questo report e una proposta JSON **non autorizzativa**.
 
 ## 1. Verifica preliminare: le due serie di energia di pendenza sono entrambe corrette, su domini diversi

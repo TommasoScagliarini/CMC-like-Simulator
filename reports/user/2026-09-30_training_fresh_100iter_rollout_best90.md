@@ -1,5 +1,10 @@
 # 2026-09-30 — Training LEFT da zero a 100 iterazioni e rollout del best90
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Instruction check token: `CMC_AGENT_OK_2026`.
 
 ## Problema e obiettivo
@@ -25,7 +30,7 @@ La verifica CLI ha confermato 100 iterazioni, `resume_from=null` e nessuna inizi
 
 ## Esito del training
 
-Fonte: [summary del training](<../../Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_fresh_best80config_100iter_2026-09-29/summary.json>).
+Fonte: [summary del training — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-07181fe70ed86880>).
 
 | Voce | Risultato |
 | --- | --- |
@@ -46,7 +51,7 @@ Il best è quello selezionato dal criterio di training, non una selezione compar
 
 Il rollout carica `rl_module_best` e la configurazione salvata nel run, con azione deterministica, registrazione degli output OpenSim e della traccia policy. Non vengono svolti aggiornamenti PPO.
 
-Fonte: [rollout summary](<../../Trajectory Generator/unified_MLP_39/runs/rollout/unified_MLP_39/runs/rollout/MLP39_LEFT_fresh_best90_2026-09-30_deterministic/rollout_summary.json>).
+Fonte: [rollout summary — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-db376ebb13abed03>).
 
 | Metrica | Valore |
 | --- | ---: |
@@ -85,9 +90,9 @@ La cartella generica iniziale `plot/09_30_2026_1` è stata rinominata con il nom
 
 Tutti i percorsi abbreviati seguenti sono sotto `Trajectory Generator/unified_MLP_39/`.
 
-- [Configurazione fresh](<../../Trajectory Generator/unified_MLP_39/configs/left_fresh_best80config_100iter_2026-09-29.yaml>).
-- [Piano e launcher](<../../Trajectory Generator/unified_MLP_39/runs/plans/left_fresh_best80config_100iter_2026-09-29/>): `config.yaml`, `preflight.json`, `launch.py`, `launch.json`, `training.log`.
-- [Run di training](<../../Trajectory Generator/unified_MLP_39/runs/training/MLP39_LEFT_fresh_best80config_100iter_2026-09-29/>): checkpoint, configurazione risolta, summary e telemetria.
+- [Configurazione fresh — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-081f13b1df694839>).
+- [Piano e launcher — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-b5d44d81c7824dc8>): `config.yaml`, `preflight.json`, `launch.py`, `launch.json`, `training.log`.
+- [Run di training — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-8b79ed9dccd92cfa>): checkpoint, configurazione risolta, summary e telemetria.
 - Rollout e trace nel percorso effettivo collegato sopra, con `rollout_execution.log` e `plots/render.log`.
 - Sette PNG, `plot_receipt.json`, `verification.json` e diagnostica dei canali nella cartella root dei plot.
 - Il presente report.

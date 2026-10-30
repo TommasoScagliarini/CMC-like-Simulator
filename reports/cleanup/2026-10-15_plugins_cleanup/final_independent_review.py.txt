@@ -1,0 +1,100 @@
+from __future__ import annotations
+import hashlib,json,sys,tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+ROOT=Path('/Users/tommy/Documents/CMC-like-Simulator - Claude')
+OUT=Path('/tmp/cmc_plugins_cleanup_2026_10_15')
+sys.path.insert(0,str(ROOT))
+from path_resolver import remap_plugin_path,resolve_plugin_path,resolve_repo_path
+import model_loader
+import visualize
+
+receipt=json.loads((OUT/'binary_migration_receipt.json').read_text())
+baseline=json.loads((OUT/'before_manifest.json').read_text())['files']
+checks=[]
+expected_removed={
+ 'plugins/SEA_Plugin_BlackBox_mCMC_impedence.dll',
+ 'plugins/SEA_Plugin_BlackBox_mCMC_impedence.dylib',
+ 'plugins/libSEA_Plugin_BlackBox_mCMC_impedence.dylib',
+ 'plugins/libSEA_Plugin_BlackBox_mCMC_impedence_PID.dylib',
+ 'plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib.abs_omega_backup_20260515',
+ 'plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib.no_pi_backup_20260517',
+ 'plugins/libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib.pre_pi_bandmatched_20260517',
+}
+assert {r['path'] for r in receipt['removed']}==expected_removed
+assert receipt['removed_count']==len(expected_removed)==7
+assert sum(r['bytes'] for r in receipt['removed'])==2153336
+assert sum(r['bytes'] for r in receipt['removed'])==receipt['removed_bytes']
+for item in receipt['removed']:
+    assert baseline[item['path']]=={k:item[k] for k in ('bytes','sha256')}
+    assert not (ROOT/item['path']).exists()
+    # Root retained provisional rollback files outside the repository during tests.
+    backup=OUT/'removed_libraries'/Path(item['path']).name
+    assert backup.stat().st_size==item['bytes']
+    assert hashlib.sha256(backup.read_bytes()).hexdigest()==item['sha256']
+    checks.append({'check':'removed_only_expected_legacy','path':item['path'],'passed':True})
+assert receipt['moved_count']==len(receipt['moved'])==2
+expected_live=set()
+for item in receipt['moved']:
+    assert baseline[item['old_path']]=={k:item[k] for k in ('bytes','sha256')}
+    assert not (ROOT/item['old_path']).exists()
+    new=ROOT/item['new_path']; expected_live.add(new.relative_to(ROOT).as_posix())
+    assert new.stat().st_size==item['bytes']
+    assert hashlib.sha256(new.read_bytes()).hexdigest()==item['sha256']
+    checks.append({'check':'moved_binary_exact_before_sha256','old':item['old_path'],'new':item['new_path'],
+                   'sha256':item['sha256'],'passed':True})
+assert {p.relative_to(ROOT).as_posix() for p in (ROOT/'plugins').rglob('*') if p.is_file() and p.name not in ('.gitkeep','README.md')}==expected_live
+assert (ROOT/'plugins/.gitkeep').read_bytes()==b''
+
+stems={'SEA_Plugin_BlackBox_mCMC_impedence_ff':'SEA','OnlineGRFContact':'online_grf_contact'}
+path_cases=[]
+for stem,directory in stems.items():
+    expected_stem=ROOT/'plugins'/directory/stem
+    for filename in (stem,'lib'+stem,stem+'.dll','lib'+stem+'.dylib','lib'+stem+'.so'):
+        for raw in (f'plugins/{filename}',f'plugins\\{filename}',str(ROOT/'plugins'/filename),
+                    f'C:\\projects\\CMC-like-Simulator - Claude\\plugins\\{filename}',
+                    f'/old/CMC-like-Simulator/plugins/{filename}',f'plugins/{directory}/{filename}'):
+            expected=ROOT/'plugins'/directory/filename
+            assert remap_plugin_path(raw)==expected,(raw,remap_plugin_path(raw))
+            assert resolve_repo_path(raw)==expected
+            assert resolve_plugin_path(raw)==expected_stem
+            assert visualize._resolve_project_path(raw,library_basename=True)==str(expected)
+            with patch.object(model_loader,'_configure_windows_dll_search_path'),patch.object(model_loader.opensim,'LoadOpenSimLibrary') as load:
+                model_loader._load_plugin(raw)
+                load.assert_called_once_with(str(expected_stem))
+            path_cases.append({'input':raw,'canonical_file_or_stem':str(expected),'OpenSim_stem':str(expected_stem)})
+    for archive in (ROOT/'validation/archive/plugins'/stem,ROOT/'runs/archive/plugins'/stem,
+                    Path('/backup/validation/CMC-like-Simulator/plugins')/stem):
+        assert remap_plugin_path(archive) is None,archive
+        assert resolve_plugin_path(archive)==archive
+    with tempfile.TemporaryDirectory(prefix='independent_plugins_') as temporary:
+        external=Path(temporary)/'CMC-like-Simulator/plugins'
+        external.mkdir(parents=True)
+        binary=external/('lib'+stem+'.dylib')
+        binary.write_bytes(b'preserve external library fixture; never loaded')
+        basename=external/stem
+        assert remap_plugin_path(binary) is None
+        assert remap_plugin_path(basename) is None
+        assert resolve_plugin_path(binary)==basename
+        assert resolve_plugin_path(basename)==basename
+        assert visualize._resolve_project_path(str(basename),library_basename=True)==str(basename)
+        # The helper must not consume matching names belonging to an external checkout.
+        assert binary.read_bytes()==b'preserve external library fixture; never loaded'
+for name in ('SEA_Plugin_BlackBox_mCMC_impedence','libSEA_Plugin_BlackBox_mCMC_impedence_PID.dylib',
+             'libSEA_Plugin_BlackBox_mCMC_impedence_ff.dylib.no_pi_backup_20260517','unrelated.dll'):
+    raw=f'plugins/{name}'
+    assert remap_plugin_path(raw) is None
+    assert resolve_plugin_path(raw)==ROOT/raw
+
+result={'all_passed':True,'reviewed_files':['path_resolver.py','model_loader.py','visualize.py'],
+ 'binary_integrity':checks,'removed_libraries':len(expected_removed),'removed_bytes':receipt['removed_bytes'],
+ 'remaining_libraries':sorted(expected_live),'path_case_count':len(path_cases),'path_cases':path_cases,
+ 'external_binary_and_basename_preserved':True,'nested_historical_namespaces_preserved':True,
+ 'removed_variants_never_aliased_to_current_pi':True,
+ 'qualification':['OpenSim loader calls mocked for breadth of path variants; root native simulation and native legacy-load receipts provide real library loading.',
+                  'No native Windows execution; Windows paths/default DLL names checked on macOS.',
+                  'Frozen converter takes explicit plugin path and remains unchanged to preserve identity attestation.'],
+ 'blocking_findings':[]}
+(OUT/'final_independent_review.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({k:v for k,v in result.items() if k not in ('path_cases',)},indent=2))

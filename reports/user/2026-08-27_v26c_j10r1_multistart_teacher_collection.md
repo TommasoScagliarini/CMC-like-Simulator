@@ -1,5 +1,13 @@
 # V26C J10R1 — Raccolta multistart prescribed-teacher: esecuzione e audit
 
+> Aggiornamento della struttura del 2026-10-19: le procedure conservate nella
+> precedente `Trajectory Generator/baseline_MLP/validation/` sono ora in
+> [`imitation_to_exnovo/`](<../../Trajectory Generator/baseline_MLP/imitation_to_exnovo/>).
+> I percorsi e gli hash nel corpo restano quelli del documento originale.
+> Mappa della rinomina, compatibilità e dipendenze già mancanti sono nel
+> [registro della rinomina](../cleanup/2026-10-19_imitation_to_exnovo_rename/README.md).
+
+
 **Data**: 2026-08-27
 **Stadio**: `V26C_J10R1_MULTISTART_TEACHER`
 **Esecuzioni**: 1 (una sola, nessun retry)

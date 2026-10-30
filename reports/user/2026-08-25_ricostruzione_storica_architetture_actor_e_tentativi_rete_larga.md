@@ -1,5 +1,12 @@
 # Ricostruzione storica: architetture actor giugno–luglio, adapter, e ogni tentativo di rete più larga
 
+> Aggiornamento successivo del 2026-10-19: i riferimenti di questo documento
+> alla filiera V12, al bundle V26C, alla campagna sigma o ai file nella radice
+> di `baseline_MLP/validation/` sono storici: quei materiali sono stati rimossi.
+> La workspace V26C e i suoi checkpoint sono conservati. Per rieseguire
+> le procedure con input o prerequisiti rimossi occorre il loro ripristino.
+> Vedere il [registro della pulizia](../cleanup/2026-10-19_baseline_validation_removal/README.md).
+
 **Data**: 2026-08-25
 **Natura**: task **read-only**. Nessun training, nessun rollout, nessuna modifica, nessun file toccato.
 **Metodo**: ricostruzione dagli artefatti (forme dei pesi lette dai `module_state.pkl`, config risolte, manifest, receipt) e dai report. **Fatti** e **inferenze** sono separati esplicitamente e marcati.

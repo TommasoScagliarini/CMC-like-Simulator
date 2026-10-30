@@ -1,5 +1,10 @@
 # LEFT: esiti dei pilot reward e diagnosi del coefficiente KL
 
+> Aggiornamento del 2026-10-17: alcuni materiali citati sono stati rimossi
+> nella pulizia del progetto. I collegamenti contrassegnati «materiale
+> rimosso» portano al registro con il percorso originale.
+
+
 Data del report: **2026-09-29**. Attività sperimentali rendicontate: 25–28 settembre 2026.
 Instruction check token: `CMC_AGENT_OK_2026`.
 
@@ -100,13 +105,13 @@ Questi sono risultati delle esecuzioni precedenti, non test rilanciati per scriv
 
 ## Artefatti di riferimento
 
-- [Pilot ankle 10%: confronto](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_2026-09-25/comparison.md>)
-- [Pilot ankle 5%: report completo](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_best80_ankle5_2026-09-25/report.md>)
-- [Diagnosi e valutazioni intermedie concluse](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_pilot_diagnosis_2026-09-28/report.md>)
-- [Diagnosi del learner e KL](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_pilot_diagnosis_2026-09-28/training_analysis/report.md>)
-- [Fasi, eventi e contatto](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_pilot_diagnosis_2026-09-28/phase_analysis/report.md>)
-- [Screening nominale degli intermedi](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_pilot_diagnosis_2026-09-28/analysis/report.md>)
-- [Verifica finale dei rollout e plot](<../../Trajectory Generator/unified_MLP_39/runs/reward_tuning/left_pilot_diagnosis_2026-09-28/verification.json>)
+- [Pilot ankle 10%: confronto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-0e649f6ca765eec2>)
+- [Pilot ankle 5%: report completo — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-2f540a74e927820b>)
+- [Diagnosi e valutazioni intermedie concluse — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-587de19e52f59be2>)
+- [Diagnosi del learner e KL — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-d78466abe2cef5ec>)
+- [Fasi, eventi e contatto — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-74e3d7c45e2ba609>)
+- [Screening nominale degli intermedi — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-dfe245037d862b6f>)
+- [Verifica finale dei rollout e plot — materiale rimosso](<../cleanup/2026-10-17_trajectory_removal/README.md#artifact-1bc73cf104bd3df0>)
 
 ## TODO da propagare
 
